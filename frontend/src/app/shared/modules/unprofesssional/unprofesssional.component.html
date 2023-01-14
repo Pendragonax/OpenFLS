@@ -1,0 +1,129 @@
+<div class="container-fluid">
+  <!--ADD-->
+  <div class="row"
+       *showOnRole="'leader'">
+    <div class="container-fluid text-center">
+      <button mat-raised-button
+              color="primary"
+              (click)="openValueModal(editContent)"
+              [disabled]="sponsors.length <= 0"
+              [hidden]="hideAddButton"
+              *showOnRole="'admin'"> nicht Fachkraftstatus hinzufügen </button>
+    </div>
+  </div>
+
+  <!--TABLE-->
+  <div class="row">
+    <table mat-table [dataSource]="tableSource">
+        <ng-container matColumnDef="employee">
+          <th mat-header-cell *matHeaderCellDef>Mitarbeiter</th>
+          <td mat-cell *matCellDef="let value">{{value[0].lastName}}, {{value[0].firstName}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="sponsor">
+          <th mat-header-cell *matHeaderCellDef>Kostenträger</th>
+          <td mat-cell *matCellDef="let value">{{value[1].name}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="end">
+          <th mat-header-cell *matHeaderCellDef>Ende</th>
+          <td mat-cell *matCellDef="let value">{{getLocalDateString(value[2].end)}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell class="text-center" *matHeaderCellDef>Aktionen</th>
+          <td mat-cell class="text-center" *matCellDef="let value">
+            <button mat-mini-fab
+                    color="primary"
+                    *showOnRole="'admin'"
+                    class="m-1"
+                    (click)="openValueModal(editContent, value[2])">
+              <mat-icon>edit</mat-icon></button>
+            <button mat-mini-fab
+                    color="warn"
+                    class="m-1"
+                    *showOnRole="'admin'"
+                    (click)="openDeleteModal(deleteContent, value[2])">
+              <mat-icon>delete</mat-icon></button></td>
+        </ng-container>
+
+      <!--DELETE CONFIRMATION MODAL-->
+      <ng-template #deleteContent let-modal>
+        <div class="modal-header">
+          <h2 class="modal-title"
+              id="modal-basic-title-delete">Löschbestätigung</h2>
+          <button type="button"
+                  class="btn-close"
+                  aria-label="Close"
+                  (click)="modal.dismiss('Cross click')"></button>
+        </div>
+        <div class="modal-body">
+          <p>Wollen sie den <b>"keine Fackkraft"</b> Zustand wirklich löschen?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button"
+                  class="btn btn-danger"
+                  (click)="modal.close(true)">Löschen</button>
+          <button type="button"
+                  class="btn btn-outline-dark"
+                  (click)="modal.close(false)">Abbrechen</button>
+        </div>
+      </ng-template>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+  </div>
+
+  <!--EDIT MODAL-->
+  <ng-template #editContent let-modal>
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-basic-title">nicht Fachkraft bei...</h2>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+      <div class="container-fluid text-center">
+        <form [formGroup]="editForm">
+          <mat-form-field appearance="outline">
+            <mat-label>Kostenträger</mat-label>
+            <mat-select formControlName="sponsor"
+                        required>
+              <mat-option *ngFor="let value of sponsors"
+                          [value]="value.id">
+                {{value.name}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="input-field">
+            <mat-form-field appearance="outline">
+              <mat-label>Ende</mat-label>
+              <input matInput
+                     formControlName="end"
+                     (dateChange)="setEnd($event)"
+                     [matDatepicker]="endPicker">
+              <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+              <mat-datepicker-toggle matSuffix
+                                     [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+
+            <button mat-icon-button
+                    class="input-reset-button"
+                    (click)="resetEnd()">
+              <mat-icon>clear</mat-icon></button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button mat-raised-button
+              color="primary"
+              class="mx-1"
+              (click)="modal.close(true)">Speichern</button>
+      <button mat-raised-button
+              class="mx-1"
+              (click)="modal.close(false)">Abbrechen</button>
+    </div>
+  </ng-template>
+</div>

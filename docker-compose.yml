@@ -1,0 +1,86 @@
+version: '3.6'
+
+services:
+  db:
+    container_name: open_fls_db
+    image: mysql
+    restart: always
+    env_file: docker-compose.env
+    volumes:
+      - open-fls-db:/var/lib/mysql
+    secrets:
+      - db_root_password
+      - db_password
+      - db_user
+    networks:
+      - open-fls-network
+
+  adminer:
+    container_name: open_fls_adminer
+    image: adminer
+    restart: always
+    networks:
+      - open-fls-network
+  
+  backend:
+    container_name: open_fls_backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    env_file: docker-compose.env
+    volumes:
+      - ./backend:/app
+      - ${LOG_PATH}:/logs/
+    depends_on:
+      - db
+    secrets:
+      - db_root_password
+      - db_password
+      - db_user
+    networks:
+      - open-fls-network
+
+  frontend:
+    container_name: open_fls_frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: DEV
+    restart: always
+    volumes:
+      - ./frontend:/app
+    networks:
+      - open-fls-network
+
+  proxy:
+    container_name: open_fls_proxy
+    image: nginx
+    env_file: docker-compose.env
+    volumes:
+     - ./proxy/nginx.conf:/etc/nginx/nginx.conf
+     - ${LOG_PATH}:/var/log/nginx/
+    depends_on:
+      - db
+      - backend
+      - frontend
+      - adminer
+    ports:
+      - ${PORT}:8000
+    networks:
+      - open-fls-network
+
+networks:
+  open-fls-network:
+    internal: false
+
+secrets:
+  db_password:
+    file: secrets/db_password.secret
+  db_root_password:
+    file: secrets/db_root_password.secret
+  db_user:
+    file: secrets/db_user.secret
+
+volumes:
+  open-fls-db:

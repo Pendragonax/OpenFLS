@@ -1,0 +1,23 @@
+.top-nav-button {
+  background-color: limegreen !important;
+}
+
+.top-nav-button:hover {
+  background-color: white !important;
+}
+
+.scale-75 {
+  transform: scale(0.75) !important;
+}
+
+.scale-50 {
+  transform: scale(0.5) !important;
+}
+
+.mat-form-field {
+  width: 300px !important;
+}
+
+.small-mat-form-field {
+  width: 70px !important;
+}

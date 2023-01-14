@@ -1,0 +1,17 @@
+.scale-75 {
+  transform: scale(0.75);
+}
+
+.mat-form-field {
+  width: 300px;
+}
+
+.input-field {
+  position: relative;
+}
+
+.input-reset-button {
+  position: absolute;
+  top: 9px;
+  right: 40px;
+}

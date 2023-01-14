@@ -1,0 +1,21 @@
+.information-title {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.information-content {
+  white-space: break-spaces;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+@media (max-width: 770px) {
+  .information-title {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.00rem !important;
+  }
+  .information-content {
+    margin-top: 0.00rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+}

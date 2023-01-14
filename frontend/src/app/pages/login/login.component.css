@@ -1,0 +1,19 @@
+.mat-card {
+  width: 500px
+}
+mat-form-field {
+  width: 100%;
+}
+
+.warn-icon {
+  position: absolute;
+  height: 100%;
+  right: 60px;
+  top: 70px;
+}
+
+.loading {
+  position: absolute;
+  margin-left: 60%;
+  margin-top: 10px;
+}

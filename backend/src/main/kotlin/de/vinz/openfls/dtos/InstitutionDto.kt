@@ -1,0 +1,20 @@
+package de.vinz.openfls.dtos
+
+import javax.validation.constraints.NotEmpty
+
+class InstitutionDto {
+    var id: Long = 0
+
+    @field:NotEmpty
+    var name: String = ""
+
+    var email: String = ""
+
+    var phonenumber: String = ""
+
+    var permissions: Array<PermissionDto>? = null
+
+    var contingents: Array<ContingentDto>? = null
+
+    var assistancePlans: Array<AssistancePlanDto>? = null
+}

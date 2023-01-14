@@ -1,0 +1,85 @@
+<app-info-header [title]="'Neuer Klient'"></app-info-header>
+
+<mat-stepper [linear]="true">
+  <!--DATA-->
+  <mat-step [stepControl]="infoForm">
+    <ng-template matStepLabel>Informationen</ng-template>
+    <div class="container-fluid text-center">
+      <form [formGroup]="infoForm">
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Vorname</mat-label>
+            <input matInput formControlName="firstName" required>
+          </mat-form-field>
+        </div>
+
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Nachname</mat-label>
+            <input matInput formControlName="lastName" required>
+          </mat-form-field>
+        </div>
+
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Telefonnummer</mat-label>
+            <input matInput formControlName="phone">
+          </mat-form-field>
+        </div>
+
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email">
+          </mat-form-field>
+        </div>
+
+        <div>
+          <mat-form-field class="mt-2">
+            <mat-label>Bereich</mat-label>
+            <mat-select formControlName="institution" required>
+              <mat-option *ngFor="let institution of institutions"
+                          [value]="institution.id">{{institution.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div>
+          <mat-form-field class="mt-2">
+            <mat-label>Kategorievorlage</mat-label>
+            <mat-select formControlName="categoryTemplate" required>
+              <mat-option *ngFor="let categoryTemplate of categoryTemplates"
+                          [value]="categoryTemplate.id">{{categoryTemplate.title}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+
+      <div>
+        <button mat-button
+                class="mat-stroked-button"
+                [disabled]="!infoForm.valid"
+                matStepperNext>Weiter</button>
+      </div>
+    </div>
+  </mat-step>
+
+  <mat-step>
+    <ng-template matStepLabel>Speichern</ng-template>
+    <div class="container-fluid text-center">
+      <div>
+        <div class="row text-center">
+          <div class="col">
+            <p>Alle Daten wurden vollständig eingegeben. Sie können nun den Klienten entgültig in die Datenbank aufnehmen.</p>
+          </div>
+        </div>
+        <button mat-button class="mat-stroked-button me-2" matStepperPrevious>Zurück</button>
+        <button mat-button
+                mat-raised-button
+                color="primary"
+                [disabled]="!infoForm.valid || isSubmitting"
+                (click)="create()">Speichern</button>
+      </div>
+    </div>
+  </mat-step>
+</mat-stepper>

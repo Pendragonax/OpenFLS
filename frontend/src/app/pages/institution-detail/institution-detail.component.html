@@ -1,0 +1,148 @@
+<app-info-header [title]="'Bereich &quot;' + value.dto.name + '&quot;'"></app-info-header>
+
+<mat-tab-group>
+  <mat-tab label="Allgemein">
+    <mat-accordion>
+      <mat-expansion-panel class="mx-2 mt-2">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="fw-bold">
+            Informationen
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <!--EDIT FORM-->
+        <div class="container-fluid text-center"
+             [hidden]="!adminMode">
+          <form [formGroup]="infoForm">
+            <div>
+              <mat-form-field appearance="fill">
+                <mat-label>Name</mat-label>
+                <input matInput
+                       formControlName="name" required>
+              </mat-form-field>
+            </div>
+
+            <div>
+              <mat-form-field appearance="fill">
+                <mat-label>Telefonnummer</mat-label>
+                <input matInput formControlName="phone">
+              </mat-form-field>
+            </div>
+
+            <div>
+              <mat-form-field appearance="fill">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email">
+              </mat-form-field>
+            </div>
+
+            <div>
+              <button mat-raised-button
+                      color="primary"
+                      class="mat-stroked-button"
+                      *showOnRole="'leader'"
+                      (click)="update()"
+                      [disabled]="infoForm.invalid || isSubmitting || !editMode">Speichern</button>
+            </div>
+          </form>
+        </div>
+
+        <!--SHOW-->
+        <div class="container-fluid"
+             [hidden]="adminMode">
+          <app-information-row [title]="'Name'"
+                               [content]="value.dto.name"></app-information-row>
+          <app-information-row [title]="'Email'"
+                               [content]="value.dto.email"></app-information-row>
+          <app-information-row [title]="'Telefon'"
+                               [content]="value.dto.phonenumber"></app-information-row>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel class="mx-2 mb-2">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="fw-bold">
+            Zugriffsrechte
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="container-fluid">
+          <div class="row">
+            <table mat-table
+                   [dataSource]="permissions"
+                   class="mat-elevation-z4">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef class="text-center"> Name </th>
+                <td mat-cell *matCellDef="let permission" class="text-center">{{permission[1].lastName}} {{permission[1].firstName}}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="lead">
+                <th mat-header-cell *matHeaderCellDef class="text-center">Leitung</th>
+                <td mat-cell *matCellDef="let permission" class="text-center">
+                  <mat-checkbox class="example-margin"
+                                [disabled]="!adminMode"
+                                [checked]="permission[2].changeInstitution"
+                                (change)="permission[2].changeInstitution = !permission[2].changeInstitution"></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="write">
+                <th mat-header-cell *matHeaderCellDef class="text-center">Schreibrecht</th>
+                <td mat-cell *matCellDef="let permission" class="text-center">
+                  <mat-checkbox class="example-margin"
+                                [disabled]="!adminMode"
+                                [checked]="permission[2].writeEntries"
+                                (change)="permission[2].writeEntries = !permission[2].writeEntries"></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="read">
+                <th mat-header-cell *matHeaderCellDef class="text-center">Leserecht</th>
+                <td mat-cell *matCellDef="let permission" class="text-center">
+                  <mat-checkbox class="example-margin"
+                                [disabled]="!adminMode"
+                                [checked]="permission[2].readEntries"
+                                (change)="permission[2].readEntries = !permission[2].readEntries"></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="affiliated">
+                <th mat-header-cell *matHeaderCellDef class="text-center">Zugehörigkeit</th>
+                <td mat-cell *matCellDef="let permission" class="text-center">
+                  <mat-checkbox class="example-margin"
+                                [disabled]="!adminMode"
+                                [checked]="permission[2].affiliated"
+                                (change)="permission[2].affiliated = !permission[2].affiliated"></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+            </table>
+          </div>
+          <div class="row text-center mt-3">
+            <button mat-raised-button
+                    color="primary"
+                    *showOnRole="'admin'"
+                    (click)="updatePermissions()"
+                    [disabled]="isSubmitting">Zugriffsrechte speichern</button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </mat-tab>
+
+  <mat-tab label="Kontigente">
+    <app-contingents class="m-2"
+                     [hideInstitutionColumn]="true"
+                     [institutionView$]="value$"></app-contingents>
+  </mat-tab>
+
+  <!--CONTRACTS-->
+  <mat-tab label="Hilfepläne">
+    <app-assistance-plans class="m-2"
+                          [hideInstitutionFilter]="true"
+                          [hideInstitutionColumn]="true"
+                          [institution$]="value$"></app-assistance-plans>
+  </mat-tab>
+</mat-tab-group>
+

@@ -1,0 +1,81 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary" [hidden]="!isAuthenticated">
+  <div class="container-fluid">
+    <a class="navbar-brand" [routerLink]="'.'">OpenFLS</a>
+
+    <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
+      &#9776;
+    </button>
+
+    <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse me-1">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link"
+             [routerLink]="'.'"
+             (click)="isMenuCollapsed = true">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             routerLinkActive="active"
+             [routerLink]="'services'"
+             (click)="isMenuCollapsed = true">Dokumentationen</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             routerLinkActive="active"
+             [routerLink]="'employees'"
+             (click)="isMenuCollapsed = true">Mitarbeiter</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             routerLinkActive="active"
+             [routerLink]="'clients'"
+             (click)="isMenuCollapsed = true">Klienten</a>
+        </li>
+        <li class="nav-item" *showOnRole="'leader'">
+          <a class="nav-link"
+             routerLinkActive="active"
+             [routerLink]="'institutions'"
+             (click)="isMenuCollapsed = true">Bereiche</a>
+        </li>
+        <li class="nav-item" *showOnRole="'admin'">
+          <a class="nav-link"
+             routerLinkActive="active"
+             [routerLink]="'categories'"
+             (click)="isMenuCollapsed = true">Kategorien</a>
+        </li>
+        <li class="nav-item" *showOnRole="'leader'">
+          <a class="nav-link"
+             routerLinkActive="active"
+             [routerLink]="'sponsors'"
+             (click)="isMenuCollapsed = true">Kostenträger</a>
+        </li>
+        <li class="nav-item" *showOnRole="'admin'">
+          <a class="nav-link"
+             routerLinkActive="active"
+             [routerLink]="'hour_types'"
+             (click)="isMenuCollapsed = true">Stundentypen</a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="text-white me-2">
+      <div class="container-fluid justify-content-center">
+        <div class="row">
+          {{ employee?.firstName }}, {{employee?.lastName}}
+        </div>
+        <div class="row fw-light justify-content-center" [matTooltip]="'Abmeldung in ...'">
+          {{ (timeLeft$ | async) }}
+        </div>
+      </div>
+    </div>
+
+    <button mat-icon-button
+            [matTooltip]="'Logout'"
+            color="accent"
+            class="m-1 my-3 my-lg-0" (click)="logout()">
+      <mat-icon>exit_to_app</mat-icon>
+    </button>
+  </div>
+</nav>
+
+<router-outlet (activate)="onActivate($event)"></router-outlet>

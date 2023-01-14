@@ -1,0 +1,11 @@
+mat-list-option[aria-selected="true"] {
+  background: rgba(13, 109, 251, 0.1);
+}
+
+textarea {
+  width: 100%;
+}
+
+.list-option-large {
+  height: 60px !important;
+}

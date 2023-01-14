@@ -1,0 +1,16 @@
+.scale-75 {
+  transform: scale(0.75);
+}
+
+@media (max-width: 767px) {
+  .hide-on-small {
+    display: none;
+  }
+  .scale-on-small {
+    transform: scale(0.75);
+  }
+}
+
+.mat-form-field {
+  width: 300px;
+}

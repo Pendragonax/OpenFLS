@@ -1,0 +1,25 @@
+.center-spinner {
+  margin: 0 auto;
+}
+
+.demo-inline-calendar-card {
+  width: 250px;
+}
+
+.position-top-end {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: auto;
+  margin: auto;
+}
+
+.break-spaces {
+  white-space: break-spaces;
+}
+
+td , th {
+  white-space: break-spaces;
+  word-wrap: break-word;
+  max-width: 200px;
+}

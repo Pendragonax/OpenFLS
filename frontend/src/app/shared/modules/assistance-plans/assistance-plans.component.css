@@ -1,0 +1,13 @@
+.mat-row:hover {
+  background-color: whitesmoke;
+}
+
+td , th {
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 130px;
+}
+
+.sidenav-height {
+  height: 250px;
+}

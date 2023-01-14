@@ -1,0 +1,16 @@
+<app-info-header [title]="'Kostenträger &quot;' + sponsor?.name + '&quot;'"></app-info-header>
+
+<mat-tab-group>
+  <!--CONTRACTS-->
+  <mat-tab label="Hilfepläne">
+    <app-assistance-plans class="m-2"
+                          [sponsor$]="sponsor$"></app-assistance-plans>
+  </mat-tab>
+
+  <!--UNPROFESSIONALS-->
+  <mat-tab label="keine Fachkräfte">
+    <app-unprofesssional class="m-2"
+                         [hideAddButton]="true"
+                         [values$]="noProfessionals$"></app-unprofesssional>
+  </mat-tab>
+</mat-tab-group>

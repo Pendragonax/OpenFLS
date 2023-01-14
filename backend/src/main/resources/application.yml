@@ -1,0 +1,21 @@
+server:
+  port: 8081
+  forward-headers-strategy: FRAMEWORK
+  servlet:
+    contextPath: /api
+
+jwt:
+  private-key: classpath:private.key
+  public-key: classpath:public.key
+
+logging:
+  file:
+    name: "/logs/open-fls-backend.log"
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  jackson:
+    serialization:
+      fail-on-empty-beans: false

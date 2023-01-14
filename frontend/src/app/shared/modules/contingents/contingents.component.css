@@ -1,0 +1,27 @@
+::ng-deep .cdk-overlay-container {
+  z-index: 1200 !important;
+}
+
+td , th {
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 150px;
+}
+
+.input-field {
+  position: relative;
+}
+
+.input-reset-button {
+  position: absolute;
+  top: 9px;
+  right: 40px;
+}
+
+.mat-header-cell {
+  padding: 4px 4px 4px 4px;
+}
+
+.mat-cell {
+  padding: 4px 4px 4px 4px;
+}

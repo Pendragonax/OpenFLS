@@ -1,0 +1,234 @@
+<app-info-header [title]="'Übersicht'"
+                 [addRole]="'user'"
+                 [addButtonRouting]="true"
+                 [addRouterLink]="['/services/new']"></app-info-header>
+
+<mat-drawer-container class="h-100">
+  <!--SIDE-->
+  <mat-drawer #drawer
+              mode="over"
+              class="bg-primary text-white">
+    <div class="container-fluid">
+      <div class="row my-2 justify-content-end">
+        <div class="col text-center">
+          <span class="fw-bold">Filter</span>
+        </div>
+      </div>
+      <div>
+        <mat-card class="demo-inline-calendar-card my-2">
+          <mat-calendar [(selected)]="filterDate"
+                        (selectedChange)="handleFilterDateChanged()"></mat-calendar>
+        </mat-card>
+      </div>
+    </div>
+  </mat-drawer>
+
+  <!--MAIN-->
+  <div class="container-fluid h-100">
+    <!--ACTIONS-->
+    <div class="row">
+      <div class="col-2 my-auto">
+        <div class="d-flex">
+          <button type="button"
+                  mat-icon-button
+                  (click)="drawer.toggle()">
+            <mat-icon>filter_list</mat-icon>
+          </button>
+          <button type="button"
+                  mat-icon-button
+                  [disabled]="isSubmitting"
+                  (click)="increaseFilterDate(-1)">
+            <mat-icon>keyboard_arrow_left</mat-icon>
+          </button>
+          <button type="button"
+                  mat-icon-button
+                  [disabled]="isSubmitting"
+                  (click)="increaseFilterDate(1)">
+            <mat-icon>keyboard_arrow_right</mat-icon>
+          </button>
+          <span class="mx-3 my-auto fw-light">{{getDate(filterDate)}}</span>
+        </div>
+      </div>
+
+      <div class="col mx-auto">
+        <mat-paginator class="paginator"
+                       showFirstLastButtons
+                       (page)="handlePageEvent($event)"
+                       [pageSizeOptions]="[5, 10, 25, 100]"
+                       [length]="pageLength"
+                       [pageIndex]="pageIndex"
+                       [pageSize]="pageSize"></mat-paginator>
+      </div>
+    </div>
+
+    <!--LOADING-->
+    <div class="row  m-2"
+         [hidden]="!isSubmitting">
+      <div class="row justify-content-center">
+        <mat-spinner [strokeWidth]="2"
+                     [diameter]="100"
+                     class="center-spinner"></mat-spinner>
+      </div>
+      <div class="row text-center">
+        <p><b>Lade Dokumentationen</b></p>
+      </div>
+    </div>
+
+    <!--TABLE-->
+    <div class="row mx-0">
+      <div class="row"
+           [hidden]="isSubmitting">
+        <table mat-table
+               matSort
+               (matSortChange)="sortData($event)"
+               [dataSource]="tableSource"
+               class="mat-elevation-z4">
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[1]}}"
+                *matHeaderCellDef>Datum</th>
+            <td mat-cell
+                *matCellDef="let value">{{getDate(value[3].start)}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="client">
+            <th mat-header-cell
+                class="ps-2 hide-on-small"
+                mat-sort-header="{{tableColumns[2]}}"
+                *matHeaderCellDef>Klient</th>
+            <td mat-cell
+                class="ps-2 hide-on-small"
+                *matCellDef="let value">{{value[0].lastName}} {{value[0].firstName}}</td>
+          </ng-container>
+
+<!--          <ng-container matColumnDef="start">-->
+<!--            <th mat-header-cell-->
+<!--                mat-sort-header="{{tableColumns[3]}}"-->
+<!--                *matHeaderCellDef> Start </th>-->
+<!--            <td mat-cell-->
+<!--                *matCellDef="let value"> {{getTime(value[3].start)}}</td>-->
+<!--          </ng-container>-->
+
+<!--          <ng-container matColumnDef="end">-->
+<!--            <th mat-header-cell-->
+<!--                class="hide-on-small"-->
+<!--                mat-sort-header="{{tableColumns[4]}}"-->
+<!--                *matHeaderCellDef> Ende </th>-->
+<!--            <td mat-cell-->
+<!--                class="hide-on-small"-->
+<!--                *matCellDef="let value"> {{getTime(value[3].end)}}</td>-->
+<!--          </ng-container>-->
+
+          <ng-container matColumnDef="title">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[3]}}"
+                class="ps-1"
+                *matHeaderCellDef>Titel</th>
+            <td mat-cell
+                class="ps-1"
+                *matCellDef="let value">{{value[3].title}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="content">
+            <th mat-header-cell
+                class="hide-on-small"
+                mat-sort-header="{{tableColumns[4]}}"
+                *matHeaderCellDef>Inhalt</th>
+            <td mat-cell
+                class="hide-on-small"
+                *matCellDef="let value">{{value[3].content}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell
+                *matHeaderCellDef
+                class="text-center">Aktionen</th>
+            <td mat-cell
+                *matCellDef="let value"
+                class="text-center">
+              <div class="">
+                <button mat-mini-fab
+                        color="accent"
+                        class="m-1"
+                        [hidden]="!value[4]"
+                        [routerLink]="['/services/edit', value[3].id]">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-mini-fab
+                        color="primary"
+                        class="m-1"
+                        (click)="openServiceInformationModal(informationModal, value)">
+                  <mat-icon>search</mat-icon>
+                </button>
+                <button mat-mini-fab
+                        color="warn"
+                        class="m-1"
+                        *showOnRole="'admin'"
+                        (click)="openDeleteConfirmation(deleteContent, value[1])">
+                  <mat-icon>delete</mat-icon></button>
+
+                <!--DELETE MODAL CONFIRMATION-->
+                <ng-template #deleteContent let-modal>
+                  <div class="modal-header">
+                    <h2 class="modal-title"
+                        id="modal-basic-delete-title">Löschbestätigung</h2>
+                    <button type="button"
+                            class="btn-close"
+                            aria-label="Close"
+                            (click)="modal.dismiss('Cross click')"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Wollen sie den Dokumentationseintrag wirklich löschen?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-danger"
+                            (click)="modal.close(true)">Löschen</button>
+                    <button type="button"
+                            class="btn btn-outline-dark"
+                            (click)="modal.close(false)">Abbrechen</button>
+                  </div>
+                </ng-template>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+        </table>
+      </div>
+    </div>
+
+    <!--INFORMATION MODAL-->
+    <ng-template #informationModal let-modal>
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-basic-title">Information</h2>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <app-information-row [title]="'Klient'"
+                               [content]="editTableValue[0].lastName + ', ' + editTableValue[0].firstName"></app-information-row>
+          <app-information-row [title]="'Start'"
+                               [content]="getDateTime(editTableValue[3].start)"></app-information-row>
+          <app-information-row [title]="'Ende'"
+                               [content]="getDateTime(editTableValue[3].end)"></app-information-row>
+          <app-information-row [title]="'Mitarbeiter'"
+                               [content]="editTableValue[1].lastName + ', ' + editTableValue[1].firstName"></app-information-row>
+          <app-information-row [title]="'Bereich'"
+                               [content]="editTableValue[2].name"></app-information-row>
+          <app-information-row [title]="'Titel'"
+                               [content]="editTableValue[3].title"></app-information-row>
+          <app-information-row [title]="'Inhalt'"
+                               [content]="editTableValue[3].content"></app-information-row>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button mat-raised-button
+                class="mx-1"
+                (click)="modal.close(false)">Schließen</button>
+      </div>
+    </ng-template>
+  </div>
+</mat-drawer-container>
