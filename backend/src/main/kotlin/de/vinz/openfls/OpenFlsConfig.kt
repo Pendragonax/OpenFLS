@@ -133,7 +133,7 @@ class OpenFlsConfig : WebSecurityConfigurerAdapter() {
     fun corsFilter(): CorsFilter {
         val config = CorsConfiguration().apply {
             allowCredentials = true
-            addAllowedOrigin("*");
+            addAllowedOriginPattern("*");
             addAllowedHeader("*");
             addAllowedMethod("OPTIONS");
             addAllowedMethod("HEAD");
