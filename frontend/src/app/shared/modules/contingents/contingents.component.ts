@@ -23,6 +23,8 @@ import {Converter} from "../../converter.helper";
 import {UserService} from "../../../services/user.service";
 import {InstitutionView} from "../../../models/institution-view.model";
 import {EmployeeView} from "../../../models/employee-view.model";
+import {createStartEndValidator} from "../../validators/start-end-validator";
+import {createMatchingPasswordsValidator} from "../../validators/matching-passwords.validator";
 
 @Component({
   selector: 'app-contingents',
@@ -74,7 +76,7 @@ export class ContingentsComponent
     hours: new FormControl({value:0, disabled: false}, Validators.compose([
       Validators.required])),
     institution: new FormControl()
-  })
+  }, { validators: createStartEndValidator })
 
   override filterForm = new FormGroup({
     searchString: new FormControl(""),
