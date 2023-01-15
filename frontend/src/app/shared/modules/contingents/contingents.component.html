@@ -256,6 +256,7 @@
               <mat-label>Ende</mat-label>
               <input matInput
                      formControlName="end"
+                     [min]="minEndDate"
                      [matDatepicker]="endPicker">
               <mat-hint>optional</mat-hint>
               <mat-datepicker-toggle matSuffix
