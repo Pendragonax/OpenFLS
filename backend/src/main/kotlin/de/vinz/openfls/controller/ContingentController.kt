@@ -26,6 +26,8 @@ class ContingentController(
         return try {
             if (!accessService.isLeader(token, valueDto.institutionId))
                 throw IllegalArgumentException("no permission to add this contingent")
+            if (valueDto.end != null && valueDto.start >= valueDto.end)
+                throw IllegalArgumentException("end before start")
 
             var entity = modelMapper.map(valueDto, Contingent::class.java)
             entity = contingentService.create(entity)
@@ -53,6 +55,8 @@ class ContingentController(
                 throw java.lang.IllegalArgumentException("path id and dto id are not the same")
             if (!contingentService.existsById(id))
                 throw IllegalArgumentException("contingent not found")
+            if (valueDto.end != null && valueDto.start >= valueDto.end)
+                throw IllegalArgumentException("end before start")
 
             // convert dto to entity
             var entity = modelMapper.map(valueDto, Contingent::class.java)
