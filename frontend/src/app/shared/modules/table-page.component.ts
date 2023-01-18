@@ -102,8 +102,12 @@ export abstract class TablePageComponent<T, R> implements OnInit {
   handleDeleteModalClosed() { }
 
   handlePageEvent(e: PageEvent) {
-    this.pageIndex = e.pageIndex;
-    this.setPage(e.pageIndex);
+    if (e != null) {
+      this.pageIndex = e.pageIndex;
+      this.pageSize = e.pageSize;
+
+      this.setPage(e.pageIndex);
+    }
   }
 
   setPage(pageIndex: number) {
