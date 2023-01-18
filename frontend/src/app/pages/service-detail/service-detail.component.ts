@@ -66,7 +66,8 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   selectedCategories: CategoryDto[] = [];
   clientSelected: boolean = false;
   assistancePlanSelected: boolean = false;
-  timeNow = new Date(Date.now())
+  timeNow = new Date(Date.now());
+  minDate = new Date();
 
   // FORMS
   firstForm = new FormGroup({
@@ -278,6 +279,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         .subscribe((value) => {
           if (value != null) {
             this.selectedStartDate = this.converter.formatDate(new Date(value.toString()));
+            this.minDate = new Date(value.toString());
           }
 
           this.endDateControl.setValue(value);
@@ -401,16 +403,6 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   resetCategories() {
     this.selectedCategories = [];
     this.value.categorys = [];
-  }
-
-  setStartDate(event) {
-    if (event.value !== undefined && event.value !== null)
-      this.selectedStartDate = this.converter.formatDate(new Date(event.value.toString()))
-  }
-
-  setEndDate(event) {
-    if (event.value !== undefined && event.value !== null)
-      this.selectedEndDate = this.converter.formatDate(new Date(event.value.toString()))
   }
 
   create() {

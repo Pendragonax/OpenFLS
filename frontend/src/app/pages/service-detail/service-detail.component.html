@@ -61,6 +61,7 @@
                     <mat-label>Datum</mat-label>
                     <input matInput
                            formControlName="endDate"
+                           [min]="minDate"
                            [matDatepicker]="endPicker"
                            required>
                     <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
