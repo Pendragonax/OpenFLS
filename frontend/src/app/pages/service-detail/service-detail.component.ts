@@ -276,6 +276,10 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       this.startDateControl.enable();
       this.startDateControl.valueChanges
         .subscribe((value) => {
+          if (value != null) {
+            this.selectedStartDate = this.converter.formatDate(new Date(value.toString()));
+          }
+
           this.endDateControl.setValue(value);
         });
 
@@ -283,6 +287,12 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       this.startMinuteControl.valueChanges.subscribe(value => this.endMinuteControl.setValue(value));
 
       this.endDateControl.enable();
+      this.endDateControl.valueChanges
+        .subscribe((value) => {
+          if (value != null) {
+            this.selectedEndDate = this.converter.formatDate(new Date(value.toString()));
+          }
+        })
 
       this.clientControl.enable();
       this.clientControl.valueChanges.pipe(startWith('')).subscribe(value => {

@@ -25,7 +25,6 @@
                     <input matInput
                            formControlName="startDate"
                            [matDatepicker]="startPicker"
-                           (dateChange)="setStartDate($event)"
                            required>
                     <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
                     <mat-datepicker-toggle matSuffix
@@ -63,7 +62,6 @@
                     <input matInput
                            formControlName="endDate"
                            [matDatepicker]="endPicker"
-                           (dateChange)="setEndDate($event)"
                            required>
                     <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
                     <mat-datepicker-toggle matSuffix
