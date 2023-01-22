@@ -321,10 +321,11 @@ export class AssistancePlansComponent
     if (plan.goals == null || plan.goals.length <= 0)
       return 0;
 
-    return plan.goals
+    const goalHours = plan.goals
       .filter(goal => goal.hours != null && goal.hours.length > 0)
-      .map(goal => goal.hours.map(x => x.weeklyHours).reduce((sum, current) => sum + current))
-      .reduce((sum, current) => sum + current);
+      .map(goal => goal.hours.map(x => x.weeklyHours).reduce((sum, current) => sum + current));
+
+    return (goalHours.length > 0) ? goalHours.reduce((sum, current) => sum + current) : 0;
   }
 
   sumWeeklyHoursByPlan(plan: AssistancePlanDto): number {
