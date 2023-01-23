@@ -164,16 +164,28 @@ class AccessService(
         }
     }
 
+    fun canReadEmployeeStats(userToken: String, employeeId: Long): Boolean {
+        return try {
+            val userInfo = tokenService.getUserInfo(userToken)
+
+            // ADMIN
+            if (userInfo.second)
+                return true
+
+            val leadingInstitutions = this.getLeadingInstitutionIds(userInfo.first)
+            val affiliatedInstitutions = this.getAffiliatedInstitutionIds(employeeId)
+
+            leadingInstitutions.any { affiliatedInstitutions.contains(it) }
+        } catch (ex: Exception) {
+            false
+        }
+    }
+
     private fun isAffiliated(userId: Long, institutionId: Long): Boolean {
         return try {
-            val affiliatedInstitutions = permissionService
-                .getPermissionByEmployee(userId)
-                .filter { it.affiliated }
-                .map { it.institution?.id ?: 0 }
+            val institutions = this.getAffiliatedInstitutionIds(userId)
 
-            affiliatedInstitutions.forEach { println(it) }
-
-            affiliatedInstitutions.contains(institutionId)
+            institutions.contains(institutionId)
         } catch (ex: Exception) {
             false
         }
@@ -181,12 +193,9 @@ class AccessService(
 
     private fun isLeader(userId: Long, institutionId: Long): Boolean {
         return try {
-            val leadingInstitutions = permissionService
-                .getPermissionByEmployee(userId)
-                .filter { it.changeInstitution }
-                .map { it.institution?.id ?: 0 }
+            val institutions = this.getLeadingInstitutionIds(userId)
 
-            leadingInstitutions.contains(institutionId)
+            institutions.contains(institutionId)
         } catch (ex: Exception) {
             false
         }
@@ -194,10 +203,7 @@ class AccessService(
 
     private fun canWriteEntries(userId: Long, institutionId: Long): Boolean {
         return try {
-            val institutions = permissionService
-                .getPermissionByEmployee(userId)
-                .filter { it.writeEntries }
-                .map { it.institution?.id ?: 0 }
+            val institutions = this.getWriteRightsInstitutionIds(userId)
 
             institutions.contains(institutionId)
         } catch (ex: Exception) {
@@ -207,14 +213,39 @@ class AccessService(
 
     private fun canReadEntries(userId: Long, institutionId: Long): Boolean {
         return try {
-            val institutions = permissionService
-                .getPermissionByEmployee(userId)
-                .filter { it.readEntries }
-                .map { it.institution?.id ?: 0 }
+            val institutions = this.getReadRightsInstitutionIds(userId)
 
             institutions.contains(institutionId)
         } catch (ex: Exception) {
             false
         }
+    }
+
+    private fun getAffiliatedInstitutionIds(id: Long): List<Long> {
+        return permissionService
+            .getPermissionByEmployee(id)
+            .filter { it.affiliated }
+            .map { it.institution?.id ?: 0 }
+    }
+
+    private fun getLeadingInstitutionIds(id: Long): List<Long> {
+        return permissionService
+            .getPermissionByEmployee(id)
+            .filter { it.changeInstitution }
+            .map { it.institution?.id ?: 0 }
+    }
+
+    private fun getWriteRightsInstitutionIds(id: Long): List<Long> {
+        return permissionService
+            .getPermissionByEmployee(id)
+            .filter { it.writeEntries }
+            .map { it.institution?.id ?: 0 }
+    }
+
+    private fun getReadRightsInstitutionIds(id: Long): List<Long> {
+        return permissionService
+            .getPermissionByEmployee(id)
+            .filter { it.readEntries }
+            .map { it.institution?.id ?: 0 }
     }
 }

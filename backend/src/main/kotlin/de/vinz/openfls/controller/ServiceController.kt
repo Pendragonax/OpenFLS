@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.validation.Valid
 
 @RestController
@@ -22,7 +23,8 @@ class ServiceController(
     private val accessService: AccessService,
     private val permissionService: PermissionService,
     private val modelMapper: ModelMapper,
-    private val helperService: HelperService
+    private val helperService: HelperService,
+    private val converter: ConverterService
 ) {
     @PostMapping
     fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
@@ -225,6 +227,35 @@ class ServiceController(
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
             helperService.printLog(this::class.simpleName, "getByEmployeeAndFilter - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("times/{id}/{start}/{end}")
+    fun getTimesByEmployee(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                           @PathVariable id: Long,
+                           @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
+                           @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            if (accessService.getId(token) != id &&
+                !accessService.isAdmin(token) &&
+                !accessService.canReadEmployeeStats(token, id))
+                throw IllegalArgumentException("No permission to get the times of this employee")
+
+            val entities = serviceService.getByEmployeeAndStartEndDate(id, start, end)
+            val dto = this.converter.convertServiceDTOsToServiceTimeDto(entities).apply {
+                periodDays = start.until(end).days + 1
+            }
+
+            helperService.printLog(this::class.simpleName, "getTimesByEmployee", false)
+
+            ResponseEntity.ok(dto)
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getTimesByEmployee - ${ex.message}", true)
 
             ResponseEntity(
                 ex.message,
