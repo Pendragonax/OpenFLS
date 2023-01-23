@@ -139,7 +139,7 @@ class ServiceController(
             val dto = modelMapper.map(serviceService.getById(id), ServiceDto::class.java)
 
             if (!accessService.isAdmin(token) &&
-                accessService.canReadEntries(token, dto.institutionId))
+                !accessService.canReadEntries(token, dto.institutionId))
                 throw IllegalArgumentException("Your not the allowed to read this entry")
 
             helperService.printLog(this::class.simpleName, "getByEmployeeAndDate", false)
