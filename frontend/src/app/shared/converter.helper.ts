@@ -8,6 +8,10 @@ export class Converter {
     return num.toString().padStart(2, '0');
   }
 
+  roundTo2Digits(val: number) : number {
+    return Math.round(val * 100) / 100;
+  }
+
   /**
    * Converts date to a string with YYYY-MM-DD pattern
    * @param date

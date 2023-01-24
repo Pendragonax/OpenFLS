@@ -6,7 +6,6 @@ import de.vinz.openfls.repositories.ServiceRepository
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
-import java.time.Period
 import javax.transaction.Transactional
 
 @org.springframework.stereotype.Service
@@ -58,6 +57,10 @@ class ServiceService(
 
     fun getByEmployeeAndDate(employeeId: Long, date: LocalDate): List<Service> {
         return serviceRepository.findByEmployeeAndDate(employeeId, date)
+    }
+
+    fun getByEmployeeAndStartEndDate(employeeId: Long, start: LocalDate, end: LocalDate): List<Service> {
+        return serviceRepository.findByEmployeeAndStartEndDate(employeeId, start, end)
     }
 
     fun getByClientAndDate(clientId: Long, date: LocalDate): List<Service> {

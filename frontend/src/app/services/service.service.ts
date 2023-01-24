@@ -5,6 +5,7 @@ import {Observable} from "rxjs";
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Converter} from "../shared/converter.helper";
+import {ServiceTimeDto} from "../dtos/service-time-dto.model";
 
 @Injectable({
   providedIn: 'root'
@@ -31,5 +32,10 @@ export class ServiceService extends Base<ServiceDto> {
   getByClientAndDate(clientId: number, date: Date): Observable<ServiceDto[]> {
     return this.http
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/client/${clientId}/${this.converter.formatDate(date)}`)
+  }
+
+  getTimesByEmployeeAndStartEnd(employeeId: number, start: Date, end: Date): Observable<ServiceTimeDto> {
+    return this.http
+      .get<ServiceTimeDto>(`${environment.api_url}${this.url}/times/${employeeId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
   }
 }

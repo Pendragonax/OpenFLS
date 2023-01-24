@@ -27,6 +27,7 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
   permissions: [InstitutionDto, EmployeeDto, PermissionDto][] = [];
   permissionTableColumns: string[] = ['name', 'lead', 'write', 'read', 'affiliated'];
   employeeView$: ReplaySubject<EmployeeView> = new ReplaySubject<EmployeeView>();
+  employee$: ReplaySubject<EmployeeDto> = new ReplaySubject<EmployeeDto>();
 
   // STATEs
   editMode: boolean = false;
@@ -93,12 +94,16 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
           this.editValue.access = null;
           this.notProfessionals$.next(employee.unprofessionals);
           this.adminMode = (user?.access?.role ?? 99) === 1;
-          this.editMode = this.adminMode;
+          this.editMode = this.adminMode ||
+            leadingIds.some(x => employee.permissions.some(y => y.affiliated && y.institutionId == x));
           this.permissions = this.dtoCombinerService.combinePermissionsByEmployee(employee, institutions);
+
+          if (this.editMode) {
+            this.employee$.next(this.value);
+          }
           this.employeeView$.next(<EmployeeView> {
             dto: this.value,
-            editable: this.adminMode ||
-              leadingIds.some(x => employee.permissions.some(y => y.affiliated && y.institutionId == x))
+            editable: this.editMode
           });
 
           this.refreshForm();
