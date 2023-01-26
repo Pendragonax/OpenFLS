@@ -2,6 +2,7 @@ package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.ServiceDto
 import de.vinz.openfls.dtos.ServiceFilterDto
+import de.vinz.openfls.dtos.ServiceXLDto
 import de.vinz.openfls.model.Service
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
@@ -22,6 +23,7 @@ class ServiceController(
     private val employeeService: EmployeeService,
     private val accessService: AccessService,
     private val permissionService: PermissionService,
+    private val assistancePlanService: AssistancePlanService,
     private val modelMapper: ModelMapper,
     private val helperService: HelperService,
     private val converter: ConverterService
@@ -144,11 +146,39 @@ class ServiceController(
                 !accessService.canReadEntries(token, dto.institutionId))
                 throw IllegalArgumentException("Your not the allowed to read this entry")
 
-            helperService.printLog(this::class.simpleName, "getByEmployeeAndDate", false)
+            helperService.printLog(this::class.simpleName, "getById", false)
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
             helperService.printLog(this::class.simpleName, "getById - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("assistance_plan/{id}")
+    fun getByAssistancePlan(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                            @PathVariable id: Long): Any {
+        return try {
+            if (id <= 0)
+                throw IllegalArgumentException("id is <= 0")
+            if (!assistancePlanService.existsById(id))
+                throw IllegalArgumentException("assistance plan not found")
+            if (!accessService.canModifyAssistancePlan(token, id))
+                throw IllegalArgumentException("no permission to load the services of this assistance plan")
+
+            val dtos = serviceService.getByAssistancePlan(id).map {
+                modelMapper.map(it, ServiceXLDto::class.java)
+            }
+
+            helperService.printLog(this::class.simpleName, "getByAssistancePlan", false)
+
+            ResponseEntity.ok(dtos)
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getByAssistancePlan - ${ex.message}", true)
 
             ResponseEntity(
                 ex.message,

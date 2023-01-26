@@ -32,4 +32,7 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId")
     fun findByEmployee(@Param("employeeId") employeeId: Long): List<Service>
 
+    @Query("SELECT u FROM Service u WHERE u.assistancePlan.id = :assistancePlanId")
+    fun findByAssistancePlan(@Param("assistancePlanId") assistancePlanId: Long): List<Service>
+
 }
