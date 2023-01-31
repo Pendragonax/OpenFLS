@@ -111,6 +111,7 @@ class ClientController(
         return try {
             val dtos = clientService.getAll()
                 .map { modelMapper.map(it, ClientSimpleDto::class.java)}
+                .sortedBy { it.lastName.lowercase() }
 
             helperService.printLog(this::class.simpleName, "getAll", false)
 

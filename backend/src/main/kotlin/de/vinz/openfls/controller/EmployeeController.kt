@@ -193,7 +193,7 @@ class EmployeeController(
         return try {
             val dtos = employeeService
                 .getAll()
-                .sortedBy { it.lastname }
+                .sortedBy { it.lastname.lowercase() }
                 .map { employee -> modelMapper.map(employee, EmployeeDto::class.java).apply {
                     access?.password = ""
                 } }

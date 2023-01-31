@@ -102,7 +102,7 @@ class CategoryTemplateController(
         return try {
             val entities = categoryTemplateService
                 .getAll()
-                .sortedByDescending { it.title }
+                .sortedByDescending { it.title.lowercase() }
                 .map { value ->
                     modelMapper.map(value, CategoryTemplateDto::class.java).apply {
                         categories = categories.sortedBy { it.id }.toTypedArray() }
