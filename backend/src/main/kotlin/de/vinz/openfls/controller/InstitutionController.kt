@@ -122,7 +122,7 @@ class InstitutionController(
         return try {
             val dtos = institutionService
                 .getAll()
-                .sortedBy { it.name }
+                .sortedBy { it.name.lowercase() }
                 .map { value -> modelMapper.map(value, InstitutionDto::class.java) }
 
             helperService.printLog(this::class.simpleName, "getAll", false)
