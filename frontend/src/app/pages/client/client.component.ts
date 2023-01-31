@@ -28,8 +28,6 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
   }
 
   loadValues() {
-    if (this.isSubmitting) return;
-
     this.isSubmitting = true;
 
     combineLatest([

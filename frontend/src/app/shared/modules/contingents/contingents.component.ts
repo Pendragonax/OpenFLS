@@ -23,6 +23,7 @@ import {Converter} from "../../converter.helper";
 import {UserService} from "../../../services/user.service";
 import {InstitutionView} from "../../../models/institution-view.model";
 import {EmployeeView} from "../../../models/employee-view.model";
+import {createStartEndValidator} from "../../validators/start-end-validator";
 
 @Component({
   selector: 'app-contingents',
@@ -60,6 +61,7 @@ export class ContingentsComponent
   employees : EmployeeDto[] = [];
   institutions: InstitutionDto[] = [];
   contingents : [EmployeeDto, InstitutionDto, ContingentDto, boolean][] = [];
+  minEndDate = new Date();
 
   // FILTER
   filterDate : Date | null = null;
@@ -74,7 +76,7 @@ export class ContingentsComponent
     hours: new FormControl({value:0, disabled: false}, Validators.compose([
       Validators.required])),
     institution: new FormControl()
-  })
+  }, { validators: createStartEndValidator })
 
   override filterForm = new FormGroup({
     searchString: new FormControl(""),
@@ -180,12 +182,16 @@ export class ContingentsComponent
     this.hoursControl.valueChanges.subscribe(value => this.editValue.weeklyServiceHours = value);
     this.startControl.valueChanges.subscribe(value => {
       if (value != null) {
-        this.editValue.start = this.converter.formatDate(new Date(value.toString()))
+        this.editValue.start = this.converter.formatDate(new Date(value.toString()));
+
+        const newMinDate = new Date(value.toString());
+        newMinDate.setDate(newMinDate.getDate() + 1);
+        this.minEndDate = newMinDate;
       }
     });
     this.endControl.valueChanges.subscribe(value => {
       if (value != null) {
-        this.editValue.end = this.converter.formatDate(new Date(value.toString()))
+        this.editValue.end = this.converter.formatDate(new Date(value.toString()));
       } else {
         this.editValue.end = null;
       }

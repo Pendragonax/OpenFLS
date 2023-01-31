@@ -30,6 +30,7 @@ import {GoalHourDto} from "../../dtos/goal-hour-dto.model";
 import {AssistancePlanHourDto} from "../../dtos/assistance-plan-hour-dto.model";
 import {Location} from "@angular/common";
 import {HelperService} from "../../services/helper.service";
+import {createStartTimeEndTimeValidator} from "../../shared/validators/startTimeEndTimeValidator";
 
 @Component({
   selector: 'app-service-detail',
@@ -66,27 +67,28 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   selectedCategories: CategoryDto[] = [];
   clientSelected: boolean = false;
   assistancePlanSelected: boolean = false;
-  timeNow = new Date(Date.now())
+  timeNow = new Date(Date.now());
+  minDate = new Date();
 
   // FORMS
   firstForm = new FormGroup({
     startDate: new FormControl({value: this.timeNow, disabled: true},
       Validators.compose([Validators.required])),
-    startHour: new FormControl(this.timeNow.getHours(),
+    startHour: new FormControl({value: this.timeNow.getHours(), disabled: true},
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
-    startMinute: new FormControl(this.timeNow.getMinutes(),
+    startMinute: new FormControl({value: this.timeNow.getMinutes(), disabled: true},
       Validators.compose([Validators.required, Validators.max(59), Validators.min(0)])),
     endDate: new FormControl({value: this.timeNow, disabled: true},
       Validators.compose([Validators.required])),
-    endHour: new FormControl(this.timeNow.getHours(),
+    endHour: new FormControl({value: this.timeNow.getHours(), disabled: true},
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
-    endMinute: new FormControl(this.timeNow.getMinutes(),
+    endMinute: new FormControl({value: this.timeNow.getMinutes(), disabled: true},
       Validators.compose([Validators.required, Validators.max(59), Validators.min(0)])),
     institution: new FormControl(null,
       Validators.compose([Validators.required])),
     hourType: new FormControl(null,
       Validators.compose([Validators.required]))
-  });
+  }, createStartTimeEndTimeValidator);
 
   secondForm = new FormGroup({
     client: new FormControl({value: '', disabled: true }),
@@ -224,14 +226,19 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         this.value = service;
         this.selectedClient = client;
         this.clientSelected = true;
-        this.selectedStartDate = this.converter.formatDate(new Date(service.start.toString()))
-        this.selectedEndDate = this.converter.formatDate(new Date(service.end.toString()))
 
+        // START and END
+        const startDate = new Date(service.start.toString());
+        this.selectedStartDate = this.converter.formatDate(startDate);
+        this.selectedEndDate = this.converter.formatDate(new Date(service.end.toString()));
+
+        // ASSISTANCE PLAN
         this.selectedAssistancePlan = client.assistancePlans.find(value => value.id == service.assistancePlanId);
         this.filteredAssistancePlans = [this.selectedAssistancePlan ?? new AssistancePlanDto()];
         this.assistancePlanSelected = true;
         this.setGoals(service.goals.map(value => value.id));
 
+        // CATEGORIES
         this.categories = client.categoryTemplate.categories;
         this.selectedCategories = this.categories.filter(value => service.categorys.some(category => category.id == value.id));
 
@@ -271,18 +278,27 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   }
 
   override initFormSubscriptions() {
-    // only on EditMode
+    // EDIT-MODE
     if (!this.editMode) {
       this.startDateControl.enable();
       this.startDateControl.valueChanges
         .subscribe((value) => {
+          if (value != null) {
+            this.selectedStartDate = this.converter.formatDate(new Date(value.toString()));
+            // constraints for the end time and date
+            this.minDate = new Date(value.toString());
+          }
+
           this.endDateControl.setValue(value);
         });
 
-      this.startHourControl.valueChanges.subscribe(value => this.endHourControl.setValue(value));
-      this.startMinuteControl.valueChanges.subscribe(value => this.endMinuteControl.setValue(value));
-
       this.endDateControl.enable();
+      this.endDateControl.valueChanges
+        .subscribe((value) => {
+          if (value != null) {
+            this.selectedEndDate = this.converter.formatDate(new Date(value.toString()));
+          }
+        })
 
       this.clientControl.enable();
       this.clientControl.valueChanges.pipe(startWith('')).subscribe(value => {
@@ -328,7 +344,26 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         });
     }
 
-    // general
+    // GENERAL
+    // START HOUR
+    this.startHourControl.enable()
+    this.startHourControl.valueChanges.subscribe(value => {
+      if (value != null && !this.editMode) {
+        this.endHourControl.setValue(value);
+      }
+    });
+
+    // START MINUTE
+    this.startMinuteControl.enable()
+    this.startMinuteControl.valueChanges.subscribe(value => {
+      if (value != null && !this.editMode) {
+        this.endMinuteControl.setValue(value);
+      }
+    });
+
+    this.endHourControl.enable()
+    this.endMinuteControl.enable()
+
     this.hourTypeControl.valueChanges.subscribe(value => this.value.hourTypeId = value);
     this.institutionControl.valueChanges.subscribe(value => this.value.institutionId = value);
 
@@ -391,16 +426,6 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   resetCategories() {
     this.selectedCategories = [];
     this.value.categorys = [];
-  }
-
-  setStartDate(event) {
-    if (event.value !== undefined && event.value !== null)
-      this.selectedStartDate = this.converter.formatDate(new Date(event.value.toString()))
-  }
-
-  setEndDate(event) {
-    if (event.value !== undefined && event.value !== null)
-      this.selectedEndDate = this.converter.formatDate(new Date(event.value.toString()))
   }
 
   create() {

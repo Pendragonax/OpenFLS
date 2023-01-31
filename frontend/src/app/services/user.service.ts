@@ -78,6 +78,7 @@ export class UserService {
     const token = this.tokenService.getToken();
 
     if (token) {
+      this.isAuthenticated$.next(true);
       this.loadUser();
     } else {
       this.destroyToken();
@@ -86,11 +87,11 @@ export class UserService {
 
   private saveToken(token: Token) {
     this.tokenService.saveToken(token);
+    this.isAuthenticated$.next(true);
     this.loadUser();
   }
 
-  private loadUser() {
-    this.isAuthenticated$.next(true);
+  loadUser() {
     this.getUser().subscribe({
       next: data => {
         this.roles$.next(UserService.getRoles(data));
@@ -120,7 +121,7 @@ export class UserService {
 
   private handleError(error: HttpErrorResponse) {
     this.destroyToken();
-    this.router.navigate(["/login"]).then();
+    this.router.navigate(["/login"]).then(() => window.location.reload());
 
     return throwError(() => new Error(`Something bad happened; please try again later. ${error.message}`));
   }

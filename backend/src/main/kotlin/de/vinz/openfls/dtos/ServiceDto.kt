@@ -20,6 +20,8 @@ class ServiceDto {
 
     var unfinished: Boolean = false
 
+    var minutes: Int = 0
+
     @field:NotNull
     var employeeId: Long = 0
 

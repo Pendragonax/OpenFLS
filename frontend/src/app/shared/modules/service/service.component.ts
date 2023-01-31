@@ -100,9 +100,6 @@ export class ServiceComponent
   }
 
   loadValues() {
-    if (this.isSubmitting)
-      return;
-
     this.isSubmitting = true;
 
     if (this.clientId != null) {
@@ -119,13 +116,16 @@ export class ServiceComponent
       this.serviceService.getByEmployeeAndDate(this.employeeId ?? 0, this.filterDate),
       this.employeeId$
     ])
-      .subscribe(([services, employeeId]) => {
-        this.employeeId = employeeId;
-        this.values$.next(services);
-        this.values = services;
-        this.isSubmitting = false;
+      .subscribe({
+        next: ([services, employeeId]) => {
+          this.employeeId = employeeId;
+          this.values$.next(services);
+          this.values = services;
+          this.isSubmitting = false;
 
-        this.refreshTableData();
+          this.refreshTableData();
+        },
+        error: () => this.handleFailure("Fehler beim laden")
       });
   }
 
@@ -134,13 +134,16 @@ export class ServiceComponent
       this.serviceService.getByClientAndDate(this.clientId ?? 0, this.filterDate),
       this.clientId$
     ])
-      .subscribe(([services, client]) => {
-        this.clientId = client;
-        this.values$.next(services);
-        this.values = services;
-        this.isSubmitting = false;
+      .subscribe({
+        next: ([services, client]) => {
+          this.clientId = client;
+          this.values$.next(services);
+          this.values = services;
+          this.isSubmitting = false;
 
-        this.refreshTableData();
+          this.refreshTableData();
+        },
+        error: () => this.handleFailure("Fehler beim laden")
       });
   }
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {UserService} from "../../services/user.service";
-import {combineLatest} from "rxjs";
+import {combineLatest, ReplaySubject} from "rxjs";
 import {EmployeeDto} from "../../dtos/employee-dto.model";
 import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
 import {PasswordDto} from "../../dtos/password-dto.model";
@@ -22,6 +22,7 @@ export class HomeComponent implements OnInit {
   pwdPattern = '(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&].{8,}';
 
   currentEmployee: EmployeeDto = new EmployeeDto();
+  currentEmployee$: ReplaySubject<EmployeeDto> = new ReplaySubject<EmployeeDto>();
   permissions: [InstitutionDto, EmployeeDto, PermissionDto][] = [];
   role = "";
   username: string = "";
@@ -64,11 +65,16 @@ export class HomeComponent implements OnInit {
     )
       .subscribe(([employee, institutions]) => {
         this.currentEmployee = employee;
+        this.currentEmployee$.next(employee);
         this.username = employee.access?.username ?? "";
         this.role = HomeComponent.getRole(employee.access?.role);
         this.permissions = institutions != null ?
           this.dtoCombinerService.combinePermissionsByEmployee(employee, institutions) : [];
       })
+  }
+
+  refreshUser() {
+    this.userService.loadUser();
   }
 
   initFormSubscriptions() {

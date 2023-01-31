@@ -86,7 +86,9 @@ class SponsorController(
     @GetMapping
     fun getAll(): Any {
         return try {
-            val entities = sponsorService.getAll().map { modelMapper.map(it, SponsorDto::class.java) }
+            val entities = sponsorService.getAll()
+                .map { modelMapper.map(it, SponsorDto::class.java) }
+                .sortedBy { it.name.lowercase() }
 
             helperService.printLog(this::class.simpleName, "getAll", false)
 

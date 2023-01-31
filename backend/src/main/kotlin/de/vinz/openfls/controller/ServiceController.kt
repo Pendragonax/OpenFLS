@@ -2,6 +2,7 @@ package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.ServiceDto
 import de.vinz.openfls.dtos.ServiceFilterDto
+import de.vinz.openfls.dtos.ServiceXLDto
 import de.vinz.openfls.model.Service
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.validation.Valid
 
 @RestController
@@ -21,8 +23,10 @@ class ServiceController(
     private val employeeService: EmployeeService,
     private val accessService: AccessService,
     private val permissionService: PermissionService,
+    private val assistancePlanService: AssistancePlanService,
     private val modelMapper: ModelMapper,
-    private val helperService: HelperService
+    private val helperService: HelperService,
+    private val converter: ConverterService
 ) {
     @PostMapping
     fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
@@ -139,14 +143,42 @@ class ServiceController(
             val dto = modelMapper.map(serviceService.getById(id), ServiceDto::class.java)
 
             if (!accessService.isAdmin(token) &&
-                accessService.canReadEntries(token, dto.institutionId))
+                !accessService.canReadEntries(token, dto.institutionId))
                 throw IllegalArgumentException("Your not the allowed to read this entry")
 
-            helperService.printLog(this::class.simpleName, "getByEmployeeAndDate", false)
+            helperService.printLog(this::class.simpleName, "getById", false)
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
             helperService.printLog(this::class.simpleName, "getById - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("assistance_plan/{id}")
+    fun getByAssistancePlan(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                            @PathVariable id: Long): Any {
+        return try {
+            if (id <= 0)
+                throw IllegalArgumentException("id is <= 0")
+            if (!assistancePlanService.existsById(id))
+                throw IllegalArgumentException("assistance plan not found")
+            if (!accessService.canModifyAssistancePlan(token, id))
+                throw IllegalArgumentException("no permission to load the services of this assistance plan")
+
+            val dtos = serviceService.getByAssistancePlan(id).map {
+                modelMapper.map(it, ServiceXLDto::class.java)
+            }
+
+            helperService.printLog(this::class.simpleName, "getByAssistancePlan", false)
+
+            ResponseEntity.ok(dtos)
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getByAssistancePlan - ${ex.message}", true)
 
             ResponseEntity(
                 ex.message,
@@ -225,6 +257,35 @@ class ServiceController(
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
             helperService.printLog(this::class.simpleName, "getByEmployeeAndFilter - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("times/{id}/{start}/{end}")
+    fun getTimesByEmployee(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                           @PathVariable id: Long,
+                           @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
+                           @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            if (accessService.getId(token) != id &&
+                !accessService.isAdmin(token) &&
+                !accessService.canReadEmployeeStats(token, id))
+                throw IllegalArgumentException("No permission to get the times of this employee")
+
+            val entities = serviceService.getByEmployeeAndStartEndDate(id, start, end)
+            val dto = this.converter.convertServiceDTOsToServiceTimeDto(entities).apply {
+                periodDays = start.until(end).days + 1
+            }
+
+            helperService.printLog(this::class.simpleName, "getTimesByEmployee", false)
+
+            ResponseEntity.ok(dto)
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getTimesByEmployee - ${ex.message}", true)
 
             ResponseEntity(
                 ex.message,

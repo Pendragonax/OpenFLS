@@ -256,6 +256,7 @@
               <mat-label>Ende</mat-label>
               <input matInput
                      formControlName="end"
+                     [min]="minEndDate"
                      [matDatepicker]="endPicker">
               <mat-hint>optional</mat-hint>
               <mat-datepicker-toggle matSuffix
@@ -283,6 +284,7 @@
       <button mat-raised-button
               color="primary"
               class="mx-1"
+              [disabled]="infoForm.invalid"
               (click)="modal.close(true)">Speichern</button>
       <button mat-raised-button
               class="mx-1"

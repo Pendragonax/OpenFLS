@@ -65,6 +65,10 @@ import { ServiceMyComponent } from './pages/service-my/service-my.component';
 import { ServiceClientComponent } from './pages/service-client/service-client.component';
 import { ServiceEmployeeComponent } from './pages/service-employee/service-employee.component';
 import { InformationRowComponent } from './shared/layouts/information-row/information-row.component';
+import { ContingentEvaluationComponent } from './shared/modules/contingent-evaluation/contingent-evaluation.component';
+import { WorkTimeCardComponent } from './shared/layouts/work-time-card/work-time-card.component';
+import { AssistancePlanEvaluationComponent } from './shared/modules/assistance-plan-evaluation/assistance-plan-evaluation.component';
+import {MatRadioModule} from "@angular/material/radio";
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: ''},
@@ -105,40 +109,44 @@ const routes: Routes = [
     ServiceMyComponent,
     ServiceClientComponent,
     ServiceEmployeeComponent,
-    InformationRowComponent
+    InformationRowComponent,
+    ContingentEvaluationComponent,
+    WorkTimeCardComponent,
+    AssistancePlanEvaluationComponent
   ],
-  imports: [
-    RouterModule.forRoot(routes),
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    NgbModule,
-    FormsModule,
-    BrowserAnimationsModule,
-    MatIconModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatStepperModule,
-    MatInputModule,
-    MatTabsModule,
-    MatCheckboxModule,
-    MatSelectModule,
-    MatTableModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule,
-    MatListModule,
-    MatSidenavModule,
-    MatSnackBarModule,
-    MatExpansionModule,
-    MatSortModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatAutocompleteModule,
-    MatToolbarModule,
-    MatPaginatorModule
-  ],
+    imports: [
+        RouterModule.forRoot(routes),
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        NgbModule,
+        FormsModule,
+        BrowserAnimationsModule,
+        MatIconModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatStepperModule,
+        MatInputModule,
+        MatTabsModule,
+        MatCheckboxModule,
+        MatSelectModule,
+        MatTableModule,
+        MatCardModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        MatListModule,
+        MatSidenavModule,
+        MatSnackBarModule,
+        MatExpansionModule,
+        MatSortModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatAutocompleteModule,
+        MatToolbarModule,
+        MatPaginatorModule,
+        MatRadioModule
+    ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: MatPaginatorIntl, useValue: getGermanPaginatorIntl() },

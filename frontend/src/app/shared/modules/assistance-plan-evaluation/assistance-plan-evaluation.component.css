@@ -1,0 +1,14 @@
+.break-spaces {
+  white-space: break-spaces;
+}
+
+td , th {
+  white-space: break-spaces;
+  word-wrap: break-word;
+  max-width: 200px;
+}
+
+.selected-button {
+  background-color: var(--bs-primary);
+  color: white;
+}

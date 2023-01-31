@@ -22,7 +22,17 @@ interface ServiceRepository : CrudRepository<Service, Long> {
                                        @Param("clientId") clientId: Long,
                                        @Param("date") date: LocalDate): List<Service>
 
+    @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND " +
+            "cast(u.start as LocalDate) <= :end AND " +
+            "cast(u.start as LocalDate) >= :start")
+    fun findByEmployeeAndStartEndDate(@Param("employeeId") employeeId: Long,
+                                       @Param("start") start: LocalDate,
+                                       @Param("end") end: LocalDate): List<Service>
+
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId")
     fun findByEmployee(@Param("employeeId") employeeId: Long): List<Service>
+
+    @Query("SELECT u FROM Service u WHERE u.assistancePlan.id = :assistancePlanId")
+    fun findByAssistancePlan(@Param("assistancePlanId") assistancePlanId: Long): List<Service>
 
 }

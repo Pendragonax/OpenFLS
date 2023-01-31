@@ -84,7 +84,9 @@ class HourTypeController(
     @GetMapping
     fun getAll(): Any {
         return try {
-            val entities = hourTypeService.getAll()
+            val entities = hourTypeService
+                .getAll()
+                .sortedBy { it.title.lowercase() }
 
             helperService.printLog(this::class.simpleName, "getAll", false)
 
