@@ -53,9 +53,6 @@ export class HourTypeComponent extends TablePageComponent<HourTypeDto, HourTypeD
   }
 
   loadValues() {
-    if (this.isSubmitting)
-      return
-
     this.isSubmitting = true;
 
     this.hourTypeService.allValues$.subscribe({

@@ -34,8 +34,6 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
   }
 
   loadValues() {
-    if (this.isSubmitting) return;
-
     this.isSubmitting = true;
 
     combineLatest([
@@ -43,21 +41,25 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
       this.employeeService.allValues$,
       this.institutionService.allValues$,
       this.userService.isAdmin$]
-    ).subscribe(([leadingIds, employees, institutions, isAdmin]) => {
-      this.values = employees.map(value => <EmployeeView> {
-        dto: value,
-        editable: isAdmin || this.isEmployeeEditable(leadingIds, value),
-        administrator: (value?.access?.role ?? 99) <= 1 ?? false,
-        leader: (value?.access?.role ?? 99) <= 2 ?? false,
-        institutions: institutions
-          .filter(institution =>
-            value.permissions
-              .some(permission => permission.affiliated && permission.institutionId == institution.id))});
-      this.values$.next(this.values);
-      this.filteredTableData = this.values;
-      this.isSubmitting = false;
+    ).subscribe({
+      next: ([leadingIds, employees, institutions, isAdmin]) => {
+        this.values = employees.map(value => <EmployeeView>{
+          dto: value,
+          editable: isAdmin || this.isEmployeeEditable(leadingIds, value),
+          administrator: (value?.access?.role ?? 99) <= 1 ?? false,
+          leader: (value?.access?.role ?? 99) <= 2 ?? false,
+          institutions: institutions
+            .filter(institution =>
+              value.permissions
+                .some(permission => permission.affiliated && permission.institutionId == institution.id))
+        });
+        this.values$.next(this.values);
+        this.filteredTableData = this.values;
+        this.isSubmitting = false;
 
-      this.refreshTablePage();
+        this.refreshTablePage();
+      },
+      error: () => this.handleFailure("Fehler beim laden")
     });
   }
 

@@ -121,7 +121,7 @@ export class UserService {
 
   private handleError(error: HttpErrorResponse) {
     this.destroyToken();
-    this.router.navigate(["/login"]).then();
+    this.router.navigate(["/login"]).then(() => window.location.reload());
 
     return throwError(() => new Error(`Something bad happened; please try again later. ${error.message}`));
   }

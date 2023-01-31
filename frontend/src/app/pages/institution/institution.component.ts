@@ -33,26 +33,28 @@ export class InstitutionComponent extends TablePageComponent<InstitutionView, In
   }
 
   loadValues() {
-    if (this.isSubmitting) return;
-
     this.isSubmitting = true;
 
     combineLatest([
       this.userService.user$,
       this.userService.leadingInstitutions$,
       this.institutionService.allValues$
-    ]).subscribe(([user, leadingIds, institutions]) => {
-      const isAdmin = this.isAdmin(user);
-      this.values = institutions.map(value => <InstitutionView> {
-        dto: value,
-        editable: this.isEditable(leadingIds, value) || isAdmin});
-      this.values$.next(this.values);
-      this.filteredTableData = this.values;
-      this.tableSource.data = this.values;
-      this.isSubmitting = false;
+    ]).subscribe({
+      next: ([user, leadingIds, institutions]) => {
+        const isAdmin = this.isAdmin(user);
+        this.values = institutions.map(value => <InstitutionView>{
+          dto: value,
+          editable: this.isEditable(leadingIds, value) || isAdmin
+        });
+        this.values$.next(this.values);
+        this.filteredTableData = this.values;
+        this.tableSource.data = this.values;
+        this.isSubmitting = false;
 
-      this.refreshTablePage();
-    })
+        this.refreshTablePage();
+      },
+      error: () => this.handleFailure("Fehler beim laden")
+    });
   }
 
   getNewValue(): InstitutionView {
