@@ -7,6 +7,7 @@ export class ServiceDto {
   end: string = Date.now().toString();
   title: string = "";
   content: string = "";
+  minutes: number = 0;
   unfinished: boolean = false;
   employeeId: number = 0;
   clientId: number = 0;

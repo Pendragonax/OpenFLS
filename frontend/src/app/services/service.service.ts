@@ -38,4 +38,9 @@ export class ServiceService extends Base<ServiceDto> {
     return this.http
       .get<ServiceTimeDto>(`${environment.api_url}${this.url}/times/${employeeId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
   }
+
+  getByAssistancePlan(assistancePlanId: number): Observable<ServiceDto[]> {
+    return this.http
+      .get<ServiceDto[]>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}`)
+  }
 }

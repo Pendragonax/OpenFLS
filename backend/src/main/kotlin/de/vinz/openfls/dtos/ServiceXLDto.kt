@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
 import javax.validation.constraints.Size
 
-class ServiceDto {
+class ServiceXLDto {
     var id: Long = 0
 
     var start: LocalDateTime = LocalDateTime.now()
@@ -40,6 +40,5 @@ class ServiceDto {
     @JsonIgnoreProperties(value = ["services", "hours", "hibernateLazyInitializer"])
     var goals: MutableSet<GoalDto> = mutableSetOf()
 
-    @JsonIgnoreProperties(value = ["services", "categoryTemplate", "hibernateLazyInitializer"])
     var categorys: MutableSet<CategoryDto> = mutableSetOf()
 }

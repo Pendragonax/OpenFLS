@@ -55,6 +55,10 @@ class ServiceService(
         return serviceRepository.existsById(id)
     }
 
+    fun getByAssistancePlan(id: Long): List<Service> {
+        return serviceRepository.findByAssistancePlan(id)
+    }
+
     fun getByEmployeeAndDate(employeeId: Long, date: LocalDate): List<Service> {
         return serviceRepository.findByEmployeeAndDate(employeeId, date)
     }

@@ -10,7 +10,7 @@ import {SponsorDto} from "../../dtos/sponsor-dto.model";
 import {AssistancePlanService} from "../../services/assistance-plan.service";
 import {ActivatedRoute} from "@angular/router";
 import {SponsorService} from "../../services/sponsor.service";
-import {combineLatest} from "rxjs";
+import {combineLatest, ReplaySubject} from "rxjs";
 import {AssistancePlanView} from "../../models/assistance-plan-view.model";
 import {UserService} from "../../services/user.service";
 import {Converter} from "../../shared/converter.helper";
@@ -23,6 +23,7 @@ import {AssistancePlanHourDto} from "../../dtos/assistance-plan-hour-dto.model";
 import {AssistancePlanInfoForm} from "../../shared/form/assistance-plan-info-form";
 import {DetailPageComponent} from "../../shared/modules/detail-page.component";
 import {HelperService} from "../../services/helper.service";
+import {AssistancePlanDto} from "../../dtos/assistance-plan-dto.model";
 
 @Component({
   selector: 'app-assistance-plan-detail',
@@ -47,6 +48,7 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
   institutions: InstitutionDto[] = [];
   sponsors: SponsorDto[] = [];
   client: ClientDto = new ClientDto();
+  dto$ = new ReplaySubject<AssistancePlanDto>();
 
   // FORMs
   infoForm = new AssistancePlanInfoForm(true);
@@ -80,6 +82,7 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
           this.value = <AssistancePlanView> {
             dto: plan,
             editable: affiliatedInstitutions.some(value => value === plan.institutionId)};
+          this.dto$.next(plan);
           this.value$.next(this.value);
           this.editValue = <AssistancePlanView> {...this.value};
           this.institutions = institutions;
