@@ -49,6 +49,7 @@ export class CategoryComponent extends TablePageComponent<CategoryTemplateDto, C
   }
 
   loadValues() {
+    this.isSubmitting = true;
     this.categoryService
       .allValues$
       .subscribe({
@@ -58,6 +59,7 @@ export class CategoryComponent extends TablePageComponent<CategoryTemplateDto, C
           this.filteredTableData = values;
 
           this.refreshTablePage();
+          this.isSubmitting = false;
         },
         error: () => this.handleFailure("Fehler beim laden")
       })
