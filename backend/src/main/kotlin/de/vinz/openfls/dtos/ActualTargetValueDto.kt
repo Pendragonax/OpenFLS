@@ -5,5 +5,7 @@ open class ActualTargetValueDto {
 
     var actual: Double = 0.0
 
-    var size: Int = 0
+    var size: Long = 0
+
+    var hourType: HourTypeDto = HourTypeDto()
 }

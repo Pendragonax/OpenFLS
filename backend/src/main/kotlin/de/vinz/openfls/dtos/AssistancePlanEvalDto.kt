@@ -1,7 +1,11 @@
 package de.vinz.openfls.dtos
 
 class AssistancePlanEvalDto {
-    var total: ActualTargetValueDto = ActualTargetValueDto()
+    var total: List<ActualTargetValueDto> = listOf()
 
-    var months: List<ActualTargetValueDateDto> = listOf()
+    var tillToday: List<ActualTargetValueDto> = listOf()
+
+    var notMatchingServices: Int = 0
+
+    var notMatchingServicesIds: MutableList<Long> = mutableListOf()
 }

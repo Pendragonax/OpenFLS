@@ -1,17 +1,26 @@
 package de.vinz.openfls.services
 
+import de.vinz.openfls.dtos.ActualTargetValueDto
+import de.vinz.openfls.dtos.AssistancePlanEvalDto
+import de.vinz.openfls.dtos.HourTypeDto
 import de.vinz.openfls.model.AssistancePlan
 import de.vinz.openfls.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.repositories.AssistancePlanRepository
+import de.vinz.openfls.repositories.ServiceRepository
+import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.LocalDate
 import javax.transaction.Transactional
 import kotlin.IllegalArgumentException
 
 @Service
 class AssistancePlanService(
     private val assistancePlanRepository: AssistancePlanRepository,
-    private val assistancePlanHourRepository: AssistancePlanHourRepository
+    private val assistancePlanHourRepository: AssistancePlanHourRepository,
+    private val serviceRepository: ServiceRepository,
+    private val modelMapper: ModelMapper
 ): GenericService<AssistancePlan> {
     @Transactional
     override fun create(value: AssistancePlan): AssistancePlan {
@@ -96,5 +105,54 @@ class AssistancePlanService(
 
     fun getByInstitutionId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findByInstitutionId(id)
+    }
+
+    fun getEvaluationById(id: Long): AssistancePlanEvalDto {
+        val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ")}
+        val services = serviceRepository.findByAssistancePlan(id)
+        val eval = AssistancePlanEvalDto()
+
+        val days = Duration.between(assistancePlan.start, assistancePlan.end).toDays()
+        val daysTillToday = if (assistancePlan.end < LocalDate.now()) {
+            Duration.between(assistancePlan.start, assistancePlan.end).toDays()
+        } else {
+            Duration.between(assistancePlan.start, LocalDate.now()).toDays()
+        }
+
+        eval.total = assistancePlan.hours.map {
+            ActualTargetValueDto().apply {
+                target = days * (it.weeklyHours / 7)
+                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
+            }
+        }
+
+        eval.tillToday = assistancePlan.hours.map {
+            ActualTargetValueDto().apply {
+                target = daysTillToday * (it.weeklyHours / 7)
+                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
+            }
+        }
+
+        for (service in services) {
+            val tmp = eval.total.firstOrNull { it.hourType.id == service.hourType.id }
+
+            if (tmp == null) {
+                eval.notMatchingServices++
+                eval.notMatchingServicesIds.add(service.id)
+            } else {
+                tmp.apply {
+                    actual += service.minutes / 60.0
+                    size++
+                }
+                eval.tillToday
+                    .first { it.hourType.id == service.hourType.id }
+                    .apply {
+                        actual += service.minutes / 60.0
+                        size++
+                }
+            }
+        }
+
+        return eval
     }
 }
