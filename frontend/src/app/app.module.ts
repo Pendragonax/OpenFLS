@@ -69,6 +69,7 @@ import { ContingentEvaluationComponent } from './shared/modules/contingent-evalu
 import { WorkTimeCardComponent } from './shared/layouts/work-time-card/work-time-card.component';
 import { AssistancePlanEvaluationComponent } from './shared/modules/assistance-plan-evaluation/assistance-plan-evaluation.component';
 import {MatRadioModule} from "@angular/material/radio";
+import { AssistancePlanAnalysisComponent } from './shared/modules/assitance-plan-analysis/assistance-plan-analysis.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: ''},
@@ -112,7 +113,8 @@ const routes: Routes = [
     InformationRowComponent,
     ContingentEvaluationComponent,
     WorkTimeCardComponent,
-    AssistancePlanEvaluationComponent
+    AssistancePlanEvaluationComponent,
+    AssistancePlanAnalysisComponent
   ],
     imports: [
         RouterModule.forRoot(routes),
