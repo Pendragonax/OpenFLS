@@ -10,8 +10,8 @@ import de.vinz.openfls.repositories.ServiceRepository
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.time.Duration
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import javax.transaction.Transactional
 import kotlin.IllegalArgumentException
 
@@ -112,12 +112,21 @@ class AssistancePlanService(
         val services = serviceRepository.findByAssistancePlan(id)
         val eval = AssistancePlanEvalDto()
 
-        val days = Duration.between(assistancePlan.start, assistancePlan.end).toDays()
-        val daysTillToday = if (assistancePlan.end < LocalDate.now()) {
-            Duration.between(assistancePlan.start, assistancePlan.end).toDays()
-        } else {
-            Duration.between(assistancePlan.start, LocalDate.now()).toDays()
-        }
+        val days = ChronoUnit.DAYS.between(assistancePlan.start, assistancePlan.end) + 1
+        val tillDate = if (assistancePlan.end < LocalDate.now()) assistancePlan.end else LocalDate.now()
+        val startActualYearDate =
+            if (assistancePlan.start.year == LocalDate.now().year)
+                assistancePlan.start
+            else
+                LocalDate.of(LocalDate.now().year, 1, 1)
+        val startActualMonthDate =
+            if (assistancePlan.start.year == LocalDate.now().year && assistancePlan.start.month == LocalDate.now().month)
+                assistancePlan.start
+            else
+                LocalDate.of(LocalDate.now().year, LocalDate.now().month, 1)
+        val daysTillToday = ChronoUnit.DAYS.between(assistancePlan.start, tillDate) + 1
+        val daysTillTodayInActualYear = ChronoUnit.DAYS.between(startActualYearDate, tillDate) + 1
+        val daysTillTodayInActualMonth = ChronoUnit.DAYS.between(startActualMonthDate, tillDate) + 1
 
         eval.total = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
@@ -133,23 +142,65 @@ class AssistancePlanService(
             }
         }
 
-        for (service in services) {
-            val tmp = eval.total.firstOrNull { it.hourType.id == service.hourType.id }
+        eval.actualYear = assistancePlan.hours.map {
+            ActualTargetValueDto().apply {
+                target = daysTillTodayInActualYear * (it.weeklyHours / 7)
+                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
+            }
+        }
 
-            if (tmp == null) {
+        eval.actualMonth = assistancePlan.hours.map {
+            ActualTargetValueDto().apply {
+                target = daysTillTodayInActualMonth * (it.weeklyHours / 7)
+                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
+            }
+        }
+
+        for (service in services) {
+            val total = eval.total.firstOrNull { it.hourType.id == service.hourType.id &&
+                    service.start.year <= assistancePlan.end.year &&
+                    (service.start.month < assistancePlan.end.month ||
+                            (service.start.month == assistancePlan.end.month && service.start.dayOfMonth <= assistancePlan.end.dayOfMonth))}
+
+            // service is not between the start and end of the assistance plan
+            if (total == null) {
                 eval.notMatchingServices++
                 eval.notMatchingServicesIds.add(service.id)
             } else {
-                tmp.apply {
+                total.apply {
                     actual += service.minutes / 60.0
                     size++
                 }
+
                 eval.tillToday
-                    .first { it.hourType.id == service.hourType.id }
-                    .apply {
+                    .firstOrNull { it.hourType.id == service.hourType.id &&
+                            service.start.year <= tillDate.year &&
+                            (service.start.month < tillDate.month ||
+                                    (service.start.month == tillDate.month && service.start.dayOfMonth <= tillDate.dayOfMonth))
+                    }
+                    ?.apply {
                         actual += service.minutes / 60.0
                         size++
                 }
+
+                eval.actualYear
+                    .firstOrNull { it.hourType.id == service.hourType.id &&
+                            service.start.year == tillDate.year
+                    }
+                    ?.apply {
+                        actual += service.minutes / 60.0
+                        size++
+                    }
+
+                eval.actualMonth
+                    .firstOrNull { it.hourType.id == service.hourType.id &&
+                            service.start.year == tillDate.year &&
+                            service.start.month == tillDate.month
+                    }
+                    ?.apply {
+                        actual += service.minutes / 60.0
+                        size++
+                    }
             }
         }
 
