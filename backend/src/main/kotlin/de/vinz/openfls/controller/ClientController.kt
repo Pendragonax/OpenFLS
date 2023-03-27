@@ -130,6 +130,7 @@ class ClientController(
     fun getById(@PathVariable id: Long): Any {
         return try {
             val dto = modelMapper.map(clientService.getById(id), ClientDto::class.java)
+            dto.categoryTemplate.categories = dto.categoryTemplate.categories.sortedBy { it.shortcut }.toTypedArray()
 
             helperService.printLog(this::class.simpleName, "getById [id=$id]", false)
 
