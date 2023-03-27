@@ -92,10 +92,26 @@
                 *matCellDef="let value">{{getDate(value[3].start)}}</td>
           </ng-container>
 
+          <ng-container matColumnDef="start">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[2]}}"
+                *matHeaderCellDef>Start</th>
+            <td mat-cell
+                *matCellDef="let value">{{getTime(value[3].start)}}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="end">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[3]}}"
+                *matHeaderCellDef>Ende</th>
+            <td mat-cell
+                *matCellDef="let value">{{getTime(value[3].end)}}</td>
+          </ng-container>
+
           <ng-container matColumnDef="client">
             <th mat-header-cell
                 class="ps-2 hide-on-small"
-                mat-sort-header="{{tableColumns[2]}}"
+                mat-sort-header="{{tableColumns[4]}}"
                 *matHeaderCellDef>Klient</th>
             <td mat-cell
                 class="ps-2 hide-on-small"
@@ -122,7 +138,7 @@
 
           <ng-container matColumnDef="title">
             <th mat-header-cell
-                mat-sort-header="{{tableColumns[3]}}"
+                mat-sort-header="{{tableColumns[5]}}"
                 class="ps-1"
                 *matHeaderCellDef>Titel</th>
             <td mat-cell
@@ -133,7 +149,7 @@
           <ng-container matColumnDef="content">
             <th mat-header-cell
                 class="hide-on-small"
-                mat-sort-header="{{tableColumns[4]}}"
+                mat-sort-header="{{tableColumns[6]}}"
                 *matHeaderCellDef>Inhalt</th>
             <td mat-cell
                 class="hide-on-small"

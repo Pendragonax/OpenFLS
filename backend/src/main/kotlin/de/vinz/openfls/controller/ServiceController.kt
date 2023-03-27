@@ -200,6 +200,7 @@ class ServiceController(
             val dtos = serviceService.getByEmployeeAndDate(id, date)
                 .map { modelMapper.map(it, ServiceDto::class.java) }
                 .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
+                .sortedBy { it.start }
 
             helperService.printLog(this::class.simpleName, "getByEmployeeAndDate", false)
 
