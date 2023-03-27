@@ -1,4 +1,17 @@
-<div class="container">
+<!--LOADING-->
+<div class="container justify-content-center"
+     [hidden]="!isSubmitting">
+  <div class="row justify-content-center">
+    <mat-spinner [strokeWidth]="2"
+                 [diameter]="100"
+                 class="center-spinner"></mat-spinner>
+  </div>
+  <div class="row text-center">
+    <p><b>Lade Analysen</b></p>
+  </div>
+</div>
+
+<div class="container" [hidden]="isSubmitting">
   <div class="row">
     <div *ngFor="let type of eval.total"
          class="container">
