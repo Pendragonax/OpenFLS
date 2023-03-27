@@ -29,7 +29,7 @@ export class ServiceComponent
   @Input() employeeId$: ReplaySubject<number> = new ReplaySubject<number>();
 
   // CONFIG
-  tableColumns: string[] = ['date', 'client', 'title', 'content', 'actions'];
+  tableColumns: string[] = ['date', 'start', 'end', 'client', 'title', 'content', 'actions'];
 
   // VARs
   clientId: number | null = null;
