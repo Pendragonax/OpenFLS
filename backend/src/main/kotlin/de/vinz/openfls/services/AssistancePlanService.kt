@@ -114,19 +114,11 @@ class AssistancePlanService(
 
         val days = ChronoUnit.DAYS.between(assistancePlan.start, assistancePlan.end) + 1
         val tillDate = if (assistancePlan.end < LocalDate.now()) assistancePlan.end else LocalDate.now()
-        val startActualYearDate =
-            if (assistancePlan.start.year == LocalDate.now().year)
-                assistancePlan.start
-            else
-                LocalDate.of(LocalDate.now().year, 1, 1)
-        val startActualMonthDate =
-            if (assistancePlan.start.year == LocalDate.now().year && assistancePlan.start.month == LocalDate.now().month)
-                assistancePlan.start
-            else
-                LocalDate.of(LocalDate.now().year, LocalDate.now().month, 1)
         val daysTillToday = ChronoUnit.DAYS.between(assistancePlan.start, tillDate) + 1
-        val daysTillTodayInActualYear = ChronoUnit.DAYS.between(startActualYearDate, tillDate) + 1
-        val daysTillTodayInActualMonth = ChronoUnit.DAYS.between(startActualMonthDate, tillDate) + 1
+
+        val actualMonth = getDaysOfActualMonth(assistancePlan)
+        val actualYear = getDaysOfActualYear(assistancePlan)
+
 
         eval.total = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
@@ -144,34 +136,33 @@ class AssistancePlanService(
 
         eval.actualYear = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = daysTillTodayInActualYear * (it.weeklyHours / 7)
+                target = actualYear.first * (it.weeklyHours / 7)
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
 
         eval.actualMonth = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = daysTillTodayInActualMonth * (it.weeklyHours / 7)
+                target = actualMonth.first * (it.weeklyHours / 7)
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
 
         for (service in services) {
-            val total = eval.total.firstOrNull { it.hourType.id == service.hourType.id &&
-                    service.start.year <= assistancePlan.end.year &&
-                    (service.start.month < assistancePlan.end.month ||
-                            (service.start.month == assistancePlan.end.month && service.start.dayOfMonth <= assistancePlan.end.dayOfMonth))}
+            val startDate = service.start.toLocalDate()
 
-            // service is not between the start and end of the assistance plan
-            if (total == null) {
-                eval.notMatchingServices++
-                eval.notMatchingServicesIds.add(service.id)
-            } else {
-                total.apply {
-                    actual += service.minutes / 60.0
-                    size++
-                }
+            // service is in between the start and end inclusive
+            if ((assistancePlan.start.isBefore(startDate) || assistancePlan.start.isEqual(startDate)) &&
+                (assistancePlan.end.isAfter(startDate) || assistancePlan.end.isEqual(startDate))) {
+                // total values
+                eval.total
+                    .firstOrNull { it.hourType.id == service.hourType.id }
+                    ?.apply {
+                        actual += service.minutes / 60.0
+                        size++
+                    }
 
+                // till today
                 eval.tillToday
                     .firstOrNull { it.hourType.id == service.hourType.id &&
                             service.start.year <= tillDate.year &&
@@ -181,29 +172,90 @@ class AssistancePlanService(
                     ?.apply {
                         actual += service.minutes / 60.0
                         size++
+                    }
+
+                if (actualYear.second != null && actualYear.third != null) {
+                    // actual year
+                    eval.actualYear
+                        .firstOrNull { it.hourType.id == service.hourType.id &&
+                                (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
+                                (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
+                        }
+                        ?.apply {
+                            actual += service.minutes / 60.0
+                            size++
+                        }
                 }
 
-                eval.actualYear
-                    .firstOrNull { it.hourType.id == service.hourType.id &&
-                            service.start.year == tillDate.year
-                    }
-                    ?.apply {
-                        actual += service.minutes / 60.0
-                        size++
-                    }
+                if (actualMonth.second != null && actualMonth.third != null) {
+                    // actual month
+                    eval.actualMonth
+                        .firstOrNull { it.hourType.id == service.hourType.id &&
+                                (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
+                                (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
+                        }
+                        ?.apply {
+                            actual += service.minutes / 60.0
+                            size++
+                        }
+                }
 
-                eval.actualMonth
-                    .firstOrNull { it.hourType.id == service.hourType.id &&
-                            service.start.year == tillDate.year &&
-                            service.start.month == tillDate.month
-                    }
-                    ?.apply {
-                        actual += service.minutes / 60.0
-                        size++
-                    }
+            } else {
+                eval.notMatchingServices++
+                eval.notMatchingServicesIds.add(service.id)
             }
         }
 
         return eval
+    }
+
+    private fun getDaysOfActualMonth(assistancePlan: AssistancePlan): Triple<Long, LocalDate?, LocalDate?> {
+        val today = LocalDate.now()
+        val firstOfMonth = LocalDate.of(today.year, today.monthValue, 1)
+        var from: LocalDate = firstOfMonth
+        var till: LocalDate = today
+
+        // month is in between start and end
+        if ((today.isAfter(assistancePlan.start) || today.isEqual(assistancePlan.start)) &&
+            (firstOfMonth.isBefore(assistancePlan.end) || firstOfMonth.isEqual(assistancePlan.end))) {
+            // start is in the actual month
+            if (assistancePlan.start.year == today.year && assistancePlan.start.month == today.month) {
+                from = assistancePlan.start
+            }
+
+            // end is in the actual month
+            if (assistancePlan.end < today && assistancePlan.end.year == today.year && assistancePlan.end.month == today.month) {
+                till = assistancePlan.end
+            }
+
+            return Triple(ChronoUnit.DAYS.between(from, till) + 1, from, till)
+        } else {
+            return Triple(0, null, null)
+        }
+    }
+
+    private fun getDaysOfActualYear(assistancePlan: AssistancePlan): Triple<Long, LocalDate?, LocalDate?> {
+        val today = LocalDate.now()
+        val firstOfYear = LocalDate.of(today.year, 1, 1)
+        var from: LocalDate = firstOfYear
+        var till: LocalDate = today
+
+        // month is in between start and end
+        if ((today.isAfter(assistancePlan.start) || today.isEqual(assistancePlan.start)) &&
+            (firstOfYear.isBefore(assistancePlan.end) || firstOfYear.isEqual(assistancePlan.end))) {
+            // start is in the actual month
+            if (assistancePlan.start.year == today.year) {
+                from = assistancePlan.start
+            }
+
+            // end is in the actual month
+            if (assistancePlan.end < today && assistancePlan.end.year == today.year) {
+                till = assistancePlan.end
+            }
+
+            return Triple(ChronoUnit.DAYS.between(from, till) + 1, from, till)
+        } else {
+            return Triple(0, null, null)
+        }
     }
 }
