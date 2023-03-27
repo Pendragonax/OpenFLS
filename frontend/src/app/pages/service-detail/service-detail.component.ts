@@ -54,6 +54,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   // VARs
   institutions: InstitutionDto[] = []
   hourTypes: HourTypeDto[] = []
+  assistancePlanHourTypes: HourTypeDto[] = []
   clients: ClientDto[] = [];
   sponsors: SponsorDto[] = [];
   categories: CategoryDto[] = [];
@@ -121,7 +122,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
   get institutionControl() { return this.firstForm.controls['institution']; }
 
-  get hourTypeControl() { return this.firstForm.controls['hourType']; }
+  get hourTypeControl() { return this.secondForm.controls['hourType']; }
 
   get assistancePlansControl() { return this.secondForm.controls['assistancePlanList']; }
 
@@ -237,6 +238,11 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         this.filteredAssistancePlans = [this.selectedAssistancePlan ?? new AssistancePlanDto()];
         this.assistancePlanSelected = true;
         this.setGoals(service.goals.map(value => value.id));
+        if (this.selectedAssistancePlan != null) {
+          this.assistancePlanHourTypes = this.hourTypes.filter(x =>
+            this.selectedAssistancePlan!!.hours.some(hour => hour.hourTypeId == x.id) ||
+            this.selectedAssistancePlan!!.goals.some(goal => goal.hours.some(hour => hour.hourTypeId == x.id)))
+        }
 
         // CATEGORIES
         this.categories = client.categoryTemplate.categories;
@@ -395,10 +401,15 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       this.assistancePlanSelected = true;
       this.value.assistancePlanId = plan.id;
       this.selectedAssistancePlan = plan;
+      this.assistancePlanHourTypes = this.hourTypes.filter(x =>
+        plan.hours.some(hour => hour.hourTypeId == x.id) ||
+        plan.goals.some(goal => goal.hours.some(hour => hour.hourTypeId == x.id)))
     } else {
       this.assistancePlanSelected = false;
       this.value.assistancePlanId = 0;
       this.selectedAssistancePlan = null;
+      this.assistancePlanHourTypes = [];
+      this.hourTypeControl.reset();
     }
   }
 

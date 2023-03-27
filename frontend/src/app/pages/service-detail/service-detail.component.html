@@ -245,7 +245,7 @@
               <mat-label>Stundentyp</mat-label>
               <mat-select formControlName="hourType"
                           required>
-                <mat-option *ngFor="let value of hourTypes"
+                <mat-option *ngFor="let value of assistancePlanHourTypes"
                             [value]="value.id">
                   {{value.title}}
                 </mat-option>
