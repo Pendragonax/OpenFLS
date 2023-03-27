@@ -85,8 +85,6 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     endMinute: new FormControl({value: this.timeNow.getMinutes(), disabled: true},
       Validators.compose([Validators.required, Validators.max(59), Validators.min(0)])),
     institution: new FormControl(null,
-      Validators.compose([Validators.required])),
-    hourType: new FormControl(null,
       Validators.compose([Validators.required]))
   }, createStartTimeEndTimeValidator);
 
@@ -94,7 +92,9 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     client: new FormControl({value: '', disabled: true }),
     clientList: new FormControl({value: '', disabled: true }),
     assistancePlanList: new FormControl({value: '', disabled: true }),
-    goalList: new FormControl(null)
+    goalList: new FormControl(null),
+    hourType: new FormControl(null,
+      Validators.compose([Validators.required]))
   });
 
   thirdForm = new FormGroup({
