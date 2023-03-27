@@ -196,6 +196,12 @@
             class="text-center px-2">
           <div class="text-center">
             <button mat-mini-fab
+                    color="primary"
+                    class="m-1"
+                    [hidden]="!combination[3].editable"
+                    (click)="openAnalysisModal(analysisContent, combination[3].dto.id)">
+              <mat-icon>query_builder</mat-icon></button>
+            <button mat-mini-fab
                     color="accent"
                     class="m-1"
                     [hidden]="!combination[3].editable"
@@ -238,6 +244,19 @@
                         class="btn btn-outline-dark"
                         (click)="modal.close(false)">Abbrechen</button>
               </div>
+            </ng-template>
+
+            <!--ANALYSIS MODAL-->
+            <ng-template #analysisContent let-modal>
+              <div class="modal-header">
+                <h2 class="modal-title"
+                    id="modal-basic-title-analysis">Zeitanalyse</h2>
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Close"
+                        (click)="modal.dismiss('Cross click')"></button>
+              </div>
+              <app-assistance-plan-analysis [id]=combination[3].dto.id></app-assistance-plan-analysis>
             </ng-template>
           </div>
         </td>

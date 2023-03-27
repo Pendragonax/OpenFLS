@@ -1,0 +1,71 @@
+<!--LOADING-->
+<div class="container justify-content-center"
+     [hidden]="!isSubmitting">
+  <div class="row justify-content-center">
+    <mat-spinner [strokeWidth]="2"
+                 [diameter]="100"
+                 class="center-spinner"></mat-spinner>
+  </div>
+  <div class="row text-center">
+    <p><b>Lade Analysen</b></p>
+  </div>
+</div>
+
+<div class="container" [hidden]="isSubmitting">
+  <div class="row">
+    <div *ngFor="let type of eval.total"
+         class="container">
+      <div class="row justify-content-center fw-bold">
+        gesamter Hilfeplan
+      </div>
+      <app-information-row [title]="'Stundentyp'"
+                           [content]="type.hourType?.title ?? ''"></app-information-row>
+      <app-information-row [title]="'Soll/Ist'"
+                           [content]="type.target.toFixed(2) + '/' + type.actual.toFixed(2)"></app-information-row>
+      <app-information-row [title]="'Differenz'"
+                           [content]="(type.actual - type.target).toFixed(2)"></app-information-row>
+    </div>
+  </div>
+  <div class="row">
+    <div *ngFor="let type of eval.tillToday"
+         class="container">
+      <div class="row justify-content-center fw-bold">
+        gesamter Hilfeplan (bis heute)
+      </div>
+      <app-information-row [title]="'Stundentyp'"
+                           [content]="type.hourType?.title ?? ''"></app-information-row>
+      <app-information-row [title]="'Soll/Ist'"
+                           [content]="type.target.toFixed(2) + '/' + type.actual.toFixed(2)"></app-information-row>
+      <app-information-row [title]="'Differenz'"
+                           [content]="(type.actual - type.target).toFixed(2)"></app-information-row>
+    </div>
+  </div>
+  <div class="row">
+    <div *ngFor="let type of eval.actualYear"
+         class="container">
+      <div class="row justify-content-center fw-bold">
+        aktuelles Jahr (bis heute)
+      </div>
+      <app-information-row [title]="'Stundentyp'"
+                           [content]="type.hourType?.title ?? ''"></app-information-row>
+      <app-information-row [title]="'Soll/Ist'"
+                           [content]="type.target.toFixed(2) + '/' + type.actual.toFixed(2)"></app-information-row>
+      <app-information-row [title]="'Differenz'"
+                           [content]="(type.actual - type.target).toFixed(2)"></app-information-row>
+    </div>
+  </div>
+  <div class="row">
+    <div *ngFor="let type of eval.actualMonth"
+         class="container">
+      <div class="row justify-content-center fw-bold">
+        aktueller Monat (bis heute)
+      </div>
+      <app-information-row [title]="'Stundentyp'"
+                           [content]="type.hourType?.title ?? ''"></app-information-row>
+      <app-information-row [title]="'Soll/Ist'"
+                           [content]="type.target.toFixed(2) + '/' + type.actual.toFixed(2)"></app-information-row>
+      <app-information-row [title]="'Differenz'"
+                           [content]="(type.actual - type.target).toFixed(2)"></app-information-row>
+    </div>
+  </div>
+</div>
