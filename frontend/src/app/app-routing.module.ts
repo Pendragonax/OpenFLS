@@ -49,6 +49,7 @@ const routes: Routes = [
   { path: 'services', component: ServiceMyComponent, canActivate: [AuthGuard] },
   { path: 'services/my', component: ServiceMyComponent, canActivate: [AuthGuard] },
   { path: 'services/new', component: ServiceDetailComponent, canActivate: [AuthGuard] },
+  { path: 'services/new/:date', component: ServiceDetailComponent, canActivate: [AuthGuard] },
   { path: 'services/edit/:id', component: ServiceDetailComponent, canActivate: [AuthGuard] },
   { path: 'services/client/:id', component: ServiceClientComponent, canActivate: [AuthGuard] },
   { path: 'services/employee/:id', component: ServiceEmployeeComponent, canActivate: [AuthGuard] }
