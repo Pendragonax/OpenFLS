@@ -94,17 +94,21 @@
 
           <ng-container matColumnDef="start">
             <th mat-header-cell
+                class="ps-2 hide-on-small"
                 mat-sort-header="{{tableColumns[2]}}"
                 *matHeaderCellDef>Start</th>
             <td mat-cell
+                class="ps-2 hide-on-small"
                 *matCellDef="let value">{{getTime(value[3].start)}}</td>
           </ng-container>
 
           <ng-container matColumnDef="end">
             <th mat-header-cell
+                class="ps-2 hide-on-small"
                 mat-sort-header="{{tableColumns[3]}}"
                 *matHeaderCellDef>Ende</th>
             <td mat-cell
+                class="ps-2 hide-on-small"
                 *matCellDef="let value">{{getTime(value[3].end)}}</td>
           </ng-container>
 
