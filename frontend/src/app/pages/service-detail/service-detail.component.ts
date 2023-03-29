@@ -202,6 +202,22 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         // service
         this.value.employeeId = user.id;
 
+        // date
+        const dateStr = this.route.snapshot.paramMap.get('date');
+        if (dateStr) {
+          try {
+            const startDate = new Date(dateStr);
+            this.value.start = startDate.valueOf().toString();
+            this.startDateControl.setValue(this.converter.formatDate(startDate));
+            this.endDateControl.setValue(this.converter.formatDate(startDate));
+            this.selectedStartDate = this.converter.formatDate(startDate);
+            this.selectedEndDate = this.converter.formatDate(startDate);
+            this.minDate = startDate;
+          } catch {
+            console.log("parsing failed");
+          }
+        }
+
         this.initFormSubscriptions();
       });
   }
