@@ -65,6 +65,12 @@ class ServiceController(
             if (!accessService.isAdmin(token) &&
                 serviceService.getById(id)?.employee?.id != accessService.getId(token))
                 throw IllegalArgumentException("Your not the owner of this service or the admin")
+            if (serviceService.getById(id)
+                ?.start
+                ?.toLocalDate()
+                ?.isBefore(LocalDate.now().minusDays(14)) == true) {
+                throw IllegalArgumentException("14 days edit period is over")
+            }
 
             val entity = modelMapper.map(valueDto, Service::class.java)
 
@@ -87,7 +93,15 @@ class ServiceController(
     fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @PathVariable id: Long): Any {
         return try {
-            if (!accessService.isAdmin(token))
+            val service = serviceService.getById(id);
+
+            println((service?.employee?.id == accessService.getId(token)))
+            println("start - ${service?.start} | end - ${LocalDate.now().minusDays(14)}")
+            println(service?.start?.toLocalDate()?.isAfter(LocalDate.now().minusDays(14)))
+
+            if (!accessService.isAdmin(token) &&
+                (service?.employee?.id != accessService.getId(token) ||
+                        service.start.toLocalDate().isBefore(LocalDate.now().minusDays(14))))
                 throw IllegalArgumentException("No permission to delete this service")
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")

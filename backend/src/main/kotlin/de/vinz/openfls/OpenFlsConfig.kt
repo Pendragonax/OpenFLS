@@ -81,7 +81,6 @@ class OpenFlsConfig : WebSecurityConfigurerAdapter() {
             .authorizeRequests()
             .antMatchers(HttpMethod.POST, "/login/**").permitAll()
             .antMatchers("/change_role/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.DELETE,"/services/**").hasAuthority("ADMIN")
             .antMatchers(HttpMethod.POST,"/employees/**").hasAuthority("ADMIN")
             .antMatchers(HttpMethod.PUT,"/employees/**").hasAnyAuthority("ADMIN", "LEAD")
             .antMatchers(HttpMethod.DELETE,"/employees/**").hasAuthority("ADMIN")

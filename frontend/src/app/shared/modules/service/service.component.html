@@ -180,8 +180,8 @@
                 <button mat-mini-fab
                         color="warn"
                         class="m-1"
-                        *showOnRole="'admin'"
-                        (click)="openDeleteConfirmation(deleteContent, value[1])">
+                        [hidden]="!value[4]"
+                        (click)="openDeleteConfirmation(deleteContent, value[3])">
                   <mat-icon>delete</mat-icon></button>
 
                 <!--DELETE MODAL CONFIRMATION-->
