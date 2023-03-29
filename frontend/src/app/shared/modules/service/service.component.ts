@@ -160,7 +160,7 @@ export class ServiceComponent
         this.employees.find(employee => employee.id == value.employeeId) ?? new EmployeeDto(),
         this.institutions.find(institution => institution.id == value.institutionId) ?? new InstitutionDto(),
         value,
-        (this.user.access?.role ?? 99) == 1 || value.employeeId == this.user.id
+        (this.user.access?.role ?? 99) == 1 || (value.employeeId == this.user.id && this.isEditableByDate(new Date(value.start)))
       ]);
   }
 
@@ -223,6 +223,13 @@ export class ServiceComponent
 
   getDateTime(value: string): string {
     return this.converter.formatDateToGermanTime(new Date(value));
+  }
+
+  isEditableByDate(date: Date) {
+    const lastEditDate = new Date();
+    lastEditDate.setDate(lastEditDate.getDate() - 14);
+
+    return date > lastEditDate
   }
 
   sortData(sort: Sort) {
