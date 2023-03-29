@@ -217,8 +217,12 @@ export class ServiceComponent
     return this.converter.formatToTime(new Date(date));
   }
 
-  getDate(date: Date): string {
+  getGermanDate(date: Date): string {
     return this.converter.formatDateToGerman(new Date(date));
+  }
+
+  getDate(date: Date): string {
+    return this.converter.formatDate(new Date(date));
   }
 
   getDateTime(value: string): string {

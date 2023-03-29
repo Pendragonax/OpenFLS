@@ -1,7 +1,7 @@
 <app-info-header [title]="'Übersicht'"
                  [addRole]="'user'"
                  [addButtonRouting]="true"
-                 [addRouterLink]="['/services/new']"></app-info-header>
+                 [addRouterLink]="['/services/new/' + getDate(filterDate)]"></app-info-header>
 
 <mat-drawer-container class="h-100">
   <!--SIDE-->
@@ -46,7 +46,7 @@
                   (click)="increaseFilterDate(1)">
             <mat-icon>keyboard_arrow_right</mat-icon>
           </button>
-          <span class="mx-3 my-auto fw-light">{{getDate(filterDate)}}</span>
+          <span class="mx-3 my-auto fw-light">{{getGermanDate(filterDate)}}</span>
         </div>
       </div>
 
@@ -89,7 +89,7 @@
                 mat-sort-header="{{tableColumns[1]}}"
                 *matHeaderCellDef>Datum</th>
             <td mat-cell
-                *matCellDef="let value">{{getDate(value[3].start)}}</td>
+                *matCellDef="let value">{{getGermanDate(value[3].start)}}</td>
           </ng-container>
 
           <ng-container matColumnDef="start">
