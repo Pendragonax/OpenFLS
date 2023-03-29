@@ -93,7 +93,15 @@ class ServiceController(
     fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @PathVariable id: Long): Any {
         return try {
-            if (!accessService.isAdmin(token))
+            val service = serviceService.getById(id);
+
+            println((service?.employee?.id == accessService.getId(token)))
+            println("start - ${service?.start} | end - ${LocalDate.now().minusDays(14)}")
+            println(service?.start?.toLocalDate()?.isAfter(LocalDate.now().minusDays(14)))
+
+            if (!accessService.isAdmin(token) &&
+                (service?.employee?.id != accessService.getId(token) ||
+                        service.start.toLocalDate().isBefore(LocalDate.now().minusDays(14))))
                 throw IllegalArgumentException("No permission to delete this service")
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
