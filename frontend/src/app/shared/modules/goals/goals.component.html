@@ -63,8 +63,32 @@
                   color="warn"
                   class="m-1"
                   *showOnRole="'admin'"
-                  (click)="delete(element[0])">
+                  (click)="openDeleteConfirmation(deleteContent, element[0])">
             <mat-icon>delete</mat-icon></button>
+
+          <!--DELETE MODAL CONFIRMATION-->
+          <ng-template #deleteContent let-modal>
+            <div class="modal-header">
+              <h2 class="modal-title"
+                  id="modal-basic-title-delete">Löschbestätigung</h2>
+              <button type="button"
+                      class="btn-close"
+                      aria-label="Close"
+                      (click)="modal.dismiss('Cross click')"></button>
+            </div>
+            <div class="modal-body">
+              <p>Wollen sie das Ziel "<b>{{ element[0].title }}</b>" wirklich löschen?<br>
+                Es würden <b>{{ deleteServiceCount }}</b> Dokumentationen ebenfalls gelöscht.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button"
+                      class="btn btn-danger"
+                      (click)="modal.close(true)">Löschen</button>
+              <button type="button"
+                      class="btn btn-outline-dark"
+                      (click)="modal.close(false)">Abbrechen</button>
+            </div>
+          </ng-template>
         </div>
       </ng-container>
 
