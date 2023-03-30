@@ -80,4 +80,16 @@ class ServiceService(
 
         return serviceRepository.findByEmployeeAndDate(employeeId, filter.date!!)
     }
+
+    fun countByEmployee(employeeId: Long): Long {
+        return serviceRepository.countByEmployeeId(employeeId)
+    }
+
+    fun countByClient(clientId: Long): Long {
+        return serviceRepository.countByClientId(clientId)
+    }
+
+    fun countByAssistancePlan(assistancePlanId: Long): Long {
+        return serviceRepository.countByAssistancePlanId(assistancePlanId)
+    }
 }

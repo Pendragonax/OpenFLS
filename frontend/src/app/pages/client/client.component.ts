@@ -8,6 +8,8 @@ import {combineLatest} from "rxjs";
 import {UserService} from "../../services/user.service";
 import {TablePageComponent} from "../../shared/modules/table-page.component";
 import {HelperService} from "../../services/helper.service";
+import {EmployeeView} from "../../models/employee-view.model";
+import {ServiceService} from "../../services/service.service";
 
 @Component({
   selector: 'app-client',
@@ -18,10 +20,13 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
   // VARs
   tableColumns = ['name', 'institution', 'actions'];
 
+  deleteServiceCount: number = 0;
+
   constructor(
     override modalService: NgbModal,
     override helperService: HelperService,
     private clientService: ClientsService,
+    private serviceService: ServiceService,
     private userService: UserService,
     private comparer: Comparer) {
     super(modalService, helperService)
@@ -87,6 +92,13 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
         next: () => this.handleSuccess("Klient gelöscht"),
         error: () => this.handleFailure("Fehler beim löschen")
       })
+  }
+
+  override handleDeleteModalOpen(value: ClientView) {
+    this.serviceService.getCountByClientId(value.dto.id)
+      .subscribe({
+        next: (value) => this.deleteServiceCount = value
+      });
   }
 
   sortData(sort: Sort) {

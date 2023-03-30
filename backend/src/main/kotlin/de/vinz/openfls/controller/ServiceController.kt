@@ -308,4 +308,52 @@ class ServiceController(
             )
         }
     }
+
+    @GetMapping("count/employee/{id}")
+    fun countByEmployee(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                        @PathVariable id: Long): Any {
+        return try {
+            helperService.printLog(this::class.simpleName, "countByEmployee", false)
+            ResponseEntity.ok(serviceService.countByEmployee(id))
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "countByEmployee - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("count/client/{id}")
+    fun countByClient(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                      @PathVariable id: Long): Any {
+        return try {
+            helperService.printLog(this::class.simpleName, "countByClient", false)
+            ResponseEntity.ok(serviceService.countByClient(id))
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "countByClient - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("count/assistance_plan/{id}")
+    fun countByAssistancePlan(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                              @PathVariable id: Long): Any {
+        return try {
+            helperService.printLog(this::class.simpleName, "countByAssistancePlan", false)
+            ResponseEntity.ok(serviceService.countByAssistancePlan(id))
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "countByAssistancePlan - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
 }
