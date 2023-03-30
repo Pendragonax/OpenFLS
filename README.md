@@ -1,5 +1,5 @@
 [![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)
-[![GitHub release](https://img.shields.io/badge/version-0.2.0-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
+[![GitHub release](https://img.shields.io/badge/version-0.3.0-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
 # OpenFLS
