@@ -92,4 +92,8 @@ class ServiceService(
     fun countByAssistancePlan(assistancePlanId: Long): Long {
         return serviceRepository.countByAssistancePlanId(assistancePlanId)
     }
+
+    fun countByGoal(goalId: Long): Long {
+        return serviceRepository.countByGoalId(goalId)
+    }
 }

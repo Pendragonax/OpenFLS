@@ -20,6 +20,7 @@ import {AssistancePlanView} from "../../../models/assistance-plan-view.model";
 import {TablePageComponent} from "../table-page.component";
 import {HelperService} from "../../../services/helper.service";
 import {Sort} from "@angular/material/sort";
+import {ServiceService} from "../../../services/service.service";
 
 @Component({
   selector: 'app-goals',
@@ -49,6 +50,8 @@ export class GoalsComponent
   // CONFIG
   tableColumns = ['title', 'description', 'institution', 'weeklyHours', 'action'];
   hourTableColumns = ['type', 'weeklyHours', 'actions'];
+
+  deleteServiceCount: number = 0;
 
   // VARs
   institutions: InstitutionDto[] = [];
@@ -99,6 +102,7 @@ export class GoalsComponent
     override modalService: NgbModal,
     override helperService: HelperService,
     private institutionService: InstitutionService,
+    private serviceService: ServiceService,
     private hourTypeService: HourTypeService
   ) {
     super(modalService, helperService);
@@ -225,6 +229,13 @@ export class GoalsComponent
       return "n/a";
 
     return institution.name;
+  }
+
+  override handleDeleteModalOpen(value: GoalDto) {
+    this.serviceService.getCountByGoalId(value.id)
+      .subscribe({
+        next: (value) => this.deleteServiceCount = value
+      });
   }
 
   sumWeeklyHours(goal: GoalDto): number {

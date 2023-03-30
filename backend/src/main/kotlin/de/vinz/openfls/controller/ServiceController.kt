@@ -356,4 +356,20 @@ class ServiceController(
             )
         }
     }
+
+    @GetMapping("count/goal/{id}")
+    fun countByGoal(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                    @PathVariable id: Long): Any {
+        return try {
+            helperService.printLog(this::class.simpleName, "countByGoal", false)
+            ResponseEntity.ok(serviceService.countByGoal(id))
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "countByGoal - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
 }
