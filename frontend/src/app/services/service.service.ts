@@ -43,4 +43,10 @@ export class ServiceService extends Base<ServiceDto> {
     return this.http
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}`)
   }
+
+  getCountByEmployeeId(employeeId: number): Observable<number> {
+    return this.http
+      .get<number>(`${environment.api_url}${this.url}/count/employee/${employeeId}`)
+
+  }
 }

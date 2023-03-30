@@ -99,6 +99,8 @@ export abstract class TablePageComponent<T, R> implements OnInit {
 
   handleEditModalClosed() { }
 
+  handleDeleteModalOpen(value: T) { }
+
   handleDeleteModalClosed() { }
 
   handlePageEvent(e: PageEvent) {
@@ -160,6 +162,8 @@ export abstract class TablePageComponent<T, R> implements OnInit {
   }
 
   openDeleteConfirmation(content, value: T) {
+    this.handleDeleteModalOpen(value);
+
     this.modalService
       .open(content, { ariaLabelledBy: 'modal-basic-delete-title', scrollable: true })
       .result

@@ -10,6 +10,7 @@ import {Comparer} from "../../shared/comparer.helper";
 import {InstitutionService} from "../../services/institution.service";
 import {TablePageComponent} from "../../shared/modules/table-page.component";
 import {HelperService} from "../../services/helper.service";
+import {ServiceService} from "../../services/service.service";
 
 @Component({
   selector: 'app-employees',
@@ -22,11 +23,14 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
   // VARs
   tableColumns: string[] = ['roles', 'name', 'institution', 'actions'];
 
+  deleteServiceCount: number = 0;
+
   constructor(
     override modalService: NgbModal,
     override helperService: HelperService,
     private employeeService: EmployeeService,
     private userService: UserService,
+    private serviceService: ServiceService,
     private comparer: Comparer,
     private institutionService: InstitutionService
   ) {
@@ -120,6 +124,13 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
           return 0;
       }
     });
+  }
+
+  override handleDeleteModalOpen(value: EmployeeView) {
+    this.serviceService.getCountByEmployeeId(value.dto.id)
+      .subscribe({
+        next: (value) => this.deleteServiceCount = value
+      });
   }
 
   private isEmployeeEditable(leadingIds: number[], employee: EmployeeDto | null): boolean {
