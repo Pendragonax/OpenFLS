@@ -65,6 +65,12 @@ class ServiceController(
             if (!accessService.isAdmin(token) &&
                 serviceService.getById(id)?.employee?.id != accessService.getId(token))
                 throw IllegalArgumentException("Your not the owner of this service or the admin")
+            if (serviceService.getById(id)
+                ?.start
+                ?.toLocalDate()
+                ?.isBefore(LocalDate.now().minusDays(14)) == true) {
+                throw IllegalArgumentException("14 days edit period is over")
+            }
 
             val entity = modelMapper.map(valueDto, Service::class.java)
 
@@ -87,7 +93,15 @@ class ServiceController(
     fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @PathVariable id: Long): Any {
         return try {
-            if (!accessService.isAdmin(token))
+            val service = serviceService.getById(id);
+
+            println((service?.employee?.id == accessService.getId(token)))
+            println("start - ${service?.start} | end - ${LocalDate.now().minusDays(14)}")
+            println(service?.start?.toLocalDate()?.isAfter(LocalDate.now().minusDays(14)))
+
+            if (!accessService.isAdmin(token) &&
+                (service?.employee?.id != accessService.getId(token) ||
+                        service.start.toLocalDate().isBefore(LocalDate.now().minusDays(14))))
                 throw IllegalArgumentException("No permission to delete this service")
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
@@ -200,6 +214,7 @@ class ServiceController(
             val dtos = serviceService.getByEmployeeAndDate(id, date)
                 .map { modelMapper.map(it, ServiceDto::class.java) }
                 .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
+                .sortedBy { it.start }
 
             helperService.printLog(this::class.simpleName, "getByEmployeeAndDate", false)
 
@@ -286,6 +301,70 @@ class ServiceController(
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
             helperService.printLog(this::class.simpleName, "getTimesByEmployee - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("count/employee/{id}")
+    fun countByEmployee(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                        @PathVariable id: Long): Any {
+        return try {
+            helperService.printLog(this::class.simpleName, "countByEmployee", false)
+            ResponseEntity.ok(serviceService.countByEmployee(id))
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "countByEmployee - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("count/client/{id}")
+    fun countByClient(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                      @PathVariable id: Long): Any {
+        return try {
+            helperService.printLog(this::class.simpleName, "countByClient", false)
+            ResponseEntity.ok(serviceService.countByClient(id))
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "countByClient - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("count/assistance_plan/{id}")
+    fun countByAssistancePlan(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                              @PathVariable id: Long): Any {
+        return try {
+            helperService.printLog(this::class.simpleName, "countByAssistancePlan", false)
+            ResponseEntity.ok(serviceService.countByAssistancePlan(id))
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "countByAssistancePlan - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("count/goal/{id}")
+    fun countByGoal(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                    @PathVariable id: Long): Any {
+        return try {
+            helperService.printLog(this::class.simpleName, "countByGoal", false)
+            ResponseEntity.ok(serviceService.countByGoal(id))
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "countByGoal - ${ex.message}", true)
 
             ResponseEntity(
                 ex.message,

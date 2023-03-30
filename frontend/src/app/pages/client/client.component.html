@@ -151,7 +151,8 @@
                           (click)="modal.dismiss('Cross click')"></button>
                 </div>
                 <div class="modal-body">
-                  <p>Wollen sie den Klienten "<b>{{ client.dto.firstName }} {{ client.dto.lastName }}</b>" wirklich löschen?</p>
+                  <p>Wollen sie den Klienten "<b>{{ client.dto.firstName }} {{ client.dto.lastName }}</b>" wirklich löschen?<br>
+                    Es würden <b>{{ deleteServiceCount }}</b> Dokumentationen ebenfalls gelöscht.</p>
                 </div>
                 <div class="modal-footer">
                   <button type="button"

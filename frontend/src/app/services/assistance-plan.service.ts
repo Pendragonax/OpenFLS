@@ -13,6 +13,10 @@ import {UserService} from "./user.service";
 import {AssistancePlanView} from "../models/assistance-plan-view.model";
 import {SponsorService} from "./sponsor.service";
 import {SponsorDto} from "../dtos/sponsor-dto.model";
+import {
+  AssistancePlanEvaluationComponent
+} from "../shared/modules/assistance-plan-evaluation/assistance-plan-evaluation.component";
+import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
 
 @Injectable({
   providedIn: 'root'
@@ -112,5 +116,10 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
         }]
       })
     }))
+  }
+
+  getEvaluationById(id: number): Observable<AssistancePlanEvaluation> {
+    return this.http
+      .get<AssistancePlanEvaluation>(`${environment.api_url}${this.url}/eval/${id}`)
   }
 }

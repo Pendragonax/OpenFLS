@@ -246,4 +246,22 @@ class AssistancePlanController(
             )
         }
     }
+
+    @GetMapping("eval/{id}")
+    fun getEvalById(@PathVariable id: Long): Any {
+        return try {
+            val dto = assistancePlanService.getEvaluationById(id)
+
+            helperService.printLog(this::class.simpleName, "getEvalById [id=$id]", false)
+
+            ResponseEntity.ok(dto)
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getEvalById - ${ex.message}", true)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
 }

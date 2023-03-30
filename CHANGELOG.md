@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.3.0
+
+#### Features
+
+- evaluation of assistance plans
+- show start and end of each service
+- filter hour type by assistance plan when creating and assistance entry
+- add 14 day period to edit and delete own assistance entries
+- add given date url when creating an assistance entry
+- use date of the selected overview when creating an entry
+- add related assistance entries to the delete confirmations
+
+#### Fix
+
+- Fix: sort categories when creating an assistance entry
+- Fix: proxy restart now working
+- Fix: no confirmation when deleting a goal
+
 ## 0.2.0
 
 #### Features
