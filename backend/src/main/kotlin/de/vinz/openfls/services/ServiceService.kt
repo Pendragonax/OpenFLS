@@ -71,10 +71,6 @@ class ServiceService(
         return serviceRepository.findByClientAndDate(clientId, date)
     }
 
-    fun countByEmployee(employeeId: Long): Long {
-        return serviceRepository.countByEmployeeId(employeeId)
-    }
-
     fun getByEmployeeAndFilter(employeeId: Long, filter: ServiceFilterDto): List<Service> {
         if (filter.date == null)
             return emptyList()
@@ -83,5 +79,13 @@ class ServiceService(
             return serviceRepository.findByEmployeeAndClientAndDate(employeeId, filter.clientId!!, filter.date!!)
 
         return serviceRepository.findByEmployeeAndDate(employeeId, filter.date!!)
+    }
+
+    fun countByEmployee(employeeId: Long): Long {
+        return serviceRepository.countByEmployeeId(employeeId)
+    }
+
+    fun countByClient(clientId: Long): Long {
+        return serviceRepository.countByClientId(clientId)
     }
 }
