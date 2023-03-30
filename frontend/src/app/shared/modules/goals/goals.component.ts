@@ -232,7 +232,7 @@ export class GoalsComponent
   }
 
   override handleDeleteModalOpen(value: GoalDto) {
-    this.serviceService.getCountByEmployeeId(value.id)
+    this.serviceService.getCountByGoalId(value.id)
       .subscribe({
         next: (value) => this.deleteServiceCount = value
       });

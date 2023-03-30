@@ -44,4 +44,7 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     @Query("SELECT Count(*) FROM Service u WHERE u.assistancePlan.id = :assistancePlanId")
     fun countByAssistancePlanId(@Param("assistancePlanId") assistancePlanId: Long): Long
 
+    @Query("SELECT Count(*) FROM Service u JOIN u.goals g WHERE g.id = :goalId")
+    fun countByGoalId(@Param("goalId") goalId: Long): Long
+
 }
