@@ -88,4 +88,8 @@ class ServiceService(
     fun countByClient(clientId: Long): Long {
         return serviceRepository.countByClientId(clientId)
     }
+
+    fun countByAssistancePlan(assistancePlanId: Long): Long {
+        return serviceRepository.countByAssistancePlanId(assistancePlanId)
+    }
 }

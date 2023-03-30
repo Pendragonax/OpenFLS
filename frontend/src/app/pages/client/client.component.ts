@@ -95,7 +95,7 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
   }
 
   override handleDeleteModalOpen(value: ClientView) {
-    this.serviceService.getCountByEmployeeId(value.dto.id)
+    this.serviceService.getCountByClientId(value.dto.id)
       .subscribe({
         next: (value) => this.deleteServiceCount = value
       });

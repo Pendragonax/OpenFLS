@@ -26,6 +26,7 @@ import {Converter} from "../../converter.helper";
 import {GoalDto} from "../../../dtos/goal-dto.model";
 import {HourTypeDto} from "../../../dtos/hour-type-dto.model";
 import {HourTypeService} from "../../../services/hour-type.service";
+import {ServiceService} from "../../../services/service.service";
 
 @Component({
   selector: 'app-assistance-plans',
@@ -62,6 +63,8 @@ export class AssistancePlansComponent
   // Config
   tableColumns = ['client', 'institution', 'sponsor', 'start', 'end', 'hours', 'actions'];
 
+  deleteServiceCount: number = 0;
+
   // VARs
   client: ClientView = new ClientView();
   sponsor: SponsorDto = new SponsorDto();
@@ -96,6 +99,7 @@ export class AssistancePlansComponent
     override helperService: HelperService,
     private assistancePlanService: AssistancePlanService,
     private institutionService: InstitutionService,
+    private serviceService: ServiceService,
     private hourTypeService: HourTypeService,
     private comparer: Comparer,
     private converter: Converter
@@ -281,6 +285,13 @@ export class AssistancePlansComponent
 
   override handleInformationModalClosed() {
     this.modalGoal = new GoalDto();
+  }
+
+  override handleDeleteModalOpen(value: AssistancePlanDto) {
+    this.serviceService.getCountByAssistancePlanId(value.id)
+      .subscribe({
+        next: (value) => this.deleteServiceCount = value
+      });
   }
 
   openAnalysisModal(content, id: number) {
