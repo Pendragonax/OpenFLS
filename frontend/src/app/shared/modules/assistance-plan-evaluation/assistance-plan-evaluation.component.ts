@@ -15,6 +15,8 @@ import {
   MomentDateAdapter
 } from "@angular/material-moment-adapter";
 import {CsvService} from "../../../services/csv.service";
+import {UnprofessionalDto} from "../../../dtos/unprofessional-dto.model";
+import {EmployeeView} from "../../../models/employee-view.model";
 
 @Component({
   selector: 'app-assistance-plan-evaluation',
@@ -137,17 +139,17 @@ export class AssistancePlanEvaluationComponent implements OnInit {
 
   private generateProfessionalTable() {
     this.tableColumns = ['Zeitpunkt', 'Kategorien Kürzel', 'Minuten', 'Fachkraft'];
-    this.tableSource.data = this.getKMMRows(this.getProfessionalServices(), this.selectedDate);
+    this.tableSource.data = this.getCategoryMinuteEmployeeRows(this.getProfessionalServices(), this.selectedDate);
   }
 
   private generateNoProfessionalTable() {
     this.tableColumns = ['Zeitpunkt', 'Kategorien Kürzel', 'Minuten', 'keine Fachkraft'];
-    this.tableSource.data = this.getKMMRows(this.getNoProfessionalServices(), this.selectedDate);
+    this.tableSource.data = this.getCategoryMinuteEmployeeRows(this.getNoProfessionalServices(), this.selectedDate);
   }
 
   private generateDetailedTable() {
     this.tableColumns = ['Datum', 'Stunden', 'Kategorien', 'Inhalt', 'Mitarbeiter'];
-    this.tableSource.data = this.getTHKCMRows(this.services, this.selectedDate);
+    this.tableSource.data = this.getTimeHourCategoryContentEmployeeRows(this.services, this.selectedDate);
   }
 
   private generateEmptyTable() {
@@ -156,31 +158,59 @@ export class AssistancePlanEvaluationComponent implements OnInit {
   }
 
   private getTotalData(): [number, string, number, string][] {
-    return this.getKMMRows(this.services, this.selectedDate);
+    return this.getCategoryMinuteEmployeeRows(this.services, this.selectedDate);
   }
 
   private getProfessionalServices(): ServiceDto[] {
-    return this.services.filter(service => !this.isProfessionalService(service, this.employees));
+  return this.services.filter(service =>
+      this.isServiceProfessional(
+        service,
+        this.assistancePlan.sponsorId,
+        this.getUnProfessionalStates(this.employees)));
   }
 
   private getNoProfessionalServices(): ServiceDto[] {
-    return this.services.filter(service => !this.isProfessionalService(service, this.employees));
+    return this.services.filter(service =>
+      this.isServiceUnProfessional(
+        service,
+        this.assistancePlan.sponsorId,
+        this.getUnProfessionalStates(this.employees)
+      ));
   }
 
-  private isProfessionalService(service: ServiceDto, employees: EmployeeDto[]): boolean {
-    const noProfessionals = employees.find(employee => employee.id == service.employeeId)?.unprofessionals ?? [];
+  private getUnProfessionalStates(employees: EmployeeDto[]): UnprofessionalDto[] {
+    return employees.map(employee => employee.unprofessionals).flat();
+  }
 
-    return !noProfessionals
-      .some(noProfessional => {
-        const endDate = noProfessional.end != null ? new Date(noProfessional.end) : null
-        endDate?.setHours(23, 59, 59);
+  private isServiceUnProfessional(service: ServiceDto, sponsorId: number, unprofessionalStates: UnprofessionalDto[]): boolean {
+    return !this.isServiceProfessional(service, sponsorId, unprofessionalStates);
+  }
 
-        return noProfessional.sponsorId == this.assistancePlan.sponsorId &&
-          ((endDate != null && endDate > new Date(service.start)) || endDate == null)
+  private isServiceProfessional(service: ServiceDto, sponsorId: number, unProfessionalStates: UnprofessionalDto[]): boolean {
+    let activeUnProfessionalStates =
+      this.getActiveUnProfessionalStates(sponsorId, new Date(service.start), unProfessionalStates);
+
+    return !activeUnProfessionalStates.some(state => state.employeeId == service.employeeId);
+  }
+
+  private getActiveUnProfessionalStates(
+    sponsorId: number,
+    date: Date,
+    unProfessionalStates: UnprofessionalDto[]): UnprofessionalDto[] {
+    return unProfessionalStates.filter(state => {
+      return state.sponsorId == sponsorId &&
+        this.isDateAfterDate(state.end, date);
     });
   }
 
-  private getKMMRows(services: ServiceDto[], targetDate: Date)
+  private isDateAfterDate(check: string | null, target: Date) {
+    const checkDate = check != null ? new Date(check) : null;
+    checkDate?.setHours(23, 59, 59);
+
+    return ((checkDate != null && checkDate > target) || checkDate == null)
+  }
+
+  private getCategoryMinuteEmployeeRows(services: ServiceDto[], targetDate: Date)
     : [number, string, number, string][] {
     const rows = Array<[number, string, number, string]>(this.converter.getDaysOfMonth(targetDate));
 
@@ -211,7 +241,7 @@ export class AssistancePlanEvaluationComponent implements OnInit {
     return rows;
   }
 
-  private getTHKCMRows(services: ServiceDto[], targetDate: Date)
+  private getTimeHourCategoryContentEmployeeRows(services: ServiceDto[], targetDate: Date)
     : [string, number, string, string, string][] {
     return services
       .filter(value => {
