@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.3.1
+
+#### Fix
+
+- Fix: Charcters illegal at output
+- Fix: Evaluation tables incorrect calculation
+
 ## 0.3.0
 
 #### Features

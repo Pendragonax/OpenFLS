@@ -45,7 +45,7 @@ export class CsvService {
   }
 
   exportFile(data: any, fileType: string, fileName: string) {
-    const blob = new Blob([data], { type: fileType });
+    const blob = new Blob(["\uFEFF"+data], { type: fileType });
     FileSaver.saveAs(blob, fileName);
   }
 }
