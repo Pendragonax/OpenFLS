@@ -122,11 +122,12 @@ export class ContingentsComponent
     // load institutions
     combineLatest([
       this.institutionService.allValues$,
-      this.userService.leadingInstitutions$
+      this.userService.leadingInstitutions$,
+      this.userService.isAdmin$
     ])
-      .subscribe(([institutions, leadingIds]) => {
+      .subscribe(([institutions, leadingIds, isAdmin]) => {
         this.institutions = institutions;
-        this.leadingInstitutions = institutions.filter(x => leadingIds.some(y => y == x.id));
+        this.leadingInstitutions = institutions.filter(x => isAdmin || leadingIds.some(y => y == x.id));
       });
 
     // load employees
