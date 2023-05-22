@@ -8,7 +8,6 @@ All notable changes to this project will be documented in this file.
 
 - Fix: Admin cant select all instituions at creating contingents
 
-
 ## 0.3.1
 
 #### Fix
