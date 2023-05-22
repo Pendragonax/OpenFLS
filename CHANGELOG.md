@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.3.2
+
+#### Fix
+
+- Fix: Admin cant select all instituions at creating contingents
+
+## 0.3.1
+
+#### Fix
+
+- Fix: Charcters illegal at output
+- Fix: Evaluation tables incorrect calculation
+
 ## 0.3.0
 
 #### Features
