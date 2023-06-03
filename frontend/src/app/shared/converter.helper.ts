@@ -43,7 +43,7 @@ export class Converter {
    * @return number of days
    */
   getDaysOfMonth(date: Date): number {
-    return new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   }
 
   /**
