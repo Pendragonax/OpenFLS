@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.3.4
+
+#### Fix
+
+- Fix: Admin can add assistance plans for all
+
 ## 0.3.3
 
 #### Fix
