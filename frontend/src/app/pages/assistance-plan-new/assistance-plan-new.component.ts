@@ -78,16 +78,17 @@ export class AssistancePlanNewComponent extends NewPageComponent<AssistancePlanD
     combineLatest([
       this.institutionService.allValues$,
       this.sponsorService.allValues$,
-      this.userService.affiliatedInstitutions$
+      this.userService.affiliatedInstitutions$,
+      this.userService.isAdmin$
     ])
-      .subscribe(([institutions, sponsors, affiliatedIds]) => {
+      .subscribe(([institutions, sponsors, affiliatedIds, isAdmin]) => {
         this.valueView$.next(<AssistancePlanView> {
           dto: this.value,
           editable: true
         });
         this.institutions = institutions;
         this.sponsors = sponsors;
-        this.affiliatedInstitutions = this.institutions.filter(value => affiliatedIds.some(id => id === value.id));
+        this.affiliatedInstitutions = this.institutions.filter(value => isAdmin || affiliatedIds.some(id => id === value.id));
       });
 
     this.loadClient();
