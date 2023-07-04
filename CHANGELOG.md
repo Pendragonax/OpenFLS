@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.3.5
+
+#### Feature
+
+- Grant admin right to add assistance plans for all institutions
+- Grant admin right to add assistance goals for everyone
+- Remove contingent from home page
+
 ## 0.3.4
 
 #### Fix
