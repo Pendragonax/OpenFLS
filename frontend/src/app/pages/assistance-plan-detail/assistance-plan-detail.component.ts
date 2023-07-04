@@ -76,12 +76,13 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
         this.sponsorService.allValues$,
         this.assistancePlanService.getById(+id),
         this.userService.affiliatedInstitutions$,
+        this.userService.isAdmin$,
         this.institutionService.allValues$
       ])
-        .subscribe(([sponsors, plan, affiliatedInstitutions, institutions]) => {
+        .subscribe(([sponsors, plan, affiliatedInstitutions,isAdmin, institutions]) => {
           this.value = <AssistancePlanView> {
             dto: plan,
-            editable: affiliatedInstitutions.some(value => value === plan.institutionId)};
+            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId)};
           this.dto$.next(plan);
           this.value$.next(this.value);
           this.editValue = <AssistancePlanView> {...this.value};
