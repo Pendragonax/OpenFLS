@@ -242,6 +242,10 @@
                                [content]="editTableValue[3].title"></app-information-row>
           <app-information-row [title]="'Inhalt'"
                                [content]="editTableValue[3].content"></app-information-row>
+          <ng-container *ngFor="let goal of editTableValue[3].goals; let i = index">
+            <app-information-row [title]="'Ziel ' + (i+1)"
+                                 [content]="goal.title"></app-information-row>
+          </ng-container>
         </div>
       </div>
       <div class="modal-footer">
