@@ -71,6 +71,10 @@ class ServiceService(
         return serviceRepository.findByClientAndDate(clientId, date)
     }
 
+    fun getByClientAndStartAndEnd(clientId: Long, start: LocalDate, end: LocalDate): List<Service> {
+        return serviceRepository.findByClientAndStartAndEnd(clientId, start, end)
+    }
+
     fun getByEmployeeAndFilter(employeeId: Long, filter: ServiceFilterDto): List<Service> {
         if (filter.date == null)
             return emptyList()
