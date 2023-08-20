@@ -1,24 +1,32 @@
 <app-info-header [title]="'Übersicht'"
                  [addRole]="'user'"
                  [addButtonRouting]="true"
-                 [addRouterLink]="['/services/new/' + getDate(filterDate)]"></app-info-header>
+                 [addRouterLink]="['/services/new/' + getDate(filterDateStart)]"></app-info-header>
 
 <mat-drawer-container class="h-100">
   <!--SIDE-->
   <mat-drawer #drawer
               mode="over"
-              class="bg-primary text-white">
+              class="bg-white">
     <div class="container-fluid">
       <div class="row my-2 justify-content-end">
         <div class="col text-center">
           <span class="fw-bold">Filter</span>
         </div>
       </div>
-      <div>
-        <mat-card class="demo-inline-calendar-card my-2">
-          <mat-calendar [(selected)]="filterDate"
-                        (selectedChange)="handleFilterDateChanged()"></mat-calendar>
-        </mat-card>
+      <div class="row">
+        <div class="container p-1 border-1 my-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Zeitraum auswählen</mat-label>
+            <mat-date-range-input [rangePicker]="picker" [formGroup]="dateFilterGroup">
+              <input matStartDate placeholder="Start Datum" formControlName="start">
+              <input matEndDate placeholder="Ende Datum" formControlName="end">
+            </mat-date-range-input>
+            <mat-datepicker-toggle matPrefix [for]="picker" class="me-2"></mat-datepicker-toggle>
+            <mat-hint>DD.MM.YYYY – DD.MM.YYYY</mat-hint>
+            <mat-date-range-picker #picker (selectionchange)="handleFilterDateChanged()"></mat-date-range-picker>
+          </mat-form-field>
+        </div>
       </div>
     </div>
   </mat-drawer>
@@ -46,7 +54,7 @@
                   (click)="increaseFilterDate(1)">
             <mat-icon>keyboard_arrow_right</mat-icon>
           </button>
-          <span class="mx-3 my-auto fw-light">{{getGermanDate(filterDate)}}</span>
+          <span class="mx-3 my-auto fw-light">{{getGermanDate(filterDateStart)}}</span>
         </div>
       </div>
 

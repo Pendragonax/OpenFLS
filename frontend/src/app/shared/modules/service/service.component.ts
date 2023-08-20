@@ -15,11 +15,28 @@ import {InstitutionDto} from "../../../dtos/institution-dto.model";
 import {InstitutionService} from "../../../services/institution.service";
 import {EmployeeDto} from "../../../dtos/employee-dto.model";
 import {EmployeeService} from "../../../services/employee.service";
+import {DateRange} from "@angular/material/datepicker";
+import {FormControl, FormGroup} from "@angular/forms";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
+import {
+  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
+  MAT_MOMENT_DATE_FORMATS,
+  MomentDateAdapter
+} from "@angular/material-moment-adapter";
 
 @Component({
   selector: 'app-service',
   templateUrl: './service.component.html',
-  styleUrls: ['./service.component.css']
+  styleUrls: ['./service.component.css'],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+    },
+    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
+  ]
 })
 export class ServiceComponent
   extends TablePageComponent<ServiceDto, [ClientDto, EmployeeDto, InstitutionDto, ServiceDto, boolean]>
@@ -45,7 +62,17 @@ export class ServiceComponent
   user: EmployeeDto = new EmployeeDto();
 
   // FILTER-VARs
-  filterDate: Date = new Date(Date.now());
+  filterDateStart: Date = new Date(Date.now());
+  filterDateEnd: Date = new Date(Date.now());
+
+  // Form Groups
+  dateFilterGroup = new FormGroup({
+    start: new FormControl(new Date(Date.now())),
+    end: new FormControl(new Date(Date.now()))
+  });
+
+  get dateFilterStartControl() { return this.dateFilterGroup.controls['start']; }
+  get dateFilterEndControl() { return this.dateFilterGroup.controls['end']; }
 
   constructor(
     override modalService: NgbModal,
@@ -113,7 +140,7 @@ export class ServiceComponent
 
   loadServicesByEmployee() {
     combineLatest([
-      this.serviceService.getByEmployeeAndDate(this.employeeId ?? 0, this.filterDate),
+      this.serviceService.getByEmployeeAndStartAndEnd(this.employeeId ?? 0, this.filterDateStart, this.filterDateEnd),
       this.employeeId$
     ])
       .subscribe({
@@ -131,7 +158,7 @@ export class ServiceComponent
 
   loadServicesByClient() {
     combineLatest([
-      this.serviceService.getByClientAndDate(this.clientId ?? 0, this.filterDate),
+      this.serviceService.getByClientAndStartAndEnd(this.clientId ?? 0, this.filterDateStart, this.filterDateEnd),
       this.clientId$
     ])
       .subscribe({
@@ -195,6 +222,15 @@ export class ServiceComponent
 
   initFormSubscriptions() {
     // no form is in use
+    this.dateFilterStartControl.valueChanges.subscribe((value) => {
+      this.filterDateStart = new Date(value);
+      this.filterDateEnd = new Date(value);
+      this.handleFilterDateChanged();
+    });
+    this.dateFilterEndControl.valueChanges.subscribe((value) => {
+      this.filterDateEnd = new Date(value);
+      this.handleFilterDateChanged();
+    });
   }
 
   handleFilterDateChanged() {
@@ -202,7 +238,8 @@ export class ServiceComponent
   }
 
   increaseFilterDate(days: number) {
-    this.filterDate.setDate(this.filterDate.getDate() + days);
+    this.filterDateStart.setDate(this.filterDateStart.getDate() + days);
+    this.filterDateEnd = this.filterDateStart;
     this.loadValues();
   }
 
