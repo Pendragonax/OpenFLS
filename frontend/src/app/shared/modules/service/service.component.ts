@@ -5,7 +5,7 @@ import {Sort} from "@angular/material/sort";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ServiceService} from "../../../services/service.service";
 import {UserService} from "../../../services/user.service";
-import {ReplaySubject} from "rxjs";
+import {ReplaySubject, Subject, window} from "rxjs";
 import {Converter} from "../../converter.helper";
 import {ClientDto} from "../../../dtos/client-dto.model";
 import {ClientsService} from "../../../services/clients.service";
@@ -15,11 +15,28 @@ import {InstitutionDto} from "../../../dtos/institution-dto.model";
 import {InstitutionService} from "../../../services/institution.service";
 import {EmployeeDto} from "../../../dtos/employee-dto.model";
 import {EmployeeService} from "../../../services/employee.service";
+import {FormControl, FormGroup} from "@angular/forms";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
+import {
+  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
+  MAT_MOMENT_DATE_FORMATS,
+  MomentDateAdapter
+} from "@angular/material-moment-adapter";
+import {Comparer} from "../../comparer.helper";
 
 @Component({
   selector: 'app-service',
   templateUrl: './service.component.html',
-  styleUrls: ['./service.component.css']
+  styleUrls: ['./service.component.css'],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+    },
+    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
+  ]
 })
 export class ServiceComponent
   extends TablePageComponent<ServiceDto, [ClientDto, EmployeeDto, InstitutionDto, ServiceDto, boolean]>
@@ -43,9 +60,22 @@ export class ServiceComponent
   employees$: ReplaySubject<EmployeeDto[]> = new ReplaySubject();
   employees: EmployeeDto[] = [];
   user: EmployeeDto = new EmployeeDto();
+  tableData: [ClientDto, EmployeeDto, InstitutionDto, ServiceDto, boolean][] = [];
 
   // FILTER-VARs
-  filterDate: Date = new Date(Date.now());
+  filterDateStart: Date = new Date(Date.now());
+  filterDateEnd: Date = new Date(Date.now());
+  filteredValues: ServiceDto[] = [];
+  filteredValues$: Subject<ServiceDto[]> = new Subject<ServiceDto[]>();
+
+  // Form Groups
+  dateFilterGroup = new FormGroup({
+    start: new FormControl(new Date(Date.now())),
+    end: new FormControl(new Date(Date.now()))
+  });
+
+  get dateFilterStartControl() { return this.dateFilterGroup.controls['start']; }
+  get dateFilterEndControl() { return this.dateFilterGroup.controls['end']; }
 
   constructor(
     override modalService: NgbModal,
@@ -55,6 +85,7 @@ export class ServiceComponent
     private clientService: ClientsService,
     private institutionService: InstitutionService,
     private employeeService: EmployeeService,
+    private comparer: Comparer,
     private userService: UserService
   ) {
     super(modalService, helperService);
@@ -101,6 +132,7 @@ export class ServiceComponent
 
   loadValues() {
     this.isSubmitting = true;
+    this.searchString = "";
 
     if (this.clientId != null) {
       this.loadServicesByClient();
@@ -113,7 +145,7 @@ export class ServiceComponent
 
   loadServicesByEmployee() {
     combineLatest([
-      this.serviceService.getByEmployeeAndDate(this.employeeId ?? 0, this.filterDate),
+      this.serviceService.getByEmployeeAndStartAndEnd(this.employeeId ?? 0, this.filterDateStart, this.filterDateEnd),
       this.employeeId$
     ])
       .subscribe({
@@ -121,9 +153,12 @@ export class ServiceComponent
           this.employeeId = employeeId;
           this.values$.next(services);
           this.values = services;
+          this.searchStringControl.setValue("");
+          this.filteredValues = services;
+          this.filteredValues$.next(services);
           this.isSubmitting = false;
 
-          this.refreshTableData();
+          this.setTableSource(this.getTableData())
         },
         error: () => this.handleFailure("Fehler beim laden")
       });
@@ -131,7 +166,7 @@ export class ServiceComponent
 
   loadServicesByClient() {
     combineLatest([
-      this.serviceService.getByClientAndDate(this.clientId ?? 0, this.filterDate),
+      this.serviceService.getByClientAndStartAndEnd(this.clientId ?? 0, this.filterDateStart, this.filterDateEnd),
       this.clientId$
     ])
       .subscribe({
@@ -139,17 +174,28 @@ export class ServiceComponent
           this.clientId = client;
           this.values$.next(services);
           this.values = services;
+          this.filteredValues = services;
+          this.filteredValues$.next(services);
+          this.searchStringControl.setValue("");
           this.isSubmitting = false;
 
-          this.refreshTableData();
+          this.setTableSource(this.getTableData())
         },
         error: () => this.handleFailure("Fehler beim laden")
       });
   }
 
-  refreshTableData() {
-    this.sourceTableData = this.getTableData();
-    this.filteredTableData = this.sourceTableData;
+  filterTableData() {
+    let filteredData = this.getTableData();
+
+    // filter by searchString
+    filteredData = filteredData.filter(x => {
+      return x[3].title.toLowerCase().includes(this.searchString) ||
+      x[3].content.toLowerCase().includes(this.searchString)
+    });
+
+    this.filteredTableData = filteredData;
+
     this.refreshTablePage();
   }
 
@@ -186,15 +232,21 @@ export class ServiceComponent
     throw new Error('Method not implemented.');
   }
 
-  filterTableData() {
-  }
-
   getNewValue(): ServiceDto {
     return new ServiceDto();
   }
 
   initFormSubscriptions() {
     // no form is in use
+    this.dateFilterStartControl.valueChanges.subscribe((value) => {
+      this.filterDateStart = new Date(value);
+      this.filterDateEnd = new Date(value);
+      this.handleFilterDateChanged();
+    });
+    this.dateFilterEndControl.valueChanges.subscribe((value) => {
+      this.filterDateEnd = new Date(value);
+      this.handleFilterDateChanged();
+    });
   }
 
   handleFilterDateChanged() {
@@ -202,8 +254,30 @@ export class ServiceComponent
   }
 
   increaseFilterDate(days: number) {
-    this.filterDate.setDate(this.filterDate.getDate() + days);
-    this.loadValues();
+    this.filterDateStart.setDate(this.filterDateStart.getDate() + days);
+    this.filterDateEnd = this.filterDateStart;
+    this.dateFilterStartControl.setValue(this.filterDateStart);
+    this.dateFilterEndControl.setValue(this.filterDateEnd);
+  }
+
+  setFilterDateToToday() {
+    this.filterDateStart = new Date(Date.now());
+    this.filterDateEnd = this.filterDateStart;
+    this.dateFilterStartControl.setValue(this.filterDateStart);
+    this.dateFilterEndControl.setValue(this.filterDateEnd);
+  }
+
+  setTableSource(data) {
+    this.filteredTableData = data;
+    this.tableData = this.filteredTableData;
+    this.tableSource.data = this.filteredTableData;
+
+    this.refreshTablePage();
+  }
+
+  scrollUp() {
+    document.body.scrollTop = 0; // For Safari
+    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
   }
 
   openServiceInformationModal(content, value: [ClientDto, EmployeeDto, InstitutionDto, ServiceDto, boolean]) {
@@ -237,6 +311,20 @@ export class ServiceComponent
   }
 
   sortData(sort: Sort) {
-    // TODO: sort table
+    const data = this.tableData.slice();
+    if (!sort.active || sort.direction === '') {
+      this.tableSource.data = data;
+      return;
+    }
+
+    this.tableSource.data = data.sort((a, b) => {
+      const isAsc = sort.direction === 'asc';
+      switch (sort.active) {
+        case this.tableColumns[1]:
+          return this.comparer.compareDates(new Date(a[3].start), new Date(b[3].start), isAsc);
+        default:
+          return 0;
+      }
+    });
   }
 }

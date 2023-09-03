@@ -29,9 +29,19 @@ export class ServiceService extends Base<ServiceDto> {
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/employee/${employeeId}/${this.converter.formatDate(date)}`)
   }
 
+  getByEmployeeAndStartAndEnd(employeeId: number, start: Date, end: Date): Observable<ServiceDto[]> {
+    return this.http
+      .get<ServiceDto[]>(`${environment.api_url}${this.url}/employee/${employeeId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
+  }
+
   getByClientAndDate(clientId: number, date: Date): Observable<ServiceDto[]> {
     return this.http
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/client/${clientId}/${this.converter.formatDate(date)}`)
+  }
+
+  getByClientAndStartAndEnd(clientId: number, start: Date, end: Date): Observable<ServiceDto[]> {
+    return this.http
+      .get<ServiceDto[]>(`${environment.api_url}${this.url}/client/${clientId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
   }
 
   getTimesByEmployeeAndStartEnd(employeeId: number, start: Date, end: Date): Observable<ServiceTimeDto> {

@@ -229,6 +229,35 @@ class ServiceController(
         }
     }
 
+    @GetMapping("employee/{id}/{start}/{end}")
+    fun getByEmployeeAndStartAndEnd(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                                    @PathVariable id: Long,
+                                    @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
+                                    @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            val leadingInstitutionIds = permissionService
+                    .getLeadingInstitutionIdsByEmployee(accessService.getId(token))
+            val userId = accessService.getId(token)
+            val isAdmin = accessService.isAdmin(token)
+
+            val dtos = serviceService.getByEmployeeAndStartAndEnd(id, start, end)
+                    .map { modelMapper.map(it, ServiceDto::class.java) }
+                    .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
+                    .sortedBy { it.start }
+
+            helperService.printLog(this::class.simpleName, "getByEmployeeAndStartAndEnd", false)
+
+            ResponseEntity.ok(dtos)
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getByEmployeeAndStartAndEnd - ${ex.message}", true)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
     @GetMapping("client/{id}/{date}")
     fun getByClientAndDate(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                              @PathVariable id: Long,
@@ -252,6 +281,34 @@ class ServiceController(
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("client/{id}/{start}/{end}")
+    fun getByClientAndStartAndEnd(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                                  @PathVariable id: Long,
+                                  @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
+                                  @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            val affiliatedInstitutionIds = permissionService
+                    .getReadableInstitutionIdsByEmployee(accessService.getId(token))
+            val userId = accessService.getId(token)
+            val isAdmin = accessService.isAdmin(token)
+
+            val dtos = serviceService.getByClientAndStartAndEnd(id, start, end)
+                    .map { modelMapper.map(it, ServiceDto::class.java) }
+                    .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
+
+            helperService.printLog(this::class.simpleName, "getByClientAndStartAndEnd", false)
+
+            ResponseEntity.ok(dtos)
+        } catch(ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getByClientAndStartAndEnd - ${ex.message}", true)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
