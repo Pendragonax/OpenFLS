@@ -2,23 +2,42 @@
                  [addRole]="'user'"
                  [addButtonRouting]="true"
                  [addRouterLink]="['/services/new/' + getDate(filterDateStart)]"></app-info-header>
+<!--SCROLL FLOATING BUTTON UP-->
+<button mat-icon-button class="floating-button" (click)="scrollUp()">
+  <mat-icon>arrow_upward</mat-icon>
+</button>
 
-<mat-drawer-container class="h-100">
-  <!--SIDE-->
-  <mat-drawer #drawer
-              mode="over"
-              class="bg-white">
-    <div class="container-fluid">
-      <div class="row my-2 justify-content-end">
-        <div class="col text-center">
-          <span class="fw-bold">Filter</span>
-        </div>
-      </div>
-      <div class="row">
-        <div class="container p-1 border-1 my-2">
-          <mat-form-field appearance="outline">
+<!--MAIN-->
+<div class="container-fluid">
+    <!--ACTIONS-->
+    <div class="row">
+      <div class="col-4 my-auto d-flex">
+        <button type="button"
+                class="my-auto"
+                mat-icon-button
+                [disabled]="isSubmitting"
+                (click)="increaseFilterDate(-1)">
+          <mat-icon>keyboard_arrow_left</mat-icon>
+        </button>
+        <button type="button"
+                class="my-auto"
+                mat-icon-button
+                [matTooltip]="'Heute'"
+                [disabled]="isSubmitting"
+                (click)="setFilterDateToToday()">
+          <mat-icon>calendar_today</mat-icon>
+        </button>
+        <button type="button"
+                class="my-auto"
+                mat-icon-button
+                [disabled]="isSubmitting"
+                (click)="increaseFilterDate(1)">
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </button>
+        <div class="my-2">
+          <mat-form-field appearance="outline" class="width-250">
             <mat-label>Zeitraum auswählen</mat-label>
-            <mat-date-range-input [rangePicker]="picker" [formGroup]="dateFilterGroup">
+            <mat-date-range-input class="width-scale-70" [rangePicker]="picker" [formGroup]="dateFilterGroup">
               <input matStartDate placeholder="Start Datum" formControlName="start">
               <input matEndDate placeholder="Ende Datum" formControlName="end">
             </mat-date-range-input>
@@ -27,50 +46,27 @@
             <mat-date-range-picker #picker (selectionchange)="handleFilterDateChanged()"></mat-date-range-picker>
           </mat-form-field>
         </div>
-      </div>
-    </div>
-  </mat-drawer>
-
-  <!--MAIN-->
-  <div class="container-fluid h-100">
-    <!--ACTIONS-->
-    <div class="row">
-      <div class="col-2 my-auto">
-        <div class="d-flex">
-          <button type="button"
-                  mat-icon-button
-                  (click)="drawer.toggle()">
-            <mat-icon>filter_list</mat-icon>
-          </button>
-          <button type="button"
-                  mat-icon-button
-                  [disabled]="isSubmitting"
-                  (click)="increaseFilterDate(-1)">
-            <mat-icon>keyboard_arrow_left</mat-icon>
-          </button>
-          <button type="button"
-                  mat-icon-button
-                  [disabled]="isSubmitting"
-                  (click)="increaseFilterDate(1)">
-            <mat-icon>keyboard_arrow_right</mat-icon>
-          </button>
-          <span class="mx-3 my-auto fw-light">{{getGermanDate(filterDateStart)}}</span>
+        <div class="ms-2 mt-2">
+          <mat-form-field appearance="outline" [formGroup]="filterForm">
+            <mat-label>Suchtext</mat-label>
+            <input matInput placeholder="..." formControlName="searchString">
+            <button mat-icon-button class="me-1" matPrefix (click)="resetFilterSearchString()"><mat-icon>clear</mat-icon></button>
+          </mat-form-field>
         </div>
       </div>
-
-      <div class="col mx-auto">
-        <mat-paginator class="paginator"
-                       showFirstLastButtons
-                       (page)="handlePageEvent($event)"
-                       [pageSizeOptions]="[5, 10, 25, 100]"
-                       [length]="pageLength"
-                       [pageIndex]="pageIndex"
-                       [pageSize]="pageSize"></mat-paginator>
-      </div>
     </div>
 
+    <div class="row">
+      <mat-paginator class="paginator"
+                     showFirstLastButtons
+                     (page)="handlePageEvent($event)"
+                     [pageSizeOptions]="[5, 10, 25, 100]"
+                     [length]="pageLength"
+                     [pageIndex]="pageIndex"
+                     [pageSize]="pageSize"></mat-paginator>
+    </div>
     <!--LOADING-->
-    <div class="row  m-2"
+    <div class="row m-2"
          [hidden]="!isSubmitting">
       <div class="row justify-content-center">
         <mat-spinner [strokeWidth]="2"
@@ -83,8 +79,7 @@
     </div>
 
     <!--TABLE-->
-    <div class="row mx-0">
-      <div class="row"
+    <div class="row"
            [hidden]="isSubmitting">
         <table mat-table
                matSort
@@ -226,7 +221,6 @@
           <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
         </table>
       </div>
-    </div>
 
     <!--INFORMATION MODAL-->
     <ng-template #informationModal let-modal>
@@ -263,4 +257,3 @@
       </div>
     </ng-template>
   </div>
-</mat-drawer-container>

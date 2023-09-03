@@ -18,8 +18,25 @@
   white-space: break-spaces;
 }
 
+.width-250 {
+  width: 200px !important;
+}
+
 td , th {
   white-space: break-spaces;
   word-wrap: break-word;
   max-width: 200px;
+}
+
+.floating-button {
+  position:fixed;
+  width:60px;
+  height:60px;
+  bottom:40px;
+  left:40px;
+  background-color: rgba(0, 204, 153, 0.51);
+  color:#FFF;
+  border-radius:50px;
+  text-align:center;
+  box-shadow: 2px 2px 3px #999;
 }

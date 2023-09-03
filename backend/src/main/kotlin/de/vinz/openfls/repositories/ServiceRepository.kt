@@ -24,21 +24,23 @@ interface ServiceRepository : CrudRepository<Service, Long> {
 
     @Query("SELECT u FROM Service u WHERE u.client.id = :clientId " +
             "AND cast(u.start as LocalDate) >= :start " +
-            "AND cast(u.start as LocalDate) <= :end")
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start ASC")
     fun findByClientAndStartAndEnd(@Param("clientId") clientId: Long,
                                    @Param("start") start: LocalDate,
                                    @Param("end") end: LocalDate): List<Service>
 
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND " +
             "u.client.id = :clientId AND " +
-            "cast(u.start as LocalDate) = :date")
+            "cast(u.start as LocalDate) = :date ORDER BY u.start ASC")
     fun findByEmployeeAndClientAndDate(@Param("employeeId") employeeId: Long,
                                        @Param("clientId") clientId: Long,
                                        @Param("date") date: LocalDate): List<Service>
 
-    @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND " +
-            "cast(u.start as LocalDate) <= :end AND " +
-            "cast(u.start as LocalDate) >= :start")
+    @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "ORDER BY u.start ASC")
     fun findByEmployeeAndStartEndDate(@Param("employeeId") employeeId: Long,
                                        @Param("start") start: LocalDate,
                                        @Param("end") end: LocalDate): List<Service>

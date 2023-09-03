@@ -64,7 +64,7 @@ class ServiceService(
     }
 
     fun getByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<Service> {
-        return serviceRepository.findByClientAndStartAndEnd(employeeId, start, end)
+        return serviceRepository.findByEmployeeAndStartAndEnd(employeeId, start, end)
     }
 
     fun getByEmployeeAndStartEndDate(employeeId: Long, start: LocalDate, end: LocalDate): List<Service> {
