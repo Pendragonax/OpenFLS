@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.3.6
+
+#### Feature
+
+- Add service filter
+- Rework service layout
+- Show goals on service detail
+
 ## 0.3.5
 
 #### Feature
