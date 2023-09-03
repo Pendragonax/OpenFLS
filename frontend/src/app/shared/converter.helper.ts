@@ -85,6 +85,21 @@ export class Converter {
    * @param date
    * @return string with format YYYY-MM-DD
    */
+  formatDEDate(date: Date) {
+    return (
+      [
+        date.getFullYear(),
+        Converter.padTo2Digits(date.getMonth() + 1),
+        Converter.padTo2Digits(date.getDate()),
+      ].join('-')
+    );
+  }
+
+  /**
+   * Converts date to a string with YYYY-MM-DD pattern
+   * @param date
+   * @return string with format YYYY-MM-DD
+   */
   formatDateToGerman(date: Date) {
     return (
       [
