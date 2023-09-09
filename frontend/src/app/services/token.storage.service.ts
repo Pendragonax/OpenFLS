@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import {Token} from "../models/token.model";
 import {Converter} from "../shared/converter.helper";
-import {BehaviorSubject, ReplaySubject} from "rxjs";
+import {ReplaySubject} from "rxjs";
+import {Router} from "@angular/router";
 
 const TOKEN_KEY = 'auth-token';
 const USER_ID = 'auth-user-id';
@@ -12,9 +13,13 @@ const EXPIRE_DATETIME = 'auth-token-expire';
 })
 export class TokenStorageService {
   expireTimeString$: ReplaySubject<string> = new ReplaySubject<string>();
+  tokenValid$: ReplaySubject<boolean> = new ReplaySubject();
+
+  private tokenExpireTimerId;
 
   constructor(
-    private converter: Converter
+    private converter: Converter,
+    private router: Router
   ) {
     this.startExpireTimeInterval();
   }
@@ -35,7 +40,8 @@ export class TokenStorageService {
   }
 
   getExpireTimeString(): string {
-    return this.converter.convertToTimeString(new Date(this.getExpireDateTimeString()).getTime() - Date.now());
+    const diffDate = new Date(this.getExpireDateTimeString()).getTime() - Date.now();
+    return this.converter.convertToTimeString(diffDate);
   }
 
   saveToken(token: Token): void {
@@ -63,7 +69,21 @@ export class TokenStorageService {
     window.sessionStorage.removeItem(EXPIRE_DATETIME);
   }
 
+  checkExpireTime() {
+    this.expireTimeString$.next(this.getExpireTimeString().toString())
+    const diffDate = new Date(this.getExpireDateTimeString()).getTime() - Date.now()
+
+    if (diffDate < 0) {
+      clearInterval(this.tokenExpireTimerId);
+      this.destroyToken();
+      this.router.navigate(["/login"]).then(() => window.location.reload());
+      this.tokenValid$.next(false);
+    } else {
+      this.tokenValid$.next(true);
+    }
+  }
+
   private startExpireTimeInterval() {
-    setInterval(() => this.expireTimeString$.next(this.getExpireTimeString().toString()), 500);
+    this.tokenExpireTimerId = setInterval(() => this.checkExpireTime(), 500);
   }
 }
