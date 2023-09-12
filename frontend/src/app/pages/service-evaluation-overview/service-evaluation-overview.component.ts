@@ -87,8 +87,11 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   executeURLParams() {
     this.route.params.subscribe(params => {
       this.periodModeControl.setValue(params['month'] != '0' ? '2' : '1');
-      this.year = params['year'];
-      this.month = params['month'] <= 0 || params['month'] > 12 ? 1 : params['month'];
+      this.year = params['year'] != null ? params['year'] : 2023;
+
+      if (params['month'] != null) {
+        this.month = params['month'] <= 0 || params['month'] > 12 ? 1 : params['month'];
+      }
       this.overviewModeControl.setValue(this.overviewMode[params['overviewModeId']]);
       this.hourTypeControl.setValue(this.hourTypes[params['hourTypeId']]);
       this.areaControl.setValue(this.areas[params['areaId']]);

@@ -14,4 +14,8 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
     @Query("SELECT u FROM AssistancePlan u WHERE u.institution.id = :institutionId")
     fun findByInstitutionId(@Param("institutionId") id: Long): List<AssistancePlan>
+
+    @Query("SELECT u FROM AssistancePlan u WHERE u.institution.id = :institutionId AND u.sponsor.id = :sponsorId")
+    fun findByInstitutionIdAndSponsorId(@Param("institutionId") institutionId: Long,
+                                        @Param("sponsorId") sponsorId: Long): List<AssistancePlan>
 }

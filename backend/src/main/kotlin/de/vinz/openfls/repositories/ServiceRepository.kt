@@ -44,6 +44,16 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     fun findByEmployeeAndStartEndDate(@Param("employeeId") employeeId: Long,
                                        @Param("start") start: LocalDate,
                                        @Param("end") end: LocalDate): List<Service>
+    @Query("SELECT u FROM Service u WHERE " +
+            "(extract(YEAR from u.start)) = :year " +
+            "AND u.hourType.id = :hourTypeId " +
+            "AND u.assistancePlan.institution.id = :areaId " +
+            "AND u.assistancePlan.sponsor.id = :sponsorId " +
+            "ORDER BY u.start ASC")
+    fun findServiceByYearByHourTypeIdAndAreaIdAndSponsorId(@Param("year") year: Int,
+                                                           @Param("hourTypeId") hourTypeId: Long,
+                                                           @Param("areaId") areaId: Long,
+                                                           @Param("sponsorId") sponsorId: Long): List<Service>
 
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId")
     fun findByEmployee(@Param("employeeId") employeeId: Long): List<Service>

@@ -97,6 +97,7 @@ class OpenFlsConfig : WebSecurityConfigurerAdapter() {
             .antMatchers(HttpMethod.PUT,"/institutions/**").hasAuthority("ADMIN")
             .antMatchers(HttpMethod.DELETE,"/institutions/**").hasAuthority("ADMIN")
             .antMatchers("/contingents/**").hasAnyAuthority("ADMIN", "LEAD")
+            .antMatchers("/overviews/**").hasAnyAuthority("ADMIN", "LEAD")
             .antMatchers(HttpMethod.POST,"/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
             .antMatchers(HttpMethod.PUT,"/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
             .antMatchers(HttpMethod.DELETE,"/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
