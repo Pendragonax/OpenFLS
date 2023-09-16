@@ -1,6 +1,5 @@
 package de.vinz.openfls.controller
 
-import de.vinz.openfls.exceptions.ValueTypeNotFoundException
 import de.vinz.openfls.services.OverviewService
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -19,11 +18,29 @@ class OverviewController(
             @PathVariable hourTypeId: Long,
             @PathVariable areaId: Long,
             @PathVariable sponsorId: Long): Any {
-        val result = overviewService.getExecutedHoursOverviewFromAssistancePlanByYear(
-                    year,
-                    hourTypeId,
-                    areaId,
-                    sponsorId);
+        val result = overviewService.getExecutedHoursOverview(
+                year = year,
+                month = null,
+                hourTypeId = hourTypeId,
+                areaId = areaId,
+                sponsorId = sponsorId);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("{year}/{month}/{hourTypeId}/{areaId}/{sponsorId}/$VALUE_TYPE_EXECUTED_HOURS")
+    fun getByYearAndMonthAndHourTypeIdAndAreaIdAndSponsorIdAndValueTypeId(
+            @PathVariable year: Int,
+            @PathVariable month: Int,
+            @PathVariable hourTypeId: Long,
+            @PathVariable areaId: Long,
+            @PathVariable sponsorId: Long): Any {
+        val result = overviewService.getExecutedHoursOverview(
+                year = year,
+                month = month,
+                hourTypeId = hourTypeId,
+                areaId = areaId,
+                sponsorId = sponsorId);
 
         return ResponseEntity.ok(result);
     }

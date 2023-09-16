@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ReplaySubject} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {FormControl, FormGroup} from "@angular/forms";
+import {OverviewService} from "../../services/overview.service";
+import {OverviewAssistancePlan} from "../../dtos/overview-assistance-plan.dto";
 
 @Component({
   selector: 'app-service-evaluation-overview',
@@ -43,7 +45,8 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   // Status
   isGenerating: boolean = false;
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute,
+              private overviewService: OverviewService) { }
 
   get periodModeControl() { return this.selectionForm.controls['periodModeControl']; }
   get overviewModeControl() { return this.selectionForm.controls['overviewModeControl']; }
@@ -144,32 +147,60 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   generateTable() {
     this.isGenerating = true;
-    let count = this.selectedPeriodMode == 1 ? 13 : 32;
-    this.columns = [];
-    this.data = [];
-
-    for (let i = 0; i < count; i++) {
-      if (i == 0) {
-        this.columns.push("Name");
-      } else {
-        this.columns.push(i.toString());
-      }
-    }
-
-    for (let amount = 0; amount < 30; amount++) {
-      let data: string[] = [];
-      for (let i = 0; i < this.columns.length; i++) {
-        if (i == 0) {
-          data.push("unbekannt");
-        } else {
-          data.push((amount + 1) + "|" + i);
+    this.overviewService
+      .getExecutedHoursOverviewFromAssistancePlanByYearAndMonth(this.year,2,2,1)
+      .subscribe({
+        next: (value) => {
+          this.columns = ["Name", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+          this.columns$.next(this.columns);
+          this.data = this.convertToData(value);
+          this.data$.next(this.data);
+          console.log(value);
+          this.isGenerating = false;
         }
-      }
-      this.data.push(data);
-    }
+      })
+    // let count = this.selectedPeriodMode == 1 ? 13 : 32;
+    // this.columns = [];
+    // this.data = [];
+    //
+    // for (let i = 0; i < count; i++) {
+    //   if (i == 0) {
+    //     this.columns.push("Name");
+    //   } else {
+    //     this.columns.push(i.toString());
+    //   }
+    // }
+    //
+    // for (let amount = 0; amount < 30; amount++) {
+    //   let data: string[] = [];
+    //   for (let i = 0; i < this.columns.length; i++) {
+    //     if (i == 0) {
+    //       data.push("unbekannt");
+    //     } else {
+    //       data.push((amount + 1) + "|" + i);
+    //     }
+    //   }
+    //   this.data.push(data);
+    // }
+    //
+    // this.columns$.next(this.columns);
+    // this.data$.next(this.data);
+    // this.isGenerating = false;
+  }
 
-    this.columns$.next(this.columns);
-    this.data$.next(this.data);
-    this.isGenerating = false;
+  convertToData(source: OverviewAssistancePlan[]) {
+    return source.map(value => [value.clientDto?.firstName ?? "unbekannt",
+      value.values[0].toString(),
+      value.values[1].toString(),
+      value.values[2].toString(),
+      value.values[3].toString(),
+      value.values[4].toString(),
+      value.values[5].toString(),
+      value.values[6].toString(),
+      value.values[7].toString(),
+      value.values[8].toString(),
+      value.values[9].toString(),
+      value.values[10].toString(),
+      value.values[11].toString()]);
   }
 }

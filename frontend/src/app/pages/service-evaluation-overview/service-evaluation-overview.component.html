@@ -74,7 +74,13 @@
     </div>
     <div class="col">
       <div class="mt-2 example-container mat-elevation-z8">
-        <app-overview-table [columns$]="columns$" [data$]="data$"></app-overview-table>
+        <div class="text-center" [hidden]="!isGenerating">
+          <mat-spinner [strokeWidth]="2"
+                       [diameter]="100"
+                       class="m-auto mt-2"></mat-spinner>
+          <p class="mt-1"><b>Generiere Daten</b></p>
+        </div>
+        <app-overview-table [hidden]="isGenerating" [columns$]="columns$" [data$]="data$"></app-overview-table>
       </div>
     </div>
   </div>
