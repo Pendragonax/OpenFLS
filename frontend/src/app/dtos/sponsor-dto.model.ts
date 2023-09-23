@@ -6,4 +6,9 @@ export class SponsorDto {
   payOverhang: boolean = false;
   payExact: boolean = false;
   unprofessionals: UnprofessionalDto[] = [];
+
+  public constructor(init?:Partial<SponsorDto>) {
+    Object.assign(this, init);
+  }
+
 }
