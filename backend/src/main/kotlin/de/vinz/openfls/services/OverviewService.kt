@@ -32,18 +32,19 @@ class OverviewService(
                 areaId = areaId,
                 sponsorId = sponsorId)
 
-        val assistancePlanDTOs = getAssistancePlans(areaId, sponsorId)
-                .map { modelMapper.map(it, AssistancePlanDto::class.java) }
 
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) };
 
         // Monthly
         if (month != null) {
+            val assistancePlanDTOs = getAssistancePlans(year, month, areaId, sponsorId)
+
             return getExecutedHoursMonthlyByAssistancePlansAndYear(
                     services, assistancePlanDTOs, clientSimpleDTOs, year, month)
         }
 
         // Yearly
+        val assistancePlanDTOs = getAssistancePlans(year, null, areaId, sponsorId)
         return getExecutedHoursYearlyByAssistancePlansAndYear(services, assistancePlanDTOs, clientSimpleDTOs)
     }
 
@@ -52,17 +53,19 @@ class OverviewService(
                                  hourTypeId: Long,
                                  areaId: Long?,
                                  sponsorId: Long?): List<AssistancePlanOverviewDTO> {
-        val assistancePlanDTOs = getAssistancePlans(areaId, sponsorId)
 
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) }
 
         // Monthly
         if (month != null) {
+            val assistancePlanDTOs = getAssistancePlans(year, month, areaId, sponsorId)
+
             return getApprovedHoursMonthly(
                     assistancePlanDTOs, clientSimpleDTOs, year, month)
         }
 
         // Yearly
+        val assistancePlanDTOs = getAssistancePlans(year, null, areaId, sponsorId)
         return getApprovedHoursYearly(assistancePlanDTOs, clientSimpleDTOs, year)
     }
 
@@ -168,25 +171,55 @@ class OverviewService(
     }
 
     private fun getAssistancePlans(
+            year: Int,
+            month: Int?,
             institutionId: Long?,
             sponsorId: Long?) : List<AssistancePlanDto> {
         if (institutionId != null && sponsorId != null) {
-            return assistancePlanRepository
-                    .findByInstitutionIdAndSponsorId(institutionId, sponsorId)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            return if (month == null) {
+                assistancePlanRepository
+                        .findByInstitutionIdAndSponsorIdAndYear(institutionId, sponsorId, year)
+                        .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            } else {
+                assistancePlanRepository
+                        .findByInstitutionIdAndSponsorIdAndYear(institutionId, sponsorId, year)
+                        .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month))}
+            }
         } else if (institutionId != null) {
-            return assistancePlanRepository
-                    .findByInstitutionId(institutionId)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            return if (month == null) {
+                assistancePlanRepository
+                        .findByInstitutionIdAndYear(institutionId, year)
+                        .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            } else {
+                assistancePlanRepository
+                        .findByInstitutionIdAndYear(institutionId, year)
+                        .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month))}
+            }
         } else if (sponsorId != null) {
-            return assistancePlanRepository
-                    .findBySponsorId(sponsorId)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            return if (month == null) {
+                assistancePlanRepository
+                        .findBySponsorIdAndYear(sponsorId, year)
+                        .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            } else {
+                assistancePlanRepository
+                        .findBySponsorIdAndYear(sponsorId, year)
+                        .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month))}
+            }
         }
 
-        return assistancePlanRepository
-                .findAll().toList()
-                .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return if (month == null) {
+            assistancePlanRepository
+                    .findAllByYear(year).toList()
+                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        } else {
+            assistancePlanRepository
+                    .findAllByYear(year).toList()
+                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+                    .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month))}
+        }
     }
 
     private fun getServices(

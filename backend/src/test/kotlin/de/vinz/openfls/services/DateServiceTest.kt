@@ -2,9 +2,13 @@ package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.AssistancePlanDto
 import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.annotations.Parameter
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 import java.time.Year
+import java.time.YearMonth
 
 class DateServiceTest {
     @Test
@@ -80,6 +84,21 @@ class DateServiceTest {
 
         // Then
         assertThat(isInside).isFalse();
+    }
+
+    @ParameterizedTest
+    @CsvSource("2023, 1, false", "2023, 2, true", "2023, 12, false", "2023, 6, true", "2022, 6, false")
+    fun containsStartAndEndASpecificYearMonth(year: Int, month: Int, expected: Boolean) {
+        // Given
+        val start = LocalDate.of(2023, 2, 1)
+        val end = LocalDate.of(2023, 11, 30)
+        val checkYearMonth = YearMonth.of(year, month)
+
+        // When
+        val isInside = DateService.containsStartAndEndASpecificYearMonth(start, end, checkYearMonth)
+
+        // Then
+        assertThat(isInside).isEqualTo(expected);
     }
 
     @Test

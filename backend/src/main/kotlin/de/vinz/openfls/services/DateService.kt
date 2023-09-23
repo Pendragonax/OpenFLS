@@ -2,6 +2,7 @@ package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.AssistancePlanDto
 import java.time.LocalDate
+import java.time.Year
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
@@ -9,6 +10,17 @@ class DateService {
     companion object {
         fun isDateInAssistancePlan(date: LocalDate, assistancePlanDto: AssistancePlanDto): Boolean {
             return !date.isBefore(assistancePlanDto.start) && !date.isAfter(assistancePlanDto.end)
+        }
+
+        fun containsStartAndEndASpecificYearMonth(start: LocalDate, end: LocalDate, yearMonth: YearMonth): Boolean {
+            val startYearMonth = YearMonth.of(start.year, start.month)
+            val endYearMonth = YearMonth.of(end.year, end.month)
+
+            if (startYearMonth > yearMonth || endYearMonth < yearMonth) {
+                return false
+            }
+
+            return startYearMonth <= yearMonth && endYearMonth >= yearMonth
         }
 
         fun countDaysOfAssistancePlan(year: Int, month: Int?, assistancePlanDto: AssistancePlanDto): Long {
