@@ -125,17 +125,16 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.validateGenerationStatus();
     });
     this.areaControl.valueChanges.subscribe(value => {
-      this.selectedArea = value;
-      console.log(value);
+      this.selectedArea = this.areas.find(it => it.id == value) ?? null;
       this.updateUrl();
       this.validateGenerationStatus();
     });
     this.sponsorControl.valueChanges.subscribe(value => {
-      this.selectedSponsor = value;
+      this.selectedSponsor = this.sponsors.find(it => it.id == value) ?? null;
       this.validateGenerationStatus();
     });
     this.valueTypeControl.valueChanges.subscribe(value => {
-      this.selectedValueType = value;
+      this.selectedValueType = this.valueTypes.find(it => it == value) ?? this.valueTypes[0];
       this.updateUrl();
       this.validateGenerationStatus();
     });
@@ -281,7 +280,8 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   private updateUrl() {
     let monthParam = this.selectedPeriodMode == 1 ? 0 : this.month
+    console.log(this.selectedArea)
 
-    this.location.go(`overview/${this.year}/${monthParam}/${this.selectedOverviewMode}/${this.selectedHourType}/${this.selectedArea?.id }/${this.selectedSponsor?.id}/${this.selectedValueType}`);
+    this.location.go(`overview/${this.year}/${monthParam}/${this.selectedOverviewMode}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
   }
 }

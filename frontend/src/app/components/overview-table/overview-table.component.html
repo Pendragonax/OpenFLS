@@ -1,6 +1,6 @@
 <table mat-table class="w-100" [dataSource]="data">
   <ng-container [matColumnDef]="column" *ngFor="let column of columns; let columnIndex = index">
-    <th mat-header-cell *matHeaderCellDef>{{column}}</th>
+    <th mat-header-cell *matHeaderCellDef [ngClass]="{'vinz-col': columnIndex > 1}">{{column}}</th>
     <td mat-cell *matCellDef="let element; let i = index">{{element[columnIndex]}}</td>
   </ng-container>
 
