@@ -78,8 +78,42 @@ class OverviewController(
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("year/{year}/{hourTypeId}/{areaId}/{sponsorId}/$VALUE_TYPE_DIFFERENCE_HOURS")
+    fun getDifferenceHours(
+            @PathVariable year: Int,
+            @PathVariable hourTypeId: Long,
+            @PathVariable areaId: Long,
+            @PathVariable sponsorId: Long): Any {
+        val result = overviewService.getDifferenceHoursOverview(
+                year = year,
+                month = null,
+                hourTypeId = hourTypeId,
+                areaId = if (areaId.toInt() == 0) null else areaId,
+                sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("month/{year}/{month}/{hourTypeId}/{areaId}/{sponsorId}/$VALUE_TYPE_DIFFERENCE_HOURS")
+    fun getDifferenceHours(
+            @PathVariable year: Int,
+            @PathVariable month: Int,
+            @PathVariable hourTypeId: Long,
+            @PathVariable areaId: Long,
+            @PathVariable sponsorId: Long): Any {
+        val result = overviewService.getDifferenceHoursOverview(
+                year = year,
+                month = month,
+                hourTypeId = hourTypeId,
+                areaId = if (areaId.toInt() == 0) null else areaId,
+                sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
+
+        return ResponseEntity.ok(result);
+    }
+
     companion object {
         const val VALUE_TYPE_EXECUTED_HOURS = "EXECUTED_HOURS"
         const val VALUE_TYPE_APPROVED_HOURS = "APPROVED_HOURS"
+        const val VALUE_TYPE_DIFFERENCE_HOURS = "DIFFERENCE_HOURS"
     }
 }
