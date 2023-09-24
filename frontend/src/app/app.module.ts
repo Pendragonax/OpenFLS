@@ -72,6 +72,8 @@ import {MatRadioModule} from "@angular/material/radio";
 import { AssistancePlanAnalysisComponent } from './shared/modules/assistance-plan-analysis/assistance-plan-analysis.component';
 import { OverviewTableComponent } from './components/overview-table/overview-table.component';
 import { ServiceEvaluationOverviewComponent } from './pages/service-evaluation-overview/service-evaluation-overview.component';
+import { OverviewValueTypeInfoModalComponent } from './modals/overview-valuetype-info-modal/overview-value-type-info-modal.component';
+import {MatDialog, MatDialogModule} from "@angular/material/dialog";
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: ''},
@@ -118,7 +120,8 @@ const routes: Routes = [
     AssistancePlanEvaluationComponent,
     AssistancePlanAnalysisComponent,
     OverviewTableComponent,
-    ServiceEvaluationOverviewComponent
+    ServiceEvaluationOverviewComponent,
+    OverviewValueTypeInfoModalComponent
   ],
     imports: [
         RouterModule.forRoot(routes),
@@ -151,7 +154,8 @@ const routes: Routes = [
         MatAutocompleteModule,
         MatToolbarModule,
         MatPaginatorModule,
-        MatRadioModule
+        MatRadioModule,
+        MatDialogModule
     ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

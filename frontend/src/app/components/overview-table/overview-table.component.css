@@ -1,3 +1,7 @@
-.vinz-col {
-  width: 4rem;
+.overview-fixed-column-width {
+  width: 3vw !important;
+}
+
+.overview-font-size {
+  font-size: 0.65vw;
 }

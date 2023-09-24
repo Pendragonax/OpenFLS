@@ -19,9 +19,9 @@
         </div>
       </div>
       <div class="row my-3 justify-content-center">
-        <mat-form-field>
+        <mat-form-field class="width-20-vw">
           <mat-label>Stundentypen</mat-label>
-          <mat-select formControlName="hourTypeControl" [disabled]="isGenerating">
+          <mat-select formControlName="hourTypeControl">
             <mat-option *ngFor="let hourType of hourTypes" [value]="hourType.id">
               {{hourType.title}}
             </mat-option>
@@ -29,9 +29,9 @@
         </mat-form-field>
       </div>
       <div class="row my-3 justify-content-center">
-        <mat-form-field>
+        <mat-form-field class="width-20-vw">
           <mat-label>Bereich</mat-label>
-          <mat-select formControlName="areaControl" [disabled]="isGenerating">
+          <mat-select formControlName="areaControl">
             <mat-option *ngFor="let area of areas" [value]="area.id">
               {{area.name}}
             </mat-option>
@@ -39,9 +39,9 @@
         </mat-form-field>
       </div>
       <div class="row my-3 justify-content-center">
-        <mat-form-field>
+        <mat-form-field class="width-20-vw">
           <mat-label>Kostenträger</mat-label>
-          <mat-select formControlName="sponsorControl" [disabled]="isGenerating">
+          <mat-select formControlName="sponsorControl">
             <mat-option *ngFor="let sponsor of sponsors" [value]="sponsor.id">
               {{sponsor.name}}
             </mat-option>
@@ -49,17 +49,19 @@
         </mat-form-field>
       </div>
       <div class="row my-3 justify-content-center">
-        <mat-form-field>
+        <mat-form-field class="width-20-vw">
           <mat-label>anzuzeigender Wert</mat-label>
-          <mat-select formControlName="valueTypeControl" [disabled]="isGenerating">
+          <mat-select formControlName="valueTypeControl">
             <mat-option *ngFor="let valueType of valueTypes" [value]="valueType">
               {{valueType}}
             </mat-option>
           </mat-select>
         </mat-form-field>
+        <button mat-icon-button color="primary" (click)="openValueTypeInfoModal()"><mat-icon>info</mat-icon></button>
       </div>
       <div class="row justify-content-center my-3">
-        <button mat-raised-button color="asc" class="w-75 button-color" [disabled]="!generationAllowed || isGenerating" (click)="generateTable()">Generieren</button>
+        <button mat-raised-button color="asc" class="w-75 button-color"
+                [disabled]="!generationAllowed || isGenerating" (click)="generateTable()">Generieren</button>
       </div>
     </div>
     <div class="col">

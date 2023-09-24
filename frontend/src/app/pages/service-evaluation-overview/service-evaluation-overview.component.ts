@@ -19,6 +19,10 @@ import {
 } from "@angular/material-moment-adapter";
 import {EOverviewType} from "../../enums/EOverviewType";
 import {Converter} from "../../shared/converter.helper";
+import {
+  OverviewValueTypeInfoModalComponent
+} from "../../modals/overview-valuetype-info-modal/overview-value-type-info-modal.component";
+import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-service-evaluation-overview',
@@ -72,10 +76,10 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   selectionForm: FormGroup = new FormGroup({
     periodModeControl: new FormControl({value: '2', disabled: this.isGenerating}),
-    hourTypeControl: new FormControl(),
-    areaControl: new FormControl(),
-    sponsorControl: new FormControl(),
-    valueTypeControl: new FormControl()
+    hourTypeControl: new FormControl({disabled: this.isGenerating}),
+    areaControl: new FormControl({disabled: this.isGenerating}),
+    sponsorControl: new FormControl({disabled: this.isGenerating}),
+    valueTypeControl: new FormControl({disabled: this.isGenerating})
   });
 
   constructor(private route: ActivatedRoute,
@@ -84,6 +88,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
               private institutionService: InstitutionService,
               private sponsorService: SponsorService,
               private converter: Converter,
+              private dialog: MatDialog,
               private location: Location) {
     this.boldColumnIndices$.next(this.boldColumnIndices)
   }
@@ -140,6 +145,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     });
     this.sponsorControl.valueChanges.subscribe(value => {
       this.selectedSponsor = this.sponsors.find(it => it.id == value) ?? null;
+      this.updateUrl();
       this.validateGenerationStatus();
     });
     this.valueTypeControl.valueChanges.subscribe(value => {
@@ -196,15 +202,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     this.updateUrl();
   }
 
-  private validateGenerationStatus() {
-    this.generationAllowed =
-      this.selectedValueType != null &&
-      this.selectedSponsor != null &&
-      this.selectedArea != null &&
-      this.selectedHourType != null &&
-      this.selectedPeriodMode != null;
-  }
-
   generateTable() {
     this.isGenerating = true;
 
@@ -235,6 +232,16 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     }
   }
 
+  getMonthName(month: number): string {
+    const date = new Date();
+    date.setMonth(month - 1);
+    return date.toLocaleString('de-DE', { month: 'long' });
+  }
+
+  openValueTypeInfoModal() {
+    this.dialog.open(OverviewValueTypeInfoModalComponent)
+  }
+
   private convertToData(source: OverviewAssistancePlan[]) {
     return source.map(value => {
       // client name
@@ -243,18 +250,11 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       // assistance plan end
       result.push(this.getDateString(value.assistancePlanDto?.end ?? null));
 
-      console.log("Number of rows = " + value.values.length)
       for (let i = 0; i < value.values.length; i++) {
         result.push(value.values[i].toString());
       }
       return result;
     });
-  }
-
-  getMonthName(month: number): string {
-    const date = new Date();
-    date.setMonth(month - 1);
-    return date.toLocaleString('de-DE', { month: 'long' });
   }
 
   private getDaysInMonth(year: number, month: number): number {
@@ -306,5 +306,14 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       }
     }
     return null;
+  }
+
+  private validateGenerationStatus() {
+    this.generationAllowed =
+      this.selectedValueType != null &&
+      this.selectedSponsor != null &&
+      this.selectedArea != null &&
+      this.selectedHourType != null &&
+      this.selectedPeriodMode != null;
   }
 }
