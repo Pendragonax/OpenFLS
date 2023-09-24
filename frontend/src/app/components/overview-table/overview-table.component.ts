@@ -10,10 +10,13 @@ export class OverviewTableComponent implements OnInit {
   @Input() columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>();
   @Input() data$: ReplaySubject<string[][]> = new ReplaySubject<string[][]>();
   @Input() columnFixedWidthFromIndex$: ReplaySubject<number> = new ReplaySubject<number>();
+  @Input() boldColumnIndices$: ReplaySubject<number[]> = new ReplaySubject<number[]>();
 
   columns: string[] = [];
   data: string[][] = [];
   columnFixedWidthFromIndex: number = 0;
+  boldColumnIndices: number[] = []
+
 
   constructor() { }
 
@@ -27,5 +30,12 @@ export class OverviewTableComponent implements OnInit {
     this.columnFixedWidthFromIndex$.subscribe({
       next: (value) => this.columnFixedWidthFromIndex = value
     });
+    this.boldColumnIndices$.subscribe({
+      next: (value) => this.boldColumnIndices = value
+    });
+  }
+
+  arrayContainsNumber(value: number): boolean {
+    return this.boldColumnIndices.includes(value)
   }
 }

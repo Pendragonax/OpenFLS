@@ -43,10 +43,12 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>()
   data$: ReplaySubject<string[][]> = new ReplaySubject()
   columnFixedWidthFromIndex$: ReplaySubject<number> = new ReplaySubject<number>()
+  boldColumnIndices$: ReplaySubject<number[]> = new ReplaySubject<number[]>()
 
   columns: string[] = []
   data: string[][] = []
   columnFixedWidthFromIndex: number = 0
+  boldColumnIndices: number[] = [2]
 
   selectedPeriodMode: number = 1;
   hourTypeAll = new HourTypeDto({title:"alle"})
@@ -76,14 +78,15 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     valueTypeControl: new FormControl()
   });
 
-
   constructor(private route: ActivatedRoute,
               private overviewService: OverviewService,
               private hourTypeService: HourTypeService,
               private institutionService: InstitutionService,
               private sponsorService: SponsorService,
               private converter: Converter,
-              private location: Location) { }
+              private location: Location) {
+    this.boldColumnIndices$.next(this.boldColumnIndices)
+  }
 
   get periodModeControl() { return this.selectionForm.controls['periodModeControl']; }
   get hourTypeControl() { return this.selectionForm.controls['hourTypeControl']; }

@@ -71,7 +71,8 @@
           <p class="mt-1"><b>Generiere Daten</b></p>
         </div>
         <app-overview-table [hidden]="isGenerating" [columns$]="columns$" [data$]="data$"
-                            [columnFixedWidthFromIndex$]="columnFixedWidthFromIndex$"></app-overview-table>
+                            [columnFixedWidthFromIndex$]="columnFixedWidthFromIndex$"
+                            [boldColumnIndices$]="boldColumnIndices$"></app-overview-table>
       </div>
     </div>
   </div>
