@@ -56,7 +56,7 @@ const routes: Routes = [
   { path: 'services/client/:id', component: ServiceClientComponent, canActivate: [AuthGuard] },
   { path: 'services/employee/:id', component: ServiceEmployeeComponent, canActivate: [AuthGuard] },
   { path: 'overview', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] },
-  { path: 'overview/:year/:month/:overviewModeId/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] }
+  { path: 'overview/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({

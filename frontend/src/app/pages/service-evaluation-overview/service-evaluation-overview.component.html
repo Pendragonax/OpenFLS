@@ -4,8 +4,8 @@
       <p>{{outputString}}</p>
       <div class="row mt-3">
         <mat-radio-group aria-label="Select an option" color="primary" formControlName="periodModeControl">
-          <mat-radio-button class="me-2" value="1" [disabled]="isGenerating">Jahr</mat-radio-button>
-          <mat-radio-button class="ms-2" value="2" [disabled]="isGenerating">Monat</mat-radio-button>
+          <mat-radio-button class="me-2" value="1">Jahr</mat-radio-button>
+          <mat-radio-button class="ms-2" value="2">Monat</mat-radio-button>
         </mat-radio-group>
         <div class="d-flex justify-content-center mt-2" *ngIf="selectedPeriodMode == 1">
           <button mat-mini-fab (click)="prevYear()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_left</mat-icon></button>
@@ -17,16 +17,6 @@
           <p class="my-auto w-50 fw-bold">{{getMonthName(month)}} - {{year}}</p>
           <button mat-mini-fab (click)="nextMonth()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_right</mat-icon></button>
         </div>
-      </div>
-      <div class="row my-3 justify-content-center">
-        <mat-form-field>
-          <mat-label>Übersichtstyp</mat-label>
-          <mat-select formControlName="overviewModeControl" [disabled]="isGenerating">
-            <mat-option *ngFor="let mode of overviewMode" [value]="mode">
-              {{mode}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
       </div>
       <div class="row my-3 justify-content-center">
         <mat-form-field>

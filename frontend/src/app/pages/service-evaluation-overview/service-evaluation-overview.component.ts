@@ -35,8 +35,7 @@ import {Converter} from "../../shared/converter.helper";
   ]
 })
 export class ServiceEvaluationOverviewComponent implements OnInit {
-  readonly COLUMN_FIXED_CLIENT_MODE: number = 2
-  readonly COLUMN_FIXED_ASSISTANCE_PLAN_MODE: number = 2
+  readonly FIXED_COLUMN_FROM_INDEX: number = 2
 
   clientColumnHeader = "Klient"
   assistancePlanColumnHeader = "Ende"
@@ -52,8 +51,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   hourTypeAll = new HourTypeDto({title:"alle"})
   hourTypes: HourTypeDto[] = []
   selectedHourType: HourTypeDto | null = null;
-  overviewMode: string[] = ["Klient", "Hilfeplan"]
-  selectedOverviewMode: string = "0";
   areaAll = new InstitutionDto({name:"alle"})
   areas: InstitutionDto[] = [this.areaAll]
   selectedArea: InstitutionDto | null = null;
@@ -62,22 +59,22 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   selectedSponsor: SponsorDto | null = null;
   valueTypes: string[] = Object.values(EOverviewType);
   selectedValueType: EOverviewType = EOverviewType.EXECUTED_HOURS;
-  year: number = 2023;
-  month: number = 1;
+  year: number = new Date().getFullYear() + 1;
+  month: number = 0;
   outputString: string = "";
   generationAllowed: boolean = false;
 
+  // Status
+  isGenerating: boolean = false;
+
   selectionForm: FormGroup = new FormGroup({
-    periodModeControl: new FormControl('1'),
-    overviewModeControl: new FormControl(),
+    periodModeControl: new FormControl({value: '2', disabled: this.isGenerating}),
     hourTypeControl: new FormControl(),
     areaControl: new FormControl(),
     sponsorControl: new FormControl(),
     valueTypeControl: new FormControl()
   });
 
-  // Status
-  isGenerating: boolean = false;
 
   constructor(private route: ActivatedRoute,
               private overviewService: OverviewService,
@@ -88,7 +85,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
               private location: Location) { }
 
   get periodModeControl() { return this.selectionForm.controls['periodModeControl']; }
-  get overviewModeControl() { return this.selectionForm.controls['overviewModeControl']; }
   get hourTypeControl() { return this.selectionForm.controls['hourTypeControl']; }
   get areaControl() { return this.selectionForm.controls['areaControl']; }
   get sponsorControl() { return this.selectionForm.controls['sponsorControl']; }
@@ -113,26 +109,18 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.sponsors = [this.sponsorAll]
       this.sponsors.push(...sponsors);
       this.valueTypes = Object.values(EOverviewType);
+      this.columnFixedWidthFromIndex$.next(this.FIXED_COLUMN_FROM_INDEX);
       this.executeURLParams();
     })
   }
 
   initFormControlSubscriptions() {
     this.periodModeControl.valueChanges.subscribe(value => {
-      this.selectedPeriodMode = value;
-      this.updateUrl();
-      this.validateGenerationStatus();
-    });
-    this.overviewModeControl.valueChanges.subscribe(value => {
-      this.selectedOverviewMode = this.overviewMode.find(it => it == value) ?? "";
-      if (this.selectedOverviewMode === this.overviewMode[0]) {
-        console.log(this.selectedOverviewMode)
-        this.columnFixedWidthFromIndex = this.COLUMN_FIXED_CLIENT_MODE
-      } else if (this.selectedOverviewMode === this.overviewMode[1]) {
-        console.log(this.selectedOverviewMode)
-        this.columnFixedWidthFromIndex = this.COLUMN_FIXED_ASSISTANCE_PLAN_MODE
+      if (this.month == 0) {
+        this.month = new Date().getMonth() + 1
       }
-      this.columnFixedWidthFromIndex$.next(this.columnFixedWidthFromIndex)
+
+      this.selectedPeriodMode = value;
       this.updateUrl();
       this.validateGenerationStatus();
     });
@@ -159,13 +147,12 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   executeURLParams() {
     this.route.params.subscribe(params => {
-      this.periodModeControl.setValue(params['month'] != '0' ? '2' : '1');
+      this.periodModeControl.setValue(params['month'] != null && params['month'] != '0' ? '2' : '1');
       this.year = params['year'] != null ? +params['year'] : 2023;
 
       if (params['month'] != null) {
         this.month = params['month'] <= 0 || params['month'] > 12 ? 1 : +params['month'];
       }
-      this.overviewModeControl.setValue(this.overviewMode.find(value => value == params['overviewModeId']));
       this.hourTypeControl.setValue(this.hourTypes.find(value => value.id == params['hourTypeId'])?.id);
       this.areaControl.setValue(this.areas.find(value => value.id == params['areaId'])?.id);
       this.sponsorControl.setValue(this.sponsors.find(value => value.id == params['sponsorId'])?.id);
@@ -208,7 +195,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   private validateGenerationStatus() {
     this.generationAllowed =
       this.selectedValueType != null &&
-      this.selectedOverviewMode != null &&
       this.selectedSponsor != null &&
       this.selectedArea != null &&
       this.selectedHourType != null &&
@@ -299,7 +285,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   private updateUrl() {
     let monthParam = this.selectedPeriodMode == 1 ? 0 : this.month
-    this.location.go(`overview/${this.year}/${monthParam}/${this.selectedOverviewMode}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
+    this.location.go(`overview/${this.year}/${monthParam}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
   }
 
   getDateString(dateString: string | null): string {
