@@ -13,7 +13,7 @@ export class OverviewTableComponent implements OnInit {
 
   columns: string[] = [];
   data: string[][] = [];
-  columnFixedWidthFromIndex: number = 4;
+  columnFixedWidthFromIndex: number = 0;
 
   constructor() { }
 

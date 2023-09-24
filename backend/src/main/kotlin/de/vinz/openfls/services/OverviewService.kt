@@ -85,10 +85,13 @@ class OverviewService(
             val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId)
 
             if (assistancePlanOverviewDTO != null) {
-                for (i in 0 until daysInMonth) {
+                for (i in 1..daysInMonth) {
                     if (DateService.isDateInAssistancePlan(
-                                    LocalDate.of(year, month, i + 1), assistancePlanDto)) {
+                                    LocalDate.of(year, month, i), assistancePlanDto)) {
+                        assistancePlanOverviewDTO.values[0] += hoursPerDay
                         assistancePlanOverviewDTO.values[i] = hoursPerDay
+
+                        allAssistancePlanOverviewDTO.values[0] += hoursPerDay
                         allAssistancePlanOverviewDTO.values[i] += hoursPerDay
                     } else {
                         assistancePlanOverviewDTO.values[i] = 0.0
@@ -117,10 +120,13 @@ class OverviewService(
             val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId)
 
             if (assistancePlanOverviewDTO != null) {
-                for (i in 0 until MONTH_COUNT) {
-                    val daysInMonth = DateService.countDaysOfAssistancePlan(year, i + 1, assistancePlanDto)
+                for (i in 1..MONTH_COUNT) {
+                    val daysInMonth = DateService.countDaysOfAssistancePlan(year, i, assistancePlanDto)
                     val hoursPerMonth = hoursPerDay * daysInMonth
+                    assistancePlanOverviewDTO.values[0] += hoursPerMonth
                     assistancePlanOverviewDTO.values[i] = hoursPerMonth
+
+                    allAssistancePlanOverviewDTO.values[0] += hoursPerMonth
                     allAssistancePlanOverviewDTO.values[i] += hoursPerMonth
                 }
             }
@@ -141,11 +147,12 @@ class OverviewService(
         services.forEach { service ->
             val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan.id }
             if (assistancePlanOverviewDTO != null) {
-                val month = service.start.monthValue - 1;
-                assistancePlanOverviewDTO.values[month] =
-                        assistancePlanOverviewDTO.values[month] + service.minutes
-                allAssistancePlanOverviewDTO.values[month] =
-                        allAssistancePlanOverviewDTO.values[month] + service.minutes
+                val month = service.start.monthValue;
+                assistancePlanOverviewDTO.values[0] += service.minutes.toDouble()
+                assistancePlanOverviewDTO.values[month] += service.minutes.toDouble()
+
+                allAssistancePlanOverviewDTO.values[0] += service.minutes.toDouble()
+                allAssistancePlanOverviewDTO.values[month] += service.minutes.toDouble()
             }
         }
         
@@ -168,11 +175,12 @@ class OverviewService(
         services.forEach { service ->
             val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan.id }
             if (assistancePlanOverviewDTO != null) {
-                val day = service.start.dayOfMonth - 1;
-                assistancePlanOverviewDTO.values[day] =
-                        assistancePlanOverviewDTO.values[day] + service.minutes
-                allAssistancePlanOverviewDTO.values[day] =
-                        allAssistancePlanOverviewDTO.values[day] + service.minutes
+                val day = service.start.dayOfMonth;
+                assistancePlanOverviewDTO.values[0] += service.minutes.toDouble()
+                assistancePlanOverviewDTO.values[day] += service.minutes.toDouble()
+
+                allAssistancePlanOverviewDTO.values[0] += service.minutes.toDouble()
+                allAssistancePlanOverviewDTO.values[day] += service.minutes.toDouble()
             }
         }
 
@@ -326,11 +334,11 @@ class OverviewService(
         val result = assistancePlanDTOs
                 .map { AssistancePlanOverviewDTO(it,
                         clientDTOs.find { client -> client.id == it.clientId } ?: throw IllegalArgumentException(),
-                        DoubleArray(valuesCount) { 0.0 })}
+                        DoubleArray(valuesCount + 1) { 0.0 })}
                 .sortedBy { it.clientDto.lastName }
                 .toMutableList()
 
-        result.add(0, AssistancePlanOverviewDTO(AssistancePlanDto(), allClient, DoubleArray(valuesCount) { 0.0 }))
+        result.add(0, AssistancePlanOverviewDTO(AssistancePlanDto(), allClient, DoubleArray(valuesCount + 1) { 0.0 }))
 
         return result;
     }

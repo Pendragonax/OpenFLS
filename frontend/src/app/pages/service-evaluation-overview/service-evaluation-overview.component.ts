@@ -36,6 +36,7 @@ import {Converter} from "../../shared/converter.helper";
 })
 export class ServiceEvaluationOverviewComponent implements OnInit {
   readonly FIXED_COLUMN_FROM_INDEX: number = 2
+  readonly COMBINATION_COLUMN_NAME: string = "Gesamt"
 
   clientColumnHeader = "Klient"
   assistancePlanColumnHeader = "Ende"
@@ -239,6 +240,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       // assistance plan end
       result.push(this.getDateString(value.assistancePlanDto?.end ?? null));
 
+      console.log("Number of rows = " + value.values.length)
       for (let i = 0; i < value.values.length; i++) {
         result.push(value.values[i].toString());
       }
@@ -266,6 +268,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     const daysInMonth = this.getDaysInMonth(year, month);
     let daysArray: string[] = [this.clientColumnHeader, this.assistancePlanColumnHeader];
 
+    daysArray.push(this.COMBINATION_COLUMN_NAME)
     for (let i = 1; i <= daysInMonth; i++) {
       daysArray.push(i.toString().padStart(2, '0'));
     }
@@ -276,6 +279,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   private getMonthsInYearColumns(): string[] {
     let daysArray: string[] = [this.clientColumnHeader, this.assistancePlanColumnHeader];
 
+    daysArray.push(this.COMBINATION_COLUMN_NAME)
     for (let i = 1; i <= 12; i++) {
       daysArray.push(i.toString().padStart(2, '0'));
     }
