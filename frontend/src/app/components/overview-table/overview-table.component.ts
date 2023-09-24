@@ -9,8 +9,11 @@ import {ReplaySubject} from "rxjs";
 export class OverviewTableComponent implements OnInit {
   @Input() columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>();
   @Input() data$: ReplaySubject<string[][]> = new ReplaySubject<string[][]>();
+  @Input() columnFixedWidthFromIndex$: ReplaySubject<number> = new ReplaySubject<number>();
+
   columns: string[] = [];
   data: string[][] = [];
+  columnFixedWidthFromIndex: number = 4;
 
   constructor() { }
 
@@ -20,6 +23,9 @@ export class OverviewTableComponent implements OnInit {
     });
     this.data$.subscribe({
       next: (value) => this.data = value
+    });
+    this.columnFixedWidthFromIndex$.subscribe({
+      next: (value) => this.columnFixedWidthFromIndex = value
     });
   }
 }

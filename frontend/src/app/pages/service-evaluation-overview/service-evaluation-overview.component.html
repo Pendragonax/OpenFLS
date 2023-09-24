@@ -80,7 +80,8 @@
                        class="m-auto mt-2"></mat-spinner>
           <p class="mt-1"><b>Generiere Daten</b></p>
         </div>
-        <app-overview-table [hidden]="isGenerating" [columns$]="columns$" [data$]="data$"></app-overview-table>
+        <app-overview-table [hidden]="isGenerating" [columns$]="columns$" [data$]="data$"
+                            [columnFixedWidthFromIndex$]="columnFixedWidthFromIndex$"></app-overview-table>
       </div>
     </div>
   </div>

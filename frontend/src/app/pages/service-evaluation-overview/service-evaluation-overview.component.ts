@@ -18,6 +18,7 @@ import {
   MomentDateAdapter
 } from "@angular/material-moment-adapter";
 import {EOverviewType} from "../../enums/EOverviewType";
+import {Converter} from "../../shared/converter.helper";
 
 @Component({
   selector: 'app-service-evaluation-overview',
@@ -34,13 +35,18 @@ import {EOverviewType} from "../../enums/EOverviewType";
   ]
 })
 export class ServiceEvaluationOverviewComponent implements OnInit {
-  clientColumnHeader = "Klient";
-  assistancePlanColumnHeader = "Start";
-  columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>();
-  data$: ReplaySubject<string[][]> = new ReplaySubject();
+  readonly COLUMN_FIXED_CLIENT_MODE: number = 2
+  readonly COLUMN_FIXED_ASSISTANCE_PLAN_MODE: number = 2
+
+  clientColumnHeader = "Klient"
+  assistancePlanColumnHeader = "Ende"
+  columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>()
+  data$: ReplaySubject<string[][]> = new ReplaySubject()
+  columnFixedWidthFromIndex$: ReplaySubject<number> = new ReplaySubject<number>()
 
   columns: string[] = []
   data: string[][] = []
+  columnFixedWidthFromIndex: number = 0
 
   selectedPeriodMode: number = 1;
   hourTypeAll = new HourTypeDto({title:"alle"})
@@ -78,6 +84,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
               private hourTypeService: HourTypeService,
               private institutionService: InstitutionService,
               private sponsorService: SponsorService,
+              private converter: Converter,
               private location: Location) { }
 
   get periodModeControl() { return this.selectionForm.controls['periodModeControl']; }
@@ -118,6 +125,14 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     });
     this.overviewModeControl.valueChanges.subscribe(value => {
       this.selectedOverviewMode = this.overviewMode.find(it => it == value) ?? "";
+      if (this.selectedOverviewMode === this.overviewMode[0]) {
+        console.log(this.selectedOverviewMode)
+        this.columnFixedWidthFromIndex = this.COLUMN_FIXED_CLIENT_MODE
+      } else if (this.selectedOverviewMode === this.overviewMode[1]) {
+        console.log(this.selectedOverviewMode)
+        this.columnFixedWidthFromIndex = this.COLUMN_FIXED_ASSISTANCE_PLAN_MODE
+      }
+      this.columnFixedWidthFromIndex$.next(this.columnFixedWidthFromIndex)
       this.updateUrl();
       this.validateGenerationStatus();
     });
@@ -212,7 +227,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
             this.columns$.next(this.columns);
             this.data = this.convertToData(value);
             this.data$.next(this.data);
-            console.log(value);
             this.isGenerating = false;
           }
         })
@@ -225,7 +239,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
             this.columns$.next(this.columns);
             this.data = this.convertToData(value);
             this.data$.next(this.data);
-            console.log(value);
             this.isGenerating = false;
           }
         })
@@ -234,8 +247,12 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   private convertToData(source: OverviewAssistancePlan[]) {
     return source.map(value => {
+      // client name
       let result = [(value.clientDto?.lastName ?? "") + " " + (value.clientDto?.firstName ?? "unbekannt")];
-      result.push(value.assistancePlanDto?.start ?? "unbekannt")
+
+      // assistance plan end
+      result.push(this.getDateString(value.assistancePlanDto?.end ?? null));
+
       for (let i = 0; i < value.values.length; i++) {
         result.push(value.values[i].toString());
       }
@@ -282,9 +299,11 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   private updateUrl() {
     let monthParam = this.selectedPeriodMode == 1 ? 0 : this.month
-    console.log(this.selectedArea)
-
     this.location.go(`overview/${this.year}/${monthParam}/${this.selectedOverviewMode}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
+  }
+
+  getDateString(dateString: string | null): string {
+    return this.converter.getLocalDateString(dateString);
   }
 
   private getEnumByValue<T>(enumObj: T, value: T[keyof T]): T[keyof T] | null {

@@ -1,7 +1,7 @@
 <table mat-table class="w-100" [dataSource]="data">
   <ng-container [matColumnDef]="column" *ngFor="let column of columns; let columnIndex = index">
-    <th mat-header-cell *matHeaderCellDef [ngClass]="{'vinz-col': columnIndex > 1}">{{column}}</th>
-    <td mat-cell *matCellDef="let element; let i = index">{{element[columnIndex]}}</td>
+    <th mat-header-cell *matHeaderCellDef [ngClass]="{'vinz-col text-center': columnIndex >= columnFixedWidthFromIndex}">{{column}}</th>
+    <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{'vinz-col text-center': columnIndex >= columnFixedWidthFromIndex}">{{element[columnIndex]}}</td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="columns"></tr>

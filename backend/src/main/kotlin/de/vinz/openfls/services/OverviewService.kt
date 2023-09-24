@@ -61,32 +61,35 @@ class OverviewService(
             val assistancePlanDTOs = getAssistancePlans(year, month, areaId, sponsorId)
 
             return getApprovedHoursMonthly(
-                    assistancePlanDTOs, clientSimpleDTOs, year, month)
+                    assistancePlanDTOs, clientSimpleDTOs, hourTypeId, year, month)
         }
 
         // Yearly
         val assistancePlanDTOs = getAssistancePlans(year, null, areaId, sponsorId)
-        return getApprovedHoursYearly(assistancePlanDTOs, clientSimpleDTOs, year)
+        return getApprovedHoursYearly(assistancePlanDTOs, clientSimpleDTOs, hourTypeId, year)
     }
 
     private fun getApprovedHoursMonthly(assistancePlanDTOs: List<AssistancePlanDto>,
                                         clientSimpleDTOs: List<ClientSimpleDto>,
+                                        hourTypeId: Long?,
                                         year: Int,
                                         month: Int): List<AssistancePlanOverviewDTO> {
         val daysInMonth = YearMonth.of(year, month).lengthOfMonth()
         val assistancePlanOverviewDTOs =
                 getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientSimpleDTOs, daysInMonth)
+        val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
         assistancePlanDTOs.forEach { assistancePlanDto ->
             val assistancePlanOverviewDTO =
                     assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == assistancePlanDto.id }
-            val hoursPerDay = NumberService.convertDoubleToTimeDouble(assistancePlanDto.hours.sumOf { it.weeklyHours / 7 })
+            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId)
 
             if (assistancePlanOverviewDTO != null) {
                 for (i in 0 until daysInMonth) {
                     if (DateService.isDateInAssistancePlan(
                                     LocalDate.of(year, month, i + 1), assistancePlanDto)) {
                         assistancePlanOverviewDTO.values[i] = hoursPerDay
+                        allAssistancePlanOverviewDTO.values[i] += hoursPerDay
                     } else {
                         assistancePlanOverviewDTO.values[i] = 0.0
                     }
@@ -94,28 +97,37 @@ class OverviewService(
             }
         }
 
+        // convert to minute double
+        convertDoubleToMinuteDouble(assistancePlanOverviewDTOs)
+
         return assistancePlanOverviewDTOs;
     }
 
     private fun getApprovedHoursYearly(assistancePlanDTOs: List<AssistancePlanDto>,
-                                        clientSimpleDTOs: List<ClientSimpleDto>,
-                                        year: Int): List<AssistancePlanOverviewDTO> {
+                                       clientSimpleDTOs: List<ClientSimpleDto>,
+                                       hourTypeId: Long?,
+                                       year: Int): List<AssistancePlanOverviewDTO> {
         val assistancePlanOverviewDTOs =
                 getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientSimpleDTOs, MONTH_COUNT)
+        val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
         assistancePlanDTOs.forEach { assistancePlanDto ->
             val assistancePlanOverviewDTO =
                     assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == assistancePlanDto.id }
-            val hoursPerDay = assistancePlanDto.hours.sumOf { it.weeklyHours / 7 }
+            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId)
 
             if (assistancePlanOverviewDTO != null) {
                 for (i in 0 until MONTH_COUNT) {
-                    val daysInMonth = DateService.countDaysOfAssistancePlan(year, i+1, assistancePlanDto)
-                    assistancePlanOverviewDTO.values[i] =
-                            NumberService.convertDoubleToTimeDouble(hoursPerDay * daysInMonth)
+                    val daysInMonth = DateService.countDaysOfAssistancePlan(year, i + 1, assistancePlanDto)
+                    val hoursPerMonth = hoursPerDay * daysInMonth
+                    assistancePlanOverviewDTO.values[i] = hoursPerMonth
+                    allAssistancePlanOverviewDTO.values[i] += hoursPerMonth
                 }
             }
         }
+
+        // convert to minute double
+        convertDoubleToMinuteDouble(assistancePlanOverviewDTOs)
 
         return assistancePlanOverviewDTOs;
     }
@@ -124,18 +136,23 @@ class OverviewService(
                                                                assistancePlanDTOs: List<AssistancePlanDto>,
                                                                clientDTOs: List<ClientSimpleDto>): List<AssistancePlanOverviewDTO> {
         val assistancePlanOverviewDTOs = getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientDTOs, MONTH_COUNT)
+        val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
         services.forEach { service ->
             val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan.id }
             if (assistancePlanOverviewDTO != null) {
-                addMonthlyServiceMinutesToOverviewValues(service, assistancePlanOverviewDTO)
+                val month = service.start.monthValue - 1;
+                assistancePlanOverviewDTO.values[month] =
+                        assistancePlanOverviewDTO.values[month] + service.minutes
+                allAssistancePlanOverviewDTO.values[month] =
+                        allAssistancePlanOverviewDTO.values[month] + service.minutes
             }
         }
         
         // convert from minutes to hours
         convertMinutesValuesToHourValues(assistancePlanOverviewDTOs)
 
-        return assistancePlanOverviewDTOs.sortedBy { it.clientDto.lastName }
+        return assistancePlanOverviewDTOs
     }
 
     private fun getExecutedHoursMonthlyByAssistancePlansAndYear(services: List<de.vinz.openfls.model.Service>,
@@ -145,19 +162,33 @@ class OverviewService(
                                                                 month: Int): List<AssistancePlanOverviewDTO> {
         val daysInMonth = YearMonth.of(year, month).lengthOfMonth();
         val assistancePlanOverviewDTOs = getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientDTOs, daysInMonth)
+        val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
 
         services.forEach { service ->
-            val resultEntity = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan.id }
-            if (resultEntity != null) {
-                addDailyServiceMinutesToOverviewValues(service, resultEntity)
+            val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan.id }
+            if (assistancePlanOverviewDTO != null) {
+                val day = service.start.dayOfMonth - 1;
+                assistancePlanOverviewDTO.values[day] =
+                        assistancePlanOverviewDTO.values[day] + service.minutes
+                allAssistancePlanOverviewDTO.values[day] =
+                        allAssistancePlanOverviewDTO.values[day] + service.minutes
             }
         }
 
         // convert from minutes to hours
         convertMinutesValuesToHourValues(assistancePlanOverviewDTOs)
 
-        return assistancePlanOverviewDTOs.sortedBy { it.clientDto.lastName }
+        return assistancePlanOverviewDTOs
+    }
+
+    private fun convertDoubleToMinuteDouble(assistancePlanOverviewDTOs: List<AssistancePlanOverviewDTO>) {
+        assistancePlanOverviewDTOs.forEach { assistancePlanOverviewDTO ->
+            for (i in 0 until assistancePlanOverviewDTO.values.size) {
+                assistancePlanOverviewDTO.values[i] =
+                        NumberService.convertDoubleToTimeDouble(assistancePlanOverviewDTO.values[i])
+            }
+        }
     }
 
     private fun convertMinutesValuesToHourValues(assistancePlanOverviewDTOs: List<AssistancePlanOverviewDTO>) {
@@ -286,27 +317,37 @@ class OverviewService(
         }
     }
 
-    private fun addMonthlyServiceMinutesToOverviewValues(service: de.vinz.openfls.model.Service,
-                                                         resultEntity: AssistancePlanOverviewDTO) {
-        val month = service.start.monthValue - 1;
-        resultEntity.values[month] =
-                NumberService.convertDoubleToTimeDouble(resultEntity.values[month] + service.minutes)
-    }
-
-    private fun addDailyServiceMinutesToOverviewValues(service: de.vinz.openfls.model.Service,
-                                                       resultEntity: AssistancePlanOverviewDTO) {
-        val day = service.start.dayOfMonth - 1;
-        resultEntity.values[day] =
-                NumberService.convertDoubleToTimeDouble(resultEntity.values[day] + service.minutes)
-    }
-
     private fun getAssistancePlanOverviewDTOS(assistancePlanDTOs: List<AssistancePlanDto>,
                                               clientDTOs: List<ClientSimpleDto>,
-                                              valuesCount: Int): List<AssistancePlanOverviewDTO> {
-        return assistancePlanDTOs
+                                              valuesCount: Int): MutableList<AssistancePlanOverviewDTO> {
+        val allClient = ClientSimpleDto()
+        allClient.lastName = "Gesamt"
+
+        val result = assistancePlanDTOs
                 .map { AssistancePlanOverviewDTO(it,
                         clientDTOs.find { client -> client.id == it.clientId } ?: throw IllegalArgumentException(),
                         DoubleArray(valuesCount) { 0.0 })}
                 .sortedBy { it.clientDto.lastName }
+                .toMutableList()
+
+        result.add(0, AssistancePlanOverviewDTO(AssistancePlanDto(), allClient, DoubleArray(valuesCount) { 0.0 }))
+
+        return result;
     }
+
+    private fun getDailyHoursOfAssistancePlanByHourType(assistancePlanDto: AssistancePlanDto, hourTypeId: Long?): Double =
+            if (hourTypeId == null) {
+                0.0
+            } else if (assistancePlanDto.hours.size > 0) {
+                NumberService.roundDoubleToTwoDigits(
+                        assistancePlanDto.hours
+                                .filter { it.hourTypeId == hourTypeId }
+                                .sumOf { it.weeklyHours / 7 })
+            } else {
+                NumberService.roundDoubleToTwoDigits(
+                        assistancePlanDto.goals
+                                .flatMap { it.hours }
+                                .filter { it.hourTypeId == hourTypeId }
+                                .sumOf { it.weeklyHours / 7 })
+            }
 }
