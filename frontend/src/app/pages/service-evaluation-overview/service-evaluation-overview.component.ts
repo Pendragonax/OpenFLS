@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {combineLatest, ReplaySubject} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {FormControl, FormGroup} from "@angular/forms";
 import {OverviewService} from "../../services/overview.service";
 import {OverviewAssistancePlan} from "../../dtos/overview-assistance-plan.dto";
-import { Location } from '@angular/common';
+import {Location} from '@angular/common';
 import {HourTypeDto} from "../../dtos/hour-type-dto.model";
 import {HourTypeService} from "../../services/hour-type.service";
 import {InstitutionService} from "../../services/institution.service";
@@ -17,6 +17,7 @@ import {
   MAT_MOMENT_DATE_FORMATS,
   MomentDateAdapter
 } from "@angular/material-moment-adapter";
+import {EOverviewType} from "../../enums/EOverviewType";
 
 @Component({
   selector: 'app-service-evaluation-overview',
@@ -53,8 +54,8 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   sponsorAll = new SponsorDto({name:"alle"})
   sponsors: SponsorDto[] = [this.sponsorAll]
   selectedSponsor: SponsorDto | null = null;
-  valueTypes: string[] = ["geleistet", "beantragt", "Differenz"]
-  selectedValueType: string = "";
+  valueTypes: string[] = Object.values(EOverviewType);
+  selectedValueType: EOverviewType = EOverviewType.EXECUTED_HOURS;
   year: number = 2023;
   month: number = 1;
   outputString: string = "";
@@ -104,6 +105,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.areas.push(...institutions);
       this.sponsors = [this.sponsorAll]
       this.sponsors.push(...sponsors);
+      this.valueTypes = Object.values(EOverviewType);
       this.executeURLParams();
     })
   }
@@ -115,7 +117,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.validateGenerationStatus();
     });
     this.overviewModeControl.valueChanges.subscribe(value => {
-      this.selectedOverviewMode = value;
+      this.selectedOverviewMode = this.overviewMode.find(it => it == value) ?? "";
       this.updateUrl();
       this.validateGenerationStatus();
     });
@@ -134,7 +136,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.validateGenerationStatus();
     });
     this.valueTypeControl.valueChanges.subscribe(value => {
-      this.selectedValueType = this.valueTypes.find(it => it == value) ?? this.valueTypes[0];
+      this.selectedValueType = this.getEnumByValue(EOverviewType, value) ?? EOverviewType.EXECUTED_HOURS;
       this.updateUrl();
       this.validateGenerationStatus();
     });
@@ -203,7 +205,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
     if (this.selectedPeriodMode == 1) {
       this.overviewService
-        .getExecutedHoursOverviewFromAssistancePlanByYear(this.year,this.selectedHourType?.id ?? null, this.selectedArea?.id ?? null,this.selectedSponsor?.id ?? null)
+        .getOverviewFromAssistancePlanByYear(this.year,this.selectedHourType?.id ?? null, this.selectedArea?.id ?? null,this.selectedSponsor?.id ?? null, this.selectedValueType)
         .subscribe({
           next: (value) => {
             this.columns = this.getMonthsInYearColumns()
@@ -216,7 +218,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
         })
     } else {
       this.overviewService
-        .getExecutedHoursOverviewFromAssistancePlanByYearAndMonth(this.year, this.month,this.selectedHourType?.id ?? null, this.selectedArea?.id ?? null,this.selectedSponsor?.id ?? null)
+        .getOverviewFromAssistancePlanByYearAndMonth(this.year, this.month,this.selectedHourType?.id ?? null, this.selectedArea?.id ?? null,this.selectedSponsor?.id ?? null, this.selectedValueType)
         .subscribe({
           next: (value) => {
             this.columns = this.getDaysInMonthColumns(this.year, this.month);
@@ -283,5 +285,14 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     console.log(this.selectedArea)
 
     this.location.go(`overview/${this.year}/${monthParam}/${this.selectedOverviewMode}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
+  }
+
+  private getEnumByValue<T>(enumObj: T, value: T[keyof T]): T[keyof T] | null {
+    for (const key in enumObj) {
+      if (enumObj[key] === value) {
+        return enumObj[key] as T[keyof T];
+      }
+    }
+    return null;
   }
 }

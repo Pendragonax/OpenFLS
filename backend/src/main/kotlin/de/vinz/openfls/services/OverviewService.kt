@@ -157,7 +157,6 @@ class OverviewService(
         // convert from minutes to hours
         convertMinutesValuesToHourValues(assistancePlanOverviewDTOs)
 
-
         return assistancePlanOverviewDTOs.sortedBy { it.clientDto.lastName }
     }
 
@@ -304,10 +303,10 @@ class OverviewService(
     private fun getAssistancePlanOverviewDTOS(assistancePlanDTOs: List<AssistancePlanDto>,
                                               clientDTOs: List<ClientSimpleDto>,
                                               valuesCount: Int): List<AssistancePlanOverviewDTO> {
-        return assistancePlanDTOs.map {
-            AssistancePlanOverviewDTO(it,
-                    clientDTOs.find { client -> client.id == it.clientId } ?: throw IllegalArgumentException(),
-                    DoubleArray(valuesCount) { 0.0 })
-        };
+        return assistancePlanDTOs
+                .map { AssistancePlanOverviewDTO(it,
+                        clientDTOs.find { client -> client.id == it.clientId } ?: throw IllegalArgumentException(),
+                        DoubleArray(valuesCount) { 0.0 })}
+                .sortedBy { it.clientDto.lastName }
     }
 }
