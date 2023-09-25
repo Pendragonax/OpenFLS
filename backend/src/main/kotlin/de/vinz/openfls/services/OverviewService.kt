@@ -3,6 +3,7 @@ package de.vinz.openfls.services
 import de.vinz.openfls.dtos.AssistancePlanDto
 import de.vinz.openfls.dtos.AssistancePlanOverviewDTO
 import de.vinz.openfls.dtos.ClientSimpleDto
+import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ClientRepository
 import de.vinz.openfls.repositories.ServiceRepository
@@ -25,12 +26,15 @@ class OverviewService(
                                  hourTypeId: Long,
                                  areaId: Long?,
                                  sponsorId: Long?): List<AssistancePlanOverviewDTO> {
+        checkTime(year, month)
+
         val services = getServices(
                 year = year,
                 month = month,
                 hourTypeId = hourTypeId,
                 areaId = areaId,
                 sponsorId = sponsorId)
+
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) };
 
         // Monthly
@@ -51,6 +55,7 @@ class OverviewService(
                                  hourTypeId: Long,
                                  areaId: Long?,
                                  sponsorId: Long?): List<AssistancePlanOverviewDTO> {
+        checkTime(year, month)
 
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) }
 
@@ -72,6 +77,8 @@ class OverviewService(
                                    hourTypeId: Long,
                                    areaId: Long?,
                                    sponsorId: Long?): List<AssistancePlanOverviewDTO> {
+        checkTime(year, month)
+
         val services = getServices(
                 year = year,
                 month = month,
@@ -434,4 +441,17 @@ class OverviewService(
                                 .filter { it.hourTypeId == hourTypeId }
                                 .sumOf { it.weeklyHours / 7 })
             }
+
+    @Throws(IllegalTimeException::class)
+    private fun checkTime(year: Int, month: Int?) {
+        if (year < 0) {
+            throw IllegalTimeException("Year is below 0")
+        }
+
+        month?.let {
+            if (it <= 0 || it > 12) {
+                throw IllegalTimeException("Month is below 0 or higher than 12")
+            }
+        }
+    }
 }
