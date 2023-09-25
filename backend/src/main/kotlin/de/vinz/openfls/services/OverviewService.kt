@@ -184,7 +184,7 @@ class OverviewService(
         }
         
         // convert from minutes to hours
-        if (toTimeDouble) convertMinutesValuesToHourValues(assistancePlanOverviewDTOs, toTimeDouble)
+        convertMinutesValuesToHourValues(assistancePlanOverviewDTOs, toTimeDouble)
 
         return assistancePlanOverviewDTOs
     }
@@ -212,7 +212,7 @@ class OverviewService(
         }
 
         // convert from minutes to hours
-        if (toTimeDouble) convertMinutesValuesToHourValues(assistancePlanOverviewDTOs, toTimeDouble)
+        convertMinutesValuesToHourValues(assistancePlanOverviewDTOs, toTimeDouble)
 
         return assistancePlanOverviewDTOs
     }

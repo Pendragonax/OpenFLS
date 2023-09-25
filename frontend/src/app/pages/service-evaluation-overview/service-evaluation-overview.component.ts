@@ -128,7 +128,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       if (this.month == 0) {
         this.month = new Date().getMonth() + 1
       }
-
       this.selectedPeriodMode = value;
       this.updateUrl();
       this.validateGenerationStatus();

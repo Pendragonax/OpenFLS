@@ -18,6 +18,11 @@ export class OverviewValueTypeInfoModalComponent implements OnInit {
     "Sollten dort keine Eintragen sein, dann werden die Ziele und deren Stunden für die Berechnung genutzt. " +
     "Bitte achten sie dabei auf die korrekt angelegten Hilfepläne. " +
     "Für die Ermittlung werden die ausgewählten Filter berücksichtigt."
+  readonly DIFFERENCE_TITLE: string = "Differenz der Stunden"
+  readonly DIFFERENCE_DESCRIPTION: string =
+    "Die Differenz wird durch das Abziehen der genehmigten Stunden von den geleisteten Stunden ermittelt. " +
+    "Aus diesem Grund spiegelt eine positive Zahl die 'zuviel' geleisteten und eine " +
+    "negative die 'noch zu erbringenden' Stunden wider."
 
   constructor() { }
 

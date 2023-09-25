@@ -17,6 +17,7 @@ export class OverviewService {
 
   private EXECUTED_HOURS_TYPE_URL_STRING = `EXECUTED_HOURS`;
   private APPROVED_HOURS_TYPE_URL_STRING = `APPROVED_HOURS`;
+  private DIFFERENCE_HOURS_TYPE_URL_STRING = `DIFFERENCE_HOURS`;
 
   getOverviewFromAssistancePlanByYear(year: number,
                                       hourTypeId: number | null,
