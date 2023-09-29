@@ -1,0 +1,27 @@
+.custom-fullscreen {
+  height: 93vh !important;
+  max-height: 93% !important;
+}
+
+.custom-height-100-percent {
+  height: 100vh !important;
+  max-height: 100% !important;
+}
+
+table {
+  width: 100%;
+}
+.example-container {
+  height: 91vh;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.button-color {
+  background-color: limegreen !important;
+}
+
+.button-color :disabled {
+  background-color: #541a1a !important;
+}
+

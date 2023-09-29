@@ -20,11 +20,13 @@ import {ClientDetailComponent} from "./pages/client-detail/client-detail.compone
 import {AssistancePlanNewComponent} from "./pages/assistance-plan-new/assistance-plan-new.component";
 import {AssistancePlanDetailComponent} from "./pages/assistance-plan-detail/assistance-plan-detail.component";
 import {HourTypeComponent} from "./pages/hour-type/hour-type.component";
-import {ServiceComponent} from "./shared/modules/service/service.component";
 import {ServiceDetailComponent} from "./pages/service-detail/service-detail.component";
 import {ServiceMyComponent} from "./pages/service-my/service-my.component";
 import {ServiceClientComponent} from "./pages/service-client/service-client.component";
 import {ServiceEmployeeComponent} from "./pages/service-employee/service-employee.component";
+import {
+  ServiceEvaluationOverviewComponent
+} from "./pages/service-evaluation-overview/service-evaluation-overview.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -52,7 +54,9 @@ const routes: Routes = [
   { path: 'services/new/:date', component: ServiceDetailComponent, canActivate: [AuthGuard] },
   { path: 'services/edit/:id', component: ServiceDetailComponent, canActivate: [AuthGuard] },
   { path: 'services/client/:id', component: ServiceClientComponent, canActivate: [AuthGuard] },
-  { path: 'services/employee/:id', component: ServiceEmployeeComponent, canActivate: [AuthGuard] }
+  { path: 'services/employee/:id', component: ServiceEmployeeComponent, canActivate: [AuthGuard] },
+  { path: 'overview', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] },
+  { path: 'overview/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({

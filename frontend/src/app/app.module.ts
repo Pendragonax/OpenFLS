@@ -70,6 +70,11 @@ import { WorkTimeCardComponent } from './shared/layouts/work-time-card/work-time
 import { AssistancePlanEvaluationComponent } from './shared/modules/assistance-plan-evaluation/assistance-plan-evaluation.component';
 import {MatRadioModule} from "@angular/material/radio";
 import { AssistancePlanAnalysisComponent } from './shared/modules/assistance-plan-analysis/assistance-plan-analysis.component';
+import { OverviewTableComponent } from './components/overview-table/overview-table.component';
+import { ServiceEvaluationOverviewComponent } from './pages/service-evaluation-overview/service-evaluation-overview.component';
+import { OverviewValueTypeInfoModalComponent } from './modals/overview-valuetype-info-modal/overview-value-type-info-modal.component';
+import {MatDialog, MatDialogModule} from "@angular/material/dialog";
+import { OverviewPermissionInfoModalComponent } from './modals/overview-permission-info-modal/overview-permission-info-modal.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: ''},
@@ -114,7 +119,11 @@ const routes: Routes = [
     ContingentEvaluationComponent,
     WorkTimeCardComponent,
     AssistancePlanEvaluationComponent,
-    AssistancePlanAnalysisComponent
+    AssistancePlanAnalysisComponent,
+    OverviewTableComponent,
+    ServiceEvaluationOverviewComponent,
+    OverviewValueTypeInfoModalComponent,
+    OverviewPermissionInfoModalComponent
   ],
     imports: [
         RouterModule.forRoot(routes),
@@ -147,7 +156,8 @@ const routes: Routes = [
         MatAutocompleteModule,
         MatToolbarModule,
         MatPaginatorModule,
-        MatRadioModule
+        MatRadioModule,
+        MatDialogModule
     ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

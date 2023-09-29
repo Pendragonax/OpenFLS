@@ -1,0 +1,15 @@
+.overview-fixed-column-width {
+  width: 3vw !important;
+}
+
+.overview-row-height {
+  height: 4vh !important;
+}
+
+.overview-font-size {
+  font-size: 0.65vw;
+}
+
+.mat-row:nth-child(odd){
+  background-color: #e1e5ff;
+}
