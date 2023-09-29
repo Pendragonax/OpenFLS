@@ -1,5 +1,6 @@
 package de.vinz.openfls.exceptionResolver
 
+import de.vinz.openfls.exceptions.CsvCreationFailedException
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.http.HttpStatus
@@ -29,5 +30,15 @@ class OverviewExceptionResolver: ResponseEntityExceptionHandler() {
                 ex.message)
 
         return ResponseEntity(message, HttpStatus.FORBIDDEN)
+    }
+
+    @ExceptionHandler
+    fun overviewCsvCreationFailedException(ex: CsvCreationFailedException): ResponseEntity<ErrorMessageModel> {
+        val message = ErrorMessageModel(
+                Date(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ex.message)
+
+        return ResponseEntity(message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 }
