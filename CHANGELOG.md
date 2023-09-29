@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## 0.4.0
+
+#### Feature
+
+- Add assistanceplan overview for executed, approved and difference hours
+- Remove end date control from new service
+- Fix auto logout when token expired
+
 ## 0.3.6
 
 #### Feature
