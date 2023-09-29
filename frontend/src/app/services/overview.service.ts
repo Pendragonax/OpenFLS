@@ -15,10 +15,6 @@ export class OverviewService {
     protected http: HttpClient) {
   }
 
-  private EXECUTED_HOURS_TYPE_URL_STRING = `EXECUTED_HOURS`;
-  private APPROVED_HOURS_TYPE_URL_STRING = `APPROVED_HOURS`;
-  private DIFFERENCE_HOURS_TYPE_URL_STRING = `DIFFERENCE_HOURS`;
-
   getOverviewFromAssistancePlanByYear(year: number,
                                       hourTypeId: number | null,
                                       areaId: number | null,
@@ -26,6 +22,15 @@ export class OverviewService {
                                       overviewType: EOverviewType): Observable<OverviewAssistancePlan[]> {
     return this.http
       .get<OverviewAssistancePlan[]>(`${environment.api_url}${this.url}/year/${year}/${hourTypeId}/${areaId ?? 0}/${sponsorId ?? 0}/${this.getEnumName(EOverviewType, overviewType)}`)
+  }
+
+  getOverviewCSVFromAssistancePlanByYear(year: number,
+                                         hourTypeId: number | null,
+                                         areaId: number | null,
+                                         sponsorId: number | null,
+                                         overviewType: EOverviewType): Observable<any> {
+    return this.http
+      .get(`${environment.api_url}${this.url}/year/csv/${year}/${hourTypeId}/${areaId ?? 0}/${sponsorId ?? 0}/${this.getEnumName(EOverviewType, overviewType)}`, {responseType: 'blob', observe: 'response'})
   }
 
   getOverviewFromAssistancePlanByYearAndMonth(year: number,
@@ -38,38 +43,14 @@ export class OverviewService {
       .get<OverviewAssistancePlan[]>(`${environment.api_url}${this.url}/month/${year}/${month}/${hourTypeId}/${areaId ?? 0}/${sponsorId ?? 0}/${this.getEnumName(EOverviewType, overviewType)}`)
   }
 
-  getExecutedHoursOverviewFromAssistancePlanByYear(year: number,
-                                                   hourTypeId: number | null,
-                                                   areaId: number | null,
-                                                   sponsorId: number | null): Observable<OverviewAssistancePlan[]> {
+  getOverviewCSVFromAssistancePlanByYearAndMonth(year: number,
+                                                 month: number,
+                                                 hourTypeId: number | null,
+                                                 areaId: number | null,
+                                                 sponsorId: number | null,
+                                                 overviewType: EOverviewType): Observable<any> {
     return this.http
-      .get<OverviewAssistancePlan[]>(`${environment.api_url}${this.url}/year/${year}/${hourTypeId}/${areaId ?? 0}/${sponsorId ?? 0}/${this.EXECUTED_HOURS_TYPE_URL_STRING}`)
-  }
-
-  getExecutedHoursOverviewFromAssistancePlanByYearAndMonth(year: number,
-                                                           month: number,
-                                                           hourTypeId: number | null,
-                                                           areaId: number | null,
-                                                           sponsorId: number | null): Observable<OverviewAssistancePlan[]> {
-    return this.http
-      .get<OverviewAssistancePlan[]>(`${environment.api_url}${this.url}/month/${year}/${month}/${hourTypeId}/${areaId ?? 0}/${sponsorId ?? 0}/${this.EXECUTED_HOURS_TYPE_URL_STRING}`)
-  }
-
-  getApprovedHoursOverviewFromAssistancePlanByYear(year: number,
-                                                   hourTypeId: number | null,
-                                                   areaId: number | null,
-                                                   sponsorId: number | null): Observable<OverviewAssistancePlan[]> {
-    return this.http
-      .get<OverviewAssistancePlan[]>(`${environment.api_url}${this.url}/year/${year}/${hourTypeId}/${areaId ?? 0}/${sponsorId ?? 0}/${this.APPROVED_HOURS_TYPE_URL_STRING}`)
-  }
-
-  getApprovedHoursOverviewFromAssistancePlanByYearAndMonth(year: number,
-                                                           month: number,
-                                                           hourTypeId: number | null,
-                                                           areaId: number | null,
-                                                           sponsorId: number | null): Observable<OverviewAssistancePlan[]> {
-    return this.http
-      .get<OverviewAssistancePlan[]>(`${environment.api_url}${this.url}/month/${year}/${month}/${hourTypeId}/${areaId ?? 0}/${sponsorId ?? 0}/${this.APPROVED_HOURS_TYPE_URL_STRING}`)
+      .get(`${environment.api_url}${this.url}/month/csv/${year}/${month}/${hourTypeId}/${areaId ?? 0}/${sponsorId ?? 0}/${this.getEnumName(EOverviewType, overviewType)}`, {responseType: 'blob', observe: 'response'})
   }
 
   private getEnumName<T>(enumObj: T, value: T[keyof T]): keyof T | string {

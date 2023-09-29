@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {combineLatest, ReplaySubject} from "rxjs";
+import {combineLatest, Observable, ReplaySubject} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {FormControl, FormGroup} from "@angular/forms";
 import {OverviewService} from "../../services/overview.service";
@@ -23,10 +23,12 @@ import {
   OverviewValueTypeInfoModalComponent
 } from "../../modals/overview-valuetype-info-modal/overview-value-type-info-modal.component";
 import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
-import {HttpErrorResponse} from "@angular/common/http";
+import {HttpErrorResponse, HttpStatusCode} from "@angular/common/http";
 import {
   OverviewPermissionInfoModalComponent
 } from "../../modals/overview-permission-info-modal/overview-permission-info-modal.component";
+import FileSaver from "file-saver";
+import {DateService} from "../../services/date.service";
 
 @Component({
   selector: 'app-service-evaluation-overview',
@@ -45,9 +47,11 @@ import {
 export class ServiceEvaluationOverviewComponent implements OnInit {
   readonly FIXED_COLUMN_FROM_INDEX: number = 2
   readonly COMBINATION_COLUMN_NAME: string = "Gesamt"
+  readonly CLIENT_COLUMN_HEADER: string = "Klient"
+  readonly ASSISTANCE_PLAN_END_COLUMN_HEADER: string = "Ende"
+  readonly PERIOD_MODE_YEARLY: number = 1
+  readonly PERIOD_MODE_MONTHLY: number = 2
 
-  clientColumnHeader = "Klient"
-  assistancePlanColumnHeader = "Ende"
   columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>()
   data$: ReplaySubject<string[][]> = new ReplaySubject()
   columnFixedWidthFromIndex$: ReplaySubject<number> = new ReplaySubject<number>()
@@ -58,7 +62,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   columnFixedWidthFromIndex: number = 0
   boldColumnIndices: number[] = [2]
 
-  selectedPeriodMode: number = 1;
+  selectedPeriodMode: number = this.PERIOD_MODE_YEARLY;
   hourTypeAll = new HourTypeDto({title:"alle"})
   hourTypes: HourTypeDto[] = []
   selectedHourType: HourTypeDto | null = null;
@@ -78,6 +82,8 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   // Status
   isGenerating: boolean = false;
   forbiddenRequest: boolean = false;
+  errorOccurred: boolean = false;
+  csvGenerated: boolean = false;
 
   selectionForm: FormGroup = new FormGroup({
     periodModeControl: new FormControl({value: '2', disabled: this.isGenerating}),
@@ -92,6 +98,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
               private hourTypeService: HourTypeService,
               private institutionService: InstitutionService,
               private sponsorService: SponsorService,
+              private dateService: DateService,
               private converter: Converter,
               private dialog: MatDialog,
               private location: Location) {
@@ -207,38 +214,47 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   }
 
   generateTable() {
-    this.isGenerating = true;
-    this.forbiddenRequest = false;
+    this.isGenerating = true
+    this.forbiddenRequest = false
+    this.errorOccurred = false
 
-    if (this.selectedPeriodMode == 1) {
-      this.overviewService
-        .getOverviewFromAssistancePlanByYear(this.year,this.selectedHourType?.id ?? null, this.selectedArea?.id ?? null,this.selectedSponsor?.id ?? null, this.selectedValueType)
-        .subscribe({
-          next: (value) => {
-            this.columns = this.getMonthsInYearColumns()
-            this.columns$.next(this.columns);
-            this.data = this.convertToData(value);
-            this.data$.next(this.data);
-            this.isGenerating = false;
-          },
-          error: (err: HttpErrorResponse) => {
-            this.forbiddenRequest = true;
-            this.isGenerating = false;
-          }
-        })
+    if (this.selectedPeriodMode == this.PERIOD_MODE_YEARLY) {
+      this.loadYearlyOverviewData()
+        .subscribe(this.getDataObserver(this.getMonthsColumns()))
     } else {
-      this.overviewService
-        .getOverviewFromAssistancePlanByYearAndMonth(this.year, this.month,this.selectedHourType?.id ?? null, this.selectedArea?.id ?? null,this.selectedSponsor?.id ?? null, this.selectedValueType)
-        .subscribe({
-          next: (value) => {
-            this.columns = this.getDaysInMonthColumns(this.year, this.month);
-            this.columns$.next(this.columns);
-            this.data = this.convertToData(value);
-            this.data$.next(this.data);
-            this.isGenerating = false;
-          }
-        })
+      this.loadMonthlyOverviewData()
+        .subscribe(this.getDataObserver(this.getDaysColumns(this.year, this.month)))
     }
+  }
+
+  downloadCsv() {
+    this.isGenerating = true
+    this.forbiddenRequest = false
+    this.errorOccurred = false
+    this.resetData()
+
+    if (this.selectedPeriodMode == this.PERIOD_MODE_YEARLY) {
+      this.overviewService.getOverviewCSVFromAssistancePlanByYear(
+        this.year,
+        this.selectedHourType?.id ?? null,
+        this.selectedArea?.id ?? null,
+        this.selectedSponsor?.id ?? null,
+        this.selectedValueType)
+        .subscribe(this.getDownloadObserver())
+    } else {
+      this.overviewService.getOverviewCSVFromAssistancePlanByYearAndMonth(
+        this.year,
+        this.month,
+        this.selectedHourType?.id ?? null,
+        this.selectedArea?.id ?? null,
+        this.selectedSponsor?.id ?? null,
+        this.selectedValueType)
+        .subscribe(this.getDownloadObserver())
+    }
+  }
+
+  getLocalDateString(dateString: string | null): string {
+    return this.converter.getLocalDateString(dateString);
   }
 
   getMonthName(month: number): string {
@@ -255,34 +271,53 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     this.dialog.open(OverviewValueTypeInfoModalComponent)
   }
 
-  private convertToData(source: OverviewAssistancePlan[]) {
-    return source.map(value => {
+  private resetData() {
+    this.columns = []
+    this.columns$.next(this.columns)
+    this.data = []
+    this.data$.next(this.data)
+  }
+
+  private loadYearlyOverviewData(): Observable<OverviewAssistancePlan[]> {
+    return this.overviewService.getOverviewFromAssistancePlanByYear(
+      this.year,
+      this.selectedHourType?.id ?? null,
+      this.selectedArea?.id ?? null,
+      this.selectedSponsor?.id ?? null,
+      this.selectedValueType)
+  }
+
+  private loadMonthlyOverviewData(): Observable<OverviewAssistancePlan[]> {
+    return this.overviewService.getOverviewFromAssistancePlanByYearAndMonth(
+      this.year,
+      this.month,
+      this.selectedHourType?.id ?? null,
+      this.selectedArea?.id ?? null,
+      this.selectedSponsor?.id ?? null,
+      this.selectedValueType)
+  }
+
+  private generateTableData(source: OverviewAssistancePlan[]) {
+    const data = source.map(value => {
       // client name
       let result = [(value.clientDto?.lastName ?? "") + " " + (value.clientDto?.firstName ?? "unbekannt")];
 
       // assistance plan end
-      result.push(this.getDateString(value.assistancePlanDto?.end ?? null));
+      result.push(this.getLocalDateString(value.assistancePlanDto?.end ?? null));
 
       for (let i = 0; i < value.values.length; i++) {
         result.push(value.values[i].toString());
       }
       return result;
     });
+
+    this.data = data
+    this.data$.next(data)
   }
 
-  private getDaysInMonth(year: number, month: number): number {
-    // Check if the month is valid (1 to 12)
-    if (month < 1 || month > 12) {
-      throw new Error("Month must be between 1 and 12");
-    }
-
-    // Use the Date class to calculate the number of days
-    return new Date(year, month, 0).getDate();
-  }
-
-  private getDaysInMonthColumns(year: number, month: number): string[] {
-    const daysInMonth = this.getDaysInMonth(year, month);
-    let daysArray: string[] = [this.clientColumnHeader, this.assistancePlanColumnHeader];
+  private getDaysColumns(year: number, month: number): string[] {
+    const daysInMonth = this.dateService.getDaysAmountInMonth(year, month);
+    let daysArray: string[] = [this.CLIENT_COLUMN_HEADER, this.ASSISTANCE_PLAN_END_COLUMN_HEADER];
 
     daysArray.push(this.COMBINATION_COLUMN_NAME)
     for (let i = 1; i <= daysInMonth; i++) {
@@ -292,8 +327,8 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     return daysArray;
   }
 
-  private getMonthsInYearColumns(): string[] {
-    let daysArray: string[] = [this.clientColumnHeader, this.assistancePlanColumnHeader];
+  private getMonthsColumns(): string[] {
+    let daysArray: string[] = [this.CLIENT_COLUMN_HEADER, this.ASSISTANCE_PLAN_END_COLUMN_HEADER];
 
     daysArray.push(this.COMBINATION_COLUMN_NAME)
     for (let i = 1; i <= 12; i++) {
@@ -306,10 +341,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   private updateUrl() {
     let monthParam = this.selectedPeriodMode == 1 ? 0 : this.month
     this.location.go(`overview/${this.year}/${monthParam}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
-  }
-
-  getDateString(dateString: string | null): string {
-    return this.converter.getLocalDateString(dateString);
   }
 
   private getEnumByValue<T>(enumObj: T, value: T[keyof T]): T[keyof T] | null {
@@ -329,4 +360,57 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.selectedHourType != null &&
       this.selectedPeriodMode != null;
   }
+
+  private getDataObserver(header: string[]) {
+    return {
+      next: (value) => {
+        this.columns = header;
+        this.columns$.next(this.columns);
+        this.generateTableData(value);
+        this.isGenerating = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isGenerating = false
+        if (err.status == HttpStatusCode.Forbidden) {
+          this.forbiddenRequest = true
+        } else {
+          this.errorOccurred = true
+        }
+      }
+    };
+  }
+
+  private getDownloadObserver() {
+    return {
+      next: (response) => {
+        const contentDispositionHeader = response.headers.get('Content-Disposition');
+        const filename = this.getFilenameFromHeader(contentDispositionHeader);
+        FileSaver.saveAs(response.body, filename);
+        this.isGenerating = false
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isGenerating = false
+        if (err.status == HttpStatusCode.Forbidden) {
+          this.forbiddenRequest = true
+        } else {
+          this.errorOccurred = true
+        }
+      }
+    };
+  }
+
+  private getFilenameFromHeader(header: string | null): string {
+    if (!header) {
+      return '';
+    }
+
+    const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(header);
+    if (matches != null && matches[1]) {
+      return matches[1].replace(/['"]/g, '');
+    } else {
+      return '';
+    }
+  }
+
+  protected readonly PluginArray = PluginArray;
 }

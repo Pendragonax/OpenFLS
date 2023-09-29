@@ -27,6 +27,7 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
+        <div class="mat-icon-button"></div>
       </div>
       <div class="row my-3 justify-content-center">
         <mat-form-field class="width-20-vw">
@@ -48,6 +49,7 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
+        <div class="mat-icon-button"></div>
       </div>
       <div class="row my-3 justify-content-center">
         <mat-form-field class="width-20-vw">
@@ -61,8 +63,12 @@
         <button mat-icon-button color="primary" (click)="openValueTypeInfoModal()"><mat-icon>info</mat-icon></button>
       </div>
       <div class="row justify-content-center my-3">
-        <button mat-raised-button color="asc" class="w-75 button-color"
-                [disabled]="!generationAllowed || isGenerating" (click)="generateTable()">Generieren</button>
+        <button mat-raised-button color="asc" class="button-color w-50"
+                [disabled]="!generationAllowed || isGenerating" (click)="generateTable()">Anzeigen</button>
+        <button mat-icon-button color="asc"
+                [disabled]="!generationAllowed || isGenerating" (click)="downloadCsv()" [matTooltip]="'speichern'">
+          <mat-icon>save</mat-icon>
+        </button>
       </div>
     </div>
     <div class="col">
