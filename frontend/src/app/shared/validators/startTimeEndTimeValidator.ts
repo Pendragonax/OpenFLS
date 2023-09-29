@@ -10,23 +10,18 @@ export function createStartTimeEndTimeValidator(control:AbstractControl) : Valid
     || control.get('startMinute')?.value == null
     || control.get('endHour')?.value == null
     || control.get('endMinute')?.value == null
-    || control.get('startDate')?.value == null
-    || control.get('endDate')?.value == null) {
+    || control.get('startDate')?.value == null) {
     return null;
   }
 
   try {
-    if (control.get('startDate')?.value == control.get('endDate')?.value) {
-      const startHour = control.get('startHour')?.value as number;
-      const startMinute = control.get('startMinute')?.value as number;
-      const endHour = control.get('endHour')?.value as number;
-      const endMinute = control.get('endMinute')?.value as number;
+    const startHour = control.get('startHour')?.value as number;
+    const startMinute = control.get('startMinute')?.value as number;
+    const endHour = control.get('endHour')?.value as number;
+    const endMinute = control.get('endMinute')?.value as number;
 
-      return ((startHour == endHour && startMinute >= endMinute) || (startHour > endHour))
-        ? { invalidEnd: true } : null;
-    }
-
-    return null;
+    return ((startHour == endHour && startMinute >= endMinute) || (startHour > endHour))
+      ? { invalidEnd: true } : null;
   } catch(e) {
     return { invalidEnd: true }
   }
