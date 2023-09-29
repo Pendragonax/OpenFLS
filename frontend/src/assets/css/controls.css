@@ -18,6 +18,10 @@
   width: 300px !important;
 }
 
+.width-20-vw {
+  width: 20vw !important;
+}
+
 .small-mat-form-field {
   width: 70px !important;
 }

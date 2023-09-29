@@ -8,4 +8,8 @@ export class InstitutionDto {
   email: string = "";
   permissions: PermissionDto[] = [];
   contingents: ContingentDto[] = [];
+
+  public constructor(init?:Partial<InstitutionDto>) {
+    Object.assign(this, init);
+  }
 }
