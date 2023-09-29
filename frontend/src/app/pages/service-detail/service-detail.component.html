@@ -19,7 +19,7 @@
             <div class="container ">
               <div class="row justify-content-center">
                 <div class="col">
-                  <mat-label><b>Beginn</b></mat-label><br>
+                  <mat-label><b>Datum</b></mat-label><br>
                   <mat-form-field appearance="outline">
                     <mat-label>Datum</mat-label>
                     <input matInput
@@ -31,7 +31,11 @@
                                            [for]="startPicker"></mat-datepicker-toggle>
                     <mat-datepicker #startPicker></mat-datepicker>
                   </mat-form-field><br><br>
-
+                </div>
+              </div>
+              <div class="row">
+                <div class="col text-end">
+                  <mat-label class="me-5"><b>Beginn</b></mat-label><br>
                   <mat-form-field appearance="outline"
                                   class="small-mat-form-field me-1">
                     <mat-label>Stunde</mat-label>
@@ -55,21 +59,8 @@
                   </mat-form-field><br><br>
                 </div>
 
-                <div class="col">
-                  <mat-label><b>Ende</b></mat-label><br>
-                  <mat-form-field appearance="outline">
-                    <mat-label>Datum</mat-label>
-                    <input matInput
-                           formControlName="endDate"
-                           [min]="minDate"
-                           [matDatepicker]="endPicker"
-                           required>
-                    <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
-                    <mat-datepicker-toggle matSuffix
-                                           [for]="endPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #endPicker></mat-datepicker>
-                  </mat-form-field><br><br>
-
+                <div class="col text-start">
+                  <mat-label class="ms-5"><b>Ende</b></mat-label><br>
                   <mat-form-field appearance="outline"
                                   class="small-mat-form-field me-1">
                     <mat-label>Stunde</mat-label>

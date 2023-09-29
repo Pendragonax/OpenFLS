@@ -79,8 +79,6 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
     startMinute: new FormControl({value: this.timeNow.getMinutes(), disabled: true},
       Validators.compose([Validators.required, Validators.max(59), Validators.min(0)])),
-    endDate: new FormControl({value: this.timeNow, disabled: true},
-      Validators.compose([Validators.required])),
     endHour: new FormControl({value: this.timeNow.getHours(), disabled: true},
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
     endMinute: new FormControl({value: this.timeNow.getMinutes(), disabled: true},
@@ -307,20 +305,11 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         .subscribe((value) => {
           if (value != null) {
             this.selectedStartDate = this.converter.formatDate(new Date(value.toString()));
+            this.selectedEndDate = this.converter.formatDate(new Date(value.toString()));
             // constraints for the end time and date
             this.minDate = new Date(value.toString());
           }
-
-          this.endDateControl.setValue(value);
         });
-
-      this.endDateControl.enable();
-      this.endDateControl.valueChanges
-        .subscribe((value) => {
-          if (value != null) {
-            this.selectedEndDate = this.converter.formatDate(new Date(value.toString()));
-          }
-        })
 
       this.clientControl.enable();
       this.clientControl.valueChanges.pipe(startWith('')).subscribe(value => {
