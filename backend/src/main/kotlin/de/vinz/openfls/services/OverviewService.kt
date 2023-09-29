@@ -39,7 +39,6 @@ class OverviewService(
                 hourTypeId = hourTypeId,
                 areaId = areaId,
                 sponsorId = sponsorId)
-
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) };
 
         // Monthly

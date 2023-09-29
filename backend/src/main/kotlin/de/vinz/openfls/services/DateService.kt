@@ -2,7 +2,6 @@ package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.AssistancePlanDto
 import java.time.LocalDate
-import java.time.Year
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
