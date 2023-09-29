@@ -23,6 +23,10 @@ import {
   OverviewValueTypeInfoModalComponent
 } from "../../modals/overview-valuetype-info-modal/overview-value-type-info-modal.component";
 import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
+import {HttpErrorResponse} from "@angular/common/http";
+import {
+  OverviewPermissionInfoModalComponent
+} from "../../modals/overview-permission-info-modal/overview-permission-info-modal.component";
 
 @Component({
   selector: 'app-service-evaluation-overview',
@@ -73,6 +77,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   // Status
   isGenerating: boolean = false;
+  forbiddenRequest: boolean = false;
 
   selectionForm: FormGroup = new FormGroup({
     periodModeControl: new FormControl({value: '2', disabled: this.isGenerating}),
@@ -203,6 +208,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   generateTable() {
     this.isGenerating = true;
+    this.forbiddenRequest = false;
 
     if (this.selectedPeriodMode == 1) {
       this.overviewService
@@ -213,6 +219,10 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
             this.columns$.next(this.columns);
             this.data = this.convertToData(value);
             this.data$.next(this.data);
+            this.isGenerating = false;
+          },
+          error: (err: HttpErrorResponse) => {
+            this.forbiddenRequest = true;
             this.isGenerating = false;
           }
         })
@@ -235,6 +245,10 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     const date = new Date();
     date.setMonth(month - 1);
     return date.toLocaleString('de-DE', { month: 'long' });
+  }
+
+  openPermissionInfoModal() {
+    this.dialog.open(OverviewPermissionInfoModalComponent)
   }
 
   openValueTypeInfoModal() {

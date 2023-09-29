@@ -1,6 +1,7 @@
 package de.vinz.openfls.exceptionResolver
 
 import de.vinz.openfls.exceptions.IllegalTimeException
+import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -18,5 +19,15 @@ class OverviewExceptionResolver: ResponseEntityExceptionHandler() {
                 ex.message)
 
         return ResponseEntity(message, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler
+    fun overviewUserNotAllowedException(ex: UserNotAllowedException): ResponseEntity<ErrorMessageModel> {
+        val message = ErrorMessageModel(
+                Date(),
+                HttpStatus.FORBIDDEN.value(),
+                ex.message)
+
+        return ResponseEntity(message, HttpStatus.FORBIDDEN)
     }
 }

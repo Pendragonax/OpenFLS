@@ -74,6 +74,7 @@ import { OverviewTableComponent } from './components/overview-table/overview-tab
 import { ServiceEvaluationOverviewComponent } from './pages/service-evaluation-overview/service-evaluation-overview.component';
 import { OverviewValueTypeInfoModalComponent } from './modals/overview-valuetype-info-modal/overview-value-type-info-modal.component';
 import {MatDialog, MatDialogModule} from "@angular/material/dialog";
+import { OverviewPermissionInfoModalComponent } from './modals/overview-permission-info-modal/overview-permission-info-modal.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: ''},
@@ -121,7 +122,8 @@ const routes: Routes = [
     AssistancePlanAnalysisComponent,
     OverviewTableComponent,
     ServiceEvaluationOverviewComponent,
-    OverviewValueTypeInfoModalComponent
+    OverviewValueTypeInfoModalComponent,
+    OverviewPermissionInfoModalComponent
   ],
     imports: [
         RouterModule.forRoot(routes),

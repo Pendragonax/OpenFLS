@@ -4,6 +4,7 @@ import de.vinz.openfls.dtos.AssistancePlanDto
 import de.vinz.openfls.dtos.AssistancePlanOverviewDTO
 import de.vinz.openfls.dtos.ClientSimpleDto
 import de.vinz.openfls.exceptions.IllegalTimeException
+import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ClientRepository
 import de.vinz.openfls.repositories.ServiceRepository
@@ -16,16 +17,20 @@ private const val MONTH_COUNT = 12
 
 @Service
 class OverviewService(
-        private val permissionService: PermissionService,
+        private val accessService: AccessService,
         private val serviceRepository: ServiceRepository,
         private val assistancePlanRepository: AssistancePlanRepository,
         private val clientRepository: ClientRepository,
         private val modelMapper: ModelMapper) {
-    fun getExecutedHoursOverview(year: Int,
+
+    @Throws(UserNotAllowedException::class, IllegalTimeException::class)
+    fun getExecutedHoursOverview(token: String,
+                                 year: Int,
                                  month: Int?,
                                  hourTypeId: Long,
                                  areaId: Long?,
                                  sponsorId: Long?): List<AssistancePlanOverviewDTO> {
+        checkAccess(areaId, token)
         checkTime(year, month)
 
         val services = getServices(
@@ -50,11 +55,14 @@ class OverviewService(
         return getExecutedHoursYearly(services, assistancePlanDTOs, clientSimpleDTOs)
     }
 
-    fun getApprovedHoursOverview(year: Int,
+    @Throws(UserNotAllowedException::class, IllegalTimeException::class)
+    fun getApprovedHoursOverview(token: String,
+                                 year: Int,
                                  month: Int?,
                                  hourTypeId: Long,
                                  areaId: Long?,
                                  sponsorId: Long?): List<AssistancePlanOverviewDTO> {
+        checkAccess(areaId, token)
         checkTime(year, month)
 
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) }
@@ -72,11 +80,14 @@ class OverviewService(
         return getApprovedHoursYearly(assistancePlanDTOs, clientSimpleDTOs, hourTypeId, year)
     }
 
-    fun getDifferenceHoursOverview(year: Int,
+    @Throws(UserNotAllowedException::class, IllegalTimeException::class)
+    fun getDifferenceHoursOverview(token: String,
+                                   year: Int,
                                    month: Int?,
                                    hourTypeId: Long,
                                    areaId: Long?,
                                    sponsorId: Long?): List<AssistancePlanOverviewDTO> {
+        checkAccess(areaId, token)
         checkTime(year, month)
 
         val services = getServices(
@@ -452,6 +463,16 @@ class OverviewService(
             if (it <= 0 || it > 12) {
                 throw IllegalTimeException("Month is below 0 or higher than 12")
             }
+        }
+    }
+
+    @Throws(UserNotAllowedException::class)
+    private fun checkAccess(areaId: Long?, token: String) {
+        if (areaId == null && !accessService.isAdmin(token)) {
+            throw UserNotAllowedException()
+        }
+        if (areaId != null && !accessService.canReadEntries(token, areaId)) {
+            throw UserNotAllowedException()
         }
     }
 }
