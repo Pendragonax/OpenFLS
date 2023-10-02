@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## 0.4.1
+
+#### Bug
+
+- Bug when editing an service because of removeing the endDate
+
+
 ## 0.4.0
 
 #### Feature

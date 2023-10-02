@@ -60,8 +60,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   categories: CategoryDto[] = [];
   filteredClients: ClientDto[] = [];
   filteredAssistancePlans: AssistancePlanDto[] = [];
-  selectedStartDate: string = this.converter.formatDate(new Date(Date.now()));
-  selectedEndDate: string = this.converter.formatDate(new Date(Date.now()));
+  selectedServiceDate: string = this.converter.formatDate(new Date(Date.now()));
   selectedClient: ClientDto = new ClientDto();
   selectedAssistancePlan: AssistancePlanDto | null | undefined = null;
   selectedGoals: GoalDto[] = [];
@@ -73,7 +72,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
   // FORMS
   firstForm = new FormGroup({
-    startDate: new FormControl({value: this.timeNow, disabled: true},
+    serviceDate: new FormControl({value: this.timeNow, disabled: true},
       Validators.compose([Validators.required])),
     startHour: new FormControl({value: this.timeNow.getHours(), disabled: true},
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
@@ -106,13 +105,11 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   });
 
   // GETTER
-  get startDateControl() { return this.firstForm.controls['startDate']; }
+  get serviceDateControl() { return this.firstForm.controls['serviceDate']; }
 
   get startHourControl() { return this.firstForm.controls['startHour']; }
 
   get startMinuteControl() { return this.firstForm.controls['startMinute']; }
-
-  get endDateControl() { return this.firstForm.controls['endDate']; }
 
   get endHourControl() { return this.firstForm.controls['endHour']; }
 
@@ -206,10 +203,8 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
           try {
             const startDate = new Date(dateStr);
             this.value.start = startDate.valueOf().toString();
-            this.startDateControl.setValue(this.converter.formatDate(startDate));
-            this.endDateControl.setValue(this.converter.formatDate(startDate));
-            this.selectedStartDate = this.converter.formatDate(startDate);
-            this.selectedEndDate = this.converter.formatDate(startDate);
+            this.serviceDateControl.setValue(this.converter.formatDate(startDate));
+            this.selectedServiceDate = this.converter.formatDate(startDate);
             this.minDate = startDate;
           } catch {
             console.log("parsing failed");
@@ -243,9 +238,8 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         this.clientSelected = true;
 
         // START and END
-        const startDate = new Date(service.start.toString());
-        this.selectedStartDate = this.converter.formatDate(startDate);
-        this.selectedEndDate = this.converter.formatDate(new Date(service.end.toString()));
+        const serviceDate = new Date(service.start.toString());
+        this.selectedServiceDate = this.converter.formatDate(serviceDate);
 
         // ASSISTANCE PLAN
         this.selectedAssistancePlan = client.assistancePlans.find(value => value.id == service.assistancePlanId);
@@ -267,20 +261,19 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       });
   }
 
-  loadClient(id: number) {
+  private loadClient(id: number) {
     this.clientService.getById(id).subscribe(value => {
       this.selectedClient = value;
-      this.filteredAssistancePlans = this.getAssistancePlansByDateString(value.assistancePlans, this.startDateControl.value);
+      this.filteredAssistancePlans = this.getAssistancePlansByDateString(value.assistancePlans, this.serviceDateControl.value);
       this.categories = value.categoryTemplate.categories;
     })
   }
 
-  fillFormGroups() {
-    this.startDateControl.setValue(this.converter.formatDate(new Date(this.value.start)));
+  private fillFormGroups() {
+    this.serviceDateControl.setValue(this.converter.formatDate(new Date(this.value.start)));
     this.startHourControl.setValue(new Date(this.value.start).getHours());
     this.startMinuteControl.setValue(new Date(this.value.start).getMinutes());
 
-    this.endDateControl.setValue(this.converter.formatDate(new Date(this.value.end)));
     this.endHourControl.setValue(new Date(this.value.end).getHours());
     this.endMinuteControl.setValue(new Date(this.value.end).getMinutes());
 
@@ -300,12 +293,11 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   override initFormSubscriptions() {
     // EDIT-MODE
     if (!this.editMode) {
-      this.startDateControl.enable();
-      this.startDateControl.valueChanges
+      this.serviceDateControl.enable();
+      this.serviceDateControl.valueChanges
         .subscribe((value) => {
           if (value != null) {
-            this.selectedStartDate = this.converter.formatDate(new Date(value.toString()));
-            this.selectedEndDate = this.converter.formatDate(new Date(value.toString()));
+            this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
             // constraints for the end time and date
             this.minDate = new Date(value.toString());
           }
@@ -451,12 +443,12 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     this.isSubmitting = true;
 
     this.value.start = this.converter.getDateTimeString(
-      this.selectedStartDate,
+      this.selectedServiceDate,
       this.startHourControl.value,
       this.startMinuteControl.value);
 
     this.value.end = this.converter.getDateTimeString(
-      this.selectedEndDate,
+      this.selectedServiceDate,
       this.endHourControl.value,
       this.endMinuteControl.value);
 
