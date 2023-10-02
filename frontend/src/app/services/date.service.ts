@@ -16,4 +16,20 @@ export class DateService {
     // Use the Date class to calculate the number of days
     return new Date(year, month, 0).getDate();
   }
+
+  public addMinutesToTime(time: number, minutesToAdd: number): number {
+    // Extract the hours and minutes from the input time
+    const hours = Math.floor(time);
+    const minutes = (time - hours) * 100;
+
+    // Add the minutes to the existing minutes
+    const totalMinutes = minutes + minutesToAdd;
+
+    // Calculate the new hours and minutes
+    const newHours = hours + Math.floor(totalMinutes / 60);
+    const newMinutes = totalMinutes % 60;
+
+    // Combine the new hours and minutes and return as a number with decimals
+    return newHours + newMinutes / 100;
+  }
 }
