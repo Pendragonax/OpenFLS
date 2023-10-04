@@ -1,6 +1,6 @@
 <div class="container-fluid mx-auto custom-fullscreen">
-  <div class="row custom-height-100-percent">
-    <div class="col-3 text-center" [formGroup]="selectionForm">
+  <div class="row custom-height-100-percent justify-content-center">
+    <div class="col-3 text-center test" [formGroup]="selectionForm">
       <p>{{outputString}}</p>
       <div class="row mt-3">
         <mat-radio-group aria-label="Select an option" color="primary" formControlName="periodModeControl">
@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="row my-3 justify-content-center">
-        <mat-form-field class="width-20-vw">
+        <mat-form-field>
           <mat-label>Stundentypen</mat-label>
           <mat-select formControlName="hourTypeControl">
             <mat-option *ngFor="let hourType of hourTypes" [value]="hourType.id">
@@ -30,7 +30,7 @@
         <div class="mat-icon-button"></div>
       </div>
       <div class="row my-3 justify-content-center">
-        <mat-form-field class="width-20-vw">
+        <mat-form-field>
           <mat-label>Bereich</mat-label>
           <mat-select formControlName="areaControl">
             <mat-option *ngFor="let area of areas" [value]="area.id">
@@ -41,7 +41,7 @@
         <button mat-icon-button color="primary" (click)="openPermissionInfoModal()"><mat-icon>info</mat-icon></button>
       </div>
       <div class="row my-3 justify-content-center">
-        <mat-form-field class="width-20-vw">
+        <mat-form-field>
           <mat-label>Kostenträger</mat-label>
           <mat-select formControlName="sponsorControl">
             <mat-option *ngFor="let sponsor of sponsors" [value]="sponsor.id">
@@ -52,7 +52,7 @@
         <div class="mat-icon-button"></div>
       </div>
       <div class="row my-3 justify-content-center">
-        <mat-form-field class="width-20-vw">
+        <mat-form-field>
           <mat-label>anzuzeigender Wert</mat-label>
           <mat-select formControlName="valueTypeControl">
             <mat-option *ngFor="let valueType of valueTypes" [value]="valueType">
@@ -71,8 +71,8 @@
         </button>
       </div>
     </div>
-    <div class="col">
-      <div class="mt-2 example-container mat-elevation-z8">
+    <div class="col test">
+      <div class="my-3 mat-elevation-z8 example-container">
         <div class="text-center" [hidden]="!isGenerating">
           <mat-spinner [strokeWidth]="2"
                        [diameter]="100"
