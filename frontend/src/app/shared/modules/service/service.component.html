@@ -37,20 +37,30 @@
         <div class="my-2">
           <mat-form-field appearance="outline" class="width-230">
             <mat-label>Zeitraum auswählen</mat-label>
-            <mat-date-range-input class="width-scale-70" [rangePicker]="picker" [formGroup]="dateFilterGroup">
-              <input matStartDate placeholder="Start Datum" formControlName="start">
-              <input matEndDate placeholder="Ende Datum" formControlName="end">
+            <mat-date-range-input class="width-scale-70"
+                                  [rangePicker]="picker"
+                                  [formGroup]="dateFilterGroup"
+                                  [disabled]="isSubmitting">
+              <input matStartDate placeholder="Start Datum" #rangeStart formControlName="start">
+              <input matEndDate placeholder="Ende Datum" #rangeEnd formControlName="end">
             </mat-date-range-input>
             <mat-datepicker-toggle matPrefix [for]="picker" class="me-2"></mat-datepicker-toggle>
             <mat-hint>DD.MM.YYYY – DD.MM.YYYY</mat-hint>
-            <mat-date-range-picker #picker (selectionchange)="handleFilterDateChanged()"></mat-date-range-picker>
+            <mat-date-range-picker #picker (closed)="setTimePeriod(rangeStart, rangeEnd)"></mat-date-range-picker>
           </mat-form-field>
         </div>
+        <button type="button"
+                class="my-auto"
+                mat-icon-button
+                [disabled]="isSubmitting"
+                (click)="increaseFilterDate(1)">
+          <mat-icon>keyboard_arrow_right</mat-icon>
+        </button>
         <div class="ms-2 mt-2">
           <mat-form-field appearance="outline" [formGroup]="filterForm">
             <mat-label>Suchtext</mat-label>
             <input matInput placeholder="..." formControlName="searchString">
-            <button mat-icon-button class="me-1" matPrefix (click)="resetFilterSearchString()"><mat-icon>clear</mat-icon></button>
+            <button mat-icon-button class="me-1" matPrefix (click)="resetFilterSearchString()" [disabled]="isSubmitting"><mat-icon>clear</mat-icon></button>
           </mat-form-field>
         </div>
       </div>
