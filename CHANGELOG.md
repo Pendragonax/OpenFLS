@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## 0.4.2
+
+#### Bug
+
+- Navbar shrinks on mobile view
+- Service filter delayed on multiple selectes
+
+
 ## 0.4.1
 
 #### Bug
