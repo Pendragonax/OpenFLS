@@ -70,8 +70,8 @@ export class ServiceComponent
 
   // Form Groups
   dateFilterGroup = new FormGroup({
-    start: new FormControl(new Date(Date.now())),
-    end: new FormControl(new Date(Date.now()))
+    start: new FormControl({value:new Date(Date.now()), disabled: this.isSubmitting}),
+    end: new FormControl({value:new Date(Date.now()), disabled: this.isSubmitting})
   });
 
   get dateFilterStartControl() { return this.dateFilterGroup.controls['start']; }
@@ -237,16 +237,16 @@ export class ServiceComponent
   }
 
   initFormSubscriptions() {
-    // no form is in use
-    this.dateFilterStartControl.valueChanges.subscribe((value) => {
-      this.filterDateStart = new Date(value);
-      this.filterDateEnd = new Date(value);
-      this.handleFilterDateChanged();
-    });
-    this.dateFilterEndControl.valueChanges.subscribe((value) => {
-      this.filterDateEnd = new Date(value);
-      this.handleFilterDateChanged();
-    });
+  }
+
+  setTimePeriod(start, end) {
+    if (start.value == null || end.value == null || start.value === "" || end.value === "") {
+      return
+    }
+
+    this.filterDateStart = this.parseDateString(start.value) ?? new Date();
+    this.filterDateEnd = this.parseDateString(end.value) ?? new Date();
+    this.handleFilterDateChanged();
   }
 
   handleFilterDateChanged() {
@@ -258,6 +258,7 @@ export class ServiceComponent
     this.filterDateEnd = this.filterDateStart;
     this.dateFilterStartControl.setValue(this.filterDateStart);
     this.dateFilterEndControl.setValue(this.filterDateEnd);
+    this.handleFilterDateChanged();
   }
 
   setFilterDateToToday() {
@@ -265,6 +266,7 @@ export class ServiceComponent
     this.filterDateEnd = this.filterDateStart;
     this.dateFilterStartControl.setValue(this.filterDateStart);
     this.dateFilterEndControl.setValue(this.filterDateEnd);
+    this.handleFilterDateChanged();
   }
 
   setTableSource(data) {
@@ -326,5 +328,34 @@ export class ServiceComponent
           return 0;
       }
     });
+  }
+
+  parseDateString(dateString: string): Date | null {
+    const dateParts = dateString.split('.');
+
+    if (dateParts.length !== 3) {
+      return null; // Invalid format
+    }
+
+    const day = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1; // Months are zero-based in JavaScript
+    const year = parseInt(dateParts[2]);
+
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+      return null; // Invalid numeric values
+    }
+
+    const date = new Date(year, month, day);
+
+    // Check if the parsed date is valid
+    if (
+      date.getDate() === day &&
+      date.getMonth() === month &&
+      date.getFullYear() === year
+    ) {
+      return date;
+    } else {
+      return null; // Invalid date
+    }
   }
 }
