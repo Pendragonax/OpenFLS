@@ -37,7 +37,7 @@ export abstract class TablePageComponent<T, R> implements OnInit {
 
   // FORMs
   filterForm = new FormGroup({
-    searchString: new FormControl("")
+    searchString: new FormControl({value:"", disabled: this.isSubmitting})
   })
 
   protected constructor(
