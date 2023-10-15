@@ -9,6 +9,7 @@ jwt:
   public-key: classpath:public.key
 
 logging:
+  performance: true
   file:
     name: "/logs/open-fls-backend.log"
 

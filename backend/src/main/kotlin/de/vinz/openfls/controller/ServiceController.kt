@@ -3,17 +3,19 @@ package de.vinz.openfls.controller
 import de.vinz.openfls.dtos.ServiceDto
 import de.vinz.openfls.dtos.ServiceFilterDto
 import de.vinz.openfls.dtos.ServiceXLDto
+import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.model.Service
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
-import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.validation.Valid
 
 @RestController
@@ -25,13 +27,19 @@ class ServiceController(
     private val permissionService: PermissionService,
     private val assistancePlanService: AssistancePlanService,
     private val modelMapper: ModelMapper,
-    private val helperService: HelperService,
     private val converter: ConverterService
 ) {
+
+    private val logger: Logger = LoggerFactory.getLogger(ServiceController::class.java)
+
+    @Value("\${logging.performance}")
+    private val logPerformance: Boolean = false
+
     @PostMapping
     fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @Valid @RequestBody valueDto: ServiceDto): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             if (!accessService.canWriteEntries(token, valueDto.institutionId))
                 throw IllegalArgumentException("No permission to write entries to this institution")
 
@@ -40,11 +48,15 @@ class ServiceController(
             entity.employee.unprofessionals = null
             val savedEntity = serviceService.create(entity)
 
-            helperService.printLog(this::class.simpleName, "create [id=${savedEntity.id}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s create took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(modelMapper.map(savedEntity, ServiceDto::class.java))
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "create - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 employeeService.getById(valueDto.employeeId),
@@ -58,6 +70,7 @@ class ServiceController(
                @PathVariable id: Long,
                @Valid @RequestBody valueDto: ServiceDto): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             if (!accessService.canWriteEntries(token, valueDto.institutionId))
                 throw IllegalArgumentException("No permission to update this service")
             if (!serviceService.existsById(id))
@@ -76,11 +89,15 @@ class ServiceController(
 
             val savedEntity = serviceService.update(entity)
 
-            helperService.printLog(this::class.simpleName, "update [id=${savedEntity.id}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s update took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(modelMapper.map(savedEntity, ServiceDto::class.java))
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "update - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -93,11 +110,8 @@ class ServiceController(
     fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @PathVariable id: Long): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             val service = serviceService.getById(id);
-
-            println((service?.employee?.id == accessService.getId(token)))
-            println("start - ${service?.start} | end - ${LocalDate.now().minusDays(14)}")
-            println(service?.start?.toLocalDate()?.isAfter(LocalDate.now().minusDays(14)))
 
             if (!accessService.isAdmin(token) &&
                 (service?.employee?.id != accessService.getId(token) ||
@@ -110,11 +124,15 @@ class ServiceController(
 
             serviceService.delete(id)
 
-            helperService.printLog(this::class.simpleName, "delete [id=${id}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s delete took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(entity)
         }catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "delete - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -126,17 +144,23 @@ class ServiceController(
     @GetMapping
     fun getAll(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             if (!accessService.isAdmin(token))
                 throw IllegalArgumentException("No permission to get all services")
 
             val dtos = serviceService.getAll()
                 .map { modelMapper.map(it, ServiceDto::class.java) }
 
-            helperService.printLog(this::class.simpleName, "getAll", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getAll took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getAll - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -149,6 +173,7 @@ class ServiceController(
     fun getById(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                 @PathVariable id: Long): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             if (id <= 0)
                 throw IllegalArgumentException("id is <= 0")
             if (!serviceService.existsById(id))
@@ -160,11 +185,15 @@ class ServiceController(
                 !accessService.canReadEntries(token, dto.institutionId))
                 throw IllegalArgumentException("Your not the allowed to read this entry")
 
-            helperService.printLog(this::class.simpleName, "getById", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getById took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getById - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -177,6 +206,7 @@ class ServiceController(
     fun getByAssistancePlan(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                             @PathVariable id: Long): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             if (id <= 0)
                 throw IllegalArgumentException("id is <= 0")
             if (!assistancePlanService.existsById(id))
@@ -188,11 +218,16 @@ class ServiceController(
                 modelMapper.map(it, ServiceXLDto::class.java)
             }
 
-            helperService.printLog(this::class.simpleName, "getByAssistancePlan", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getByAssistancePlan took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getByAssistancePlan - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -206,6 +241,7 @@ class ServiceController(
                              @PathVariable id: Long,
                              @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") date: LocalDate): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             val leadingInstitutionIds = permissionService
                 .getLeadingInstitutionIdsByEmployee(accessService.getId(token))
             val userId = accessService.getId(token)
@@ -216,11 +252,16 @@ class ServiceController(
                 .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
                 .sortedBy { it.start }
 
-            helperService.printLog(this::class.simpleName, "getByEmployeeAndDate", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getByEmployeeAndDate took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getByEmployeeAndDate - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -235,6 +276,7 @@ class ServiceController(
                                     @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
                                     @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             val leadingInstitutionIds = permissionService
                     .getLeadingInstitutionIdsByEmployee(accessService.getId(token))
             val userId = accessService.getId(token)
@@ -245,11 +287,16 @@ class ServiceController(
                     .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
                     .sortedBy { it.start }
 
-            helperService.printLog(this::class.simpleName, "getByEmployeeAndStartAndEnd", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getByEmployeeAndStartAndEnd took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getByEmployeeAndStartAndEnd - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                     ex.message,
@@ -263,6 +310,7 @@ class ServiceController(
                              @PathVariable id: Long,
                              @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") date: LocalDate): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             val affiliatedInstitutionIds = permissionService
                 .getReadableInstitutionIdsByEmployee(accessService.getId(token))
             val userId = accessService.getId(token)
@@ -272,11 +320,16 @@ class ServiceController(
                 .map { modelMapper.map(it, ServiceDto::class.java) }
                 .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
 
-            helperService.printLog(this::class.simpleName, "getByClientAndDate", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getByClientAndDate took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getByClientAndDate - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -291,6 +344,7 @@ class ServiceController(
                                   @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
                                   @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             val affiliatedInstitutionIds = permissionService
                     .getReadableInstitutionIdsByEmployee(accessService.getId(token))
             val userId = accessService.getId(token)
@@ -300,11 +354,16 @@ class ServiceController(
                     .map { modelMapper.map(it, ServiceDto::class.java) }
                     .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
 
-            helperService.printLog(this::class.simpleName, "getByClientAndStartAndEnd", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getByClientAndStartAndEnd took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getByClientAndStartAndEnd - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                     ex.message,
@@ -318,17 +377,23 @@ class ServiceController(
                                @PathVariable id: Long,
                                @Valid @RequestBody valueDto: ServiceFilterDto): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             if (valueDto.date == null)
                 throw IllegalArgumentException("No date")
 
             val dtos = serviceService.getByEmployeeAndFilter(id, valueDto)
                 .map { modelMapper.map(it, ServiceDto::class.java) }
 
-            helperService.printLog(this::class.simpleName, "getByEmployeeAndFilter", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getByEmployeeAndFilter took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getByEmployeeAndFilter - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -343,6 +408,7 @@ class ServiceController(
                            @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
                            @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
         return try {
+            val startMs = System.currentTimeMillis()
             if (accessService.getId(token) != id &&
                 !accessService.isAdmin(token) &&
                 !accessService.canReadEmployeeStats(token, id))
@@ -353,11 +419,15 @@ class ServiceController(
                 periodDays = start.until(end).days + 1
             }
 
-            helperService.printLog(this::class.simpleName, "getTimesByEmployee", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getTimesByEmployee took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getTimesByEmployee - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -370,10 +440,9 @@ class ServiceController(
     fun countByEmployee(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                         @PathVariable id: Long): Any {
         return try {
-            helperService.printLog(this::class.simpleName, "countByEmployee", false)
             ResponseEntity.ok(serviceService.countByEmployee(id))
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "countByEmployee - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -386,10 +455,9 @@ class ServiceController(
     fun countByClient(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                       @PathVariable id: Long): Any {
         return try {
-            helperService.printLog(this::class.simpleName, "countByClient", false)
             ResponseEntity.ok(serviceService.countByClient(id))
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "countByClient - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -402,10 +470,9 @@ class ServiceController(
     fun countByAssistancePlan(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                               @PathVariable id: Long): Any {
         return try {
-            helperService.printLog(this::class.simpleName, "countByAssistancePlan", false)
             ResponseEntity.ok(serviceService.countByAssistancePlan(id))
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "countByAssistancePlan - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
@@ -418,10 +485,9 @@ class ServiceController(
     fun countByGoal(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                     @PathVariable id: Long): Any {
         return try {
-            helperService.printLog(this::class.simpleName, "countByGoal", false)
             ResponseEntity.ok(serviceService.countByGoal(id))
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "countByGoal - ${ex.message}", true)
+            logger.error(ex.message)
 
             ResponseEntity(
                 ex.message,
