@@ -1,8 +1,12 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.ServiceFilterDto
+import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.model.Service
 import de.vinz.openfls.repositories.ServiceRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
@@ -12,6 +16,12 @@ import javax.transaction.Transactional
 class ServiceService(
     private val serviceRepository: ServiceRepository
 ): GenericService<Service> {
+
+    @Value("\${logging.performance}")
+    private val logPerformance: Boolean = false
+
+    private val logger: Logger = LoggerFactory.getLogger(ServiceService::class.java)
+
     @Transactional
     override fun create(value: Service): Service {
         if (value.id > 0)
@@ -64,19 +74,55 @@ class ServiceService(
     }
 
     fun getByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<Service> {
-        return serviceRepository.findByEmployeeAndStartAndEnd(employeeId, start, end)
+        val startMs = System.currentTimeMillis()
+        val result = serviceRepository.findByEmployeeAndStartAndEnd(employeeId, start, end)
+
+        if (logPerformance) {
+            logger.info(String.format("%s getByEmployeeAndStartAndEnd took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    result.size))
+        }
+        return result
     }
 
     fun getByEmployeeAndStartEndDate(employeeId: Long, start: LocalDate, end: LocalDate): List<Service> {
-        return serviceRepository.findByEmployeeAndStartEndDate(employeeId, start, end)
+        val startMs = System.currentTimeMillis()
+        val result = serviceRepository.findByEmployeeAndStartEndDate(employeeId, start, end)
+
+        if (logPerformance) {
+            logger.info(String.format("%s getByEmployeeAndStartEndDate took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    result.size))
+        }
+        return result
     }
 
     fun getByClientAndDate(clientId: Long, date: LocalDate): List<Service> {
-        return serviceRepository.findByClientAndDate(clientId, date)
+        val startMs = System.currentTimeMillis()
+        val result = serviceRepository.findByClientAndDate(clientId, date)
+
+        if (logPerformance) {
+            logger.info(String.format("%s getByClientAndDate took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    result.size))
+        }
+        return result
     }
 
     fun getByClientAndStartAndEnd(clientId: Long, start: LocalDate, end: LocalDate): List<Service> {
-        return serviceRepository.findByClientAndStartAndEnd(clientId, start, end)
+        val startMs = System.currentTimeMillis()
+        val result = serviceRepository.findByClientAndStartAndEnd(clientId, start, end)
+
+        if (logPerformance) {
+            logger.info(String.format("%s getByClientAndStartAndEnd took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    result.size))
+        }
+        return result
     }
 
     fun getByEmployeeAndFilter(employeeId: Long, filter: ServiceFilterDto): List<Service> {

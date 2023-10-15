@@ -15,7 +15,7 @@
 
     <appender name="PERFORMANCE" class="ch.qos.logback.core.FileAppender">
         <filter class="de.vinz.openfls.logback.PerformanceLogbackFilter"/>
-        <file>performance.log</file>
+        <file>/logs/open-fls-backend-performance.log</file>
         <encoder>
             <pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
