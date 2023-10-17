@@ -29,7 +29,6 @@ import javax.validation.Valid
 class AssistancePlanController(
     private val assistancePlanService: AssistancePlanService,
     private val modelMapper: ModelMapper,
-    private val helperService: HelperService,
     private val institutionService: InstitutionService,
     private val sponsorService: SponsorService,
     private val clientService: ClientService,
