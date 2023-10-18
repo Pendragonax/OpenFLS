@@ -162,6 +162,7 @@ class AssistancePlanController(
                 throw IllegalArgumentException("assistance plan not found")
 
             val entity = assistancePlanService.getById(id)
+            val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
 
             assistancePlanService.delete(id)
 
@@ -171,7 +172,7 @@ class AssistancePlanController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(modelMapper.map(entity, AssistancePlanDto::class.java))
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
@@ -215,6 +216,7 @@ class AssistancePlanController(
             val startMs = System.currentTimeMillis()
 
             val entity = assistancePlanService.getById(id)
+            val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",
@@ -222,7 +224,7 @@ class AssistancePlanController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(modelMapper.map(entity, AssistancePlanDto::class.java))
+            ResponseEntity.ok(dto)
         } catch(ex: Exception) {
             logger.error(ex.message, ex)
 

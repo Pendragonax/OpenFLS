@@ -1,11 +1,14 @@
 package de.vinz.openfls.controller
 
-import de.vinz.openfls.dtos.CategoryTemplateDto
 import de.vinz.openfls.dtos.ClientDto
 import de.vinz.openfls.dtos.ClientSimpleDto
+import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.model.Client
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -26,25 +29,36 @@ import kotlin.IllegalArgumentException
 @RequestMapping("/clients")
 class ClientController(
     private val clientService: ClientService,
-    private val helperService: HelperService,
     private val accessService: AccessService,
-    private val modelMapper: ModelMapper
+    private val modelMapper: ModelMapper) {
 
-) {
+    private val logger: Logger = LoggerFactory.getLogger(ClientController::class.java)
+
+    @Value("\${logging.performance}")
+    private val logPerformance: Boolean = false
+
     @PostMapping
     fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @Valid @RequestBody value: ClientDto): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             if (!accessService.isLeader(token, value.institution.id))
                 throw IllegalArgumentException("no permission to add clients")
 
             val entity = clientService.create(modelMapper.map(value, Client::class.java))
+            val dto = modelMapper.map(entity, ClientDto::class.java)
 
-            helperService.printLog(this::class.simpleName, "create", false)
+            if (logPerformance) {
+                logger.info(String.format("%s create took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
-            ResponseEntity.ok(modelMapper.map(entity, ClientDto::class.java))
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "create - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,
@@ -58,6 +72,9 @@ class ClientController(
                @PathVariable id: Long,
                @Valid @RequestBody valueDto: ClientDto): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             if (id != valueDto.id)
                 throw java.lang.IllegalArgumentException("path id and dto id are not the same")
             if (!clientService.existById(id))
@@ -66,12 +83,17 @@ class ClientController(
                 throw IllegalArgumentException("no permission to update this client")
 
             val entity = clientService.update(modelMapper.map(valueDto, Client::class.java))
+            val dto = modelMapper.map(entity, ClientDto::class.java)
 
-            helperService.printLog(this::class.simpleName, "update [id=$id]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s update took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
-            ResponseEntity.ok(modelMapper.map(entity, ClientDto::class.java))
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "update [id=$id] - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,
@@ -84,6 +106,9 @@ class ClientController(
     fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @PathVariable id: Long): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             if (!accessService.isAdmin(token))
                 throw IllegalArgumentException("no permission to delete this client")
             if (!clientService.existById(id))
@@ -93,11 +118,15 @@ class ClientController(
 
             clientService.delete(id)
 
-            helperService.printLog(this::class.simpleName, "delete [id=$id]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s delete took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(modelMapper.map(entity, ClientDto::class.java))
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "delete [id=$id] - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,
@@ -109,15 +138,22 @@ class ClientController(
     @GetMapping
     fun getAll(): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val dtos = clientService.getAll()
                 .map { modelMapper.map(it, ClientSimpleDto::class.java)}
                 .sortedBy { it.lastName.lowercase() }
 
-            helperService.printLog(this::class.simpleName, "getAll", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getAll took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getAll - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,
@@ -129,14 +165,21 @@ class ClientController(
     @GetMapping("{id}")
     fun getById(@PathVariable id: Long): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val dto = modelMapper.map(clientService.getById(id), ClientDto::class.java)
             dto.categoryTemplate.categories = dto.categoryTemplate.categories.sortedBy { it.shortcut }.toTypedArray()
 
-            helperService.printLog(this::class.simpleName, "getById [id=$id]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getById took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getById [id=$id] - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,

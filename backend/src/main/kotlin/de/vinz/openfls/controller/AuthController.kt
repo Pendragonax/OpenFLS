@@ -71,7 +71,7 @@ class AuthController(
             val token = this.jwtEncoder.encode(JwtEncoderParameters.from(claims))?.tokenValue
 
             if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
+                logger.info(String.format("%s login took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs))
             }
@@ -102,7 +102,7 @@ class AuthController(
             employeeService.changePassword(id, passwordDto)
 
             if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
+                logger.info(String.format("%s changePassword took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs))
             }
@@ -127,7 +127,7 @@ class AuthController(
             employeeService.changeRole(id, role)
 
             if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
+                logger.info(String.format("%s changeRole took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs))
             }
@@ -186,7 +186,7 @@ class AuthController(
             }
 
             if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
+                logger.info(String.format("%s getUser took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs))
             }
