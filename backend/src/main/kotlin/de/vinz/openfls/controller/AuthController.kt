@@ -1,11 +1,15 @@
 package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.*
+import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.model.*
 import de.vinz.openfls.services.EmployeeService
 import de.vinz.openfls.services.HelperService
 import de.vinz.openfls.services.TokenService
 import org.modelmapper.ModelMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -29,13 +33,20 @@ class AuthController(
     private val passwordEncoder: PasswordEncoder,
     private val authenticationManager: AuthenticationManager,
     private val jwtEncoder: JwtEncoder,
-    private val helperService: HelperService,
     private val tokenService: TokenService,
     private val modelMapper: ModelMapper
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(AuthController::class.java)
+
+    @Value("\${logging.performance}")
+    private val logPerformance: Boolean = false
+
     @PostMapping("/login")
     fun login(@RequestBody request: AuthRequest): ResponseEntity<Map<String, String>> {
         try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val authentication = authenticationManager
                 .authenticate(UsernamePasswordAuthenticationToken(request.username, request.password))
 
@@ -59,7 +70,11 @@ class AuthController(
 
             val token = this.jwtEncoder.encode(JwtEncoderParameters.from(claims))?.tokenValue
 
-            helperService.printLog(this::class.simpleName, "login [id=${user.getId()}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s login took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, token)
@@ -68,7 +83,7 @@ class AuthController(
                     "token" to (token?: ""),
                     "expiredAt" to now.plusSeconds(expiry).toString()))
         } catch (ex: BadCredentialsException) {
-            helperService.printLog(this::class.simpleName, "login - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
@@ -78,16 +93,23 @@ class AuthController(
     fun changePassword(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                        @Valid @RequestBody passwordDto: PasswordDto): ResponseEntity<String> {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val id = tokenService.getUserInfo(token).first
             passwordDto.newPassword = passwordEncoder.encode(passwordDto.newPassword) ?: passwordDto.newPassword
 
             employeeService.changePassword(id, passwordDto)
 
-            helperService.printLog(this::class.simpleName, "changePassword [id=$id]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s changePassword took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity(HttpStatus.OK)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "changePassword - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.localizedMessage,
@@ -99,13 +121,20 @@ class AuthController(
     fun changeRole(@PathVariable id: Long,
                    @RequestBody role: Int): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             employeeService.changeRole(id, role)
 
-            helperService.printLog(this::class.simpleName, "changeRole [id=$id]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s changeRole took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity(HttpStatus.OK)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "changeRole - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.localizedMessage,
@@ -121,12 +150,13 @@ class AuthController(
     @GetMapping("/user")
     fun getUser(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val id = tokenService.getUserInfo(token).first
 
             // default admin logged in
             if (id == 0L) {
-                helperService.printLog(this::class.simpleName, "getUser [default admin]", false)
-
                 return ResponseEntity.ok(EmployeeDto().apply {
                     this.id = 0
                     firstName = "ADMIN"
@@ -155,11 +185,15 @@ class AuthController(
                     ?.toTypedArray()
             }
 
-            helperService.printLog(this::class.simpleName, "getUser [id=$id]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getUser took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             return ResponseEntity.ok(employeeDto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getUser - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.localizedMessage,
