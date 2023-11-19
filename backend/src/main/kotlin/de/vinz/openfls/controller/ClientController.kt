@@ -42,10 +42,17 @@ class ClientController(
                @Valid @RequestBody value: ClientDto): Any {
         return try {
             // performance
-            val startMs = System.currentTimeMillis()
+            var startMs = System.currentTimeMillis()
 
             if (!accessService.isLeader(token, value.institution.id))
                 throw IllegalArgumentException("no permission to add clients")
+
+            if (logPerformance) {
+                logger.info(String.format("%s access check took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+                startMs = System.currentTimeMillis()
+            }
 
             val entity = clientService.create(modelMapper.map(value, Client::class.java))
             val dto = modelMapper.map(entity, ClientDto::class.java)
