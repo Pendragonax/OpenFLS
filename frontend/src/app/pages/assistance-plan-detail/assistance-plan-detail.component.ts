@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
 import {
   MAT_MOMENT_DATE_ADAPTER_OPTIONS,
@@ -41,6 +41,10 @@ import {AssistancePlanDto} from "../../dtos/assistance-plan-dto.model";
 })
 export class AssistancePlanDetailComponent extends DetailPageComponent<AssistancePlanView> implements OnInit {
 
+  // CONST
+  private validTabIndices = [0,1,2,3,4];
+  private tabParamName = 'tab'
+
   // CONFIG
   tableColumns = ['title', 'description', 'hours', 'institution', 'action'];
 
@@ -49,6 +53,7 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
   sponsors: SponsorDto[] = [];
   client: ClientDto = new ClientDto();
   dto$ = new ReplaySubject<AssistancePlanDto>();
+  tabIndex = 0;
 
   // FORMs
   infoForm = new AssistancePlanInfoForm(true);
@@ -65,6 +70,25 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
     override helperService: HelperService
   ) {
     super(helperService);
+  }
+
+  override ngOnInit() {
+    this.executeURLParams();
+    super.ngOnInit();
+  }
+
+  executeURLParams() {
+    this.route.params.subscribe(params => {
+      // which tab should be open param
+      if (params[this.tabParamName]) {
+        const urlTabIndex = +params[this.tabParamName]
+        if (!this.validTabIndices.includes(urlTabIndex, 0)) {
+          return;
+        }
+
+        this.tabIndex = urlTabIndex;
+      }
+    });
   }
 
   loadValues() {

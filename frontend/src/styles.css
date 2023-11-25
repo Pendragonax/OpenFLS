@@ -34,4 +34,5 @@ body {
 
 .mat-row:hover {
   background-color: whitesmoke;
+  font-weight: bold;
 }

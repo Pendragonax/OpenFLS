@@ -1,6 +1,6 @@
 <app-info-header [title]="'Hilfeplan von &quot;' + client.lastName + ' ' + client.firstName + '&quot;'"></app-info-header>
 
-<mat-tab-group dynamicHeight>
+<mat-tab-group dynamicHeight [(selectedIndex)]="tabIndex">
   <mat-tab label="Allgemein">
     <mat-accordion>
       <mat-expansion-panel class="mat-elevation-z2 m-2">
@@ -89,6 +89,9 @@
                (updatedGoalEvent)="updateGoal($event)"
                (addedGoalEvent)="createGoal($event)"
                (deletedGoalEvent)="deleteGoal($event)"></app-goals>
+  </mat-tab>
+
+  <mat-tab label="Zielauswertung">
   </mat-tab>
 
   <mat-tab label="tab. Ansichten">

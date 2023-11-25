@@ -47,6 +47,7 @@ const routes: Routes = [
   { path: 'clients/detail/:id', component: ClientDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/new/:id', component: AssistancePlanNewComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
+  { path: 'assistance_plans/detail/:id/:tab', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
   { path: 'hour_types', component: HourTypeComponent, canActivate: [AuthGuard] },
   { path: 'services', component: ServiceMyComponent, canActivate: [AuthGuard] },
   { path: 'services/my', component: ServiceMyComponent, canActivate: [AuthGuard] },
