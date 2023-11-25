@@ -72,5 +72,15 @@ class Employee(
         mappedBy = "employee",
         cascade = [CascadeType.ALL],
         fetch = FetchType.LAZY)
-    var services: MutableSet<Service> = mutableSetOf()
+    var services: MutableSet<Service> = mutableSetOf(),
+
+    @ManyToMany(
+            fetch = FetchType.EAGER
+    )
+    @JoinTable(
+            name = "assistance_plan_favorites",
+            joinColumns = [JoinColumn(name = "employee_id")],
+            inverseJoinColumns = [JoinColumn(name = "assistance_plan_id")])
+    @JsonIgnoreProperties(value = ["employees", "hibernateLazyInitializer"])
+    var assistancePlanFavorites: MutableSet<AssistancePlan> = mutableSetOf(),
 )

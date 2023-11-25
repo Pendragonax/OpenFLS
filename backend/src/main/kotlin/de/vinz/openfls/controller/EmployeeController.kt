@@ -24,7 +24,8 @@ class EmployeeController(
     private val modelMapper: ModelMapper,
     private val passwordEncoder: PasswordEncoder,
     private val accessService: AccessService,
-    private val helperService: HelperService
+    private val helperService: HelperService,
+    private val tokenService: TokenService
 ) {
     @PostMapping
     fun create(@Valid @RequestBody valueDto: EmployeeDto): Any {
@@ -102,7 +103,6 @@ class EmployeeController(
                 throw IllegalArgumentException("employee not found")
 
             val dto = modelMapper.map(employeeService.resetPassword(id), EmployeeDto::class.java)
-            println("${dto.id}")
 
             helperService.printLog(this::class.simpleName, "resetPassword [id=${id}]", false)
 
@@ -160,6 +160,42 @@ class EmployeeController(
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @PostMapping("assistance_plan/favorite/{id}")
+    fun addAssistancePlanFavorite(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                                  @PathVariable id: Long): Any {
+        return try {
+            val userId = tokenService.getUserInfo(token)
+
+            employeeService.addAssistancePlanAsFavorite(id, userId.first)
+
+            ResponseEntity.ok()
+        } catch (ex: Exception) {
+            helperService.printLog(this::class.simpleName, "addAssistancePlanFavorite [id=${id}] - ${ex.message}", true)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @DeleteMapping("assistance_plan/favorite/{id}")
+    fun deleteAssistancePlanFavorite(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                                     @PathVariable id: Long): Any {
+        return try {
+            val userId = tokenService.getUserInfo(token)
+
+            employeeService.deleteAssistancePlanAsFavorite(id, userId.first)
+
+            ResponseEntity.ok()
+        } catch (ex: Exception) {
+            helperService.printLog(this::class.simpleName, "deleteAssistancePlanFavorite [id=${id}] - ${ex.message}", true)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST)
         }
     }
 

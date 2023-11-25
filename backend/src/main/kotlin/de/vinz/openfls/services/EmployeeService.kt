@@ -5,6 +5,8 @@ import de.vinz.openfls.model.*
 import de.vinz.openfls.repositories.*
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import javax.persistence.Entity
+import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 import kotlin.IllegalArgumentException
 
@@ -14,6 +16,7 @@ class EmployeeService(
     private val employeeAccessRepository: EmployeeAccessRepository,
     private val permissionServiceImpl: PermissionService,
     private val unprofessionalService: UnprofessionalService,
+    private val assistancePlanRepository: AssistancePlanRepository,
     private val passwordEncoder: PasswordEncoder
 ) : GenericService<Employee> {
 
@@ -121,6 +124,30 @@ class EmployeeService(
         employeeAccessRepository.findById(id).orElse(null)?.also {
             employeeAccessRepository.changeRole(id, role)
         } ?: throw IllegalArgumentException("employee doesnt exists")
+    }
+
+    @Transactional
+    fun addAssistancePlanAsFavorite(assistancePlanId: Long, employeeId: Long) {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+        val assistancePlan = assistancePlanRepository.findById(assistancePlanId)
+                .orElseThrow { EntityNotFoundException() }
+
+        if (employee.assistancePlanFavorites.none { it.id == assistancePlanId }) {
+            employee.assistancePlanFavorites.add(assistancePlan)
+            employeeRepository.save(employee)
+        }
+    }
+
+    @Transactional
+    fun deleteAssistancePlanAsFavorite(assistancePlanId: Long, employeeId: Long) {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+
+        if (employee.assistancePlanFavorites.any { it.id == assistancePlanId }) {
+            employee.assistancePlanFavorites.removeIf { it.id == assistancePlanId }
+            employeeRepository.save(employee)
+        }
     }
 
     override fun getAll(): List<Employee> {

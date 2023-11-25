@@ -60,5 +60,8 @@ class AssistancePlan(
         mappedBy = "assistancePlan",
         cascade = [CascadeType.ALL],
         fetch = FetchType.LAZY)
-    var services: MutableSet<Service> = mutableSetOf()
+    var services: MutableSet<Service> = mutableSetOf(),
+
+    @ManyToMany(mappedBy = "assistancePlanFavorites")
+    var employees: MutableSet<Employee> = mutableSetOf()
 )
