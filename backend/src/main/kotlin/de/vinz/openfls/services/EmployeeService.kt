@@ -1,8 +1,10 @@
 package de.vinz.openfls.services
 
+import de.vinz.openfls.dtos.AssistancePlanDto
 import de.vinz.openfls.dtos.PasswordDto
 import de.vinz.openfls.model.*
 import de.vinz.openfls.repositories.*
+import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import javax.persistence.Entity
@@ -17,7 +19,8 @@ class EmployeeService(
     private val permissionServiceImpl: PermissionService,
     private val unprofessionalService: UnprofessionalService,
     private val assistancePlanRepository: AssistancePlanRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val modelMapper: ModelMapper
 ) : GenericService<Employee> {
 
     @Transactional
@@ -124,6 +127,13 @@ class EmployeeService(
         employeeAccessRepository.findById(id).orElse(null)?.also {
             employeeAccessRepository.changeRole(id, role)
         } ?: throw IllegalArgumentException("employee doesnt exists")
+    }
+
+    fun getAssistancePlanAsFavorites(employeeId: Long): List<AssistancePlanDto> {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+
+        return employee.assistancePlanFavorites.map { modelMapper.map(it, AssistancePlanDto::class.java) }
     }
 
     @Transactional

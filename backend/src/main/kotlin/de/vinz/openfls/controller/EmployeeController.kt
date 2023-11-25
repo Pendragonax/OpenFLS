@@ -163,6 +163,21 @@ class EmployeeController(
         }
     }
 
+    @GetMapping("assistance_plan/favorite")
+    fun getAssistancePlanFavorites(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): Any {
+        return try {
+            val userId = tokenService.getUserInfo(token)
+
+            ResponseEntity.ok(employeeService.getAssistancePlanAsFavorites(userId.first))
+        } catch (ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getAssistancePlanFavorites - ${ex.message}", true)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST)
+        }
+    }
+
     @PostMapping("assistance_plan/favorite/{id}")
     fun addAssistancePlanFavorite(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                                   @PathVariable id: Long): Any {
