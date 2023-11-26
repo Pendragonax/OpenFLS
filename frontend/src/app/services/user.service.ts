@@ -14,6 +14,7 @@ import {Token} from "../models/token.model";
 import {EmployeeDto} from "../dtos/employee-dto.model";
 import {Router} from "@angular/router";
 import {PasswordDto} from "../dtos/password-dto.model";
+import {AssistancePlanDto} from "../dtos/assistance-plan-dto.model";
 
 const httpOptions = {
   headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -104,6 +105,10 @@ export class UserService {
       },
       error: err => this.handleError(err)
     });
+  }
+
+  getFavorites(): Observable<AssistancePlanDto[]> {
+    return this.http.get<AssistancePlanDto[]>(`${environment.api_url}employees/assistance_plan/favorite`)
   }
 
   private destroyToken() {

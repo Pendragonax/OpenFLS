@@ -107,27 +107,27 @@
               *matCellDef="let employee"
               class="text-center">
             <div class="">
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="primary"
                       class="m-1"
                       [hidden]="!employee.editable"
                       [routerLink]="['/services/employee/', employee.dto.id]">
                 <mat-icon>library_books</mat-icon>
               </button>
-              <button mat-mini-fab
-                      color="accent"
+              <button mat-icon-button
+                      color="primary"
                       class="m-1"
                       *showOnRole="'leader'"
                       [routerLink]="['/employees/detail/', employee.dto.id ]">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="primary"
                       class="m-1"
                       (click)="openInformationModal(informationModal, employee)">
                 <mat-icon>search</mat-icon>
               </button>
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="warn"
                       class="m-1"
                       *showOnRole="'admin'"

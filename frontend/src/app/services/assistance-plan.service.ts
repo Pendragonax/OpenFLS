@@ -13,9 +13,6 @@ import {UserService} from "./user.service";
 import {AssistancePlanView} from "../models/assistance-plan-view.model";
 import {SponsorService} from "./sponsor.service";
 import {SponsorDto} from "../dtos/sponsor-dto.model";
-import {
-  AssistancePlanEvaluationComponent
-} from "../shared/modules/assistance-plan-evaluation/assistance-plan-evaluation.component";
 import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
 
 @Injectable({
@@ -49,8 +46,15 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
       this.sponsorService.allValues$,
       this.getByClientId(id),
       this.userService.affiliatedInstitutions$,
-      this.userService.isAdmin$]
-    ).pipe(map(([client, institutions, sponsors, assistancePlans, affiliatedInstitutions, isAdmin]) => {
+      this.userService.isAdmin$,
+      this.userService.getFavorites()]
+    ).pipe(map(([client,
+                             institutions,
+                             sponsors,
+                             assistancePlans,
+                             affiliatedInstitutions,
+                             isAdmin,
+                             favoriteAssistancePlans]) => {
       return assistancePlans.map<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>(plan => {
         return [
           client,
@@ -58,7 +62,8 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
           sponsors.find(x => x.id === plan.sponsorId) ?? new SponsorDto(),
           <AssistancePlanView> {
             dto: plan,
-            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId)
+            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId),
+            favorite: favoriteAssistancePlans.some(value => value.id === plan.id)
         }]
       })
     }))
@@ -76,8 +81,15 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
       this.sponsorService.allValues$,
       this.getByInstitutionId(id),
       this.userService.affiliatedInstitutions$,
-      this.userService.isAdmin$]
-    ).pipe(map(([clients, institution, sponsors, assistancePlans, affiliatedInstitutions, isAdmin]) => {
+      this.userService.isAdmin$,
+      this.userService.getFavorites()]
+    ).pipe(map(([clients,
+                             institution,
+                             sponsors,
+                             assistancePlans,
+                             affiliatedInstitutions,
+                             isAdmin,
+                             favoriteAssistancePlans]) => {
       return assistancePlans.map<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>(plan => {
         return [
           clients.find(x => x.id === plan.clientId) ?? new ClientDto(),
@@ -85,8 +97,37 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
           sponsors.find(x => x.id === plan.sponsorId) ?? new SponsorDto(),
           <AssistancePlanView> {
             dto: plan,
-            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId)
+            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId),
+            favorite: favoriteAssistancePlans.some(value => value.id === plan.id)
         }]
+      })
+    }))
+  }
+
+  getCombinationByFavorites(): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
+    return combineLatest([
+      this.clientService.allValues$,
+      this.institutionService.allValues$,
+      this.sponsorService.allValues$,
+      this.userService.getFavorites(),
+      this.userService.affiliatedInstitutions$,
+      this.userService.isAdmin$]
+    ).pipe(map(([clients,
+                             institutions,
+                             sponsors,
+                             favoriteAssistancePlans,
+                             affiliatedInstitutions,
+                             isAdmin,]) => {
+      return favoriteAssistancePlans.map<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>(plan => {
+        return [
+          clients.find(x => x.id === plan.clientId) ?? new ClientDto(),
+          institutions.find(x => x.id === plan.institutionId) ?? new InstitutionDto(),
+          sponsors.find(x => x.id === plan.sponsorId) ?? new SponsorDto(),
+          <AssistancePlanView> {
+            dto: plan,
+            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId),
+            favorite: true
+          }]
       })
     }))
   }
@@ -103,8 +144,15 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
       this.sponsorService.getById(id),
       this.getBySponsorId(id),
       this.userService.affiliatedInstitutions$,
-      this.userService.isAdmin$]
-    ).pipe(map(([clients, institutions, sponsor, assistancePlans, affiliatedInstitutions, isAdmin]) => {
+      this.userService.isAdmin$,
+      this.userService.getFavorites()]
+    ).pipe(map(([clients,
+                             institutions,
+                             sponsor,
+                             assistancePlans,
+                             affiliatedInstitutions,
+                             isAdmin,
+                             favoriteAssistancePlans]) => {
       return assistancePlans.map<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>(plan => {
         return [
           clients.find(x => x.id === plan.clientId) ?? new ClientDto(),
@@ -112,7 +160,8 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
           sponsor,
           <AssistancePlanView> {
             dto: plan,
-            editable : isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId)
+            editable : isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId),
+            favorite: favoriteAssistancePlans.some(value => value.id === plan.id)
         }]
       })
     }))

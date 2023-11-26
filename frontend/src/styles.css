@@ -33,6 +33,5 @@ body {
 }
 
 .mat-row:hover {
-  background-color: whitesmoke;
-  font-weight: bold;
+  background-color: #ccd3ff !important;
 }

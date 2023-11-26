@@ -73,8 +73,9 @@ import { AssistancePlanAnalysisComponent } from './shared/modules/assistance-pla
 import { OverviewTableComponent } from './components/overview-table/overview-table.component';
 import { ServiceEvaluationOverviewComponent } from './pages/service-evaluation-overview/service-evaluation-overview.component';
 import { OverviewValueTypeInfoModalComponent } from './modals/overview-valuetype-info-modal/overview-value-type-info-modal.component';
-import {MatDialog, MatDialogModule} from "@angular/material/dialog";
+import { MatDialogModule} from "@angular/material/dialog";
 import { OverviewPermissionInfoModalComponent } from './modals/overview-permission-info-modal/overview-permission-info-modal.component';
+import { GoalEvaluationComponent } from './pages/goal-evaluation/goal-evaluation.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: ''},
@@ -123,7 +124,8 @@ const routes: Routes = [
     OverviewTableComponent,
     ServiceEvaluationOverviewComponent,
     OverviewValueTypeInfoModalComponent,
-    OverviewPermissionInfoModalComponent
+    OverviewPermissionInfoModalComponent,
+    GoalEvaluationComponent
   ],
     imports: [
         RouterModule.forRoot(routes),

@@ -27,6 +27,7 @@ import {ServiceEmployeeComponent} from "./pages/service-employee/service-employe
 import {
   ServiceEvaluationOverviewComponent
 } from "./pages/service-evaluation-overview/service-evaluation-overview.component";
+import {GoalEvaluationComponent} from "./pages/goal-evaluation/goal-evaluation.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -48,6 +49,8 @@ const routes: Routes = [
   { path: 'assistance_plans/new/:id', component: AssistancePlanNewComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id/:tab', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
+  { path: 'assistance_plans/goals/:id', component: GoalEvaluationComponent, canActivate: [AuthGuard] },
+  { path: 'assistance_plans/goals/:id/:tab', component: GoalEvaluationComponent, canActivate: [AuthGuard] },
   { path: 'hour_types', component: HourTypeComponent, canActivate: [AuthGuard] },
   { path: 'services', component: ServiceMyComponent, canActivate: [AuthGuard] },
   { path: 'services/my', component: ServiceMyComponent, canActivate: [AuthGuard] },
