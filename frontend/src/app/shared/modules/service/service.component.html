@@ -49,13 +49,6 @@
             <mat-date-range-picker #picker (closed)="setTimePeriod(rangeStart, rangeEnd)"></mat-date-range-picker>
           </mat-form-field>
         </div>
-        <button type="button"
-                class="my-auto"
-                mat-icon-button
-                [disabled]="isSubmitting"
-                (click)="increaseFilterDate(1)">
-          <mat-icon>keyboard_arrow_right</mat-icon>
-        </button>
         <div class="ms-2 mt-2">
           <mat-form-field appearance="outline" [formGroup]="filterForm">
             <mat-label>Suchtext</mat-label>

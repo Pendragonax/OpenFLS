@@ -1,3 +1,7 @@
 <app-info-header [title]="'Zielauswertung'"></app-info-header>
 
-<p>goal-evaluation works!</p>
+<mat-tab-group [(selectedIndex)]="tabIndex">
+  <mat-tab label="Allgemein"></mat-tab>
+  <mat-tab label="Zeitauswertung"></mat-tab>
+  <mat-tab label="Evaluationen"></mat-tab>
+</mat-tab-group>

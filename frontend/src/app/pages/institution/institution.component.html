@@ -103,7 +103,7 @@
               <button mat-icon-button
                       color="primary"
                       class="m-1"
-                      [hidden]="!institution.editable"
+                      [disabled]="!institution.editable"
                       [routerLink]="['/institutions/detail/', institution.dto.id ]">
                 <mat-icon>edit</mat-icon>
               </button>

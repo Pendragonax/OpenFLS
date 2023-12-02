@@ -53,13 +53,13 @@
         <th mat-header-cell class="text-center" *matHeaderCellDef> Aktionen </th>
         <div class="text-center"
              *matCellDef="let element">
-          <button mat-mini-fab
+          <button mat-icon-button
                   color="primary"
                   class="m-1"
                   [hidden]="!editable"
                   (click)="openEditModal(editContent, element[0])">
             <mat-icon>edit</mat-icon></button>
-          <button mat-mini-fab
+          <button mat-icon-button
                   color="warn"
                   class="m-1"
                   *showOnRole="'admin'"
