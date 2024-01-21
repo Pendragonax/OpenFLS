@@ -5,6 +5,9 @@
 </nav>
 
 <mat-tab-group>
+  <mat-tab label="Hilfeplan Favoriten">
+    <app-assistance-plans class="m-2"
+                          [favorites$]="favorite$"></app-assistance-plans></mat-tab>
   <mat-tab label="Allgemein">
     <mat-accordion>
       <!--INFORMATIONS-->

@@ -94,13 +94,13 @@
               *matCellDef="let category"
               class="text-center">
             <div class="container-fluid">
-              <button mat-mini-fab
-                      color="accent"
+              <button mat-icon-button
+                      color="primary"
                       class="m-1"
                       [routerLink]="['/category/detail/', category.id ]">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="warn"
                       class="m-1"
                       *showOnRole="'admin'"

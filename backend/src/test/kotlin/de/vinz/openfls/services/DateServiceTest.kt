@@ -1,14 +1,18 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.AssistancePlanDto
+import de.vinz.openfls.exceptions.YearOutOfRangeException
+import de.vinz.openfls.services.models.DateRangeArgument
 import org.assertj.core.api.Assertions.assertThat
-import org.hibernate.annotations.Parameter
+import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.Year
 import java.time.YearMonth
+import java.util.stream.Stream
 
 class DateServiceTest {
     @Test
@@ -211,5 +215,146 @@ class DateServiceTest {
 
         // Then
         assertThat(numberOfDays).isEqualTo(61);
+    }
+
+    @Test
+    fun getStartAndEndInYear_inBetween_correctAmount() {
+        // Given
+        val start = LocalDate.of(2023, 1, 1)
+        val end = LocalDate.of(2023, 1, 31)
+
+        // When
+        val numberOfDays = DateService.getStartAndEndInYear(2023, start, end)
+
+        // Then
+        assertThat(numberOfDays.first).isEqualTo(start)
+        assertThat(numberOfDays.second).isEqualTo(end)
+    }
+
+    @Test
+    fun getStartAndEndInYear_startBeforeEndInBetween_correctAmount() {
+        // Given
+        val start = LocalDate.of(2022, 1, 1)
+        val end = LocalDate.of(2023, 1, 31)
+
+        // When
+        val numberOfDays = DateService.getStartAndEndInYear(2023, start, end)
+
+        // Then
+        assertThat(numberOfDays.first).isEqualTo(LocalDate.of(2023, 1, 1))
+        assertThat(numberOfDays.second).isEqualTo(end)
+    }
+
+    @Test
+    fun getStartAndEndInYear_startInBetweenEndAfter_correctAmount() {
+        // Given
+        val start = LocalDate.of(2023, 1, 26)
+        val end = LocalDate.of(2024, 1, 31)
+
+        // When
+        val numberOfDays = DateService.getStartAndEndInYear(2023, start, end)
+
+        // Then
+        assertThat(numberOfDays.first).isEqualTo(start)
+        assertThat(numberOfDays.second).isEqualTo(LocalDate.of(2023, 12, 31))
+    }
+
+    @Test
+    fun getStartAndEndInYear_before_ThrowException() {
+        // Given
+        val year = 2023
+        val start = LocalDate.of(2022, 1, 1)
+        val end = LocalDate.of(2022, 12, 31)
+
+        // When
+        assertThatCode { DateService.getStartAndEndInYear(year, start, end) }
+                .isInstanceOf(YearOutOfRangeException::class.java)
+    }
+
+    @Test
+    fun getStartAndEndInYear_after_ThrowException() {
+        // Given
+        val year = 2021
+        val start = LocalDate.of(2022, 1, 1)
+        val end = LocalDate.of(2022, 12, 31)
+
+        // When
+        assertThatCode { DateService.getStartAndEndInYear(year, start, end) }
+                .isInstanceOf(YearOutOfRangeException::class.java)
+    }
+
+    @Test
+    fun countDaysOfMonthAndYearBetweenStartAndEnd_inBetween_correctAmount() {
+        // Given
+        val start = LocalDate.of(2023, 1, 1);
+        val end = LocalDate.of(2023, 1, 31);
+
+        // When
+        val numberOfDays = DateService.countDaysOfMonthAndYearBetweenStartAndEnd(2023, 1, start, end)
+
+        // Then
+        assertThat(numberOfDays).isEqualTo(31);
+    }
+
+    @ParameterizedTest
+    @MethodSource("dateRangeProvider")
+    fun countDaysOfMonthAndYearBetweenStartAndEnd_endInBetween_correctAmount(arguments: DateRangeArgument) {
+        // Given
+
+        // When
+        val numberOfDays = DateService.countDaysOfMonthAndYearBetweenStartAndEnd(
+                arguments.year, arguments.month, arguments.start, arguments.end)
+
+        // Then
+        assertThat(numberOfDays).isEqualTo(arguments.expectedDays);
+    }
+
+    companion object {
+        @JvmStatic
+        fun dateRangeProvider(): Stream<DateRangeArgument> {
+            return Stream.of(
+                    DateRangeArgument(
+                            LocalDate.of(2022, 1, 1),
+                            LocalDate.of(2022, 1, 31),
+                            2022,
+                            1,
+                            31),
+                    DateRangeArgument(
+                            LocalDate.of(2022, 1, 1),
+                            LocalDate.of(2022, 1, 11),
+                            2022,
+                            1,
+                            11),
+                    DateRangeArgument(
+                            LocalDate.of(2022, 1, 5),
+                            LocalDate.of(2022, 1, 11),
+                            2022,
+                            1,
+                            7),
+                    DateRangeArgument(
+                            LocalDate.of(2021, 1, 5),
+                            LocalDate.of(2022, 1, 11),
+                            2022,
+                            1,
+                            11),
+                    DateRangeArgument(
+                            LocalDate.of(2022, 1, 5),
+                            LocalDate.of(2023, 1, 11),
+                            2022,
+                            1,
+                            27),
+                    DateRangeArgument(
+                            LocalDate.of(2023, 1, 5),
+                            LocalDate.of(2023, 1, 11),
+                            2022,
+                            1,
+                            0),
+                    DateRangeArgument(
+                            LocalDate.of(2022, 1, 5),
+                            LocalDate.of(2022, 1, 11),
+                            2023,
+                            1,
+                            0))
+        }
     }
 }

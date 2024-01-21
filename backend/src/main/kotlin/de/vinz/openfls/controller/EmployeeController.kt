@@ -3,10 +3,10 @@ package de.vinz.openfls.controller
 import de.vinz.openfls.dtos.EmployeeDto
 import de.vinz.openfls.dtos.PermissionDto
 import de.vinz.openfls.dtos.UnprofessionalDto
-import de.vinz.openfls.model.Employee
-import de.vinz.openfls.model.EmployeeAccess
-import de.vinz.openfls.model.Permission
-import de.vinz.openfls.model.Unprofessional
+import de.vinz.openfls.entities.Employee
+import de.vinz.openfls.entities.EmployeeAccess
+import de.vinz.openfls.entities.Permission
+import de.vinz.openfls.entities.Unprofessional
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpHeaders
@@ -24,7 +24,8 @@ class EmployeeController(
     private val modelMapper: ModelMapper,
     private val passwordEncoder: PasswordEncoder,
     private val accessService: AccessService,
-    private val helperService: HelperService
+    private val helperService: HelperService,
+    private val tokenService: TokenService
 ) {
     @PostMapping
     fun create(@Valid @RequestBody valueDto: EmployeeDto): Any {
@@ -102,7 +103,6 @@ class EmployeeController(
                 throw IllegalArgumentException("employee not found")
 
             val dto = modelMapper.map(employeeService.resetPassword(id), EmployeeDto::class.java)
-            println("${dto.id}")
 
             helperService.printLog(this::class.simpleName, "resetPassword [id=${id}]", false)
 
@@ -160,6 +160,57 @@ class EmployeeController(
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @GetMapping("assistance_plan/favorite")
+    fun getAssistancePlanFavorites(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): Any {
+        return try {
+            val userId = tokenService.getUserInfo(token)
+
+            ResponseEntity.ok(employeeService.getAssistancePlanAsFavorites(userId.first))
+        } catch (ex: Exception) {
+            helperService.printLog(this::class.simpleName, "getAssistancePlanFavorites - ${ex.message}", true)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @PostMapping("assistance_plan/favorite/{id}")
+    fun addAssistancePlanFavorite(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                                  @PathVariable id: Long): Any {
+        return try {
+            val userId = tokenService.getUserInfo(token)
+
+            employeeService.addAssistancePlanAsFavorite(id, userId.first)
+
+            ResponseEntity.ok()
+        } catch (ex: Exception) {
+            helperService.printLog(this::class.simpleName, "addAssistancePlanFavorite [id=${id}] - ${ex.message}", true)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @DeleteMapping("assistance_plan/favorite/{id}")
+    fun deleteAssistancePlanFavorite(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
+                                     @PathVariable id: Long): Any {
+        return try {
+            val userId = tokenService.getUserInfo(token)
+
+            employeeService.deleteAssistancePlanAsFavorite(id, userId.first)
+
+            ResponseEntity.ok()
+        } catch (ex: Exception) {
+            helperService.printLog(this::class.simpleName, "deleteAssistancePlanFavorite [id=${id}] - ${ex.message}", true)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST)
         }
     }
 

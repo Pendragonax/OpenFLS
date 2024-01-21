@@ -1,7 +1,7 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.model.Client
+import de.vinz.openfls.entities.Client
 import de.vinz.openfls.repositories.ClientRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

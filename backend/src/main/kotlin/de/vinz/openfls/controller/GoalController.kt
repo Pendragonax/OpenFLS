@@ -2,8 +2,8 @@ package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.GoalDto
 import de.vinz.openfls.dtos.GoalHourDto
-import de.vinz.openfls.model.Goal
-import de.vinz.openfls.model.GoalHour
+import de.vinz.openfls.entities.Goal
+import de.vinz.openfls.entities.GoalHour
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpHeaders

@@ -1,0 +1,16 @@
+.mat-chip {
+  font-weight: lighter;
+  max-width: 500px;
+}
+
+.mat-chip.mat-standard-chip {
+  background-color: #a39ebf;
+}
+
+.mat-hour-chip {
+  background-color: #9ebfab !important;
+}
+
+.wrap-content {
+  white-space: pre-line;
+}

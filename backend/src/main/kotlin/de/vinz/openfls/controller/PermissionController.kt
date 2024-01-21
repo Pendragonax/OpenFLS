@@ -1,12 +1,11 @@
 package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.PermissionDto
-import de.vinz.openfls.model.Permission
+import de.vinz.openfls.entities.Permission
 import de.vinz.openfls.repositories.PermissionRepository
 import de.vinz.openfls.repositories.EmployeeRepository
 import de.vinz.openfls.repositories.InstitutionRepository
 import de.vinz.openfls.services.HelperService
-import de.vinz.openfls.services.PermissionService
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

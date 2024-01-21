@@ -27,6 +27,10 @@ import {GoalDto} from "../../../dtos/goal-dto.model";
 import {HourTypeDto} from "../../../dtos/hour-type-dto.model";
 import {HourTypeService} from "../../../services/hour-type.service";
 import {ServiceService} from "../../../services/service.service";
+import {EmployeeService} from "../../../services/employee.service";
+import {MatDialog} from "@angular/material/dialog";
+import {GoalEvaluationModalComponent} from "../../../modals/goal-evaluation-modal/goal-evaluation-modal.component";
+import {ConfirmationModalComponent} from "../../../modals/confirmation-modal/confirmation-modal.component";
 
 @Component({
   selector: 'app-assistance-plans',
@@ -50,6 +54,7 @@ export class AssistancePlansComponent
   @Input() client$: ReplaySubject<ClientView> = new ReplaySubject<ClientView>();
   @Input() sponsor$: ReplaySubject<SponsorDto> = new ReplaySubject<SponsorDto>();
   @Input() institution$: ReplaySubject<InstitutionView> = new ReplaySubject<InstitutionView>();
+  @Input() favorites$: ReplaySubject<Boolean> = new ReplaySubject<Boolean>();
   @Input() hideInstitutionColumn: boolean = false;
   @Input() hideClientColumn: boolean = false;
   @Input() hideSponsorColumn: boolean = false;
@@ -101,7 +106,9 @@ export class AssistancePlansComponent
     private institutionService: InstitutionService,
     private serviceService: ServiceService,
     private hourTypeService: HourTypeService,
+    private employeeService: EmployeeService,
     private comparer: Comparer,
+    private matDialog: MatDialog,
     private converter: Converter
   ) {
     super(modalService, helperService);
@@ -136,6 +143,13 @@ export class AssistancePlansComponent
       }
     });
 
+    this.favorites$.subscribe({
+      next: (value) => {
+        this.addAvailable = false;
+        this.loadValuesByFavorites();
+      }
+    })
+
     combineLatest([
       this.institutionService.allValues$,
       this.hourTypeService.allValues$
@@ -147,20 +161,42 @@ export class AssistancePlansComponent
   }
 
   loadValuesByClient() {
+    this.isSubmitting = true;
     this.assistancePlanService.getCombinationByClientId(this.client.dto.id).subscribe({
-      next: (values) => this.setTableSource(values)
+      next: (values) => {
+        this.isSubmitting = false
+        this.setTableSource(values)
+      }
     });
   }
 
   loadValuesBySponsor() {
+    this.isSubmitting = true;
     this.assistancePlanService.getCombinationBySponsorId(this.sponsor.id).subscribe({
-      next: (values) => this.setTableSource(values)
+      next: (values) => {
+        this.isSubmitting = false
+        this.setTableSource(values)
+      }
     });
   }
 
   loadValuesByInstitution() {
+    this.isSubmitting = true;
     this.assistancePlanService.getCombinationByInstitutionId(this.institution.dto.id).subscribe({
-      next: (values) => this.setTableSource(values)
+      next: (values) => {
+        this.isSubmitting = false
+        this.setTableSource(values)
+      }
+    });
+  }
+
+  loadValuesByFavorites() {
+    this.isSubmitting = true;
+    this.assistancePlanService.getCombinationByFavorites().subscribe({
+      next: (values) => {
+        this.isSubmitting = false
+        this.setTableSource(values)
+      }
     });
   }
 
@@ -323,6 +359,33 @@ export class AssistancePlansComponent
           return 0;
       }
     });
+  }
+
+  addAssistancePlanAsFavorite(id: number) {
+    this.employeeService.addAssistancePlanFavorite(id).subscribe({
+      next: value => this.loadValues()
+    })
+  }
+
+  deleteAssistancePlanAsFavorite(id: number) {
+    this.openFavoriteDeleteConfirmationModal(() => {
+      this.employeeService.deleteAssistancePlanFavorite(id).subscribe({
+        next: value => this.loadValues()
+      })
+    });
+  }
+
+  openFavoriteDeleteConfirmationModal(operation: () => void) {
+    let dialogRef = this.matDialog.open(ConfirmationModalComponent);
+    let dialog = dialogRef.componentInstance;
+    dialog.description = "Wollen sie diesen Hilfeplan wirklich aus den Favoriten löschen?";
+    dialogRef.afterClosed().subscribe({
+      next: value => {
+        if (value) {
+          operation()
+        }
+      }
+    })
   }
 
   getDateString(date: string | null) : string {

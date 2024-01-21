@@ -1,6 +1,6 @@
 package de.vinz.openfls
 
-import de.vinz.openfls.exceptions.ValueTypeNotFoundException
+import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,6 +20,12 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
         val type = ex.requiredType!!.simpleName
         val value = ex.value
         val message = String.format("'%s' should be a valid '%s' and '%s' isn't", name, type, value)
+        return handleExceptionInternal(ex, message, HttpHeaders(), HttpStatus.BAD_REQUEST, request!!);
+    }
+
+    @ExceptionHandler(NoGoalFoundWithHourTypeException::class)
+    fun handleTypeMismatch(ex: NoGoalFoundWithHourTypeException, request: WebRequest?): ResponseEntity<Any> {
+        val message = ex.message
         return handleExceptionInternal(ex, message, HttpHeaders(), HttpStatus.BAD_REQUEST, request!!);
     }
 }

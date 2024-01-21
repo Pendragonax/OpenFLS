@@ -1,7 +1,7 @@
 package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.SponsorDto
-import de.vinz.openfls.model.Sponsor
+import de.vinz.openfls.entities.Sponsor
 import de.vinz.openfls.services.HelperService
 import de.vinz.openfls.services.SponsorService
 import org.modelmapper.ModelMapper

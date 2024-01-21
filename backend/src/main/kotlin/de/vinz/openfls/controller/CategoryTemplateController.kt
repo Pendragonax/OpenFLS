@@ -3,7 +3,7 @@ package de.vinz.openfls.controller
 import de.vinz.openfls.dtos.CategoryDto
 import de.vinz.openfls.dtos.CategoryTemplateDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.model.CategoryTemplate
+import de.vinz.openfls.entities.CategoryTemplate
 import de.vinz.openfls.services.CategoryTemplateService
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger

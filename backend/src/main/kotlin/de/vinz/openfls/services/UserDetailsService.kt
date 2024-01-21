@@ -1,8 +1,8 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.CustomUserDetails
-import de.vinz.openfls.model.Employee
-import de.vinz.openfls.model.EmployeeAccess
+import de.vinz.openfls.entities.CustomUserDetails
+import de.vinz.openfls.entities.Employee
+import de.vinz.openfls.entities.EmployeeAccess
 import de.vinz.openfls.repositories.EmployeeAccessRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.userdetails.UserDetails

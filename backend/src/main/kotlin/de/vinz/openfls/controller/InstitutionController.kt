@@ -2,7 +2,7 @@ package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.AssistancePlanDto
 import de.vinz.openfls.dtos.InstitutionDto
-import de.vinz.openfls.model.Institution
+import de.vinz.openfls.entities.Institution
 import de.vinz.openfls.services.HelperService
 import de.vinz.openfls.services.InstitutionService
 import org.modelmapper.ModelMapper

@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.*
+import de.vinz.openfls.entities.*
 import de.vinz.openfls.repositories.InstitutionRepository
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional

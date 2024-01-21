@@ -1,10 +1,13 @@
 package de.vinz.openfls.services
 
+import de.vinz.openfls.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.dtos.PasswordDto
-import de.vinz.openfls.model.*
+import de.vinz.openfls.entities.*
 import de.vinz.openfls.repositories.*
+import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 import kotlin.IllegalArgumentException
 
@@ -12,9 +15,14 @@ import kotlin.IllegalArgumentException
 class EmployeeService(
     private val employeeRepository: EmployeeRepository,
     private val employeeAccessRepository: EmployeeAccessRepository,
+    private val clientRepository: ClientRepository,
+    private val sponsorRepository: SponsorRepository,
     private val permissionServiceImpl: PermissionService,
     private val unprofessionalService: UnprofessionalService,
-    private val passwordEncoder: PasswordEncoder
+    private val assistancePlanRepository: AssistancePlanRepository,
+    private val institutionRepository: InstitutionRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val modelMapper: ModelMapper
 ) : GenericService<Employee> {
 
     @Transactional
@@ -123,6 +131,39 @@ class EmployeeService(
         } ?: throw IllegalArgumentException("employee doesnt exists")
     }
 
+    fun getAssistancePlanAsFavorites(employeeId: Long): List<AssistancePlanResponseDto> {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+
+        return employee.assistancePlanFavorites
+                .map { modelMapper.map(it, AssistancePlanResponseDto::class.java) }
+                .sortedByDescending { it.end }
+    }
+
+    @Transactional
+    fun addAssistancePlanAsFavorite(assistancePlanId: Long, employeeId: Long) {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+        val assistancePlan = assistancePlanRepository.findById(assistancePlanId)
+                .orElseThrow { EntityNotFoundException() }
+
+        if (employee.assistancePlanFavorites.none { it.id == assistancePlanId }) {
+            employee.assistancePlanFavorites.add(assistancePlan)
+            employeeRepository.save(employee)
+        }
+    }
+
+    @Transactional
+    fun deleteAssistancePlanAsFavorite(assistancePlanId: Long, employeeId: Long) {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+
+        if (employee.assistancePlanFavorites.any { it.id == assistancePlanId }) {
+            employee.assistancePlanFavorites.removeIf { it.id == assistancePlanId }
+            employeeRepository.save(employee)
+        }
+    }
+
     override fun getAll(): List<Employee> {
         return employeeRepository.findAll().map {
             it.apply {
@@ -143,7 +184,9 @@ class EmployeeService(
 
     fun getById(id: Long, adminMode: Boolean): Employee? {
         val value = employeeRepository.findById(id).orElse(null)?.apply {
-            this.access?.password = ""
+            if (!adminMode) {
+                this.access?.password = ""
+            }
         }
 
         return value

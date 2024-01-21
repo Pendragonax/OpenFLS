@@ -34,4 +34,14 @@ export class EmployeeService extends Base<EmployeeDto>{
     return this.http
       .put<EmployeeDto>(`${environment.api_url}${this.url}/reset_password/${id}`, null)
   }
+
+  addAssistancePlanFavorite(id: number) {
+    return this.http
+      .post(`${environment.api_url}${this.url}/assistance_plan/favorite/${id}`, null)
+  }
+
+  deleteAssistancePlanFavorite(id: number) {
+    return this.http
+      .delete(`${environment.api_url}${this.url}/assistance_plan/favorite/${id}`)
+  }
 }

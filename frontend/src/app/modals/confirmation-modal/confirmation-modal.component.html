@@ -1,0 +1,8 @@
+<h1 mat-dialog-title>{{title}}</h1>
+<div mat-dialog-content>
+  <p>{{description}}</p>
+</div>
+<div mat-dialog-actions class="justify-content-end">
+  <button mat-raised-button (click)="onDismiss()">{{ABORT_BUTTON_DESCRIPTION}}</button>
+  <button mat-raised-button color="primary" (click)="onConfirm()">{{CONFIRM_BUTTON_DESCRIPTION}}</button>
+</div>

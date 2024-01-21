@@ -3,15 +3,16 @@ package de.vinz.openfls.services
 import de.vinz.openfls.dtos.ServiceTimeDayDto
 import de.vinz.openfls.dtos.ServiceTimeDto
 import org.springframework.stereotype.Service
+import kotlin.math.min
 
 @Service
 class ConverterService {
     /**
-     * This method convert the [List] of [de.vinz.openfls.model.Service] into [ServiceTimeDto]
-     * @param services - [List] [de.vinz.openfls.model.Service]
+     * This method convert the [List] of [de.vinz.openfls.entities.Service] into [ServiceTimeDto]
+     * @param services - [List] [de.vinz.openfls.entities.Service]
      * @return [ServiceTimeDto]
      */
-    fun convertServiceDTOsToServiceTimeDto(services: List<de.vinz.openfls.model.Service>): ServiceTimeDto {
+    fun convertServiceDTOsToServiceTimeDto(services: List<de.vinz.openfls.entities.Service>): ServiceTimeDto {
         if (services.isEmpty())
             return ServiceTimeDto()
 
@@ -26,5 +27,19 @@ class ConverterService {
             .toMutableSet()
 
         return serviceTimeDto
+    }
+
+    fun convertMinutesToHour(minutes: Double): Double {
+        val minutesPart = minutes % 60
+        val hoursPart = (minutes - minutesPart) / 60
+
+        return hoursPart + (minutesPart / 100.0)
+    }
+
+    fun convertHourToMinutes(hour: Double): Int {
+        val hours = hour.toInt()
+        val minutesPart = ((hour - hours) * 100).toInt()
+
+        return hours * 60 + minutesPart
     }
 }

@@ -102,21 +102,21 @@
               *matCellDef="let sponsor"
               class="text-center">
             <div class="">
-              <button mat-mini-fab
-                      color="accent"
+              <button mat-icon-button
+                      color="primary"
                       class="m-1"
                       *showOnRole="'leader'"
                       (click)="openEditModal(editableModal, sponsor)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="primary"
                       class="m-1"
                       *showOnRole="'leader'"
                       [routerLink]="['/sponsors/detail/', sponsor.id ]">
                 <mat-icon>search</mat-icon>
               </button>
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="warn"
                       class="m-1"
                       *showOnRole="'admin'"

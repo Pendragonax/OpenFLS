@@ -20,6 +20,7 @@ export class HomeComponent implements OnInit {
 
   tableColumns: string[] = ['name', 'lead', 'write', 'read', 'affiliated'];
   pwdPattern = '(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&].{8,}';
+  favorite$: ReplaySubject<Boolean> = new ReplaySubject<Boolean>();
 
   currentEmployee: EmployeeDto = new EmployeeDto();
   currentEmployee$: ReplaySubject<EmployeeDto> = new ReplaySubject<EmployeeDto>();
@@ -56,6 +57,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.loadValues();
     this.initFormSubscriptions();
+    this.favorite$.next(true);
   }
 
   loadValues() {

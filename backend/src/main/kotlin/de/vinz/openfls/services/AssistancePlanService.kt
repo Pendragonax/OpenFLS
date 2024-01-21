@@ -4,7 +4,7 @@ import de.vinz.openfls.dtos.ActualTargetValueDto
 import de.vinz.openfls.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.dtos.HourTypeDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.model.AssistancePlan
+import de.vinz.openfls.entities.AssistancePlan
 import de.vinz.openfls.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ServiceRepository

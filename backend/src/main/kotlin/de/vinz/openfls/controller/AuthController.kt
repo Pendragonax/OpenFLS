@@ -2,9 +2,8 @@ package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.*
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.model.*
+import de.vinz.openfls.entities.*
 import de.vinz.openfls.services.EmployeeService
-import de.vinz.openfls.services.HelperService
 import de.vinz.openfls.services.TokenService
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger

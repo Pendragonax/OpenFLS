@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.HourType
+import de.vinz.openfls.entities.HourType
 import de.vinz.openfls.repositories.HourTypeRepository
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
