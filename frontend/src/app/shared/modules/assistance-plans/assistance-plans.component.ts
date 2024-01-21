@@ -29,6 +29,8 @@ import {HourTypeService} from "../../../services/hour-type.service";
 import {ServiceService} from "../../../services/service.service";
 import {EmployeeService} from "../../../services/employee.service";
 import {MatDialog} from "@angular/material/dialog";
+import {GoalEvaluationModalComponent} from "../../../modals/goal-evaluation-modal/goal-evaluation-modal.component";
+import {ConfirmationModalComponent} from "../../../modals/confirmation-modal/confirmation-modal.component";
 
 @Component({
   selector: 'app-assistance-plans',
@@ -366,8 +368,23 @@ export class AssistancePlansComponent
   }
 
   deleteAssistancePlanAsFavorite(id: number) {
-    this.employeeService.deleteAssistancePlanFavorite(id).subscribe({
-      next: value => this.loadValues()
+    this.openFavoriteDeleteConfirmationModal(() => {
+      this.employeeService.deleteAssistancePlanFavorite(id).subscribe({
+        next: value => this.loadValues()
+      })
+    });
+  }
+
+  openFavoriteDeleteConfirmationModal(operation: () => void) {
+    let dialogRef = this.matDialog.open(ConfirmationModalComponent);
+    let dialog = dialogRef.componentInstance;
+    dialog.description = "Wollen sie diesen Hilfeplan wirklich aus den Favoriten löschen?";
+    dialogRef.afterClosed().subscribe({
+      next: value => {
+        if (value) {
+          operation()
+        }
+      }
     })
   }
 

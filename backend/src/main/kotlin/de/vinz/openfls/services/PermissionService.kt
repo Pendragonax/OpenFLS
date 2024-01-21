@@ -1,8 +1,8 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.Employee
-import de.vinz.openfls.model.Institution
-import de.vinz.openfls.model.Permission
+import de.vinz.openfls.entities.Employee
+import de.vinz.openfls.entities.Institution
+import de.vinz.openfls.entities.Permission
 import de.vinz.openfls.repositories.EmployeeRepository
 import de.vinz.openfls.repositories.InstitutionRepository
 import de.vinz.openfls.repositories.PermissionRepository

@@ -14,6 +14,7 @@ import {AssistancePlanView} from "../models/assistance-plan-view.model";
 import {SponsorService} from "./sponsor.service";
 import {SponsorDto} from "../dtos/sponsor-dto.model";
 import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
+import {AssistancePlanResponseDto} from "../dtos/assistance-plan-response-dto.model";
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +33,11 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
   }
 
   override initialLoad() {
+  }
+
+  getTestById(id: number): Observable<AssistancePlanResponseDto> {
+    return this.http
+      .get<AssistancePlanResponseDto>(`${environment.api_url}${this.url}/${id}`)
   }
 
   getByClientId(id: number): Observable<AssistancePlanDto[]> {

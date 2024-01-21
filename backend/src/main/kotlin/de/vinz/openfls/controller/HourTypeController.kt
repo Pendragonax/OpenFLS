@@ -1,7 +1,7 @@
 package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.HourTypeDto
-import de.vinz.openfls.model.HourType
+import de.vinz.openfls.entities.HourType
 import de.vinz.openfls.services.HelperService
 import de.vinz.openfls.services.HourTypeService
 import org.modelmapper.ModelMapper

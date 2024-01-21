@@ -3,10 +3,10 @@ package de.vinz.openfls.controller
 import de.vinz.openfls.dtos.EmployeeDto
 import de.vinz.openfls.dtos.PermissionDto
 import de.vinz.openfls.dtos.UnprofessionalDto
-import de.vinz.openfls.model.Employee
-import de.vinz.openfls.model.EmployeeAccess
-import de.vinz.openfls.model.Permission
-import de.vinz.openfls.model.Unprofessional
+import de.vinz.openfls.entities.Employee
+import de.vinz.openfls.entities.EmployeeAccess
+import de.vinz.openfls.entities.Permission
+import de.vinz.openfls.entities.Unprofessional
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpHeaders

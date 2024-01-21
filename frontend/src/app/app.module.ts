@@ -76,6 +76,16 @@ import { OverviewValueTypeInfoModalComponent } from './modals/overview-valuetype
 import { MatDialogModule} from "@angular/material/dialog";
 import { OverviewPermissionInfoModalComponent } from './modals/overview-permission-info-modal/overview-permission-info-modal.component';
 import { GoalEvaluationComponent } from './pages/goal-evaluation/goal-evaluation.component';
+import { GoalSingleComponent } from './components/goal-single/goal-single.component';
+import {MatChipsModule} from "@angular/material/chips";
+import { YearMonthSelectionComponent } from './components/year-month-selection/year-month-selection.component';
+import { GoalTimeEvaluationFilterComponent } from './pages/goal-evaluation/components/goal-time-evaluation-filter/goal-time-evaluation-filter.component';
+import { TableButtonComponent } from './components/table-button/table-button.component';
+import { GoalEvaluationFilterComponent } from './pages/goal-evaluation/components/goal-evaluation-filter/goal-evaluation-filter.component';
+import { GoalEvaluationModalComponent } from './modals/goal-evaluation-modal/goal-evaluation-modal.component';
+import { ConfirmationModalComponent } from './modals/confirmation-modal/confirmation-modal.component';
+import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
+import { ErrorIconComponent } from './components/error-icon/error-icon.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: ''},
@@ -125,42 +135,52 @@ const routes: Routes = [
     ServiceEvaluationOverviewComponent,
     OverviewValueTypeInfoModalComponent,
     OverviewPermissionInfoModalComponent,
-    GoalEvaluationComponent
+    GoalEvaluationComponent,
+    GoalSingleComponent,
+    YearMonthSelectionComponent,
+    GoalTimeEvaluationFilterComponent,
+    TableButtonComponent,
+    GoalEvaluationFilterComponent,
+    GoalEvaluationModalComponent,
+    ConfirmationModalComponent,
+    LoadingSpinnerComponent,
+    ErrorIconComponent
   ],
-    imports: [
-        RouterModule.forRoot(routes),
-        BrowserModule,
-        AppRoutingModule,
-        HttpClientModule,
-        ReactiveFormsModule,
-        NgbModule,
-        FormsModule,
-        BrowserAnimationsModule,
-        MatIconModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatStepperModule,
-        MatInputModule,
-        MatTabsModule,
-        MatCheckboxModule,
-        MatSelectModule,
-        MatTableModule,
-        MatCardModule,
-        MatProgressSpinnerModule,
-        MatTooltipModule,
-        MatListModule,
-        MatSidenavModule,
-        MatSnackBarModule,
-        MatExpansionModule,
-        MatSortModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatAutocompleteModule,
-        MatToolbarModule,
-        MatPaginatorModule,
-        MatRadioModule,
-        MatDialogModule
-    ],
+  imports: [
+    RouterModule.forRoot(routes),
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    ReactiveFormsModule,
+    NgbModule,
+    FormsModule,
+    BrowserAnimationsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatStepperModule,
+    MatInputModule,
+    MatTabsModule,
+    MatCheckboxModule,
+    MatSelectModule,
+    MatTableModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatListModule,
+    MatSidenavModule,
+    MatSnackBarModule,
+    MatExpansionModule,
+    MatSortModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatAutocompleteModule,
+    MatToolbarModule,
+    MatPaginatorModule,
+    MatRadioModule,
+    MatDialogModule,
+    MatChipsModule
+  ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: MatPaginatorIntl, useValue: getGermanPaginatorIntl() },

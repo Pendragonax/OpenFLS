@@ -1,8 +1,8 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.model.Category
-import de.vinz.openfls.model.CategoryTemplate
+import de.vinz.openfls.entities.Category
+import de.vinz.openfls.entities.CategoryTemplate
 import de.vinz.openfls.repositories.CategoryTemplateRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

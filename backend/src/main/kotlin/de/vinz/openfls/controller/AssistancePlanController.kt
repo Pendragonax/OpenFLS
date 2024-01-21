@@ -2,9 +2,10 @@ package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.AssistancePlanDto
 import de.vinz.openfls.dtos.AssistancePlanHourDto
+import de.vinz.openfls.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.model.AssistancePlan
-import de.vinz.openfls.model.AssistancePlanHour
+import de.vinz.openfls.entities.AssistancePlan
+import de.vinz.openfls.entities.AssistancePlanHour
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
@@ -216,7 +217,7 @@ class AssistancePlanController(
             val startMs = System.currentTimeMillis()
 
             val entity = assistancePlanService.getById(id)
-            val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
+            val dto = modelMapper.map(entity, AssistancePlanResponseDto::class.java)
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",

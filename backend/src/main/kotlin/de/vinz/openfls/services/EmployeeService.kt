@@ -1,13 +1,12 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.dtos.AssistancePlanDto
+import de.vinz.openfls.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.dtos.PasswordDto
-import de.vinz.openfls.model.*
+import de.vinz.openfls.entities.*
 import de.vinz.openfls.repositories.*
 import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import javax.persistence.Entity
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 import kotlin.IllegalArgumentException
@@ -16,9 +15,12 @@ import kotlin.IllegalArgumentException
 class EmployeeService(
     private val employeeRepository: EmployeeRepository,
     private val employeeAccessRepository: EmployeeAccessRepository,
+    private val clientRepository: ClientRepository,
+    private val sponsorRepository: SponsorRepository,
     private val permissionServiceImpl: PermissionService,
     private val unprofessionalService: UnprofessionalService,
     private val assistancePlanRepository: AssistancePlanRepository,
+    private val institutionRepository: InstitutionRepository,
     private val passwordEncoder: PasswordEncoder,
     private val modelMapper: ModelMapper
 ) : GenericService<Employee> {
@@ -129,11 +131,13 @@ class EmployeeService(
         } ?: throw IllegalArgumentException("employee doesnt exists")
     }
 
-    fun getAssistancePlanAsFavorites(employeeId: Long): List<AssistancePlanDto> {
+    fun getAssistancePlanAsFavorites(employeeId: Long): List<AssistancePlanResponseDto> {
         val employee = employeeRepository.findById(employeeId)
                 .orElseThrow { EntityNotFoundException() }
 
-        return employee.assistancePlanFavorites.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return employee.assistancePlanFavorites
+                .map { modelMapper.map(it, AssistancePlanResponseDto::class.java) }
+                .sortedByDescending { it.end }
     }
 
     @Transactional
@@ -180,7 +184,9 @@ class EmployeeService(
 
     fun getById(id: Long, adminMode: Boolean): Employee? {
         val value = employeeRepository.findById(id).orElse(null)?.apply {
-            this.access?.password = ""
+            if (!adminMode) {
+                this.access?.password = ""
+            }
         }
 
         return value

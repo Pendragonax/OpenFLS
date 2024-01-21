@@ -3,7 +3,7 @@ package de.vinz.openfls.controller
 import de.vinz.openfls.dtos.ClientDto
 import de.vinz.openfls.dtos.ClientSimpleDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.model.Client
+import de.vinz.openfls.entities.Client
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger

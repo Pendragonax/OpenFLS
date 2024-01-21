@@ -4,7 +4,7 @@ import de.vinz.openfls.dtos.ServiceDto
 import de.vinz.openfls.dtos.ServiceFilterDto
 import de.vinz.openfls.dtos.ServiceXLDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.model.Service
+import de.vinz.openfls.entities.Service
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
@@ -186,7 +186,7 @@ class ServiceController(
                 throw IllegalArgumentException("Your not the allowed to read this entry")
 
             if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms and found %d entities",
+                logger.info(String.format("%s getById took %d ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs))
             }
@@ -296,7 +296,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                     ex.message,

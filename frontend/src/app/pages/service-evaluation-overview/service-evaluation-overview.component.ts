@@ -22,7 +22,7 @@ import {Converter} from "../../shared/converter.helper";
 import {
   OverviewValueTypeInfoModalComponent
 } from "../../modals/overview-valuetype-info-modal/overview-value-type-info-modal.component";
-import {MatDialog, MatDialogConfig} from "@angular/material/dialog";
+import {MatDialog} from "@angular/material/dialog";
 import {HttpErrorResponse, HttpStatusCode} from "@angular/common/http";
 import {
   OverviewPermissionInfoModalComponent

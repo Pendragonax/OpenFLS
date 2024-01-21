@@ -1,14 +1,61 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.AssistancePlanDto
+import de.vinz.openfls.exceptions.YearOutOfRangeException
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 class DateService {
     companion object {
+        fun getStartAndEndInYearLocalDatetime(year: Int, start: LocalDate, end: LocalDate): Pair<LocalDateTime, LocalDateTime> {
+            val startAndEnd = getStartAndEndInYear(year, start, end)
+
+            return Pair(LocalDateTime.of(startAndEnd.first, LocalTime.of(0,0,0)),
+                    LocalDateTime.of(startAndEnd.second, LocalTime.of(23,59,59)))
+        }
+
+        fun getStartAndEndInYear(year: Int, start: LocalDate, end: LocalDate): Pair<LocalDate, LocalDate> {
+            var resultStart = LocalDate.of(year, 1, 1)
+            var resultEnd = LocalDate.of(year, 12, 31)
+
+            if (start.year < year) {
+                resultEnd = if (end > resultStart) {
+                    if (end >= resultEnd) resultEnd else end;
+                } else if (end == resultStart) {
+                    LocalDate.of(year, 1, 1)
+                } else {
+                    throw YearOutOfRangeException()
+                }
+                return Pair(resultStart, resultEnd)
+            }
+
+            if (start <= resultEnd) {
+                resultStart = start
+                resultEnd = if (end > resultEnd) {
+                    resultEnd
+                } else if (end < resultEnd) {
+                    end
+                } else {
+                    throw YearOutOfRangeException()
+                }
+                return Pair(resultStart, resultEnd)
+            }
+
+            throw YearOutOfRangeException()
+        }
+
         fun isDateInAssistancePlan(date: LocalDate, assistancePlanDto: AssistancePlanDto): Boolean {
             return !date.isBefore(assistancePlanDto.start) && !date.isAfter(assistancePlanDto.end)
+        }
+
+        fun isYearMonthInBetweenInclusive(yearMonth: YearMonth, start: LocalDate, end: LocalDate): Boolean {
+            val endYearMonth = YearMonth.of(end.year, end.monthValue)
+            val startYearMonth = YearMonth.of(start.year, start.monthValue)
+            return (yearMonth.isBefore(endYearMonth) || yearMonth == endYearMonth) &&
+                    (yearMonth.isAfter(startYearMonth) || yearMonth == startYearMonth)
         }
 
         fun containsStartAndEndASpecificYearMonth(start: LocalDate, end: LocalDate, yearMonth: YearMonth): Boolean {
@@ -41,6 +88,37 @@ class DateService {
             end =  if (assistancePlanDto.end > end) end else assistancePlanDto.end
 
             return ChronoUnit.DAYS.between(start, end) + 1
+        }
+
+        fun countDaysOfMonthAndYearBetweenStartAndEnd(year: Int, month: Int, start: LocalDate, end: LocalDate): Int {
+            val calcStart = LocalDate.of(year, month, 1)
+            val calcEnd = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+            if (start > calcEnd || end < calcStart) {
+                return 0
+            }
+
+            if (start == calcEnd || end == calcStart) {
+                return 1;
+            }
+
+            if (start < calcStart && end > calcEnd) {
+                return calcEnd.dayOfMonth
+            }
+
+            if (start >= calcStart && end <= calcEnd) {
+                return (ChronoUnit.DAYS.between(start, end) + 1).toInt()
+            }
+
+            if (start >= calcStart) {
+                return (ChronoUnit.DAYS.between(start, calcEnd) + 1).toInt()
+            }
+
+            if (end <= calcEnd) {
+                return (ChronoUnit.DAYS.between(calcStart, end) + 1).toInt()
+            }
+
+            return 0;
         }
 
         fun countDaysOfAssistancePlan(year: Int, assistancePlanDto: AssistancePlanDto): Long {

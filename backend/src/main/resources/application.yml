@@ -17,6 +17,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
   jackson:
     serialization:
       fail-on-empty-beans: false

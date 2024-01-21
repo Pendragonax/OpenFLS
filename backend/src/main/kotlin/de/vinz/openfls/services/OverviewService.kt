@@ -9,6 +9,8 @@ import de.vinz.openfls.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ClientRepository
 import de.vinz.openfls.repositories.ServiceRepository
 import org.modelmapper.ModelMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -22,6 +24,8 @@ class OverviewService(
         private val assistancePlanRepository: AssistancePlanRepository,
         private val clientRepository: ClientRepository,
         private val modelMapper: ModelMapper) {
+
+    private val logger: Logger = LoggerFactory.getLogger(OverviewService::class.java)
 
     @Throws(UserNotAllowedException::class, IllegalTimeException::class)
     fun getExecutedHoursOverview(token: String,
@@ -181,7 +185,7 @@ class OverviewService(
         return assistancePlanOverviewDTOs;
     }
 
-    private fun getExecutedHoursYearly(services: List<de.vinz.openfls.model.Service>,
+    private fun getExecutedHoursYearly(services: List<de.vinz.openfls.entities.Service>,
                                        assistancePlanDTOs: List<AssistancePlanDto>,
                                        clientDTOs: List<ClientSimpleDto>,
                                        toTimeDouble: Boolean = true): List<AssistancePlanOverviewDTO> {
@@ -206,7 +210,7 @@ class OverviewService(
         return assistancePlanOverviewDTOs
     }
 
-    private fun getExecutedHoursMonthly(services: List<de.vinz.openfls.model.Service>,
+    private fun getExecutedHoursMonthly(services: List<de.vinz.openfls.entities.Service>,
                                         assistancePlanDTOs: List<AssistancePlanDto>,
                                         clientDTOs: List<ClientSimpleDto>,
                                         year: Int,
@@ -234,7 +238,7 @@ class OverviewService(
         return assistancePlanOverviewDTOs
     }
 
-    private fun getDifferenceHoursYearly(services: List<de.vinz.openfls.model.Service>,
+    private fun getDifferenceHoursYearly(services: List<de.vinz.openfls.entities.Service>,
                                          assistancePlanDTOs: List<AssistancePlanDto>,
                                          clientSimpleDTOs: List<ClientSimpleDto>,
                                          hourTypeId: Long?,
@@ -248,7 +252,7 @@ class OverviewService(
         return subtractApprovedFromExecutedOverview(executedOverviewDTOs, approvedOverviewDTOs, toTimeDouble)
     }
 
-    private fun getDifferenceHoursMonthly(services: List<de.vinz.openfls.model.Service>,
+    private fun getDifferenceHoursMonthly(services: List<de.vinz.openfls.entities.Service>,
                                           assistancePlanDTOs: List<AssistancePlanDto>,
                                           clientSimpleDTOs: List<ClientSimpleDto>,
                                           hourTypeId: Long?,
@@ -283,9 +287,14 @@ class OverviewService(
 
     private fun convertDoubleToMinuteDouble(assistancePlanOverviewDTOs: List<AssistancePlanOverviewDTO>) {
         assistancePlanOverviewDTOs.forEach { assistancePlanOverviewDTO ->
-            for (i in 0 until assistancePlanOverviewDTO.values.size) {
+            assistancePlanOverviewDTO.values[0] = 0.0
+            for (i in 1 until assistancePlanOverviewDTO.values.size) {
                 assistancePlanOverviewDTO.values[i] =
                         NumberService.convertDoubleToTimeDouble(assistancePlanOverviewDTO.values[i])
+                assistancePlanOverviewDTO.values[0] =
+                        NumberService.sumTimeDoubles(
+                                assistancePlanOverviewDTO.values[0],
+                                assistancePlanOverviewDTO.values[i])
             }
         }
     }
@@ -358,7 +367,7 @@ class OverviewService(
             month: Int?,
             hourTypeId: Long,
             areaId: Long?,
-            sponsorId: Long?): List<de.vinz.openfls.model.Service> {
+            sponsorId: Long?): List<de.vinz.openfls.entities.Service> {
         if (month == null) {
             if (areaId != null && sponsorId != null) {
                 return serviceRepository
@@ -440,16 +449,14 @@ class OverviewService(
             if (hourTypeId == null) {
                 0.0
             } else if (assistancePlanDto.hours.size > 0) {
-                NumberService.roundDoubleToTwoDigits(
                         assistancePlanDto.hours
                                 .filter { it.hourTypeId == hourTypeId }
-                                .sumOf { it.weeklyHours / 7 })
+                                .sumOf { it.weeklyHours / 7 }
             } else {
-                NumberService.roundDoubleToTwoDigits(
                         assistancePlanDto.goals
                                 .flatMap { it.hours }
                                 .filter { it.hourTypeId == hourTypeId }
-                                .sumOf { it.weeklyHours / 7 })
+                                .sumOf { it.weeklyHours / 7 }
             }
 
     @Throws(IllegalTimeException::class)
