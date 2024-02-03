@@ -3,7 +3,7 @@ version: '3.6'
 services:
   db:
     container_name: open_fls_db
-    image: mysql
+    image: mysql:8.3.0-oracle
     restart: always
     env_file: docker-compose.env
     volumes:
@@ -17,7 +17,7 @@ services:
 
   adminer:
     container_name: open_fls_adminer
-    image: adminer
+    image: adminer:4.8.1
     restart: always
     networks:
       - open-fls-network

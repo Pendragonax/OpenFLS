@@ -1,8 +1,11 @@
 package de.vinz.openfls.services
 
+import de.vinz.openfls.dtos.ClientInstitutionDto
+import de.vinz.openfls.dtos.ClientSimpleDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.entities.Client
 import de.vinz.openfls.repositories.ClientRepository
+import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -14,7 +17,8 @@ import javax.transaction.Transactional
 class ClientService(
     private val clientRepository: ClientRepository,
     private val institutionService: InstitutionService,
-    private val categoryTemplateService: CategoryTemplateService
+    private val categoryTemplateService: CategoryTemplateService,
+    private val modelMapper: ModelMapper
 ): GenericService<Client> {
 
     private val logger: Logger = LoggerFactory.getLogger(ClientService::class.java)
@@ -94,6 +98,22 @@ class ClientService(
         }
 
         return entity
+    }
+
+    fun getAllSimple(): List<ClientSimpleDto> {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        val clientsInstitutions = clientRepository.findAllClientSimpleDto()
+        val simpleClients = clientsInstitutions.map { modelMapper.map(it, ClientSimpleDto::class.java) }
+
+        if (logPerformance) {
+            logger.info(String.format("%s getAllSimple took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
+        }
+
+        return simpleClients
     }
 
     override fun getById(id: Long): Client? {

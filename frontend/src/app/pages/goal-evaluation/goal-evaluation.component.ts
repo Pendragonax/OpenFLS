@@ -6,7 +6,6 @@ import {PeriodMode} from "../../components/year-month-selection/PeriodMode";
 import {ReplaySubject} from "rxjs";
 import {DateService} from "../../services/date.service";
 import {Period} from "../../components/year-month-selection/Period";
-import {GoalResponseDto} from "../../dtos/goal-response-dto.model";
 import {TableButtonCell} from "../../components/table-button/TableButtonCell";
 import {MatDialog} from "@angular/material/dialog";
 import {GoalEvaluationModalComponent} from "../../modals/goal-evaluation-modal/goal-evaluation-modal.component";
@@ -54,6 +53,7 @@ export class GoalEvaluationComponent implements OnInit {
   // STATE
   isGenerating: boolean = false
   errorOccurred: boolean = true
+  goalTimesErrorOccurred: boolean = true
 
   constructor(private assistancePlanService: AssistancePlanService,
               private goalTimeEvaluationService: GoalTimeEvaluationService,
@@ -65,7 +65,7 @@ export class GoalEvaluationComponent implements OnInit {
 
   ngOnInit(): void {
     this.executeURLParams();
-    this.assistancePlanService.getTestById(this.assistancePlanId).subscribe({
+    this.assistancePlanService.getStrippedById(this.assistancePlanId).subscribe({
       next: value => {
         this.assistancePlan = value;
         this.loadValues();
@@ -113,7 +113,12 @@ export class GoalEvaluationComponent implements OnInit {
   }
 
   loadGoalTimes() {
-    this.errorOccurred = false
+    if (this.selectedGoalTimeHourTypeId <= 0 || this.assistancePlanId <= 0) {
+      this.goalTimesErrorOccurred = true
+      return
+    }
+
+    this.goalTimesErrorOccurred = false
     this.isGenerating = true
     this.isGenerating$.next(this.isGenerating)
 
@@ -129,7 +134,7 @@ export class GoalEvaluationComponent implements OnInit {
         error: _ => {
           this.isGenerating = false
           this.isGenerating$.next(this.isGenerating)
-          this.errorOccurred = true
+          this.goalTimesErrorOccurred = true
         }
       })
   }
@@ -231,7 +236,7 @@ export class GoalEvaluationComponent implements OnInit {
     dialog.goalId$.next(payload.goalId);
     dialog.date$.next(payload.date);
     dialogRef.afterClosed().subscribe({
-      next: value => this.loadEvaluations()
+      next: _ => this.loadEvaluations()
     })
   }
 

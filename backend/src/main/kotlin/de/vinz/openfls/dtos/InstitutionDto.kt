@@ -17,4 +17,13 @@ class InstitutionDto {
     var contingents: Array<ContingentDto>? = null
 
     var assistancePlans: Array<AssistancePlanDto>? = null
+
+    constructor(id: Long, name: String, email: String, phonenumber: String) {
+        this.id = id
+        this.name = name
+        this.email = email
+        this.phonenumber = phonenumber
+    }
+
+    constructor()
 }

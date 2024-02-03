@@ -35,7 +35,7 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
   override initialLoad() {
   }
 
-  getTestById(id: number): Observable<AssistancePlanResponseDto> {
+  getStrippedById(id: number): Observable<AssistancePlanResponseDto> {
     return this.http
       .get<AssistancePlanResponseDto>(`${environment.api_url}${this.url}/${id}`)
   }

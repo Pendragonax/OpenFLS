@@ -44,7 +44,7 @@ class GoalTimeEvaluationService(
                 assistancePlan.goals.filter { it.hours.any { goalHour -> goalHour.hourType.id == hourTypeId } }
 
         if (goalsWithHourType.isEmpty()) {
-            throw NoGoalFoundWithHourTypeException()
+            throw NoGoalFoundWithHourTypeException(hourTypeId)
         }
 
         try {

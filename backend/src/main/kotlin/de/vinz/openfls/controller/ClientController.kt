@@ -148,8 +148,7 @@ class ClientController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = clientService.getAll()
-                .map { modelMapper.map(it, ClientSimpleDto::class.java)}
+            val dtos = clientService.getAllSimple()
                 .sortedBy { it.lastName.lowercase() }
 
             if (logPerformance) {

@@ -18,8 +18,8 @@
         <div class="col">
           <div class="my-3 mat-elevation-z8 example-container">
             <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
-            <app-error-icon *ngIf="errorOccurred" [description]="'Es konnten keine Werte gefunden werden'"></app-error-icon>
-            <app-overview-table *ngIf="!errorOccurred && !isGenerating"
+            <app-error-icon *ngIf="goalTimesErrorOccurred" [description]="'Es konnten keine Werte gefunden werden'"></app-error-icon>
+            <app-overview-table *ngIf="!goalTimesErrorOccurred && !isGenerating"
                                 [boldColumnIndices$]="boldColumnIndices$"
                                 [columns$]="columns$"
                                 [data$]="data$"></app-overview-table>

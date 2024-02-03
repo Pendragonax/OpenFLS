@@ -100,13 +100,13 @@
                     *matCellDef="let category"
                     class="text-center">
                   <div class="text-center">
-                    <button mat-mini-fab
+                    <button mat-icon-button
                             color="primary"
                             class="mx-1"
                             [disabled]="!infoForm.valid || isSubmitting"
                             (click)="openCategoryEditModal(content, category)">
                       <mat-icon>edit</mat-icon></button>
-                    <button mat-mini-fab
+                    <button mat-icon-button
                             color="warn"
                             class="mx-1"
                             *showOnRole="'admin'"
