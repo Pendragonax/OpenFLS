@@ -422,7 +422,7 @@ class ServiceController(
             }
 
             if (logPerformance) {
-                logger.info(String.format("%s getTimesByEmployee took %s ms and found %d entities",
+                logger.info(String.format("%s getTimesByEmployee took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs))
             }
