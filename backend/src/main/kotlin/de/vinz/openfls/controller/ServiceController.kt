@@ -40,6 +40,7 @@ class ServiceController(
                @Valid @RequestBody valueDto: ServiceDto): Any {
         return try {
             val startMs = System.currentTimeMillis()
+
             if (!accessService.canWriteEntries(token, valueDto.institutionId))
                 throw IllegalArgumentException("No permission to write entries to this institution")
 
@@ -71,6 +72,7 @@ class ServiceController(
                @Valid @RequestBody valueDto: ServiceDto): Any {
         return try {
             val startMs = System.currentTimeMillis()
+
             if (!accessService.canWriteEntries(token, valueDto.institutionId))
                 throw IllegalArgumentException("No permission to update this service")
             if (!serviceService.existsById(id))
