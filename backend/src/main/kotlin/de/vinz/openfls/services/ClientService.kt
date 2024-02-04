@@ -21,37 +21,18 @@ class ClientService(
     private val modelMapper: ModelMapper
 ): GenericService<Client> {
 
-    private val logger: Logger = LoggerFactory.getLogger(ClientService::class.java)
-
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @Transactional
     override fun create(value: Client): Client {
-        // performance
-        val startMs = System.currentTimeMillis()
-
         value.institution = institutionService.getById(value.institution.id ?: 0)
             ?: throw IllegalArgumentException("institution not found")
         value.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate.id ?: 0)
             ?: throw IllegalArgumentException("category template not found")
 
-        val entity = clientRepository.save(value)
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        return clientRepository.save(value)
     }
 
     @Transactional
     override fun update(value: Client): Client {
-        // performance
-        val startMs = System.currentTimeMillis()
-
         if (!clientRepository.existsById(value.id))
             throw IllegalArgumentException("client not found")
 
@@ -60,104 +41,32 @@ class ClientService(
         value.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate.id ?: 0)
             ?: throw IllegalArgumentException("category template not found")
 
-        val entity = clientRepository.save(value)
-
-        if (logPerformance) {
-            logger.info(String.format("%s update took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        return clientRepository.save(value)
     }
 
     @Transactional
     override fun delete(id: Long) {
-        // performance
-        val startMs = System.currentTimeMillis()
-
         clientRepository.deleteById(id)
-
-        if (logPerformance) {
-            logger.info(String.format("%s delete took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
     }
 
     override fun getAll(): List<Client> {
-        // performance
-        val startMs = System.currentTimeMillis()
-
-        val entity = clientRepository.findAll().toList()
-
-        if (logPerformance) {
-            logger.info(String.format("%s getAll took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        return clientRepository.findAll().toList()
     }
 
     fun getAllSimple(): List<ClientSimpleDto> {
-        // performance
-        val startMs = System.currentTimeMillis()
-
         val clientsInstitutions = clientRepository.findAllClientSimpleDto()
-        val simpleClients = clientsInstitutions.map { modelMapper.map(it, ClientSimpleDto::class.java) }
-
-        if (logPerformance) {
-            logger.info(String.format("%s getAllSimple took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return simpleClients
+        return clientsInstitutions.map { modelMapper.map(it, ClientSimpleDto::class.java) }
     }
 
     override fun getById(id: Long): Client? {
-        // performance
-        val startMs = System.currentTimeMillis()
-
-        val entity = clientRepository.findById(id).orElse(null)
-
-        if (logPerformance) {
-            logger.info(String.format("%s getById took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        return clientRepository.findById(id).orElse(null)
     }
 
     override fun existsById(id: Long): Boolean {
-        // performance
-        val startMs = System.currentTimeMillis()
-
-        val entity = clientRepository.existsById(id)
-
-        if (logPerformance) {
-            logger.info(String.format("%s existsById took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        return clientRepository.existsById(id)
     }
 
     fun existById(id: Long): Boolean {
-        // performance
-        val startMs = System.currentTimeMillis()
-
-        val entity = clientRepository.existsById(id)
-
-        if (logPerformance) {
-            logger.info(String.format("%s existById took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        return clientRepository.existsById(id)
     }
 }
