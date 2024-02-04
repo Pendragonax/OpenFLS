@@ -1,0 +1,8 @@
+.example-container {
+  height: calc(90vh - 100px) !important;
+  overflow: auto;
+}
+
+.min-width-350 {
+  min-width: 350px !important;
+}

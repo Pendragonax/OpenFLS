@@ -175,13 +175,13 @@
             *matCellDef="let contingent"
             class="text-center m-2">
           <div class="text-center">
-            <button mat-mini-fab
+            <button mat-icon-button
                     color="primary"
                     class="m-1"
                     [hidden]="!contingent[3]"
                     (click)="openEditModal(content, contingent[2])">
               <mat-icon>edit</mat-icon></button>
-            <button mat-mini-fab
+            <button mat-icon-button
                     color="warn"
                     class="m-1"
                     *showOnRole="'admin'"

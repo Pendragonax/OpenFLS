@@ -195,29 +195,37 @@
             *matCellDef="let combination"
             class="text-center px-2">
           <div class="text-center">
-            <button mat-mini-fab
+            <button mat-icon-button
                     color="primary"
-                    class="m-1"
-                    [hidden]="!combination[3].editable"
+                    [matTooltip]="'Favorit'"
+                    [matTooltipPosition]="'above'"
+                    (click)="combination[3].favorite ? deleteAssistancePlanAsFavorite(combination[3].dto.id) : addAssistancePlanAsFavorite(combination[3].dto.id)">
+              <mat-icon>{{combination[3].favorite ? 'bookmark' : 'bookmark_border'}}</mat-icon></button>
+            <button mat-icon-button
+                    color="primary"
+                    [matTooltip]="'Zeitanalyse'"
+                    [matTooltipPosition]="'above'"
+                    [disabled]="!combination[3].editable"
                     (click)="openAnalysisModal(analysisContent, combination[3].dto.id)">
               <mat-icon>query_builder</mat-icon></button>
-            <button mat-mini-fab
-                    color="accent"
-                    class="m-1"
-                    [hidden]="!combination[3].editable"
+            <button mat-icon-button
+                    color="primary"
+                    [matTooltip]="'Bearbeiten'"
+                    [matTooltipPosition]="'above'"
+                    [disabled]="!combination[3].editable"
                     [routerLink]="['/assistance_plans/detail', combination[3].dto.id]">
               <mat-icon>edit</mat-icon></button>
-            <button mat-mini-fab
+            <button mat-icon-button
                     color="primary"
-                    class="m-1"
                     [matTooltip]="'Ziele'"
-                    [matTooltipPosition]="'right'"
-                    (click)="openInformationModal(informationModal, combination[3].dto)">
+                    [matTooltipPosition]="'above'"
+                    [routerLink]="['/assistance_plans/goals', combination[3].dto.id, '0']">
               <mat-icon>view_module</mat-icon></button>
-            <button mat-mini-fab
+            <button mat-icon-button
                     color="warn"
-                    class="m-1"
                     *showOnRole="'admin'"
+                    [matTooltip]="'Löschen'"
+                    [matTooltipPosition]="'above'"
                     (click)="openDeleteConfirmation(deleteContent, combination[3].dto)">
               <mat-icon>delete</mat-icon></button>
 

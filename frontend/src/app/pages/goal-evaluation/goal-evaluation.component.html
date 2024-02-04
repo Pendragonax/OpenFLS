@@ -1,0 +1,50 @@
+<app-info-header [title]="'Zielauswertung von ' + assistancePlan.clientFirstName + ' ' + assistancePlan.clientLastName"></app-info-header>
+
+<mat-tab-group [(selectedIndex)]="tabIndex" (selectedTabChange)="updateUrl()">
+  <mat-tab label="Ziele">
+    <div *ngFor="let goal of assistancePlan.goals">
+      <app-goal-single [goal]="goal"></app-goal-single>
+    </div>
+  </mat-tab>
+  <mat-tab label="Zeitauswertung">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="min-width-350 col-3">
+          <app-goal-time-evaluation-filter (onEvaluationTypeSelectionChanged)="onGoalTimeEvaluationTypeChanged($event)"
+                                           (onHourTypeSelectionChanged)="onGoalTimeHourTypeChanged($event)"
+                                           (onDateSelectionChanged)="onGoalTimePeriodChanged($event)"
+                                           [disabled$]="isGenerating$"></app-goal-time-evaluation-filter>
+        </div>
+        <div class="col">
+          <div class="my-3 mat-elevation-z8 example-container">
+            <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
+            <app-error-icon *ngIf="goalTimesErrorOccurred" [description]="'Es konnten keine Werte gefunden werden'"></app-error-icon>
+            <app-overview-table *ngIf="!goalTimesErrorOccurred && !isGenerating"
+                                [boldColumnIndices$]="boldColumnIndices$"
+                                [columns$]="columns$"
+                                [data$]="data$"></app-overview-table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </mat-tab>
+  <mat-tab label="Evaluationen">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="width-20-vw">
+          <app-goal-evaluation-filter (onDateSelectionChanged)="onEvaluationPeriodChanged($event)"></app-goal-evaluation-filter>
+        </div>
+      </div>
+      <div class="row">
+        <div class="my-3">
+          <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
+          <app-table-button *ngIf="!errorOccurred && !isGenerating"
+                            [boldColumnIndices$]="boldColumnIndices$"
+                            [columns$]="columnsEvaluation$"
+                            [data$]="dataEvaluation$"
+                            (evaluationEvent)="openEvaluationModal($event)"></app-table-button>
+        </div>
+      </div>
+    </div></mat-tab>
+</mat-tab-group>

@@ -1,10 +1,11 @@
 package de.vinz.openfls.repositories
 
-import de.vinz.openfls.model.Service
+import de.vinz.openfls.entities.Service
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 interface ServiceRepository : CrudRepository<Service, Long> {
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND cast(u.start as LocalDate) = :date")
@@ -58,6 +59,10 @@ interface ServiceRepository : CrudRepository<Service, Long> {
             @Param("hourTypeId") hourTypeId: Long,
             @Param("areaId") areaId: Long,
             @Param("sponsorId") sponsorId: Long): List<Service>
+
+    fun findServicesByAssistancePlanIdAndStartIsBetween(@Param("assistancePlanId") assistancePlanId: Long,
+                                                        @Param("start") start: LocalDateTime,
+                                                        @Param("end") end: LocalDateTime): List<Service>
 
     @Query("SELECT u FROM Service u WHERE " +
             "(extract(YEAR from u.start)) = :year " +

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## 1.0.0
+
+#### Features
+- Evaluations for each goal
+- Goal time evaluation for each goal
+- Favorite assistance plans
+- perfomance logs
+
+
 ## 0.4.2
 
 #### Bug

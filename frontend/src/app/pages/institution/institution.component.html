@@ -100,14 +100,14 @@
               *matCellDef="let institution"
               class="text-center">
             <div class="">
-              <button mat-mini-fab
-                      color="accent"
+              <button mat-icon-button
+                      color="primary"
                       class="m-1"
-                      [hidden]="!institution.editable"
+                      [disabled]="!institution.editable"
                       [routerLink]="['/institutions/detail/', institution.dto.id ]">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="warn"
                       class="m-1"
                       *showOnRole="'admin'"

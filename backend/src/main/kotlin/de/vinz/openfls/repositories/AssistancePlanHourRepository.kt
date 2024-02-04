@@ -1,6 +1,6 @@
 package de.vinz.openfls.repositories
 
-import de.vinz.openfls.model.AssistancePlanHour
+import de.vinz.openfls.entities.AssistancePlanHour
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param

@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.Category
+import de.vinz.openfls.entities.Category
 import de.vinz.openfls.repositories.CategoryRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service

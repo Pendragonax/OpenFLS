@@ -3,11 +3,15 @@ package de.vinz.openfls.services
 import de.vinz.openfls.dtos.ActualTargetValueDto
 import de.vinz.openfls.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.dtos.HourTypeDto
-import de.vinz.openfls.model.AssistancePlan
+import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.entities.AssistancePlan
 import de.vinz.openfls.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ServiceRepository
 import org.modelmapper.ModelMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -22,8 +26,17 @@ class AssistancePlanService(
     private val serviceRepository: ServiceRepository,
     private val modelMapper: ModelMapper
 ): GenericService<AssistancePlan> {
+
+    private val logger: Logger = LoggerFactory.getLogger(AssistancePlanService::class.java)
+
+    @Value("\${logging.performance}")
+    private val logPerformance: Boolean = false
+
     @Transactional
     override fun create(value: AssistancePlan): AssistancePlan {
+        // performance
+        val startMs: Long = System.currentTimeMillis();
+
         if (value.id > 0)
             throw IllegalArgumentException("id is set")
 
@@ -44,11 +57,20 @@ class AssistancePlanService(
                 })}
             .toMutableSet()
 
+        if (logPerformance) {
+            logger.info(String.format("%s create took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
+        }
+
         return entity
     }
 
     @Transactional
     override fun update(value: AssistancePlan): AssistancePlan {
+        // performance
+        val startMs: Long = System.currentTimeMillis();
+
         if (value.id <= 0)
             throw IllegalArgumentException("id is set")
         if (!assistancePlanRepository.existsById(value.id))
@@ -74,6 +96,12 @@ class AssistancePlanService(
                     assistancePlan = entity
                 })}
             .toMutableSet()
+
+        if (logPerformance) {
+            logger.info(String.format("%s update took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
+        }
 
         return entity
     }
@@ -108,6 +136,9 @@ class AssistancePlanService(
     }
 
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
+        // performance
+        val startMs: Long = System.currentTimeMillis();
+
         val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ")}
         val services = serviceRepository.findByAssistancePlan(id)
         val eval = AssistancePlanEvalDto()
@@ -204,6 +235,12 @@ class AssistancePlanService(
                 eval.notMatchingServices++
                 eval.notMatchingServicesIds.add(service.id)
             }
+        }
+
+        if (logPerformance) {
+            logger.info(String.format("%s getEvaluationById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
         }
 
         return eval

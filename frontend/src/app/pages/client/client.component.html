@@ -90,25 +90,25 @@
               *matCellDef="let client"
               class="text-center">
             <div class="">
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="primary"
                       class="m-1"
                       [routerLink]="['/services/client/', client.dto.id]">
                 <mat-icon>library_books</mat-icon>
               </button>
-              <button mat-mini-fab
-                      color="accent"
+              <button mat-icon-button
+                      color="primary"
                       class="m-1"
                       [routerLink]="['/clients/detail/', client.dto.id]">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="primary"
                       class="m-1"
                       (click)="openInformationModal(informationModal, client)">
                 <mat-icon>search</mat-icon>
               </button>
-              <button mat-mini-fab
+              <button mat-icon-button
                       color="warn"
                       class="m-1"
                       *showOnRole="'admin'"

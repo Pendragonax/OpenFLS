@@ -1,7 +1,6 @@
 package de.vinz.openfls.repositories
 
-import de.vinz.openfls.model.Category
-import de.vinz.openfls.model.Permission
+import de.vinz.openfls.entities.Category
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param

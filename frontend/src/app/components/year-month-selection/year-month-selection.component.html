@@ -1,0 +1,19 @@
+<div class="m-3 text-center" [formGroup]="selectionForm">
+  <div class="d-flex justify-content-center" *ngIf="!withoutMonth">
+    <mat-radio-group aria-label="Select an option" color="primary" formControlName="periodModeControl">
+      <mat-radio-button class="me-2" value="1">Jahr</mat-radio-button>
+      <mat-radio-button class="ms-2" value="2" >Monat</mat-radio-button>
+    </mat-radio-group>
+  </div>
+
+  <div class="d-flex justify-content-center mt-2" *ngIf="selectedPeriodMode == 1">
+    <button mat-mini-fab (click)="prevYear()" class="button-color" [disabled]="disabled"><mat-icon>arrow_left</mat-icon></button>
+    <p class="my-auto w-50 fw-bold">{{year}}</p>
+    <button mat-mini-fab (click)="nextYear()" class="button-color" [disabled]="disabled"><mat-icon>arrow_right</mat-icon></button>
+  </div>
+  <div class="d-flex justify-content-center mt-2" *ngIf="selectedPeriodMode === 2">
+    <button mat-mini-fab (click)="prevMonth()" class="button-color" [disabled]="disabled"><mat-icon>arrow_left</mat-icon></button>
+    <p class="my-auto w-50 fw-bold">{{getMonthName(month)}} - {{year}}</p>
+    <button mat-mini-fab (click)="nextMonth()" class="button-color" [disabled]="disabled"><mat-icon>arrow_right</mat-icon></button>
+  </div>
+</div>

@@ -1,8 +1,12 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.ServiceFilterDto
-import de.vinz.openfls.model.Service
+import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.entities.Service
 import de.vinz.openfls.repositories.ServiceRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
@@ -12,6 +16,7 @@ import javax.transaction.Transactional
 class ServiceService(
     private val serviceRepository: ServiceRepository
 ): GenericService<Service> {
+
     @Transactional
     override fun create(value: Service): Service {
         if (value.id > 0)

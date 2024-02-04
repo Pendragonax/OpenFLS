@@ -2,10 +2,13 @@ package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.CategoryDto
 import de.vinz.openfls.dtos.CategoryTemplateDto
-import de.vinz.openfls.model.CategoryTemplate
+import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.entities.CategoryTemplate
 import de.vinz.openfls.services.CategoryTemplateService
-import de.vinz.openfls.services.HelperService
 import org.modelmapper.ModelMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,12 +20,20 @@ import javax.validation.Valid
 @RequestMapping("/categories")
 class CategoryTemplateController(
     private val categoryTemplateService: CategoryTemplateService,
-    private val helperService: HelperService,
     private val modelMapper: ModelMapper
 ) {
+
+    private val logger: Logger = LoggerFactory.getLogger(CategoryTemplateController::class.java)
+
+    @Value("\${logging.performance}")
+    private val logPerformance: Boolean = false
+
     @PostMapping
     fun create(@Valid @RequestBody valueDto: CategoryTemplateDto): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val entity = categoryTemplateService.create(modelMapper.map(valueDto, CategoryTemplate::class.java))
 
             // generate return DTO
@@ -35,11 +46,15 @@ class CategoryTemplateController(
                     ?: emptyArray()
             }
 
-            helperService.printLog(this::class.simpleName, "create [id=${entity.id}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s create took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(valueDto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "create - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.localizedMessage,
@@ -51,6 +66,9 @@ class CategoryTemplateController(
     fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: CategoryTemplateDto): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             if (id != valueDto.id)
                 throw IllegalArgumentException("path id and dto id are not the same")
             if (!categoryTemplateService.existsById(id))
@@ -64,11 +82,15 @@ class CategoryTemplateController(
                 ?.toTypedArray()
                 ?: emptyArray()
 
-            helperService.printLog(this::class.simpleName, "update [id=${entity.id}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s update took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(valueDto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "update [id=${id}] - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.localizedMessage,
@@ -79,17 +101,24 @@ class CategoryTemplateController(
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             if (!categoryTemplateService.existsById(id))
                 throw IllegalArgumentException("category template not found")
 
             val dto = modelMapper.map(categoryTemplateService.getById(id), CategoryTemplateDto::class.java)
             categoryTemplateService.delete(id)
 
-            helperService.printLog(this::class.simpleName, "delete [id=${dto.id}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s delete took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "delete [id=${id}] - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.localizedMessage,
@@ -100,6 +129,9 @@ class CategoryTemplateController(
     @GetMapping("")
     fun getAll(): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val entities = categoryTemplateService
                 .getAll()
                 .sortedByDescending { it.title.lowercase() }
@@ -108,11 +140,15 @@ class CategoryTemplateController(
                         categories = categories.sortedBy { it.id }.toTypedArray() }
                 }
 
-            helperService.printLog(this::class.simpleName, "getAll", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getAll took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(entities)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getAll - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity.ok(emptyList())
         }
@@ -121,14 +157,21 @@ class CategoryTemplateController(
     @GetMapping("{id}")
     fun getById(@PathVariable id: Long): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val dto = modelMapper.map(categoryTemplateService.getById(id), CategoryTemplateDto::class.java)
                 .apply { categories = categories.sortedBy { it.id }.toTypedArray() }
 
-            helperService.printLog(this::class.simpleName, "getById", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getById took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getById - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity.ok(null)
         }

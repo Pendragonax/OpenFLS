@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.Goal
+import de.vinz.openfls.entities.Goal
 import de.vinz.openfls.repositories.GoalHourRepository
 import de.vinz.openfls.repositories.GoalRepository
 import org.springframework.data.repository.findByIdOrNull

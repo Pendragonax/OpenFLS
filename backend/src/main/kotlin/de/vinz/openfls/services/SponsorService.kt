@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.Sponsor
+import de.vinz.openfls.entities.Sponsor
 import de.vinz.openfls.repositories.SponsorRepository
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional

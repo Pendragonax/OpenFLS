@@ -1,7 +1,6 @@
 package de.vinz.openfls.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import de.vinz.openfls.model.AssistancePlan
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 

@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.Unprofessional
+import de.vinz.openfls.entities.Unprofessional
 import de.vinz.openfls.repositories.UnprofessionalRepository
 import org.springframework.stereotype.Service
 

@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.model.GoalHour
+import de.vinz.openfls.entities.GoalHour
 import de.vinz.openfls.repositories.GoalHourRepository
 import org.springframework.stereotype.Service
 

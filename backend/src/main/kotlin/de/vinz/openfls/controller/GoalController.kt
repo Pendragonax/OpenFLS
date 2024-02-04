@@ -2,10 +2,14 @@ package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.GoalDto
 import de.vinz.openfls.dtos.GoalHourDto
-import de.vinz.openfls.model.Goal
-import de.vinz.openfls.model.GoalHour
+import de.vinz.openfls.entities.Goal
+import de.vinz.openfls.entities.GoalHour
+import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,14 +24,22 @@ class GoalController(
     private val assistancePlanService: AssistancePlanService,
     private val institutionService: InstitutionService,
     private val accessService: AccessService,
-    private val modelMapper: ModelMapper,
-    private val helperService: HelperService
+    private val modelMapper: ModelMapper
 ) {
+
+    private val logger: Logger = LoggerFactory.getLogger(GoalController::class.java)
+
+    @Value("\${logging.performance}")
+    private val logPerformance: Boolean = false
+
     @PostMapping("")
     fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @Valid @RequestBody valueDto: GoalDto
     ): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             if (!accessService.canModifyAssistancePlan(token, valueDto.assistancePlanId))
                 throw IllegalArgumentException("no permission to create goals to this assistance plan")
 
@@ -57,11 +69,15 @@ class GoalController(
                     .toMutableSet()
             }
 
-            helperService.printLog(this::class.simpleName, "create [id=${valueDto.id}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s create took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(valueDto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "create - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,
@@ -76,6 +92,9 @@ class GoalController(
                @Valid @RequestBody valueDto: GoalDto
     ): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             if (!accessService.canModifyAssistancePlan(token, valueDto.assistancePlanId))
                 throw IllegalArgumentException("no permission to update this goal to this assistance plan")
             if (id != valueDto.id)
@@ -109,11 +128,15 @@ class GoalController(
                     .toMutableSet()
             }
 
-            helperService.printLog(this::class.simpleName, "create [id=${valueDto.id}]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s update took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(valueDto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "create - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,
@@ -126,6 +149,9 @@ class GoalController(
     fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
                @PathVariable id: Long): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             if (!accessService.isAdmin(token))
                 throw IllegalArgumentException("no permission to delete this goal to this assistance plan")
             if (!goalService.existsById(id))
@@ -135,11 +161,15 @@ class GoalController(
 
             goalService.delete(id)
 
-            helperService.printLog(this::class.simpleName, "delete [id=$id]", false)
+            if (logPerformance) {
+                logger.info(String.format("%s delete took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            helperService.printLog(this::class.simpleName, "delete - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,
@@ -151,15 +181,22 @@ class GoalController(
     @GetMapping("assistance_plan/{id}")
     fun getByAssistancePlanId(@PathVariable id: Long): Any {
         return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
             val dtos = goalService.getByAssistancePlanId(id).map {
                 modelMapper.map(it, GoalDto::class.java) ?: throw IllegalArgumentException()
             }
 
-            helperService.printLog(this::class.simpleName, "getAll", false)
+            if (logPerformance) {
+                logger.info(String.format("%s getByAssistancePlanId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            helperService.printLog(this::class.simpleName, "getAll - ${ex.message}", true)
+            logger.error(ex.message, ex)
 
             ResponseEntity(
                 ex.message,
