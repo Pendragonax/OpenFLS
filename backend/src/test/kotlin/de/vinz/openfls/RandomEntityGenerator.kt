@@ -1,5 +1,6 @@
 package de.vinz.openfls
 
+import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.entities.*
 import java.time.LocalDate
 import kotlin.random.Random

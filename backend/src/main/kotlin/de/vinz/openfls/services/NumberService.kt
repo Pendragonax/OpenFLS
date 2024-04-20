@@ -16,6 +16,21 @@ class NumberService {
             return roundDoubleToTwoDigits(intValue + decimal)
         }
 
+        fun convertTimeDoubleToDouble(value: Double): Double {
+            val intValue = value.toInt();
+            var decimal = value - intValue;
+            decimal *= (100.0 / 60.0);
+
+            return roundDoubleToTwoDigits(intValue + decimal)
+        }
+
+        fun convertMinutesToTimeDouble(value: Int): Double {
+            val minutes = (value % 60).toDouble() / 100
+            val hours = value / 60
+
+            return roundDoubleToTwoDigits(hours.toDouble() + minutes)
+        }
+
         fun sumTimeDoubles(sum1: Double, sum2: Double): Double {
             val hourValue1 = sum1.toInt()
             val hourValue2 = sum2.toInt()

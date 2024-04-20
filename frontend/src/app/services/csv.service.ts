@@ -13,33 +13,21 @@ export class CsvService {
     private converter: Converter
   ) { }
 
-  exportToCsv(filename: string, rows: object[]) {
+  exportToCsvWithHeader(filename: string, rows: any[], header: string[]) {
+    let clonedRows = [...rows]
+    clonedRows.unshift(header)
+    this.exportToCsv(filename, clonedRows);
+  }
+
+  exportToCsv(filename: string, rows: any[]) {
     if (!rows || !rows.length) {
       return;
     }
 
     const keys = Object.keys(rows[0]);
-    const csvData =
-      rows.map(row => {
-        return keys.map(k => {
-          let cell = row[k] == null ? '' : row[k];
-
-          cell = cell instanceof Date
-            ? cell.toLocaleString()
-            : cell.toString().replace(/"/g, '""');
-          console.log(typeof cell)
-          cell = this.converter.isNumber(cell)
-            ? cell.toString().replace('.', this.decimalSeparator)
-            : cell;
-
-          const regex = /("|;|,|\n)/g;
-
-          if (cell.search(regex) >= 0) {
-            cell = `"${cell}"`;
-          }
-          return cell;
-        }).join(this.separator);
-      }).join('\n');
+    const csvData = [
+      ...this.convertRowsToCsv(rows, keys)
+    ].join('\n');
 
     this.exportFile([csvData], 'text/csv;charset=utf-8;', filename);
   }
@@ -47,5 +35,34 @@ export class CsvService {
   exportFile(data: any, fileType: string, fileName: string) {
     const blob = new Blob(["\uFEFF"+data], { type: fileType });
     FileSaver.saveAs(blob, fileName);
+  }
+
+  private convertRowsToCsv(rows, keys) {
+    return rows.map(row => {
+      return keys.map(k => this.formatCell(row[k])).join(this.separator);
+    });
+  }
+
+  private formatCell(cell) {
+    if (cell == null) {
+      return '';
+    }
+
+    if (cell instanceof Date) {
+      cell = cell.toLocaleString();
+    } else {
+      cell = cell.toString().replace(/"/g, '""');
+    }
+
+    if (this.converter.isNumber(cell)) {
+      cell = cell.toString().replace('.', this.decimalSeparator);
+    }
+
+    const regex = /("|;|,|\n)/g;
+    if (cell.search(regex) >= 0) {
+      cell = `"${cell}"`;
+    }
+
+    return cell;
   }
 }

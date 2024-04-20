@@ -1,0 +1,28 @@
+<table mat-table [dataSource]="data" class="w-100">
+  <ng-container [matColumnDef]="column" *ngFor="let column of header; let columnIndex = index">
+    <th mat-header-cell *matHeaderCellDef class="overview-font-size"
+        [ngClass]="{'overview-fixed-column-width text-center': columnIndex >= columnFixedWidthFromIndex,
+                    'fw-bold': boldIndicesContains(columnIndex)}">
+      {{ column }}
+      <button mat-icon-button
+              *ngIf="columnIndex == 0"
+              (click)="exportAsCSV()"
+              [matTooltip]="'.csv speichern'">
+        <mat-icon>save</mat-icon>
+      </button>
+    </th>
+    <td mat-cell *matCellDef="let element" class="overview-font-size"
+        [ngClass]="{'overview-fixed-column-width text-center': columnIndex >= columnFixedWidthFromIndex,
+                    'fw-bold': boldIndicesContains(columnIndex)}">
+      <ng-container *ngIf="isNumberColumn(columnIndex); else stringTemplate">
+        {{ element[columnIndex] | number }}
+      </ng-container>
+      <ng-template #stringTemplate>
+        {{ element[columnIndex] }}
+      </ng-template>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="header"></tr>
+  <tr mat-row *matRowDef="let row; columns: header;" class="overview-row-height"></tr>
+</table>

@@ -1,0 +1,32 @@
+<div class="container-fluid">
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="width-20-vw">
+        <div class="text-center">
+          <app-year-month-selection [withoutMonth]="true" (periodChangedEvent)="onDateSelectionChanged($event)"></app-year-month-selection>
+        </div>
+      </div>
+      <div class="text-center" [formGroup]="filterForm">
+        <mat-form-field appearance="outline">
+          <mat-label>Stundentyp</mat-label>
+          <mat-select formControlName="hourType"
+                      required>
+            <mat-option *ngFor="let value of hourTypes"
+                        [value]="value.value">
+              {{value.name}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="row">
+        <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
+        <app-number-table [boldColumnIndices]="[0,1]"
+                          [exportFilename]="'ContingentOverview'"
+                          [columnFixedWidthFromIndex]="1"
+                          [data$]="data$"
+                          [header$]="header$"
+                          *ngIf="!isGenerating && isLoadedInitially"></app-number-table>
+    </div>
+  </div>
+</div>

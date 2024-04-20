@@ -6,7 +6,7 @@ import {Component, Input, OnInit} from '@angular/core';
   styleUrls: ['./work-time-card.component.css']
 })
 export class WorkTimeCardComponent implements OnInit {
-  @Input() time: [number, number, number, number] = [0, 0, 0, 0];
+  @Input() time: [number, number, number, number, number] = [0, 0, 0, 0, 0];
   @Input() title: string = "";
 
   constructor() { }

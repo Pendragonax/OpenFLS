@@ -25,9 +25,9 @@ export class ContingentEvaluationComponent implements OnInit {
 
   // VARs
   employee: EmployeeDto = new EmployeeDto();
-  time1: [number, number, number, number] = [0, 0, 0, 0];
-  time7: [number, number, number, number] = [0, 0, 0, 0];
-  time30: [number, number, number, number] = [0, 0, 0, 0];
+  time1: [number, number, number, number, number] = [0, 0, 0, 0, 0];
+  time7: [number, number, number, number, number] = [0, 0, 0, 0, 0];
+  time30: [number, number, number, number, number] = [0, 0, 0, 0, 0];
   serviceDates: [Date, number][] = [];
 
   constructor(
@@ -62,6 +62,7 @@ export class ContingentEvaluationComponent implements OnInit {
           this.time1[3] = (this.time1[0] > 0)
             ? this.converter.roundTo2Digits(this.time1[1] * 100 / this.time1[0])
             : 100.0;
+          this.time1[4] = this.converter.roundToDecimalPlaces(this.time1[2] * 60, 0)
 
           this.time7[0] = this.converter.roundTo2Digits(this.getContingentHoursByPeriod(7, this.employee.contingents));
           this.time7[1] = this.getServiceHours(value.days, 6);
@@ -69,6 +70,7 @@ export class ContingentEvaluationComponent implements OnInit {
           this.time7[3] = (this.time7[0] > 0)
             ? this.converter.roundTo2Digits(this.time7[1] * 100 / this.time7[0])
             : 100.0;
+          this.time7[4] = this.converter.roundToDecimalPlaces(this.time7[2] * 60, 0)
 
           this.time30[0] = this.converter.roundTo2Digits(this.getContingentHoursByPeriod(30, this.employee.contingents));
           this.time30[1] = this.getServiceHours(value.days, 29);
@@ -76,6 +78,7 @@ export class ContingentEvaluationComponent implements OnInit {
           this.time30[3] = (this.time30[0] > 0)
             ? this.converter.roundTo2Digits(this.time30[1] * 100 / this.time30[0])
             : 100.0;
+          this.time30[4] = this.converter.roundToDecimalPlaces(this.time30[2] * 60, 0)
 
           this.serviceDates = this.getServiceDatesAndHours(value.days, this.employee.contingents);
 

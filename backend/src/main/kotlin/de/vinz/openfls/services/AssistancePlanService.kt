@@ -5,6 +5,7 @@ import de.vinz.openfls.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.dtos.HourTypeDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.entities.AssistancePlan
+import de.vinz.openfls.projections.AssistancePlanProjection
 import de.vinz.openfls.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ServiceRepository
@@ -133,6 +134,39 @@ class AssistancePlanService(
 
     fun getByInstitutionId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findByInstitutionId(id)
+    }
+
+    fun getAssistancePlanHoursByYear(year: Int, assistancePlans: List<AssistancePlanProjection>): List<Double> {
+        val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
+
+        for (assistancePlan in assistancePlans) {
+            for (month in 1..12) {
+                monthlyHours[month] = NumberService.sumTimeDoubles(
+                        monthlyHours[month],
+                        getAssistancePlanHoursByYearMonth(year, month, assistancePlan))
+            }
+        }
+
+        monthlyHours[0] = monthlyHours.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+
+        return monthlyHours
+    }
+
+    fun getAssistancePlanHoursByYear(year: Int, assistancePlan: AssistancePlanProjection): List<Double> {
+        val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
+
+        for (month in 1..12) {
+            monthlyHours[month] = getAssistancePlanHoursByYearMonth(year, month, assistancePlan)
+        }
+        monthlyHours[0] = monthlyHours.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+
+        return monthlyHours
+    }
+
+    fun getAssistancePlanHoursByYearMonth(year: Int, month: Int, assistancePlan: AssistancePlanProjection): Double {
+        val dailyHours = assistancePlan.hours.sumOf { it.weeklyHours } / 7
+        return NumberService.convertDoubleToTimeDouble(
+                dailyHours * getAssistancePlanDaysInYearMonth(year, month, assistancePlan))
     }
 
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
@@ -294,5 +328,24 @@ class AssistancePlanService(
         } else {
             return Triple(0, null, null)
         }
+    }
+
+    private fun getAssistancePlanDaysInYearMonth(year: Int, month: Int, assistancePlan: AssistancePlanProjection): Int {
+        if (!isAssistancePlanInYearMonth(year, month, assistancePlan)) {
+            return 0
+        }
+
+        return DateService.countDaysOfMonthAndYearBetweenStartAndEnd(
+                year,
+                month,
+                assistancePlan.start,
+                assistancePlan.end)
+    }
+
+    private fun isAssistancePlanInYearMonth(year: Int, month: Int, assistancePlan: AssistancePlanProjection): Boolean {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return assistancePlan.start <= end && assistancePlan.end >= start
     }
 }

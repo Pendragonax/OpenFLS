@@ -13,6 +13,15 @@ export class Converter {
     return Math.round(val * 100) / 100;
   }
 
+  roundToDecimalPlaces(value: number, decimalPlaces: number): number {
+    if (isNaN(value) || decimalPlaces < 0) {
+      throw new Error("Invalid input");
+    }
+
+    const factor = Math.pow(10, decimalPlaces);
+    return Math.round(value * factor) / factor;
+  }
+
   /**
    * checks if string or number is a number
    * @param value: string | number
