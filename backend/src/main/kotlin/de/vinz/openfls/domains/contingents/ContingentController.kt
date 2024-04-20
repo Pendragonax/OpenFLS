@@ -1,8 +1,8 @@
-package de.vinz.openfls.controller
+package de.vinz.openfls.domains.contingents
 
-import de.vinz.openfls.dtos.ContingentDto
+import de.vinz.openfls.domains.contingents.dtos.ContingentDto
+import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.entities.Contingent
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
@@ -19,9 +19,9 @@ import kotlin.IllegalArgumentException
 @RestController
 @RequestMapping("/contingents")
 class ContingentController(
-    private val contingentService: ContingentService,
-    private val modelMapper: ModelMapper,
-    private val accessService: AccessService) {
+        private val contingentService: ContingentService,
+        private val modelMapper: ModelMapper,
+        private val accessService: AccessService) {
 
     private val logger: Logger = LoggerFactory.getLogger(ContingentController::class.java)
 

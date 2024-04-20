@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.contingents.dtos
 
 import java.time.LocalDate
 import javax.validation.constraints.NotEmpty

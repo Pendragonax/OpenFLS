@@ -1,12 +1,22 @@
 package de.vinz.openfls.repositories
 
+import de.vinz.openfls.domains.contingents.projections.ContingentProjection
 import de.vinz.openfls.entities.AssistancePlan
+import de.vinz.openfls.projections.AssistancePlanProjection
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
+
+    @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.institution.id = :institutionId " +
+            "AND (:end >= u.start AND :start <= u.end)")
+    fun findByInstitutionIdAndStartAndEnd(institutionId: Long,
+                                          start: LocalDate,
+                                          end: LocalDate): List<AssistancePlanProjection>
+
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE (YEAR(u.start) <= :year AND YEAR(u.end) >= :year)")
     fun findAllByYear(@Param("year") year: Int): List<AssistancePlan>

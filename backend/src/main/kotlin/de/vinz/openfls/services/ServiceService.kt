@@ -1,12 +1,9 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.ServiceFilterDto
-import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.entities.Service
+import de.vinz.openfls.projections.ServiceProjection
 import de.vinz.openfls.repositories.ServiceRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
@@ -50,6 +47,12 @@ class ServiceService(
 
     override fun getAll(): List<Service> {
         return serviceRepository.findAll().toList()
+    }
+
+    fun getAllByInstitutionAndYear(institutionId: Long, year: Int): List<ServiceProjection> {
+        val start = LocalDate.of(year, 1, 1)
+        val end = LocalDate.of(year, 12, 31)
+        return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
     override fun getById(id: Long): Service? {

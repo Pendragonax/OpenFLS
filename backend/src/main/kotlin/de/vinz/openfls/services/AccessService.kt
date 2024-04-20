@@ -1,16 +1,17 @@
 package de.vinz.openfls.services
 
+import de.vinz.openfls.domains.contingents.services.ContingentService
 import org.springframework.stereotype.Service
 
 @Service
 class AccessService(
-    private val tokenService: TokenService,
-    private val employeeService: EmployeeService,
-    private val goalService: GoalService,
-    private val contingentService: ContingentService,
-    private val assistancePlanService: AssistancePlanService,
-    private val permissionService: PermissionService,
-    private val clientService: ClientService
+        private val tokenService: TokenService,
+        private val employeeService: EmployeeService,
+        private val goalService: GoalService,
+        private val contingentService: ContingentService,
+        private val assistancePlanService: AssistancePlanService,
+        private val permissionService: PermissionService,
+        private val clientService: ClientService
 ) {
     /**
      * Checks if the user is an admin

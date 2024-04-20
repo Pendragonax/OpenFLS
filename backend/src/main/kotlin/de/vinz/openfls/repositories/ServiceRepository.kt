@@ -1,6 +1,7 @@
 package de.vinz.openfls.repositories
 
 import de.vinz.openfls.entities.Service
+import de.vinz.openfls.projections.ServiceProjection
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -8,6 +9,25 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 interface ServiceRepository : CrudRepository<Service, Long> {
+
+    @Query("SELECT u FROM Service u " +
+            "WHERE u.employee.id = :employeeId " +
+            "AND u.institution.id >= :institutionId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end")
+    fun findByEmployeeIdAndInstitutionIdAndStartAndEnd(employeeId: Long,
+                                                       institutionId: Long,
+                                                       start: LocalDate,
+                                                       end: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u " +
+            "WHERE u.institution.id >= :institutionId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end")
+    fun findByInstitutionIdAndStartAndEnd(institutionId: Long,
+                                          start: LocalDate,
+                                          end: LocalDate): List<ServiceProjection>
+
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND cast(u.start as LocalDate) = :date")
     fun findByEmployeeAndDate(@Param("employeeId") employeeId: Long,
                               @Param("date") date: LocalDate): List<Service>

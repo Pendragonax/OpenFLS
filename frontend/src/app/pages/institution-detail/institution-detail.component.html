@@ -137,6 +137,10 @@
                      [institutionView$]="value$"></app-contingents>
   </mat-tab>
 
+  <mat-tab label="Kontigente Übersicht">
+    <app-contingent-overview [institutionId]="this.institutionId"></app-contingent-overview>
+  </mat-tab>
+
   <!--CONTRACTS-->
   <mat-tab label="Hilfepläne">
     <app-assistance-plans class="m-2"
