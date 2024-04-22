@@ -1,23 +1,24 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.assistancePlans
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.entities.*
 import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
 @Table(name = "assistance_plans")
 class AssistancePlan(
-    @Id
+        @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: Long,
 
     //@field:NotNull(message = "start is null")
-    var start: LocalDate = LocalDate.now(),
+        var start: LocalDate = LocalDate.now(),
 
     //@field:NotNull(message = "end is null")
-    var end: LocalDate = LocalDate.now(),
+        var end: LocalDate = LocalDate.now(),
 
-    @JsonIgnore
+        @JsonIgnore
     @ManyToOne(
         cascade = [CascadeType.PERSIST],
         fetch = FetchType.LAZY
@@ -25,7 +26,7 @@ class AssistancePlan(
     @JoinColumn(name = "client_id")
     var client: Client,
 
-    @JsonIgnore
+        @JsonIgnore
     @ManyToOne(
         cascade = [CascadeType.PERSIST],
         fetch = FetchType.LAZY
@@ -33,7 +34,7 @@ class AssistancePlan(
     @JoinColumn(name = "sponsor_id")
     var sponsor: Sponsor,
 
-    @JsonIgnore
+        @JsonIgnore
     @ManyToOne(
         cascade = [CascadeType.PERSIST],
         fetch = FetchType.LAZY
@@ -41,26 +42,26 @@ class AssistancePlan(
     @JoinColumn(name = "institution_id")
     var institution: Institution,
 
-    @OneToMany(
+        @OneToMany(
         cascade = [CascadeType.ALL],
         mappedBy = "assistancePlan",
         fetch = FetchType.LAZY
     )
     var goals: MutableSet<Goal> = mutableSetOf(),
 
-    @OneToMany(
+        @OneToMany(
         cascade = [CascadeType.ALL],
         mappedBy = "assistancePlan",
         fetch = FetchType.LAZY
     )
     var hours: MutableSet<AssistancePlanHour> = mutableSetOf(),
 
-    @OneToMany(
+        @OneToMany(
         mappedBy = "assistancePlan",
         cascade = [CascadeType.ALL],
         fetch = FetchType.LAZY)
     var services: MutableSet<Service> = mutableSetOf(),
 
-    @ManyToMany(mappedBy = "assistancePlanFavorites")
+        @ManyToMany(mappedBy = "assistancePlanFavorites")
     var employees: MutableSet<Employee> = mutableSetOf()
 )

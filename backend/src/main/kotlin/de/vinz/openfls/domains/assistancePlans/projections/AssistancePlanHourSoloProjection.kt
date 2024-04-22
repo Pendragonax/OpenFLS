@@ -1,4 +1,4 @@
-package de.vinz.openfls.projections
+package de.vinz.openfls.domains.assistancePlans.projections
 
 import java.time.LocalDate
 

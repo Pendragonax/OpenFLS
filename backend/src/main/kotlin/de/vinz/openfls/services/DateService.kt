@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.exceptions.YearOutOfRangeException
 import java.time.LocalDate
 import java.time.LocalDateTime

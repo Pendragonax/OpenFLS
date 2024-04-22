@@ -1,5 +1,6 @@
 package de.vinz.openfls.controller
 
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.dtos.ServiceDto
 import de.vinz.openfls.dtos.ServiceFilterDto
 import de.vinz.openfls.dtos.ServiceXLDto
@@ -21,13 +22,13 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/services")
 class ServiceController(
-    private val serviceService: ServiceService,
-    private val employeeService: EmployeeService,
-    private val accessService: AccessService,
-    private val permissionService: PermissionService,
-    private val assistancePlanService: AssistancePlanService,
-    private val modelMapper: ModelMapper,
-    private val converter: ConverterService
+        private val serviceService: ServiceService,
+        private val employeeService: EmployeeService,
+        private val accessService: AccessService,
+        private val permissionService: PermissionService,
+        private val assistancePlanService: AssistancePlanService,
+        private val modelMapper: ModelMapper,
+        private val converter: ConverterService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(ServiceController::class.java)

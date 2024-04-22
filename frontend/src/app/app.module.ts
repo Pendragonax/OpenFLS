@@ -85,7 +85,7 @@ import { GoalEvaluationModalComponent } from './modals/goal-evaluation-modal/goa
 import { ConfirmationModalComponent } from './modals/confirmation-modal/confirmation-modal.component';
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
 import { ErrorIconComponent } from './components/error-icon/error-icon.component';
-import { NumberTableComponent } from './components/number-table/number-table.component';
+import { ObjectTableComponent } from './components/object-table/object-table.component';
 import {ContingentEvaluationComponent} from "./shared/modules/contingent-evaluation/contingent-evaluation.component";
 import {ContingentOverviewComponent} from "./domains/contingent-overviews/contingent-overview.component";
 
@@ -147,7 +147,7 @@ const routes: Routes = [
     ConfirmationModalComponent,
     LoadingSpinnerComponent,
     ErrorIconComponent,
-    NumberTableComponent,
+    ObjectTableComponent,
     ContingentEvaluationComponent,
     ContingentOverviewComponent
   ],

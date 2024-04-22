@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NumberTableComponent } from './number-table.component';
+import { ObjectTableComponent } from './object-table.component';
 
 describe('NumberTableComponent', () => {
-  let component: NumberTableComponent;
-  let fixture: ComponentFixture<NumberTableComponent>;
+  let component: ObjectTableComponent;
+  let fixture: ComponentFixture<ObjectTableComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NumberTableComponent ]
+      declarations: [ ObjectTableComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(NumberTableComponent);
+    fixture = TestBed.createComponent(ObjectTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

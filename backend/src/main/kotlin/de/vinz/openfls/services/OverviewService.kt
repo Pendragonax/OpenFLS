@@ -1,11 +1,11 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.dtos.AssistancePlanOverviewDTO
 import de.vinz.openfls.dtos.ClientSimpleDto
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
-import de.vinz.openfls.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ClientRepository
 import de.vinz.openfls.repositories.ServiceRepository
 import org.modelmapper.ModelMapper

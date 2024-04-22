@@ -83,7 +83,9 @@
           <mat-icon [color]="'warn'" class="m-auto mt-2">remove_circle_outline</mat-icon>
           <p class="mt-1"><b>Sie haben keine Berechtigung für diese Anfrage.</b></p>
         </div>
-        <app-overview-table [hidden]="isGenerating || forbiddenRequest" [columns$]="columns$" [data$]="data$"
+        <app-overview-table [hidden]="isGenerating || forbiddenRequest"
+                            [columns$]="columns$"
+                            [data$]="data$"
                             [columnFixedWidthFromIndex$]="columnFixedWidthFromIndex$"
                             [boldColumnIndices$]="boldColumnIndices$"></app-overview-table>
       </div>

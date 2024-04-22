@@ -7,7 +7,7 @@ import de.vinz.openfls.entities.Goal
 import de.vinz.openfls.exceptions.AssistancePlanNotFoundException
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
 import de.vinz.openfls.models.YearMonthDoubleValue
-import de.vinz.openfls.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ServiceRepository
 import de.vinz.openfls.services.ConverterService
 import de.vinz.openfls.services.DateService

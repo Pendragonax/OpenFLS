@@ -3,10 +3,12 @@ package de.vinz.openfls.services
 import de.vinz.openfls.dtos.ServiceFilterDto
 import de.vinz.openfls.entities.Service
 import de.vinz.openfls.projections.ServiceProjection
+import de.vinz.openfls.projections.ServiceSoloProjection
 import de.vinz.openfls.repositories.ServiceRepository
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.transaction.Transactional
 
 @org.springframework.stereotype.Service
@@ -95,6 +97,27 @@ class ServiceService(
             return serviceRepository.findByEmployeeAndClientAndDate(employeeId, filter.clientId!!, filter.date!!)
 
         return serviceRepository.findByEmployeeAndDate(employeeId, filter.date!!)
+    }
+
+    fun getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(year: Int,
+                                                             month: Int,
+                                                             assistancePlanId: Long,
+                                                             hourTypeId: Long): List<ServiceSoloProjection> {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return serviceRepository.findByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
+                assistancePlanId, hourTypeId, start, end)
+    }
+
+    fun getAllByAssistancePlanIdAndYearAndMonth(year: Int,
+                                                month: Int,
+                                                assistancePlanId: Long,): List<ServiceSoloProjection> {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return serviceRepository.findByAssistancePlanIdAndStartAndEnd(
+                assistancePlanId, start, end)
     }
 
     fun countByEmployee(employeeId: Long): Long {
