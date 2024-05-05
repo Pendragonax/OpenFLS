@@ -23,6 +23,7 @@ import {
   MomentDateAdapter
 } from "@angular/material-moment-adapter";
 import {Comparer} from "../../comparer.helper";
+import {CsvService} from "../../../services/csv.service";
 
 @Component({
   selector: 'app-service',
@@ -80,6 +81,7 @@ export class ServiceComponent
   constructor(
     override modalService: NgbModal,
     override helperService: HelperService,
+    private csvService: CsvService,
     private converter: Converter,
     private serviceService: ServiceService,
     private clientService: ClientsService,
@@ -357,5 +359,9 @@ export class ServiceComponent
     } else {
       return null; // Invalid date
     }
+  }
+
+  exportToCsv() {
+    this.csvService.exportToCsvWithHeader("Dokumentationen", this.tableData, this.tableColumns)
   }
 }

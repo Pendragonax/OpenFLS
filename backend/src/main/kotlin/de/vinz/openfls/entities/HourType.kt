@@ -1,6 +1,7 @@
 package de.vinz.openfls.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import org.jetbrains.annotations.NotNull
 import javax.persistence.*
 

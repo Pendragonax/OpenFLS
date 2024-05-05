@@ -1,5 +1,8 @@
 package de.vinz.openfls
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.entities.*
 import java.time.LocalDate
 import kotlin.random.Random

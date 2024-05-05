@@ -65,8 +65,7 @@ import { ServiceMyComponent } from './pages/service-my/service-my.component';
 import { ServiceClientComponent } from './pages/service-client/service-client.component';
 import { ServiceEmployeeComponent } from './pages/service-employee/service-employee.component';
 import { InformationRowComponent } from './shared/layouts/information-row/information-row.component';
-import { ContingentEvaluationComponent } from './shared/modules/contingent-evaluation/contingent-evaluation.component';
-import { WorkTimeCardComponent } from './shared/layouts/work-time-card/work-time-card.component';
+import { WorkTimeCardComponent } from './shared/modules/contingent-evaluation/work-time-card/work-time-card.component';
 import { AssistancePlanEvaluationComponent } from './shared/modules/assistance-plan-evaluation/assistance-plan-evaluation.component';
 import {MatRadioModule} from "@angular/material/radio";
 import { AssistancePlanAnalysisComponent } from './shared/modules/assistance-plan-analysis/assistance-plan-analysis.component';
@@ -86,6 +85,9 @@ import { GoalEvaluationModalComponent } from './modals/goal-evaluation-modal/goa
 import { ConfirmationModalComponent } from './modals/confirmation-modal/confirmation-modal.component';
 import { LoadingSpinnerComponent } from './components/loading-spinner/loading-spinner.component';
 import { ErrorIconComponent } from './components/error-icon/error-icon.component';
+import { ObjectTableComponent } from './components/object-table/object-table.component';
+import {ContingentEvaluationComponent} from "./shared/modules/contingent-evaluation/contingent-evaluation.component";
+import {ContingentOverviewComponent} from "./domains/contingent-overviews/contingent-overview.component";
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: ''},
@@ -144,7 +146,10 @@ const routes: Routes = [
     GoalEvaluationModalComponent,
     ConfirmationModalComponent,
     LoadingSpinnerComponent,
-    ErrorIconComponent
+    ErrorIconComponent,
+    ObjectTableComponent,
+    ContingentEvaluationComponent,
+    ContingentOverviewComponent
   ],
   imports: [
     RouterModule.forRoot(routes),

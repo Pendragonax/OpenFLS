@@ -27,6 +27,7 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
 
   editMode: boolean = false;
   adminMode: boolean = false;
+  institutionId: number = 0;
 
   permissionForm = new FormGroup({
     role: new FormControl()
@@ -49,6 +50,7 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
     const id = this.route.snapshot.paramMap.get('id');
 
     if (id != null) {
+      this.institutionId = parseInt(id)
       // sync loading employees and institution
       combineLatest([
           this.institutionService.getById(+id),

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## 1.1.0
+
+#### Features
+- assistance plan analysis
+- contigent analysis by institution
+- minutes in employee contigent overview
+
+
+
 ## 1.0.0
 
 #### Features

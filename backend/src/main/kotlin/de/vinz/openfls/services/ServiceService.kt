@@ -1,15 +1,14 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.dtos.ServiceFilterDto
-import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.entities.Service
+import de.vinz.openfls.projections.ServiceProjection
+import de.vinz.openfls.projections.ServiceSoloProjection
 import de.vinz.openfls.repositories.ServiceRepository
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.transaction.Transactional
 
 @org.springframework.stereotype.Service
@@ -52,6 +51,12 @@ class ServiceService(
         return serviceRepository.findAll().toList()
     }
 
+    fun getAllByInstitutionAndYear(institutionId: Long, year: Int): List<ServiceProjection> {
+        val start = LocalDate.of(year, 1, 1)
+        val end = LocalDate.of(year, 12, 31)
+        return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end)
+    }
+
     override fun getById(id: Long): Service? {
         return serviceRepository.findByIdOrNull(id)
     }
@@ -92,6 +97,27 @@ class ServiceService(
             return serviceRepository.findByEmployeeAndClientAndDate(employeeId, filter.clientId!!, filter.date!!)
 
         return serviceRepository.findByEmployeeAndDate(employeeId, filter.date!!)
+    }
+
+    fun getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(year: Int,
+                                                             month: Int,
+                                                             assistancePlanId: Long,
+                                                             hourTypeId: Long): List<ServiceSoloProjection> {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return serviceRepository.findByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
+                assistancePlanId, hourTypeId, start, end)
+    }
+
+    fun getAllByAssistancePlanIdAndYearAndMonth(year: Int,
+                                                month: Int,
+                                                assistancePlanId: Long,): List<ServiceSoloProjection> {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return serviceRepository.findByAssistancePlanIdAndStartAndEnd(
+                assistancePlanId, start, end)
     }
 
     fun countByEmployee(employeeId: Long): Long {

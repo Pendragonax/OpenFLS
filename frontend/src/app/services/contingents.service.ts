@@ -10,6 +10,7 @@ import {HttpClient} from "@angular/common/http";
 import {EmployeeService} from "./employee.service";
 import {InstitutionService} from "./institution.service";
 import {UserService} from "./user.service";
+import {ContingentEvaluationDto} from "../domains/contingent-overviews/dtos/contingent-evaluation-dto.model";
 
 @Injectable({
   providedIn: 'root'
@@ -48,14 +49,15 @@ export class ContingentsService extends Base<ContingentDto> {
       this.employeeService.getById(id),
       this.institutionService.allValues$,
       this.getByEmployeeId(id),
-      this.userService.leadingInstitutions$]
-    ).pipe(map(([employee, institutions, contingents, leadingIds]) => {
+      this.userService.leadingInstitutions$,
+      this.userService.isAdmin$]
+    ).pipe(map(([employee, institutions, contingents, leadingIds, isAdmin]) => {
       return contingents.map<[EmployeeDto, InstitutionDto, ContingentDto, boolean]>(contingent => {
         return [
           employee,
           institutions.find(x => x.id === contingent.institutionId) ?? new InstitutionDto(),
           contingent,
-          leadingIds.some(x => x == contingent.institutionId)
+          leadingIds.some(x => x == contingent.institutionId) || isAdmin
         ]
       })
     }))
@@ -66,14 +68,15 @@ export class ContingentsService extends Base<ContingentDto> {
       this.institutionService.getById(id),
       this.employeeService.allValues$,
       this.getByInstitutionId(id),
-      this.userService.leadingInstitutions$]
-    ).pipe(map(([institution, employees, contingents, leadingIds]) => {
+      this.userService.leadingInstitutions$,
+      this.userService.isAdmin$]
+    ).pipe(map(([institution, employees, contingents, leadingIds, isAdmin]) => {
       return contingents.map<[EmployeeDto, InstitutionDto, ContingentDto, boolean]>(contingent => {
         return [
           employees.find(x => x.id == contingent.employeeId) ?? new EmployeeDto(),
           institution,
           contingent,
-          leadingIds.some(x => x == contingent.institutionId)
+          leadingIds.some(x => x == contingent.institutionId) || isAdmin
         ]
       })
     }))

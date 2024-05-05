@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.evaluations.repositories.EvaluationRepository
 import de.vinz.openfls.dtos.GenericYearlyResponseDto
 import de.vinz.openfls.entities.Employee
 import de.vinz.openfls.entities.Goal
-import de.vinz.openfls.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.services.DateService
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull

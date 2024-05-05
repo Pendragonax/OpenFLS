@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.exceptions.YearOutOfRangeException
 import de.vinz.openfls.services.models.DateRangeArgument
 import org.assertj.core.api.Assertions.assertThat

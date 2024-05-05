@@ -2,6 +2,7 @@ package de.vinz.openfls.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import org.springframework.lang.Nullable
 import javax.persistence.*
 import javax.validation.constraints.NotEmpty

@@ -1,10 +1,9 @@
 package de.vinz.openfls.controller
 
-import de.vinz.openfls.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.dtos.InstitutionDto
 import de.vinz.openfls.entities.Institution
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.HelperService
 import de.vinz.openfls.services.InstitutionService
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger

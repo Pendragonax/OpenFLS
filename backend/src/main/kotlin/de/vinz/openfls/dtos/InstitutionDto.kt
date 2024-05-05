@@ -1,5 +1,7 @@
 package de.vinz.openfls.dtos
 
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import javax.validation.constraints.NotEmpty
 
 class InstitutionDto {
