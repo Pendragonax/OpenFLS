@@ -1,5 +1,6 @@
 package de.vinz.openfls.controller
 
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.dtos.GoalDto
 import de.vinz.openfls.dtos.GoalHourDto
 import de.vinz.openfls.entities.Goal
@@ -19,12 +20,12 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/goals")
 class GoalController(
-    private val goalService: GoalService,
-    private val hourTypeService: HourTypeService,
-    private val assistancePlanService: AssistancePlanService,
-    private val institutionService: InstitutionService,
-    private val accessService: AccessService,
-    private val modelMapper: ModelMapper
+        private val goalService: GoalService,
+        private val hourTypeService: HourTypeService,
+        private val assistancePlanService: AssistancePlanService,
+        private val institutionService: InstitutionService,
+        private val accessService: AccessService,
+        private val modelMapper: ModelMapper
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(GoalController::class.java)

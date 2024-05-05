@@ -1,8 +1,7 @@
-package de.vinz.openfls.repositories
+package de.vinz.openfls.domains.assistancePlans.repositories
 
-import de.vinz.openfls.domains.contingents.projections.ContingentProjection
-import de.vinz.openfls.entities.AssistancePlan
-import de.vinz.openfls.projections.AssistancePlanProjection
+import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -11,11 +10,25 @@ import java.time.LocalDate
 interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
     @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE :end >= u.start AND :start <= u.end")
+    fun findProjectionByStartAndEnd(start: LocalDate,
+                                    end: LocalDate): List<AssistancePlanProjection>
+
+    @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId " +
             "AND (:end >= u.start AND :start <= u.end)")
-    fun findByInstitutionIdAndStartAndEnd(institutionId: Long,
-                                          start: LocalDate,
-                                          end: LocalDate): List<AssistancePlanProjection>
+    fun findProjectionByInstitutionIdAndStartAndEnd(institutionId: Long,
+                                                    start: LocalDate,
+                                                    end: LocalDate): List<AssistancePlanProjection>
+
+    @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.institution.id = :institutionId " +
+            "And u.sponsor.id = :sponsorId " +
+            "AND (:end >= u.start AND :start <= u.end)")
+    fun findProjectionByInstitutionIdAndSponsorIdAndStartAndEnd(institutionId: Long,
+                                                                sponsorId: Long,
+                                                                start: LocalDate,
+                                                                end: LocalDate): List<AssistancePlanProjection>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE (YEAR(u.start) <= :year AND YEAR(u.end) >= :year)")
@@ -44,6 +57,10 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId")
     fun findByInstitutionId(@Param("institutionId") id: Long): List<AssistancePlan>
+
+    @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.institution.id = :institutionId")
+    fun findProjectionByInstitutionId(@Param("institutionId") institutionId: Long): List<AssistancePlanProjection>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId" +

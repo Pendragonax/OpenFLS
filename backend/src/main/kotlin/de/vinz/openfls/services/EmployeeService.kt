@@ -1,6 +1,7 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.dtos.AssistancePlanResponseDto
+import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.dtos.PasswordDto
 import de.vinz.openfls.entities.*
 import de.vinz.openfls.repositories.*
@@ -13,16 +14,16 @@ import kotlin.IllegalArgumentException
 
 @Service
 class EmployeeService(
-    private val employeeRepository: EmployeeRepository,
-    private val employeeAccessRepository: EmployeeAccessRepository,
-    private val clientRepository: ClientRepository,
-    private val sponsorRepository: SponsorRepository,
-    private val permissionServiceImpl: PermissionService,
-    private val unprofessionalService: UnprofessionalService,
-    private val assistancePlanRepository: AssistancePlanRepository,
-    private val institutionRepository: InstitutionRepository,
-    private val passwordEncoder: PasswordEncoder,
-    private val modelMapper: ModelMapper
+        private val employeeRepository: EmployeeRepository,
+        private val employeeAccessRepository: EmployeeAccessRepository,
+        private val clientRepository: ClientRepository,
+        private val sponsorRepository: SponsorRepository,
+        private val permissionServiceImpl: PermissionService,
+        private val unprofessionalService: UnprofessionalService,
+        private val assistancePlanRepository: AssistancePlanRepository,
+        private val institutionRepository: InstitutionRepository,
+        private val passwordEncoder: PasswordEncoder,
+        private val modelMapper: ModelMapper
 ) : GenericService<Employee> {
 
     @Transactional

@@ -1,11 +1,10 @@
-package de.vinz.openfls.controller
+package de.vinz.openfls.domains.assistancePlans
 
-import de.vinz.openfls.dtos.AssistancePlanDto
-import de.vinz.openfls.dtos.AssistancePlanHourDto
-import de.vinz.openfls.dtos.AssistancePlanResponseDto
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.entities.AssistancePlan
-import de.vinz.openfls.entities.AssistancePlanHour
 import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
@@ -28,13 +27,13 @@ import javax.validation.Valid
 @RestController
 @RequestMapping("/assistance_plans")
 class AssistancePlanController(
-    private val assistancePlanService: AssistancePlanService,
-    private val modelMapper: ModelMapper,
-    private val institutionService: InstitutionService,
-    private val sponsorService: SponsorService,
-    private val clientService: ClientService,
-    private val hourTypeService: HourTypeService,
-    private val accessService: AccessService
+        private val assistancePlanService: AssistancePlanService,
+        private val modelMapper: ModelMapper,
+        private val institutionService: InstitutionService,
+        private val sponsorService: SponsorService,
+        private val clientService: ClientService,
+        private val hourTypeService: HourTypeService,
+        private val accessService: AccessService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanController::class.java)
 

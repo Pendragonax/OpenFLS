@@ -3,11 +3,11 @@ import {ReplaySubject} from "rxjs";
 import {CsvService} from "../../services/csv.service";
 
 @Component({
-  selector: 'app-number-table',
-  templateUrl: './number-table.component.html',
-  styleUrls: ['./number-table.component.css']
+  selector: 'app-object-table',
+  templateUrl: './object-table.component.html',
+  styleUrls: ['./object-table.component.css']
 })
-export class NumberTableComponent implements OnInit {
+export class ObjectTableComponent implements OnInit {
   @Input() header$: ReplaySubject<string[]> = new ReplaySubject<string[]>()
   @Input() data$: ReplaySubject<any[][]> = new ReplaySubject<any[][]>()
   @Input() columnFixedWidthFromIndex: number = 0;
@@ -24,9 +24,7 @@ export class NumberTableComponent implements OnInit {
       next: (value) => this.header = value
     });
     this.data$.subscribe({
-      next: (value) => {
-        console.log(value)
-        this.data = value}
+      next: (value) => this.data = value
     });
   }
 

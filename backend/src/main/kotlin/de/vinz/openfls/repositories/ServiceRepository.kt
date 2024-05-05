@@ -2,6 +2,7 @@ package de.vinz.openfls.repositories
 
 import de.vinz.openfls.entities.Service
 import de.vinz.openfls.projections.ServiceProjection
+import de.vinz.openfls.projections.ServiceSoloProjection
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -19,6 +20,24 @@ interface ServiceRepository : CrudRepository<Service, Long> {
                                                        institutionId: Long,
                                                        start: LocalDate,
                                                        end: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u " +
+            "WHERE u.assistancePlan.id = :assistancePlanId " +
+            "AND u.hourType.id = :hourTypeId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end")
+    fun findByAssistancePlanIdAndHourTypeIdAndStartAndEnd(assistancePlanId: Long,
+                                                          hourTypeId: Long,
+                                                          start: LocalDate,
+                                                          end: LocalDate): List<ServiceSoloProjection>
+
+    @Query("SELECT u FROM Service u " +
+            "WHERE u.assistancePlan.id = :assistancePlanId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end")
+    fun findByAssistancePlanIdAndStartAndEnd(assistancePlanId: Long,
+                                                          start: LocalDate,
+                                                          end: LocalDate): List<ServiceSoloProjection>
 
     @Query("SELECT u FROM Service u " +
             "WHERE u.institution.id >= :institutionId " +

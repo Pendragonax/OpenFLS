@@ -1,0 +1,38 @@
+.overview-fixed-column-width {
+  width: 3vw !important;
+}
+
+.overview-row-height {
+  height: 4vh !important;
+}
+
+.table-font-size {
+  font-size: 0.688rem;
+}
+
+.mat-row:nth-child(odd){
+  background-color: #e1e5ff;
+}
+
+.mat-icon-button {
+  color: limegreen !important;
+}
+
+.fixed-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 100;
+  opacity: 0.3;
+  background: limegreen;
+  color: white;
+}
+
+.fixed-button:hover {
+  transition: opacity 200ms ease-in-out;
+  opacity: 1;
+ }
+
+.table-container {
+  position: relative;
+}
