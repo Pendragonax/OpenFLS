@@ -6,8 +6,8 @@
   height: 4vh !important;
 }
 
-.overview-font-size {
-  font-size: 0.65vw;
+.table-font-size {
+  font-size: 0.688rem;
 }
 
 .mat-row:nth-child(odd){
@@ -16,4 +16,23 @@
 
 .mat-icon-button {
   color: limegreen !important;
+}
+
+.fixed-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 100;
+  opacity: 0.3;
+  background: limegreen;
+  color: white;
+}
+
+.fixed-button:hover {
+  transition: opacity 200ms ease-in-out;
+  opacity: 1;
+ }
+
+.table-container {
+  position: relative;
 }

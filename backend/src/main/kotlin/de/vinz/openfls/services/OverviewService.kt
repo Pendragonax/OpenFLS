@@ -55,7 +55,7 @@ class OverviewService(
 
         // Yearly
         val assistancePlanDTOs = getAssistancePlans(year, null, areaId, sponsorId)
-        return getExecutedHoursYearly(services, assistancePlanDTOs, clientSimpleDTOs)
+        return getExecutedHoursYearly(services, assistancePlanDTOs, clientSimpleDTOs, year)
     }
 
     @Throws(UserNotAllowedException::class, IllegalTimeException::class)
@@ -124,6 +124,10 @@ class OverviewService(
         val assistancePlanOverviewDTOs =
                 getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientSimpleDTOs, daysInMonth)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
+        allAssistancePlanOverviewDTO.assistancePlanDto.start =
+                LocalDate.of(year, month, 1)
+        allAssistancePlanOverviewDTO.assistancePlanDto.end =
+                LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
 
         assistancePlanDTOs.forEach { assistancePlanDto ->
             val assistancePlanOverviewDTO =
@@ -188,9 +192,12 @@ class OverviewService(
     private fun getExecutedHoursYearly(services: List<de.vinz.openfls.entities.Service>,
                                        assistancePlanDTOs: List<AssistancePlanDto>,
                                        clientDTOs: List<ClientSimpleDto>,
+                                       year: Int,
                                        toTimeDouble: Boolean = true): List<AssistancePlanOverviewDTO> {
         val assistancePlanOverviewDTOs = getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientDTOs, MONTH_COUNT)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
+        allAssistancePlanOverviewDTO.assistancePlanDto.start = LocalDate.of(year, 1, 1)
+        allAssistancePlanOverviewDTO.assistancePlanDto.end = LocalDate.of(year, 12, 31)
 
         services.forEach { service ->
             val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan.id }
@@ -247,7 +254,7 @@ class OverviewService(
         val approvedOverviewDTOs = getApprovedHoursYearly(
                 assistancePlanDTOs, clientSimpleDTOs, hourTypeId, year, false)
         val executedOverviewDTOs = getExecutedHoursYearly(
-                services, assistancePlanDTOs, clientSimpleDTOs, false)
+                services, assistancePlanDTOs, clientSimpleDTOs, year, false)
 
         return subtractApprovedFromExecutedOverview(executedOverviewDTOs, approvedOverviewDTOs, toTimeDouble)
     }

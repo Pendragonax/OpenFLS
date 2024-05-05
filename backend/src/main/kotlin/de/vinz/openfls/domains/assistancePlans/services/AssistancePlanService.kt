@@ -1,17 +1,15 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
-import de.vinz.openfls.dtos.ActualTargetValueDto
-import de.vinz.openfls.dtos.AssistancePlanEvalDto
-import de.vinz.openfls.dtos.HourTypeDto
-import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
+import de.vinz.openfls.dtos.ActualTargetValueDto
+import de.vinz.openfls.dtos.AssistancePlanEvalDto
+import de.vinz.openfls.dtos.HourTypeDto
+import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.repositories.ServiceRepository
-import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.GenericService
-import de.vinz.openfls.services.NumberService
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.transaction.Transactional
-import kotlin.IllegalArgumentException
 
 @Service
 class AssistancePlanService(
@@ -137,6 +134,14 @@ class AssistancePlanService(
 
     fun getByInstitutionId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findByInstitutionId(id)
+    }
+
+    fun getProjectionByYearMonth(year: Int,
+                                 month: Int): List<AssistancePlanProjection> {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return assistancePlanRepository.findProjectionByStartAndEnd(start, end)
     }
 
     fun getProjectionByYearMonthInstitutionId(year: Int,

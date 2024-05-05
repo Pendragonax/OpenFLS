@@ -3,7 +3,10 @@ package de.vinz.openfls.domains.assistancePlans.services
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthCollectionDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
+import de.vinz.openfls.exceptions.IllegalTimeException
+import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.projections.GoalProjection
+import de.vinz.openfls.services.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.NumberService
 import de.vinz.openfls.services.ServiceService
@@ -13,13 +16,64 @@ import java.time.LocalDate
 @Service
 class AssistancePlanAnalysisService(
         private val assistancePlanService: AssistancePlanService,
-        private val serviceService: ServiceService
+        private val serviceService: ServiceService,
+        private val accessService: AccessService
 ) {
+    fun getAnalysisByInstitutionAndSponsorAndHourTypeInMonth(year: Int,
+                                                             month: Int,
+                                                             institutionId: Long,
+                                                             sponsorId: Long,
+                                                             hourTypeId: Long,
+                                                             token: String): AssistancePlanAnalysisMonthCollectionDto {
+        validateInstitutionAccess(institutionId, token)
+        validateTime(year, month)
+
+        if (sponsorId <= 0) {
+            return getAnalysisByInstitutionAndHourTypeInMonth(year, month, institutionId, hourTypeId, token)
+        }
+
+        val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionId(year, month, institutionId)
+        val analysis = getAnalysisByHourTypeIdInMonth(year, month, assistancePlans, hourTypeId)
+
+        return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
+    }
+
     fun getAnalysisByInstitutionAndHourTypeInMonth(year: Int,
                                                    month: Int,
                                                    institutionId: Long,
-                                                   hourTypeId: Long): AssistancePlanAnalysisMonthCollectionDto {
+                                                   hourTypeId: Long,
+                                                   token: String): AssistancePlanAnalysisMonthCollectionDto {
+        validateInstitutionAccess(institutionId, token)
+        validateTime(year, month)
+
+        if (hourTypeId <= 0 && institutionId <= 0) {
+            return getAnalysisInMonth(year, month, token)
+        }
+        if (hourTypeId <= 0) {
+            return getAnalysisByInstitutionInMonth(year, month, institutionId, token)
+        }
+        if (institutionId <= 0) {
+            return getAnalysisByInstitutionInMonth(year, month, institutionId, token)
+        }
+
         val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionId(year, month, institutionId)
+        val analysis = getAnalysisByHourTypeIdInMonth(year, month, assistancePlans, hourTypeId)
+
+        return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
+    }
+
+    fun getAnalysisByHourTypeInMonth(year: Int,
+                                     month: Int,
+                                     hourTypeId: Long,
+                                     token: String): AssistancePlanAnalysisMonthCollectionDto {
+        validateAdmin(token)
+        validateTime(year, month)
+
+        if (hourTypeId <= 0) {
+            return getAnalysisInMonth(year, month, token)
+        }
+
+        val assistancePlans = assistancePlanService.getProjectionByYearMonth(year, month)
         val analysis = getAnalysisByHourTypeIdInMonth(year, month, assistancePlans, hourTypeId)
 
         return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
@@ -27,8 +81,22 @@ class AssistancePlanAnalysisService(
 
     fun getAnalysisByInstitutionInMonth(year: Int,
                                         month: Int,
-                                        institutionId: Long): AssistancePlanAnalysisMonthCollectionDto {
+                                        institutionId: Long,
+                                        token: String): AssistancePlanAnalysisMonthCollectionDto {
+        if (institutionId <= 0) {
+            return getAnalysisInMonth(year, month, token)
+        }
+
         val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionId(year, month, institutionId)
+        val analysis = getAnalysisInMonth(year, month, assistancePlans)
+
+        return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
+    }
+
+    fun getAnalysisInMonth(year: Int,
+                           month: Int,
+                           token: String): AssistancePlanAnalysisMonthCollectionDto {
+        val assistancePlans = assistancePlanService.getProjectionByYearMonth(year, month)
         val analysis = getAnalysisInMonth(year, month, assistancePlans)
 
         return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
@@ -38,8 +106,16 @@ class AssistancePlanAnalysisService(
             year: Int,
             month: Int,
             assistancePlanAnalysis: List<AssistancePlanAnalysisMonthDto>): AssistancePlanAnalysisMonthCollectionDto {
-        val approvedHours = assistancePlanAnalysis.map { it.approvedHours }.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
-        val executedHours = assistancePlanAnalysis.map { it.executedHours }.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+        val approvedHours =
+                if (assistancePlanAnalysis.isNotEmpty())
+                    assistancePlanAnalysis.map { it.approvedHours }.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+                else
+                    0.0
+        val executedHours =
+                if (assistancePlanAnalysis.isNotEmpty())
+                    assistancePlanAnalysis.map { it.executedHours }.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+                else
+                    0.0
         val executedPercent =
                 if (approvedHours > 0)
                     NumberService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
@@ -54,14 +130,16 @@ class AssistancePlanAnalysisService(
                 executedHours = executedHours,
                 executedPercent = executedPercent,
                 missingHours = missingHours,
-                assistancePlanAnalysis = assistancePlanAnalysis)
+                assistancePlanAnalysis = assistancePlanAnalysis.sortedBy { it.clientLastName })
     }
 
     fun getAnalysisByHourTypeIdInMonth(year: Int,
                                        month: Int,
                                        assistancePlans: List<AssistancePlanProjection>,
                                        hourTypeId: Long): List<AssistancePlanAnalysisMonthDto> {
-        return assistancePlans.map { getAnalysisByHourTypeIdInMonth(year, month, it, hourTypeId) }
+        return assistancePlans
+                .map { getAnalysisByHourTypeIdInMonth(year, month, it, hourTypeId) }
+                .filter { it.approvedHours > 0 }
     }
 
     fun getAnalysisByHourTypeIdInMonth(year: Int,
@@ -95,7 +173,9 @@ class AssistancePlanAnalysisService(
     fun getAnalysisInMonth(year: Int,
                            month: Int,
                            assistancePlans: List<AssistancePlanProjection>): List<AssistancePlanAnalysisMonthDto> {
-        return assistancePlans.map { getAnalysisInMonth(year, month, it) }
+        return assistancePlans
+                .map { getAnalysisInMonth(year, month, it) }
+                .filter { it.approvedHours > 0 }
     }
 
     fun getAnalysisInMonth(year: Int,
@@ -321,5 +401,35 @@ class AssistancePlanAnalysisService(
 
     private fun existsAssistancePlanHours(assistancePlan: AssistancePlanProjection): Boolean {
         return assistancePlan.hours.isNotEmpty()
+    }
+
+    @Throws(IllegalTimeException::class)
+    private fun validateTime(year: Int, month: Int?) {
+        if (year < 0) {
+            throw IllegalTimeException("Year is below 0")
+        }
+
+        month?.let {
+            if (it <= 0 || it > 12) {
+                throw IllegalTimeException("Month is below 0 or higher than 12")
+            }
+        }
+    }
+
+    @Throws(UserNotAllowedException::class)
+    private fun validateInstitutionAccess(institutionId: Long?, token: String) {
+        if (institutionId == null && !accessService.isAdmin(token)) {
+            throw UserNotAllowedException()
+        }
+        if (institutionId != null && !accessService.canReadEntries(token, institutionId)) {
+            throw UserNotAllowedException()
+        }
+    }
+
+    @Throws(UserNotAllowedException::class)
+    private fun validateAdmin(token: String) {
+        if (!accessService.isAdmin(token)) {
+            throw UserNotAllowedException()
+        }
     }
 }
