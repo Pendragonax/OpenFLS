@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {Period} from "../../../../components/year-month-selection/Period";
-import {FormGroup} from "@angular/forms";
+import {UntypedFormGroup} from "@angular/forms";
 import {PeriodMode} from "../../../../components/year-month-selection/PeriodMode";
 
 @Component({
@@ -14,7 +14,7 @@ export class GoalEvaluationFilterComponent implements OnInit {
 
   disabled = false;
 
-  filterGroup: FormGroup = new FormGroup({
+  filterGroup: UntypedFormGroup = new UntypedFormGroup({
   });
 
   constructor() { }

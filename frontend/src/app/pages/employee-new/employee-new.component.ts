@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {EmployeeService} from "../../services/employee.service";
 import {Router} from "@angular/router";
 import {STEPPER_GLOBAL_OPTIONS} from "@angular/cdk/stepper";
@@ -31,27 +31,27 @@ export class EmployeeNewComponent extends NewPageComponent<EmployeeDto> implemen
   permissionTableColumns: string[] = ['name', 'lead', 'write', 'read', 'affiliated'];
 
   // FORMs
-  accessForm: FormGroup = new FormGroup({
-    username: new FormControl({value:'', disabled: false}, Validators.compose([
+  accessForm: UntypedFormGroup = new UntypedFormGroup({
+    username: new UntypedFormControl({value:'', disabled: false}, Validators.compose([
       Validators.required,
       Validators.minLength(6)])),
-    role: new FormControl({value:'3', disabled: false})
+    role: new UntypedFormControl({value:'3', disabled: false})
   });
-  personalInfoForm = new FormGroup({
-    firstName: new FormControl({value:'', disabled: false}, Validators.compose([
+  personalInfoForm = new UntypedFormGroup({
+    firstName: new UntypedFormControl({value:'', disabled: false}, Validators.compose([
       Validators.required,
       Validators.minLength(1)])),
-    lastName: new FormControl({value:'', disabled: false}, Validators.compose([
+    lastName: new UntypedFormControl({value:'', disabled: false}, Validators.compose([
       Validators.required,
       Validators.minLength(1)])),
-    phone: new FormControl(''),
-    email: new FormControl('', Validators.compose([
+    phone: new UntypedFormControl(''),
+    email: new UntypedFormControl('', Validators.compose([
       Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")
     ])),
-    description: new FormControl(''),
-    inactive: new FormControl('')
+    description: new UntypedFormControl(''),
+    inactive: new UntypedFormControl('')
   });
-  permissionForm = new FormGroup({
+  permissionForm = new UntypedFormGroup({
   })
 
   get usernameControl() { return this.accessForm.controls['username']; }

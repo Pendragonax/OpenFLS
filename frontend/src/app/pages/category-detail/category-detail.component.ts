@@ -3,7 +3,7 @@ import {CategoryTemplateDto} from "../../dtos/category-template-dto.model";
 import {CategoriesService} from "../../services/categories.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {DtoCombinerService} from "../../services/dto-combiner.service";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {CategoryDto} from "../../dtos/category-dto.model";
 import {DetailPageComponent} from "../../shared/modules/detail-page.component";
@@ -23,19 +23,19 @@ export class CategoryDetailComponent extends DetailPageComponent<CategoryTemplat
   editCategory = new CategoryDto();
 
   // FORMs
-  infoForm = new FormGroup({
-    title: new FormControl(
+  infoForm = new UntypedFormGroup({
+    title: new UntypedFormControl(
       { value:'', disabled: false },
       Validators.compose([Validators.required, Validators.minLength(1)])),
-    description: new FormControl( { value:'', disabled: false } ),
-    withoutClient: new FormControl(false)
+    description: new UntypedFormControl( { value:'', disabled: false } ),
+    withoutClient: new UntypedFormControl(false)
   })
 
-  editCategoryForm = new FormGroup({
-    title: new FormControl(),
-    shortcut: new FormControl(),
-    description: new FormControl( { value:'', disabled: false } ),
-    faceToFace: new FormControl(true)
+  editCategoryForm = new UntypedFormGroup({
+    title: new UntypedFormControl(),
+    shortcut: new UntypedFormControl(),
+    description: new UntypedFormControl( { value:'', disabled: false } ),
+    faceToFace: new UntypedFormControl(true)
   })
 
   get titleControl() { return this.infoForm.controls['title']; }

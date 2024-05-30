@@ -3,7 +3,7 @@ import {ActivatedRoute} from "@angular/router";
 import {EmployeeService} from "../../services/employee.service";
 import {EmployeeDto} from "../../dtos/employee-dto.model";
 import {InstitutionService} from "../../services/institution.service";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {PermissionDto} from "../../dtos/permission-dto.model";
 import {ReplaySubject, Subject} from "rxjs";
 import {InstitutionDto} from "../../dtos/institution-dto.model";
@@ -34,21 +34,21 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
   adminMode: boolean = false;
 
   // FORMs
-  permissionForm = new FormGroup({
-    role: new FormControl()
+  permissionForm = new UntypedFormGroup({
+    role: new UntypedFormControl()
   });
-  detailForm = new FormGroup({
-    firstName: new FormControl({value:'', disabled: false}, Validators.compose([
+  detailForm = new UntypedFormGroup({
+    firstName: new UntypedFormControl({value:'', disabled: false}, Validators.compose([
       Validators.required,
       Validators.minLength(1)])),
-    lastName: new FormControl({value:'', disabled: false}, Validators.compose([
+    lastName: new UntypedFormControl({value:'', disabled: false}, Validators.compose([
       Validators.required,
       Validators.minLength(1)])),
-    phone: new FormControl(''),
-    email: new FormControl('', Validators.compose([
+    phone: new UntypedFormControl(''),
+    email: new UntypedFormControl('', Validators.compose([
       Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")
     ])),
-    description: new FormControl('')}
+    description: new UntypedFormControl('')}
   );
 
   get roleControl() { return this.permissionForm.controls['role']; }

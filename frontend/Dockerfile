@@ -3,7 +3,7 @@ FROM node:22-alpine AS DEV
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
-RUN npm install -g @angular/cli@13.3.8
+RUN npm install -g @angular/cli@14.2.13
 COPY . /app/
 EXPOSE 4200 49153
 ENTRYPOINT ["sh", "entrypoint.sh"]
@@ -14,7 +14,7 @@ FROM node:22-alpine AS BUILD
 WORKDIR /app
 COPY package*.json package-lock.json ./
 RUN npm ci
-RUN npm install -g @angular/cli@13.3.8
+RUN npm install -g @angular/cli@14.2.13
 COPY . /app/
 RUN ["ng", "build"]
 

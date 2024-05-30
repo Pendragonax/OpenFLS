@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {combineLatest, Observable, ReplaySubject} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {OverviewService} from "../../services/overview.service";
 import {OverviewAssistancePlan} from "../../dtos/overview-assistance-plan.dto";
 import {Location} from '@angular/common';
@@ -91,12 +91,12 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   errorOccurred: boolean = false;
   csvGenerated: boolean = false;
 
-  selectionForm: FormGroup = new FormGroup({
-    periodModeControl: new FormControl({value: '2', disabled: this.isGenerating}),
-    hourTypeControl: new FormControl({disabled: this.isGenerating}),
-    areaControl: new FormControl({disabled: this.isGenerating}),
-    sponsorControl: new FormControl({disabled: this.isGenerating}),
-    valueTypeControl: new FormControl({disabled: this.isGenerating})
+  selectionForm: UntypedFormGroup = new UntypedFormGroup({
+    periodModeControl: new UntypedFormControl({value: '2', disabled: this.isGenerating}),
+    hourTypeControl: new UntypedFormControl({disabled: this.isGenerating}),
+    areaControl: new UntypedFormControl({disabled: this.isGenerating}),
+    sponsorControl: new UntypedFormControl({disabled: this.isGenerating}),
+    valueTypeControl: new UntypedFormControl({disabled: this.isGenerating})
   });
 
   constructor(private route: ActivatedRoute,

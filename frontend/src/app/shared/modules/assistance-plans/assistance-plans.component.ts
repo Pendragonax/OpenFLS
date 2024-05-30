@@ -3,7 +3,7 @@ import {combineLatest, ReplaySubject} from "rxjs";
 import {InstitutionDto} from "../../../dtos/institution-dto.model";
 import {ClientDto} from "../../../dtos/client-dto.model";
 import {AssistancePlanDto} from "../../../dtos/assistance-plan-dto.model";
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {AssistancePlanService} from "../../../services/assistance-plan.service";
 import {Sort} from "@angular/material/sort";
 import {Comparer} from "../../comparer.helper";
@@ -86,11 +86,11 @@ export class AssistancePlansComponent
   filterClientId : number | null = null;
 
   // FORMs
-  override filterForm = new FormGroup({
-    searchString: new FormControl(""),
-    date: new FormControl(),
-    institution: new FormControl(),
-    client: new FormControl(),
+  override filterForm = new UntypedFormGroup({
+    searchString: new UntypedFormControl(""),
+    date: new UntypedFormControl(),
+    institution: new UntypedFormControl(),
+    client: new UntypedFormControl(),
   });
 
   get dateControl() { return this.filterForm.controls['date']; }

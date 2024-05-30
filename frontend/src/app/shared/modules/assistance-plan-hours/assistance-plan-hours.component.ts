@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ReplaySubject} from "rxjs";
 import {AssistancePlanHourDto} from "../../../dtos/assistance-plan-hour-dto.model";
 import {HourTypeDto} from "../../../dtos/hour-type-dto.model";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {HourTypeService} from "../../../services/hour-type.service";
 import {combineLatest} from "rxjs";
@@ -36,9 +36,9 @@ export class AssistancePlanHoursComponent
   value: AssistancePlanHourDto = new AssistancePlanHourDto();
 
   // FORMS
-  editForm = new FormGroup({
-    type: new FormControl(null, Validators.compose([Validators.required])),
-    weeklyHours: new FormControl(
+  editForm = new UntypedFormGroup({
+    type: new UntypedFormControl(null, Validators.compose([Validators.required])),
+    weeklyHours: new UntypedFormControl(
       0,
       Validators.compose([
         Validators.min(0.1),

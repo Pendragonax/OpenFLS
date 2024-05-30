@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {GoalDto} from "../../../dtos/goal-dto.model";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
 import {
   MAT_MOMENT_DATE_ADAPTER_OPTIONS,
@@ -61,8 +61,8 @@ export class GoalsComponent
   hourTableSource: MatTableDataSource<[GoalHourDto, HourTypeDto]> = new MatTableDataSource();
   emptyHourTableSource: boolean = true;
 
-  infoForm = new FormGroup({
-    title: new FormControl(
+  infoForm = new UntypedFormGroup({
+    title: new UntypedFormControl(
       '',
       Validators.compose([
         Validators.required,
@@ -70,22 +70,22 @@ export class GoalsComponent
         Validators.maxLength(64)
       ])
     ),
-    description: new FormControl(
+    description: new UntypedFormControl(
       '',
       Validators.compose([
         Validators.maxLength(256),
         Validators.required
       ])
     ),
-    institution: new FormControl(null)
+    institution: new UntypedFormControl(null)
   });
 
-  hourForm = new FormGroup({
-    hourType: new FormControl(null, Validators.compose([Validators.required])),
-    weeklyHours: new FormControl(
+  hourForm = new UntypedFormGroup({
+    hourType: new UntypedFormControl(null, Validators.compose([Validators.required])),
+    weeklyHours: new UntypedFormControl(
       0,
       Validators.compose([Validators.required, Validators.min(0.1)])),
-    hourTable: new FormControl()
+    hourTable: new UntypedFormControl()
   })
 
   get titleControl() { return this.infoForm.controls['title']; }

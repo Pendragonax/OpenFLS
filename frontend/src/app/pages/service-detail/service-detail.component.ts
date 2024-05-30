@@ -9,7 +9,7 @@ import {CategoriesService} from "../../services/categories.service";
 import {UserService} from "../../services/user.service";
 import {InstitutionDto} from "../../dtos/institution-dto.model";
 import {combineLatest, startWith} from "rxjs";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ClientDto} from "../../dtos/client-dto.model";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
 import {
@@ -71,37 +71,37 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   minDate = new Date();
 
   // FORMS
-  firstForm = new FormGroup({
-    serviceDate: new FormControl({value: this.timeNow, disabled: true},
+  firstForm = new UntypedFormGroup({
+    serviceDate: new UntypedFormControl({value: this.timeNow, disabled: true},
       Validators.compose([Validators.required])),
-    startHour: new FormControl({value: this.timeNow.getHours(), disabled: true},
+    startHour: new UntypedFormControl({value: this.timeNow.getHours(), disabled: true},
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
-    startMinute: new FormControl({value: this.timeNow.getMinutes(), disabled: true},
+    startMinute: new UntypedFormControl({value: this.timeNow.getMinutes(), disabled: true},
       Validators.compose([Validators.required, Validators.max(59), Validators.min(0)])),
-    endHour: new FormControl({value: this.timeNow.getHours(), disabled: true},
+    endHour: new UntypedFormControl({value: this.timeNow.getHours(), disabled: true},
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
-    endMinute: new FormControl({value: this.timeNow.getMinutes(), disabled: true},
+    endMinute: new UntypedFormControl({value: this.timeNow.getMinutes(), disabled: true},
       Validators.compose([Validators.required, Validators.max(59), Validators.min(0)])),
-    institution: new FormControl(null,
+    institution: new UntypedFormControl(null,
       Validators.compose([Validators.required]))
   }, createStartTimeEndTimeValidator);
 
-  secondForm = new FormGroup({
-    client: new FormControl({value: '', disabled: true }),
-    clientList: new FormControl({value: '', disabled: true }),
-    assistancePlanList: new FormControl({value: '', disabled: true }),
-    goalList: new FormControl(null),
-    hourType: new FormControl(null,
+  secondForm = new UntypedFormGroup({
+    client: new UntypedFormControl({value: '', disabled: true }),
+    clientList: new UntypedFormControl({value: '', disabled: true }),
+    assistancePlanList: new UntypedFormControl({value: '', disabled: true }),
+    goalList: new UntypedFormControl(null),
+    hourType: new UntypedFormControl(null,
       Validators.compose([Validators.required]))
   });
 
-  thirdForm = new FormGroup({
-    categoryList: new FormControl(null),
-    title: new FormControl("",
+  thirdForm = new UntypedFormGroup({
+    categoryList: new UntypedFormControl(null),
+    title: new UntypedFormControl("",
       Validators.compose([Validators.max(64)])),
-    content: new FormControl("",
+    content: new UntypedFormControl("",
       Validators.compose([Validators.max(1024)])),
-    unfinished: new FormControl(false)
+    unfinished: new UntypedFormControl(false)
   });
 
   // GETTER

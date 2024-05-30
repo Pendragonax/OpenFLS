@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {InstitutionDto} from "../../dtos/institution-dto.model";
 import {PermissionDto} from "../../dtos/permission-dto.model";
 import {EmployeeDto} from "../../dtos/employee-dto.model";
-import {AbstractControl, FormGroup} from "@angular/forms";
+import {AbstractControl, UntypedFormGroup} from "@angular/forms";
 import {EmployeeService} from "../../services/employee.service";
 import {InstitutionService} from "../../services/institution.service";
 import {InstitutionInfoForm} from "../../shared/form/institution-info-form";
@@ -22,7 +22,7 @@ export class InstitutionNewComponent extends NewPageComponent<InstitutionDto> im
   permissionTableColumns: string[] = ['name', 'lead', 'write', 'read', 'affiliated'];
 
   infoForm = new InstitutionInfoForm();
-  permissionForm = new FormGroup({ });
+  permissionForm = new UntypedFormGroup({ });
 
   constructor(
     private employeeService: EmployeeService,

@@ -4,7 +4,7 @@ import {HourTypeDto} from "../../dtos/hour-type-dto.model";
 import {Sort} from "@angular/material/sort";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {HourTypeService} from "../../services/hour-type.service";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {Converter} from "../../shared/converter.helper";
 import {HelperService} from "../../services/helper.service";
 
@@ -16,11 +16,11 @@ import {HelperService} from "../../services/helper.service";
 export class HourTypeComponent extends TablePageComponent<HourTypeDto, HourTypeDto> implements OnInit {
   tableColumns: string[] = ['title', 'price', 'actions']
 
-  editForm = new FormGroup({
-    title: new FormControl(
+  editForm = new UntypedFormGroup({
+    title: new UntypedFormControl(
       "",
       { validators: Validators.compose([Validators.required, Validators.minLength(1)])}),
-    price: new FormControl(0, { validators: Validators.compose([Validators.required])})
+    price: new UntypedFormControl(0, { validators: Validators.compose([Validators.required])})
   })
 
   get titleControl() { return this.editForm.controls['title']; }

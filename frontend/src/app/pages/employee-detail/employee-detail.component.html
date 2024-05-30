@@ -1,4 +1,4 @@
-<app-info-header [title]="'Mitarbeiter &quot;' + value?.lastName + ' ' + value?.firstName + '&quot;'"></app-info-header>
+<app-info-header [title]="'Mitarbeiter &quot;' + (value ? value.lastName : '') + ' ' + (value ? value.firstName : '') + '&quot;'"></app-info-header>
 
 <mat-tab-group>
   <mat-tab label="Allgemein">
@@ -207,7 +207,7 @@
             <button mat-raised-button
                     color="primary"
                     class="mat-stroked-button m-1 w-auto"
-                    [disabled]="value?.inactive || isSubmitting"
+                    [disabled]="(value ? value.inactive : false) || isSubmitting"
                     *showOnRole="'admin'"
                     (click)="updateInactiveState(true)">Mitarbeiter deaktivieren</button>
           </div>
@@ -216,7 +216,7 @@
             <button mat-raised-button
                     color="primary"
                     class="mat-stroked-button m-1 w-auto"
-                    [disabled]="!value?.inactive || isSubmitting"
+                    [disabled]="!(value ? value.inactive : false) || isSubmitting"
                     *showOnRole="'admin'"
                     (click)="updateInactiveState(false)">Mitarbeiter aktivieren</button>
           </div>

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {CategoryTemplateDto} from "../../dtos/category-template-dto.model";
-import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {CategoriesService} from "../../services/categories.service";
 import {Router} from "@angular/router";
@@ -25,17 +25,17 @@ export class CategoryNewComponent implements OnInit {
 
   tableDataSource = new MatTableDataSource<CategoryDto>()
 
-  infoForm = new FormGroup({
-    title: new FormControl(
+  infoForm = new UntypedFormGroup({
+    title: new UntypedFormControl(
       { value:'', disabled: false },
       Validators.compose([Validators.required, Validators.minLength(1)])),
-    description: new FormControl( { value:'', disabled: false } ),
-    withoutClient: new FormControl(false)
+    description: new UntypedFormControl( { value:'', disabled: false } ),
+    withoutClient: new UntypedFormControl(false)
   })
-  editCategoryForm = new FormGroup({
-    title: new FormControl(),
-    shortcut: new FormControl(),
-    faceToFace: new FormControl(true)
+  editCategoryForm = new UntypedFormGroup({
+    title: new UntypedFormControl(),
+    shortcut: new UntypedFormControl(),
+    faceToFace: new UntypedFormControl(true)
   })
 
   public get title() { return this.infoForm.get('title'); }
