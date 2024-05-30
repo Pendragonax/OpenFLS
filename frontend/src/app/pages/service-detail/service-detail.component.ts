@@ -60,7 +60,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   categories: CategoryDto[] = [];
   filteredClients: ClientDto[] = [];
   filteredAssistancePlans: AssistancePlanDto[] = [];
-  selectedServiceDate: string = this.converter.formatDate(new Date(Date.now()));
+  selectedServiceDate: string = "";
   selectedClient: ClientDto = new ClientDto();
   selectedAssistancePlan: AssistancePlanDto | null | undefined = null;
   selectedGoals: GoalDto[] = [];
@@ -154,6 +154,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   }
 
   override ngOnInit() {
+    this.selectedServiceDate = this.converter.formatDate(new Date(Date.now()));
     this.loadValues();
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {Converter} from "../shared/converter.helper";
-import FileSaver from "file-saver";
+import {saveAs} from "file-saver-es";
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +34,7 @@ export class CsvService {
 
   exportFile(data: any, fileType: string, fileName: string) {
     const blob = new Blob(["\uFEFF"+data], { type: fileType });
-    FileSaver.saveAs(blob, fileName);
+    saveAs(blob, fileName);
   }
 
   private convertRowsToCsv(rows, keys) {
