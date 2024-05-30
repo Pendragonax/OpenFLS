@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/assistance_plans")
@@ -61,8 +61,8 @@ class AssistancePlanController(
             entity.hours = valueDto.hours
                 .map { modelMapper.map(it, AssistancePlanHour::class.java) }
                 .map { it.apply {
-                    hourType = hourTypeService.getById(it.hourType.id)
-                        ?: throw IllegalArgumentException("hour type with id ${hourType.id} not found")
+                    hourType = hourTypeService.getById(it.hourType!!.id)
+                        ?: throw IllegalArgumentException("hour type with id ${hourType?.id} not found")
                 } }
                 .toMutableSet()
 
@@ -118,8 +118,8 @@ class AssistancePlanController(
             entity.hours = valueDto.hours
                 .map { modelMapper.map(it, AssistancePlanHour::class.java) }
                 .map { it.apply {
-                    hourType = hourTypeService.getById(it.hourType.id)
-                        ?: throw IllegalArgumentException("hour type with id ${hourType.id} not found")
+                    hourType = hourTypeService.getById(it.hourType!!.id)
+                        ?: throw IllegalArgumentException("hour type with id ${hourType!!.id} not found")
                 } }
                 .toMutableSet()
 

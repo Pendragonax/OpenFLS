@@ -1,7 +1,6 @@
 package de.vinz.openfls.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import javax.validation.constraints.NotNull
 
 class ClientSimpleDto {
     var id: Long = 0

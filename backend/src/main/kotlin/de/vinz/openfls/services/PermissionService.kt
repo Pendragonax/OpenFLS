@@ -8,7 +8,7 @@ import de.vinz.openfls.repositories.InstitutionRepository
 import de.vinz.openfls.repositories.PermissionRepository
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 class PermissionService(

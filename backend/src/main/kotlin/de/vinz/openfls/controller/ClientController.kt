@@ -1,7 +1,6 @@
 package de.vinz.openfls.controller
 
 import de.vinz.openfls.dtos.ClientDto
-import de.vinz.openfls.dtos.ClientSimpleDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.entities.Client
 import de.vinz.openfls.services.*
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.lang.Exception
-import javax.validation.Valid
+import jakarta.validation.Valid
 import kotlin.IllegalArgumentException
 
 @RestController

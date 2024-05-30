@@ -3,7 +3,7 @@ package de.vinz.openfls.dtos
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.Size
 
 class ServiceDto {
     var id: Long = 0

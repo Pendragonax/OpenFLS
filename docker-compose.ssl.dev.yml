@@ -3,7 +3,7 @@ version: '3.6'
 services:
   db:
     container_name: open_fls_db
-    image: mysql
+    image: mysql:8.4.0
     restart: always
     env_file: docker-compose.env
     volumes:
@@ -27,6 +27,7 @@ services:
     build: 
       context: ./backend
       dockerfile: Dockerfile
+      target: DEVELOPMENT
     restart: always
     env_file: docker-compose.env
     volumes:

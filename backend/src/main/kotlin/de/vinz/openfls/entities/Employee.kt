@@ -6,94 +6,94 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.evaluations.entities.Evaluation
 import org.springframework.lang.Nullable
-import javax.persistence.*
-import javax.validation.constraints.Email
+import jakarta.persistence.*
+import jakarta.validation.constraints.Email
 
 @Entity
 @Table(name = "employees")
 class Employee(
         @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    var id: Long? = null,
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Long? = null,
 
-    //@field:NotEmpty(message = "Bitte geben sie einen Vornamen an")
+        //@field:NotEmpty(message = "Bitte geben sie einen Vornamen an")
         @Column(length = 64)
-    var firstname: String,
+        var firstname: String = "",
 
-    //@field:NotEmpty(message = "Bitte geben sie einen Nachnamen an")
+        //@field:NotEmpty(message = "Bitte geben sie einen Nachnamen an")
         @Column(length = 64)
-    var lastname: String,
+        var lastname: String = "",
 
         @Column(length = 32)
-    var phonenumber: String,
+        var phonenumber: String = "",
 
         @field:Email
-    @Column(length = 64)
-    var email: String,
+        @Column(length = 64)
+        var email: String = "",
 
-        var inactive: Boolean,
+        var inactive: Boolean = false,
 
         @Column(length = 1024)
-    var description: String,
+        var description: String = "",
 
         @OneToOne(
-        mappedBy = "employee",
-        cascade = [CascadeType.MERGE],
-        fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    @JsonIgnore
-    var access: EmployeeAccess?,
+                mappedBy = "employee",
+                cascade = [CascadeType.MERGE],
+                fetch = FetchType.LAZY)
+        @PrimaryKeyJoinColumn
+        @JsonIgnore
+        var access: EmployeeAccess? = null,
 
         @field:Nullable
-    @OneToMany(
-        mappedBy = "employee",
-        cascade = [CascadeType.REMOVE],
-        fetch = FetchType.LAZY)
-    var permissions: MutableSet<Permission>?,
+        @OneToMany(
+                mappedBy = "employee",
+                cascade = [CascadeType.REMOVE],
+                fetch = FetchType.LAZY)
+        var permissions: MutableSet<Permission>? = null,
 
         @field:Nullable
-    @JsonIgnoreProperties(value = ["sponsor", "hibernateLazyInitializer"])
-    @OneToMany(
-        mappedBy = "employee",
-        cascade = [CascadeType.REMOVE],
-        fetch = FetchType.LAZY)
-    var unprofessionals: MutableSet<Unprofessional>?,
+        @JsonIgnoreProperties(value = ["sponsor", "hibernateLazyInitializer"])
+        @OneToMany(
+                mappedBy = "employee",
+                cascade = [CascadeType.REMOVE],
+                fetch = FetchType.LAZY)
+        var unprofessionals: MutableSet<Unprofessional>? = null,
 
         @field:Nullable
-    @OneToMany(
-        mappedBy = "employee",
-        cascade = [CascadeType.REMOVE],
-        fetch = FetchType.LAZY)
-    var contingents: MutableSet<Contingent>?,
+        @OneToMany(
+                mappedBy = "employee",
+                cascade = [CascadeType.REMOVE],
+                fetch = FetchType.LAZY)
+        var contingents: MutableSet<Contingent>? = null,
 
         @JsonIgnore
-    @OneToMany(
-            mappedBy = "createdBy",
-            cascade = [CascadeType.REFRESH],
-            fetch = FetchType.LAZY)
-    var createdEvaluations: MutableSet<Evaluation> = mutableSetOf(),
+        @OneToMany(
+                mappedBy = "createdBy",
+                cascade = [CascadeType.REFRESH],
+                fetch = FetchType.LAZY)
+        var createdEvaluations: MutableSet<Evaluation> = mutableSetOf(),
 
         @JsonIgnore
-    @OneToMany(
-            mappedBy = "updatedBy",
-            cascade = [CascadeType.REFRESH],
-            fetch = FetchType.LAZY)
-    var updatedEvaluations: MutableSet<Evaluation> = mutableSetOf(),
+        @OneToMany(
+                mappedBy = "updatedBy",
+                cascade = [CascadeType.REFRESH],
+                fetch = FetchType.LAZY)
+        var updatedEvaluations: MutableSet<Evaluation> = mutableSetOf(),
 
         @JsonIgnore
-    @OneToMany(
-        mappedBy = "employee",
-        cascade = [CascadeType.ALL],
-        fetch = FetchType.LAZY)
-    var services: MutableSet<Service> = mutableSetOf(),
+        @OneToMany(
+                mappedBy = "employee",
+                cascade = [CascadeType.ALL],
+                fetch = FetchType.LAZY)
+        var services: MutableSet<Service> = mutableSetOf(),
 
         @ManyToMany(
-            fetch = FetchType.LAZY
-    )
-    @JoinTable(
-            name = "assistance_plan_favorites",
-            joinColumns = [JoinColumn(name = "employee_id")],
-            inverseJoinColumns = [JoinColumn(name = "assistance_plan_id")])
-    @JsonIgnoreProperties(value = ["employees", "hibernateLazyInitializer"])
-    var assistancePlanFavorites: MutableSet<AssistancePlan> = mutableSetOf(),
+                fetch = FetchType.LAZY
+        )
+        @JoinTable(
+                name = "assistance_plan_favorites",
+                joinColumns = [JoinColumn(name = "employee_id")],
+                inverseJoinColumns = [JoinColumn(name = "assistance_plan_id")])
+        @JsonIgnoreProperties(value = ["employees", "hibernateLazyInitializer"])
+        var assistancePlanFavorites: MutableSet<AssistancePlan> = mutableSetOf(),
 )

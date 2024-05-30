@@ -1,27 +1,26 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
+import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.dtos.PasswordDto
-import de.vinz.openfls.entities.*
+import de.vinz.openfls.entities.Employee
+import de.vinz.openfls.entities.EmployeeAccess
+import de.vinz.openfls.entities.Permission
+import de.vinz.openfls.entities.Unprofessional
 import de.vinz.openfls.repositories.*
+import jakarta.persistence.EntityNotFoundException
+import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import javax.persistence.EntityNotFoundException
-import javax.transaction.Transactional
-import kotlin.IllegalArgumentException
 
 @Service
 class EmployeeService(
         private val employeeRepository: EmployeeRepository,
         private val employeeAccessRepository: EmployeeAccessRepository,
-        private val clientRepository: ClientRepository,
-        private val sponsorRepository: SponsorRepository,
         private val permissionServiceImpl: PermissionService,
         private val unprofessionalService: UnprofessionalService,
         private val assistancePlanRepository: AssistancePlanRepository,
-        private val institutionRepository: InstitutionRepository,
         private val passwordEncoder: PasswordEncoder,
         private val modelMapper: ModelMapper
 ) : GenericService<Employee> {
@@ -212,15 +211,15 @@ class EmployeeService(
         unprofessionalService
             .getByEmployeeId(employee.id ?: 0)
             .filter { !unprofessionals.any { value ->
-                    value.id.employeeId == it.id.employeeId && value.id.sponsorId == it.id.sponsorId} }
+                    value.id?.employeeId == it.id?.employeeId && value.id?.sponsorId == it.id?.sponsorId} }
             .forEach { unprofessionalService
-                .deleteByEmployeeIdSponsorId(it.id.employeeId ?: 0, it.id.sponsorId ?: 0) }
+                .deleteByEmployeeIdSponsorId(it.id?.employeeId ?: 0, it.id?.sponsorId ?: 0) }
 
         return unprofessionals
             .map { it.apply {
                 this.employee = employee
-                this.id.employeeId = employee.id
-                this.id.sponsorId = this.sponsor?.id
+                this.id?.employeeId = employee.id
+                this.id?.sponsorId = this.sponsor?.id
             } }
             .map { unprofessionalService.create(it) }
             .toMutableSet()

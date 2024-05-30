@@ -1,8 +1,8 @@
 package de.vinz.openfls.dtos
 
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
-import javax.validation.Valid
-import javax.validation.constraints.NotEmpty
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotEmpty
 
 class EmployeeDto {
     var id: Long = 0

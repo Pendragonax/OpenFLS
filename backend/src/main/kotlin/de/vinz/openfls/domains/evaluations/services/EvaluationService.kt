@@ -113,8 +113,8 @@ class EvaluationService(
 
     private fun convertEntityToDto(entity: Evaluation): EvaluationResponseDto {
         val responseDto = modelMapper.map(entity, EvaluationResponseDto::class.java)
-        responseDto.createdBy = entity.createdBy.lastname + " " + entity.createdBy.firstname
-        responseDto.updatedBy = entity.updatedBy.lastname + " " + entity.updatedBy.firstname
+        responseDto.createdBy = entity.createdBy!!.lastname + " " + entity.createdBy!!.firstname
+        responseDto.updatedBy = entity.updatedBy!!.lastname + " " + entity.updatedBy!!.firstname
 
         return responseDto
     }

@@ -5,7 +5,7 @@ import de.vinz.openfls.repositories.CategoryRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 class CategoryService(

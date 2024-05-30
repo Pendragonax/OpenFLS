@@ -10,6 +10,7 @@ import de.vinz.openfls.dtos.HourTypeDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.repositories.ServiceRepository
 import de.vinz.openfls.services.GenericService
+import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -18,7 +19,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import javax.transaction.Transactional
 
 @Service
 class AssistancePlanService(
@@ -205,7 +205,7 @@ class AssistancePlanService(
                 (assistancePlan.end.isAfter(startDate) || assistancePlan.end.isEqual(startDate))) {
                 // total values
                 eval.total
-                    .firstOrNull { it.hourType.id == service.hourType.id }
+                    .firstOrNull { it.hourType.id == service.hourType?.id }
                     ?.apply {
                         actual += service.minutes / 60.0
                         size++
@@ -213,7 +213,7 @@ class AssistancePlanService(
 
                 // till today
                 eval.tillToday
-                    .firstOrNull { it.hourType.id == service.hourType.id &&
+                    .firstOrNull { it.hourType.id == service.hourType?.id &&
                             service.start.year <= tillDate.year &&
                             (service.start.month < tillDate.month ||
                                     (service.start.month == tillDate.month && service.start.dayOfMonth <= tillDate.dayOfMonth))
@@ -226,7 +226,7 @@ class AssistancePlanService(
                 if (actualYear.second != null && actualYear.third != null) {
                     // actual year
                     eval.actualYear
-                        .firstOrNull { it.hourType.id == service.hourType.id &&
+                        .firstOrNull { it.hourType.id == service.hourType?.id &&
                                 (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
                                 (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
                         }
@@ -239,7 +239,7 @@ class AssistancePlanService(
                 if (actualMonth.second != null && actualMonth.third != null) {
                     // actual month
                     eval.actualMonth
-                        .firstOrNull { it.hourType.id == service.hourType.id &&
+                        .firstOrNull { it.hourType.id == service.hourType?.id &&
                                 (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
                                 (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
                         }

@@ -1,6 +1,6 @@
 package de.vinz.openfls.dtos
 
-import javax.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotEmpty
 
 class CategoryDto {
     var id: Long = 0

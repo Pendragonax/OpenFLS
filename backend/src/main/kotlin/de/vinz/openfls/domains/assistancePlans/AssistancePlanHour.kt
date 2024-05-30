@@ -2,32 +2,32 @@ package de.vinz.openfls.domains.assistancePlans
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.entities.HourType
-import javax.persistence.*
-import javax.validation.constraints.NotNull
+import jakarta.persistence.*
+import jakarta.validation.constraints.NotNull
 
 @Entity
 @Table(name = "assistance_plan_hours")
-class AssistancePlanHour (
+class AssistancePlanHour(
         @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    var id: Long = 0,
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Long = 0,
 
         @field:NotNull(message = "weekly hours are null")
-    @Column(precision = 7, scale = 2)
-    var weeklyHours: Double,
+        @Column(precision = 7)
+        var weeklyHours: Double = 0.0,
 
         @JsonIgnoreProperties(value = ["assistancePlanHours", "hibernateLazyInitializer"])
-    @ManyToOne(
-        cascade = [CascadeType.PERSIST],
-        fetch = FetchType.LAZY
-    )
-    @JoinColumn(name = "hour_type_id")
-    var hourType: HourType,
+        @ManyToOne(
+                cascade = [CascadeType.PERSIST],
+                fetch = FetchType.LAZY
+        )
+        @JoinColumn(name = "hour_type_id")
+        var hourType: HourType? = null,
 
         @ManyToOne(
-        cascade = [CascadeType.PERSIST],
-        fetch = FetchType.LAZY
-    )
-    @JoinColumn(name = "assistance_plan_id")
-    var assistancePlan: AssistancePlan
+                cascade = [CascadeType.PERSIST],
+                fetch = FetchType.LAZY
+        )
+        @JoinColumn(name = "assistance_plan_id")
+        var assistancePlan: AssistancePlan? = null
 )

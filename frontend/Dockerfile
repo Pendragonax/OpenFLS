@@ -1,33 +1,25 @@
-FROM node:16-alpine AS DEV
+FROM node:22-alpine AS DEV
 
 WORKDIR /app
-
 COPY package*.json ./
-
 RUN npm ci
-
-RUN npm install -g @angular/cli@13.3.11
-
+RUN npm install -g @angular/cli@13.3.8
 COPY . /app/
-
 EXPOSE 4200 49153
-
 ENTRYPOINT ["sh", "entrypoint.sh"]
 
 
-FROM node:16-alpine AS BUILD
+FROM node:22-alpine AS BUILD
 
 WORKDIR /app
 COPY package*.json package-lock.json ./
 RUN npm ci
-RUN npm install -g @angular/cli@13.3.11
-
+RUN npm install -g @angular/cli@13.3.8
 COPY . /app/
-
 RUN ["ng", "build"]
 
 
-FROM nginx:1.17.1-alpine AS PROD
+FROM nginx:1.27.0-alpine-slim AS PROD
 
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=BUILD /app/dist /usr/share/nginx/html

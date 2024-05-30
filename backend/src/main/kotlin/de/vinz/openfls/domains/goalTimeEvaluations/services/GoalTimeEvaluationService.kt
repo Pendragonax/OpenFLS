@@ -41,7 +41,7 @@ class GoalTimeEvaluationService(
                         .findById(assistancePlanId)
                         .orElseThrow{ AssistancePlanNotFoundException(assistancePlanId)}
         val goalsWithHourType =
-                assistancePlan.goals.filter { it.hours.any { goalHour -> goalHour.hourType.id == hourTypeId } }
+                assistancePlan.goals.filter { it.hours.any { goalHour -> goalHour.hourType!!.id == hourTypeId } }
 
         if (goalsWithHourType.isEmpty()) {
             throw NoGoalFoundWithHourTypeException(hourTypeId)
@@ -176,7 +176,7 @@ class GoalTimeEvaluationService(
                                         start: LocalDate,
                                         end: LocalDate,
                                         sum: Boolean): List<YearMonthDoubleValue> {
-        val dailyHours = ((goal.hours.first { it.hourType.id == hourTypeId }.weeklyHours) / 7)
+        val dailyHours = ((goal.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
         var resultList = YearMonthDoubleValue.getEmpty(start, end)
 
         for (value in resultList) {
@@ -248,7 +248,7 @@ class GoalTimeEvaluationService(
     }
 
     private fun isServiceHourType(service: de.vinz.openfls.entities.Service, hourTypeId: Long): Boolean {
-        return service.hourType.id == hourTypeId
+        return service.hourType?.id == hourTypeId
     }
 
     private fun containsServiceGoal(service: de.vinz.openfls.entities.Service, goal: Goal): Boolean {

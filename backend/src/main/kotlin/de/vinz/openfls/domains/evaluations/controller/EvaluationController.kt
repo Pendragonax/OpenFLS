@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.lang.Exception
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @Controller
 @RequestMapping("/evaluations")

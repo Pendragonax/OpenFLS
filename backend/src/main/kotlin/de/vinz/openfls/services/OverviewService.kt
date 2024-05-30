@@ -200,7 +200,7 @@ class OverviewService(
         allAssistancePlanOverviewDTO.assistancePlanDto.end = LocalDate.of(year, 12, 31)
 
         services.forEach { service ->
-            val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan.id }
+            val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan?.id }
             if (assistancePlanOverviewDTO != null) {
                 val month = service.start.monthValue;
                 assistancePlanOverviewDTO.values[0] += service.minutes.toDouble()
@@ -228,7 +228,7 @@ class OverviewService(
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
         services.forEach { service ->
-            val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan.id }
+            val assistancePlanOverviewDTO = assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == service.assistancePlan?.id }
             if (assistancePlanOverviewDTO != null) {
                 val day = service.start.dayOfMonth;
                 assistancePlanOverviewDTO.values[0] += service.minutes.toDouble()
