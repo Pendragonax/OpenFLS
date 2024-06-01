@@ -117,4 +117,9 @@ export class HourTypeComponent extends TablePageComponent<HourTypeDto, HourTypeD
 
   sortData(sort: Sort) {
   }
+
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
+  }
 }

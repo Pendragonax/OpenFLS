@@ -415,4 +415,9 @@ export class AssistancePlansComponent
       .map(value => value.weeklyHours)
       .reduce((sum, current) => sum + current);
   }
+
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
+  }
 }

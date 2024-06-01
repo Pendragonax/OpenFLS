@@ -84,7 +84,7 @@ export class Converter {
       [
         date.getFullYear(),
         Converter.padTo2Digits(date.getMonth() + 1),
-        Converter.padTo2Digits(date.getDay()),
+        Converter.padTo2Digits(date.getDate()),
       ].join('-')
     );
   }

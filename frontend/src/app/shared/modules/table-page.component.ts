@@ -29,7 +29,7 @@ export abstract class TablePageComponent<T, R> implements OnInit {
   sourceTableData: R[] = [];
   filteredTableData: R[] = [];
   pageLength: number = 0;
-  pageSize: number = 25;
+  pageSize: number = 100;
   pageIndex: number = 0;
 
   // FILTER-VARs

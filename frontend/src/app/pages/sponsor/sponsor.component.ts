@@ -140,4 +140,9 @@ export class SponsorComponent extends TablePageComponent<SponsorDto, SponsorDto>
 
     this.refreshTablePage();
   }
+
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
+  }
 }

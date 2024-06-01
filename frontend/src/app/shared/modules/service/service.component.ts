@@ -145,6 +145,11 @@ export class ServiceComponent
     }
   }
 
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
+  }
+
   loadServicesByEmployee() {
     combineLatest([
       this.serviceService.getByEmployeeAndStartAndEnd(this.employeeId ?? 0, this.filterDateStart, this.filterDateEnd),

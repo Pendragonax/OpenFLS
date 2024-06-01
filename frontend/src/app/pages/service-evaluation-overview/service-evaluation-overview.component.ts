@@ -260,11 +260,13 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     return date.toLocaleString('de-DE', { month: 'long' });
   }
 
-  openPermissionInfoModal() {
+  openPermissionInfoModal(event) {
+    event.stopPropagation()
     this.dialog.open(OverviewPermissionInfoModalComponent)
   }
 
-  openValueTypeInfoModal() {
+  openValueTypeInfoModal(event) {
+    event.stopPropagation();
     this.dialog.open(OverviewValueTypeInfoModalComponent)
   }
 

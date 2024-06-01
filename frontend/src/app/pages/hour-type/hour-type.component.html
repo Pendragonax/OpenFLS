@@ -11,16 +11,10 @@
       <div class="container-fluid text-center">
         <div class="row justify-content-center">
           <div class="col-auto">
-            <div class="input-field">
-              <mat-form-field appearance="outline">
-                <mat-label>Suchwort</mat-label>
-                <input matInput
-                       formControlName="searchString">
-              </mat-form-field>
-              <button mat-icon-button
-                      (click)="resetFilterSearchString()">
-                <mat-icon>clear</mat-icon></button>
-            </div>
+            <app-search-field [isSubmitting]="isSubmitting"
+                              [placeholder]="'...'"
+                              (onSearchStringChanges)="onSearchStringChanges($event)"
+                              [onResetClick]="resetFilterSearchString"></app-search-field>
           </div>
         </div>
       </div>
@@ -36,7 +30,6 @@
         <mat-paginator class="paginator"
                        showFirstLastButtons
                        (page)="handlePageEvent($event)"
-                       [pageSizeOptions]="[5, 10, 25, 100]"
                        [length]="pageLength"
                        [pageIndex]="pageIndex"
                        [pageSize]="pageSize"></mat-paginator>

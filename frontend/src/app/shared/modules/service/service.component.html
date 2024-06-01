@@ -19,6 +19,7 @@
                 (click)="increaseFilterDate(-1)">
           <mat-icon>keyboard_arrow_left</mat-icon>
         </button>
+
         <button type="button"
                 class="my-auto"
                 mat-icon-button
@@ -27,6 +28,7 @@
                 (click)="setFilterDateToToday()">
           <mat-icon>calendar_today</mat-icon>
         </button>
+
         <button type="button"
                 class="my-auto"
                 mat-icon-button
@@ -34,9 +36,10 @@
                 (click)="increaseFilterDate(1)">
           <mat-icon>keyboard_arrow_right</mat-icon>
         </button>
+
         <div class="my-2">
-          <mat-form-field appearance="outline" class="width-230">
-            <mat-label>Zeitraum auswählen</mat-label>
+          <mat-form-field appearance="fill">
+            <mat-label>Zeitraum</mat-label>
             <mat-date-range-input class="width-scale-70"
                                   [rangePicker]="picker"
                                   [formGroup]="dateFilterGroup"
@@ -44,17 +47,17 @@
               <input matStartDate placeholder="Start Datum" #rangeStart formControlName="start">
               <input matEndDate placeholder="Ende Datum" #rangeEnd formControlName="end">
             </mat-date-range-input>
-            <mat-datepicker-toggle matPrefix [for]="picker" class="me-2"></mat-datepicker-toggle>
-            <mat-hint>DD.MM.YYYY – DD.MM.YYYY</mat-hint>
+            <mat-datepicker-toggle matPrefix [for]="picker" class="m-2"></mat-datepicker-toggle>
+            <mat-hint class="fw-light">Tag.Monat.Jahr – Tag.Monat.Jahr</mat-hint>
             <mat-date-range-picker #picker (closed)="setTimePeriod(rangeStart, rangeEnd)"></mat-date-range-picker>
           </mat-form-field>
         </div>
+
         <div class="ms-2 mt-2">
-          <mat-form-field appearance="outline" [formGroup]="filterForm">
-            <mat-label>Suchtext</mat-label>
-            <input matInput placeholder="..." formControlName="searchString">
-            <button mat-icon-button class="me-1" matPrefix (click)="resetFilterSearchString()" [disabled]="isSubmitting"><mat-icon>clear</mat-icon></button>
-          </mat-form-field>
+          <app-search-field [isSubmitting]="isSubmitting"
+                            [placeholder]="'...'"
+                            (onSearchStringChanges)="onSearchStringChanges($event)"
+                            [onResetClick]="resetFilterSearchString"></app-search-field>
         </div>
       </div>
     </div>
@@ -63,11 +66,11 @@
       <mat-paginator class="paginator"
                      showFirstLastButtons
                      (page)="handlePageEvent($event)"
-                     [pageSizeOptions]="[5, 10, 25, 100]"
                      [length]="pageLength"
                      [pageIndex]="pageIndex"
                      [pageSize]="pageSize"></mat-paginator>
     </div>
+
     <!--LOADING-->
     <div class="row m-2"
          [hidden]="!isSubmitting">
@@ -127,24 +130,6 @@
                 class="ps-2 hide-on-small"
                 *matCellDef="let value">{{value[0].lastName}} {{value[0].firstName}}</td>
           </ng-container>
-
-<!--          <ng-container matColumnDef="start">-->
-<!--            <th mat-header-cell-->
-<!--                mat-sort-header="{{tableColumns[3]}}"-->
-<!--                *matHeaderCellDef> Start </th>-->
-<!--            <td mat-cell-->
-<!--                *matCellDef="let value"> {{getTime(value[3].start)}}</td>-->
-<!--          </ng-container>-->
-
-<!--          <ng-container matColumnDef="end">-->
-<!--            <th mat-header-cell-->
-<!--                class="hide-on-small"-->
-<!--                mat-sort-header="{{tableColumns[4]}}"-->
-<!--                *matHeaderCellDef> Ende </th>-->
-<!--            <td mat-cell-->
-<!--                class="hide-on-small"-->
-<!--                *matCellDef="let value"> {{getTime(value[3].end)}}</td>-->
-<!--          </ng-container>-->
 
           <ng-container matColumnDef="title">
             <th mat-header-cell

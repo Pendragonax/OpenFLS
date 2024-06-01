@@ -18,8 +18,8 @@
   white-space: break-spaces;
 }
 
-.width-230 {
-  width: 230px !important;
+width-scale-50 {
+  scale: 50%;
 }
 
 td , th {

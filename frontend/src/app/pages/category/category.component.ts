@@ -98,4 +98,9 @@ export class CategoryComponent extends TablePageComponent<CategoryTemplateDto, C
   getNewValue(): CategoryTemplateDto {
     return new CategoryTemplateDto();
   }
+
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
+  }
 }

@@ -25,7 +25,7 @@
             <div class="row justify-content-start">
               <div class="col-auto">
                 <div class="input-field">
-                  <mat-form-field appearance="outline">
+                  <mat-form-field appearance="fill">
                     <mat-label>Stichtag</mat-label>
                     <input matInput
                            formControlName="date"
@@ -34,16 +34,17 @@
                     <mat-datepicker-toggle matSuffix
                                            [for]="filterPicker"></mat-datepicker-toggle>
                     <mat-datepicker #filterPicker></mat-datepicker>
+                    <button mat-icon-button
+                            matPrefix
+                            class="my-1 mx-2"
+                            (click)="resetFilterDate()">
+                      <mat-icon>clear</mat-icon></button>
                   </mat-form-field>
-                  <button mat-icon-button
-                          class="input-reset-button"
-                          (click)="resetFilterDate()">
-                    <mat-icon>clear</mat-icon></button>
                 </div>
               </div>
               <div class="col-auto" [hidden]="hideInstitutionColumn">
                 <div class="input-field">
-                  <mat-form-field appearance="outline">
+                  <mat-form-field appearance="fill">
                     <mat-label>Bereich</mat-label>
                     <mat-select formControlName="institution">
                       <mat-option *ngFor="let value of institutions"
@@ -51,16 +52,17 @@
                         {{value.name}}
                       </mat-option>
                     </mat-select>
+                    <button mat-icon-button
+                            matPrefix
+                            class="my-1 mx-2"
+                            (click)="resetFilterInstitution()">
+                      <mat-icon>clear</mat-icon></button>
                   </mat-form-field>
-                  <button mat-icon-button
-                          class="input-reset-button"
-                          (click)="resetFilterInstitution()">
-                    <mat-icon>clear</mat-icon></button>
                 </div>
               </div>
               <div class="col-auto" [hidden]="hideEmployeeColumn">
                 <div class="input-field">
-                  <mat-form-field appearance="outline">
+                  <mat-form-field appearance="fill">
                     <mat-label>Mitarbeiter</mat-label>
                     <mat-select formControlName="employee"
                                 (selectionChange)="setFilterEmployee($event)">
@@ -69,11 +71,12 @@
                         {{value.lastName}} {{value.firstName}}
                       </mat-option>
                     </mat-select>
+                    <button mat-icon-button
+                            matPrefix
+                            class="my-1 mx-2"
+                            (click)="resetFilterEmployee()">
+                      <mat-icon>clear</mat-icon></button>
                   </mat-form-field>
-                  <button mat-icon-button
-                          class="input-reset-button"
-                          (click)="resetFilterEmployee()">
-                    <mat-icon>clear</mat-icon></button>
                 </div>
               </div>
             </div>
@@ -93,7 +96,6 @@
         <mat-paginator class="paginator"
                        showFirstLastButtons
                        (page)="handlePageEvent($event)"
-                       [pageSizeOptions]="[5, 10, 25, 100]"
                        [length]="pageLength"
                        [pageIndex]="pageIndex"
                        [pageSize]="pageSize"></mat-paginator>

@@ -126,6 +126,11 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
     });
   }
 
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
+  }
+
   override handleDeleteModalOpen(value: EmployeeView) {
     this.serviceService.getCountByEmployeeId(value.dto.id)
       .subscribe({
