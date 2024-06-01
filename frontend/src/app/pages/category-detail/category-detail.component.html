@@ -154,29 +154,29 @@
               <div class="modal-body">
                 <div class="container-fluid text-center">
                   <form [formGroup]="editCategoryForm">
-                    <mat-form-field appearance="outline">
+                    <mat-form-field appearance="fill" class="w-100">
                       <mat-label>Titel</mat-label>
                       <input matInput
                              formControlName="title"
                              required>
                     </mat-form-field><br>
 
-                    <mat-form-field appearance="outline">
+                    <mat-form-field appearance="fill" class="w-100">
                       <mat-label>Kürzel</mat-label>
                       <input matInput
                              formControlName="shortcut"
                              required>
                     </mat-form-field><br>
 
-                    <mat-form-field appearance="fill">
+                    <mat-form-field appearance="fill" class="w-100">
                       <mat-label>Beschreibung</mat-label>
                       <textarea matInput
                                 rows="4"
                                 maxlength="1024"
                                 formControlName="description"></textarea>
-                    </mat-form-field>
+                    </mat-form-field><br>
 
-                    <mat-checkbox formControlName="faceToFace">Face-to-Face</mat-checkbox>
+                    <mat-checkbox formControlName="faceToFace" class="w-100">Face-to-Face</mat-checkbox>
                   </form>
                 </div>
               </div>

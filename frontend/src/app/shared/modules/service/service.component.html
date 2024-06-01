@@ -47,7 +47,7 @@
               <input matStartDate placeholder="Start Datum" #rangeStart formControlName="start">
               <input matEndDate placeholder="Ende Datum" #rangeEnd formControlName="end">
             </mat-date-range-input>
-            <mat-datepicker-toggle matPrefix [for]="picker" class="m-2"></mat-datepicker-toggle>
+            <mat-datepicker-toggle matSuffix [for]="picker" class="m-2"></mat-datepicker-toggle>
             <mat-hint class="fw-light">Tag.Monat.Jahr – Tag.Monat.Jahr</mat-hint>
             <mat-date-range-picker #picker (closed)="setTimePeriod(rangeStart, rangeEnd)"></mat-date-range-picker>
           </mat-form-field>

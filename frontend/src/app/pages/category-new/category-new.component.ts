@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {CategoryTemplateDto} from "../../dtos/category-template-dto.model";
 import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {MatSnackBar} from "@angular/material/snack-bar";
@@ -106,7 +106,8 @@ export class CategoryNewComponent implements OnInit {
   }
 
   deleteCategory(categoryDto: CategoryDto) {
-    this.value.categories = this.value.categories.filter((it) => it === categoryDto)
+    this.value.categories = this.value.categories.filter((it) => it != categoryDto)
+    this.updateTableDatasource()
   }
 
   open(content, categoryDto: CategoryDto | null) {
@@ -129,11 +130,8 @@ export class CategoryNewComponent implements OnInit {
             categoryDto.title = this.editableCategory.title;
             categoryDto.shortcut = this.editableCategory.shortcut;
             categoryDto.faceToFace = this.editableCategory.faceToFace;
-            console.log("edited category")
           } else {
             this.value.categories.push(this.editableCategory)
-            console.log(this.value.categories)
-            console.log(this.editableCategory)
           }
 
           this.updateTableDatasource()

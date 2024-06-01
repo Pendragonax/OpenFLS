@@ -83,7 +83,7 @@
 
     <div class="modal-body text-center">
       <form [formGroup]="editForm">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="fill">
           <mat-label>Stunden</mat-label>
           <input matInput
                  type="number"
@@ -96,7 +96,7 @@
           <mat-hint>Punkttrennung (5.3)</mat-hint>
         </mat-form-field><br><br>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="fill">
           <mat-label>Stundentyp</mat-label>
           <mat-select formControlName="type"
                       [disabled]="modalEditMode">
@@ -105,12 +105,13 @@
               {{type.title}}
             </mat-option>
           </mat-select>
-        </mat-form-field>
 
-        <button mat-icon-button
-                [disabled]="modalEditMode"
-                (click)="resetHourType()">
-          <mat-icon>clear</mat-icon></button>
+          <button mat-icon-button
+                  matPrefix
+                  [disabled]="modalEditMode"
+                  (click)="resetHourType()">
+            <mat-icon>clear</mat-icon></button>
+        </mat-form-field>
       </form>
     </div>
     <div class="modal-footer">

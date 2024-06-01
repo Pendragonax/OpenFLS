@@ -134,14 +134,14 @@
         <div class="modal-body">
           <div class="container-fluid text-center">
             <form [formGroup]="editForm">
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill" class="w-100">
                 <mat-label>Name</mat-label>
                 <input matInput
                        formControlName="title"
                        required>
               </mat-form-field><br>
 
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill" class="w-100">
                 <mat-label>Preis</mat-label>
                 <input matInput
                        formControlName="price"

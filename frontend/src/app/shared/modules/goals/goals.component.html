@@ -103,12 +103,13 @@
       <h2 class="modal-title" id="modal-information-title">Ziel - Hilfeplan</h2>
       <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
     </div>
-    <div class="modal-body text-center">
+    <div class="modal-body text-center w-100">
       <mat-tab-group>
         <mat-tab label="Allgemein">
           <div class="container-fluid text-center mt-2">
             <form [formGroup]="infoForm">
-              <mat-form-field appearance="outline">
+
+              <mat-form-field appearance="fill" class="w-100">
                 <mat-label>Titel</mat-label>
                 <input matInput
                        type="text"
@@ -116,7 +117,7 @@
                        required>
               </mat-form-field><br>
 
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill" class="w-100">
                 <mat-label>Beschreibung</mat-label>
                 <textarea matInput
                           placeholder="Beschreibung"
@@ -125,7 +126,7 @@
                           required></textarea>
               </mat-form-field><br>
 
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill" class="w-100">
                 <mat-label>Bereich</mat-label>
                 <mat-select formControlName="institution">
                   <mat-option *ngFor="let institution of institutions"
@@ -133,11 +134,12 @@
                     {{institution.name}}
                   </mat-option>
                 </mat-select>
-              </mat-form-field>
 
-              <button mat-icon-button
-                      (click)="resetInstitutionControl()">
-                <mat-icon>clear</mat-icon></button><br>
+                <button mat-icon-button
+                        matPrefix
+                        (click)="resetInstitutionControl()">
+                  <mat-icon>clear</mat-icon></button><br>
+              </mat-form-field>
             </form>
           </div>
         </mat-tab>
@@ -145,41 +147,40 @@
         <mat-tab label="Stunden">
           <div class="container-fluid text-center mt-2">
             <div class="row">
-              <div class="col">
-                <form [formGroup]="hourForm">
-                  <mat-form-field appearance="outline">
-                    <mat-label>Stundentyp</mat-label>
-                    <mat-select formControlName="hourType">
-                      <mat-option *ngFor="let type of filteredHourTypes"
-                                  [value]="type.id">
-                        {{type.title}}
-                      </mat-option>
-                    </mat-select>
-                  </mat-form-field><br>
+              <form [formGroup]="hourForm">
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label>Stundentyp</mat-label>
+                  <mat-select formControlName="hourType">
+                    <mat-option *ngFor="let type of filteredHourTypes"
+                                [value]="type.id">
+                      {{type.title}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field><br>
 
-                  <mat-form-field appearance="outline">
-                    <mat-label>h/Woche</mat-label>
-                    <input matInput
-                           type="number"
-                           min="0"
-                           max="999"
-                           step="0.1"
-                           pattern="^\d*(\.\d{0,2})?$"
-                           formControlName="weeklyHours"
-                           required>
-                    <mat-hint>Punkttrennung (5.30)</mat-hint>
-                  </mat-form-field>
-                </form>
-              </div>
+                <mat-form-field appearance="fill" class="w-100">
+                  <mat-label>h/Woche</mat-label>
+                  <input matInput
+                         type="number"
+                         min="0"
+                         max="999"
+                         step="0.1"
+                         pattern="^\d*(\.\d{0,2})?$"
+                         formControlName="weeklyHours"
+                         required>
+                  <mat-hint>Punkttrennung (5.30)</mat-hint>
+                </mat-form-field>
+              </form>
+            </div>
 
-              <div class="col align-self-center justify-content-center">
-                <button mat-raised-button
-                        color="primary"
-                        [disabled]="hourForm.invalid"
-                        (click)="createGoalHour()">
-                  hinzufügen
-                </button>
-              </div>
+            <div class="row text-center justify-content-center w-100">
+              <button mat-raised-button
+                      class="w-50"
+                      color="primary"
+                      [disabled]="hourForm.invalid"
+                      (click)="createGoalHour()">
+                hinzufügen
+              </button>
             </div>
 
             <div class="row mt-2">
@@ -204,7 +205,7 @@
                   <td mat-cell
                       class="pt-3"
                       *matCellDef="let element">
-                    <button mat-mini-fab
+                    <button mat-icon-button
                             color="warn"
                             (click)="deleteGoalHour(element[0])">
                       <mat-icon>delete</mat-icon></button><br><br>

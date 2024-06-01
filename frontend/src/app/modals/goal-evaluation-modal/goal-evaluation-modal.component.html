@@ -3,7 +3,7 @@
   <h1 *ngIf="!newEvaluation" mat-dialog-title>{{TITLE_EXISTING}}</h1>
   <div mat-dialog-content>
     <div [formGroup]="inputGroup">
-      <mat-form-field appearance="outline" class="w-100">
+      <mat-form-field appearance="fill" class="w-100 mt-1">
         <mat-label>Beschreibung</mat-label>
         <textarea matInput
                   placeholder="..."
