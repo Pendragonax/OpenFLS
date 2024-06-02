@@ -8,21 +8,24 @@
             <div class="container-fluid">
               <p class="position-absolute top-0 end-0 fw-light scale-75">v.{{version}}</p>
               <div class="row justify-content-center">
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="fill">
                   <mat-label>Benutzername</mat-label>
                   <input matInput formControlName="username" required>
+                  <mat-icon [hidden]="!loginFailed"
+                            [color]="'warn'"
+                            matSuffix
+                            title="Fehler beim Login">report_problem</mat-icon>
                 </mat-form-field>
-
-                <mat-icon [hidden]="!loginFailed"
-                          [color]="'warn'"
-                          title="Fehler beim Login"
-                          class="mat-icon-rtl-mirror warn-icon">report_problem</mat-icon>
               </div>
 
               <div class="row justify-content-center">
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="fill">
                   <mat-label>Password</mat-label>
                   <input matInput type="password" formControlName="password" required>
+                  <mat-icon [hidden]="!loginFailed"
+                            [color]="'warn'"
+                            matSuffix
+                            title="Fehler beim Login">report_problem</mat-icon>
                 </mat-form-field>
               </div>
 
