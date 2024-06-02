@@ -2,12 +2,12 @@ package de.vinz.openfls.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.dtos.PasswordDto
 import de.vinz.openfls.entities.Employee
 import de.vinz.openfls.entities.EmployeeAccess
 import de.vinz.openfls.entities.Permission
 import de.vinz.openfls.entities.Unprofessional
-import de.vinz.openfls.repositories.*
+import de.vinz.openfls.repositories.EmployeeAccessRepository
+import de.vinz.openfls.repositories.EmployeeRepository
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
@@ -106,29 +106,6 @@ class EmployeeService(
     @Transactional
     override fun delete(id: Long) {
         employeeAccessRepository.deleteById(id)
-    }
-
-    @Transactional
-    fun changePassword(id: Long, passwordDto: PasswordDto) {
-        if (passwordDto.oldPassword.isEmpty())
-            throw IllegalArgumentException("old password is empty")
-        if (passwordDto.newPassword.isEmpty())
-            throw IllegalArgumentException("new password is empty")
-
-        employeeAccessRepository.findById(id).orElse(null)?.also {
-            // old password is correct?
-            if (!passwordEncoder.matches(passwordDto.oldPassword, it.password))
-                throw IllegalArgumentException("old password is wrong")
-
-            employeeAccessRepository.changePassword(id, passwordDto.newPassword)
-        } ?: throw IllegalArgumentException("employee doesnt exists")
-    }
-
-    @Transactional
-    fun changeRole(id: Long, role: Int) {
-        employeeAccessRepository.findById(id).orElse(null)?.also {
-            employeeAccessRepository.changeRole(id, role)
-        } ?: throw IllegalArgumentException("employee doesnt exists")
     }
 
     fun getAssistancePlanAsFavorites(employeeId: Long): List<AssistancePlanResponseDto> {

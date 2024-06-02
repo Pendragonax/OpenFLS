@@ -4,11 +4,9 @@ import de.vinz.openfls.entities.CustomUserDetails
 import de.vinz.openfls.entities.Employee
 import de.vinz.openfls.entities.EmployeeAccess
 import de.vinz.openfls.repositories.EmployeeAccessRepository
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
@@ -23,6 +21,8 @@ class UserDetailsService(
 
         if (user == null) {
             val userCount = employeeAccessRepository.count()
+
+            // no users in db it will return default admin for initial progress
             if (userCount == 0L) {
                 return CustomUserDetails(
                     EmployeeAccess(
@@ -39,7 +39,7 @@ class UserDetailsService(
                             inactive = false,
                             description = "",
                             access = null,
-                            permissions = HashSet(),
+                            permissions = mutableSetOf(),
                             contingents = mutableSetOf(),
                             unprofessionals = mutableSetOf()
                         ),

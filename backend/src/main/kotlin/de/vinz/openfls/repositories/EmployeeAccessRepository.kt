@@ -13,7 +13,8 @@ interface EmployeeAccessRepository : CrudRepository<EmployeeAccess, Long> {
 
     @Modifying
     @Query("UPDATE EmployeeAccess u SET u.password = :password WHERE u.id = :id")
-    fun changePassword(@Param("id") id: Long, @Param("password") password: String): Int
+    fun changePassword(@Param("id") id: Long,
+                       @Param("password") password: String): Int
 
     @Modifying
     @Query("UPDATE EmployeeAccess u SET u.role = :role WHERE u.id = :id")
