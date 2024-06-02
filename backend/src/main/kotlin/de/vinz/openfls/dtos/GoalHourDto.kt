@@ -1,6 +1,6 @@
 package de.vinz.openfls.dtos
 
-import javax.validation.constraints.Min
+import jakarta.validation.constraints.Min
 
 class GoalHourDto {
     var id: Long = 0

@@ -1,6 +1,5 @@
 package de.vinz.openfls.controller
 
-import de.vinz.openfls.domains.evaluations.controller.EvaluationController
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.CsvService
 import de.vinz.openfls.services.OverviewService

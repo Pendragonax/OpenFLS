@@ -15,7 +15,7 @@ import {InstitutionDto} from "../../../dtos/institution-dto.model";
 import {InstitutionService} from "../../../services/institution.service";
 import {EmployeeDto} from "../../../dtos/employee-dto.model";
 import {EmployeeService} from "../../../services/employee.service";
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
 import {
   MAT_MOMENT_DATE_ADAPTER_OPTIONS,
@@ -70,9 +70,9 @@ export class ServiceComponent
   filteredValues$: Subject<ServiceDto[]> = new Subject<ServiceDto[]>();
 
   // Form Groups
-  dateFilterGroup = new FormGroup({
-    start: new FormControl({value:new Date(Date.now()), disabled: this.isSubmitting}),
-    end: new FormControl({value:new Date(Date.now()), disabled: this.isSubmitting})
+  dateFilterGroup = new UntypedFormGroup({
+    start: new UntypedFormControl({value:new Date(Date.now()), disabled: this.isSubmitting}),
+    end: new UntypedFormControl({value:new Date(Date.now()), disabled: this.isSubmitting})
   });
 
   get dateFilterStartControl() { return this.dateFilterGroup.controls['start']; }
@@ -143,6 +143,11 @@ export class ServiceComponent
     if (this.employeeId != null) {
       this.loadServicesByEmployee();
     }
+  }
+
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
   }
 
   loadServicesByEmployee() {

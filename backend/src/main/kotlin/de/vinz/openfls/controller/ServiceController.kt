@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/services")
@@ -47,7 +47,7 @@ class ServiceController(
 
             val entity = modelMapper.map(valueDto, Service::class.java)
 
-            entity.employee.unprofessionals = null
+            entity.employee?.unprofessionals = null
             val savedEntity = serviceService.create(entity)
 
             if (logPerformance) {

@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
-import javax.validation.constraints.Min
+import jakarta.validation.constraints.Min
 
 class AssistancePlanHourDto {
     var id: Long = 0

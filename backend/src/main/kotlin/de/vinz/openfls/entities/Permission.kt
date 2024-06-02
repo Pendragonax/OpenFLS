@@ -1,38 +1,29 @@
 package de.vinz.openfls.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import javax.persistence.*
+import jakarta.persistence.*
 
 
 @Entity
 @Table(name = "permissions")
 class Permission(
-    @EmbeddedId
-    var id: EmployeeInstitutionRightsKey,
+        @EmbeddedId
+        var id: EmployeeInstitutionRightsKey = EmployeeInstitutionRightsKey(),
 
-    @JsonIgnore
-    @ManyToOne(
-        cascade = [CascadeType.PERSIST],
-        fetch = FetchType.LAZY
-    )
-    @MapsId("employeeId")
-    @JoinColumn(name = "employee_Id", referencedColumnName = "id")
-    var employee: Employee?,
+        @JsonIgnore
+        @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+        @MapsId("employeeId")
+        @JoinColumn(name = "employee_Id", referencedColumnName = "id")
+        var employee: Employee? = null,
 
-    @JsonIgnore
-    @ManyToOne(
-        cascade = [CascadeType.PERSIST],
-        fetch = FetchType.LAZY
-    )
-    @MapsId("institutionId")
-    @JoinColumn(name = "institution_Id", referencedColumnName = "id")
-    var institution: Institution?,
+        @JsonIgnore
+        @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+        @MapsId("institutionId")
+        @JoinColumn(name = "institution_Id", referencedColumnName = "id")
+        var institution: Institution? = null,
 
-    var readEntries: Boolean,
-
-    var writeEntries: Boolean,
-
-    var changeInstitution: Boolean,
-
-    var affiliated: Boolean
-    )
+        var readEntries: Boolean = false,
+        var writeEntries: Boolean = false,
+        var changeInstitution: Boolean = false,
+        var affiliated: Boolean = false
+)

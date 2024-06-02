@@ -9,7 +9,7 @@ import {DtoCombinerService} from "../../../services/dto-combiner.service";
 import {EmployeeDto} from "../../../dtos/employee-dto.model";
 import {SponsorDto} from "../../../dtos/sponsor-dto.model";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {Converter} from "../../converter.helper";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
 import {
@@ -49,9 +49,9 @@ export class UnprofesssionalComponent implements OnInit {
   displayedColumns: string[] = ['employee', 'sponsor', 'end', 'actions'];
 
   // FORMS
-  editForm = new FormGroup({
-    sponsor: new FormControl(null, Validators.compose([Validators.required])),
-    end: new FormControl('', Validators.compose([Validators.required]))
+  editForm = new UntypedFormGroup({
+    sponsor: new UntypedFormControl(null, Validators.compose([Validators.required])),
+    end: new UntypedFormControl('', Validators.compose([Validators.required]))
   });
 
   get sponsorControl() {

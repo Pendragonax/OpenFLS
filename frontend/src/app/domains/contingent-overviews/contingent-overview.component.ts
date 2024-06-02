@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ReplaySubject} from "rxjs";
 import {Period} from "../../components/year-month-selection/Period";
 import {ContingentEvaluationDto} from "./dtos/contingent-evaluation-dto.model";
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {ContingentEvaluationService} from "./services/contingent-evaluation.service";
 
 @Component({
@@ -27,8 +27,8 @@ export class ContingentOverviewComponent implements OnInit {
     [{name: "Kontingent [h]", value: 1}, {name: "Geleistet [h]", value: 2}, {name: "Geleistet [%]", value: 3}, {name: "Nicht geleistet [h]", value: 4}]
   selectedHourType: number = 0
 
-  filterForm = new FormGroup({
-    hourType: new FormControl({value: '1'})
+  filterForm = new UntypedFormGroup({
+    hourType: new UntypedFormControl({value: '1'})
     })
 
   public get hourTypeControl() { return this.filterForm.get('hourType'); }

@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*
 import java.lang.String.format
 import java.time.Instant
 import java.util.stream.Collectors.joining
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @RestController
 class AuthController(

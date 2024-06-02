@@ -4,7 +4,7 @@ import {SponsorService} from "../../services/sponsor.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {Sort} from "@angular/material/sort";
 import {Comparer} from "../../shared/comparer.helper";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {TablePageComponent} from "../../shared/modules/table-page.component";
 import {HelperService} from "../../services/helper.service";
 
@@ -19,13 +19,13 @@ export class SponsorComponent extends TablePageComponent<SponsorDto, SponsorDto>
   tableColumns = ['name', 'overhang', 'exact', 'actions'];
   sponsors: SponsorDto[] = [];
 
-  editForm = new FormGroup({
-    name: new FormControl({value: ''}, Validators.compose([
+  editForm = new UntypedFormGroup({
+    name: new UntypedFormControl({value: ''}, Validators.compose([
       Validators.required,
       Validators.minLength(1)
     ])),
-    payOverhead: new FormControl(false),
-    payExact: new FormControl(false)
+    payOverhead: new UntypedFormControl(false),
+    payExact: new UntypedFormControl(false)
   });
 
   get nameControl() { return this.editForm.controls['name']; }
@@ -139,5 +139,10 @@ export class SponsorComponent extends TablePageComponent<SponsorDto, SponsorDto>
       value.name.toLowerCase().includes(this.searchString.toLowerCase()));
 
     this.refreshTablePage();
+  }
+
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
   }
 }

@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.lang.Exception
 import java.lang.IllegalArgumentException
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/categories")
@@ -40,10 +40,9 @@ class CategoryTemplateController(
             valueDto.apply {
                 id = entity.id ?: throw IllegalArgumentException("id not found after saving")
                 categories = entity.categories
-                    ?.map { modelMapper.map(it, CategoryDto::class.java) }
-                    ?.sortedBy { id }
-                    ?.toTypedArray()
-                    ?: emptyArray()
+                    .map { modelMapper.map(it, CategoryDto::class.java) }
+                    .sortedBy { id }
+                    .toTypedArray()
             }
 
             if (logPerformance) {
@@ -77,10 +76,9 @@ class CategoryTemplateController(
             val entity = categoryTemplateService.update(modelMapper.map(valueDto, CategoryTemplate::class.java))
 
             valueDto.categories = entity.categories
-                ?.map { modelMapper.map(it, CategoryDto::class.java) }
-                ?.sortedBy { it.id }
-                ?.toTypedArray()
-                ?: emptyArray()
+                .map { modelMapper.map(it, CategoryDto::class.java) }
+                .sortedBy { it.id }
+                .toTypedArray()
 
             if (logPerformance) {
                 logger.info(String.format("%s update took %s ms",

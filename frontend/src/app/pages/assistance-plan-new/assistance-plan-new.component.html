@@ -9,7 +9,7 @@
         <p><b>{{client.lastName}} {{client.firstName}}</b></p>
 
         <form [formGroup]="generalForm">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill" class="w-25">
             <mat-label>Beginn</mat-label>
             <input matInput
                    formControlName="start"
@@ -21,7 +21,7 @@
             <mat-datepicker #startPicker></mat-datepicker>
           </mat-form-field><br><br>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill" class="w-25">
             <mat-label>Ende</mat-label>
             <input matInput
                    formControlName="end"
@@ -33,7 +33,7 @@
             <mat-datepicker #endPicker></mat-datepicker>
           </mat-form-field><br><br>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill" class="w-25">
             <mat-label>Kostenträger</mat-label>
             <mat-select formControlName="sponsor"
                         required>
@@ -44,7 +44,7 @@
             </mat-select>
           </mat-form-field><br>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill" class="w-25">
             <mat-label>Bereich</mat-label>
             <mat-select formControlName="institution"
                         required>

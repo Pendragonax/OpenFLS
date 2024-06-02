@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ReplaySubject} from "rxjs";
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {EvaluationDto} from "../../dtos/evaluation-dto.model";
 import {EvaluationsService} from "../../services/evaluations.service";
 import {DateService} from "../../services/date.service";
@@ -32,9 +32,9 @@ export class GoalEvaluationModalComponent implements OnInit {
   readonly DELETE_BUTTON_DESCRIPTION: string = "Löschen"
   readonly CLOSE_BUTTON_DESCRIPTION: string = "Schließen"
 
-  inputGroup: FormGroup = new FormGroup({
-    description: new FormControl({value: this.description, disabled: false}),
-    timesAdhered: new FormControl({value: true, disabled: false}),
+  inputGroup: UntypedFormGroup = new UntypedFormGroup({
+    description: new UntypedFormControl({value: this.description, disabled: false}),
+    timesAdhered: new UntypedFormControl({value: true, disabled: false}),
   })
   // GETTER
   get descriptionControl() { return this.inputGroup.controls['description']; }

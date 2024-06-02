@@ -5,11 +5,10 @@ import de.vinz.openfls.entities.Service
 import de.vinz.openfls.projections.ServiceProjection
 import de.vinz.openfls.projections.ServiceSoloProjection
 import de.vinz.openfls.repositories.ServiceRepository
+import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
-import javax.transaction.Transactional
 
 @org.springframework.stereotype.Service
 class ServiceService(

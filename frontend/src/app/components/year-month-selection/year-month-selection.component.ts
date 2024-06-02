@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import { PeriodMode } from './PeriodMode';
 import {Period} from "./Period";
 import {ReplaySubject} from "rxjs";
@@ -22,8 +22,8 @@ export class YearMonthSelectionComponent implements OnInit {
   year: number = new Date(Date.now()).getFullYear();
   month: number = 0;
 
-  selectionForm: FormGroup = new FormGroup({
-    periodModeControl: new FormControl({
+  selectionForm: UntypedFormGroup = new UntypedFormGroup({
+    periodModeControl: new UntypedFormControl({
       value: PeriodMode.PERIOD_MODE_YEARLY,
       disabled: this.disabled
     }),

@@ -15,7 +15,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import javax.validation.Valid
+import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/goals")
@@ -57,7 +57,7 @@ class GoalController(
             entity.hours = valueDto.hours
                 .map { modelMapper.map(it, GoalHour::class.java).apply {
                     hourType = hourTypeService.getById(it.hourTypeId)
-                        ?: throw IllegalArgumentException("hour type with id ${hourType.id} not found")
+                        ?: throw IllegalArgumentException("hour type with id ${hourType?.id ?: 0} not found")
                 } }
                 .toMutableSet()
 
@@ -116,7 +116,7 @@ class GoalController(
             entity.hours = valueDto.hours
                 .map { modelMapper.map(it, GoalHour::class.java).apply {
                     hourType = hourTypeService.getById(it.hourTypeId)
-                        ?: throw IllegalArgumentException("hour type with id ${hourType.id} not found")
+                        ?: throw IllegalArgumentException("hour type with id ${hourType?.id ?: 0} not found")
                 } }
                 .toMutableSet()
 

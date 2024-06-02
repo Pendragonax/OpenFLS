@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
-    fun handleTypeMismatch(ex: MethodArgumentTypeMismatchException, request: WebRequest?): ResponseEntity<Any> {
+    fun handleTypeMismatch(ex: MethodArgumentTypeMismatchException, request: WebRequest?): ResponseEntity<Any>? {
         val name = ex.name
         val type = ex.requiredType!!.simpleName
         val value = ex.value
@@ -24,7 +24,7 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(NoGoalFoundWithHourTypeException::class)
-    fun handleTypeMismatch(ex: NoGoalFoundWithHourTypeException, request: WebRequest?): ResponseEntity<Any> {
+    fun handleTypeMismatch(ex: NoGoalFoundWithHourTypeException, request: WebRequest?): ResponseEntity<Any>? {
         val message = ex.message
         return handleExceptionInternal(ex, message, HttpHeaders(), HttpStatus.BAD_REQUEST, request!!);
     }

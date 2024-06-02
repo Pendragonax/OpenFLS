@@ -1,7 +1,7 @@
 package de.vinz.openfls.dtos
 
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.Size
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Size
 
 class PasswordDto(
     @field:NotEmpty

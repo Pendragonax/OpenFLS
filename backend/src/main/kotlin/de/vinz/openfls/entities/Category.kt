@@ -1,37 +1,34 @@
 package de.vinz.openfls.entities
 
-import javax.persistence.*
-import javax.validation.constraints.NotEmpty
+import jakarta.persistence.*
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.Size
 
 @Entity
 @Table(name = "categories")
-class Category(
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    var id: Long? = null,
+data class Category(
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Long? = null,
 
-    @field:NotEmpty(message = "title is needed")
-    @Column(length = 124)
-    var title: String,
+        @field:NotEmpty(message = "Title is required.")
+        @Column(length = 124)
+        var title: String = "",
 
-    @field:NotEmpty(message = "shortcut is needed")
-    @Column(length = 8)
-    var shortcut: String,
+        @field:NotEmpty(message = "Shortcut is required.")
+        @Column(length = 8)
+        var shortcut: String = "",
 
-    @Column(length = 1024)
-    var description: String,
+        @field:Size(max = 1024, message = "Description must not exceed 1024 characters.")
+        @Column(length = 1024)
+        var description: String = "",
 
-    var faceToFace: Boolean,
+        var faceToFace: Boolean = false,
 
-    @ManyToOne(
-        cascade = [CascadeType.PERSIST],
-        fetch = FetchType.LAZY
-    )
-    @JoinColumn(name = "category_template_id")
-    var categoryTemplate: CategoryTemplate,
+        @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+        @JoinColumn(name = "category_template_id")
+        var categoryTemplate: CategoryTemplate? = null,
 
-    @ManyToMany(
-        fetch = FetchType.LAZY,
-        mappedBy = "categorys")
-    var services: MutableSet<Service> = mutableSetOf()
+        @ManyToMany(fetch = FetchType.LAZY, mappedBy = "categorys")
+        var services: MutableSet<Service> = mutableSetOf()
 )

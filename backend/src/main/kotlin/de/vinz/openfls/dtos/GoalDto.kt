@@ -1,8 +1,8 @@
 package de.vinz.openfls.dtos
 
-import javax.validation.Valid
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.NotNull
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
 
 class GoalDto {
     var id: Long = 0

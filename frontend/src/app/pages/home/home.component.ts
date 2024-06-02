@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {UserService} from "../../services/user.service";
 import {combineLatest, ReplaySubject} from "rxjs";
 import {EmployeeDto} from "../../dtos/employee-dto.model";
-import {AbstractControl, FormControl, FormGroup, Validators} from "@angular/forms";
+import {AbstractControl, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {PasswordDto} from "../../dtos/password-dto.model";
 import {InstitutionService} from "../../services/institution.service";
 import {PermissionDto} from "../../dtos/permission-dto.model";
@@ -32,13 +32,13 @@ export class HomeComponent implements OnInit {
   isSubmitting = false;
 
   // FORMs
-  passwordForm = new FormGroup({
-    oldPassword: new FormControl({value:'', disabled: false}),
-    password1: new FormControl({value:'', disabled: false}, Validators.compose([
+  passwordForm = new UntypedFormGroup({
+    oldPassword: new UntypedFormControl({value:'', disabled: false}),
+    password1: new UntypedFormControl({value:'', disabled: false}, Validators.compose([
       Validators.required,
       Validators.pattern(this.pwdPattern),
       Validators.minLength(8)])),
-    password2: new FormControl({value:'', disabled: false})
+    password2: new UntypedFormControl({value:'', disabled: false})
   }, { validators: createMatchingPasswordsValidator });
 
   get oldPasswordControl() { return this.passwordForm.controls['oldPassword']; }

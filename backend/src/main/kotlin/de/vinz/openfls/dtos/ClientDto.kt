@@ -2,8 +2,8 @@ package de.vinz.openfls.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 
 class ClientDto {
     var id: Long = 0

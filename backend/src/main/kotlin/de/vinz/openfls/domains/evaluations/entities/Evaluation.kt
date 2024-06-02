@@ -3,19 +3,18 @@ package de.vinz.openfls.domains.evaluations.entities
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.entities.Employee
 import de.vinz.openfls.entities.Goal
-import org.jetbrains.annotations.NotNull
+import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.persistence.*
 
 @Entity
 @Table(name = "evaluations")
-class Evaluation (
+class Evaluation(
         @Id
-        @GeneratedValue(strategy= GenerationType.IDENTITY)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
-        @field:NotNull
+        @Column(nullable = false)
         var date: LocalDate = LocalDate.now(),
 
         @Column(length = 1024)
@@ -23,30 +22,24 @@ class Evaluation (
 
         var approved: Boolean = false,
 
-        @field:NotNull
+        @Column(nullable = false)
         var createdAt: LocalDateTime = LocalDateTime.now(),
 
         @JsonIgnore
-        @ManyToOne(
-                cascade = [CascadeType.REFRESH],
-                fetch = FetchType.LAZY)
+        @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
         @JoinColumn(name = "createdEvaluationsId")
-        var createdBy: Employee,
+        var createdBy: Employee? = null,
 
-        @field:NotNull
+        @Column(nullable = false)
         var updatedAt: LocalDateTime = LocalDateTime.now(),
 
         @JsonIgnore
-        @ManyToOne(
-                cascade = [CascadeType.REFRESH],
-                fetch = FetchType.LAZY)
+        @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
         @JoinColumn(name = "updatedEvaluationsId")
-        var updatedBy: Employee,
+        var updatedBy: Employee? = null,
 
         @JsonIgnore
-        @ManyToOne(
-                cascade = [CascadeType.REFRESH],
-                fetch = FetchType.LAZY)
+        @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
         @JoinColumn(name = "goal_id")
-        var goal: Goal
+        var goal: Goal? = null
 )

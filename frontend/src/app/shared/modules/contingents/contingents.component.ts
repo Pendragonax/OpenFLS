@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {ContingentDto} from "../../../dtos/contingent-dto.model";
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {EmployeeDto} from "../../../dtos/employee-dto.model";
 import {InstitutionDto} from "../../../dtos/institution-dto.model";
@@ -69,20 +69,20 @@ export class ContingentsComponent
   filterEmployeeId : number | null = null;
 
   // FORMs
-  infoForm = new FormGroup({
-    start: new FormControl({value:Date.now(), disabled: false}, Validators.compose([
+  infoForm = new UntypedFormGroup({
+    start: new UntypedFormControl({value:Date.now(), disabled: false}, Validators.compose([
         Validators.required])),
-    end: new FormControl({value:null, disabled: false}),
-    hours: new FormControl({value:0, disabled: false}, Validators.compose([
+    end: new UntypedFormControl({value:null, disabled: false}),
+    hours: new UntypedFormControl({value:0, disabled: false}, Validators.compose([
       Validators.required])),
-    institution: new FormControl()
+    institution: new UntypedFormControl()
   }, { validators: createStartEndValidator })
 
-  override filterForm = new FormGroup({
-    searchString: new FormControl(""),
-    date: new FormControl(),
-    institution: new FormControl(),
-    employee: new FormControl(),
+  override filterForm = new UntypedFormGroup({
+    searchString: new UntypedFormControl(""),
+    date: new UntypedFormControl(),
+    institution: new UntypedFormControl(),
+    employee: new UntypedFormControl(),
   });
 
   public get startControl() { return this.infoForm.controls['start']; }

@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {MatTableDataSource} from "@angular/material/table";
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {ReplaySubject, switchMap} from "rxjs";
 import {AssistancePlanDto} from "../../../dtos/assistance-plan-dto.model";
 import {ServiceService} from "../../../services/service.service";
@@ -55,8 +55,8 @@ export class AssistancePlanEvaluationComponent implements OnInit {
   selectedDate = new Date(Date.now())
 
   // FORM
-  configForm = new FormGroup({
-    type: new FormControl(1)
+  configForm = new UntypedFormGroup({
+    type: new UntypedFormControl(1)
   });
 
   get typeControl() { return this.configForm.controls['type']; }

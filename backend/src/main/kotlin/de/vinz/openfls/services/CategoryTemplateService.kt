@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 class CategoryTemplateService(
@@ -29,7 +29,7 @@ class CategoryTemplateService(
         val startMs = System.currentTimeMillis()
 
         // backup categories
-        val categories = value.categories ?: mutableSetOf()
+        val categories = value.categories
         value.categories = mutableSetOf()
 
         // save entity
@@ -61,7 +61,7 @@ class CategoryTemplateService(
             throw IllegalArgumentException("id not found")
 
         // backup categories
-        val categories = value.categories ?: mutableSetOf()
+        val categories = value.categories
         value.categories = mutableSetOf()
 
         // save entity

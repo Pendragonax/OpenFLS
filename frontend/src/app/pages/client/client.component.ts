@@ -94,6 +94,11 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
       })
   }
 
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
+  }
+
   override handleDeleteModalOpen(value: ClientView) {
     this.serviceService.getCountByClientId(value.dto.id)
       .subscribe({

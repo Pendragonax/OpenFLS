@@ -14,11 +14,11 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.oauth2.jwt.JwtDecoder
@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
@@ -38,7 +39,7 @@ import java.security.interfaces.RSAPublicKey
 
 @Configuration
 @EnableWebSecurity
-class OpenFlsConfig : WebSecurityConfigurerAdapter() {
+class OpenFlsConfig {
 
     @Value("\${jwt.private-key}")
     private val rsaPrivateKey: RSAPrivateKey? = null
@@ -47,7 +48,7 @@ class OpenFlsConfig : WebSecurityConfigurerAdapter() {
     private val rsaPublicKey: RSAPublicKey? = null
 
     @Bean
-    public override fun userDetailsService(): org.springframework.security.core.userdetails.UserDetailsService =
+    fun userDetailsService(): UserDetailsService =
         de.vinz.openfls.services.UserDetailsService()
 
     @Bean
@@ -64,56 +65,62 @@ class OpenFlsConfig : WebSecurityConfigurerAdapter() {
     @Bean
     fun passwordEncoder(): PasswordEncoder? = BCryptPasswordEncoder()
 
-    override fun configure(auth: AuthenticationManagerBuilder?) {
-        auth?.authenticationProvider(authenticationProvider())
+    @Bean
+    @Throws(Exception::class)
+    fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
+        return authenticationConfiguration.authenticationManager
     }
 
-    override fun configure(http: HttpSecurity?) {
-        http!!.csrf().disable().cors()
-            .and()
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .exceptionHandling()
-            .authenticationEntryPoint(BearerTokenAuthenticationEntryPoint())
-            .accessDeniedHandler(BearerTokenAccessDeniedHandler())
-            .and()
-            .authorizeRequests()
-            .antMatchers(HttpMethod.POST, "/login/**").permitAll()
-            .antMatchers("/change_role/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.POST,"/employees/assistance_plan/**").authenticated()
-            .antMatchers(HttpMethod.PUT,"/employees/assistance_plan/**").authenticated()
-            .antMatchers(HttpMethod.DELETE,"/employees/assistance_plan/**").authenticated()
-            .antMatchers(HttpMethod.POST,"/employees/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.PUT,"/employees/**").hasAnyAuthority("ADMIN", "LEAD")
-            .antMatchers(HttpMethod.DELETE,"/employees/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.POST,"/permissions/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.PUT,"/permissions/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.DELETE,"/permissions/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.POST,"/categories/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.PUT,"/categories/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.DELETE,"/categories/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.POST,"/hour_types/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.PUT,"/hour_types/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.DELETE,"/hour_types/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.POST,"/institutions/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.PUT,"/institutions/**").hasAuthority("ADMIN")
-            .antMatchers(HttpMethod.DELETE,"/institutions/**").hasAuthority("ADMIN")
-            .antMatchers("/contingents/**").hasAnyAuthority("ADMIN", "LEAD")
-            .antMatchers(HttpMethod.POST,"/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
-            .antMatchers(HttpMethod.PUT,"/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
-            .antMatchers(HttpMethod.DELETE,"/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
-            .anyRequest().authenticated()
-            .and().httpBasic(Customizer.withDefaults())
-            .oauth2ResourceServer()
-            .jwt()
+    @Bean
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        http.csrf { csrf -> csrf.disable() }
+
+        http.sessionManagement { mgm -> mgm.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+
+        http.authorizeHttpRequests { auth ->
+            run {
+                auth.requestMatchers(HttpMethod.POST, "/login/**").permitAll()
+                        .requestMatchers("/change_role/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/employees/assistance_plan/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/employees/assistance_plan/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/employees/assistance_plan/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/employees/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/employees/**").hasAnyAuthority("ADMIN", "LEAD")
+                        .requestMatchers(HttpMethod.DELETE, "/employees/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/permissions/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/permissions/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/permissions/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/categories/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/categories/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/categories/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/hour_types/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/hour_types/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/hour_types/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/institutions/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/institutions/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/institutions/**").hasAuthority("ADMIN")
+                        .requestMatchers("/contingents/**").hasAnyAuthority("ADMIN", "LEAD")
+                        .requestMatchers(HttpMethod.POST, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
+                        .requestMatchers(HttpMethod.PUT, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
+                        .requestMatchers(HttpMethod.DELETE, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
+                        .anyRequest().authenticated()
+            }
+        }
+
+        http.oauth2ResourceServer { oauth2 -> oauth2
+                .jwt(Customizer.withDefaults())
+                .authenticationEntryPoint(BearerTokenAuthenticationEntryPoint())
+                .accessDeniedHandler(BearerTokenAccessDeniedHandler())
+        }
+
+        return http.build()
     }
 
     @Bean
     fun jwtEncoder(): JwtEncoder? {
         val jwk: JWK = RSAKey.Builder(rsaPublicKey).privateKey(rsaPrivateKey).build()
-        val jwks: JWKSource<SecurityContext> = ImmutableJWKSet(JWKSet(jwk))
-        return NimbusJwtEncoder(jwks)
+        val jwkSource: JWKSource<SecurityContext> = ImmutableJWKSet(JWKSet(jwk))
+        return NimbusJwtEncoder(jwkSource)
     }
 
     @Bean
@@ -152,7 +159,4 @@ class OpenFlsConfig : WebSecurityConfigurerAdapter() {
 
         return CorsFilter(source)
     }
-
-    @Bean
-    override fun authenticationManagerBean(): AuthenticationManager? = super.authenticationManagerBean()
 }

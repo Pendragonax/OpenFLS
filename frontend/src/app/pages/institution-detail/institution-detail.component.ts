@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {EmployeeDto} from "../../dtos/employee-dto.model";
 import {InstitutionDto} from "../../dtos/institution-dto.model";
 import {PermissionDto} from "../../dtos/permission-dto.model";
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {EmployeeService} from "../../services/employee.service";
 import {InstitutionService} from "../../services/institution.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -29,8 +29,8 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
   adminMode: boolean = false;
   institutionId: number = 0;
 
-  permissionForm = new FormGroup({
-    role: new FormControl()
+  permissionForm = new UntypedFormGroup({
+    role: new UntypedFormControl()
   })
   infoForm = new InstitutionInfoForm();
 

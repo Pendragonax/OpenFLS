@@ -4,10 +4,10 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-class CustomUserDetails(private var employeeAccess: EmployeeAccess): UserDetails {
+class CustomUserDetails(private var employeeAccess: EmployeeAccess) : UserDetails {
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        val roleString = when(employeeAccess.role) {
+        val roleString = when (employeeAccess.role) {
             1 -> "ADMIN"
             2 -> "LEAD"
             else -> "USER"

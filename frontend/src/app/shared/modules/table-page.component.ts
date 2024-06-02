@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {Subject} from "rxjs";
 import {MatTableDataSource} from "@angular/material/table";
-import {FormControl, FormGroup} from "@angular/forms";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {Sort} from "@angular/material/sort";
 import {HelperService} from "../../services/helper.service";
@@ -29,15 +29,15 @@ export abstract class TablePageComponent<T, R> implements OnInit {
   sourceTableData: R[] = [];
   filteredTableData: R[] = [];
   pageLength: number = 0;
-  pageSize: number = 25;
+  pageSize: number = 100;
   pageIndex: number = 0;
 
   // FILTER-VARs
   searchString: string = "";
 
   // FORMs
-  filterForm = new FormGroup({
-    searchString: new FormControl({value:"", disabled: this.isSubmitting})
+  filterForm = new UntypedFormGroup({
+    searchString: new UntypedFormControl({value:"", disabled: this.isSubmitting})
   })
 
   protected constructor(

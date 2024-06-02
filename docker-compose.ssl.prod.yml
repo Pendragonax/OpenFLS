@@ -3,7 +3,7 @@ version: '3.6'
 services:
   db:
     container_name: open_fls_db
-    image: mysql
+    image: mysql:8.4.0
     restart: always
     env_file: docker-compose.env
     volumes:
@@ -27,10 +27,10 @@ services:
     build: 
       context: ./backend
       dockerfile: Dockerfile
+      target: PROD
     restart: always
     env_file: docker-compose.env
     volumes:
-      - ./backend:/app
       - ${LOG_PATH}:/logs/
     depends_on:
       - db
@@ -49,7 +49,6 @@ services:
       target: PROD
     restart: always
     volumes:
-      - ./frontend:/app
       - ./proxy/nginx.frontend.conf:/etc/nginx/nginx.conf
     networks:
       - open-fls-network

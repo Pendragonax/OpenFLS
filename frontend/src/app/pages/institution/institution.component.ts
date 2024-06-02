@@ -116,6 +116,11 @@ export class InstitutionComponent extends TablePageComponent<InstitutionView, In
     });
   }
 
+  onSearchStringChanges(searchString: string) {
+    this.searchString = searchString
+    this.filterTableData()
+  }
+
   private isAdmin(employee: EmployeeDto): boolean {
     return (employee.access?.role ?? 99) <= 1 ?? false
   }
