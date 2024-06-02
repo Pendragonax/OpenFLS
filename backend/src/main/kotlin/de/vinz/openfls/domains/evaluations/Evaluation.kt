@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.evaluations.entities
+package de.vinz.openfls.domains.evaluations
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.entities.Employee

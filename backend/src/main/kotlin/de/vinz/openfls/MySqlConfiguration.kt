@@ -7,7 +7,7 @@ import java.io.File
 import javax.sql.DataSource
 
 @Configuration
-class DataSourceConfig {
+class MySqlConfiguration {
     @Bean
     fun getDataSource(): DataSource {
         return DataSourceBuilder

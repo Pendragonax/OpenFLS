@@ -1,9 +1,8 @@
-package de.vinz.openfls.domains.evaluations.controller
+package de.vinz.openfls.domains.evaluations
 
 import de.vinz.openfls.domains.evaluations.dtos.EvaluationRequestDto
 import de.vinz.openfls.services.AccessService
 import de.vinz.openfls.services.EmployeeService
-import de.vinz.openfls.domains.evaluations.services.EvaluationService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -91,6 +90,7 @@ class EvaluationController(
         return try {
             // performance
             val startMs = System.currentTimeMillis()
+
             val dto = evaluationService.delete(id)
 
             if (logPerformance) {
@@ -114,6 +114,7 @@ class EvaluationController(
         return try {
             // performance
             val startMs = System.currentTimeMillis()
+
             val dto = evaluationService.getAll()
 
             if (logPerformance) {
@@ -138,6 +139,7 @@ class EvaluationController(
         return try {
             // performance
             val startMs = System.currentTimeMillis()
+
             val dto = evaluationService.getById(id)
 
             if (logPerformance) {
@@ -163,6 +165,7 @@ class EvaluationController(
         return try {
             // performance
             val startMs = System.currentTimeMillis()
+
             val dto = evaluationService.getByAssistancePlanId(assistancePlanId)
 
             if (logPerformance) {
@@ -189,6 +192,7 @@ class EvaluationController(
         return try {
             // performance
             val startMs = System.currentTimeMillis()
+
             val dto = evaluationService.getByAssistancePlanIdAndYear(assistancePlanId, year)
 
             if (logPerformance) {

@@ -7,4 +7,4 @@ data class EmployeeContingentEvaluationDto(
         val contingentHours: List<Double>,
         val executedHours: List<Double>,
         val executedPercent: List<Double>,
-        val missingHours: List<Double>) {}
+        val missingHours: List<Double>)

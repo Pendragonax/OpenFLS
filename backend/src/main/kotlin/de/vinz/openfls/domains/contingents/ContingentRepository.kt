@@ -26,7 +26,4 @@ interface ContingentRepository : CrudRepository<Contingent, Long> {
 
     @Query("SELECT u FROM Contingent u WHERE u.institution.id = :institutionId")
     fun findAllByInstitutionId(@Param("institutionId") institutionId: Long): List<Contingent>
-
-    @Query("SELECT u FROM Contingent u WHERE u.institution.id = :institutionId")
-    fun findAllByInstitutionIdBla(@Param("institutionId") institutionId: Long): List<ContingentProjection>
 }

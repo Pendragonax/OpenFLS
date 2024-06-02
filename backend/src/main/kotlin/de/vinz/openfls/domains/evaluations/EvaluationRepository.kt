@@ -1,6 +1,6 @@
-package de.vinz.openfls.domains.evaluations.repositories
+package de.vinz.openfls.domains.evaluations
 
-import de.vinz.openfls.domains.evaluations.entities.Evaluation
+import de.vinz.openfls.domains.evaluations.Evaluation
 import org.springframework.data.repository.CrudRepository
 
 interface EvaluationRepository: CrudRepository<Evaluation, Long> {

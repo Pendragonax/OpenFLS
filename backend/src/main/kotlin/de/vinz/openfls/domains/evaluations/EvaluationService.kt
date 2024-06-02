@@ -1,11 +1,9 @@
-package de.vinz.openfls.domains.evaluations.services
+package de.vinz.openfls.domains.evaluations
 
 import de.vinz.openfls.domains.evaluations.dtos.EvaluationMonthResponseDto
 import de.vinz.openfls.domains.evaluations.dtos.EvaluationRequestDto
 import de.vinz.openfls.domains.evaluations.dtos.EvaluationResponseDto
 import de.vinz.openfls.domains.evaluations.dtos.GoalEvaluationsYearDto
-import de.vinz.openfls.domains.evaluations.entities.Evaluation
-import de.vinz.openfls.domains.evaluations.repositories.EvaluationRepository
 import de.vinz.openfls.dtos.GenericYearlyResponseDto
 import de.vinz.openfls.entities.Employee
 import de.vinz.openfls.entities.Goal

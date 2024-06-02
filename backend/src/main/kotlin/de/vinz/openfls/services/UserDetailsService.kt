@@ -10,26 +10,25 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Component
 
-class UserDetailsService(): UserDetailsService {
-
-    @Autowired
-    private var employeeAccessRepository: EmployeeAccessRepository? = null
-
-    @Autowired
-    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+@Component
+class UserDetailsService(
+        private val employeeAccessRepository: EmployeeAccessRepository,
+        private val passwordEncoder: PasswordEncoder
+): UserDetailsService {
 
     override fun loadUserByUsername(username: String?): UserDetails {
-        val user = employeeAccessRepository?.getEmployeeByUsername(username!!)
+        val user = employeeAccessRepository.getEmployeeByUsername(username!!)
 
         if (user == null) {
-            val userCount = employeeAccessRepository?.count()
+            val userCount = employeeAccessRepository.count()
             if (userCount == 0L) {
                 return CustomUserDetails(
                     EmployeeAccess(
                         id = 0,
                         username = "admin",
-                        password = passwordEncoder().encode("admin"),
+                        password = passwordEncoder.encode("admin"),
                         role = 1,
                         employee = Employee(
                             id = 0,

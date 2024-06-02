@@ -1,26 +1,22 @@
-package de.vinz.openfls.domains.goalTimeEvaluations.services
+package de.vinz.openfls.domains.goalTimeEvaluations
 
+import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalsTimeEvaluationDto
-import de.vinz.openfls.exceptions.YearOutOfRangeException
+import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
 import de.vinz.openfls.entities.Goal
 import de.vinz.openfls.exceptions.AssistancePlanNotFoundException
-import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
+import de.vinz.openfls.exceptions.YearOutOfRangeException
 import de.vinz.openfls.models.YearMonthDoubleValue
-import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.repositories.ServiceRepository
 import de.vinz.openfls.services.ConverterService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.NumberService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.HashMap
-import java.util.NoSuchElementException
 import kotlin.math.roundToInt
 
 @Service
@@ -29,8 +25,6 @@ class GoalTimeEvaluationService(
         private val assistancePlanRepository: AssistancePlanRepository,
         private val converterService: ConverterService
 ) {
-
-    private val logger: Logger = LoggerFactory.getLogger(GoalTimeEvaluationService::class.java)
 
     @Throws(AssistancePlanNotFoundException::class, NoGoalFoundWithHourTypeException::class)
     fun getByAssistancePlanIdAndHourTypeIdAndYear(assistancePlanId: Long,

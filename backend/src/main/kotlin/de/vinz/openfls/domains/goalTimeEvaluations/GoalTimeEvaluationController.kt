@@ -1,6 +1,5 @@
-package de.vinz.openfls.domains.goalTimeEvaluations.controller
+package de.vinz.openfls.domains.goalTimeEvaluations
 
-import de.vinz.openfls.domains.goalTimeEvaluations.services.GoalTimeEvaluationService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

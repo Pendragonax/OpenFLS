@@ -39,7 +39,7 @@ import java.security.interfaces.RSAPublicKey
 
 @Configuration
 @EnableWebSecurity
-class OpenFlsConfig {
+class SecurityConfiguration {
 
     @Value("\${jwt.private-key}")
     private val rsaPrivateKey: RSAPrivateKey? = null
@@ -48,13 +48,9 @@ class OpenFlsConfig {
     private val rsaPublicKey: RSAPublicKey? = null
 
     @Bean
-    fun userDetailsService(): UserDetailsService =
-        de.vinz.openfls.services.UserDetailsService()
-
-    @Bean
-    fun authenticationProvider(): DaoAuthenticationProvider {
+    fun authenticationProvider(userDetailsService: UserDetailsService): DaoAuthenticationProvider {
         return DaoAuthenticationProvider().apply {
-            setUserDetailsService(userDetailsService())
+            setUserDetailsService(userDetailsService)
             setPasswordEncoder(passwordEncoder())
         }
     }
@@ -142,15 +138,15 @@ class OpenFlsConfig {
     fun corsFilter(): CorsFilter {
         val config = CorsConfiguration().apply {
             allowCredentials = true
-            addAllowedOriginPattern("*");
-            addAllowedHeader("*");
-            addAllowedMethod("OPTIONS");
-            addAllowedMethod("HEAD");
-            addAllowedMethod("GET");
-            addAllowedMethod("PUT");
-            addAllowedMethod("POST");
-            addAllowedMethod("DELETE");
-            addAllowedMethod("PATCH");
+            addAllowedOriginPattern("*")
+            addAllowedHeader("*")
+            addAllowedMethod("OPTIONS")
+            addAllowedMethod("HEAD")
+            addAllowedMethod("GET")
+            addAllowedMethod("PUT")
+            addAllowedMethod("POST")
+            addAllowedMethod("DELETE")
+            addAllowedMethod("PATCH")
         }
 
         val source = UrlBasedCorsConfigurationSource().apply {

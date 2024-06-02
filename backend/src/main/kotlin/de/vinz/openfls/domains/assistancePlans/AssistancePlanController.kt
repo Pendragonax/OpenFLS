@@ -1,38 +1,22 @@
 package de.vinz.openfls.domains.assistancePlans
 
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.*
-import org.modelmapper.ModelMapper
+import de.vinz.openfls.services.AccessService
+import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import jakarta.validation.Valid
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/assistance_plans")
 class AssistancePlanController(
         private val assistancePlanService: AssistancePlanService,
-        private val modelMapper: ModelMapper,
-        private val institutionService: InstitutionService,
-        private val sponsorService: SponsorService,
-        private val clientService: ClientService,
-        private val hourTypeService: HourTypeService,
         private val accessService: AccessService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanController::class.java)
@@ -50,30 +34,7 @@ class AssistancePlanController(
             if (!accessService.isAffiliated(token, valueDto.institutionId))
                 throw IllegalArgumentException("user is not allowed to create assistance plans for this client")
 
-            val entity = modelMapper.map(valueDto, AssistancePlan::class.java)
-
-            entity.client = clientService.getById(valueDto.clientId)
-                ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
-            entity.institution = institutionService.getById(valueDto.institutionId)
-                ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
-            entity.sponsor = sponsorService.getById(valueDto.sponsorId)
-                ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
-            entity.hours = valueDto.hours
-                .map { modelMapper.map(it, AssistancePlanHour::class.java) }
-                .map { it.apply {
-                    hourType = hourTypeService.getById(it.hourType!!.id)
-                        ?: throw IllegalArgumentException("hour type with id ${hourType?.id} not found")
-                } }
-                .toMutableSet()
-
-            val savedEntity = assistancePlanService.create(entity)
-
-            valueDto.apply {
-                id = savedEntity.id
-                hours = savedEntity.hours
-                    .map { modelMapper.map(it, AssistancePlanHourDto::class.java) }
-                    .toMutableSet()
-            }
+            val dto = assistancePlanService.create(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s create took %s ms",
@@ -81,7 +42,7 @@ class AssistancePlanController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(valueDto)
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
@@ -102,35 +63,8 @@ class AssistancePlanController(
 
             if (!accessService.canModifyAssistancePlan(token, id))
                 throw IllegalArgumentException("user is not allowed to update this assistance plan")
-            if (id != valueDto.id)
-                throw IllegalArgumentException("path id and dto id are not the same")
-            if (!assistancePlanService.existsById(id))
-                throw IllegalArgumentException("assistance plan not found")
 
-            val entity = modelMapper.map(valueDto, AssistancePlan::class.java)
-
-            entity.client = clientService.getById(valueDto.clientId)
-                ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
-            entity.institution = institutionService.getById(valueDto.institutionId)
-                ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
-            entity.sponsor = sponsorService.getById(valueDto.sponsorId)
-                ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
-            entity.hours = valueDto.hours
-                .map { modelMapper.map(it, AssistancePlanHour::class.java) }
-                .map { it.apply {
-                    hourType = hourTypeService.getById(it.hourType!!.id)
-                        ?: throw IllegalArgumentException("hour type with id ${hourType!!.id} not found")
-                } }
-                .toMutableSet()
-
-            val savedEntity = assistancePlanService.update(entity)
-
-            valueDto.apply {
-                this.id = savedEntity.id
-                hours = savedEntity.hours
-                    .map { modelMapper.map(it, AssistancePlanHourDto::class.java) }
-                    .toMutableSet()
-            }
+            val dto = assistancePlanService.update(id, valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s update took %s ms",
@@ -138,7 +72,7 @@ class AssistancePlanController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(valueDto)
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
@@ -161,9 +95,7 @@ class AssistancePlanController(
             if (!assistancePlanService.existsById(id))
                 throw IllegalArgumentException("assistance plan not found")
 
-            val entity = assistancePlanService.getById(id)
-            val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
-
+            val dto = assistancePlanService.getAssistancePlanDtoById(id)
             assistancePlanService.delete(id)
 
             if (logPerformance) {
@@ -189,8 +121,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = assistancePlanService.getAll()
-                .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            val dtos = assistancePlanService.getAllAssistancePlanDtos()
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms",
@@ -215,8 +146,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = assistancePlanService.getById(id)
-            val dto = modelMapper.map(entity, AssistancePlanResponseDto::class.java)
+            val dto = assistancePlanService.getAssistancePlanDtoById(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",
@@ -241,8 +171,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = assistancePlanService.getByClientId(id)
-                .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            val dtos = assistancePlanService.getAssistancePlanDtosByClientId(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByClientId took %s ms",
@@ -267,8 +196,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = assistancePlanService.getBySponsorId(id)
-                .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            val dtos = assistancePlanService.getAssistancePlanDtosBySponsorId(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getBySponsorId took %s ms",
@@ -293,8 +221,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = assistancePlanService.getByInstitutionId(id)
-                .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+            val dtos = assistancePlanService.getAssistancePlanDtosByInstitutionId(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByInstitutionId took %s ms",

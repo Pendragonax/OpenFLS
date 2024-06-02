@@ -34,8 +34,8 @@ class AssistancePlanAnalysisController(
         // performance
         val startMs = System.currentTimeMillis()
 
-        val analysis = assistancePlanAnalysisService
-                .getAnalysisByInstitutionAndSponsorAndHourTypeInMonth(year, month, institutionId, sponsorId, hourTypeId, token)
+        val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionAndSponsorAndHourTypeInMonth(
+                year, month, institutionId, sponsorId, hourTypeId, token)
 
         if (logPerformance) {
             logger.info(String.format("%s getByYearAndMonthAndInstitutionIdAndHourTypeId took %s ms",
@@ -55,8 +55,8 @@ class AssistancePlanAnalysisController(
         // performance
         val startMs = System.currentTimeMillis()
 
-        val analysis = assistancePlanAnalysisService
-                .getAnalysisByInstitutionAndHourTypeInMonth(year, month, institutionId, hourTypeId, token)
+        val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionAndHourTypeInMonth(
+                year, month, institutionId, hourTypeId, token)
 
         if (logPerformance) {
             logger.info(String.format("%s getByYearAndMonthAndInstitutionIdAndHourTypeId took %s ms",
@@ -75,8 +75,7 @@ class AssistancePlanAnalysisController(
         // performance
         val startMs = System.currentTimeMillis()
 
-        val analysis = assistancePlanAnalysisService
-                .getAnalysisByInstitutionInMonth(year, month, institutionId, token)
+        val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionInMonth(year, month, institutionId, token)
 
         if (logPerformance) {
             logger.info(String.format("%s getByYearAndMonthAndInstitutionId took %s ms",
