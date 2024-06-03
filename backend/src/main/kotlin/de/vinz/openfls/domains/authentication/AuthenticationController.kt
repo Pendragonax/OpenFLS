@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.authentication
 
 import de.vinz.openfls.domains.authentication.models.EUserRoles
 import de.vinz.openfls.dtos.PasswordDto
-import de.vinz.openfls.entities.AuthRequest
+import de.vinz.openfls.domains.authentication.dtos.AuthenticationRequestDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -24,7 +24,7 @@ class AuthenticationController(
     private val logPerformance: Boolean = false
 
     @PostMapping("/login")
-    fun login(@RequestBody request: AuthRequest): ResponseEntity<Map<String, String>> {
+    fun login(@RequestBody request: AuthenticationRequestDto): ResponseEntity<Map<String, String>> {
         try {
             // performance
             val startMs = System.currentTimeMillis()

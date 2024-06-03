@@ -1,12 +1,12 @@
 package de.vinz.openfls.domains.authentication
 
-import de.vinz.openfls.domains.authentication.dtos.AuthenticationDto
+import de.vinz.openfls.domains.authentication.dtos.AuthenticationResponseDto
 import de.vinz.openfls.domains.authentication.models.EUserRoles
 import de.vinz.openfls.dtos.EmployeeAccessDto
 import de.vinz.openfls.dtos.EmployeeDto
 import de.vinz.openfls.dtos.PasswordDto
 import de.vinz.openfls.dtos.PermissionDto
-import de.vinz.openfls.entities.CustomUserDetails
+import de.vinz.openfls.security.CustomUserDetails
 import de.vinz.openfls.entities.Employee
 import de.vinz.openfls.entities.EmployeeAccess
 import de.vinz.openfls.repositories.EmployeeAccessRepository
@@ -36,7 +36,7 @@ class AuthenticationService(
         private val passwordEncoder: PasswordEncoder,
         private val modelMapper: ModelMapper
 ) {
-    fun login(username: String, password: String) : AuthenticationDto {
+    fun login(username: String, password: String): AuthenticationResponseDto {
         val authentication = authenticationManager
                 .authenticate(UsernamePasswordAuthenticationToken(username, password))
 
@@ -60,7 +60,7 @@ class AuthenticationService(
 
         val token = this.jwtEncoder.encode(JwtEncoderParameters.from(claims))?.tokenValue
 
-        return AuthenticationDto(
+        return AuthenticationResponseDto(
                 user.getId(),
                 token ?: "",
                 now.plusSeconds(expireAfterSeconds).toString()
@@ -124,13 +124,13 @@ class AuthenticationService(
 
         // initial admin from CustomUserDetailsService
         if (userId == 0L) {
-            return Optional.of(getInitialAdmin())
+            return Optional.of(getInitialAdminEmployee())
         }
 
         return employeeRepository.findById(getCurrentUserId())
     }
 
-    fun getInitialAdmin(): Employee {
+    fun getInitialAdminEmployee(): Employee {
         return Employee(
                 id = 0,
                 firstname = "Initial",
@@ -142,7 +142,7 @@ class AuthenticationService(
                 access = EmployeeAccess(
                         id = 0,
                         username = "admin",
-                        password = "",
+                        password = passwordEncoder.encode("admin"),
                         role = EUserRoles.ADMIN.id,
                         employee = null
                 ),

@@ -1,5 +1,7 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.security
 
+import de.vinz.openfls.domains.authentication.models.EUserRoles
+import de.vinz.openfls.entities.EmployeeAccess
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -8,13 +10,12 @@ class CustomUserDetails(private var employeeAccess: EmployeeAccess) : UserDetail
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         val roleString = when (employeeAccess.role) {
-            1 -> "ADMIN"
-            2 -> "LEAD"
-            else -> "USER"
+            1 -> EUserRoles.ADMIN.name
+            2 -> EUserRoles.LEAD.name
+            else -> EUserRoles.USER.name
         }
 
-        val authority = SimpleGrantedAuthority(roleString)
-        return mutableListOf(authority)
+        return mutableListOf(SimpleGrantedAuthority(roleString))
     }
 
     override fun getPassword(): String = employeeAccess.password

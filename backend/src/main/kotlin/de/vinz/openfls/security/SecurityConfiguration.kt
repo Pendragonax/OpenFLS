@@ -1,4 +1,4 @@
-package de.vinz.openfls
+package de.vinz.openfls.security
 
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.JWKSet
@@ -48,10 +48,11 @@ class SecurityConfiguration {
     private val rsaPublicKey: RSAPublicKey? = null
 
     @Bean
-    fun authenticationProvider(userDetailsService: UserDetailsService): DaoAuthenticationProvider {
+    fun authenticationProvider(userDetailsService: UserDetailsService,
+                               passwordEncoder: PasswordEncoder?): DaoAuthenticationProvider {
         return DaoAuthenticationProvider().apply {
             setUserDetailsService(userDetailsService)
-            setPasswordEncoder(passwordEncoder())
+            setPasswordEncoder(passwordEncoder)
         }
     }
 
