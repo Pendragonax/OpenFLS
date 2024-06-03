@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.domains.client.Client
 import de.vinz.openfls.entities.*
 import java.time.LocalDate
 import jakarta.persistence.*

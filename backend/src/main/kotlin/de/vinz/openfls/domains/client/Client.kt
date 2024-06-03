@@ -1,8 +1,11 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.client
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.entities.CategoryTemplate
+import de.vinz.openfls.entities.Institution
+import de.vinz.openfls.entities.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 

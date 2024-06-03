@@ -7,15 +7,13 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.client.ClientService
 import de.vinz.openfls.dtos.ActualTargetValueDto
 import de.vinz.openfls.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.dtos.HourTypeDto
 import de.vinz.openfls.services.*
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
