@@ -4,7 +4,7 @@ import de.vinz.openfls.dtos.PermissionDto
 import de.vinz.openfls.entities.Permission
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.repositories.PermissionRepository
-import de.vinz.openfls.repositories.EmployeeRepository
+import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.repositories.InstitutionRepository
 import de.vinz.openfls.services.HelperService
 import org.modelmapper.ModelMapper
@@ -20,11 +20,11 @@ import jakarta.validation.Valid
 @RestController
 @RequestMapping("/permissions")
 class PermissionController(
-    private val repository: PermissionRepository,
-    private val employeeRepository: EmployeeRepository,
-    private val institutionRepository: InstitutionRepository,
-    private val helperService: HelperService,
-    private val modelMapper: ModelMapper)
+        private val repository: PermissionRepository,
+        private val employeeRepository: EmployeeRepository,
+        private val institutionRepository: InstitutionRepository,
+        private val helperService: HelperService,
+        private val modelMapper: ModelMapper)
 {
 
     private val logger: Logger = LoggerFactory.getLogger(SponsorController::class.java)

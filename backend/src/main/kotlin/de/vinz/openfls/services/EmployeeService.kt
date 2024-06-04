@@ -2,12 +2,15 @@ package de.vinz.openfls.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.entities.Employee
-import de.vinz.openfls.entities.EmployeeAccess
+import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import de.vinz.openfls.entities.Permission
 import de.vinz.openfls.entities.Unprofessional
-import de.vinz.openfls.repositories.EmployeeAccessRepository
-import de.vinz.openfls.repositories.EmployeeRepository
+import de.vinz.openfls.domains.employees.EmployeeAccessRepository
+import de.vinz.openfls.domains.employees.EmployeeRepository
+import de.vinz.openfls.dtos.EmployeeDto
+import de.vinz.openfls.dtos.PermissionDto
+import de.vinz.openfls.dtos.UnprofessionalDto
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
@@ -18,12 +21,43 @@ import org.springframework.stereotype.Service
 class EmployeeService(
         private val employeeRepository: EmployeeRepository,
         private val employeeAccessRepository: EmployeeAccessRepository,
-        private val permissionServiceImpl: PermissionService,
+        private val permissionService: PermissionService,
         private val unprofessionalService: UnprofessionalService,
         private val assistancePlanRepository: AssistancePlanRepository,
+        private val accessService: AccessService,
         private val passwordEncoder: PasswordEncoder,
         private val modelMapper: ModelMapper
 ) : GenericService<Employee> {
+
+    @Transactional
+    fun create(valueDto: EmployeeDto): EmployeeDto {
+        // convert employee
+        val entity = modelMapper.map(valueDto, Employee::class.java)
+        // convert access
+        entity.access = modelMapper.map(valueDto.access, EmployeeAccess::class.java)?.apply {
+            password = if (username.isNotEmpty()) passwordEncoder.encode(username).toString() else ""
+        }
+
+        entity.permissions = permissionService.convertToPermissions(valueDto.permissions, -1)
+        entity.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, -1)
+
+        val savedEntity = create(entity)
+
+        // set id to dto
+        valueDto.id = savedEntity.id!!
+        valueDto.access?.id = savedEntity.id!!
+
+        valueDto.permissions = valueDto.permissions
+                ?.filter { savedEntity.permissions
+                        ?.any { permission -> permission.id.institutionId == it.institutionId } ?: false }
+                ?.map { it.apply { employeeId = savedEntity.id!! } }
+                ?.toTypedArray()
+        valueDto.unprofessionals = valueDto.unprofessionals
+                ?.map { it.apply { employeeId = savedEntity.id!! } }
+                ?.toTypedArray()
+
+        return valueDto
+    }
 
     @Transactional
     override fun create(value: Employee): Employee {
@@ -60,6 +94,34 @@ class EmployeeService(
     }
 
     @Transactional
+    fun update(id: Long, valueDto: EmployeeDto, token: String): EmployeeDto {
+        // convert employee
+        val entity = modelMapper.map(valueDto, Employee::class.java)
+
+        if (accessService.isAdmin(token)) {
+            entity.permissions = permissionService.convertToPermissions(valueDto.permissions, id)
+            entity.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, id)
+        } else {
+            entity.permissions = mutableSetOf()
+            entity.unprofessionals = mutableSetOf()
+        }
+
+        // update employee
+        val savedEntity = update(entity)
+
+        // permissions
+        valueDto.permissions = savedEntity.permissions
+                ?.map { modelMapper.map(it, PermissionDto::class.java) }
+                ?.toTypedArray()
+        // unprofessionals
+        valueDto.unprofessionals = savedEntity.unprofessionals
+                ?.map { modelMapper.map(it, UnprofessionalDto::class.java) }
+                ?.toTypedArray()
+
+        return valueDto
+    }
+
+    @Transactional
     override fun update(value: Employee): Employee {
         val tmpPermissions = value.permissions
         val tmpUnprofessionals = value.unprofessionals
@@ -73,7 +135,7 @@ class EmployeeService(
         val employeeEntity = employeeRepository.save(value).apply {
             access = null
             permissions = savePermissions(this, tmpPermissions)
-            permissions = permissionServiceImpl.getPermissionByEmployee(this.id ?: 0).toMutableSet()
+            permissions = permissionService.getPermissionByEmployee(this.id ?: 0).toMutableSet()
             unprofessionals = saveUnprofessionals(this, tmpUnprofessionals)
         }
 
@@ -81,18 +143,22 @@ class EmployeeService(
     }
 
     @Transactional
-    fun updateRole(id: Long, role: Int): Employee {
+    fun updateRole(id: Long, role: Int): EmployeeDto {
         // load employee
-        val tmpEmployee = employeeRepository.findById(id).get()
+        val employee = employeeRepository.findById(id).get()
+        employee.access?.role = role
 
-        // update role
-        tmpEmployee.access?.role = role
+        employeeRepository.save(employee)
 
-        return employeeRepository.save(tmpEmployee)
+        employee.access?.password = ""
+
+        return modelMapper.map(
+                employee,
+                EmployeeDto::class.java)
     }
 
     @Transactional
-    fun resetPassword(id: Long): Employee {
+    fun resetPassword(id: Long): EmployeeDto {
         // load employee
         val tmpEmployee = employeeRepository.findById(id).get()
 
@@ -100,7 +166,9 @@ class EmployeeService(
         tmpEmployee.access?.password =
             passwordEncoder.encode(tmpEmployee.access?.username ?: "password").toString()
 
-        return employeeRepository.save(tmpEmployee)
+        val entity = employeeRepository.save(tmpEmployee)
+
+        return modelMapper.map(entity, EmployeeDto::class.java)
     }
 
     @Transactional
@@ -141,6 +209,14 @@ class EmployeeService(
         }
     }
 
+    fun getAllEmployeeDtos(): List<EmployeeDto> {
+        return getAll()
+                .sortedBy { it.lastname.lowercase() }
+                .map { employee -> modelMapper.map(employee, EmployeeDto::class.java).apply {
+                    access?.password = ""
+                } }
+    }
+
     override fun getAll(): List<Employee> {
         return employeeRepository.findAll().map {
             it.apply {
@@ -159,6 +235,12 @@ class EmployeeService(
         return employeeRepository.existsById(id)
     }
 
+    fun getEmployeeDtoById(id: Long, adminMode: Boolean): EmployeeDto? {
+        val entity = getById(id)
+
+        return modelMapper.map(entity, EmployeeDto::class.java)
+    }
+
     fun getById(id: Long, adminMode: Boolean): Employee? {
         val value = employeeRepository.findById(id).orElse(null)?.apply {
             if (!adminMode) {
@@ -175,7 +257,7 @@ class EmployeeService(
             ?.map { it.apply {
                 this.employee = employee
                 this.id.employeeId = employee.id } }
-            ?.map { permissionServiceImpl.savePermission(it) }
+            ?.map { permissionService.savePermission(it) }
             ?.toMutableSet() ?: mutableSetOf()
     }
 

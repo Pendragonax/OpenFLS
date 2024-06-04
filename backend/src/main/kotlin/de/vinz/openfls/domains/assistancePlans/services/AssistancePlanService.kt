@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.client.ClientService
+import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.dtos.ActualTargetValueDto
 import de.vinz.openfls.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.dtos.HourTypeDto

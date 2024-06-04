@@ -1,7 +1,7 @@
 package de.vinz.openfls.security
 
 import de.vinz.openfls.domains.authentication.models.EUserRoles
-import de.vinz.openfls.entities.EmployeeAccess
+import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails

@@ -1,6 +1,6 @@
-package de.vinz.openfls.domains.client
+package de.vinz.openfls.domains.clients
 
-import de.vinz.openfls.domains.client.dtos.ClientDto
+import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.AccessService
 import jakarta.validation.Valid

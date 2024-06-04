@@ -1,6 +1,6 @@
-package de.vinz.openfls.repositories
+package de.vinz.openfls.domains.employees
 
-import de.vinz.openfls.entities.EmployeeAccess
+import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository

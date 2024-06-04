@@ -1,20 +1,23 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.entities.Employee
+import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.entities.Institution
 import de.vinz.openfls.entities.Permission
-import de.vinz.openfls.repositories.EmployeeRepository
+import de.vinz.openfls.domains.employees.EmployeeRepository
+import de.vinz.openfls.dtos.PermissionDto
 import de.vinz.openfls.repositories.InstitutionRepository
 import de.vinz.openfls.repositories.PermissionRepository
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
 import jakarta.transaction.Transactional
+import org.modelmapper.ModelMapper
 
 @Service
 class PermissionService(
-    val employeeRepository: EmployeeRepository,
-    val institutionRepository: InstitutionRepository,
-    val permissionRepository: PermissionRepository
+        val employeeRepository: EmployeeRepository,
+        val institutionRepository: InstitutionRepository,
+        val permissionRepository: PermissionRepository,
+        val modelMapper: ModelMapper
 ) {
     @Transactional
     fun savePermission(permission: Permission): Permission {
@@ -102,5 +105,14 @@ class PermissionService(
             .filter { it.readEntries }
             .map { it.id.institutionId ?: 0 }
             .toList();
+    }
+
+    fun convertToPermissions(permissionDtos: Array<PermissionDto>?, employeeId: Long): MutableSet<Permission> {
+        return permissionDtos
+                ?.map {
+                    modelMapper
+                            .map(it, Permission::class.java)
+                            .apply { it.employeeId = employeeId } }
+                ?.toMutableSet() ?: mutableSetOf()
     }
 }

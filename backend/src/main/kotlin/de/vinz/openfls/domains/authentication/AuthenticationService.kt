@@ -7,10 +7,10 @@ import de.vinz.openfls.dtos.EmployeeDto
 import de.vinz.openfls.dtos.PasswordDto
 import de.vinz.openfls.dtos.PermissionDto
 import de.vinz.openfls.security.CustomUserDetails
-import de.vinz.openfls.entities.Employee
-import de.vinz.openfls.entities.EmployeeAccess
-import de.vinz.openfls.repositories.EmployeeAccessRepository
-import de.vinz.openfls.repositories.EmployeeRepository
+import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entities.EmployeeAccess
+import de.vinz.openfls.domains.employees.EmployeeAccessRepository
+import de.vinz.openfls.domains.employees.EmployeeRepository
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.security.authentication.AuthenticationManager

@@ -1,9 +1,9 @@
 package de.vinz.openfls.security
 
 import de.vinz.openfls.domains.authentication.models.EUserRoles
-import de.vinz.openfls.entities.Employee
-import de.vinz.openfls.entities.EmployeeAccess
-import de.vinz.openfls.repositories.EmployeeAccessRepository
+import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entities.EmployeeAccess
+import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException

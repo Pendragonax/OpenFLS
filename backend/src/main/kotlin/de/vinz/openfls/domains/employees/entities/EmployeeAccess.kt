@@ -1,4 +1,4 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.employees.entities
 
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction

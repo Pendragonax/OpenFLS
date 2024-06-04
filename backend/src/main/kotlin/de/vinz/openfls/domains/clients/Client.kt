@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.client
+package de.vinz.openfls.domains.clients
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
