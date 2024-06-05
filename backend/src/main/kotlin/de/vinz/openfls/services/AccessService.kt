@@ -3,6 +3,7 @@ package de.vinz.openfls.services
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.contingents.services.ContingentService
+import de.vinz.openfls.domains.goals.services.GoalService
 import org.springframework.stereotype.Service
 
 @Service

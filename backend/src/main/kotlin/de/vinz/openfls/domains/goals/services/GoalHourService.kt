@@ -1,7 +1,8 @@
-package de.vinz.openfls.services
+package de.vinz.openfls.domains.goals.services
 
-import de.vinz.openfls.entities.GoalHour
-import de.vinz.openfls.repositories.GoalHourRepository
+import de.vinz.openfls.domains.goals.entities.GoalHour
+import de.vinz.openfls.domains.goals.repositories.GoalHourRepository
+import de.vinz.openfls.services.GenericService
 import org.springframework.stereotype.Service
 
 @Service

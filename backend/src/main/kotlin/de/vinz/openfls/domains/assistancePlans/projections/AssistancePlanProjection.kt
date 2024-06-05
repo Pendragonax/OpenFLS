@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.projections
 
 import de.vinz.openfls.projections.ClientSoloProjection
-import de.vinz.openfls.projections.GoalProjection
+import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.projections.InstitutionSoloProjection
 import de.vinz.openfls.projections.SponsorSoloProjection
 import java.time.LocalDate

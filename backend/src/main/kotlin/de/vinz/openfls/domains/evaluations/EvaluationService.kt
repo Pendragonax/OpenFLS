@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.evaluations.dtos.EvaluationResponseDto
 import de.vinz.openfls.domains.evaluations.dtos.GoalEvaluationsYearDto
 import de.vinz.openfls.dtos.GenericYearlyResponseDto
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.entities.Goal
+import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.services.DateService
 import org.modelmapper.ModelMapper

@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthD
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
-import de.vinz.openfls.projections.GoalProjection
+import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.services.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.NumberService

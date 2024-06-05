@@ -1,6 +1,7 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.goals.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.entities.HourType
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
 

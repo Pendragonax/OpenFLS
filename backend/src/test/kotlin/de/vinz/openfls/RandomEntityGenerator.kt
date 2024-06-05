@@ -5,6 +5,8 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.entities.*
 import java.time.LocalDate
 import kotlin.random.Random

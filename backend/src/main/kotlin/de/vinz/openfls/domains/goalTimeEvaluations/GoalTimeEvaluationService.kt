@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanReposi
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalsTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
-import de.vinz.openfls.entities.Goal
+import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.exceptions.AssistancePlanNotFoundException
 import de.vinz.openfls.exceptions.YearOutOfRangeException
 import de.vinz.openfls.models.YearMonthDoubleValue
@@ -153,11 +153,11 @@ class GoalTimeEvaluationService(
     }
 
     private fun getMonthlyApprovedHoursInYear(goal: Goal,
-                                                hourTypeId: Long,
-                                                start: LocalDate,
-                                                end: LocalDate,
-                                                year: Int,
-                                                sum: Boolean): List<Double> {
+                                              hourTypeId: Long,
+                                              start: LocalDate,
+                                              end: LocalDate,
+                                              year: Int,
+                                              sum: Boolean): List<Double> {
         val approvedMinutes = getApprovedHoursMonthly(goal, hourTypeId, start, end, sum)
         val approvedMinutesInYear = approvedMinutes.filter { it.yearMonth.year == year }
         val result = getYearMonthValuesByYear(approvedMinutesInYear ,year)

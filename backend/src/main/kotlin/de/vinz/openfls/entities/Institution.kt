@@ -3,6 +3,7 @@ package de.vinz.openfls.entities
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.contingents.Contingent
+import de.vinz.openfls.domains.goals.entities.Goal
 import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email

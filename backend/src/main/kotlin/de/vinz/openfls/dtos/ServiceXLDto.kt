@@ -1,6 +1,7 @@
 package de.vinz.openfls.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import de.vinz.openfls.domains.goals.dtos.GoalDto
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
 import jakarta.validation.constraints.Size

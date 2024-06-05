@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.goals.dtos
 
 import jakarta.validation.constraints.Min
 

@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.goals.dtos
 
 class GoalHourResponseDto {
     var id: Long = 0
