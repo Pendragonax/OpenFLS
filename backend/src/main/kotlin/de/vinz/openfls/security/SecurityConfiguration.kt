@@ -36,7 +36,6 @@ import org.springframework.web.filter.CorsFilter
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
-
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration {

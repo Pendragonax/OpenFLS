@@ -5,11 +5,10 @@ import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalsTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
 import de.vinz.openfls.domains.goals.entities.Goal
-import de.vinz.openfls.exceptions.AssistancePlanNotFoundException
-import de.vinz.openfls.exceptions.YearOutOfRangeException
+import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.AssistancePlanNotFoundException
+import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeException
 import de.vinz.openfls.domains.goalTimeEvaluations.models.YearMonthDoubleValue
 import de.vinz.openfls.domains.services.ServiceRepository
-import de.vinz.openfls.services.ConverterService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.NumberService
 import org.springframework.stereotype.Service
@@ -22,8 +21,7 @@ import kotlin.math.roundToInt
 @Service
 class GoalTimeEvaluationService(
         private val serviceRepository: ServiceRepository,
-        private val assistancePlanRepository: AssistancePlanRepository,
-        private val converterService: ConverterService
+        private val assistancePlanRepository: AssistancePlanRepository
 ) {
 
     @Throws(AssistancePlanNotFoundException::class, NoGoalFoundWithHourTypeException::class)
@@ -33,7 +31,7 @@ class GoalTimeEvaluationService(
         val assistancePlan =
                 assistancePlanRepository
                         .findById(assistancePlanId)
-                        .orElseThrow{ AssistancePlanNotFoundException(assistancePlanId)}
+                        .orElseThrow{ AssistancePlanNotFoundException(assistancePlanId) }
         val goalsWithHourType =
                 assistancePlan.goals.filter { it.hours.any { goalHour -> goalHour.hourType!!.id == hourTypeId } }
 
@@ -100,7 +98,7 @@ class GoalTimeEvaluationService(
                                       services: List<de.vinz.openfls.domains.services.Service>,
                                       sum: Boolean): List<Double> {
         val executedMinutes = getExecutedMinutesMonthlyByYear(goal, hourTypeId, start, end, year, services, sum)
-        return executedMinutes.map { converterService.convertMinutesToHour(it) }
+        return executedMinutes.map { DateService.convertMinutesToHour(it) }
     }
 
     fun getExecutedMinutesMonthlyByYear(goal: Goal,
@@ -196,11 +194,11 @@ class GoalTimeEvaluationService(
         val resultList = MutableList(approvedHours.size) { 0.0 }
 
         for (i in approvedHours.indices) {
-            val approvedMinutes = converterService.convertHourToMinutes(approvedHours[i])
-            val executedMinutes = converterService.convertHourToMinutes(executedHours[i])
+            val approvedMinutes = DateService.convertHourToMinutes(approvedHours[i])
+            val executedMinutes = DateService.convertHourToMinutes(executedHours[i])
             if (approvedMinutes > 0) {
                 val differenceMinutes = approvedMinutes - executedMinutes
-                resultList[i] = converterService.convertMinutesToHour(differenceMinutes.toDouble())
+                resultList[i] = DateService.convertMinutesToHour(differenceMinutes.toDouble())
             } else {
                 resultList[i] = 0.0
             }

@@ -7,7 +7,6 @@ import de.vinz.openfls.domains.permissions.PermissionService
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.ConverterService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,8 +25,7 @@ class ServiceController(
         private val employeeService: EmployeeService,
         private val accessService: AccessService,
         private val permissionService: PermissionService,
-        private val assistancePlanService: AssistancePlanService,
-        private val converter: ConverterService
+        private val assistancePlanService: AssistancePlanService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(ServiceController::class.java)
@@ -108,7 +106,7 @@ class ServiceController(
                @PathVariable id: Long): Any {
         return try {
             val startMs = System.currentTimeMillis()
-            val service = serviceService.getById(id);
+            val service = serviceService.getById(id)
 
             if (!accessService.isAdmin(token) &&
                     (service?.employee?.id != accessService.getId(token) ||
@@ -404,7 +402,7 @@ class ServiceController(
                 throw IllegalArgumentException("No permission to get the times of this employee")
 
             val serviceDtos = serviceService.getDtosByEmployeeAndStartEndDate(id, start, end)
-            val dto = this.converter.convertServicesToServiceTimeDto(serviceDtos).apply {
+            val dto = ServiceDtoConverter.convertServicesToServiceTimeDto(serviceDtos).apply {
                 periodDays = start.until(end).days + 1
             }
 

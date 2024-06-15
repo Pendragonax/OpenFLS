@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.overviews.exceptions
 
-import de.vinz.openfls.exceptions.CsvCreationFailedException
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.http.HttpStatus

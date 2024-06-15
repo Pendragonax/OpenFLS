@@ -1,14 +1,13 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.exceptions.YearOutOfRangeException
+import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeException
 import de.vinz.openfls.services.models.DateRangeArgument
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
 import java.time.Year
 import java.time.YearMonth

@@ -1,7 +1,5 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.services.NumberService.Companion.roundHalfToEven
-
 class NumberService {
     companion object {
         fun roundDoubleToTwoDigits(value: Double): Double {
