@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.goals.repositories.GoalHourRepository
 import de.vinz.openfls.domains.goals.repositories.GoalRepository
 import de.vinz.openfls.services.GenericService
-import de.vinz.openfls.services.HourTypeService
+import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.services.InstitutionService
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull

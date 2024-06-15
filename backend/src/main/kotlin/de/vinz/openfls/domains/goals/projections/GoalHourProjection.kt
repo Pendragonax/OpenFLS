@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.goals.projections
 
-import de.vinz.openfls.projections.HourTypeSoloProjection
+import de.vinz.openfls.domains.hourTypes.HourTypeSoloProjection
 
 interface GoalHourProjection {
     val id: Long

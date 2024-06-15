@@ -1,11 +1,8 @@
-package de.vinz.openfls.controller
+package de.vinz.openfls.domains.hourTypes
 
-import de.vinz.openfls.dtos.HourTypeDto
-import de.vinz.openfls.entities.HourType
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.HourTypeService
 import jakarta.validation.Valid
-import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -16,8 +13,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/hour_types")
 class HourTypeController(
-    private val hourTypeService: HourTypeService,
-    private val modelMapper: ModelMapper
+        private val hourTypeService: HourTypeService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(HourTypeController::class.java)
@@ -31,8 +27,7 @@ class HourTypeController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = hourTypeService.create(modelMapper.map(value, HourType::class.java))
-            val dto = modelMapper.map(entity, HourTypeDto::class.java)
+            val dto = hourTypeService.create(value)
 
             if (logPerformance) {
                 logger.info(String.format("%s create took %s ms",
@@ -63,8 +58,7 @@ class HourTypeController(
             if (!hourTypeService.existsById(id))
                 throw IllegalArgumentException("hour type not found")
 
-            val entity = hourTypeService.update(modelMapper.map(valueDto, HourType::class.java))
-            val dto = modelMapper.map(entity, HourTypeDto::class.java)
+            val dto = hourTypeService.update(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s update took %s ms",
@@ -92,9 +86,8 @@ class HourTypeController(
             if (!hourTypeService.existsById(id))
                 throw IllegalArgumentException("hour type not found")
 
-            val entity = hourTypeService.getById(id)
+            val dto = hourTypeService.getDtoById(id)
             hourTypeService.delete(id)
-            val dto = modelMapper.map(entity, HourTypeDto::class.java)
 
             if (logPerformance) {
                 logger.info(String.format("%s delete took %s ms",
@@ -119,10 +112,7 @@ class HourTypeController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entities = hourTypeService
-                .getAll()
-                .sortedBy { it.title.lowercase() }
-            val dtos = entities.map { modelMapper.map(it, HourTypeDto::class.java) }
+            val dtos = hourTypeService.getAllDtos()
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms",
@@ -147,8 +137,7 @@ class HourTypeController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = hourTypeService.getById(id)
-            val dto = modelMapper.map(entity, HourTypeDto::class.java)
+            val dto = hourTypeService.getDtoById(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",

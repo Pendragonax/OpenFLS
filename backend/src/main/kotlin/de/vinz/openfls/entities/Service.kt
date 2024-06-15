@@ -7,6 +7,7 @@ import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.hourTypes.HourType
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
 import jakarta.persistence.*

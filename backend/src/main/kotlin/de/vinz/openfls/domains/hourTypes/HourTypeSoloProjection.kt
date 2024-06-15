@@ -1,4 +1,4 @@
-package de.vinz.openfls.projections
+package de.vinz.openfls.domains.hourTypes
 
 interface HourTypeSoloProjection {
     val id: Long

@@ -1,5 +1,7 @@
 package de.vinz.openfls.dtos
 
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
+
 open class ActualTargetValueDto {
     var target: Double = 0.0
 

@@ -8,9 +8,10 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProject
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.dtos.ActualTargetValueDto
 import de.vinz.openfls.dtos.AssistancePlanEvalDto
-import de.vinz.openfls.dtos.HourTypeDto
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
 import de.vinz.openfls.services.*
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper

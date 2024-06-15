@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.projections
 
-import de.vinz.openfls.projections.HourTypeSoloProjection
+import de.vinz.openfls.domains.hourTypes.HourTypeSoloProjection
 import java.time.LocalDate
 
 interface AssistancePlanHourProjection {
