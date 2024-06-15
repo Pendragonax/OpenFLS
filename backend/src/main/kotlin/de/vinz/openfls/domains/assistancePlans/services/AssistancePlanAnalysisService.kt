@@ -23,13 +23,12 @@ class AssistancePlanAnalysisService(
                                                              month: Int,
                                                              institutionId: Long,
                                                              sponsorId: Long,
-                                                             hourTypeId: Long,
-                                                             token: String): AssistancePlanAnalysisMonthCollectionDto {
-        validateInstitutionAccess(institutionId, token)
+                                                             hourTypeId: Long): AssistancePlanAnalysisMonthCollectionDto {
+        validateInstitutionAccess(institutionId)
         validateTime(year, month)
 
         if (sponsorId <= 0) {
-            return getAnalysisByInstitutionAndHourTypeInMonth(year, month, institutionId, hourTypeId, token)
+            return getAnalysisByInstitutionAndHourTypeInMonth(year, month, institutionId, hourTypeId)
         }
 
         val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionId(year, month, institutionId)
@@ -41,19 +40,18 @@ class AssistancePlanAnalysisService(
     fun getAnalysisByInstitutionAndHourTypeInMonth(year: Int,
                                                    month: Int,
                                                    institutionId: Long,
-                                                   hourTypeId: Long,
-                                                   token: String): AssistancePlanAnalysisMonthCollectionDto {
-        validateInstitutionAccess(institutionId, token)
+                                                   hourTypeId: Long): AssistancePlanAnalysisMonthCollectionDto {
+        validateInstitutionAccess(institutionId)
         validateTime(year, month)
 
         if (hourTypeId <= 0 && institutionId <= 0) {
-            return getAnalysisInMonth(year, month, token)
+            return getAnalysisInMonth(year, month)
         }
         if (hourTypeId <= 0) {
-            return getAnalysisByInstitutionInMonth(year, month, institutionId, token)
+            return getAnalysisByInstitutionInMonth(year, month, institutionId)
         }
         if (institutionId <= 0) {
-            return getAnalysisByInstitutionInMonth(year, month, institutionId, token)
+            return getAnalysisByInstitutionInMonth(year, month, institutionId)
         }
 
         val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionId(year, month, institutionId)
@@ -64,13 +62,12 @@ class AssistancePlanAnalysisService(
 
     fun getAnalysisByHourTypeInMonth(year: Int,
                                      month: Int,
-                                     hourTypeId: Long,
-                                     token: String): AssistancePlanAnalysisMonthCollectionDto {
-        validateAdmin(token)
+                                     hourTypeId: Long): AssistancePlanAnalysisMonthCollectionDto {
+        validateAdmin()
         validateTime(year, month)
 
         if (hourTypeId <= 0) {
-            return getAnalysisInMonth(year, month, token)
+            return getAnalysisInMonth(year, month)
         }
 
         val assistancePlans = assistancePlanService.getProjectionByYearMonth(year, month)
@@ -81,10 +78,9 @@ class AssistancePlanAnalysisService(
 
     fun getAnalysisByInstitutionInMonth(year: Int,
                                         month: Int,
-                                        institutionId: Long,
-                                        token: String): AssistancePlanAnalysisMonthCollectionDto {
+                                        institutionId: Long): AssistancePlanAnalysisMonthCollectionDto {
         if (institutionId <= 0) {
-            return getAnalysisInMonth(year, month, token)
+            return getAnalysisInMonth(year, month)
         }
 
         val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionId(year, month, institutionId)
@@ -94,8 +90,7 @@ class AssistancePlanAnalysisService(
     }
 
     fun getAnalysisInMonth(year: Int,
-                           month: Int,
-                           token: String): AssistancePlanAnalysisMonthCollectionDto {
+                           month: Int): AssistancePlanAnalysisMonthCollectionDto {
         val assistancePlans = assistancePlanService.getProjectionByYearMonth(year, month)
         val analysis = getAnalysisInMonth(year, month, assistancePlans)
 
@@ -417,18 +412,18 @@ class AssistancePlanAnalysisService(
     }
 
     @Throws(UserNotAllowedException::class)
-    private fun validateInstitutionAccess(institutionId: Long?, token: String) {
-        if (institutionId == null && !accessService.isAdmin(token)) {
+    private fun validateInstitutionAccess(institutionId: Long?) {
+        if (institutionId == null && !accessService.isAdmin()) {
             throw UserNotAllowedException()
         }
-        if (institutionId != null && !accessService.canReadEntries(token, institutionId)) {
+        if (institutionId != null && !accessService.canReadEntries(institutionId)) {
             throw UserNotAllowedException()
         }
     }
 
     @Throws(UserNotAllowedException::class)
-    private fun validateAdmin(token: String) {
-        if (!accessService.isAdmin(token)) {
+    private fun validateAdmin() {
+        if (!accessService.isAdmin()) {
             throw UserNotAllowedException()
         }
     }

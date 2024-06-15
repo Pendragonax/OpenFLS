@@ -25,13 +25,12 @@ class AssistancePlanController(
     private val logPerformance: Boolean = false
 
     @PostMapping("")
-    fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @Valid @RequestBody valueDto: AssistancePlanDto): Any {
+    fun create(@Valid @RequestBody valueDto: AssistancePlanDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAffiliated(token, valueDto.institutionId))
+            if (!accessService.isAffiliated(valueDto.institutionId))
                 throw IllegalArgumentException("user is not allowed to create assistance plans for this client")
 
             val dto = assistancePlanService.create(valueDto)
@@ -54,14 +53,13 @@ class AssistancePlanController(
     }
 
     @PutMapping("{id}")
-    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long,
+    fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: AssistancePlanDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.canModifyAssistancePlan(token, id))
+            if (!accessService.canModifyAssistancePlan(id))
                 throw IllegalArgumentException("user is not allowed to update this assistance plan")
 
             val dto = assistancePlanService.update(id, valueDto)
@@ -84,13 +82,12 @@ class AssistancePlanController(
     }
 
     @DeleteMapping("{id}")
-    fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long): Any {
+    fun delete(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAdmin(token))
+            if (!accessService.isAdmin())
                 throw IllegalArgumentException("user is not allowed to delete assistance plans for this client")
             if (!assistancePlanService.existsById(id))
                 throw IllegalArgumentException("assistance plan not found")

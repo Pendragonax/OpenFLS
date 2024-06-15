@@ -24,8 +24,7 @@ class AssistancePlanAnalysisController(
     private val logPerformance: Boolean = false
 
     @GetMapping("/institution/sponsor/hour_type/{year}/{month}/{institutionId}/{sponsorId}/{hourTypeId}")
-    fun getByYearAndMonthAndInstitutionIdAndHourTypeId(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                                       @PathVariable year: Int,
+    fun getByYearAndMonthAndInstitutionIdAndHourTypeId(@PathVariable year: Int,
                                                        @PathVariable month: Int,
                                                        @PathVariable institutionId: Long,
                                                        @PathVariable sponsorId: Long,
@@ -35,7 +34,7 @@ class AssistancePlanAnalysisController(
         val startMs = System.currentTimeMillis()
 
         val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionAndSponsorAndHourTypeInMonth(
-                year, month, institutionId, sponsorId, hourTypeId, token)
+                year, month, institutionId, sponsorId, hourTypeId)
 
         if (logPerformance) {
             logger.info(String.format("%s getByYearAndMonthAndInstitutionIdAndHourTypeId took %s ms",
@@ -47,8 +46,7 @@ class AssistancePlanAnalysisController(
     }
 
     @GetMapping("/institution/hour_type/{year}/{month}/{institutionId}/{hourTypeId}")
-    fun getByYearAndMonthAndInstitutionIdAndHourTypeId(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                                       @PathVariable year: Int,
+    fun getByYearAndMonthAndInstitutionIdAndHourTypeId(@PathVariable year: Int,
                                                        @PathVariable month: Int,
                                                        @PathVariable institutionId: Long,
                                                        @PathVariable hourTypeId: Long): ResponseEntity<Any> {
@@ -56,7 +54,7 @@ class AssistancePlanAnalysisController(
         val startMs = System.currentTimeMillis()
 
         val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionAndHourTypeInMonth(
-                year, month, institutionId, hourTypeId, token)
+                year, month, institutionId, hourTypeId)
 
         if (logPerformance) {
             logger.info(String.format("%s getByYearAndMonthAndInstitutionIdAndHourTypeId took %s ms",
@@ -68,14 +66,13 @@ class AssistancePlanAnalysisController(
     }
 
     @GetMapping("/institution/{year}/{month}/{institutionId}")
-    fun getByYearAndMonthAndInstitutionId(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                          @PathVariable year: Int,
+    fun getByYearAndMonthAndInstitutionId(@PathVariable year: Int,
                                           @PathVariable month: Int,
                                           @PathVariable institutionId: Long): ResponseEntity<Any> {
         // performance
         val startMs = System.currentTimeMillis()
 
-        val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionInMonth(year, month, institutionId, token)
+        val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionInMonth(year, month, institutionId)
 
         if (logPerformance) {
             logger.info(String.format("%s getByYearAndMonthAndInstitutionId took %s ms",

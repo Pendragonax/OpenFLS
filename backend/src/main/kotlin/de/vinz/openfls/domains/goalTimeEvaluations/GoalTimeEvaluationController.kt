@@ -20,8 +20,7 @@ class GoalTimeEvaluationController(
     private val logPerformance: Boolean = false
 
     @GetMapping("{assistancePlanId}/{hourTypeId}/{year}")
-    fun getByAssistancePlanIdAndHourTypeIdAndYear(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                                  @PathVariable assistancePlanId: Long,
+    fun getByAssistancePlanIdAndHourTypeIdAndYear(@PathVariable assistancePlanId: Long,
                                                   @PathVariable hourTypeId: Long,
                                                   @PathVariable year: Int): Any {
         return try {

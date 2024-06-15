@@ -33,7 +33,7 @@ services:
     env_file: docker-compose.env
     volumes:
       - ./backend:/app
-      - ${LOG_PATH}:/logs/
+      - ${LOG_PATH}:/app/logs/
     depends_on:
       - db
     secrets:

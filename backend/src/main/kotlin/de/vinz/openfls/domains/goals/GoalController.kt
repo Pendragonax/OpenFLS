@@ -26,14 +26,13 @@ class GoalController(
     private val logPerformance: Boolean = false
 
     @PostMapping("")
-    fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @Valid @RequestBody valueDto: GoalDto
+    fun create(@Valid @RequestBody valueDto: GoalDto
     ): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.canModifyAssistancePlan(token, valueDto.assistancePlanId))
+            if (!accessService.canModifyAssistancePlan(valueDto.assistancePlanId))
                 throw IllegalArgumentException("no permission to create goals to this assistance plan")
 
             val dto = goalService.create(valueDto)
@@ -56,15 +55,14 @@ class GoalController(
     }
 
     @PutMapping("{id}")
-    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long,
+    fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: GoalDto
     ): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.canModifyAssistancePlan(token, valueDto.assistancePlanId))
+            if (!accessService.canModifyAssistancePlan(valueDto.assistancePlanId))
                 throw IllegalArgumentException("no permission to update this goal to this assistance plan")
             if (id != valueDto.id)
                 throw java.lang.IllegalArgumentException("path id and dto id are not the same")
@@ -91,13 +89,12 @@ class GoalController(
     }
 
     @DeleteMapping("{id}")
-    fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long): Any {
+    fun delete(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAdmin(token))
+            if (!accessService.isAdmin())
                 throw IllegalArgumentException("no permission to delete this goal to this assistance plan")
             if (!goalService.existsById(id))
                 throw IllegalArgumentException("goal not found")

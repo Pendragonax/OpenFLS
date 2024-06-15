@@ -4,179 +4,148 @@ import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.goals.services.GoalService
-import de.vinz.openfls.services.TokenService
+import de.vinz.openfls.services.UserService
 import org.springframework.stereotype.Service
 
 @Service
 class AccessService(
-        private val tokenService: TokenService,
+        private val userService: UserService,
         private val goalService: GoalService,
         private val contingentService: ContingentService,
         private val assistancePlanService: AssistancePlanService,
         private val permissionService: PermissionService,
         private val clientService: ClientService
 ) {
-    /**
-     * Checks if the user is an admin
-     * @return true = admin, false = no admin
-     */
-    fun isAdmin(userToken: String): Boolean {
-        return tokenService.getUserInfo(userToken).second
+
+    fun isAdmin(): Boolean {
+        return userService.isAdmin()
     }
 
-    fun getId(userToken: String): Long {
-        return tokenService.getUserInfo(userToken).first
+    fun getId(): Long {
+        return userService.getUserId()
     }
 
-    /**
-     * Checks if the user is affiliated to the institution.
-     * @return true = affiliated or admin, false = not affiliated or admin
-     */
-    fun isAffiliated(userToken: String, institutionId: Long): Boolean {
+    fun isAffiliated(institutionId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
-            isAffiliated(userInfo.first, institutionId)
+            isAffiliated(getId(), institutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    /**
-     * Checks if the user is the leader of the institution.
-     * @return true = leader or admin, false = no leader or admin
-     */
-    fun isLeader(userToken: String, institutionId: Long): Boolean {
+    fun isLeader(institutionId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
-            isLeader(userInfo.first, institutionId)
+            isLeader(getId(), institutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    fun canWriteEntries(userToken: String, institutionId: Long): Boolean {
+    fun canWriteEntries(institutionId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
-            canWriteEntries(userInfo.first, institutionId)
+            canWriteEntries(getId(), institutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    fun canReadEntries(userToken: String, institutionId: Long): Boolean {
+    fun canReadEntries(institutionId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
-            canReadEntries(userInfo.first, institutionId)
+            canReadEntries(getId(), institutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    fun canModifyClient(userToken: String, clientId: Long): Boolean {
+    fun canModifyClient(clientId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
             val clientInstitutionId = clientService.getById(clientId)?.institution?.id ?: 0
 
-            isAffiliated(userInfo.first, clientInstitutionId)
+            isAffiliated(getId(), clientInstitutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    fun canModifyGoal(userToken: String, goalId: Long): Boolean {
+    fun canModifyGoal(goalId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
             val institutionId = assistancePlanService
                 .getById(goalService.getById(goalId)?.institution?.id ?: 0)
                 ?.institution?.id ?: 0
 
-            isAffiliated(userInfo.first, institutionId)
+            isAffiliated(getId(), institutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    fun canModifyAssistancePlan(userToken: String, assistancePlanId: Long): Boolean {
+    fun canModifyAssistancePlan(assistancePlanId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
             val institutionId = assistancePlanService.getById(assistancePlanId)?.institution?.id ?: 0
 
-            isAffiliated(userInfo.first, institutionId)
+            isAffiliated(getId(), institutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    fun canModifyContingent(userToken: String, contingentId: Long): Boolean {
+    fun canModifyContingent(contingentId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
             val institutionId = contingentService.getById(contingentId)?.institution?.id ?: 0
 
-            isLeader(userInfo.first, institutionId)
+            isLeader(getId(), institutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    fun canModifyEmployee(userToken: String, employeeId: Long): Boolean {
+    fun canModifyEmployee(employeeId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
-            userInfo.second
+            isAdmin()
         } catch (ex: Exception) {
             false
         }
     }
 
-    fun canReadEmployeeStats(userToken: String, employeeId: Long): Boolean {
+    fun canReadEmployeeStats(employeeId: Long): Boolean {
         return try {
-            val userInfo = tokenService.getUserInfo(userToken)
-
             // ADMIN
-            if (userInfo.second)
+            if (isAdmin())
                 return true
 
-            val leadingInstitutions = this.getLeadingInstitutionIds(userInfo.first)
+            val leadingInstitutions = this.getLeadingInstitutionIds(getId())
             val affiliatedInstitutions = this.getAffiliatedInstitutionIds(employeeId)
 
             leadingInstitutions.any { affiliatedInstitutions.contains(it) }

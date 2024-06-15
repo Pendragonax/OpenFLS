@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.permissions
 
+import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service
 @Service
 class PermissionService(
         val employeeRepository: EmployeeRepository,
+        val employeeAccessRepository: EmployeeAccessRepository,
         val institutionRepository: InstitutionRepository,
         val permissionRepository: PermissionRepository,
         val modelMapper: ModelMapper
@@ -105,6 +107,16 @@ class PermissionService(
                             .map(it, Permission::class.java)
                             .apply { it.employeeId = employeeId } }
                 ?.toMutableSet() ?: mutableSetOf()
+    }
+
+    fun isAdminByUserId(userId: Long): Boolean {
+        val employeeAccess = employeeAccessRepository.findById(userId)
+
+        if (employeeAccess.isPresent) {
+            return employeeAccess.get().role == 1
+        }
+
+        return false
     }
 
     private fun convertToEntity(permissionDto: PermissionDto): Permission {

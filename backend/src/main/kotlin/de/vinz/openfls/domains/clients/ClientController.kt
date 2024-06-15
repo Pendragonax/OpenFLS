@@ -24,13 +24,12 @@ class ClientController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @Valid @RequestBody value: ClientDto): Any {
+    fun create(@Valid @RequestBody value: ClientDto): Any {
         return try {
             // performance
             var startMs = System.currentTimeMillis()
 
-            if (!accessService.isLeader(token, value.institution.id))
+            if (!accessService.isLeader(value.institution.id))
                 throw IllegalArgumentException("no permission to add clients")
 
             val dto = clientService.create(value)
@@ -53,8 +52,7 @@ class ClientController(
     }
 
     @PutMapping("{id}")
-    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long,
+    fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: ClientDto): Any {
         return try {
             // performance
@@ -62,7 +60,7 @@ class ClientController(
 
             if (id != valueDto.id)
                 throw java.lang.IllegalArgumentException("path id and dto id are not the same")
-            if (!accessService.canModifyClient(token, valueDto.id))
+            if (!accessService.canModifyClient(valueDto.id))
                 throw IllegalArgumentException("no permission to update this client")
 
             val dto = clientService.update(valueDto)
@@ -85,13 +83,12 @@ class ClientController(
     }
 
     @DeleteMapping("{id}")
-    fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long): Any {
+    fun delete(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAdmin(token))
+            if (!accessService.isAdmin())
                 throw IllegalArgumentException("no permission to delete this client")
             if (!clientService.existById(id))
                 throw IllegalArgumentException("client not found")

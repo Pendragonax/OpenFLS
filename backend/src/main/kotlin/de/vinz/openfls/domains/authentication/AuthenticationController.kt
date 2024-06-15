@@ -51,8 +51,7 @@ class AuthenticationController(
     }
 
     @PostMapping("/password")
-    fun changePassword(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                       @Valid @RequestBody passwordDto: PasswordDto): ResponseEntity<String> {
+    fun changePassword(@Valid @RequestBody passwordDto: PasswordDto): ResponseEntity<String> {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -101,12 +100,12 @@ class AuthenticationController(
     }
 
     @GetMapping("/")
-    fun authCheck(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): Any {
+    fun authCheck(): Any {
         return ResponseEntity.ok()
     }
 
     @GetMapping("/user")
-    fun getUser(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): Any {
+    fun getUser(): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()

@@ -97,11 +97,11 @@ class EmployeeService(
     }
 
     @Transactional
-    fun update(id: Long, valueDto: EmployeeDto, token: String): EmployeeDto {
+    fun update(id: Long, valueDto: EmployeeDto): EmployeeDto {
         // convert employee
         val entity = modelMapper.map(valueDto, Employee::class.java)
 
-        if (accessService.isAdmin(token)) {
+        if (accessService.isAdmin()) {
             entity.permissions = permissionService.convertToPermissions(valueDto.permissions, id)
             entity.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, id)
         } else {

@@ -29,14 +29,13 @@ class EvaluationController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @Valid @RequestBody valueDto: EvaluationRequestDto): Any {
+    fun create(@Valid @RequestBody valueDto: EvaluationRequestDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
             // find user
-            val user = employeeService.getById(accessService.getId(token), true)
+            val user = employeeService.getById(accessService.getId(), true)
                     ?: throw IllegalArgumentException("User not found")
             val dto = evaluationService.create(valueDto, user)
 
@@ -57,14 +56,13 @@ class EvaluationController(
     }
 
     @PutMapping
-    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @Valid @RequestBody valueDto: EvaluationRequestDto): Any {
+    fun update(@Valid @RequestBody valueDto: EvaluationRequestDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
             // find user
-            val user = employeeService.getById(accessService.getId(token), true)
+            val user = employeeService.getById(accessService.getId(), true)
                     ?: throw IllegalArgumentException("User not found")
             val dto = evaluationService.update(valueDto, user)
 
@@ -85,8 +83,7 @@ class EvaluationController(
     }
 
     @DeleteMapping("{id}")
-    fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long): Any {
+    fun delete(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -134,8 +131,7 @@ class EvaluationController(
     }
 
     @GetMapping("{id}")
-    fun getById(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                              @PathVariable id: Long): Any {
+    fun getById(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -160,8 +156,7 @@ class EvaluationController(
     }
 
     @GetMapping("assistance_plan/{assistancePlanId}")
-    fun getByAssistancePlanId(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                              @PathVariable assistancePlanId: Long): Any {
+    fun getByAssistancePlanId(@PathVariable assistancePlanId: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -186,8 +181,7 @@ class EvaluationController(
     }
 
     @GetMapping("assistance_plan/{assistancePlanId}/{year}")
-    fun getByAssistancePlanIdAndYear(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                     @PathVariable assistancePlanId: Long,
+    fun getByAssistancePlanIdAndYear(@PathVariable assistancePlanId: Long,
                                      @PathVariable year: Int): Any {
         return try {
             // performance

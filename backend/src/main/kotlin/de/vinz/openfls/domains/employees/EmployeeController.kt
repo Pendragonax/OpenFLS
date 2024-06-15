@@ -1,10 +1,10 @@
 package de.vinz.openfls.domains.employees
 
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
-import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.services.TokenService
+import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.services.UserService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*
 class EmployeeController(
         private val employeeService: EmployeeService,
         private val accessService: AccessService,
-        private val tokenService: TokenService
+        private val userService: UserService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(EmployeeController::class.java)
@@ -52,14 +52,13 @@ class EmployeeController(
     }
 
     @PutMapping("{id}/{role}")
-    fun updateRole(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                   @PathVariable id: Long,
+    fun updateRole(@PathVariable id: Long,
                    @PathVariable role: Int): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAdmin(token))
+            if (!accessService.isAdmin())
                 throw IllegalArgumentException("no permission to change the role")
 
             // update role
@@ -82,13 +81,12 @@ class EmployeeController(
     }
 
     @PutMapping("reset_password/{id}")
-    fun resetPassword(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                      @PathVariable id: Long): Any {
+    fun resetPassword(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAdmin(token))
+            if (!accessService.isAdmin())
                 throw IllegalArgumentException("no permission to reset passwords")
             if (!employeeService.existsById(id))
                 throw IllegalArgumentException("employee not found")
@@ -112,21 +110,20 @@ class EmployeeController(
     }
 
     @PutMapping("{id}")
-    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long,
+    fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: EmployeeDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.canModifyEmployee(token, valueDto.id))
+            if (!accessService.canModifyEmployee(valueDto.id))
                 throw IllegalArgumentException("no permission to update this employee")
             if (id != valueDto.id)
                 throw IllegalArgumentException("path id and dto id are not the same")
             if (!employeeService.existsById(id))
                 throw IllegalArgumentException("employee not found")
 
-            val dto = employeeService.update(id, valueDto, token)
+            val dto = employeeService.update(id, valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s update took %s ms",
@@ -145,13 +142,13 @@ class EmployeeController(
     }
 
     @GetMapping("assistance_plan/favorite")
-    fun getAssistancePlanFavorites(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): Any {
+    fun getAssistancePlanFavorites(): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            val userId = tokenService.getUserInfo(token)
-            val dto = employeeService.getAssistancePlanAsFavorites(userId.first)
+            val userId = userService.getUserId()
+            val dto = employeeService.getAssistancePlanAsFavorites(userId)
 
             if (logPerformance) {
                 logger.info(String.format("%s getAssistancePlanFavorites took %s ms",
@@ -170,14 +167,13 @@ class EmployeeController(
     }
 
     @PostMapping("assistance_plan/favorite/{id}")
-    fun addAssistancePlanFavorite(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                  @PathVariable id: Long): Any {
+    fun addAssistancePlanFavorite(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            val userId = tokenService.getUserInfo(token)
-            employeeService.addAssistancePlanAsFavorite(id, userId.first)
+            val userId = userService.getUserId()
+            employeeService.addAssistancePlanAsFavorite(id, userId)
 
             if (logPerformance) {
                 logger.info(String.format("%s addAssistancePlanFavorite took %s ms",
@@ -196,14 +192,13 @@ class EmployeeController(
     }
 
     @DeleteMapping("assistance_plan/favorite/{id}")
-    fun deleteAssistancePlanFavorite(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                     @PathVariable id: Long): Any {
+    fun deleteAssistancePlanFavorite(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            val userId = tokenService.getUserInfo(token)
-            employeeService.deleteAssistancePlanAsFavorite(id, userId.first)
+            val userId = userService.getUserId()
+            employeeService.deleteAssistancePlanAsFavorite(id, userId)
 
             if (logPerformance) {
                 logger.info(String.format("%s deleteAssistancePlanFavorite took %s ms",
@@ -222,13 +217,12 @@ class EmployeeController(
     }
 
     @DeleteMapping("{id}")
-    fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long): Any {
+    fun delete(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAdmin(token))
+            if (!accessService.isAdmin())
                 throw IllegalArgumentException("no permission to delete this employee")
             if (!employeeService.existsById(id))
                 throw IllegalArgumentException("employee not found")
@@ -277,12 +271,12 @@ class EmployeeController(
     }
 
     @GetMapping("{id}")
-    fun getById(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String, @PathVariable id: Long): Any  {
+    fun getById(@PathVariable id: Long): Any  {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dto = employeeService.getEmployeeDtoById(id, accessService.isAdmin(token))
+            val dto = employeeService.getEmployeeDtoById(id, accessService.isAdmin())
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",

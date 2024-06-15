@@ -31,13 +31,12 @@ class OverviewService(
     private val logger: Logger = LoggerFactory.getLogger(OverviewService::class.java)
 
     @Throws(UserNotAllowedException::class, IllegalTimeException::class)
-    fun getExecutedHoursOverview(token: String,
-                                 year: Int,
+    fun getExecutedHoursOverview(year: Int,
                                  month: Int?,
                                  hourTypeId: Long,
                                  areaId: Long?,
                                  sponsorId: Long?): List<AssistancePlanOverviewDTO> {
-        checkAccess(areaId, token)
+        checkAccess(areaId)
         checkTime(year, month)
 
         val services = getServices(
@@ -62,13 +61,12 @@ class OverviewService(
     }
 
     @Throws(UserNotAllowedException::class, IllegalTimeException::class)
-    fun getApprovedHoursOverview(token: String,
-                                 year: Int,
+    fun getApprovedHoursOverview(year: Int,
                                  month: Int?,
                                  hourTypeId: Long,
                                  areaId: Long?,
                                  sponsorId: Long?): List<AssistancePlanOverviewDTO> {
-        checkAccess(areaId, token)
+        checkAccess(areaId)
         checkTime(year, month)
 
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) }
@@ -87,13 +85,12 @@ class OverviewService(
     }
 
     @Throws(UserNotAllowedException::class, IllegalTimeException::class)
-    fun getDifferenceHoursOverview(token: String,
-                                   year: Int,
+    fun getDifferenceHoursOverview(year: Int,
                                    month: Int?,
                                    hourTypeId: Long,
                                    areaId: Long?,
                                    sponsorId: Long?): List<AssistancePlanOverviewDTO> {
-        checkAccess(areaId, token)
+        checkAccess(areaId)
         checkTime(year, month)
 
         val services = getServices(
@@ -484,11 +481,11 @@ class OverviewService(
     }
 
     @Throws(UserNotAllowedException::class)
-    private fun checkAccess(areaId: Long?, token: String) {
-        if (areaId == null && !accessService.isAdmin(token)) {
+    private fun checkAccess(areaId: Long?) {
+        if (areaId == null && !accessService.isAdmin()) {
             throw UserNotAllowedException()
         }
-        if (areaId != null && !accessService.canReadEntries(token, areaId)) {
+        if (areaId != null && !accessService.canReadEntries(areaId)) {
             throw UserNotAllowedException()
         }
     }

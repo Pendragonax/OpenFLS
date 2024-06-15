@@ -34,12 +34,11 @@ class ServiceController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @Valid @RequestBody valueDto: ServiceDto): Any {
+    fun create(@Valid @RequestBody valueDto: ServiceDto): Any {
         return try {
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.canWriteEntries(token, valueDto.institutionId))
+            if (!accessService.canWriteEntries(valueDto.institutionId))
                 throw IllegalArgumentException("No permission to write entries to this institution")
 
             val dto = serviceService.create(valueDto)
@@ -62,18 +61,17 @@ class ServiceController(
     }
 
     @PutMapping("{id}")
-    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long,
+    fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: ServiceDto): Any {
         return try {
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.canWriteEntries(token, valueDto.institutionId))
+            if (!accessService.canWriteEntries(valueDto.institutionId))
                 throw IllegalArgumentException("No permission to update this service")
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
-            if (!accessService.isAdmin(token) &&
-                    serviceService.getById(id)?.employee?.id != accessService.getId(token))
+            if (!accessService.isAdmin() &&
+                    serviceService.getById(id)?.employee?.id != accessService.getId())
                 throw IllegalArgumentException("Your not the owner of this service or the admin")
             if (serviceService.getById(id)
                             ?.start
@@ -102,14 +100,13 @@ class ServiceController(
     }
 
     @DeleteMapping("{id}")
-    fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long): Any {
+    fun delete(@PathVariable id: Long): Any {
         return try {
             val startMs = System.currentTimeMillis()
             val service = serviceService.getById(id)
 
-            if (!accessService.isAdmin(token) &&
-                    (service?.employee?.id != accessService.getId(token) ||
+            if (!accessService.isAdmin() &&
+                    (service?.employee?.id != accessService.getId() ||
                             service.start.toLocalDate().isBefore(LocalDate.now().minusDays(14))))
                 throw IllegalArgumentException("No permission to delete this service")
             if (!serviceService.existsById(id))
@@ -136,10 +133,10 @@ class ServiceController(
     }
 
     @GetMapping
-    fun getAll(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String): Any {
+    fun getAll(): Any {
         return try {
             val startMs = System.currentTimeMillis()
-            if (!accessService.isAdmin(token))
+            if (!accessService.isAdmin())
                 throw IllegalArgumentException("No permission to get all services")
 
             val dtos = serviceService.getAllDtos()
@@ -163,8 +160,7 @@ class ServiceController(
     }
 
     @GetMapping("{id}")
-    fun getById(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                @PathVariable id: Long): Any {
+    fun getById(@PathVariable id: Long): Any {
         return try {
             val startMs = System.currentTimeMillis()
             if (id <= 0)
@@ -174,8 +170,8 @@ class ServiceController(
 
             val dto = serviceService.getDtoById(id)
 
-            if (dto != null && !accessService.isAdmin(token) &&
-                    !accessService.canReadEntries(token, dto.institutionId))
+            if (dto != null && !accessService.isAdmin() &&
+                    !accessService.canReadEntries(dto.institutionId))
                 throw IllegalArgumentException("Your not the allowed to read this entry")
 
 
@@ -197,15 +193,14 @@ class ServiceController(
     }
 
     @GetMapping("assistance_plan/{id}")
-    fun getByAssistancePlan(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                            @PathVariable id: Long): Any {
+    fun getByAssistancePlan(@PathVariable id: Long): Any {
         return try {
             val startMs = System.currentTimeMillis()
             if (id <= 0)
                 throw IllegalArgumentException("id is <= 0")
             if (!assistancePlanService.existsById(id))
                 throw IllegalArgumentException("assistance plan not found")
-            if (!accessService.canModifyAssistancePlan(token, id))
+            if (!accessService.canModifyAssistancePlan(id))
                 throw IllegalArgumentException("no permission to load the services of this assistance plan")
 
             val dtos = serviceService.getXLDtosByAssistancePlan(id)
@@ -229,15 +224,14 @@ class ServiceController(
     }
 
     @GetMapping("employee/{id}/{date}")
-    fun getByEmployeeAndDate(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                             @PathVariable id: Long,
+    fun getByEmployeeAndDate(@PathVariable id: Long,
                              @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") date: LocalDate): Any {
         return try {
             val startMs = System.currentTimeMillis()
             val leadingInstitutionIds = permissionService
-                    .getLeadingInstitutionIdsByEmployee(accessService.getId(token))
-            val userId = accessService.getId(token)
-            val isAdmin = accessService.isAdmin(token)
+                    .getLeadingInstitutionIdsByEmployee(accessService.getId())
+            val userId = accessService.getId()
+            val isAdmin = accessService.isAdmin()
 
             val dtos = serviceService.getDtosByEmployeeAndDate(id, date)
                     .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
@@ -262,16 +256,15 @@ class ServiceController(
     }
 
     @GetMapping("employee/{id}/{start}/{end}")
-    fun getByEmployeeAndStartAndEnd(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                    @PathVariable id: Long,
+    fun getByEmployeeAndStartAndEnd(@PathVariable id: Long,
                                     @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
                                     @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
         return try {
             val startMs = System.currentTimeMillis()
             val leadingInstitutionIds = permissionService
-                    .getLeadingInstitutionIdsByEmployee(accessService.getId(token))
-            val userId = accessService.getId(token)
-            val isAdmin = accessService.isAdmin(token)
+                    .getLeadingInstitutionIdsByEmployee(accessService.getId())
+            val userId = accessService.getId()
+            val isAdmin = accessService.isAdmin()
 
             val dtos = serviceService.getDtosByEmployeeAndStartAndEnd(id, start, end)
                     .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
@@ -296,15 +289,14 @@ class ServiceController(
     }
 
     @GetMapping("client/{id}/{date}")
-    fun getByClientAndDate(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                           @PathVariable id: Long,
+    fun getByClientAndDate(@PathVariable id: Long,
                            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") date: LocalDate): Any {
         return try {
             val startMs = System.currentTimeMillis()
             val affiliatedInstitutionIds = permissionService
-                    .getReadableInstitutionIdsByEmployee(accessService.getId(token))
-            val userId = accessService.getId(token)
-            val isAdmin = accessService.isAdmin(token)
+                    .getReadableInstitutionIdsByEmployee(accessService.getId())
+            val userId = accessService.getId()
+            val isAdmin = accessService.isAdmin()
 
             val dtos = serviceService.getDtosByClientAndDate(id, date)
                     .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
@@ -328,16 +320,15 @@ class ServiceController(
     }
 
     @GetMapping("client/{id}/{start}/{end}")
-    fun getByClientAndStartAndEnd(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                                  @PathVariable id: Long,
+    fun getByClientAndStartAndEnd(@PathVariable id: Long,
                                   @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
                                   @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
         return try {
             val startMs = System.currentTimeMillis()
             val affiliatedInstitutionIds = permissionService
-                    .getReadableInstitutionIdsByEmployee(accessService.getId(token))
-            val userId = accessService.getId(token)
-            val isAdmin = accessService.isAdmin(token)
+                    .getReadableInstitutionIdsByEmployee(accessService.getId())
+            val userId = accessService.getId()
+            val isAdmin = accessService.isAdmin()
 
             val dtos = serviceService.getDtosByClientAndStartAndEnd(id, start, end)
                     .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
@@ -361,8 +352,7 @@ class ServiceController(
     }
 
     @GetMapping("employee/{id}")
-    fun getByEmployeeAndFilter(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                               @PathVariable id: Long,
+    fun getByEmployeeAndFilter(@PathVariable id: Long,
                                @Valid @RequestBody valueDto: ServiceFilterDto): Any {
         return try {
             val startMs = System.currentTimeMillis()
@@ -390,15 +380,14 @@ class ServiceController(
     }
 
     @GetMapping("times/{id}/{start}/{end}")
-    fun getTimesByEmployee(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                           @PathVariable id: Long,
+    fun getTimesByEmployee(@PathVariable id: Long,
                            @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
                            @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
         return try {
             val startMs = System.currentTimeMillis()
-            if (accessService.getId(token) != id &&
-                    !accessService.isAdmin(token) &&
-                    !accessService.canReadEmployeeStats(token, id))
+            if (accessService.getId() != id &&
+                    !accessService.isAdmin() &&
+                    !accessService.canReadEmployeeStats(id))
                 throw IllegalArgumentException("No permission to get the times of this employee")
 
             val serviceDtos = serviceService.getDtosByEmployeeAndStartEndDate(id, start, end)
@@ -424,8 +413,7 @@ class ServiceController(
     }
 
     @GetMapping("count/employee/{id}")
-    fun countByEmployee(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                        @PathVariable id: Long): Any {
+    fun countByEmployee(@PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByEmployee(id))
         } catch (ex: Exception) {
@@ -439,8 +427,7 @@ class ServiceController(
     }
 
     @GetMapping("count/client/{id}")
-    fun countByClient(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                      @PathVariable id: Long): Any {
+    fun countByClient(@PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByClient(id))
         } catch (ex: Exception) {
@@ -454,8 +441,7 @@ class ServiceController(
     }
 
     @GetMapping("count/assistance_plan/{id}")
-    fun countByAssistancePlan(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                              @PathVariable id: Long): Any {
+    fun countByAssistancePlan(@PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByAssistancePlan(id))
         } catch (ex: Exception) {
@@ -469,8 +455,7 @@ class ServiceController(
     }
 
     @GetMapping("count/goal/{id}")
-    fun countByGoal(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                    @PathVariable id: Long): Any {
+    fun countByGoal(@PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByGoal(id))
         } catch (ex: Exception) {
