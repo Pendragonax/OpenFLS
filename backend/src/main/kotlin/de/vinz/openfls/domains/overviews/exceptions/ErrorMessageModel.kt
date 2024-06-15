@@ -1,4 +1,4 @@
-package de.vinz.openfls.exceptionResolver
+package de.vinz.openfls.domains.overviews.exceptions
 
 import java.util.*
 

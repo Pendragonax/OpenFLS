@@ -7,7 +7,6 @@ import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.evaluations.Evaluation
 import de.vinz.openfls.entities.Permission
 import de.vinz.openfls.entities.Service
-import de.vinz.openfls.entities.Unprofessional
 import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email

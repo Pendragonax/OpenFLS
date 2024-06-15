@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.evaluations.dtos.EvaluationMonthResponseDto
 import de.vinz.openfls.domains.evaluations.dtos.EvaluationRequestDto
 import de.vinz.openfls.domains.evaluations.dtos.EvaluationResponseDto
 import de.vinz.openfls.domains.evaluations.dtos.GoalEvaluationsYearDto
-import de.vinz.openfls.dtos.GenericYearlyResponseDto
+import de.vinz.openfls.domains.evaluations.dtos.GenericYearlyResponseDto
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository

@@ -1,9 +1,9 @@
 package de.vinz.openfls.domains.employees
 
-import de.vinz.openfls.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.AccessService
-import de.vinz.openfls.services.EmployeeService
+import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.services.TokenService
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/employees")
 class EmployeeController(
-    private val employeeService: EmployeeService,
-    private val accessService: AccessService,
-    private val tokenService: TokenService
+        private val employeeService: EmployeeService,
+        private val accessService: AccessService,
+        private val tokenService: TokenService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(EmployeeController::class.java)

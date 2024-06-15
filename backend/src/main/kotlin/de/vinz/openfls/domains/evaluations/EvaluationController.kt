@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.evaluations
 
 import de.vinz.openfls.domains.evaluations.dtos.EvaluationRequestDto
 import de.vinz.openfls.services.AccessService
-import de.vinz.openfls.services.EmployeeService
+import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

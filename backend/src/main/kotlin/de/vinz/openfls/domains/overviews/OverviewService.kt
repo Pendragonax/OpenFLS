@@ -1,21 +1,22 @@
-package de.vinz.openfls.services
+package de.vinz.openfls.domains.overviews
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.dtos.AssistancePlanOverviewDTO
+import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDTO
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.repositories.ServiceRepository
+import de.vinz.openfls.services.AccessService
+import de.vinz.openfls.services.DateService
+import de.vinz.openfls.services.NumberService
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
-
-private const val MONTH_COUNT = 12
 
 @Service
 class OverviewService(
@@ -25,6 +26,8 @@ class OverviewService(
         private val clientRepository: ClientRepository,
         private val modelMapper: ModelMapper) {
 
+
+    private val monthCount = 12
     private val logger: Logger = LoggerFactory.getLogger(OverviewService::class.java)
 
     @Throws(UserNotAllowedException::class, IllegalTimeException::class)
@@ -162,7 +165,7 @@ class OverviewService(
                                        year: Int,
                                        toTimeDouble: Boolean = true): List<AssistancePlanOverviewDTO> {
         val assistancePlanOverviewDTOs =
-                getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientSimpleDTOs, MONTH_COUNT)
+                getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientSimpleDTOs, monthCount)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
         assistancePlanDTOs.forEach { assistancePlanDto ->
@@ -171,7 +174,7 @@ class OverviewService(
             val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId)
 
             if (assistancePlanOverviewDTO != null) {
-                for (i in 1..MONTH_COUNT) {
+                for (i in 1..monthCount) {
                     val daysInMonth = DateService.countDaysOfAssistancePlan(year, i, assistancePlanDto)
                     val hoursPerMonth = hoursPerDay * daysInMonth
                     assistancePlanOverviewDTO.values[0] += hoursPerMonth
@@ -194,7 +197,7 @@ class OverviewService(
                                        clientDTOs: List<ClientSimpleDto>,
                                        year: Int,
                                        toTimeDouble: Boolean = true): List<AssistancePlanOverviewDTO> {
-        val assistancePlanOverviewDTOs = getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientDTOs, MONTH_COUNT)
+        val assistancePlanOverviewDTOs = getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientDTOs, monthCount)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
         allAssistancePlanOverviewDTO.assistancePlanDto.start = LocalDate.of(year, 1, 1)
         allAssistancePlanOverviewDTO.assistancePlanDto.end = LocalDate.of(year, 12, 31)
@@ -331,7 +334,7 @@ class OverviewService(
                 assistancePlanRepository
                         .findByInstitutionIdAndSponsorIdAndYear(institutionId, sponsorId, year)
                         .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month))}
+                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month)) }
             }
         } else if (institutionId != null) {
             return if (month == null) {
@@ -342,7 +345,7 @@ class OverviewService(
                 assistancePlanRepository
                         .findByInstitutionIdAndYear(institutionId, year)
                         .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month))}
+                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month)) }
             }
         } else if (sponsorId != null) {
             return if (month == null) {
@@ -353,7 +356,7 @@ class OverviewService(
                 assistancePlanRepository
                         .findBySponsorIdAndYear(sponsorId, year)
                         .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month))}
+                        .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month)) }
             }
         }
 
@@ -365,7 +368,7 @@ class OverviewService(
             assistancePlanRepository
                     .findAllByYear(year).toList()
                     .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-                    .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month))}
+                    .filter { DateService.containsStartAndEndASpecificYearMonth(it.start, it.end, YearMonth.of(year, month)) }
         }
     }
 
@@ -443,7 +446,8 @@ class OverviewService(
         val result = assistancePlanDTOs
                 .map { AssistancePlanOverviewDTO(it,
                         clientDTOs.find { client -> client.id == it.clientId } ?: throw IllegalArgumentException(),
-                        DoubleArray(valuesCount + 1) { 0.0 })}
+                        DoubleArray(valuesCount + 1) { 0.0 })
+                }
                 .sortedBy { it.clientDto.lastName }
                 .toMutableList()
 

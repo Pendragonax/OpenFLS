@@ -1,4 +1,4 @@
-package de.vinz.openfls.projections
+package de.vinz.openfls.domains.clients.projections
 
 interface ClientSoloProjection {
         val id: Long

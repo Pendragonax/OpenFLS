@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.dtos.AssistancePlanOverviewDTO
+import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDTO
 import de.vinz.openfls.exceptions.CsvCreationFailedException
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter

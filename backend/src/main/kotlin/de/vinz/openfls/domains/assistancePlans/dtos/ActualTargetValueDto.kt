@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.assistancePlans.dtos
 
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
 

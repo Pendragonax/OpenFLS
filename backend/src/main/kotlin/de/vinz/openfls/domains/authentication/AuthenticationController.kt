@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.authentication
 
 import de.vinz.openfls.domains.authentication.models.EUserRoles
-import de.vinz.openfls.dtos.PasswordDto
+import de.vinz.openfls.domains.authentication.dtos.PasswordDto
 import de.vinz.openfls.domains.authentication.dtos.AuthenticationRequestDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid

@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.employees.dtos
 
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size

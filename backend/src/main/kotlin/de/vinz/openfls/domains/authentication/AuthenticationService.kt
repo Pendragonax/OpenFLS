@@ -2,9 +2,9 @@ package de.vinz.openfls.domains.authentication
 
 import de.vinz.openfls.domains.authentication.dtos.AuthenticationResponseDto
 import de.vinz.openfls.domains.authentication.models.EUserRoles
-import de.vinz.openfls.dtos.EmployeeAccessDto
-import de.vinz.openfls.dtos.EmployeeDto
-import de.vinz.openfls.dtos.PasswordDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeAccessDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeDto
+import de.vinz.openfls.domains.authentication.dtos.PasswordDto
 import de.vinz.openfls.dtos.PermissionDto
 import de.vinz.openfls.security.CustomUserDetails
 import de.vinz.openfls.domains.employees.entities.Employee

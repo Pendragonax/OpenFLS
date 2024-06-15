@@ -6,7 +6,6 @@ import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.repositories.PermissionRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.institutions.InstitutionRepository
-import de.vinz.openfls.services.HelperService
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,7 +22,6 @@ class PermissionController(
         private val repository: PermissionRepository,
         private val employeeRepository: EmployeeRepository,
         private val institutionRepository: InstitutionRepository,
-        private val helperService: HelperService,
         private val modelMapper: ModelMapper)
 {
 

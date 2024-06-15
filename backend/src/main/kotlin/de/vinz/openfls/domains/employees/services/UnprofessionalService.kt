@@ -1,8 +1,9 @@
-package de.vinz.openfls.services
+package de.vinz.openfls.domains.employees.services
 
-import de.vinz.openfls.dtos.UnprofessionalDto
-import de.vinz.openfls.entities.Unprofessional
-import de.vinz.openfls.repositories.UnprofessionalRepository
+import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
+import de.vinz.openfls.domains.employees.entities.Unprofessional
+import de.vinz.openfls.domains.employees.UnprofessionalRepository
+import de.vinz.openfls.services.GenericService
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 

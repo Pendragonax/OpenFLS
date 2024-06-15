@@ -1,16 +1,19 @@
-package de.vinz.openfls.services
+package de.vinz.openfls.domains.employees.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import de.vinz.openfls.entities.Permission
-import de.vinz.openfls.entities.Unprofessional
+import de.vinz.openfls.domains.employees.entities.Unprofessional
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeDto
 import de.vinz.openfls.dtos.PermissionDto
-import de.vinz.openfls.dtos.UnprofessionalDto
+import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
+import de.vinz.openfls.services.AccessService
+import de.vinz.openfls.services.GenericService
+import de.vinz.openfls.services.PermissionService
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper

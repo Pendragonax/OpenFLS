@@ -1,6 +1,7 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.employees.dtos
 
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
+import de.vinz.openfls.dtos.PermissionDto
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotEmpty
 

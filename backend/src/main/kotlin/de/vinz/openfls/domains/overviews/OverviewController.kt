@@ -1,8 +1,7 @@
-package de.vinz.openfls.controller
+package de.vinz.openfls.domains.overviews
 
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.CsvService
-import de.vinz.openfls.services.OverviewService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

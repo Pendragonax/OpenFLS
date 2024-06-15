@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.assistancePlans.dtos
 
 class AssistancePlanEvalDto {
     var total: List<ActualTargetValueDto> = listOf()

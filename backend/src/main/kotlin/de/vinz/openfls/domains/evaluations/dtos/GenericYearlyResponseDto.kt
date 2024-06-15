@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.evaluations.dtos
 
 import java.time.LocalDate
 

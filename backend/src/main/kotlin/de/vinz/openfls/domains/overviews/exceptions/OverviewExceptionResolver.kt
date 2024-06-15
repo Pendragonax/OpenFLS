@@ -1,4 +1,4 @@
-package de.vinz.openfls.exceptionResolver
+package de.vinz.openfls.domains.overviews.exceptions
 
 import de.vinz.openfls.exceptions.CsvCreationFailedException
 import de.vinz.openfls.exceptions.IllegalTimeException
