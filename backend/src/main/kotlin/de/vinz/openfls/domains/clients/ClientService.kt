@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
-import de.vinz.openfls.services.CategoryTemplateService
+import de.vinz.openfls.domains.categories.services.CategoryTemplateService
 import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.services.InstitutionService
 import jakarta.transaction.Transactional

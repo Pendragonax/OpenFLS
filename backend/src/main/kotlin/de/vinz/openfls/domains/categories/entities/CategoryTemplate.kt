@@ -1,4 +1,4 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.categories.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*

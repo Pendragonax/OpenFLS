@@ -2,6 +2,8 @@ package de.vinz.openfls
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.categories.entities.Category
+import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.employees.entities.Employee

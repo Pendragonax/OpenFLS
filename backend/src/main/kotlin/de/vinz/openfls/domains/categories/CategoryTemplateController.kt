@@ -1,26 +1,20 @@
-package de.vinz.openfls.controller
+package de.vinz.openfls.domains.categories
 
-import de.vinz.openfls.dtos.CategoryDto
-import de.vinz.openfls.dtos.CategoryTemplateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDto
+import de.vinz.openfls.domains.categories.services.CategoryTemplateService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.entities.CategoryTemplate
-import de.vinz.openfls.services.CategoryTemplateService
-import org.modelmapper.ModelMapper
+import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.lang.Exception
-import java.lang.IllegalArgumentException
-import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/categories")
 class CategoryTemplateController(
-    private val categoryTemplateService: CategoryTemplateService,
-    private val modelMapper: ModelMapper
+        private val categoryTemplateService: CategoryTemplateService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(CategoryTemplateController::class.java)
@@ -34,16 +28,7 @@ class CategoryTemplateController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = categoryTemplateService.create(modelMapper.map(valueDto, CategoryTemplate::class.java))
-
-            // generate return DTO
-            valueDto.apply {
-                id = entity.id ?: throw IllegalArgumentException("id not found after saving")
-                categories = entity.categories
-                    .map { modelMapper.map(it, CategoryDto::class.java) }
-                    .sortedBy { id }
-                    .toTypedArray()
-            }
+            val dto = categoryTemplateService.create(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s create took %s ms",
@@ -51,7 +36,7 @@ class CategoryTemplateController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(valueDto)
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
@@ -73,12 +58,7 @@ class CategoryTemplateController(
             if (!categoryTemplateService.existsById(id))
                 throw IllegalArgumentException("category template not found")
 
-            val entity = categoryTemplateService.update(modelMapper.map(valueDto, CategoryTemplate::class.java))
-
-            valueDto.categories = entity.categories
-                .map { modelMapper.map(it, CategoryDto::class.java) }
-                .sortedBy { it.id }
-                .toTypedArray()
+            val dto = categoryTemplateService.update(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s update took %s ms",
@@ -86,7 +66,7 @@ class CategoryTemplateController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(valueDto)
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
@@ -105,7 +85,7 @@ class CategoryTemplateController(
             if (!categoryTemplateService.existsById(id))
                 throw IllegalArgumentException("category template not found")
 
-            val dto = modelMapper.map(categoryTemplateService.getById(id), CategoryTemplateDto::class.java)
+            val dto = categoryTemplateService.getDtoById(id)
             categoryTemplateService.delete(id)
 
             if (logPerformance) {
@@ -130,13 +110,7 @@ class CategoryTemplateController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entities = categoryTemplateService
-                .getAll()
-                .sortedByDescending { it.title.lowercase() }
-                .map { value ->
-                    modelMapper.map(value, CategoryTemplateDto::class.java).apply {
-                        categories = categories.sortedBy { it.id }.toTypedArray() }
-                }
+            val dtos = categoryTemplateService.getAllDtos()
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms",
@@ -144,7 +118,7 @@ class CategoryTemplateController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entities)
+            ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
@@ -158,8 +132,7 @@ class CategoryTemplateController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dto = modelMapper.map(categoryTemplateService.getById(id), CategoryTemplateDto::class.java)
-                .apply { categories = categories.sortedBy { it.id }.toTypedArray() }
+            val dto = categoryTemplateService.getDtoById(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",

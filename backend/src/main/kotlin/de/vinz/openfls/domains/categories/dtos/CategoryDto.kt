@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.categories.dtos
 
 import jakarta.validation.constraints.NotEmpty
 

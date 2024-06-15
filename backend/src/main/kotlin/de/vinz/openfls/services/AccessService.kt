@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 @Service
 class AccessService(
         private val tokenService: TokenService,
-        private val employeeService: EmployeeService,
         private val goalService: GoalService,
         private val contingentService: ContingentService,
         private val assistancePlanService: AssistancePlanService,

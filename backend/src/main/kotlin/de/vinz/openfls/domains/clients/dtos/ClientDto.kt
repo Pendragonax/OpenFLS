@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.clients.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.dtos.CategoryTemplateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDto
 import de.vinz.openfls.dtos.InstitutionDto
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull

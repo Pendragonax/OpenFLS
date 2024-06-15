@@ -1,7 +1,8 @@
-package de.vinz.openfls.services
+package de.vinz.openfls.domains.categories.services
 
-import de.vinz.openfls.entities.Category
-import de.vinz.openfls.repositories.CategoryRepository
+import de.vinz.openfls.domains.categories.entities.Category
+import de.vinz.openfls.domains.categories.repositories.CategoryRepository
+import de.vinz.openfls.services.GenericService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException

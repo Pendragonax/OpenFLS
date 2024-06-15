@@ -1,6 +1,6 @@
-package de.vinz.openfls.repositories
+package de.vinz.openfls.domains.categories.repositories
 
-import de.vinz.openfls.entities.CategoryTemplate
+import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 

@@ -1,5 +1,6 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.categories.entities
 
+import de.vinz.openfls.entities.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
