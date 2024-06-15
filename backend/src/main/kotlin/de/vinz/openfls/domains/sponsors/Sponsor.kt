@@ -1,4 +1,4 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.sponsors
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties

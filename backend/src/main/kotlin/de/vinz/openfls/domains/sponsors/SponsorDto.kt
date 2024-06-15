@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.sponsors
 
 import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
 

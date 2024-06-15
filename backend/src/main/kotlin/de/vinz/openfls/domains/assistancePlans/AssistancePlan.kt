@@ -5,6 +5,7 @@ import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.sponsors.Sponsor
 import de.vinz.openfls.entities.*
 import java.time.LocalDate
 import jakarta.persistence.*

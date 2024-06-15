@@ -1,6 +1,5 @@
-package de.vinz.openfls.repositories
+package de.vinz.openfls.domains.sponsors
 
-import de.vinz.openfls.entities.Sponsor
 import org.springframework.data.repository.CrudRepository
 
 interface SponsorRepository : CrudRepository<Sponsor, Long> {

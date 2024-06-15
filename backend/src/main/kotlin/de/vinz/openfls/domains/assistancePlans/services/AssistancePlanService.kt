@@ -13,6 +13,7 @@ import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
 import de.vinz.openfls.domains.institutions.InstitutionService
+import de.vinz.openfls.domains.sponsors.SponsorService
 import de.vinz.openfls.services.*
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
