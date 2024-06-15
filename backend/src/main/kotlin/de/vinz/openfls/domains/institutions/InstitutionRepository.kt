@@ -1,6 +1,6 @@
-package de.vinz.openfls.repositories
+package de.vinz.openfls.domains.institutions
 
-import de.vinz.openfls.entities.Institution
+import de.vinz.openfls.domains.institutions.Institution
 import org.springframework.data.repository.CrudRepository
 
 interface InstitutionRepository : CrudRepository<Institution, Long>

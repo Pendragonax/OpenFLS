@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.goals.entities
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.evaluations.Evaluation
-import de.vinz.openfls.entities.Institution
+import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.entities.Service
 import org.springframework.lang.Nullable
 import jakarta.persistence.*

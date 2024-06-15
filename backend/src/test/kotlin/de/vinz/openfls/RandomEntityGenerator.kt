@@ -10,6 +10,7 @@ import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.entities.*
 import java.time.LocalDate
 import kotlin.random.Random

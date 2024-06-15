@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
-import de.vinz.openfls.entities.Institution
+import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.entities.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank

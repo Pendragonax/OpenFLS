@@ -1,6 +1,7 @@
 package de.vinz.openfls.projections
 
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
+import de.vinz.openfls.domains.institutions.InstitutionSoloProjection
 import java.time.LocalDateTime
 
 interface ServiceWithEmployeeAndInstitutionProjection {

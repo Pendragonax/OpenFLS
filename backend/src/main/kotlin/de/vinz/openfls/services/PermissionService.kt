@@ -1,11 +1,11 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.entities.Institution
+import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.entities.Permission
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.dtos.PermissionDto
-import de.vinz.openfls.repositories.InstitutionRepository
+import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.repositories.PermissionRepository
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException

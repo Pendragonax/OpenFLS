@@ -1,4 +1,4 @@
-package de.vinz.openfls.projections
+package de.vinz.openfls.domains.institutions
 
 interface InstitutionSoloProjection {
     val id: Long

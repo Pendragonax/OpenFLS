@@ -2,6 +2,7 @@ package de.vinz.openfls.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.institutions.Institution
 import jakarta.persistence.*
 
 
