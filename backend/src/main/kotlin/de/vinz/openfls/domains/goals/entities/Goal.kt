@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.evaluations.Evaluation
 import de.vinz.openfls.domains.institutions.Institution
-import de.vinz.openfls.entities.Service
+import de.vinz.openfls.domains.services.Service
 import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty

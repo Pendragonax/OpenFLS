@@ -1,8 +1,8 @@
-package de.vinz.openfls.repositories
+package de.vinz.openfls.domains.services
 
-import de.vinz.openfls.entities.Service
-import de.vinz.openfls.projections.ServiceProjection
-import de.vinz.openfls.projections.ServiceSoloProjection
+import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.services.projections.ServiceProjection
+import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param

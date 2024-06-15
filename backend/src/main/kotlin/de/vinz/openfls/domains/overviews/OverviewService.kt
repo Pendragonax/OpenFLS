@@ -7,7 +7,7 @@ import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientRepository
-import de.vinz.openfls.repositories.ServiceRepository
+import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.NumberService
@@ -192,7 +192,7 @@ class OverviewService(
         return assistancePlanOverviewDTOs;
     }
 
-    private fun getExecutedHoursYearly(services: List<de.vinz.openfls.entities.Service>,
+    private fun getExecutedHoursYearly(services: List<de.vinz.openfls.domains.services.Service>,
                                        assistancePlanDTOs: List<AssistancePlanDto>,
                                        clientDTOs: List<ClientSimpleDto>,
                                        year: Int,
@@ -220,7 +220,7 @@ class OverviewService(
         return assistancePlanOverviewDTOs
     }
 
-    private fun getExecutedHoursMonthly(services: List<de.vinz.openfls.entities.Service>,
+    private fun getExecutedHoursMonthly(services: List<de.vinz.openfls.domains.services.Service>,
                                         assistancePlanDTOs: List<AssistancePlanDto>,
                                         clientDTOs: List<ClientSimpleDto>,
                                         year: Int,
@@ -248,7 +248,7 @@ class OverviewService(
         return assistancePlanOverviewDTOs
     }
 
-    private fun getDifferenceHoursYearly(services: List<de.vinz.openfls.entities.Service>,
+    private fun getDifferenceHoursYearly(services: List<de.vinz.openfls.domains.services.Service>,
                                          assistancePlanDTOs: List<AssistancePlanDto>,
                                          clientSimpleDTOs: List<ClientSimpleDto>,
                                          hourTypeId: Long?,
@@ -262,7 +262,7 @@ class OverviewService(
         return subtractApprovedFromExecutedOverview(executedOverviewDTOs, approvedOverviewDTOs, toTimeDouble)
     }
 
-    private fun getDifferenceHoursMonthly(services: List<de.vinz.openfls.entities.Service>,
+    private fun getDifferenceHoursMonthly(services: List<de.vinz.openfls.domains.services.Service>,
                                           assistancePlanDTOs: List<AssistancePlanDto>,
                                           clientSimpleDTOs: List<ClientSimpleDto>,
                                           hourTypeId: Long?,
@@ -377,7 +377,7 @@ class OverviewService(
             month: Int?,
             hourTypeId: Long,
             areaId: Long?,
-            sponsorId: Long?): List<de.vinz.openfls.entities.Service> {
+            sponsorId: Long?): List<de.vinz.openfls.domains.services.Service> {
         if (month == null) {
             if (areaId != null && sponsorId != null) {
                 return serviceRepository

@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.permissions.Permission
-import de.vinz.openfls.entities.Service
+import de.vinz.openfls.domains.services.Service
 import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email

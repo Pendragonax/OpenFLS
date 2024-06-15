@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.NumberService
-import de.vinz.openfls.services.ServiceService
+import de.vinz.openfls.domains.services.ServiceService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 

@@ -1,9 +1,9 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.dtos.ServiceTimeDayDto
-import de.vinz.openfls.dtos.ServiceTimeDto
+import de.vinz.openfls.domains.services.dtos.ServiceDto
+import de.vinz.openfls.domains.services.dtos.ServiceTimeDayDto
+import de.vinz.openfls.domains.services.dtos.ServiceTimeDto
 import org.springframework.stereotype.Service
-import kotlin.math.min
 
 @Service
 class ConverterService {
@@ -12,7 +12,7 @@ class ConverterService {
      * @param services - [List] [de.vinz.openfls.entities.Service]
      * @return [ServiceTimeDto]
      */
-    fun convertServiceDTOsToServiceTimeDto(services: List<de.vinz.openfls.entities.Service>): ServiceTimeDto {
+    fun convertServicesToServiceTimeDto(services: List<ServiceDto>): ServiceTimeDto {
         if (services.isEmpty())
             return ServiceTimeDto()
 

@@ -3,9 +3,9 @@ package de.vinz.openfls.domains.contingents.services
 import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
-import de.vinz.openfls.projections.ServiceProjection
+import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.services.NumberService
-import de.vinz.openfls.services.ServiceService
+import de.vinz.openfls.domains.services.ServiceService
 import org.springframework.stereotype.Service
 
 @Service

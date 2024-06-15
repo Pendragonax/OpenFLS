@@ -1,16 +1,14 @@
-package de.vinz.openfls.controller
+package de.vinz.openfls.domains.services
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.PermissionService
-import de.vinz.openfls.dtos.ServiceDto
-import de.vinz.openfls.dtos.ServiceFilterDto
-import de.vinz.openfls.dtos.ServiceXLDto
+import de.vinz.openfls.domains.services.dtos.ServiceDto
+import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.entities.Service
-import de.vinz.openfls.services.*
-import org.modelmapper.ModelMapper
+import de.vinz.openfls.services.ConverterService
+import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -20,7 +18,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
-import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/services")
@@ -30,7 +27,6 @@ class ServiceController(
         private val accessService: AccessService,
         private val permissionService: PermissionService,
         private val assistancePlanService: AssistancePlanService,
-        private val modelMapper: ModelMapper,
         private val converter: ConverterService
 ) {
 
@@ -48,10 +44,7 @@ class ServiceController(
             if (!accessService.canWriteEntries(token, valueDto.institutionId))
                 throw IllegalArgumentException("No permission to write entries to this institution")
 
-            val entity = modelMapper.map(valueDto, Service::class.java)
-
-            entity.employee?.unprofessionals = null
-            val savedEntity = serviceService.create(entity)
+            val dto = serviceService.create(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s create took %s ms",
@@ -59,13 +52,13 @@ class ServiceController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(modelMapper.map(savedEntity, ServiceDto::class.java))
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                employeeService.getById(valueDto.employeeId),
-                HttpStatus.BAD_REQUEST
+                    employeeService.getById(valueDto.employeeId),
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -82,18 +75,16 @@ class ServiceController(
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
             if (!accessService.isAdmin(token) &&
-                serviceService.getById(id)?.employee?.id != accessService.getId(token))
+                    serviceService.getById(id)?.employee?.id != accessService.getId(token))
                 throw IllegalArgumentException("Your not the owner of this service or the admin")
             if (serviceService.getById(id)
-                ?.start
-                ?.toLocalDate()
-                ?.isBefore(LocalDate.now().minusDays(14)) == true) {
+                            ?.start
+                            ?.toLocalDate()
+                            ?.isBefore(LocalDate.now().minusDays(14)) == true) {
                 throw IllegalArgumentException("14 days edit period is over")
             }
 
-            val entity = modelMapper.map(valueDto, Service::class.java)
-
-            val savedEntity = serviceService.update(entity)
+            val dto = serviceService.update(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s update took %s ms",
@@ -101,13 +92,13 @@ class ServiceController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(modelMapper.map(savedEntity, ServiceDto::class.java))
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -120,14 +111,13 @@ class ServiceController(
             val service = serviceService.getById(id);
 
             if (!accessService.isAdmin(token) &&
-                (service?.employee?.id != accessService.getId(token) ||
-                        service.start.toLocalDate().isBefore(LocalDate.now().minusDays(14))))
+                    (service?.employee?.id != accessService.getId(token) ||
+                            service.start.toLocalDate().isBefore(LocalDate.now().minusDays(14))))
                 throw IllegalArgumentException("No permission to delete this service")
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
 
-            val entity = serviceService.getById(id)
-
+            val dto = serviceService.getDtoById(id)
             serviceService.delete(id)
 
             if (logPerformance) {
@@ -136,13 +126,13 @@ class ServiceController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity)
-        }catch (ex: Exception) {
+            ResponseEntity.ok(dto)
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -154,8 +144,7 @@ class ServiceController(
             if (!accessService.isAdmin(token))
                 throw IllegalArgumentException("No permission to get all services")
 
-            val dtos = serviceService.getAll()
-                .map { modelMapper.map(it, ServiceDto::class.java) }
+            val dtos = serviceService.getAllDtos()
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms and found %d entities",
@@ -165,12 +154,12 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -185,11 +174,12 @@ class ServiceController(
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
 
-            val dto = modelMapper.map(serviceService.getById(id), ServiceDto::class.java)
+            val dto = serviceService.getDtoById(id)
 
-            if (!accessService.isAdmin(token) &&
-                !accessService.canReadEntries(token, dto.institutionId))
+            if (dto != null && !accessService.isAdmin(token) &&
+                    !accessService.canReadEntries(token, dto.institutionId))
                 throw IllegalArgumentException("Your not the allowed to read this entry")
+
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %d ms",
@@ -198,12 +188,12 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dto)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -220,9 +210,7 @@ class ServiceController(
             if (!accessService.canModifyAssistancePlan(token, id))
                 throw IllegalArgumentException("no permission to load the services of this assistance plan")
 
-            val dtos = serviceService.getByAssistancePlan(id).map {
-                modelMapper.map(it, ServiceXLDto::class.java)
-            }
+            val dtos = serviceService.getXLDtosByAssistancePlan(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByAssistancePlan took %s ms and found %d entities",
@@ -232,12 +220,12 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -249,14 +237,13 @@ class ServiceController(
         return try {
             val startMs = System.currentTimeMillis()
             val leadingInstitutionIds = permissionService
-                .getLeadingInstitutionIdsByEmployee(accessService.getId(token))
+                    .getLeadingInstitutionIdsByEmployee(accessService.getId(token))
             val userId = accessService.getId(token)
             val isAdmin = accessService.isAdmin(token)
 
-            val dtos = serviceService.getByEmployeeAndDate(id, date)
-                .map { modelMapper.map(it, ServiceDto::class.java) }
-                .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
-                .sortedBy { it.start }
+            val dtos = serviceService.getDtosByEmployeeAndDate(id, date)
+                    .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
+                    .sortedBy { it.start }
 
             if (logPerformance) {
                 logger.info(String.format("%s getByEmployeeAndDate took %s ms and found %d entities",
@@ -266,12 +253,12 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -288,8 +275,7 @@ class ServiceController(
             val userId = accessService.getId(token)
             val isAdmin = accessService.isAdmin(token)
 
-            val dtos = serviceService.getByEmployeeAndStartAndEnd(id, start, end)
-                    .map { modelMapper.map(it, ServiceDto::class.java) }
+            val dtos = serviceService.getDtosByEmployeeAndStartAndEnd(id, start, end)
                     .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
                     .sortedBy { it.start }
 
@@ -301,7 +287,7 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
             ResponseEntity(
@@ -313,18 +299,17 @@ class ServiceController(
 
     @GetMapping("client/{id}/{date}")
     fun getByClientAndDate(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-                             @PathVariable id: Long,
-                             @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") date: LocalDate): Any {
+                           @PathVariable id: Long,
+                           @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") date: LocalDate): Any {
         return try {
             val startMs = System.currentTimeMillis()
             val affiliatedInstitutionIds = permissionService
-                .getReadableInstitutionIdsByEmployee(accessService.getId(token))
+                    .getReadableInstitutionIdsByEmployee(accessService.getId(token))
             val userId = accessService.getId(token)
             val isAdmin = accessService.isAdmin(token)
 
-            val dtos = serviceService.getByClientAndDate(id, date)
-                .map { modelMapper.map(it, ServiceDto::class.java) }
-                .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
+            val dtos = serviceService.getDtosByClientAndDate(id, date)
+                    .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
 
             if (logPerformance) {
                 logger.info(String.format("%s getByClientAndDate took %s ms and found %d entities",
@@ -334,12 +319,12 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -356,8 +341,7 @@ class ServiceController(
             val userId = accessService.getId(token)
             val isAdmin = accessService.isAdmin(token)
 
-            val dtos = serviceService.getByClientAndStartAndEnd(id, start, end)
-                    .map { modelMapper.map(it, ServiceDto::class.java) }
+            val dtos = serviceService.getDtosByClientAndStartAndEnd(id, start, end)
                     .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
 
             if (logPerformance) {
@@ -368,7 +352,7 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
@@ -387,8 +371,7 @@ class ServiceController(
             if (valueDto.date == null)
                 throw IllegalArgumentException("No date")
 
-            val dtos = serviceService.getByEmployeeAndFilter(id, valueDto)
-                .map { modelMapper.map(it, ServiceDto::class.java) }
+            val dtos = serviceService.getDtosByEmployeeAndFilter(id, valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByEmployeeAndFilter took %s ms and found %d entities",
@@ -398,12 +381,12 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -416,12 +399,12 @@ class ServiceController(
         return try {
             val startMs = System.currentTimeMillis()
             if (accessService.getId(token) != id &&
-                !accessService.isAdmin(token) &&
-                !accessService.canReadEmployeeStats(token, id))
+                    !accessService.isAdmin(token) &&
+                    !accessService.canReadEmployeeStats(token, id))
                 throw IllegalArgumentException("No permission to get the times of this employee")
 
-            val entities = serviceService.getByEmployeeAndStartEndDate(id, start, end)
-            val dto = this.converter.convertServiceDTOsToServiceTimeDto(entities).apply {
+            val serviceDtos = serviceService.getDtosByEmployeeAndStartEndDate(id, start, end)
+            val dto = this.converter.convertServicesToServiceTimeDto(serviceDtos).apply {
                 periodDays = start.until(end).days + 1
             }
 
@@ -432,12 +415,12 @@ class ServiceController(
             }
 
             ResponseEntity.ok(dto)
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -447,12 +430,12 @@ class ServiceController(
                         @PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByEmployee(id))
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -462,12 +445,12 @@ class ServiceController(
                       @PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByClient(id))
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -477,12 +460,12 @@ class ServiceController(
                               @PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByAssistancePlan(id))
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -492,12 +475,12 @@ class ServiceController(
                     @PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByGoal(id))
-        } catch(ex: Exception) {
+        } catch (ex: Exception) {
             logger.error(ex.message)
 
             ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }

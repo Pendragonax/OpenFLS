@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.services.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.categories.dtos.CategoryDto

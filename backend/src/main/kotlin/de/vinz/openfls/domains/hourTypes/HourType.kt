@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.hourTypes
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
-import de.vinz.openfls.entities.Service
+import de.vinz.openfls.domains.services.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import org.jetbrains.annotations.NotNull

@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.services.dtos
 
 class ServiceTimeDto {
     var days: MutableSet<ServiceTimeDayDto> = mutableSetOf()
