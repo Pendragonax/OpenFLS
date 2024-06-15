@@ -8,7 +8,7 @@ import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.repositories.ServiceRepository
-import de.vinz.openfls.services.AccessService
+import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.NumberService
 import org.modelmapper.ModelMapper

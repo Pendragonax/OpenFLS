@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.institutions
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.services.GenericService
-import de.vinz.openfls.services.PermissionService
+import de.vinz.openfls.domains.permissions.PermissionService
 import org.springframework.stereotype.Service
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper

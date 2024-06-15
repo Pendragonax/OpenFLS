@@ -1,4 +1,4 @@
-package de.vinz.openfls.dtos
+package de.vinz.openfls.domains.permissions
 
 class PermissionDto {
     var employeeId: Long = 0

@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.employees
 
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.AccessService
+import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.services.TokenService
 import jakarta.validation.Valid

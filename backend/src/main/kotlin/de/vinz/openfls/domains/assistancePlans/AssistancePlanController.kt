@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.assistancePlans
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.AccessService
+import de.vinz.openfls.domains.permissions.AccessService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

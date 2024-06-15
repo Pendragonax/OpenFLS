@@ -1,8 +1,9 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.permissions
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
 import jakarta.persistence.*
 
 

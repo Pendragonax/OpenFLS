@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.AccessService
+import de.vinz.openfls.domains.permissions.AccessService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -1,29 +1,19 @@
-package de.vinz.openfls.controller
+package de.vinz.openfls.domains.permissions
 
-import de.vinz.openfls.dtos.PermissionDto
-import de.vinz.openfls.entities.Permission
-import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.repositories.PermissionRepository
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.sponsors.SponsorController
-import org.modelmapper.ModelMapper
+import de.vinz.openfls.logback.PerformanceLogbackFilter
+import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.lang.Exception
-import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/permissions")
 class PermissionController(
-        private val repository: PermissionRepository,
-        private val employeeRepository: EmployeeRepository,
-        private val institutionRepository: InstitutionRepository,
-        private val modelMapper: ModelMapper)
+        private val permissionService: PermissionService)
 {
 
     private val logger: Logger = LoggerFactory.getLogger(SponsorController::class.java)
@@ -37,7 +27,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val permission = repository.save(convertToEntity(valueDto))
+            val entity = permissionService.savePermission(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s create took %s ms",
@@ -45,7 +35,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(permission)
+            ResponseEntity.ok(entity)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
@@ -61,7 +51,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val permission = repository.save(convertToEntity(valueDto))
+            val entity = permissionService.savePermission(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s update took %s ms",
@@ -69,7 +59,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(permission)
+            ResponseEntity.ok(entity)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
@@ -85,7 +75,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            repository.deleteById(id)
+            permissionService.deleteById(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s delete took %s ms",
@@ -109,7 +99,8 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entities = repository.findAll()
+            val entities = permissionService.getAll()
+
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
@@ -133,7 +124,8 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = repository.findByIds(employeeId, institutionId)
+            val entity = permissionService.getByEmployeeIdAndInstitutionId(employeeId, institutionId)
+
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
@@ -156,7 +148,8 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = repository.findByEmployeeId(employeeId)
+            val entity = permissionService.getByEmployeeId(employeeId)
+
             if (logPerformance) {
                 logger.info(String.format("%s getByEmployeeId took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
@@ -179,7 +172,8 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = repository.findByInstitutionId(institutionId)
+            val entity = permissionService.getByInstitutionId(institutionId)
+
             if (logPerformance) {
                 logger.info(String.format("%s getByInstitutionId took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
@@ -194,14 +188,5 @@ class PermissionController(
                     ex.message,
                     HttpStatus.BAD_REQUEST)
         }
-    }
-
-    private fun convertToEntity(permissionDto: PermissionDto): Permission {
-        val permission: Permission = modelMapper.map(permissionDto, Permission::class.java)
-
-        permission.employee = employeeRepository.findById(permissionDto.employeeId).get()
-        permission.institution = institutionRepository.findById(permissionDto.institutionId).get()
-
-        return permission
     }
 }

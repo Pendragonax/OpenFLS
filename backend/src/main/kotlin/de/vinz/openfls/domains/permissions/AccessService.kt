@@ -1,9 +1,10 @@
-package de.vinz.openfls.services
+package de.vinz.openfls.domains.permissions
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.goals.services.GoalService
+import de.vinz.openfls.services.TokenService
 import org.springframework.stereotype.Service
 
 @Service

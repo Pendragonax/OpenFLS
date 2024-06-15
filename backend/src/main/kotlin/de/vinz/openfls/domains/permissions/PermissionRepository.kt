@@ -1,6 +1,5 @@
-package de.vinz.openfls.repositories
+package de.vinz.openfls.domains.permissions
 
-import de.vinz.openfls.entities.Permission
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param

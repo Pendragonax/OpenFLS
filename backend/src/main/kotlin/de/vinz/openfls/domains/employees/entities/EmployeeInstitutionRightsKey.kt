@@ -1,4 +1,4 @@
-package de.vinz.openfls.entities
+package de.vinz.openfls.domains.employees.entities
 
 import java.io.Serializable
 import jakarta.persistence.Column

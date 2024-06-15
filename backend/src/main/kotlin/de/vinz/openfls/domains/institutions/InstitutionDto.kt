@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.institutions
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
-import de.vinz.openfls.dtos.PermissionDto
+import de.vinz.openfls.domains.permissions.PermissionDto
 import jakarta.validation.constraints.NotEmpty
 
 class InstitutionDto {
