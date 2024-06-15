@@ -10,7 +10,7 @@ import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeExce
 import de.vinz.openfls.domains.goalTimeEvaluations.models.YearMonthDoubleValue
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.NumberService
+import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -178,7 +178,7 @@ class GoalTimeEvaluationService(
                     start,
                     end)
 
-            value.value = NumberService.convertDoubleToTimeDouble(days * dailyHours)
+            value.value = TimeDoubleService.convertDoubleToTimeDouble(days * dailyHours)
         }
 
         // sum up from previous months
@@ -226,7 +226,7 @@ class GoalTimeEvaluationService(
         var actualValue = 0.0
 
         for (yearHourValue in valueList) {
-            actualValue = NumberService.sumTimeDoubles(actualValue, yearHourValue.value)
+            actualValue = TimeDoubleService.sumTimeDoubles(actualValue, yearHourValue.value)
             yearHourValue.value = actualValue
         }
 

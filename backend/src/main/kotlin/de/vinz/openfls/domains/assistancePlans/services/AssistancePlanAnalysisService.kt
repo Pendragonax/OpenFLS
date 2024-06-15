@@ -8,7 +8,7 @@ import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.NumberService
+import de.vinz.openfls.services.TimeDoubleService
 import de.vinz.openfls.domains.services.ServiceService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -108,20 +108,20 @@ class AssistancePlanAnalysisService(
             assistancePlanAnalysis: List<AssistancePlanAnalysisMonthDto>): AssistancePlanAnalysisMonthCollectionDto {
         val approvedHours =
                 if (assistancePlanAnalysis.isNotEmpty())
-                    assistancePlanAnalysis.map { it.approvedHours }.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+                    assistancePlanAnalysis.map { it.approvedHours }.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
                 else
                     0.0
         val executedHours =
                 if (assistancePlanAnalysis.isNotEmpty())
-                    assistancePlanAnalysis.map { it.executedHours }.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+                    assistancePlanAnalysis.map { it.executedHours }.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
                 else
                     0.0
         val executedPercent =
                 if (approvedHours > 0)
-                    NumberService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
+                    TimeDoubleService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
                 else
                     0.0
-        val missingHours = NumberService.diffTimeDoubles(approvedHours, executedHours)
+        val missingHours = TimeDoubleService.diffTimeDoubles(approvedHours, executedHours)
 
         return AssistancePlanAnalysisMonthCollectionDto(
                 year = year,
@@ -155,10 +155,10 @@ class AssistancePlanAnalysisService(
         val executedHours = getExecutedHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
         val executedPercent =
                 if (approvedHours > 0)
-                    NumberService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
+                    TimeDoubleService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
                 else
                     0.0
-        val missingHours = NumberService.diffTimeDoubles(approvedHours, executedHours)
+        val missingHours = TimeDoubleService.diffTimeDoubles(approvedHours, executedHours)
 
         return getAnalysisInMonth(
                 year,
@@ -190,10 +190,10 @@ class AssistancePlanAnalysisService(
         val executedHours = getExecutedHoursInMonth(year, month, assistancePlan)
         val executedPercent =
                 if (approvedHours > 0)
-                    NumberService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
+                    TimeDoubleService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
                 else
                     0.0
-        val missingHours = NumberService.diffTimeDoubles(approvedHours, executedHours)
+        val missingHours = TimeDoubleService.diffTimeDoubles(approvedHours, executedHours)
 
         return getAnalysisInMonth(
                 year,
@@ -231,13 +231,13 @@ class AssistancePlanAnalysisService(
 
         for (assistancePlan in assistancePlans) {
             for (month in 1..12) {
-                monthlyHours[month] = NumberService.sumTimeDoubles(
+                monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
                         monthlyHours[month],
                         getApprovedAssistancePlanHoursInMonth(year, month, assistancePlan))
             }
         }
 
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
 
         return monthlyHours
     }
@@ -249,13 +249,13 @@ class AssistancePlanAnalysisService(
 
         for (assistancePlan in assistancePlans) {
             for (month in 1..12) {
-                monthlyHours[month] = NumberService.sumTimeDoubles(
+                monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
                         monthlyHours[month],
                         getApprovedAssistancePlanHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId))
             }
         }
 
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
 
         return monthlyHours
     }
@@ -266,7 +266,7 @@ class AssistancePlanAnalysisService(
         for (month in 1..12) {
             monthlyHours[month] = getApprovedAssistancePlanHoursInMonth(year, month, assistancePlan)
         }
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
 
         return monthlyHours
     }
@@ -280,7 +280,7 @@ class AssistancePlanAnalysisService(
             monthlyHours[month] =
                     getApprovedAssistancePlanHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
         }
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
 
         return monthlyHours
     }
@@ -290,7 +290,7 @@ class AssistancePlanAnalysisService(
                                               assistancePlan: AssistancePlanProjection): Double {
         val dailyHours = assistancePlan.hours.sumOf { it.weeklyHours } / 7
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
-        return NumberService.convertDoubleToTimeDouble(
+        return TimeDoubleService.convertDoubleToTimeDouble(
                 dailyHours * days)
     }
 
@@ -301,7 +301,7 @@ class AssistancePlanAnalysisService(
         val hours = assistancePlan.hours.filter { it.hourType.id == hourTypeId }
         val dailyHours = hours.sumOf { it.weeklyHours } / 7
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
-        return NumberService.convertDoubleToTimeDouble(dailyHours * days)
+        return TimeDoubleService.convertDoubleToTimeDouble(dailyHours * days)
     }
 
     fun getApprovedGoalHoursByHourTypeIdInMonth(year: Int,
@@ -314,7 +314,7 @@ class AssistancePlanAnalysisService(
 
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
         val approvedHours = sumGoalsHoursByHourTypeId(assistancePlan.goals, days, hourTypeId)
-        return NumberService.convertDoubleToTimeDouble(approvedHours)
+        return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
     }
 
     fun getApprovedGoalHoursInMonth(year: Int,
@@ -326,7 +326,7 @@ class AssistancePlanAnalysisService(
 
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
         val approvedHours = sumGoalsHours(assistancePlan.goals, days)
-        return NumberService.convertDoubleToTimeDouble(approvedHours)
+        return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
     }
 
     fun getExecutedHoursInMonth(year: Int,
@@ -338,7 +338,7 @@ class AssistancePlanAnalysisService(
                 month = month)
         val hours = services.sumOf { it.minutes.toDouble() } / 60
 
-        return NumberService.convertDoubleToTimeDouble(hours)
+        return TimeDoubleService.convertDoubleToTimeDouble(hours)
     }
 
     fun getExecutedHoursByHourTypeIdInMonth(year: Int,
@@ -352,7 +352,7 @@ class AssistancePlanAnalysisService(
                 month = month)
         val hours = services.sumOf { it.minutes.toDouble() } / 60
 
-        return NumberService.convertDoubleToTimeDouble(hours)
+        return TimeDoubleService.convertDoubleToTimeDouble(hours)
     }
 
     private fun countMatchingDaysInMonth(year: Int, month: Int, assistancePlan: AssistancePlanProjection): Int {

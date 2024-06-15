@@ -10,7 +10,7 @@ import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.NumberService
+import de.vinz.openfls.services.TimeDoubleService
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -300,9 +300,9 @@ class OverviewService(
             assistancePlanOverviewDTO.values[0] = 0.0
             for (i in 1 until assistancePlanOverviewDTO.values.size) {
                 assistancePlanOverviewDTO.values[i] =
-                        NumberService.convertDoubleToTimeDouble(assistancePlanOverviewDTO.values[i])
+                        TimeDoubleService.convertDoubleToTimeDouble(assistancePlanOverviewDTO.values[i])
                 assistancePlanOverviewDTO.values[0] =
-                        NumberService.sumTimeDoubles(
+                        TimeDoubleService.sumTimeDoubles(
                                 assistancePlanOverviewDTO.values[0],
                                 assistancePlanOverviewDTO.values[i])
             }
@@ -314,8 +314,8 @@ class OverviewService(
         assistancePlanOverviewDTOs.forEach { assistancePlanOverviewDTO ->
             for (i in 0 until assistancePlanOverviewDTO.values.size) {
                 assistancePlanOverviewDTO.values[i] =
-                        if (toTimeDouble) NumberService.convertDoubleToTimeDouble(assistancePlanOverviewDTO.values[i] / 60)
-                        else NumberService.roundDoubleToTwoDigits(assistancePlanOverviewDTO.values[i] / 60)
+                        if (toTimeDouble) TimeDoubleService.convertDoubleToTimeDouble(assistancePlanOverviewDTO.values[i] / 60)
+                        else TimeDoubleService.roundDoubleToTwoDigits(assistancePlanOverviewDTO.values[i] / 60)
             }
         }
     }

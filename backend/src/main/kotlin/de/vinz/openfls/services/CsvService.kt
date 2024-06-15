@@ -47,7 +47,7 @@ class CsvService {
                     overview.assistancePlanDto.start.toString(),
                     overview.assistancePlanDto.end.toString(),
                     overview.assistancePlanDto.sponsorId.toString())
-            result.addAll(overview.values.map { value -> "${NumberService.roundDoubleToTwoDigits(value)}" })
+            result.addAll(overview.values.map { value -> "${TimeDoubleService.roundDoubleToTwoDigits(value)}" })
             return result.toTypedArray()
         }
     }

@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-class NumberService {
+class TimeDoubleService {
     companion object {
         fun roundDoubleToTwoDigits(value: Double): Double {
             return String.format("%.2f", value).toDouble()

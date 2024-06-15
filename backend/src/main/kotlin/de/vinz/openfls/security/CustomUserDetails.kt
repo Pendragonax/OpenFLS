@@ -8,14 +8,10 @@ import org.springframework.security.core.userdetails.UserDetails
 
 class CustomUserDetails(private var employeeAccess: EmployeeAccess) : UserDetails {
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        val roleString = when (employeeAccess.role) {
-            1 -> EUserRoles.ADMIN.name
-            2 -> EUserRoles.LEAD.name
-            else -> EUserRoles.USER.name
-        }
+    private var role: EUserRoles = getRole()
 
-        return mutableListOf(SimpleGrantedAuthority(roleString))
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
+        return mutableListOf(SimpleGrantedAuthority(role.name))
     }
 
     override fun getPassword(): String = employeeAccess.password
@@ -31,4 +27,10 @@ class CustomUserDetails(private var employeeAccess: EmployeeAccess) : UserDetail
     override fun isEnabled(): Boolean = true
 
     fun getId(): Long = employeeAccess.id ?: -1
+
+    fun getRole(): EUserRoles = when (employeeAccess.role) {
+        1 -> EUserRoles.ADMIN
+        2 -> EUserRoles.LEAD
+        else -> EUserRoles.USER
+    }
 }
