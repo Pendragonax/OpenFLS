@@ -127,6 +127,26 @@ class ServiceService(
         return serviceRepository.findByEmployeeAndStartEndDate(employeeId, start, end)
     }
 
+    fun getDtosByInstitutionIdAndDate(institutionId: Long, date: LocalDate): List<ServiceProjection> {
+        return getByInstitutionIdAndDate(institutionId, date)
+    }
+
+    fun getByInstitutionIdAndDate(institutionId: Long, date: LocalDate): List<ServiceProjection> {
+        return serviceRepository.findByInstitutionIdAndDate(institutionId, date)
+    }
+
+    fun getDtosByInstitutionIdAndStartAndEnd(institutionId: Long,
+                                             start: LocalDate,
+                                             end: LocalDate): List<ServiceProjection> {
+        return getByInstitutionIdAndStartAndEnd(institutionId, start, end)
+    }
+
+    fun getByInstitutionIdAndStartAndEnd(institutionId: Long,
+                                         start: LocalDate,
+                                         end: LocalDate): List<ServiceProjection> {
+        return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end).sortedBy { it.start }
+    }
+
     fun getDtosByClientAndDate(clientId: Long, date: LocalDate): List<ServiceDto> {
         return getByClientAndDate(clientId, date)
                 .map { modelMapper.map(it, ServiceDto::class.java) }

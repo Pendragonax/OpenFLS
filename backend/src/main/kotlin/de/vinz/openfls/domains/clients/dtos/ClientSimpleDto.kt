@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import de.vinz.openfls.domains.institutions.InstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
 
 class ClientSimpleDto {
     var id: Long = 0

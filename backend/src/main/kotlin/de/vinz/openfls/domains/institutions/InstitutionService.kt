@@ -1,6 +1,8 @@
 package de.vinz.openfls.domains.institutions
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionSoloDto
 import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.domains.permissions.PermissionService
 import org.springframework.stereotype.Service
@@ -67,7 +69,6 @@ class InstitutionService(
         return save(value)
     }
 
-    @Transactional
     private fun save(institution: Institution): Institution {
         val tmpPermissions = institution.permissions
         institution.permissions = null
@@ -82,6 +83,11 @@ class InstitutionService(
     @Transactional
     override fun delete(id: Long) {
         institutionRepository.deleteById(id)
+    }
+
+    fun getAllSoloDTOs(): List<InstitutionSoloDto> {
+        val projections = institutionRepository.findInstitutionSoloProjectionOrderedByName()
+        return projections.map { value -> modelMapper.map(value, InstitutionSoloDto::class.java) }
     }
 
     fun getAllDtos(): List<InstitutionDto> {

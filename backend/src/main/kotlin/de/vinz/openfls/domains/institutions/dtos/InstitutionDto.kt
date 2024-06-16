@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.institutions
+package de.vinz.openfls.domains.institutions.dtos
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
