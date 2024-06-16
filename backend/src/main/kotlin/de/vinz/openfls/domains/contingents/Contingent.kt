@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.contingents
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.entities.Employee
-import de.vinz.openfls.entities.Institution
+import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.institutions.Institution
 import java.time.LocalDate
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull

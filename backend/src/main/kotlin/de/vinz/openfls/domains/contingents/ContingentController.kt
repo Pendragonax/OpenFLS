@@ -2,8 +2,8 @@ package de.vinz.openfls.domains.contingents
 
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.services.ContingentService
+import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.*
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,13 +29,12 @@ class ContingentController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @Valid @RequestBody valueDto: ContingentDto): Any {
+    fun create(@Valid @RequestBody valueDto: ContingentDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isLeader(token, valueDto.institutionId))
+            if (!accessService.isLeader(valueDto.institutionId))
                 throw IllegalArgumentException("no permission to add this contingent")
             if (valueDto.end != null && valueDto.start >= valueDto.end)
                 throw IllegalArgumentException("end before start")
@@ -61,14 +60,13 @@ class ContingentController(
     }
 
     @PutMapping("{id}")
-    fun update(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long,
+    fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: ContingentDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.canModifyContingent(token, id))
+            if (!accessService.canModifyContingent(id))
                 throw IllegalArgumentException("no permission to update this contingent")
             if (id != valueDto.id)
                 throw java.lang.IllegalArgumentException("path id and dto id are not the same")
@@ -100,13 +98,12 @@ class ContingentController(
     }
 
     @DeleteMapping("{id}")
-    fun delete(@RequestHeader(HttpHeaders.AUTHORIZATION) token: String,
-               @PathVariable id: Long): Any {
+    fun delete(@PathVariable id: Long): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAdmin(token))
+            if (!accessService.isAdmin())
                 throw IllegalArgumentException("no permission to delete this contingent")
             if (!contingentService.existsById(id))
                 throw IllegalArgumentException("contingent not found")

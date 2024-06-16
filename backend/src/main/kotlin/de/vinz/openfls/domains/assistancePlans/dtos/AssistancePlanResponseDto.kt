@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
-import de.vinz.openfls.dtos.GoalResponseDto
+import de.vinz.openfls.domains.goals.dtos.GoalResponseDto
 import java.time.LocalDate
 
 class AssistancePlanResponseDto {

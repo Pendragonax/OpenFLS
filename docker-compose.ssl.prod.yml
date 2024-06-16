@@ -31,7 +31,7 @@ services:
     restart: always
     env_file: docker-compose.env
     volumes:
-      - ${LOG_PATH}:/logs/
+      - ${LOG_PATH}:/app/logs/
     depends_on:
       - db
     secrets:

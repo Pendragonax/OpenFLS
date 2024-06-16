@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
-import de.vinz.openfls.dtos.GoalDto
+import de.vinz.openfls.domains.goals.dtos.GoalDto
 import java.time.LocalDate
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotNull

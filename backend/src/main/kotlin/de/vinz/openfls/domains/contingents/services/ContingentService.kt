@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.contingents.projections.ContingentProjection
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.GenericService
-import de.vinz.openfls.services.NumberService
+import de.vinz.openfls.services.TimeDoubleService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -160,13 +160,13 @@ class ContingentService(
 
         for (contingent in contingents) {
             for (month in 1..12) {
-                monthlyHours[month] = NumberService.sumTimeDoubles(
+                monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
                         monthlyHours[month],
                         getContingentHoursByYearAndMonth(year, month, contingent))
             }
         }
 
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
 
         return monthlyHours
     }
@@ -179,7 +179,7 @@ class ContingentService(
             monthlyHours.add(getContingentHoursByYearAndMonth(year, month, contingent))
         }
 
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> NumberService.sumTimeDoubles(acc, d) }
+        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
 
         return monthlyHours
     }
@@ -192,7 +192,7 @@ class ContingentService(
         // end date or the last day of the year when there is no end set
         val end = contingent.end ?: LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
         val days = DateService.countDaysOfMonthAndYearBetweenStartAndEnd(year, month, contingent.start, end)
-        return NumberService.convertDoubleToTimeDouble(days * (contingent.weeklyServiceHours / 7))
+        return TimeDoubleService.convertDoubleToTimeDouble(days * (contingent.weeklyServiceHours / 7))
     }
 
     fun isContingentInYearMonth(year: Int, month: Int, contingent: ContingentProjection): Boolean {
