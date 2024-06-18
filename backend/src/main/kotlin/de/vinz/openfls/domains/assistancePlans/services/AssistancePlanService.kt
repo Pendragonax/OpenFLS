@@ -26,7 +26,7 @@ class AssistancePlanService(
         private val assistancePlanHourRepository: AssistancePlanHourRepository,
         private val serviceRepository: ServiceRepository,
         private val modelMapper: ModelMapper
-): GenericService<AssistancePlan> {
+) : GenericService<AssistancePlan> {
 
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanService::class.java)
 
@@ -51,12 +51,14 @@ class AssistancePlanService(
 
         // add hours
         entity.hours = hours
-            .map { assistancePlanHourRepository
-                .save(it.apply {
-                    id = 0
-                    assistancePlan = entity
-                })}
-            .toMutableSet()
+                .map {
+                    assistancePlanHourRepository
+                            .save(it.apply {
+                                id = 0
+                                assistancePlan = entity
+                            })
+                }
+                .toMutableSet()
 
         if (logPerformance) {
             logger.info(String.format("%s create took %s ms",
@@ -86,17 +88,18 @@ class AssistancePlanService(
 
         // delete goals
         assistancePlanHourRepository
-            .findByAssistancePlanId(value.id)
-            .filter { !hours.any { hour -> hour.id == it.id } }
-            .forEach { assistancePlanHourRepository.deleteById(it.id) }
+                .findByAssistancePlanId(value.id)
+                .filter { !hours.any { hour -> hour.id == it.id } }
+                .forEach { assistancePlanHourRepository.deleteById(it.id) }
 
         // add / update goals
         entity.hours = hours
-            .map { hour ->
-                assistancePlanHourRepository.save(hour.apply {
-                    assistancePlan = entity
-                })}
-            .toMutableSet()
+                .map { hour ->
+                    assistancePlanHourRepository.save(hour.apply {
+                        assistancePlan = entity
+                    })
+                }
+                .toMutableSet()
 
         if (logPerformance) {
             logger.info(String.format("%s update took %s ms",
@@ -153,11 +156,21 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
+    fun getProjectionByYearMonthInstitutionIdSponsorId(year: Int,
+                                                       month: Int,
+                                                       institutionId: Long,
+                                                       sponsorId: Long): List<AssistancePlanProjection> {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return assistancePlanRepository.findProjectionByInstitutionIdAndSponsorIdAndStartAndEnd(institutionId, sponsorId, start, end)
+    }
+
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
         // performance
         val startMs: Long = System.currentTimeMillis();
 
-        val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ")}
+        val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ") }
         val services = serviceRepository.findByAssistancePlan(id)
         val eval = AssistancePlanEvalDto()
 
@@ -202,51 +215,54 @@ class AssistancePlanService(
 
             // service is in between the start and end inclusive
             if ((assistancePlan.start.isBefore(startDate) || assistancePlan.start.isEqual(startDate)) &&
-                (assistancePlan.end.isAfter(startDate) || assistancePlan.end.isEqual(startDate))) {
+                    (assistancePlan.end.isAfter(startDate) || assistancePlan.end.isEqual(startDate))) {
                 // total values
                 eval.total
-                    .firstOrNull { it.hourType.id == service.hourType.id }
-                    ?.apply {
-                        actual += service.minutes / 60.0
-                        size++
-                    }
+                        .firstOrNull { it.hourType.id == service.hourType.id }
+                        ?.apply {
+                            actual += service.minutes / 60.0
+                            size++
+                        }
 
                 // till today
                 eval.tillToday
-                    .firstOrNull { it.hourType.id == service.hourType.id &&
-                            service.start.year <= tillDate.year &&
-                            (service.start.month < tillDate.month ||
-                                    (service.start.month == tillDate.month && service.start.dayOfMonth <= tillDate.dayOfMonth))
-                    }
-                    ?.apply {
-                        actual += service.minutes / 60.0
-                        size++
-                    }
-
-                if (actualYear.second != null && actualYear.third != null) {
-                    // actual year
-                    eval.actualYear
-                        .firstOrNull { it.hourType.id == service.hourType.id &&
-                                (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
-                                (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
+                        .firstOrNull {
+                            it.hourType.id == service.hourType.id &&
+                                    service.start.year <= tillDate.year &&
+                                    (service.start.month < tillDate.month ||
+                                            (service.start.month == tillDate.month && service.start.dayOfMonth <= tillDate.dayOfMonth))
                         }
                         ?.apply {
                             actual += service.minutes / 60.0
                             size++
                         }
+
+                if (actualYear.second != null && actualYear.third != null) {
+                    // actual year
+                    eval.actualYear
+                            .firstOrNull {
+                                it.hourType.id == service.hourType.id &&
+                                        (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
+                                        (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
+                            }
+                            ?.apply {
+                                actual += service.minutes / 60.0
+                                size++
+                            }
                 }
 
                 if (actualMonth.second != null && actualMonth.third != null) {
                     // actual month
                     eval.actualMonth
-                        .firstOrNull { it.hourType.id == service.hourType.id &&
-                                (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
-                                (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
-                        }
-                        ?.apply {
-                            actual += service.minutes / 60.0
-                            size++
-                        }
+                            .firstOrNull {
+                                it.hourType.id == service.hourType.id &&
+                                        (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
+                                        (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
+                            }
+                            ?.apply {
+                                actual += service.minutes / 60.0
+                                size++
+                            }
                 }
 
             } else {
@@ -272,7 +288,7 @@ class AssistancePlanService(
 
         // month is in between start and end
         if ((today.isAfter(assistancePlan.start) || today.isEqual(assistancePlan.start)) &&
-            (firstOfMonth.isBefore(assistancePlan.end) || firstOfMonth.isEqual(assistancePlan.end))) {
+                (firstOfMonth.isBefore(assistancePlan.end) || firstOfMonth.isEqual(assistancePlan.end))) {
             // start is in the actual month
             if (assistancePlan.start.year == today.year && assistancePlan.start.month == today.month) {
                 from = assistancePlan.start
@@ -297,7 +313,7 @@ class AssistancePlanService(
 
         // month is in between start and end
         if ((today.isAfter(assistancePlan.start) || today.isEqual(assistancePlan.start)) &&
-            (firstOfYear.isBefore(assistancePlan.end) || firstOfYear.isEqual(assistancePlan.end))) {
+                (firstOfYear.isBefore(assistancePlan.end) || firstOfYear.isEqual(assistancePlan.end))) {
             // start is in the actual month
             if (assistancePlan.start.year == today.year) {
                 from = assistancePlan.start
