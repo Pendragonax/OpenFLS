@@ -230,7 +230,7 @@ class EmployeeService(
     }
 
     fun getAllProjections(): List<EmployeeSoloProjection> {
-        return employeeRepository.findAllProjectionsBy();
+        return employeeRepository.findAllProjectionsBy().sortedBy { it.lastname }
     }
 
     override fun getById(id: Long): Employee? {

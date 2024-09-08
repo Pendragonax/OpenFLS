@@ -41,7 +41,6 @@ export class AllServicesComponent implements OnInit {
   isBusy = false;
   errorOccurred = true;
   permissionDeniedMessage = "Sie sind nicht berechtigt für diese Anzeige";
-  errorMessage = "Bei der Anfrage ist ein Fehler aufgetreten";
   urlClientLoaded = true;
   urlInstitutionLoaded = true;
   urlEmployeeLoaded = true;

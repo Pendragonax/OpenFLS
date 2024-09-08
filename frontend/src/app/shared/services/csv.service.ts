@@ -16,6 +16,7 @@ export class CsvService {
   exportToCsvWithHeader(filename: string, rows: any[], header: string[]) {
     let clonedRows = [...rows]
     clonedRows.unshift(header)
+    console.log(rows)
     this.exportToCsv(filename, clonedRows);
   }
 

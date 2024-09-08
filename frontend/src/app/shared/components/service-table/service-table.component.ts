@@ -6,7 +6,8 @@ import {PageEvent} from "@angular/material/paginator";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {UserService} from "../../services/user.service";
 import {ReplaySubject} from "rxjs";
-import {flip} from "@popperjs/core";
+import {CsvService} from "../../services/csv.service";
+import {ServiceExport} from "./model/service-export.model";
 
 @Component({
   selector: 'app-service-table',
@@ -43,7 +44,8 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   };
 
   constructor(private modalService: NgbModal,
-              private userService: UserService) {
+              private userService: UserService,
+              private csvService: CsvService) {
     this.userService.isAdmin$.subscribe(value => this.isAdmin$.next(value))
   }
 
@@ -182,5 +184,10 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
 
   private transformLineBreaksToHtml(text: string): string {
     return text.replace(/(?:\r\n|\r|\n)/g, '<br>');
+  }
+
+  public exportAsCSV() {
+    const serviceExports = this.services.map(value => ServiceExport.arrayStringOf(value))
+    this.csvService.exportToCsvWithHeader("export", serviceExports, ServiceExport.header())
   }
 }
