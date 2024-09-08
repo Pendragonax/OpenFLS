@@ -1,23 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import {Router} from "@angular/router";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {InstitutionService} from "../../services/institution.service";
-import {InstitutionDto} from "../../dtos/institution-dto.model";
-import {UserService} from "../../services/user.service";
+import {InstitutionService} from "../../shared/services/institution.service";
+import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
+import {UserService} from "../../shared/services/user.service";
 import {combineLatest} from "rxjs";
-import {InstitutionView} from "../../models/institution-view.model";
-import {EmployeeDto} from "../../dtos/employee-dto.model";
+import {InstitutionViewModel} from "../../shared/models/institution-view.model";
+import {EmployeeDto} from "../../shared/dtos/employee-dto.model";
 import {Sort} from "@angular/material/sort";
-import {Comparer} from "../../shared/comparer.helper";
-import {TablePageComponent} from "../../shared/modules/table-page.component";
-import {HelperService} from "../../services/helper.service";
+import {Comparer} from "../../shared/services/comparer.helper";
+import {TablePageComponent} from "../../shared/components/table-page.component";
+import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
   selector: 'app-institution',
   templateUrl: './institution.component.html',
   styleUrls: ['./institution.component.css']
 })
-export class InstitutionComponent extends TablePageComponent<InstitutionView, InstitutionView> implements OnInit {
+export class InstitutionComponent extends TablePageComponent<InstitutionViewModel, InstitutionViewModel> implements OnInit {
   // VARs
   tableColumns = ['name', 'phone', 'email', 'actions'];
 
@@ -42,7 +42,7 @@ export class InstitutionComponent extends TablePageComponent<InstitutionView, In
     ]).subscribe({
       next: ([user, leadingIds, institutions]) => {
         const isAdmin = this.isAdmin(user);
-        this.values = institutions.map(value => <InstitutionView>{
+        this.values = institutions.map(value => <InstitutionViewModel>{
           dto: value,
           editable: this.isEditable(leadingIds, value) || isAdmin
         });
@@ -57,14 +57,14 @@ export class InstitutionComponent extends TablePageComponent<InstitutionView, In
     });
   }
 
-  getNewValue(): InstitutionView {
-    return new InstitutionView()
+  getNewValue(): InstitutionViewModel {
+    return new InstitutionViewModel()
   }
 
   initFormSubscriptions() {
   }
 
-  fillEditForm(value: InstitutionView) {
+  fillEditForm(value: InstitutionViewModel) {
     throw new Error('Method not implemented.');
   }
 
@@ -75,15 +75,15 @@ export class InstitutionComponent extends TablePageComponent<InstitutionView, In
     this.refreshTablePage();
   }
 
-  create(value: InstitutionView) {
+  create(value: InstitutionViewModel) {
     throw new Error('Method not implemented.');
   }
 
-  update(value: InstitutionView) {
+  update(value: InstitutionViewModel) {
     throw new Error('Method not implemented.');
   }
 
-  delete(value: InstitutionView) {
+  delete(value: InstitutionViewModel) {
     this.isSubmitting = true;
 
     this.institutionService

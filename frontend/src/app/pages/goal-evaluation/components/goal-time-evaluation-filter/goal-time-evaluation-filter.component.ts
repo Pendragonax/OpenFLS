@@ -1,10 +1,10 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
-import {Period} from "../../../../components/year-month-selection/Period";
+import {Period} from "../../../../shared/components/year-month-selection/Period";
 import {EGoalEvaluationType} from "./EGoalEvaluationType";
 import {MatSelectChange} from "@angular/material/select";
-import {HourTypeService} from "../../../../services/hour-type.service";
-import {HourTypeDto} from "../../../../dtos/hour-type-dto.model";
+import {HourTypeService} from "../../../../shared/services/hour-type.service";
+import {HourTypeDto} from "../../../../shared/dtos/hour-type-dto.model";
 import {ReplaySubject} from "rxjs";
 
 @Component({

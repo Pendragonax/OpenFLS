@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import {SponsorDto} from "../../dtos/sponsor-dto.model";
-import {SponsorService} from "../../services/sponsor.service";
+import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
+import {SponsorService} from "../../shared/services/sponsor.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {Sort} from "@angular/material/sort";
-import {Comparer} from "../../shared/comparer.helper";
+import {Comparer} from "../../shared/services/comparer.helper";
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
-import {TablePageComponent} from "../../shared/modules/table-page.component";
-import {HelperService} from "../../services/helper.service";
+import {TablePageComponent} from "../../shared/components/table-page.component";
+import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
   selector: 'app-sponsor',

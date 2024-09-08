@@ -1,0 +1,34 @@
+<mat-form-field appearance="fill">
+  <mat-label>Zeitraum</mat-label>
+  <mat-date-range-input class="width-scale-70"
+                        [rangePicker]="picker"
+                        [formGroup]="dateGroup"
+                        [disabled]="disabled">
+    <input matStartDate placeholder="Start Datum" #rangeStart formControlName="startControl">
+    <input matEndDate placeholder="Ende Datum" #rangeEnd formControlName="endControl">
+  </mat-date-range-input>
+  <mat-datepicker-toggle matSuffix [for]="picker" class="m-2"></mat-datepicker-toggle>
+  <mat-hint class="fw-light">Tag.Monat.Jahr – Tag.Monat.Jahr</mat-hint>
+  <mat-date-range-picker #picker (closed)="setStartAndEnd(rangeStart, rangeEnd)"></mat-date-range-picker>
+  <button class="my-auto ms-1"
+          mat-icon-button
+          matPrefix
+          [disabled]="disabled"
+          (click)="decreaseDate(1)">
+    <mat-icon>keyboard_arrow_left</mat-icon>
+  </button>
+  <button mat-icon-button
+          matPrefix
+          [matTooltip]="'heute'"
+          [disabled]="disabled"
+          (click)="setDateToToday($event)">
+    <mat-icon>settings_backup_restore</mat-icon>
+  </button>
+  <button class="my-auto me-1"
+          mat-icon-button
+          matSuffix
+          [disabled]="disabled"
+          (click)="increaseDate(1)">
+    <mat-icon>keyboard_arrow_right</mat-icon>
+  </button>
+</mat-form-field>

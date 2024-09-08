@@ -10,7 +10,7 @@ export function createStartTimeEndTimeValidator(control:AbstractControl) : Valid
     || control.get('startMinute')?.value == null
     || control.get('endHour')?.value == null
     || control.get('endMinute')?.value == null
-    || control.get('startDate')?.value == null) {
+    || control.get('serviceDate')?.value == null) {
     return null;
   }
 

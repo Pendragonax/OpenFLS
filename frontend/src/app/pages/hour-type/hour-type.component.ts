@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import {TablePageComponent} from "../../shared/modules/table-page.component";
-import {HourTypeDto} from "../../dtos/hour-type-dto.model";
+import {TablePageComponent} from "../../shared/components/table-page.component";
+import {HourTypeDto} from "../../shared/dtos/hour-type-dto.model";
 import {Sort} from "@angular/material/sort";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {HourTypeService} from "../../services/hour-type.service";
+import {HourTypeService} from "../../shared/services/hour-type.service";
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
-import {Converter} from "../../shared/converter.helper";
-import {HelperService} from "../../services/helper.service";
+import {Converter} from "../../shared/services/converter.helper";
+import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
   selector: 'app-hour-type',

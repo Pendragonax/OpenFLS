@@ -1,0 +1,47 @@
+<app-info-header [title]=title
+                 [addRole]="'user'"
+                 [addButtonRouting]="true"
+                 [addRouterLink]="['/services/new/' + getDate(filterDateStart)]"></app-info-header>
+
+<div class="container-fluid mt-1">
+  <div class="row justify-content-center">
+    <div class="col-auto">
+      <app-date-complete-selection [start]="start"
+                                   [end]="end"
+                                   (dateChanged)="onDateChanged($event)"
+                                   [disabled]="isBusy"></app-date-complete-selection>
+    </div>
+    <div class="col-auto">
+      <app-search-field [isSubmitting]="isBusy"
+                        (onSearchStringChanges)="onSearchStringChanged($event)"></app-search-field>
+    </div>
+    <div class="col-auto">
+      <app-institution-select [institutions]="readableInstitutions"
+                              [institutionId]="paramInstitutionId"
+                              (institutionChanged)="onInstitutionChanged($event)"
+                              [disabled]="isBusy"></app-institution-select>
+    </div>
+    <div class="col-auto">
+      <app-client-autocomplete [clients]="clients"
+                               [clientId]="paramClientId"
+                               (clientChanged)="onClientChanged($event)"
+                               [disabled]="isBusy"></app-client-autocomplete>
+    </div>
+    <div class="col-auto">
+      <app-employee-autocomplete *showOnRole="'leader'"
+                                 [employees]="employees"
+                                 [employeeId]="paramEmployeeId"
+                                 (employeeChanged)="onEmployeeChanged($event)"
+                                 [disabled]="isBusy"></app-employee-autocomplete>
+    </div>
+  </div>
+  <div class="row">
+    <app-service-table *ngIf="!isBusy && !errorOccurred" [services]="filteredServices" [editMode]="false"></app-service-table>
+    <app-loading-spinner *ngIf="isBusy" [description]="'Lade Einträge'"></app-loading-spinner>
+    <div class="text-center"
+         *ngIf="errorOccurred">
+      <mat-icon [color]="'warn'" class="m-auto mt-2">remove_circle_outline</mat-icon>
+      <p class="mt-1"><b>{{permissionDeniedMessage}}</b></p>
+    </div>
+  </div>
+</div>

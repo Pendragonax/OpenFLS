@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import {CategoryTemplateDto} from "../../dtos/category-template-dto.model";
+import {CategoryTemplateDto} from "../../shared/dtos/category-template-dto.model";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {CategoriesService} from "../../services/categories.service";
+import {CategoriesService} from "../../shared/services/categories.service";
 import {Sort} from "@angular/material/sort";
-import {Comparer} from "../../shared/comparer.helper";
-import {TablePageComponent} from "../../shared/modules/table-page.component";
-import {HelperService} from "../../services/helper.service";
+import {Comparer} from "../../shared/services/comparer.helper";
+import {TablePageComponent} from "../../shared/components/table-page.component";
+import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
   selector: 'app-category',

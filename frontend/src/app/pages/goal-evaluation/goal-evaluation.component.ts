@@ -1,22 +1,22 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {AssistancePlanService} from "../../services/assistance-plan.service";
-import {AssistancePlanResponseDto} from "../../dtos/assistance-plan-response-dto.model";
-import {PeriodMode} from "../../components/year-month-selection/PeriodMode";
+import {AssistancePlanService} from "../../shared/services/assistance-plan.service";
+import {AssistancePlanResponseDto} from "../../shared/dtos/assistance-plan-response-dto.model";
+import {PeriodMode} from "../../shared/components/year-month-selection/PeriodMode";
 import {ReplaySubject} from "rxjs";
-import {DateService} from "../../services/date.service";
-import {Period} from "../../components/year-month-selection/Period";
-import {TableButtonCell} from "../../components/table-button/TableButtonCell";
+import {DateService} from "../../shared/services/date.service";
+import {Period} from "../../shared/components/year-month-selection/Period";
+import {TableButtonCell} from "../../shared/components/table-button/TableButtonCell";
 import {MatDialog} from "@angular/material/dialog";
-import {GoalEvaluationModalComponent} from "../../modals/goal-evaluation-modal/goal-evaluation-modal.component";
+import {GoalEvaluationModalComponent} from "./modals/goal-evaluation-modal/goal-evaluation-modal.component";
 import {Location} from "@angular/common";
-import {GoalTimeEvaluationService} from "../../services/goal-time-evaluation.service";
-import {GoalsTimeEvaluationDto} from "../../dtos/goals-time-evaluation-dto.model";
-import {GoalTimeEvaluationDto} from "../../dtos/goal-time-evaluation-dto.model";
+import {GoalTimeEvaluationService} from "../../shared/services/goal-time-evaluation.service";
+import {GoalsTimeEvaluationDto} from "../../shared/dtos/goals-time-evaluation-dto.model";
+import {GoalTimeEvaluationDto} from "../../shared/dtos/goal-time-evaluation-dto.model";
 import {EGoalEvaluationType} from "./components/goal-time-evaluation-filter/EGoalEvaluationType";
-import {EvaluationsService} from "../../services/evaluations.service";
-import {GoalEvaluationYearDto} from "../../dtos/goal-evaluation-year-dto.model";
-import {EvaluationDto} from "../../dtos/evaluation-dto.model";
+import {EvaluationsService} from "../../shared/services/evaluations.service";
+import {GoalEvaluationYearDto} from "../../shared/dtos/goal-evaluation-year-dto.model";
+import {EvaluationDto} from "../../shared/dtos/evaluation-dto.model";
 
 @Component({
   selector: 'app-goal-evaluation',

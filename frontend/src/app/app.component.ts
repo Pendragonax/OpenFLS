@@ -1,9 +1,9 @@
 import { Component } from '@angular/core'
-import {UserService} from "./services/user.service";
+import {UserService} from "./shared/services/user.service";
 import {Router} from "@angular/router";
-import {EmployeeDto} from "./dtos/employee-dto.model";
+import {EmployeeDto} from "./shared/dtos/employee-dto.model";
 import {interval, ReplaySubject} from "rxjs";
-import {TokenStorageService} from "./services/token.storage.service";
+import {TokenStorageService} from "./shared/services/token.storage.service";
 
 @Component({
   selector: 'app-root',
@@ -13,6 +13,7 @@ import {TokenStorageService} from "./services/token.storage.service";
 
 export class AppComponent {
   public isMenuCollapsed = true;
+  test = false;
 
   title = 'OpenFLS';
   isAuthenticated: Boolean = false;
