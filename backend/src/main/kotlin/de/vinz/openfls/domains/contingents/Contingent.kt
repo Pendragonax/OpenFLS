@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.contingents
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import de.vinz.openfls.domains.institutions.Institution
 import java.time.LocalDate
 import jakarta.persistence.*
@@ -31,4 +32,14 @@ class Contingent(
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
         @JoinColumn(name = "institution_id")
         var institution: Institution? = null
-)
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Contingent) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id?.hashCode() ?: 0
+        }
+}

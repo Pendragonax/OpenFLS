@@ -186,7 +186,8 @@ const routes: Routes = [
     ContingentOverviewComponent,
     MyServicesComponent,
     AllServicesComponent,
-    ClientAutocompleteComponent
+    ClientAutocompleteComponent,
+    ServiceTableComponent
   ],
   imports: [
     RouterModule.forRoot(routes),
@@ -225,7 +226,6 @@ const routes: Routes = [
     SearchFieldComponent,
     InstitutionSelectComponent,
     DateCompleteSelectionComponent,
-    ServiceTableComponent,
     EmployeeAutocompleteComponent
   ],
   providers: [

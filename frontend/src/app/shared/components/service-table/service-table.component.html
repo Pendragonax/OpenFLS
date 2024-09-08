@@ -34,6 +34,7 @@
           <button mat-icon-button
                   color="warn"
                   class="m-1"
+                  [disabled]="!(isAdmin$ | async)"
                   [matTooltip]="'Dokumentation löschen'"
                   (click)="openDeleteConfirmation(deleteContent, element['id'])">
             <mat-icon>delete</mat-icon></button>

@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.institutions
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.permissions.Permission
@@ -64,4 +65,14 @@ class Institution(
                 cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf()
-)
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Institution) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id?.hashCode() ?: 0
+        }
+}

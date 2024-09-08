@@ -3,6 +3,7 @@ package de.vinz.openfls.domains.clients
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.services.Service
@@ -59,4 +60,14 @@ class Client(
                 cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf()
-)
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Client) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id.hashCode() ?: 0
+        }
+}

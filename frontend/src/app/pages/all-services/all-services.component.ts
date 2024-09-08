@@ -214,11 +214,11 @@ export class AllServicesComponent implements OnInit {
         tap(values => {
             this.services = values;
             this.filteredServices = values;
+            this.errorOccurred = false;
             this.isBusy = false;
           this.cdr.detectChanges();
           }),
         catchError(error => {
-          console.log(error);
           this.errorOccurred = true;
           this.isBusy = false;
           this.cdr.detectChanges();

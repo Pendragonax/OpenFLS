@@ -1,29 +1,15 @@
 import {AfterViewInit, Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
-import {MatTableDataSource, MatTableModule} from "@angular/material/table";
-import {NgForOf, NgIf} from "@angular/common";
-import {MatSort, MatSortModule} from "@angular/material/sort";
+import {MatTableDataSource} from "@angular/material/table";
+import {MatSort} from "@angular/material/sort";
 import {Service} from "../../dtos/service.projection";
-import {MatIconModule} from "@angular/material/icon";
-import {MatPaginatorModule, PageEvent} from "@angular/material/paginator";
-import {MatButtonModule} from "@angular/material/button";
-import {RouterLink} from "@angular/router";
+import {PageEvent} from "@angular/material/paginator";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {MatTooltipModule} from "@angular/material/tooltip";
+import {UserService} from "../../services/user.service";
+import {ReplaySubject} from "rxjs";
+import {flip} from "@popperjs/core";
 
 @Component({
   selector: 'app-service-table',
-  standalone: true,
-  imports: [
-    MatTableModule,
-    NgForOf,
-    MatSortModule,
-    NgIf,
-    MatIconModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    RouterLink,
-    MatTooltipModule
-  ],
   templateUrl: './service-table.component.html',
   styleUrl: './service-table.component.css'
 })
@@ -39,10 +25,10 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   pageLength: number = 0;
   pageSize: number = 100;
   pageIndex: number = 0;
+  isAdmin$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
 
   private static readonly COLUMN_VIEW_MAPPING = {
     start: 'Zeitpunkt',
-    // minutes: 'Minuten',
     content: 'Inhalt',
     institutionName: 'Bereich',
     employeeFullName: 'Mitarbeiter',
@@ -56,7 +42,9 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
     clientFullName: 'Klient'
   };
 
-  constructor(private modalService: NgbModal) {
+  constructor(private modalService: NgbModal,
+              private userService: UserService) {
+    this.userService.isAdmin$.subscribe(value => this.isAdmin$.next(value))
   }
 
   ngAfterViewInit(): void {

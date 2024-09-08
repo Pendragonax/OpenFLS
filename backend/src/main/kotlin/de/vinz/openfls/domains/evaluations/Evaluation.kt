@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.evaluations
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.goals.entities.Goal
 import jakarta.persistence.*
@@ -42,4 +43,14 @@ class Evaluation(
         @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
         @JoinColumn(name = "goal_id")
         var goal: Goal? = null
-)
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Evaluation) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id.hashCode() ?: 0
+        }
+}

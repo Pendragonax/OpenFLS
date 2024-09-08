@@ -32,4 +32,14 @@ data class Category(
 
         @ManyToMany(fetch = FetchType.LAZY, mappedBy = "categorys")
         var services: MutableSet<Service> = mutableSetOf()
-)
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Category) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id?.hashCode() ?: 0
+        }
+}
