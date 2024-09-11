@@ -6,6 +6,10 @@ textarea {
   width: 100%;
 }
 
+.width-300px {
+  width: 300px;
+}
+
 .list-option-large {
   height: 60px !important;
 }

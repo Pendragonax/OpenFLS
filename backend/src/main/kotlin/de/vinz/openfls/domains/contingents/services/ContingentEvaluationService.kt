@@ -3,9 +3,9 @@ package de.vinz.openfls.domains.contingents.services
 import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
-import de.vinz.openfls.projections.ServiceProjection
-import de.vinz.openfls.services.NumberService
-import de.vinz.openfls.services.ServiceService
+import de.vinz.openfls.domains.services.projections.ServiceProjection
+import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.domains.services.ServiceService
 import org.springframework.stereotype.Service
 
 @Service
@@ -53,7 +53,7 @@ class ContingentEvaluationService(
                 employeeEvaluations.remove(contingentEmployeeEvaluation)
 
                 val employeeContingentHours = contingentEmployeeEvaluation.contingentHours
-                        .mapIndexed { index, value -> NumberService.sumTimeDoubles(value, contingentHours[index]) }
+                        .mapIndexed { index, value -> TimeDoubleService.sumTimeDoubles(value, contingentHours[index]) }
                 val employeeExecutedPercent = getExecutedPercent(
                         contingentEmployeeEvaluation.contingentHours, contingentEmployeeEvaluation.executedHours)
                 val employeeMissingHours = getMissingHours(
@@ -88,20 +88,20 @@ class ContingentEvaluationService(
             }
         }
 
-        return monthlyHours.map { NumberService.convertMinutesToTimeDouble(it) }
+        return monthlyHours.map { TimeDoubleService.convertMinutesToTimeDouble(it) }
     }
 
     protected fun getMissingHours(contingentHours: List<Double>, executedHours: List<Double>): List<Double> {
         return contingentHours
                 .mapIndexed { index, hours -> if (hours <= 0) 0.0 else hours - executedHours[index] }
-                .map { NumberService.roundDoubleToTwoDigits(it) }
+                .map { TimeDoubleService.roundDoubleToTwoDigits(it) }
                 .toList()
     }
 
     protected fun getExecutedPercent(contingentHours: List<Double>, executedHours: List<Double>): List<Double> {
         return contingentHours
                 .mapIndexed { index, hours -> calculatePercent(executedHours[index], hours) }
-                .map { NumberService.roundDoubleToTwoDigits(it) }
+                .map { TimeDoubleService.roundDoubleToTwoDigits(it) }
                 .toList()
     }
 
@@ -110,7 +110,7 @@ class ContingentEvaluationService(
             return 0.0
         }
 
-        return NumberService.convertTimeDoubleToDouble(timeDouble) * 100 /
-                NumberService.convertTimeDoubleToDouble(timeDoubleOf)
+        return TimeDoubleService.convertTimeDoubleToDouble(timeDouble) * 100 /
+                TimeDoubleService.convertTimeDoubleToDouble(timeDoubleOf)
     }
 }

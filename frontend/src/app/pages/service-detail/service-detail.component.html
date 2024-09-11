@@ -16,11 +16,11 @@
 
         <div class="container-fluid text-center">
           <form [formGroup]="firstForm">
-            <div class="container ">
+            <div class="container">
               <div class="row justify-content-center">
                 <div class="col">
                   <mat-label><b>Datum</b></mat-label><br>
-                  <mat-form-field appearance="outline">
+                  <mat-form-field appearance="fill">
                     <mat-label>Datum</mat-label>
                     <input matInput
                            formControlName="serviceDate"
@@ -35,8 +35,8 @@
               </div>
               <div class="row">
                 <div class="col text-end">
-                  <mat-label class="me-5"><b>Beginn</b></mat-label><br>
-                  <mat-form-field appearance="outline"
+                  <mat-label><b>Beginn</b></mat-label><br>
+                  <mat-form-field appearance="fill"
                                   class="small-mat-form-field me-1">
                     <mat-label>Stunde</mat-label>
                     <input matInput
@@ -47,7 +47,7 @@
                            required>
                   </mat-form-field>
 
-                  <mat-form-field appearance="outline"
+                  <mat-form-field appearance="fill"
                                   class="small-mat-form-field">
                     <mat-label>Minute</mat-label>
                     <input matInput
@@ -60,8 +60,8 @@
                 </div>
 
                 <div class="col text-start">
-                  <mat-label class="ms-5"><b>Ende</b></mat-label><br>
-                  <mat-form-field appearance="outline"
+                  <mat-label><b>Ende</b></mat-label><br>
+                  <mat-form-field appearance="fill"
                                   class="small-mat-form-field me-1">
                     <mat-label>Stunde</mat-label>
                     <input matInput
@@ -72,7 +72,7 @@
                            required>
                   </mat-form-field>
 
-                  <mat-form-field appearance="outline"
+                  <mat-form-field appearance="fill"
                                   class="small-mat-form-field">
                     <mat-label>Minute</mat-label>
                     <input matInput
@@ -87,7 +87,7 @@
               </div>
             </div>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill" class="width-300px">
               <mat-label>ausführender Bereich</mat-label>
               <mat-select formControlName="institution"
                           required>
@@ -116,7 +116,7 @@
             <div class="container">
               <div class="row justify-content-center"
                    [hidden]="editMode">
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="fill" class="mt-2">
                   <mat-label>Klientensuche</mat-label>
                   <input type="text"
                          placeholder="Name des Klienten"
@@ -140,6 +140,7 @@
 
                       <div class="row">
                         <mat-selection-list [multiple]="false"
+                                            color="primary"
                                             formControlName="clientList">
                           <mat-list-option *ngFor="let value of filteredClients"
                                            [value]="value.id">
@@ -168,6 +169,7 @@
 
                         <div class="row">
                           <mat-selection-list [multiple]="false"
+                                              color="primary"
                                               *ngIf="filteredAssistancePlans.length > 0"
                                               formControlName="assistancePlanList">
                             <mat-list-option *ngFor="let value of filteredAssistancePlans"
@@ -203,10 +205,6 @@
                         <div class="container-fluid">
                           <div class="row text-start">
                             <mat-label class="fw-light">Ziele</mat-label>
-<!--                            <div class="position-top-end text-black" [hidden]="!(selectedAssistancePlan != null)">-->
-<!--                              <button mat-icon-button-->
-<!--                                      (click)="goals.toggle()"><mat-icon>menu</mat-icon></button>-->
-<!--                            </div>-->
                           </div>
                           <div class="row">
                             <mat-divider></mat-divider>
@@ -232,7 +230,7 @@
               </div>
             </div>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Stundentyp</mat-label>
               <mat-select formControlName="hourType"
                           required>
@@ -292,7 +290,7 @@
               <!--TITLE AND CONTENT-->
               <div class="col">
                 <div class="row mb-2">
-                  <mat-form-field appearance="outline"
+                  <mat-form-field appearance="fill"
                                   class="w-100">
                     <mat-label>Titel</mat-label>
                     <input matInput
@@ -303,7 +301,8 @@
                   </mat-form-field>
                 </div>
                 <div class="row my-2">
-                  <mat-form-field appearance="outline" class="w-100">
+                  <mat-form-field appearance="fill"
+                                  class="w-100">
                     <mat-label>Inhalt</mat-label>
                     <textarea matInput
                               placeholder="..."

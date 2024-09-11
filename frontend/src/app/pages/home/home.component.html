@@ -1,6 +1,6 @@
 <nav class="navbar navbar-dark bg-primary">
   <div class="container-fluid">
-    <span class="h5 fw-light text-white">Startseite von {{ currentEmployee?.firstName }} {{ currentEmployee?.lastName }}</span>
+    <span class="h5 fw-light text-white">Startseite von {{ (currentEmployee ? currentEmployee.firstName : '') }} {{ (currentEmployee ? currentEmployee.lastName : '') }}</span>
   </div>
 </nav>
 
@@ -110,7 +110,7 @@
           <div class="row">
             <div class="col">
               <form [formGroup]="passwordForm">
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="fill">
                   <mat-label>altes Passwort</mat-label>
                   <input matInput
                          type="password"
@@ -118,7 +118,12 @@
                          required>
                 </mat-form-field><br>
 
-                <mat-form-field appearance="outline">
+                <div class="fw-light">
+                  <p>9 Zeichen<br>1 Kleinbuchstabe<br>1 Großbuchstabe<br>
+                    1 Sonderzeichen (!%*?&)<br>1 Zahl </p>
+                </div>
+
+                <mat-form-field appearance="fill">
                   <mat-label>neues Passwort</mat-label>
                   <input matInput
                          type="password"
@@ -127,7 +132,7 @@
                   <mat-error *ngIf="password1Control.invalid">{{ getControlErrorMessage(password1Control) }}</mat-error>
                 </mat-form-field><br>
 
-                <mat-form-field appearance="outline">
+                <mat-form-field appearance="fill">
                   <mat-label>Passwort wiederholen</mat-label>
                   <input matInput
                          type="password"
@@ -146,5 +151,9 @@
         </div>
       </mat-expansion-panel>
     </mat-accordion>
+  </mat-tab>
+  <mat-tab label="Stunden">
+    <app-contingent-evaluation [employee$]="currentEmployee$"
+                               (onRefreshClick)="refreshUser()" ></app-contingent-evaluation>
   </mat-tab>
 </mat-tab-group>

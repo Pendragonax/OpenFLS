@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from "@angular/forms";
-import { UserService } from "../../services/user.service";
+import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
+import { UserService } from "../../shared/services/user.service";
 import packageJson from "../../../../package.json";
 
 @Component({
@@ -13,9 +13,9 @@ export class LoginComponent implements OnInit {
   loginFailed = false;
   version: string = packageJson.version;
 
-  loginForm = new FormGroup({
-    username: new FormControl(''),
-    password: new FormControl('')
+  loginForm = new UntypedFormGroup({
+    username: new UntypedFormControl(''),
+    password: new UntypedFormControl('')
   });
 
   constructor(

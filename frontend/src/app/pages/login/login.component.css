@@ -17,3 +17,7 @@ mat-form-field {
   margin-left: 60%;
   margin-top: 10px;
 }
+
+.max-width-500 {
+  max-width: 500px;
+}

@@ -1,43 +1,72 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.dtos.ActualTargetValueDto
-import de.vinz.openfls.dtos.AssistancePlanEvalDto
-import de.vinz.openfls.dtos.HourTypeDto
-import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.repositories.ServiceRepository
-import de.vinz.openfls.services.GenericService
+import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.hourTypes.HourTypeService
+import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
+import de.vinz.openfls.domains.institutions.InstitutionService
+import de.vinz.openfls.domains.services.ServiceService
+import de.vinz.openfls.domains.sponsors.SponsorService
+import de.vinz.openfls.services.*
+import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import javax.transaction.Transactional
 
 @Service
 class AssistancePlanService(
         private val assistancePlanRepository: AssistancePlanRepository,
         private val assistancePlanHourRepository: AssistancePlanHourRepository,
-        private val serviceRepository: ServiceRepository,
+        private val serviceService: ServiceService,
+        private val clientService: ClientService,
+        private val institutionService: InstitutionService,
+        private val sponsorService: SponsorService,
+        private val hourTypeService: HourTypeService,
         private val modelMapper: ModelMapper
 ) : GenericService<AssistancePlan> {
 
-    private val logger: Logger = LoggerFactory.getLogger(AssistancePlanService::class.java)
+    @Transactional
+    fun create(valueDto: AssistancePlanDto): AssistancePlanDto {
+        val entity = modelMapper.map(valueDto, AssistancePlan::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
+        entity.client = clientService.getById(valueDto.clientId)
+                ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
+        entity.institution = institutionService.getById(valueDto.institutionId)
+                ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
+        entity.sponsor = sponsorService.getById(valueDto.sponsorId)
+                ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
+        entity.hours = valueDto.hours
+                .map { modelMapper.map(it, AssistancePlanHour::class.java) }
+                .map { it.apply {
+                    hourType = hourTypeService.getById(it.hourType!!.id)
+                            ?: throw IllegalArgumentException("hour type with id ${hourType?.id} not found")
+                } }
+                .toMutableSet()
+
+        val savedEntity = this.create(entity)
+
+        valueDto.apply {
+            id = savedEntity.id
+            hours = savedEntity.hours
+                    .map { modelMapper.map(it, AssistancePlanHourDto::class.java) }
+                    .toMutableSet()
+        }
+
+        return valueDto
+    }
 
     @Transactional
     override fun create(value: AssistancePlan): AssistancePlan {
-        // performance
-        val startMs: Long = System.currentTimeMillis();
-
         if (value.id > 0)
             throw IllegalArgumentException("id is set")
 
@@ -60,20 +89,46 @@ class AssistancePlanService(
                 }
                 .toMutableSet()
 
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
         return entity
     }
 
     @Transactional
-    override fun update(value: AssistancePlan): AssistancePlan {
-        // performance
-        val startMs: Long = System.currentTimeMillis();
+    fun update(id: Long, valueDto: AssistancePlanDto): AssistancePlanDto {
+        if (id != valueDto.id)
+            throw IllegalArgumentException("path id and dto id are not the same")
+        if (!existsById(id))
+            throw IllegalArgumentException("assistance plan not found")
 
+        val entity = modelMapper.map(valueDto, AssistancePlan::class.java)
+
+        entity.client = clientService.getById(valueDto.clientId)
+                ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
+        entity.institution = institutionService.getById(valueDto.institutionId)
+                ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
+        entity.sponsor = sponsorService.getById(valueDto.sponsorId)
+                ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
+        entity.hours = valueDto.hours
+                .map { modelMapper.map(it, AssistancePlanHour::class.java) }
+                .map { it.apply {
+                    hourType = hourTypeService.getById(it.hourType!!.id)
+                            ?: throw IllegalArgumentException("hour type with id ${hourType!!.id} not found")
+                } }
+                .toMutableSet()
+
+        val savedEntity = update(entity)
+
+        valueDto.apply {
+            this.id = savedEntity.id
+            hours = savedEntity.hours
+                    .map { modelMapper.map(it, AssistancePlanHourDto::class.java) }
+                    .toMutableSet()
+        }
+
+        return valueDto
+    }
+
+    @Transactional
+    override fun update(value: AssistancePlan): AssistancePlan {
         if (value.id <= 0)
             throw IllegalArgumentException("id is set")
         if (!assistancePlanRepository.existsById(value.id))
@@ -101,12 +156,6 @@ class AssistancePlanService(
                 }
                 .toMutableSet()
 
-        if (logPerformance) {
-            logger.info(String.format("%s update took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
         return entity
     }
 
@@ -115,8 +164,18 @@ class AssistancePlanService(
         return assistancePlanRepository.deleteById(id)
     }
 
+    fun getAllAssistancePlanDtos(): List<AssistancePlanDto> {
+        val entities = assistancePlanRepository.findAll().toList()
+        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+    }
+
     override fun getAll(): List<AssistancePlan> {
         return assistancePlanRepository.findAll().toList()
+    }
+
+    fun getAssistancePlanDtoById(id: Long): AssistancePlanDto? {
+        val entity = assistancePlanRepository.findByIdOrNull(id)
+        return modelMapper.map(entity, AssistancePlanDto::class.java)
     }
 
     override fun getById(id: Long): AssistancePlan? {
@@ -127,12 +186,27 @@ class AssistancePlanService(
         return assistancePlanRepository.existsById(id)
     }
 
+    fun getAssistancePlanDtosByClientId(id: Long): List<AssistancePlanDto> {
+        val entities = assistancePlanRepository.findByClientId(id)
+        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+    }
+
     fun getByClientId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findByClientId(id)
     }
 
+    fun getAssistancePlanDtosBySponsorId(id: Long): List<AssistancePlanDto> {
+        val entities = assistancePlanRepository.findBySponsorId(id)
+        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+    }
+
     fun getBySponsorId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findBySponsorId(id)
+    }
+
+    fun getAssistancePlanDtosByInstitutionId(id: Long): List<AssistancePlanDto> {
+        val entities = assistancePlanRepository.findByInstitutionId(id)
+        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
     }
 
     fun getByInstitutionId(id: Long): List<AssistancePlan> {
@@ -167,11 +241,8 @@ class AssistancePlanService(
     }
 
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
-        // performance
-        val startMs: Long = System.currentTimeMillis();
-
         val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ") }
-        val services = serviceRepository.findByAssistancePlan(id)
+        val services = serviceService.getByAssistancePlan(id)
         val eval = AssistancePlanEvalDto()
 
         val days = ChronoUnit.DAYS.between(assistancePlan.start, assistancePlan.end) + 1
@@ -218,7 +289,7 @@ class AssistancePlanService(
                     (assistancePlan.end.isAfter(startDate) || assistancePlan.end.isEqual(startDate))) {
                 // total values
                 eval.total
-                        .firstOrNull { it.hourType.id == service.hourType.id }
+                        .firstOrNull { it.hourType.id == service.hourType?.id }
                         ?.apply {
                             actual += service.minutes / 60.0
                             size++
@@ -227,7 +298,7 @@ class AssistancePlanService(
                 // till today
                 eval.tillToday
                         .firstOrNull {
-                            it.hourType.id == service.hourType.id &&
+                            it.hourType.id == service.hourType?.id &&
                                     service.start.year <= tillDate.year &&
                                     (service.start.month < tillDate.month ||
                                             (service.start.month == tillDate.month && service.start.dayOfMonth <= tillDate.dayOfMonth))
@@ -241,7 +312,7 @@ class AssistancePlanService(
                     // actual year
                     eval.actualYear
                             .firstOrNull {
-                                it.hourType.id == service.hourType.id &&
+                                it.hourType.id == service.hourType?.id &&
                                         (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
                                         (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
                             }
@@ -249,34 +320,40 @@ class AssistancePlanService(
                                 actual += service.minutes / 60.0
                                 size++
                             }
-                }
 
-                if (actualMonth.second != null && actualMonth.third != null) {
-                    // actual month
-                    eval.actualMonth
-                            .firstOrNull {
-                                it.hourType.id == service.hourType.id &&
-                                        (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
-                                        (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
-                            }
-                            ?.apply {
-                                actual += service.minutes / 60.0
-                                size++
-                            }
-                }
+                    if (actualYear.second != null && actualYear.third != null) {
+                        // actual year
+                        eval.actualYear
+                                .firstOrNull {
+                                    it.hourType.id == service.hourType?.id &&
+                                            (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
+                                            (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
+                                }
+                                ?.apply {
+                                    actual += service.minutes / 60.0
+                                    size++
+                                }
+                    }
 
-            } else {
-                eval.notMatchingServices++
-                eval.notMatchingServicesIds.add(service.id)
+                    if (actualMonth.second != null && actualMonth.third != null) {
+                        // actual month
+                        eval.actualMonth
+                                .firstOrNull {
+                                    it.hourType.id == service.hourType?.id &&
+                                            (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
+                                            (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
+                                }
+                                ?.apply {
+                                    actual += service.minutes / 60.0
+                                    size++
+                                }
+                    }
+                } else {
+                    eval.notMatchingServices++
+                    eval.notMatchingServicesIds.add(service.id)
+                }
             }
         }
-
-        if (logPerformance) {
-            logger.info(String.format("%s getEvaluationById took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
         return eval
     }
 

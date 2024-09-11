@@ -1,5 +1,6 @@
 <div class="container-fluid mx-auto custom-fullscreen">
   <div class="row custom-height-100-percent justify-content-center">
+
     <div class="col-3 text-center test" [formGroup]="selectionForm">
       <p>{{outputString}}</p>
       <div class="row mt-3">
@@ -7,17 +8,20 @@
           <mat-radio-button class="me-2" value="1">Jahr</mat-radio-button>
           <mat-radio-button class="ms-2" value="2">Monat</mat-radio-button>
         </mat-radio-group>
+
         <div class="d-flex justify-content-center mt-2" *ngIf="selectedPeriodMode == 1">
           <button mat-mini-fab (click)="prevYear()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_left</mat-icon></button>
           <p class="my-auto w-50 fw-bold">{{year}}</p>
           <button mat-mini-fab (click)="nextYear()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_right</mat-icon></button>
         </div>
+
         <div class="d-flex justify-content-center mt-2" *ngIf="selectedPeriodMode == 2">
           <button mat-mini-fab (click)="prevMonth()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_left</mat-icon></button>
           <p class="my-auto w-50 fw-bold">{{getMonthName(month)}} - {{year}}</p>
           <button mat-mini-fab (click)="nextMonth()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_right</mat-icon></button>
         </div>
       </div>
+
       <div class="row my-3 justify-content-center">
         <mat-form-field>
           <mat-label>Stundentypen</mat-label>
@@ -27,8 +31,8 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <div class="mat-icon-button"></div>
       </div>
+
       <div class="row my-3 justify-content-center">
         <mat-form-field>
           <mat-label>Bereich</mat-label>
@@ -37,8 +41,10 @@
               {{area.name}}
             </mat-option>
           </mat-select>
+          <button mat-icon-button matSuffix color="primary" (click)="openPermissionInfoModal($event)">
+            <mat-icon>info</mat-icon>
+          </button>
         </mat-form-field>
-        <button mat-icon-button color="primary" (click)="openPermissionInfoModal()"><mat-icon>info</mat-icon></button>
       </div>
       <div class="row my-3 justify-content-center">
         <mat-form-field>
@@ -49,7 +55,6 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <div class="mat-icon-button"></div>
       </div>
       <div *ngIf="selectedPeriodMode==this.PERIOD_MODE_YEARLY" class="row my-3 justify-content-center">
         <mat-form-field>
@@ -59,14 +64,15 @@
               {{valueType}}
             </mat-option>
           </mat-select>
+          <button mat-icon-button matSuffix color="primary" (click)="openValueTypeInfoModal($event)"><mat-icon>info</mat-icon></button>
         </mat-form-field>
-        <button mat-icon-button color="primary" (click)="openValueTypeInfoModal()"><mat-icon>info</mat-icon></button>
       </div>
       <div class="row justify-content-center my-3">
         <button mat-raised-button color="asc" class="button-color w-50"
                 [disabled]="!generationAllowed || isGenerating" (click)="loadTable()">Anzeigen</button>
       </div>
     </div>
+
     <div class="col test">
       <div class="my-3 mat-elevation-z8 example-container">
         <div class="text-center" [hidden]="!isGenerating">

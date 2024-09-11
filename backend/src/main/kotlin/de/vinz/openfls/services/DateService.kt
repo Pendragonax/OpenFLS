@@ -1,29 +1,20 @@
 package de.vinz.openfls.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.exceptions.YearOutOfRangeException
+import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeException
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 class DateService {
     companion object {
-        fun getStartAndEndInYearLocalDatetime(year: Int, start: LocalDate, end: LocalDate): Pair<LocalDateTime, LocalDateTime> {
-            val startAndEnd = getStartAndEndInYear(year, start, end)
-
-            return Pair(LocalDateTime.of(startAndEnd.first, LocalTime.of(0,0,0)),
-                    LocalDateTime.of(startAndEnd.second, LocalTime.of(23,59,59)))
-        }
-
         fun getStartAndEndInYear(year: Int, start: LocalDate, end: LocalDate): Pair<LocalDate, LocalDate> {
             var resultStart = LocalDate.of(year, 1, 1)
             var resultEnd = LocalDate.of(year, 12, 31)
 
             if (start.year < year) {
                 resultEnd = if (end > resultStart) {
-                    if (end >= resultEnd) resultEnd else end;
+                    if (end >= resultEnd) resultEnd else end
                 } else if (end == resultStart) {
                     LocalDate.of(year, 1, 1)
                 } else {
@@ -99,7 +90,7 @@ class DateService {
             }
 
             if (start == calcEnd || end == calcStart) {
-                return 1;
+                return 1
             }
 
             if (start < calcStart && end > calcEnd) {
@@ -118,7 +109,7 @@ class DateService {
                 return (ChronoUnit.DAYS.between(calcStart, end) + 1).toInt()
             }
 
-            return 0;
+            return 0
         }
 
         fun countDaysOfAssistancePlan(year: Int, assistancePlanDto: AssistancePlanDto): Long {
@@ -129,6 +120,20 @@ class DateService {
                                                        start: LocalDate,
                                                        end: LocalDate): Boolean {
             return assistancePlanDto.start > start || assistancePlanDto.end < end
+        }
+
+        fun convertMinutesToHour(minutes: Double): Double {
+            val minutesPart = minutes % 60
+            val hoursPart = (minutes - minutesPart) / 60
+
+            return hoursPart + (minutesPart / 100.0)
+        }
+
+        fun convertHourToMinutes(hour: Double): Int {
+            val hours = hour.toInt()
+            val minutesPart = ((hour - hours) * 100).toInt()
+
+            return hours * 60 + minutesPart
         }
     }
 }

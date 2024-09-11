@@ -1,0 +1,13 @@
+<mat-form-field appearance="fill" [formGroup]="searchGroup">
+  <mat-label>{{label}}</mat-label>
+  <input matInput
+         placeholder="{{placeholder}}"
+         formControlName="searchControl">
+  <button mat-icon-button
+          class="my-1 mx-2"
+          matSuffix
+          (click)="clickReset()"
+          [disabled]="isSubmitting">
+    <mat-icon>clear</mat-icon>
+  </button>
+</mat-form-field>

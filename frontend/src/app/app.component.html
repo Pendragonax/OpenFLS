@@ -2,28 +2,27 @@
   <div class="container-fluid">
     <a class="navbar-brand" [routerLink]="'.'">OpenFLS</a>
 
-    <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
-      &#9776;
-    </button>
-
-    <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse me-1">
+    <div [ngbCollapse]="isMenuCollapsed"
+         class="collapse navbar-collapse me-1"
+         id="navbarSupportedContent">
       <ul class="navbar-nav">
-        <li class="nav-item active">
-          <a class="nav-link"
-             [routerLink]="'.'"
-             (click)="isMenuCollapsed = true">Home</a>
+        <li class="nav-item">
+          <a class="nav-link fw-bold"
+             routerLinkActive="active"
+             [routerLink]="'services/my'"
+             (click)="isMenuCollapsed = true">Meine</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link fw-bold"
+             routerLinkActive="active"
+             [routerLink]="'services/all'"
+             (click)="isMenuCollapsed = true">Gesamt</a>
         </li>
         <li class="nav-item">
           <a class="nav-link"
              routerLinkActive="active"
              [routerLink]="'overview'"
-             (click)="isMenuCollapsed = true">Stundenübersichten</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link"
-             routerLinkActive="active"
-             [routerLink]="'services'"
-             (click)="isMenuCollapsed = true">Dokumentationen</a>
+             (click)="isMenuCollapsed = true">Übersichten</a>
         </li>
         <li class="nav-item">
           <a class="nav-link"
@@ -80,6 +79,17 @@
             color="accent"
             class="m-1 my-3 my-lg-0" (click)="logout()">
       <mat-icon>exit_to_app</mat-icon>
+    </button>
+
+    <button class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+            (click)="isMenuCollapsed = !isMenuCollapsed">
+      <span class="navbar-toggler-icon"></span>
     </button>
   </div>
 </nav>

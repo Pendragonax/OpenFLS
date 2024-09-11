@@ -1,3 +1,3 @@
 package de.vinz.openfls.exceptions
 
-class UserNotAllowedException : Exception("You dont have the permission for this action.")
+class UserNotAllowedException : Exception("User is not allowed to perform this action")

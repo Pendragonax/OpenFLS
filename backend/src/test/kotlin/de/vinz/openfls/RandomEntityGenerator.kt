@@ -2,8 +2,20 @@ package de.vinz.openfls
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.categories.entities.Category
+import de.vinz.openfls.domains.categories.entities.CategoryTemplate
+import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.contingents.Contingent
-import de.vinz.openfls.entities.*
+import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entities.Unprofessional
+import de.vinz.openfls.domains.employees.entities.UnprofessionalKey
+import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.goals.entities.GoalHour
+import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.permissions.Permission
+import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.sponsors.Sponsor
 import java.time.LocalDate
 import kotlin.random.Random
 

@@ -1,0 +1,19 @@
+<nav class="navbar navbar-dark bg-primary">
+  <div class="container-fluid">
+    <span class="h5 fw-light text-white">{{ title }}</span>
+
+    <button mat-raised-button
+            class="top-nav-button justify-content-end"
+            [hidden]="!addButtonRouting"
+            *showOnRole="addRole"
+            [routerLink]="addRouterLink">
+      <mat-icon>add</mat-icon></button>
+
+    <button mat-raised-button
+            class="top-nav-button justify-content-end"
+            [hidden]="addButtonRouting"
+            *showOnRole="addRole"
+            (click)="handleAddClick($event)">
+      <mat-icon>add</mat-icon></button>
+  </div>
+</nav>

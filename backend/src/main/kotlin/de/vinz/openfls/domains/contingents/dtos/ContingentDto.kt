@@ -1,8 +1,7 @@
 package de.vinz.openfls.domains.contingents.dtos
 
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDate
-import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.NotNull
 
 class ContingentDto {
     var id: Long = 0
