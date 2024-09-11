@@ -31,7 +31,7 @@ class AssistancePlanAnalysisService(
             return getAnalysisByInstitutionAndHourTypeInMonth(year, month, institutionId, hourTypeId)
         }
 
-        val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionId(year, month, institutionId)
+        val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionIdSponsorId(year, month, institutionId, sponsorId)
         val analysis = getAnalysisByHourTypeIdInMonth(year, month, assistancePlans, hourTypeId)
 
         return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
