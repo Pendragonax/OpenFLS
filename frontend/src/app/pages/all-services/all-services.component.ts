@@ -87,6 +87,7 @@ export class AllServicesComponent implements OnInit {
           employeeId = parsedId;
         }
       }
+      console.log("[BEFORE] clientId: " + clientId + "\nemployeeId: " + employeeId + "\ninstitutionId: " + institutionId)
 
       if (start === null || start === '0' || end === null || start === '0') {
         this.navigate(this.start, this.end, institutionId, employeeId, clientId);
@@ -102,6 +103,8 @@ export class AllServicesComponent implements OnInit {
       this.paramEmployeeId = employeeId;
       this.urlEmployeeLoaded = !(this.paramEmployeeId != null && this.paramEmployeeId > 0);
 
+      console.log("[AFTER] paramClientId: " + this.paramClientId + "\nparamEmployeeId: " + this.paramEmployeeId + "\nparamInstitutionId: " + this.paramInstitutionId)
+
       this.start = this.dateService.convertDEDateStringToDate(start ?? "") ?? new Date();
       this.end = this.dateService.convertDEDateStringToDate(end ?? "") ?? new Date();
       this.loadReadableInstitutions();
@@ -115,14 +118,15 @@ export class AllServicesComponent implements OnInit {
     this.start = value.start;
     this.end = value.end;
 
-    this.navigate(this.start, this.end, this.selectedInstitution?.id ?? 0, this.selectedEmployee?.id ?? 0, this.selectedClient?.id ?? 0);
+    this.navigate(this.start, this.end, this.paramInstitutionId ?? 0, this.selectedEmployee?.id ?? 0, this.paramClientId ?? 0);
   }
 
   onInstitutionChanged(institution: InstitutionSoloDto | null) {
     this.selectedInstitution = institution;
+    this.paramInstitutionId = institution?.id ?? 0;
 
     if (this.urlInstitutionLoaded) {
-      this.navigate(this.start, this.end, this.selectedInstitution?.id ?? 0, this.selectedEmployee?.id ?? 0, this.selectedClient?.id ?? 0);
+      this.navigate(this.start, this.end, this.paramInstitutionId ?? 0, this.paramEmployeeId ?? 0, this.paramClientId ?? 0);
       return;
     }
 
@@ -132,9 +136,10 @@ export class AllServicesComponent implements OnInit {
 
   onClientChanged(client: ClientSoloDto | null) {
     this.selectedClient = client;
+    this.paramClientId = client?.id ?? 0;
 
     if (this.urlClientLoaded) {
-      this.navigate(this.start, this.end, this.selectedInstitution?.id ?? 0, this.selectedEmployee?.id ?? 0, this.selectedClient?.id ?? 0);
+      this.navigate(this.start, this.end, this.paramInstitutionId ?? 0, this.paramEmployeeId ?? 0, this.paramClientId ?? 0);
       return;
     }
 
@@ -144,9 +149,10 @@ export class AllServicesComponent implements OnInit {
 
   onEmployeeChanged(employee: EmployeeSolo | null) {
     this.selectedEmployee = employee;
+    this.paramEmployeeId = employee?.id ?? 0;
 
     if (this.urlEmployeeLoaded) {
-      this.navigate(this.start, this.end, this.selectedInstitution?.id ?? 0, this.selectedEmployee?.id ?? 0, this.selectedClient?.id ?? 0);
+      this.navigate(this.start, this.end, this.paramInstitutionId ?? 0, this.paramEmployeeId ?? 0, this.paramClientId ?? 0);
       return;
     }
 
@@ -227,6 +233,7 @@ export class AllServicesComponent implements OnInit {
   }
 
   private navigate(start: Date, end: Date, institutionId: number, employeeId: number, clientId: number) {
+    console.log("[NAV] clientId: " + clientId + "\nemployeeId: " + employeeId + "\ninstitutionId: " + institutionId)
     this.router.navigate([
       this.baseUrl,
       this.dateService.formatDateToYearMonthDay(start),

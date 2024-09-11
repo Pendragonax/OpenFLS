@@ -12,7 +12,7 @@
 </div>
 
 <!--CONTENT-->
-<div class="container my-2" [hidden]="isSubmitting">
+<div class="container justify-content-center align-items-center" [hidden]="isSubmitting">
   <div class="position-relative start-0"
        [hidden]="hideRefresh">
     <button mat-icon-button
@@ -21,7 +21,7 @@
     </button>
   </div>
 
-  <div class="row h-100 justify-content-center">
+  <div class="row justify-content-center">
     <div class="col">
       <div class="row my-2">
         <app-work-time-card [time]="time1"
@@ -41,12 +41,13 @@
       <div class="row">
         <mat-calendar #serviceCalendar
                       [dateClass]="dateClass()"
+                      (selectedChange)="onDateClicked($event)"
                       class="width-350 mat-elevation-z9 mt-3 mx-auto"
                       readonly></mat-calendar>
       </div>
 
       <div class="row mt-3">
-        <mat-hint>es werden nur die letzten 30 Tage berücksichtigt</mat-hint>
+        <mat-hint>es sind nur die letzten 365 Tage ausgewertet</mat-hint>
       </div>
     </div>
   </div>

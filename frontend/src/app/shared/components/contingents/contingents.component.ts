@@ -15,7 +15,6 @@ import {
 import {InstitutionService} from "../../services/institution.service";
 import {Sort} from "@angular/material/sort";
 import {Comparer} from "../../services/comparer.helper";
-import * as moment from 'moment';
 import {EmployeeService} from "../../services/employee.service";
 import {TablePageComponent} from "../table-page.component";
 import {HelperService} from "../../services/helper.service";
@@ -263,12 +262,15 @@ export class ContingentsComponent
     // filter by date
     if (this.filterDate != null) {
       filterData = filterData.filter(x => {
-        if (x[2].end != null)
-          return moment(this.filterDate)
-            .isBetween(new Date(x[2].start), new Date(x[2].end), "date", "[]");
+        const filterDate = new Date(this.filterDate!!);
+        const startDate = new Date(x[2].start);
+        const endDate = x[2].end ? new Date(x[2].end) : null;
 
-        return moment(this.filterDate)
-          .isAfter(new Date(x[2].start), "date");
+        if (endDate != null) {
+          return filterDate >= startDate && filterDate <= endDate;
+        }
+
+        return filterDate > startDate;
       });
     }
 

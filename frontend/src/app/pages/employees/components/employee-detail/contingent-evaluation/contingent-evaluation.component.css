@@ -16,3 +16,9 @@
   background-color: rgba(52, 129, 52, 0.8) !important;
   border-radius: 100%;
 }
+
+::ng-deep mat-calendar .mat-calendar-body-cell:hover {
+  background-color: rgba(52, 129, 52, 0) !important;
+  cursor: pointer;
+  border-radius: 50%;
+}

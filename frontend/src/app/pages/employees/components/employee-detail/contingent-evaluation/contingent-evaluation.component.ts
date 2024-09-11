@@ -7,6 +7,8 @@ import {ServiceService} from "../../../../../shared/services/service.service";
 import {ServiceTimeDayDto} from "../../../../../shared/dtos/service-time-day-dto.model";
 import {MatCalendarCellCssClasses} from "@angular/material/datepicker";
 import {UserService} from "../../../../../shared/services/user.service";
+import {Router} from "@angular/router";
+import {DateService} from "../../../../../shared/services/date.service";
 
 @Component({
   selector: 'app-contingent-evaluation',
@@ -16,6 +18,7 @@ import {UserService} from "../../../../../shared/services/user.service";
 export class ContingentEvaluationComponent implements OnInit {
   @Input() employee$: ReplaySubject<EmployeeDto> = new ReplaySubject<EmployeeDto>();
   @Input() hideRefresh = false;
+  @Input() navigateToMyServices = true;
   @Output() onRefreshClick = new EventEmitter<any>();
 
   @ViewChild('serviceCalendar') serviceCalendar;
@@ -29,11 +32,15 @@ export class ContingentEvaluationComponent implements OnInit {
   time7: [number, number, number, number, number] = [0, 0, 0, 0, 0];
   time30: [number, number, number, number, number] = [0, 0, 0, 0, 0];
   serviceDates: [Date, number][] = [];
+  serviceAllBaseUrl = "services/all"
+  serviceMyBaseUrl = "services/my"
 
   constructor(
     private serviceService: ServiceService,
     private userService: UserService,
-    private converter: Converter
+    private converter: Converter,
+    private router: Router,
+    private dateService: DateService
   ) { }
 
   ngOnInit(): void {
@@ -48,7 +55,7 @@ export class ContingentEvaluationComponent implements OnInit {
         this.employee = value;
 
         const past = new Date(Date.now());
-        past.setDate(past.getDate() - 29);
+        past.setDate(past.getDate() - 365);
         return this.serviceService.getTimesByEmployeeAndStartEnd(value.id, past, new Date(Date.now()))
       }))
       .subscribe({
@@ -162,5 +169,24 @@ export class ContingentEvaluationComponent implements OnInit {
 
       return start <= date && (end == null || end >= date);
     }) ?? new ContingentDto();
+  }
+
+  onDateClicked(date) {
+    if (!this.navigateToMyServices) {
+      this.router.navigate([
+        this.serviceAllBaseUrl,
+        this.dateService.formatDateToYearMonthDay(new Date(date)),
+        this.dateService.formatDateToYearMonthDay(new Date(date)),
+        0,
+        this.employee.id,
+        0
+      ])
+    } else {
+      this.router.navigate([
+        this.serviceMyBaseUrl,
+        this.dateService.formatDateToYearMonthDay(new Date(date)),
+        this.dateService.formatDateToYearMonthDay(new Date(date))
+      ])
+    }
   }
 }
