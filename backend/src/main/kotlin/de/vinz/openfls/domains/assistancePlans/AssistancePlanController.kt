@@ -30,9 +30,6 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            if (!accessService.isAffiliated(valueDto.institutionId))
-                throw IllegalArgumentException("user is not allowed to create assistance plans for this client")
-
             val dto = assistancePlanService.create(valueDto)
 
             if (logPerformance) {

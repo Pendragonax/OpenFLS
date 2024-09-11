@@ -29,7 +29,6 @@ import {HourTypeService} from "../../services/hour-type.service";
 import {ServiceService} from "../../services/service.service";
 import {EmployeeService} from "../../services/employee.service";
 import {MatDialog} from "@angular/material/dialog";
-import {GoalEvaluationModalComponent} from "../../../pages/goal-evaluation/modals/goal-evaluation-modal/goal-evaluation-modal.component";
 import {ConfirmationModalComponent} from "../../modals/confirmation-modal/confirmation-modal.component";
 
 @Component({
@@ -122,7 +121,7 @@ export class AssistancePlansComponent
     this.client$.subscribe({
       next: (value) => {
         this.client = value;
-        this.addAvailable = value.editable;
+        this.addAvailable = true;
         this.loadValuesByClient();
       }
     });

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-[![GitHub release](https://img.shields.io/badge/version-1.1.1-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
-=======
-[![GitHub release](https://img.shields.io/badge/version-1.2.0-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
->>>>>>> release-1.2.0
+[![GitHub release](https://img.shields.io/badge/version-1.2.1-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
 # OpenFLS
