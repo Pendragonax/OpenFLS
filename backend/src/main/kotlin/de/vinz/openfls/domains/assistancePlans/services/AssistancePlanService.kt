@@ -33,7 +33,7 @@ class AssistancePlanService(
         private val sponsorService: SponsorService,
         private val hourTypeService: HourTypeService,
         private val modelMapper: ModelMapper
-): GenericService<AssistancePlan> {
+) : GenericService<AssistancePlan> {
 
     @Transactional
     fun create(valueDto: AssistancePlanDto): AssistancePlanDto {
@@ -241,7 +241,7 @@ class AssistancePlanService(
     }
 
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
-        val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ")}
+        val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ") }
         val services = serviceService.getByAssistancePlan(id)
         val eval = AssistancePlanEvalDto()
 
@@ -286,59 +286,74 @@ class AssistancePlanService(
 
             // service is in between the start and end inclusive
             if ((assistancePlan.start.isBefore(startDate) || assistancePlan.start.isEqual(startDate)) &&
-                (assistancePlan.end.isAfter(startDate) || assistancePlan.end.isEqual(startDate))) {
+                    (assistancePlan.end.isAfter(startDate) || assistancePlan.end.isEqual(startDate))) {
                 // total values
                 eval.total
-                    .firstOrNull { it.hourType.id == service.hourType?.id }
-                    ?.apply {
-                        actual += service.minutes / 60.0
-                        size++
-                    }
+                        .firstOrNull { it.hourType.id == service.hourType?.id }
+                        ?.apply {
+                            actual += service.minutes / 60.0
+                            size++
+                        }
 
                 // till today
                 eval.tillToday
-                    .firstOrNull { it.hourType.id == service.hourType?.id &&
-                            service.start.year <= tillDate.year &&
-                            (service.start.month < tillDate.month ||
-                                    (service.start.month == tillDate.month && service.start.dayOfMonth <= tillDate.dayOfMonth))
-                    }
-                    ?.apply {
-                        actual += service.minutes / 60.0
-                        size++
-                    }
+                        .firstOrNull {
+                            it.hourType.id == service.hourType?.id &&
+                                    service.start.year <= tillDate.year &&
+                                    (service.start.month < tillDate.month ||
+                                            (service.start.month == tillDate.month && service.start.dayOfMonth <= tillDate.dayOfMonth))
+                        }
+                        ?.apply {
+                            actual += service.minutes / 60.0
+                            size++
+                        }
 
                 if (actualYear.second != null && actualYear.third != null) {
                     // actual year
                     eval.actualYear
-                        .firstOrNull { it.hourType.id == service.hourType?.id &&
-                                (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
-                                (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
-                        }
-                        ?.apply {
-                            actual += service.minutes / 60.0
-                            size++
-                        }
-                }
+                            .firstOrNull {
+                                it.hourType.id == service.hourType?.id &&
+                                        (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
+                                        (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
+                            }
+                            ?.apply {
+                                actual += service.minutes / 60.0
+                                size++
+                            }
 
-                if (actualMonth.second != null && actualMonth.third != null) {
-                    // actual month
-                    eval.actualMonth
-                        .firstOrNull { it.hourType.id == service.hourType?.id &&
-                                (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
-                                (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
-                        }
-                        ?.apply {
-                            actual += service.minutes / 60.0
-                            size++
-                        }
-                }
+                    if (actualYear.second != null && actualYear.third != null) {
+                        // actual year
+                        eval.actualYear
+                                .firstOrNull {
+                                    it.hourType.id == service.hourType?.id &&
+                                            (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
+                                            (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
+                                }
+                                ?.apply {
+                                    actual += service.minutes / 60.0
+                                    size++
+                                }
+                    }
 
-            } else {
-                eval.notMatchingServices++
-                eval.notMatchingServicesIds.add(service.id)
+                    if (actualMonth.second != null && actualMonth.third != null) {
+                        // actual month
+                        eval.actualMonth
+                                .firstOrNull {
+                                    it.hourType.id == service.hourType?.id &&
+                                            (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
+                                            (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
+                                }
+                                ?.apply {
+                                    actual += service.minutes / 60.0
+                                    size++
+                                }
+                    }
+                } else {
+                    eval.notMatchingServices++
+                    eval.notMatchingServicesIds.add(service.id)
+                }
             }
         }
-
         return eval
     }
 
@@ -350,7 +365,7 @@ class AssistancePlanService(
 
         // month is in between start and end
         if ((today.isAfter(assistancePlan.start) || today.isEqual(assistancePlan.start)) &&
-            (firstOfMonth.isBefore(assistancePlan.end) || firstOfMonth.isEqual(assistancePlan.end))) {
+                (firstOfMonth.isBefore(assistancePlan.end) || firstOfMonth.isEqual(assistancePlan.end))) {
             // start is in the actual month
             if (assistancePlan.start.year == today.year && assistancePlan.start.month == today.month) {
                 from = assistancePlan.start
@@ -375,7 +390,7 @@ class AssistancePlanService(
 
         // month is in between start and end
         if ((today.isAfter(assistancePlan.start) || today.isEqual(assistancePlan.start)) &&
-            (firstOfYear.isBefore(assistancePlan.end) || firstOfYear.isEqual(assistancePlan.end))) {
+                (firstOfYear.isBefore(assistancePlan.end) || firstOfYear.isEqual(assistancePlan.end))) {
             // start is in the actual month
             if (assistancePlan.start.year == today.year) {
                 from = assistancePlan.start
