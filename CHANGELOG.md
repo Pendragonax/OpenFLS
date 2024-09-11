@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 
 
+## 1.2.0
+
+#### Features
+- new service table pages for the logged in user and complete
+- contingent overview for the logged in user
+- contingent overview routes to the selected date
+
+
+## 1.1.1
+
+#### Bug
+- Fix bug by calculcation the evalution with sponsors
+
+
 ## 1.1.0
 
 #### Features
