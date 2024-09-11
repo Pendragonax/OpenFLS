@@ -25,6 +25,16 @@ class Unprofessional(
 
         var end: LocalDate? = null
 ) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Unprofessional) return false
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+
     override fun toString(): String {
         return "Unprofessional(employeeId = ${id?.employeeId}, sponsorId = ${id?.sponsorId}, end = $end)"
     }

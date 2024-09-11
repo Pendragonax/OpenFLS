@@ -1,35 +1,35 @@
 import { Component, OnInit } from '@angular/core';
-import {NewPageComponent} from "../../shared/modules/new-page.component";
-import {ServiceDto} from "../../dtos/service-dto.model";
-import {InstitutionService} from "../../services/institution.service";
-import {ClientsService} from "../../services/clients.service";
-import {AssistancePlanService} from "../../services/assistance-plan.service";
-import {HourTypeService} from "../../services/hour-type.service";
-import {CategoriesService} from "../../services/categories.service";
-import {UserService} from "../../services/user.service";
-import {InstitutionDto} from "../../dtos/institution-dto.model";
+import {NewPageComponent} from "../../shared/components/new-page.component";
+import {ServiceDto} from "../../shared/dtos/service-dto.model";
+import {InstitutionService} from "../../shared/services/institution.service";
+import {ClientsService} from "../../shared/services/clients.service";
+import {AssistancePlanService} from "../../shared/services/assistance-plan.service";
+import {HourTypeService} from "../../shared/services/hour-type.service";
+import {CategoriesService} from "../../shared/services/categories.service";
+import {UserService} from "../../shared/services/user.service";
+import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {combineLatest, startWith} from "rxjs";
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
-import {ClientDto} from "../../dtos/client-dto.model";
+import {ClientDto} from "../../shared/dtos/client-dto.model";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
 import {
   MAT_MOMENT_DATE_ADAPTER_OPTIONS,
   MAT_MOMENT_DATE_FORMATS,
   MomentDateAdapter
 } from "@angular/material-moment-adapter";
-import {AssistancePlanDto} from "../../dtos/assistance-plan-dto.model";
-import {Converter} from "../../shared/converter.helper";
-import {GoalDto} from "../../dtos/goal-dto.model";
-import {HourTypeDto} from "../../dtos/hour-type-dto.model";
-import {CategoryDto} from "../../dtos/category-dto.model";
-import {SponsorDto} from "../../dtos/sponsor-dto.model";
-import {SponsorService} from "../../services/sponsor.service";
+import {AssistancePlanDto} from "../../shared/dtos/assistance-plan-dto.model";
+import {Converter} from "../../shared/services/converter.helper";
+import {GoalDto} from "../../shared/dtos/goal-dto.model";
+import {HourTypeDto} from "../../shared/dtos/hour-type-dto.model";
+import {CategoryDto} from "../../shared/dtos/category-dto.model";
+import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
+import {SponsorService} from "../../shared/services/sponsor.service";
 import {ActivatedRoute, Router} from "@angular/router";
-import {ServiceService} from "../../services/service.service";
-import {GoalHourDto} from "../../dtos/goal-hour-dto.model";
-import {AssistancePlanHourDto} from "../../dtos/assistance-plan-hour-dto.model";
+import {ServiceService} from "../../shared/services/service.service";
+import {GoalHourDto} from "../../shared/dtos/goal-hour-dto.model";
+import {AssistancePlanHourDto} from "../../shared/dtos/assistance-plan-hour-dto.model";
 import {Location} from "@angular/common";
-import {HelperService} from "../../services/helper.service";
+import {HelperService} from "../../shared/services/helper.service";
 import {createStartTimeEndTimeValidator} from "../../shared/validators/startTimeEndTimeValidator";
 
 @Component({
@@ -74,13 +74,13 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   firstForm = new UntypedFormGroup({
     serviceDate: new UntypedFormControl({value: this.timeNow, disabled: true},
       Validators.compose([Validators.required])),
-    startHour: new UntypedFormControl({value: this.timeNow.getHours(), disabled: true},
+    startHour: new UntypedFormControl({value: this.timeNow.getHours(), disabled: false},
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
-    startMinute: new UntypedFormControl({value: this.timeNow.getMinutes(), disabled: true},
+    startMinute: new UntypedFormControl({value: this.timeNow.getMinutes(), disabled: false},
       Validators.compose([Validators.required, Validators.max(59), Validators.min(0)])),
-    endHour: new UntypedFormControl({value: this.timeNow.getHours(), disabled: true},
+    endHour: new UntypedFormControl({value: this.timeNow.getHours(), disabled: false},
       Validators.compose([Validators.required, Validators.max(23), Validators.min(0)])),
-    endMinute: new UntypedFormControl({value: this.timeNow.getMinutes(), disabled: true},
+    endMinute: new UntypedFormControl({value: this.timeNow.getMinutes(), disabled: false},
       Validators.compose([Validators.required, Validators.max(59), Validators.min(0)])),
     institution: new UntypedFormControl(null,
       Validators.compose([Validators.required]))

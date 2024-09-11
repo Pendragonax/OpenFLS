@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from "@angular/forms";
-import { UserService } from "../../services/user.service";
+import { UserService } from "../../shared/services/user.service";
 import packageJson from "../../../../package.json";
 
 @Component({

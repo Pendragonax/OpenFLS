@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.hourTypes
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.services.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
@@ -28,4 +29,14 @@ class HourType(
         @JsonIgnore
         @OneToMany(mappedBy = "hourType", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         var assistancePlanHours: MutableSet<AssistancePlanHour> = mutableSetOf()
-)
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is HourType) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id.hashCode() ?: 0
+        }
+}

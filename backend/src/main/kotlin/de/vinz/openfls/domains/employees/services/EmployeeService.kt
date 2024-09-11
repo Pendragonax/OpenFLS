@@ -11,6 +11,7 @@ import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
 import de.vinz.openfls.domains.permissions.PermissionDto
 import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
+import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.domains.permissions.PermissionService
@@ -226,6 +227,10 @@ class EmployeeService(
                 access?.password = ""
             }
         }.toList()
+    }
+
+    fun getAllProjections(): List<EmployeeSoloProjection> {
+        return employeeRepository.findAllProjectionsBy().sortedBy { it.lastname }
     }
 
     override fun getById(id: Long): Employee? {

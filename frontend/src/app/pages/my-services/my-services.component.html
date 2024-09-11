@@ -1,0 +1,23 @@
+<app-info-header [title]=title
+                 [addRole]="'user'"
+                 [addButtonRouting]="true"
+                 [addRouterLink]="['/services/new/' + getDate(filterDateStart)]"></app-info-header>
+
+<div class="container-fluid mt-1">
+  <div class="row justify-content-center">
+
+    <div class="col-auto">
+      <app-date-complete-selection [start]="start"
+                                   [end]="end"
+                                   (dateChanged)="onDateChanged($event)"
+                                   [disabled]="isBusy"></app-date-complete-selection>
+    </div>
+    <div class="col-auto">
+      <app-search-field [isSubmitting]="isBusy" (onSearchStringChanges)="onSearchStringChanged($event)"></app-search-field>
+    </div>
+  </div>
+  <div class="row">
+    <app-service-table *ngIf="!isBusy" [services]="services" [editMode]="true"></app-service-table>
+    <app-loading-spinner *ngIf="isBusy" [description]="'Lade Einträge'"></app-loading-spinner>
+  </div>
+</div>

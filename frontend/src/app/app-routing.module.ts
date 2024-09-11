@@ -4,30 +4,29 @@ import { LoginComponent } from './pages/login/login.component';
 import { HomeComponent } from "./pages/home/home.component";
 import {AuthGuard} from "./core/auth.guard";
 import {EmployeesComponent} from "./pages/employees/employees.component";
-import {EmployeeNewComponent} from "./pages/employee-new/employee-new.component";
+import {EmployeeNewComponent} from "./pages/employees/components/employee-new/employee-new.component";
 import {InstitutionComponent} from "./pages/institution/institution.component";
-import {EmployeeDetailComponent} from "./pages/employee-detail/employee-detail.component";
-import {InstitutionNewComponent} from "./pages/institution-new/institution-new.component";
-import {InstitutionDetailComponent} from "./pages/institution-detail/institution-detail.component";
+import {EmployeeDetailComponent} from "./pages/employees/components/employee-detail/employee-detail.component";
+import {InstitutionNewComponent} from "./pages/institution/components/institution-new/institution-new.component";
+import {InstitutionDetailComponent} from "./pages/institution/components/institution-detail/institution-detail.component";
 import {CategoryComponent} from "./pages/category/category.component";
-import {CategoryDetailComponent} from "./pages/category-detail/category-detail.component";
-import {CategoryNewComponent} from "./pages/category-new/category-new.component";
+import {CategoryDetailComponent} from "./pages/category/components/category-detail/category-detail.component";
+import {CategoryNewComponent} from "./pages/category/components/category-new/category-new.component";
 import {SponsorComponent} from "./pages/sponsor/sponsor.component";
-import {SponsorDetailComponent} from "./pages/sponsor-detail/sponsor-detail.component";
+import {SponsorDetailComponent} from "./pages/sponsor/components/sponsor-detail/sponsor-detail.component";
 import {ClientComponent} from "./pages/client/client.component";
-import {ClientNewComponent} from "./pages/client-new/client-new.component";
-import {ClientDetailComponent} from "./pages/client-detail/client-detail.component";
-import {AssistancePlanNewComponent} from "./pages/assistance-plan-new/assistance-plan-new.component";
-import {AssistancePlanDetailComponent} from "./pages/assistance-plan-detail/assistance-plan-detail.component";
+import {ClientNewComponent} from "./pages/client/components/client-new/client-new.component";
+import {ClientDetailComponent} from "./pages/client/components/client-detail/client-detail.component";
+import {AssistancePlanNewComponent} from "./shared/components/assistance-plans/components/assistance-plan-new/assistance-plan-new.component";
+import {AssistancePlanDetailComponent} from "./shared/components/assistance-plans/components/assistance-plan-detail/assistance-plan-detail.component";
 import {HourTypeComponent} from "./pages/hour-type/hour-type.component";
 import {ServiceDetailComponent} from "./pages/service-detail/service-detail.component";
-import {ServiceMyComponent} from "./pages/service-my/service-my.component";
-import {ServiceClientComponent} from "./pages/service-client/service-client.component";
-import {ServiceEmployeeComponent} from "./pages/service-employee/service-employee.component";
 import {
   ServiceEvaluationOverviewComponent
 } from "./pages/service-evaluation-overview/service-evaluation-overview.component";
 import {GoalEvaluationComponent} from "./pages/goal-evaluation/goal-evaluation.component";
+import {MyServicesComponent} from "./pages/my-services/my-services.component";
+import {AllServicesComponent} from "./pages/all-services/all-services.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -52,13 +51,13 @@ const routes: Routes = [
   { path: 'assistance_plans/goals/:id', component: GoalEvaluationComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/goals/:id/:tab', component: GoalEvaluationComponent, canActivate: [AuthGuard] },
   { path: 'hour_types', component: HourTypeComponent, canActivate: [AuthGuard] },
-  { path: 'services', component: ServiceMyComponent, canActivate: [AuthGuard] },
-  { path: 'services/my', component: ServiceMyComponent, canActivate: [AuthGuard] },
+  { path: 'services/my', component: MyServicesComponent, canActivate: [AuthGuard] },
+  { path: 'services/my/:start/:end', component: MyServicesComponent, canActivate: [AuthGuard] },
+  { path: 'services/all', component: AllServicesComponent, canActivate: [AuthGuard] },
+  { path: 'services/all/:start/:end/:institutionId/:employeeId/:clientId', component: AllServicesComponent, canActivate: [AuthGuard] },
   { path: 'services/new', component: ServiceDetailComponent, canActivate: [AuthGuard] },
   { path: 'services/new/:date', component: ServiceDetailComponent, canActivate: [AuthGuard] },
   { path: 'services/edit/:id', component: ServiceDetailComponent, canActivate: [AuthGuard] },
-  { path: 'services/client/:id', component: ServiceClientComponent, canActivate: [AuthGuard] },
-  { path: 'services/employee/:id', component: ServiceEmployeeComponent, canActivate: [AuthGuard] },
   { path: 'overview', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] },
   { path: 'overview/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] }
 ];

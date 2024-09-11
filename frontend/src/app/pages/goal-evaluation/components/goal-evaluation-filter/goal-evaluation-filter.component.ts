@@ -1,7 +1,7 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {Period} from "../../../../components/year-month-selection/Period";
+import {Period} from "../../../../shared/components/year-month-selection/Period";
 import {UntypedFormGroup} from "@angular/forms";
-import {PeriodMode} from "../../../../components/year-month-selection/PeriodMode";
+import {PeriodMode} from "../../../../shared/components/year-month-selection/PeriodMode";
 
 @Component({
   selector: 'app-goal-evaluation-filter',

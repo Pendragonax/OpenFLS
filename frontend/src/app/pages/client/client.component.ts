@@ -1,22 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {ClientsService} from "../../services/clients.service";
+import {ClientsService} from "../../shared/services/clients.service";
 import {Sort} from "@angular/material/sort";
-import {Comparer} from "../../shared/comparer.helper";
-import {ClientView} from "../../models/client-view.model";
+import {Comparer} from "../../shared/services/comparer.helper";
+import {ClientViewModel} from "../../shared/models/client-view.model";
 import {combineLatest} from "rxjs";
-import {UserService} from "../../services/user.service";
-import {TablePageComponent} from "../../shared/modules/table-page.component";
-import {HelperService} from "../../services/helper.service";
-import {EmployeeView} from "../../models/employee-view.model";
-import {ServiceService} from "../../services/service.service";
+import {UserService} from "../../shared/services/user.service";
+import {TablePageComponent} from "../../shared/components/table-page.component";
+import {HelperService} from "../../shared/services/helper.service";
+import {EmployeeViewModel} from "../../shared/models/employee-view.model";
+import {ServiceService} from "../../shared/services/service.service";
 
 @Component({
   selector: 'app-client',
   templateUrl: './client.component.html',
   styleUrls: ['./client.component.css']
 })
-export class ClientComponent extends TablePageComponent<ClientView, ClientView> implements OnInit {
+export class ClientComponent extends TablePageComponent<ClientViewModel, ClientViewModel> implements OnInit {
   // VARs
   tableColumns = ['name', 'institution', 'actions'];
 
@@ -40,7 +40,7 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
       this.userService.user$
     ]).subscribe(([clients, user]) => {
       this.values = clients
-        .map(client => <ClientView> {
+        .map(client => <ClientViewModel> {
           dto: client,
           editable: user.permissions
             .filter(perm => perm.affiliated)
@@ -53,14 +53,14 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
     });
   }
 
-  getNewValue(): ClientView {
-    return new ClientView()
+  getNewValue(): ClientViewModel {
+    return new ClientViewModel()
   }
 
   initFormSubscriptions() {
   }
 
-  fillEditForm(value: ClientView) {
+  fillEditForm(value: ClientViewModel) {
     throw new Error('Method not implemented.');
   }
 
@@ -73,15 +73,15 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
     this.refreshTablePage();
   }
 
-  create(value: ClientView) {
+  create(value: ClientViewModel) {
     throw new Error('Method not implemented.');
   }
 
-  update(value: ClientView) {
+  update(value: ClientViewModel) {
     throw new Error('Method not implemented.');
   }
 
-  delete(value: ClientView) {
+  delete(value: ClientViewModel) {
     if (this.isSubmitting || value == null) return;
 
     this.isSubmitting = true;
@@ -99,7 +99,7 @@ export class ClientComponent extends TablePageComponent<ClientView, ClientView> 
     this.filterTableData()
   }
 
-  override handleDeleteModalOpen(value: ClientView) {
+  override handleDeleteModalOpen(value: ClientViewModel) {
     this.serviceService.getCountByClientId(value.dto.id)
       .subscribe({
         next: (value) => this.deleteServiceCount = value

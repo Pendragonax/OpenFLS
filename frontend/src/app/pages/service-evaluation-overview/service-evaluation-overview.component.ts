@@ -2,38 +2,38 @@ import {Component, OnInit} from '@angular/core';
 import {combineLatest, Observable, ReplaySubject} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
-import {OverviewService} from "../../services/overview.service";
-import {OverviewAssistancePlan} from "../../dtos/overview-assistance-plan.dto";
+import {OverviewService} from "../../shared/services/overview.service";
+import {OverviewAssistancePlan} from "../../shared/dtos/overview-assistance-plan.dto";
 import {Location} from '@angular/common';
-import {HourTypeDto} from "../../dtos/hour-type-dto.model";
-import {HourTypeService} from "../../services/hour-type.service";
-import {InstitutionService} from "../../services/institution.service";
-import {InstitutionDto} from "../../dtos/institution-dto.model";
-import {SponsorService} from "../../services/sponsor.service";
-import {SponsorDto} from "../../dtos/sponsor-dto.model";
+import {HourTypeDto} from "../../shared/dtos/hour-type-dto.model";
+import {HourTypeService} from "../../shared/services/hour-type.service";
+import {InstitutionService} from "../../shared/services/institution.service";
+import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
+import {SponsorService} from "../../shared/services/sponsor.service";
+import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
 import {
   MAT_MOMENT_DATE_ADAPTER_OPTIONS,
   MAT_MOMENT_DATE_FORMATS,
   MomentDateAdapter
 } from "@angular/material-moment-adapter";
-import {EOverviewType} from "../../enums/EOverviewType";
-import {Converter} from "../../shared/converter.helper";
+import {EOverviewType} from "./enums/EOverviewType";
+import {Converter} from "../../shared/services/converter.helper";
 import {
   OverviewValueTypeInfoModalComponent
-} from "../../modals/overview-valuetype-info-modal/overview-value-type-info-modal.component";
+} from "./modals/overview-valuetype-info-modal/overview-value-type-info-modal.component";
 import {MatDialog} from "@angular/material/dialog";
 import {HttpErrorResponse, HttpStatusCode} from "@angular/common/http";
 import {
   OverviewPermissionInfoModalComponent
-} from "../../modals/overview-permission-info-modal/overview-permission-info-modal.component";
-import {DateService} from "../../services/date.service";
+} from "./modals/overview-permission-info-modal/overview-permission-info-modal.component";
+import {DateService} from "../../shared/services/date.service";
 import {
   AssistancePlanAnalysisService
-} from "../../domains/assistance-plan-analysis/services/assistance-plan-analysis.service";
+} from "./services/assistance-plan-analysis.service";
 import {
   AssistancePlansAnalysisMonthDto
-} from "../../domains/assistance-plan-analysis/dtos/assistance-plans-analysis-month-dto";
+} from "./dtos/assistance-plans-analysis-month-dto";
 
 @Component({
   selector: 'app-service-evaluation-overview',

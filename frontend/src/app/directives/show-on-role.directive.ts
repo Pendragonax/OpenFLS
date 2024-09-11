@@ -1,5 +1,5 @@
 import {Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef} from '@angular/core';
-import {UserService} from "../services/user.service";
+import {UserService} from "../shared/services/user.service";
 import {Subject, takeUntil} from "rxjs";
 
 @Directive({

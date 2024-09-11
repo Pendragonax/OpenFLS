@@ -1,0 +1,14 @@
+.custom-dropdown-menu {
+  background-color: rgb(0, 61, 117); /* Ändere die Hintergrundfarbe des Dropdown-Menüs */
+  /*border: 2px solid black;*/
+}
+
+.custom-dropdown-item {
+  color: #fff; /* Ändere die Textfarbe der Dropdown-Items */
+  font-size: 13px;
+}
+
+.custom-dropdown-item:hover {
+  background-color: limegreen; /* Ändere die Hintergrundfarbe beim Hover */
+  color: black;
+}

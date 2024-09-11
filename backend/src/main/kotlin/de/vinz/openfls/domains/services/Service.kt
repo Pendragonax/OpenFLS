@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.evaluations.Evaluation
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.institutions.Institution
@@ -77,4 +78,14 @@ data class Service(
                 inverseJoinColumns = [JoinColumn(name = "category_id")])
         @JsonIgnoreProperties(value = ["services", "categoryTemplate", "hibernateLazyInitializer"])
         var categorys: MutableSet<Category> = mutableSetOf()
-)
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is Service) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id.hashCode() ?: 0
+        }
+}

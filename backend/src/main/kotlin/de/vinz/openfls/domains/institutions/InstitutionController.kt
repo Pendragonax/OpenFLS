@@ -1,5 +1,7 @@
 package de.vinz.openfls.domains.institutions
 
+import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
+import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -12,7 +14,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/institutions")
 class InstitutionController(
-        private val institutionService: InstitutionService
+        private val institutionService: InstitutionService,
+        private val accessService: AccessService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(InstitutionController::class.java)
@@ -123,6 +126,31 @@ class InstitutionController(
             ResponseEntity(
                 emptyList(),
                 HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @GetMapping("/readable")
+    fun getAllReadable(): Any {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val allDTOs = institutionService.getAllSoloDTOs()
+            val dtos = allDTOs.filter { accessService.canReadEntries(it.id) }
+
+            if (logPerformance) {
+                logger.info(String.format("%s getAll took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    emptyList(),
+                    HttpStatus.BAD_REQUEST)
         }
     }
 

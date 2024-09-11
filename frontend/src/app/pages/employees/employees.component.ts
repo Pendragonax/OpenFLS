@@ -1,16 +1,16 @@
 import {Component, OnInit} from '@angular/core';
-import {EmployeeService} from "../../services/employee.service";
+import {EmployeeService} from "../../shared/services/employee.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {EmployeeDto} from "../../dtos/employee-dto.model";
-import {UserService} from "../../services/user.service";
-import {EmployeeView} from "../../models/employee-view.model";
+import {EmployeeDto} from "../../shared/dtos/employee-dto.model";
+import {UserService} from "../../shared/services/user.service";
+import {EmployeeViewModel} from "../../shared/models/employee-view.model";
 import {combineLatest} from "rxjs";
 import {Sort} from "@angular/material/sort";
-import {Comparer} from "../../shared/comparer.helper";
-import {InstitutionService} from "../../services/institution.service";
-import {TablePageComponent} from "../../shared/modules/table-page.component";
-import {HelperService} from "../../services/helper.service";
-import {ServiceService} from "../../services/service.service";
+import {Comparer} from "../../shared/services/comparer.helper";
+import {InstitutionService} from "../../shared/services/institution.service";
+import {TablePageComponent} from "../../shared/components/table-page.component";
+import {HelperService} from "../../shared/services/helper.service";
+import {ServiceService} from "../../shared/services/service.service";
 
 @Component({
   selector: 'app-employees',
@@ -19,7 +19,7 @@ import {ServiceService} from "../../services/service.service";
     './employees.component.css'
   ]
 })
-export class EmployeesComponent extends TablePageComponent<EmployeeView, EmployeeView> implements OnInit {
+export class EmployeesComponent extends TablePageComponent<EmployeeViewModel, EmployeeViewModel> implements OnInit {
   // VARs
   tableColumns: string[] = ['roles', 'name', 'institution', 'actions'];
 
@@ -47,7 +47,7 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
       this.userService.isAdmin$]
     ).subscribe({
       next: ([leadingIds, employees, institutions, isAdmin]) => {
-        this.values = employees.map(value => <EmployeeView>{
+        this.values = employees.map(value => <EmployeeViewModel>{
           dto: value,
           editable: isAdmin || this.isEmployeeEditable(leadingIds, value),
           administrator: (value?.access?.role ?? 99) <= 1 ?? false,
@@ -67,14 +67,14 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
     });
   }
 
-  getNewValue(): EmployeeView {
-    return new EmployeeView()
+  getNewValue(): EmployeeViewModel {
+    return new EmployeeViewModel()
   }
 
   initFormSubscriptions() {
   }
 
-  fillEditForm(value: EmployeeView) {
+  fillEditForm(value: EmployeeViewModel) {
     throw new Error('Method not implemented.');
   }
 
@@ -87,15 +87,15 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
     this.refreshTablePage();
   }
 
-  create(value: EmployeeView) {
+  create(value: EmployeeViewModel) {
     throw new Error('Method not implemented.');
   }
 
-  update(value: EmployeeView) {
+  update(value: EmployeeViewModel) {
     throw new Error('Method not implemented.');
   }
 
-  delete(employee: EmployeeView) {
+  delete(employee: EmployeeViewModel) {
     if (employee === null) return;
 
     this.isSubmitting = true;
@@ -131,7 +131,7 @@ export class EmployeesComponent extends TablePageComponent<EmployeeView, Employe
     this.filterTableData()
   }
 
-  override handleDeleteModalOpen(value: EmployeeView) {
+  override handleDeleteModalOpen(value: EmployeeViewModel) {
     this.serviceService.getCountByEmployeeId(value.dto.id)
       .subscribe({
         next: (value) => this.deleteServiceCount = value

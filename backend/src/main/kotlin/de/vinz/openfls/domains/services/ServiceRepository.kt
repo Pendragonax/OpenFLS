@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.services
 
-import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import org.springframework.data.jpa.repository.Query
@@ -10,16 +9,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 interface ServiceRepository : CrudRepository<Service, Long> {
-
-    @Query("SELECT u FROM Service u " +
-            "WHERE u.employee.id = :employeeId " +
-            "AND u.institution.id >= :institutionId " +
-            "AND cast(u.start as LocalDate) >= :start " +
-            "AND cast(u.start as LocalDate) <= :end")
-    fun findByEmployeeIdAndInstitutionIdAndStartAndEnd(employeeId: Long,
-                                                       institutionId: Long,
-                                                       start: LocalDate,
-                                                       end: LocalDate): List<ServiceProjection>
 
     @Query("SELECT u FROM Service u " +
             "WHERE u.assistancePlan.id = :assistancePlanId " +
@@ -32,6 +21,55 @@ interface ServiceRepository : CrudRepository<Service, Long> {
                                                           end: LocalDate): List<ServiceSoloProjection>
 
     @Query("SELECT u FROM Service u " +
+            "WHERE u.institution.id in :institutionIds " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start")
+    fun findProjectionsByInstitutionIdsAndStartAndEnd(institutionIds: List<Long>,
+                                                      start: LocalDate,
+                                                      end: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u " +
+            "WHERE u.institution.id = :institutionId " +
+            "AND u.employee.id = :employeeId " +
+            "AND u.client.id = :clientId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start")
+    fun findProjectionsByInstitutionIdAndEmployeeIdAndClientIdAndStartAndEnd(institutionId: Long,
+                                                                             employeeId: Long,
+                                                                             clientId: Long,
+                                                                             start: LocalDate,
+                                                                             end: LocalDate): List<ServiceProjection>
+    @Query("SELECT u FROM Service u " +
+            "WHERE (:institutionId <= 0 OR u.institution.id = :institutionId) " +
+            "AND (:employeeId <= 0 OR u.employee.id = :employeeId) " +
+            "AND (:clientId <= 0 OR u.client.id = :clientId) " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start")
+    fun findProjectionsBy(institutionId: Long,
+                          employeeId: Long,
+                          clientId: Long,
+                          start: LocalDate,
+                          end: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u " +
+            "WHERE (:institutionId <= 0 OR u.institution.id = :institutionId) " +
+            "AND u.institution.id in :institutionIds " +
+            "AND (:employeeId <= 0 OR u.employee.id = :employeeId) " +
+            "AND (:clientId <= 0 OR u.client.id = :clientId) " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start")
+    fun findProjectionsBy(institutionId: Long,
+                          institutionIds: List<Long>,
+                          employeeId: Long,
+                          clientId: Long,
+                          start: LocalDate,
+                          end: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u " +
             "WHERE u.assistancePlan.id = :assistancePlanId " +
             "AND cast(u.start as LocalDate) >= :start " +
             "AND cast(u.start as LocalDate) <= :end")
@@ -39,13 +77,40 @@ interface ServiceRepository : CrudRepository<Service, Long> {
                                                           start: LocalDate,
                                                           end: LocalDate): List<ServiceSoloProjection>
 
+    @Query("SELECT u FROM Service u WHERE u.institution.id = :institutionId AND cast(u.start as LocalDate) = :date")
+    fun findByInstitutionIdAndDate(@Param("institutionId") institutionId: Long,
+                                   @Param("date") date: LocalDate): List<ServiceProjection>
+
     @Query("SELECT u FROM Service u " +
-            "WHERE u.institution.id >= :institutionId " +
+            "WHERE u.institution.id = :institutionId " +
             "AND cast(u.start as LocalDate) >= :start " +
-            "AND cast(u.start as LocalDate) <= :end")
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start")
     fun findByInstitutionIdAndStartAndEnd(institutionId: Long,
                                           start: LocalDate,
                                           end: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u " +
+            "WHERE u.institution.id in :institutionIds " +
+            "AND u.client.id = :clientId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start")
+    fun findProjectionsByInstitutionIdsAndClientIdAndStartAndEnd(institutionIds: List<Long>,
+                                                                 clientId: Long,
+                                                                 start: LocalDate,
+                                                                 end: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u " +
+            "WHERE u.institution.id = :institutionId " +
+            "AND u.client.id = :clientId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start")
+    fun findByInstitutionIdAndClientIdAndStartAndEnd(institutionId: Long,
+                                                     clientId: Long,
+                                                     start: LocalDate,
+                                                     end: LocalDate): List<ServiceProjection>
 
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND cast(u.start as LocalDate) = :date")
     fun findByEmployeeAndDate(@Param("employeeId") employeeId: Long,
@@ -56,7 +121,7 @@ interface ServiceRepository : CrudRepository<Service, Long> {
             "AND cast(u.start as LocalDate) <= :end")
     fun findByEmployeeAndStartAndEnd(@Param("employeeId") clientId: Long,
                                    @Param("start") start: LocalDate,
-                                   @Param("end") end: LocalDate): List<Service>
+                                   @Param("end") end: LocalDate): List<ServiceProjection>
 
     @Query("SELECT u FROM Service u WHERE u.client.id = :clientId AND cast(u.start as LocalDate) = :date")
     fun findByClientAndDate(@Param("clientId") clientId: Long,
@@ -69,6 +134,14 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     fun findByClientAndStartAndEnd(@Param("clientId") clientId: Long,
                                    @Param("start") start: LocalDate,
                                    @Param("end") end: LocalDate): List<Service>
+
+    @Query("SELECT u FROM Service u WHERE u.client.id = :clientId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start ASC")
+    fun findSoloProjectionByClientAndStartAndEnd(@Param("clientId") clientId: Long,
+                                                 @Param("start") start: LocalDate,
+                                                 @Param("end") end: LocalDate): List<ServiceProjection>
 
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND " +
             "u.client.id = :clientId AND " +

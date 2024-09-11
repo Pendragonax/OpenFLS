@@ -6,13 +6,13 @@ import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.PermissionService
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
+import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -266,8 +266,8 @@ class ServiceController(
             val userId = accessService.getId()
             val isAdmin = accessService.isAdmin()
 
-            val dtos = serviceService.getDtosByEmployeeAndStartAndEnd(id, start, end)
-                    .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
+            val dtos = serviceService.getByEmployeeAndStartAndEnd(id, start, end)
+                    .filter { isAdmin || it.employee.id == userId || leadingInstitutionIds.contains(it.institution.id) }
                     .sortedBy { it.start }
 
             if (logPerformance) {
@@ -280,6 +280,67 @@ class ServiceController(
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("institution/{id}/{start}/{end}")
+    fun getByInstitutionIdAndStartAndEnd(@PathVariable id: Long,
+                                         @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
+                                         @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            if (!accessService.canReadEntries(id)) {
+                throw IllegalArgumentException("no permission to load the services of this institution")
+            }
+
+            val dtos = serviceService.getDtosByInstitutionIdAndStartAndEnd(id, start, end)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getByInstitutionIdAndStartAndEnd took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("institution/{id}/{date}")
+    fun getByInstitutionIdAndDate(@PathVariable id: Long,
+                                  @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") date: LocalDate): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            if (!accessService.canReadEntries(id)) {
+                throw IllegalArgumentException("no permission to load the services of this institution")
+            }
+
+            val dtos = serviceService.getDtosByInstitutionIdAndDate(id, date)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getByInstitutionIdAndDate took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message)
 
             ResponseEntity(
                     ex.message,
@@ -351,6 +412,86 @@ class ServiceController(
         }
     }
 
+    @GetMapping("institution/{institutionId}/client/{clientId}/{start}/{end}")
+    fun getByInstitutionIdAndClientIdAndStartAndEnd(@PathVariable institutionId: Long,
+                                                    @PathVariable clientId: Long,
+                                                    @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
+                                                    @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            if (!accessService.canReadEntries(institutionId)) {
+                throw IllegalArgumentException("no permission to load the services of this institution")
+            }
+
+            val readableInstitutions = accessService.getReadRightsInstitutionIds();
+            val dtos = serviceService.getProjections(institutionId, clientId, start, end, readableInstitutions)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getByInstitutionIdAndClientIdAndStartAndEnd took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("institution/{institutionId}/employee/{employeeId}/client/{clientId}/{start}/{end}")
+    fun getByInstitutionIdAndEmployeeIdAndClientIdAndStartAndEnd(@PathVariable institutionId: Long,
+                                                                 @PathVariable employeeId: Long,
+                                                                 @PathVariable clientId: Long,
+                                                                 @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
+                                                                 @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            if (!accessService.canReadEntries(institutionId)) {
+                throw ServicePermissionDeniedException()
+            }
+
+            if (employeeId > 0 &&
+                    accessService.getId() != employeeId &&
+                    !accessService.isAdmin() &&
+                    !accessService.canReadEmployee(employeeId))
+                throw ServicePermissionDeniedException()
+
+            val readableInstitutions = accessService.getReadRightsInstitutionIds();
+            val dtos = serviceService.getProjections(institutionId, employeeId, clientId, start, end, readableInstitutions)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getByInstitutionIdAndEmployeeIdAndClientIdAndStartAndEnd took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: ServicePermissionDeniedException) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.FORBIDDEN
+            )
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
     @GetMapping("employee/{id}")
     fun getByEmployeeAndFilter(@PathVariable id: Long,
                                @Valid @RequestBody valueDto: ServiceFilterDto): Any {
@@ -387,7 +528,7 @@ class ServiceController(
             val startMs = System.currentTimeMillis()
             if (accessService.getId() != id &&
                     !accessService.isAdmin() &&
-                    !accessService.canReadEmployeeStats(id))
+                    !accessService.canReadEmployee(id))
                 throw IllegalArgumentException("No permission to get the times of this employee")
 
             val serviceDtos = serviceService.getDtosByEmployeeAndStartEndDate(id, start, end)

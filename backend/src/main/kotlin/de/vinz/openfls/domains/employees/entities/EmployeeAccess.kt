@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.employees.entities
 
+import de.vinz.openfls.domains.permissions.Permission
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import jakarta.persistence.*
@@ -28,4 +29,14 @@ class EmployeeAccess(
         @MapsId
         @JoinColumn(name = "id", referencedColumnName = "id")
         var employee: Employee? = null
-)
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is EmployeeAccess) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id?.hashCode() ?: 0
+        }
+}

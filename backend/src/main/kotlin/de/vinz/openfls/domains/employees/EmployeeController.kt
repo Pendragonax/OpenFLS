@@ -270,6 +270,30 @@ class EmployeeController(
         }
     }
 
+    @GetMapping("projections")
+    fun getAllProjections(): Any {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val dtos = employeeService.getAllProjections()
+
+            if (logPerformance) {
+                logger.info(String.format("%s getAllProjections took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST)
+        }
+    }
+
     @GetMapping("{id}")
     fun getById(@PathVariable id: Long): Any  {
         return try {

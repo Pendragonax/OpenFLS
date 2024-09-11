@@ -1,0 +1,18 @@
+.fixed-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 100;
+  opacity: 0.3;
+  background: limegreen;
+  color: white;
+}
+
+.fixed-button:hover {
+  transition: opacity 200ms ease-in-out;
+  opacity: 1;
+}
+
+.table-container {
+  position: relative;
+}

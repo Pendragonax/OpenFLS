@@ -4,6 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.goals.services.GoalService
+import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.services.UserService
 import org.springframework.stereotype.Service
 
@@ -14,6 +15,7 @@ class AccessService(
         private val contingentService: ContingentService,
         private val assistancePlanService: AssistancePlanService,
         private val permissionService: PermissionService,
+        private val institutionService: InstitutionService,
         private val clientService: ClientService
 ) {
 
@@ -64,7 +66,7 @@ class AccessService(
     fun canReadEntries(institutionId: Long): Boolean {
         return try {
             // ADMIN
-            if (isAdmin())
+            if (isAdmin() || institutionId <= 0)
                 return true
 
             canReadEntries(getId(), institutionId)
@@ -139,7 +141,7 @@ class AccessService(
         }
     }
 
-    fun canReadEmployeeStats(employeeId: Long): Boolean {
+    fun canReadEmployee(employeeId: Long): Boolean {
         return try {
             // ADMIN
             if (isAdmin())
@@ -213,6 +215,17 @@ class AccessService(
             .getPermissionByEmployee(id)
             .filter { it.writeEntries }
             .map { it.institution?.id ?: 0 }
+    }
+
+    fun getReadRightsInstitutionIds(): List<Long> {
+        if (isAdmin()) {
+            return institutionService.getAllDtos().map { it.id }
+        }
+
+        return permissionService
+                .getPermissionByEmployee(getId())
+                .filter { it.readEntries }
+                .map { it.institution?.id ?: 0 }
     }
 
     private fun getReadRightsInstitutionIds(id: Long): List<Long> {

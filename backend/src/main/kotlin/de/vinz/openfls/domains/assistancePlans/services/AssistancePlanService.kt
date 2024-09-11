@@ -80,12 +80,14 @@ class AssistancePlanService(
 
         // add hours
         entity.hours = hours
-            .map { assistancePlanHourRepository
-                .save(it.apply {
-                    id = 0
-                    assistancePlan = entity
-                })}
-            .toMutableSet()
+                .map {
+                    assistancePlanHourRepository
+                            .save(it.apply {
+                                id = 0
+                                assistancePlan = entity
+                            })
+                }
+                .toMutableSet()
 
         return entity
     }
@@ -141,17 +143,18 @@ class AssistancePlanService(
 
         // delete goals
         assistancePlanHourRepository
-            .findByAssistancePlanId(value.id)
-            .filter { !hours.any { hour -> hour.id == it.id } }
-            .forEach { assistancePlanHourRepository.deleteById(it.id) }
+                .findByAssistancePlanId(value.id)
+                .filter { !hours.any { hour -> hour.id == it.id } }
+                .forEach { assistancePlanHourRepository.deleteById(it.id) }
 
         // add / update goals
         entity.hours = hours
-            .map { hour ->
-                assistancePlanHourRepository.save(hour.apply {
-                    assistancePlan = entity
-                })}
-            .toMutableSet()
+                .map { hour ->
+                    assistancePlanHourRepository.save(hour.apply {
+                        assistancePlan = entity
+                    })
+                }
+                .toMutableSet()
 
         return entity
     }
@@ -225,6 +228,16 @@ class AssistancePlanService(
         val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
 
         return assistancePlanRepository.findProjectionByInstitutionIdAndStartAndEnd(institutionId, start, end)
+    }
+
+    fun getProjectionByYearMonthInstitutionIdSponsorId(year: Int,
+                                                       month: Int,
+                                                       institutionId: Long,
+                                                       sponsorId: Long): List<AssistancePlanProjection> {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return assistancePlanRepository.findProjectionByInstitutionIdAndSponsorIdAndStartAndEnd(institutionId, sponsorId, start, end)
     }
 
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
