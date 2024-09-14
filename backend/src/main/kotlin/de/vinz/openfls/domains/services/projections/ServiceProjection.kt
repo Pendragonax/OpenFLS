@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.services.projections
 
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
-import de.vinz.openfls.domains.institutions.InstitutionSoloProjection
+import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import java.time.LocalDateTime
 
 interface ServiceProjection {
