@@ -73,12 +73,6 @@ class ServiceController(
             if (!accessService.isAdmin() &&
                     serviceService.getById(id)?.employee?.id != accessService.getId())
                 throw IllegalArgumentException("Your not the owner of this service or the admin")
-            if (serviceService.getById(id)
-                            ?.start
-                            ?.toLocalDate()
-                            ?.isBefore(LocalDate.now().minusDays(14)) == true) {
-                throw IllegalArgumentException("14 days edit period is over")
-            }
 
             val dto = serviceService.update(valueDto)
 
@@ -271,6 +265,35 @@ class ServiceController(
 
             if (logPerformance) {
                 logger.info(String.format("%s getByAssistancePlanAndStartAndEnd took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("employee/{id}/illegal")
+    fun getIllegalByEmployee(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            if (!accessService.isAdmin() && !accessService.canReadEmployee(id) && accessService.getId() != id) {
+                throw IllegalArgumentException("No permission to load the illegal services of this employee")
+            }
+
+            val dtos = serviceService.getIllegalByEmployee(id)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getIllegalByEmployee took %s ms and found %d entities",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs,
                         dtos.size))

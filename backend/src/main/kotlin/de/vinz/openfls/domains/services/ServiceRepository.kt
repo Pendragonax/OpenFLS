@@ -118,6 +118,11 @@ interface ServiceRepository : CrudRepository<Service, Long> {
                                                      start: LocalDate,
                                                      end: LocalDate): List<ServiceProjection>
 
+    @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId " +
+            "AND (cast(u.start as LocalDate) > u.assistancePlan.end OR cast(u.start as LocalDate) < u.assistancePlan.start) " +
+            "ORDER BY u.start ASC")
+    fun findIllegalByEmployee(@Param("employeeId") employeeId: Long): List<ServiceProjection>
+
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND cast(u.start as LocalDate) = :date")
     fun findByEmployeeAndDate(@Param("employeeId") employeeId: Long,
                               @Param("date") date: LocalDate): List<Service>

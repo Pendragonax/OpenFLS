@@ -25,6 +25,11 @@ export class ServiceService extends Base<ServiceDto> {
   initialLoad() {
   }
 
+  getIllegalByEmployeeId(employeeId: number): Observable<Service[]> {
+    return this.http
+      .get<Service[]>(`${environment.api_url}${this.url}/employee/${employeeId}/illegal`)
+  }
+
   getByEmployeeAndDate(employeeId: number, date: Date): Observable<ServiceDto[]> {
     return this.http
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/employee/${employeeId}/${this.converter.formatDate(date)}`)

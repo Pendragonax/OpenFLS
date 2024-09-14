@@ -120,6 +120,10 @@ class ServiceService(
         return getByEmployeeAndDate(employeeId, date).map { modelMapper.map(it, ServiceDto::class.java) }
     }
 
+    fun getIllegalByEmployee(employeeId: Long): List<ServiceProjection> {
+        return serviceRepository.findIllegalByEmployee(employeeId)
+    }
+
     fun getByEmployeeAndDate(employeeId: Long, date: LocalDate): List<Service> {
         return serviceRepository.findByEmployeeAndDate(employeeId, date)
     }
