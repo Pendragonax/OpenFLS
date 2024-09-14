@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.services
 
-import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.dtos.ServiceXLDto
@@ -109,6 +108,14 @@ class ServiceService(
         return serviceRepository.findByAssistancePlan(id)
     }
 
+    fun getIllegalByAssistancePlan(id: Long): List<ServiceProjection> {
+        return serviceRepository.findIllegalByAssistancePlan(id)
+    }
+
+    fun getByAssistancePlanAndNotBetweenStartAndEnd(id: Long, start: LocalDate, end: LocalDate): List<ServiceProjection> {
+        return serviceRepository.findByAssistancePlanAndNotBetweenStartAndEnd(id, start, end)
+    }
+
     fun getDtosByEmployeeAndDate(employeeId: Long, date: LocalDate): List<ServiceDto> {
         return getByEmployeeAndDate(employeeId, date).map { modelMapper.map(it, ServiceDto::class.java) }
     }
@@ -133,6 +140,10 @@ class ServiceService(
 
     fun getByEmployeeAndStartEndDate(employeeId: Long, start: LocalDate, end: LocalDate): List<Service> {
         return serviceRepository.findByEmployeeAndStartEndDate(employeeId, start, end)
+    }
+
+    fun getIllegalByInstitutionId(id: Long): List<ServiceProjection> {
+        return serviceRepository.findIllegalByInstitutionId(id)
     }
 
     fun getDtosByInstitutionIdAndDate(institutionId: Long, date: LocalDate): List<ServiceProjection> {

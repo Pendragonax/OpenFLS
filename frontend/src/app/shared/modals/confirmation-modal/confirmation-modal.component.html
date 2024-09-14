@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>{{title}}</h1>
 <div mat-dialog-content>
-  <p>{{description}}</p>
+  <p [innerHTML]="description"></p>
 </div>
 <div mat-dialog-actions class="justify-content-end">
   <button mat-raised-button (click)="onDismiss()">{{ABORT_BUTTON_DESCRIPTION}}</button>

@@ -38,7 +38,7 @@
               <mat-datepicker #endPicker></mat-datepicker>
             </mat-form-field><br><br>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" class="min-width-350">
               <mat-label>Kostenträger</mat-label>
               <mat-select formControlName="sponsor"
                           required>
@@ -73,6 +73,12 @@
         </div>
       </mat-expansion-panel>
     </mat-accordion>
+  </mat-tab>
+
+  <mat-tab label="fehlerhafte Dokumentationen">
+    <app-service-table [services]="illegalServices"
+                       [editMode]="false"
+                       [adminMode]="false"></app-service-table>
   </mat-tab>
 
   <mat-tab label="Stunden">

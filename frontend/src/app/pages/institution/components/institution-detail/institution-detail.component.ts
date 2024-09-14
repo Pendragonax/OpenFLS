@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {EmployeeDto} from "../../../../shared/dtos/employee-dto.model";
 import {InstitutionDto} from "../../../../shared/dtos/institution-dto.model";
 import {PermissionDto} from "../../../../shared/dtos/permission-dto.model";
@@ -13,6 +13,8 @@ import {InstitutionViewModel} from "../../../../shared/models/institution-view.m
 import {InstitutionInfoForm} from "../../forms/institution-info-form";
 import {DetailPageComponent} from "../../../../shared/components/detail-page.component";
 import {HelperService} from "../../../../shared/services/helper.service";
+import {ServiceService} from "../../../../shared/services/service.service";
+import {Service} from "../../../../shared/dtos/service.projection";
 
 @Component({
   selector: 'app-institution-detail',
@@ -28,6 +30,7 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
   editMode: boolean = false;
   adminMode: boolean = false;
   institutionId: number = 0;
+  illegalServices: Service[] = []
 
   permissionForm = new UntypedFormGroup({
     role: new UntypedFormControl()
@@ -39,6 +42,7 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
     private institutionService: InstitutionService,
     private dtoCombinerService: DtoCombinerService,
     private userService: UserService,
+    private serviceService: ServiceService,
     private router: Router,
     override helperService: HelperService,
     private route: ActivatedRoute) {
@@ -56,18 +60,21 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
           this.institutionService.getById(+id),
           this.employeeService.allValues$,
           this.userService.leadingInstitutions$,
-          this.userService.user$
+          this.userService.user$,
+          this.serviceService.getIllegalByInstitutionId(+id)
         ]
       )
-        .subscribe(([institution, employees, leadingIds, user]) => {
+        .subscribe(([institution, employees, leadingIds, user, illegalServices]) => {
           this.adminMode = (user?.access?.role ?? 99) === 1;
           this.editMode = this.isEditable(leadingIds, institution) || this.adminMode;
-          this.value = <InstitutionViewModel> {
+          this.value = <InstitutionViewModel>{
             dto: institution,
-            editable: this.editMode };
+            editable: this.editMode
+          };
           this.value$.next(this.value);
-          this.editValue = <InstitutionViewModel> {... this.value};
+          this.editValue = <InstitutionViewModel>{...this.value};
           this.institution$.next(this.value.dto);
+          this.illegalServices = illegalServices;
 
           // create permission[] from institutions and employees permissions
           if (employees.length !== undefined) {
@@ -108,14 +115,14 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
   }
 
   updatePermissions() {
-    this.editValue.dto.permissions = this.permissions.map(permission => <PermissionDto> {
+    this.editValue.dto.permissions = this.permissions.map(permission => <PermissionDto>{
       institutionId: permission[0].id,
       employeeId: permission[1].id,
       changeInstitution: permission[2].changeInstitution,
       readEntries: permission[2].readEntries,
       writeEntries: permission[2].writeEntries,
       affiliated: permission[2].affiliated
-    } );
+    });
 
     this.update();
   }
