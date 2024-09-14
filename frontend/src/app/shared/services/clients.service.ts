@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {ClientDto} from "../dtos/client-dto.model";
 import {Base} from "./base.service";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {Observable} from "rxjs";
 import {environment} from "../../../environments/environment";
 import {ClientSoloDto} from "../dtos/client-solo-dto.model";

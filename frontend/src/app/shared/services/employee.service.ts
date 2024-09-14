@@ -3,7 +3,7 @@ import {Observable, tap} from "rxjs";
 import {environment} from "../../../environments/environment";
 import {EmployeeDto} from "../dtos/employee-dto.model";
 import {Base} from "./base.service";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {EmployeeSolo} from "../dtos/employee-solo.projection";
 
 @Injectable({

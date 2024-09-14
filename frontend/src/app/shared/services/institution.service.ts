@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {InstitutionDto} from "../dtos/institution-dto.model";
 import {Base} from "./base.service";
 import {Observable} from "rxjs";
