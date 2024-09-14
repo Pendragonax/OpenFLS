@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HourTypeDto} from "../dtos/hour-type-dto.model";
 import {Base} from "./base.service";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'

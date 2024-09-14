@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {Base} from "./base.service";
 import {SponsorDto} from "../dtos/sponsor-dto.model";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'

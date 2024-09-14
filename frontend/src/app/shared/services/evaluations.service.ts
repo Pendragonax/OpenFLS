@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {Observable} from "rxjs";
 import {environment} from "../../../environments/environment";
 import {EvaluationRequestDto} from "../dtos/evaluation-request-dto.model";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {EvaluationDto} from "../dtos/evaluation-dto.model";
 import {EvaluationYearDto} from "../dtos/evaluation-year-dto.model";
 
