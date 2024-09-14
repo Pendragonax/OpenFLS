@@ -164,7 +164,7 @@ class ContingentService(
         for (contingent in contingents) {
             val workdayDailyHours = TimeDoubleService.convertTimeDoubleToDouble(contingent.weeklyServiceHours) / 5
             val workdays = DateService.countDaysOfYearBetweenStartAndEnd(year, contingent.start, contingent.end) * 5.0 / 7.0
-            val workdaysWithoutVacationInContingent = workdays * (workdaysAssumption / workdaysReal)
+            val workdaysWithoutVacationInContingent = workdays * (workdaysAssumption.toDouble() / workdaysReal)
             for (month in 1..12) {
                 monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
                         monthlyHours[month],

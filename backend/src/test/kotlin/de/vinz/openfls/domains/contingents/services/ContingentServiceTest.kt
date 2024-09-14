@@ -3,12 +3,10 @@ package de.vinz.openfls.domains.contingents.services
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
-import jakarta.inject.Qualifier
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.junit.jupiter.MockitoExtension
@@ -22,7 +20,7 @@ class ContingentServiceTest {
     @Mock
     lateinit var contingentRepository: ContingentRepository
 
-    lateinit var contingentService: ContingentService
+    private lateinit var contingentService: ContingentService
 
     @BeforeEach
     fun setUp() {
@@ -208,7 +206,7 @@ class ContingentServiceTest {
 
         // Then
         assertThat(hours).isNotEmpty
-        assertThat(hours[0]).isEqualTo(46.37)
+        assertThat(hours[0]).isEqualTo(46.35)
         assertThat(hours[1]).isEqualTo(31.00)
         assertThat(hours[2]).isEqualTo(29.00)
     }
@@ -225,7 +223,7 @@ class ContingentServiceTest {
 
         // Then
         assertThat(hours).isNotEmpty
-        assertThat(hours[0]).isEqualTo(284.21)
+        assertThat(hours[0]).isEqualTo(273.0)
         assertThat(hours[1]).isEqualTo(31.00)
         assertThat(hours[2]).isEqualTo(29.00)
         assertThat(hours[3]).isEqualTo(31.00)
@@ -245,7 +243,7 @@ class ContingentServiceTest {
         // Given
         val contingent = mock(ContingentProjection::class.java)
         whenever(contingent.start).thenReturn(LocalDate.of(2024, 1, 1))
-        whenever(contingent.weeklyServiceHours).thenReturn(30.16)
+        whenever(contingent.weeklyServiceHours).thenReturn(30.27)
 
         // When
         val hours = contingentService.getContingentHoursByYear(2024, contingent)
@@ -253,8 +251,8 @@ class ContingentServiceTest {
         // Then
         assertThat(hours).isNotEmpty
         assertThat(hours[0]).isEqualTo(1180.32)
-        assertThat(hours[1]).isEqualTo(133.34)
-        assertThat(hours[12]).isEqualTo(133.34)
+        assertThat(hours[1]).isEqualTo(134.03)
+        assertThat(hours[12]).isEqualTo(134.03)
     }
 
     @Test
