@@ -41,6 +41,7 @@ interface ServiceRepository : CrudRepository<Service, Long> {
                                                                              clientId: Long,
                                                                              start: LocalDate,
                                                                              end: LocalDate): List<ServiceProjection>
+
     @Query("SELECT u FROM Service u " +
             "WHERE (:institutionId <= 0 OR u.institution.id = :institutionId) " +
             "AND (:employeeId <= 0 OR u.employee.id = :employeeId) " +
@@ -74,12 +75,17 @@ interface ServiceRepository : CrudRepository<Service, Long> {
             "AND cast(u.start as LocalDate) >= :start " +
             "AND cast(u.start as LocalDate) <= :end")
     fun findByAssistancePlanIdAndStartAndEnd(assistancePlanId: Long,
-                                                          start: LocalDate,
-                                                          end: LocalDate): List<ServiceSoloProjection>
+                                             start: LocalDate,
+                                             end: LocalDate): List<ServiceSoloProjection>
 
     @Query("SELECT u FROM Service u WHERE u.institution.id = :institutionId AND cast(u.start as LocalDate) = :date")
     fun findByInstitutionIdAndDate(@Param("institutionId") institutionId: Long,
                                    @Param("date") date: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u WHERE u.institution.id = :institutionId " +
+            "AND (cast(u.start as LocalDate) > u.assistancePlan.end OR cast(u.start as LocalDate) < u.assistancePlan.start) " +
+            "ORDER BY u.start ASC")
+    fun findIllegalByInstitutionId(@Param("institutionId") institutionId: Long): List<ServiceProjection>
 
     @Query("SELECT u FROM Service u " +
             "WHERE u.institution.id = :institutionId " +
@@ -112,6 +118,11 @@ interface ServiceRepository : CrudRepository<Service, Long> {
                                                      start: LocalDate,
                                                      end: LocalDate): List<ServiceProjection>
 
+    @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId " +
+            "AND (cast(u.start as LocalDate) > u.assistancePlan.end OR cast(u.start as LocalDate) < u.assistancePlan.start) " +
+            "ORDER BY u.start ASC")
+    fun findIllegalByEmployee(@Param("employeeId") employeeId: Long): List<ServiceProjection>
+
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND cast(u.start as LocalDate) = :date")
     fun findByEmployeeAndDate(@Param("employeeId") employeeId: Long,
                               @Param("date") date: LocalDate): List<Service>
@@ -120,12 +131,12 @@ interface ServiceRepository : CrudRepository<Service, Long> {
             "AND cast(u.start as LocalDate) >= :start " +
             "AND cast(u.start as LocalDate) <= :end")
     fun findByEmployeeAndStartAndEnd(@Param("employeeId") clientId: Long,
-                                   @Param("start") start: LocalDate,
-                                   @Param("end") end: LocalDate): List<ServiceProjection>
+                                     @Param("start") start: LocalDate,
+                                     @Param("end") end: LocalDate): List<ServiceProjection>
 
     @Query("SELECT u FROM Service u WHERE u.client.id = :clientId AND cast(u.start as LocalDate) = :date")
     fun findByClientAndDate(@Param("clientId") clientId: Long,
-                              @Param("date") date: LocalDate): List<Service>
+                            @Param("date") date: LocalDate): List<Service>
 
     @Query("SELECT u FROM Service u WHERE u.client.id = :clientId " +
             "AND cast(u.start as LocalDate) >= :start " +
@@ -155,8 +166,8 @@ interface ServiceRepository : CrudRepository<Service, Long> {
             "AND cast(u.start as LocalDate) >= :start " +
             "ORDER BY u.start ASC")
     fun findByEmployeeAndStartEndDate(@Param("employeeId") employeeId: Long,
-                                       @Param("start") start: LocalDate,
-                                       @Param("end") end: LocalDate): List<Service>
+                                      @Param("start") start: LocalDate,
+                                      @Param("end") end: LocalDate): List<Service>
 
     @Query("SELECT u FROM Service u WHERE " +
             "(extract(YEAR from u.start)) = :year " +
@@ -235,6 +246,7 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     fun findServiceByYearByHourTypeIdAndAreaId(@Param("year") year: Int,
                                                @Param("hourTypeId") hourTypeId: Long,
                                                @Param("areaId") areaId: Long): List<Service>
+
     @Query("SELECT u FROM Service u WHERE " +
             "(extract(YEAR from u.start)) = :year " +
             "AND u.hourType.id = :hourTypeId " +
@@ -252,6 +264,18 @@ interface ServiceRepository : CrudRepository<Service, Long> {
 
     @Query("SELECT u FROM Service u WHERE u.assistancePlan.id = :assistancePlanId")
     fun findByAssistancePlan(@Param("assistancePlanId") assistancePlanId: Long): List<Service>
+
+    @Query("SELECT u FROM Service u WHERE u.assistancePlan.id = :assistancePlanId " +
+            "AND (cast(u.start as LocalDate) > u.assistancePlan.end OR cast(u.start as LocalDate) < u.assistancePlan.start) " +
+            "ORDER BY u.start ASC")
+    fun findIllegalByAssistancePlan(@Param("assistancePlanId") assistancePlanId: Long): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u WHERE u.assistancePlan.id = :assistancePlanId " +
+            "AND (cast(u.start as LocalDate) > :end OR cast(u.start as LocalDate) < :start) " +
+            "ORDER BY u.start ASC")
+    fun findByAssistancePlanAndNotBetweenStartAndEnd(@Param("assistancePlanId") assistancePlanId: Long,
+                                                     @Param("start") start: LocalDate,
+                                                     @Param("end") end: LocalDate): List<ServiceProjection>
 
     @Query("SELECT Count(*) FROM Service u WHERE u.employee.id = :employeeId")
     fun countByEmployeeId(@Param("employeeId") employeeId: Long): Long

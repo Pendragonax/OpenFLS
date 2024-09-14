@@ -15,9 +15,16 @@
     <div class="col-auto">
       <app-search-field [isSubmitting]="isBusy" (onSearchStringChanges)="onSearchStringChanged($event)"></app-search-field>
     </div>
+
+    <div class="col-auto mt-1">
+      <button mat-fab extended color="primary" (click)="loadIllegalServices()">
+        <mat-icon color="warn">new_releases</mat-icon>
+        fehlerhafte Dokumentationen
+      </button>
+    </div>
   </div>
   <div class="row">
-    <app-service-table *ngIf="!isBusy" [services]="services" [editMode]="true"></app-service-table>
+    <app-service-table *ngIf="!isBusy" [redRows]="illegalMode" [services]="services" [editMode]="true"></app-service-table>
     <app-loading-spinner *ngIf="isBusy" [description]="'Lade Einträge'"></app-loading-spinner>
   </div>
 </div>

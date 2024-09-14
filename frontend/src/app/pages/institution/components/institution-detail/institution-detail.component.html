@@ -1,6 +1,6 @@
 <app-info-header [title]="'Bereich &quot;' + value.dto.name + '&quot;'"></app-info-header>
 
-<mat-tab-group>
+<mat-tab-group dynamicHeight>
   <mat-tab label="Allgemein">
     <mat-accordion>
       <mat-expansion-panel class="mx-2 mt-2">
@@ -129,6 +129,13 @@
         </div>
       </mat-expansion-panel>
     </mat-accordion>
+  </mat-tab>
+
+  <mat-tab label="fehlerhafte Dokumentationen">
+    <app-service-table [services]="illegalServices"
+                       [editMode]="false"
+                       [redRows]="true"
+                       [adminMode]="false"></app-service-table>
   </mat-tab>
 
   <mat-tab label="Kontigente">

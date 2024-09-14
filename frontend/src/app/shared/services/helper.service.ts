@@ -14,6 +14,6 @@ export class HelperService {
     this.snackBar.open(
       text,
       "",
-      { duration: 750, verticalPosition: 'top', horizontalPosition: 'center' });
+      { duration: 1500, verticalPosition: 'top', horizontalPosition: 'center' });
   }
 }

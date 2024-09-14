@@ -10,7 +10,7 @@ import {SponsorDto} from "../../../../dtos/sponsor-dto.model";
 import {AssistancePlanService} from "../../../../services/assistance-plan.service";
 import {ActivatedRoute} from "@angular/router";
 import {SponsorService} from "../../../../services/sponsor.service";
-import {combineLatest, ReplaySubject} from "rxjs";
+import {combineLatest, Observable, ReplaySubject, switchMap, throwError} from "rxjs";
 import {AssistancePlanView} from "../../../../models/assistance-plan-view.model";
 import {UserService} from "../../../../services/user.service";
 import {Converter} from "../../../../services/converter.helper";
@@ -24,6 +24,11 @@ import {AssistancePlanInfoForm} from "../assistance-plan-info-form";
 import {DetailPageComponent} from "../../../detail-page.component";
 import {HelperService} from "../../../../services/helper.service";
 import {AssistancePlanDto} from "../../../../dtos/assistance-plan-dto.model";
+import {ServiceService} from "../../../../services/service.service";
+import {DateService} from "../../../../services/date.service";
+import {MatDialog} from "@angular/material/dialog";
+import {Service} from "../../../../dtos/service.projection";
+import {ConfirmationModalComponent} from "../../../../modals/confirmation-modal/confirmation-modal.component";
 
 @Component({
   selector: 'app-assistance-plan-detail',
@@ -52,6 +57,7 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
   institutions: InstitutionDto[] = [];
   sponsors: SponsorDto[] = [];
   client: ClientDto = new ClientDto();
+  illegalServices: Service[] = [];
   dto$ = new ReplaySubject<AssistancePlanDto>();
   tabIndex = 0;
 
@@ -61,13 +67,16 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
   constructor(
     private assistancePlanService: AssistancePlanService,
     private sponsorService: SponsorService,
+    private dateService: DateService,
+    private serviceService: ServiceService,
     private clientService: ClientsService,
     private userService: UserService,
     private institutionService: InstitutionService,
     private goalService: GoalService,
     private route: ActivatedRoute,
     private converter: Converter,
-    override helperService: HelperService
+    override helperService: HelperService,
+    private dialog: MatDialog
   ) {
     super(helperService);
   }
@@ -101,9 +110,10 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
         this.assistancePlanService.getById(+id),
         this.userService.affiliatedInstitutions$,
         this.userService.isAdmin$,
-        this.institutionService.allValues$
+        this.institutionService.allValues$,
+        this.serviceService.getIllegalByAssistancePlan(+id)
       ])
-        .subscribe(([sponsors, plan, affiliatedInstitutions,isAdmin, institutions]) => {
+        .subscribe(([sponsors, plan, affiliatedInstitutions,isAdmin, institutions, services]) => {
           this.value = <AssistancePlanView> {
             dto: plan,
             editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId)};
@@ -112,6 +122,7 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
           this.editValue = <AssistancePlanView> {...this.value};
           this.institutions = institutions;
           this.sponsors = sponsors;
+          this.illegalServices = services;
 
           this.loadClient(plan.clientId);
           this.refreshForm();
@@ -148,9 +159,33 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
 
     this.isSubmitting = true;
 
-    this.assistancePlanService.update(this.value.dto.id, this.value.dto).subscribe({
+    this.serviceService.getByAssistancePlanAndNotBetweenStartAndEnd(this.value.dto.id,
+      this.dateService.convertDEDateStringToDate(this.value.dto.start) ?? new Date(Date.now()),
+      this.dateService.convertDEDateStringToDate(this.value.dto.end) ?? new Date(Date.now())).pipe(
+        switchMap(values => {
+          if (values.length <= 0) {
+            return this.assistancePlanService.update(this.value.dto.id, this.value.dto);
+          }
+
+          return this.openUpdateConfirmationModal(values).pipe(
+            switchMap(result => {
+              if (result) {
+                return this.assistancePlanService.update(this.value.dto.id, this.value.dto);
+              }
+              return throwError(() => new Error('Speichern abgebrochen'));
+            })
+          );
+        })
+    ).subscribe({
       next: () => this.handleSuccess("Hilfeplan gespeichert"),
-      error: () => this.handleFailure("Fehler beim speichern")
+      error: error => {
+        if (error instanceof Error) {
+          this.handleFailure("Speichern abgebrochen")
+        } else {
+          this.handleFailure(error.message)
+        }
+        this.loadValues()
+      }
     });
   }
 
@@ -215,5 +250,12 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
 
   getSponsorName(id: number): string {
     return this.sponsors.find(value => value.id == id)?.name ?? "n/a";
+  }
+
+  openUpdateConfirmationModal(services: Service[]): Observable<boolean> {
+    let dialogRef = this.dialog.open(ConfirmationModalComponent);
+    let dialog = dialogRef.componentInstance;
+    dialog.description = "Es wurden <b>" + services.length + " Dokumentationen</b> gefunden, die nicht mehr im Zeitraum des Hilfeplans liegen würden. <br> Diese müssen nach dem Ändern einem anderen Hilfeplan zugeordnet werden, da sonst Probleme bei der Auswertung auftreten. <br> Möchten Sie mit der Änderung dieses Hilfeplans trotzdem fortfahren?"
+    return dialogRef.afterClosed();
   }
 }

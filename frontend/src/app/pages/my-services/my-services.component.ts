@@ -30,6 +30,7 @@ export class MyServicesComponent implements OnInit {
   end: Date = new Date(Date.now());
   searchString: string = "";
   isBusy = false;
+  illegalMode = false;
 
   userId$: ReplaySubject<number> = new ReplaySubject<number>();
 
@@ -79,6 +80,7 @@ export class MyServicesComponent implements OnInit {
 
   loadServices() {
     this.isBusy = true;
+    this.illegalMode = false;
     this.userId$.pipe(
       switchMap((employeeId: number) => {
         return this.serviceService.getByEmployeeAndStartAndEnd(employeeId, this.start, this.end);
@@ -86,6 +88,22 @@ export class MyServicesComponent implements OnInit {
     ).subscribe((services: Service[]) => {
       this.services = services;
       this.isBusy = false;
+    });
+  }
+
+  loadIllegalServices() {
+    this.isBusy = true;
+    this.illegalMode = true;
+    this.userId$.pipe(
+      switchMap((employeeId: number) => {
+        return this.serviceService.getIllegalByEmployeeId(employeeId);
+      })
+    ).subscribe({
+      next: illegalServices => {
+        this.services = illegalServices;
+        this.isBusy = false;
+      },
+      error: () => this.isBusy = false
     });
   }
 

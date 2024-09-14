@@ -1,4 +1,4 @@
-<app-info-header [title]="'Eintrag'"></app-info-header>
+<app-info-header [title]="title"></app-info-header>
 
 <mat-drawer-container class="h-100">
   <!--PLANS-->
@@ -230,7 +230,7 @@
               </div>
             </div>
 
-            <mat-form-field appearance="fill">
+            <mat-form-field appearance="fill" class="width-300px">
               <mat-label>Stundentyp</mat-label>
               <mat-select formControlName="hourType"
                           required>

@@ -8,7 +8,7 @@ import {MatDialogRef} from "@angular/material/dialog";
 })
 export class ConfirmationModalComponent implements OnInit {
   readonly CONFIRM_BUTTON_DESCRIPTION: string = "Bestätigen"
-  readonly ABORT_BUTTON_DESCRIPTION: string = "Abrrechen"
+  readonly ABORT_BUTTON_DESCRIPTION: string = "Abbrechen"
 
   @Input() title: string = "Bestätigung"
   @Input() description: string = "Wollen sie diese Aktion wirklich ausführen?"

@@ -25,6 +25,11 @@ export class ServiceService extends Base<ServiceDto> {
   initialLoad() {
   }
 
+  getIllegalByEmployeeId(employeeId: number): Observable<Service[]> {
+    return this.http
+      .get<Service[]>(`${environment.api_url}${this.url}/employee/${employeeId}/illegal`)
+  }
+
   getByEmployeeAndDate(employeeId: number, date: Date): Observable<ServiceDto[]> {
     return this.http
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/employee/${employeeId}/${this.converter.formatDate(date)}`)
@@ -45,6 +50,11 @@ export class ServiceService extends Base<ServiceDto> {
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/client/${clientId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
   }
 
+  getIllegalByInstitutionId(institutionId: number): Observable<Service[]> {
+    return this.http
+      .get<Service[]>(`${environment.api_url}${this.url}/institution/${institutionId}/illegal`)
+  }
+
   getByInstitutionIdAndClientIdAndStartAndEnd(institutionId: number, clientId: number, start: Date, end: Date): Observable<Service[]> {
     return this.http
       .get<Service[]>(`${environment.api_url}${this.url}/institution/${institutionId}/client/${clientId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
@@ -63,6 +73,16 @@ export class ServiceService extends Base<ServiceDto> {
   getByAssistancePlan(assistancePlanId: number): Observable<ServiceDto[]> {
     return this.http
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}`)
+  }
+
+  getIllegalByAssistancePlan(assistancePlanId: number): Observable<Service[]> {
+    return this.http
+      .get<Service[]>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}/illegal`)
+  }
+
+  getByAssistancePlanAndNotBetweenStartAndEnd(assistancePlanId: number, start: Date, end: Date): Observable<Service[]> {
+    return this.http
+      .get<Service[]>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}/not_between/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
   }
 
   getCountByEmployeeId(employeeId: number): Observable<number> {
