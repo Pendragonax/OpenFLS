@@ -49,6 +49,26 @@ class TimeDoubleService {
             return (hours.toDouble() + minutes / 100.0).toTwoDecimalPlaces()
         }
 
+        fun multiplyTimeDoubles(sum1: Double, sum2: Double): Double {
+            val minutes1 = timeToMinutes(sum1)
+            val minutes2 = timeToMinutes(sum2)
+            val difference = minutes1 * minutes2
+
+            val hours = difference / 60
+            val minutes = difference % 60
+            return (hours.toDouble() + minutes / 100.0).toTwoDecimalPlaces()
+        }
+
+        fun divideTimeDoubles(sum1: Double, sum2: Double): Double {
+            val minutes1 = timeToMinutes(sum1)
+            val minutes2 = timeToMinutes(sum2)
+            val difference = minutes1 / minutes2
+
+            val hours = difference / 60
+            val minutes = difference % 60
+            return (hours.toDouble() + minutes / 100.0).toTwoDecimalPlaces()
+        }
+
         private fun timeToMinutes(time: Double): Int {
             val hours = time.toInt()
             val minutes = ((time - hours) * 100).roundHalfToEven()

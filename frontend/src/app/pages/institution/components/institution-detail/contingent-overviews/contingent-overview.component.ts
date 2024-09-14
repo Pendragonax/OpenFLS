@@ -4,6 +4,8 @@ import {Period} from "../../../../../shared/components/year-month-selection/Peri
 import {ContingentEvaluationDto} from "./dtos/contingent-evaluation-dto.model";
 import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {ContingentEvaluationService} from "./services/contingent-evaluation.service";
+import {MatDialog} from "@angular/material/dialog";
+import {InformationModal} from "../../../../../shared/modals/information/information.modal";
 
 @Component({
   selector: 'app-contingent-overview',
@@ -13,6 +15,21 @@ import {ContingentEvaluationService} from "./services/contingent-evaluation.serv
 export class ContingentOverviewComponent implements OnInit {
 
   @Input() institutionId: number = 0
+
+  informationTitle: string = "Kontingentübersicht Informationen"
+  informationContent: {title: string, content: string}[] = [
+    {
+      title: "Kontingent [h]",
+      content: "Die Zeitangabe beschreibt den optimalen Monatswert ohne Krankheit, Fortbildung oder Urlaub.<br>Der Gesamtwert ist dabei bereinigt und umfasst nur die vorausgesetzten 195 tatsächliche Arbeitstage. <br>Aus diesem Grund beschreibt dieser nicht die Summe aller optimalen Einzelmonate, sondern fällt geringer aus durch das Abziehen der Abwesenheitstage."
+    },
+    {
+      title: "Geleistet [%]",
+      content: "Der Wert beschreibt die Prozent vom optimalen Monatswert. Dabei ist zu beachten, dass für einen Abwesenheitstag ~5% abzuziehen sind.<br>Der Gesamtprozentwert ist dabei wieder korrekt bereinigt und umfasst das komplette Jahr mit den vorausgesetzten 195 tatsächliche Arbeitstagen."
+    },
+    {
+      title: "Geleistet summiert [%]",
+      content: "Der Wert beschreibt die Prozent vom bereinigten Monatswert. Dabei werden alle vorangegangenen Monate jeweils mit einbezogen.<br>Der Gesamtwert Prozentwert ist dabei wieder bereinigt und umfasst das komplette Jahr mit den vorausgesetzten 195 tatsächliche Arbeitstagen."
+    }]
 
   header$: ReplaySubject<string[]> = new ReplaySubject()
   data$: ReplaySubject<any[][]> = new ReplaySubject()
@@ -24,7 +41,7 @@ export class ContingentOverviewComponent implements OnInit {
   year: number = new Date(Date.now()).getFullYear()
   type: number = 0
   hourTypes: { name: String, value: number }[] =
-    [{name: "Kontingent [h]", value: 1}, {name: "Geleistet [h]", value: 2}, {name: "Geleistet [%]", value: 3}, {name: "Nicht geleistet [h]", value: 4}]
+    [{name: "Kontingent [h]", value: 1}, {name: "Geleistet [h]", value: 2}, {name: "Geleistet [%]", value: 3}, {name: "Geleistet summiert [%]", value: 4}, {name: "Nicht geleistet [h]", value: 5}]
   selectedHourType: number = 0
 
   filterForm = new UntypedFormGroup({
@@ -33,7 +50,8 @@ export class ContingentOverviewComponent implements OnInit {
 
   public get hourTypeControl() { return this.filterForm.get('hourType'); }
 
-  constructor(private contingentEvaluationService: ContingentEvaluationService) { }
+  constructor(private contingentEvaluationService: ContingentEvaluationService,
+              private dialog: MatDialog) { }
 
   ngOnInit(): void {
     this.getHeader()
@@ -73,6 +91,16 @@ export class ContingentOverviewComponent implements OnInit {
     })
   }
 
+  openValueTypeInfoModal(event) {
+    event.stopPropagation();
+    this.dialog.open(InformationModal, {
+      data: {
+        title: this.informationTitle,
+        content: this.informationContent
+      }
+    })
+  }
+
   public getHeader() {
     this.header$.next(this.getYearHeader())
   }
@@ -99,6 +127,10 @@ export class ContingentOverviewComponent implements OnInit {
             break
           }
           case 4: {
+            values = employee.summedExecutedPercent
+            break
+          }
+          case 5: {
             values = employee.missingHours
             break
           }

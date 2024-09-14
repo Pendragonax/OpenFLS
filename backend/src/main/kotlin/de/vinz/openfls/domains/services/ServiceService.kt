@@ -198,10 +198,6 @@ class ServiceService(
                 institutionIds, clientId, start, end)
     }
 
-    fun getProjectionByClientAndStartAndEnd(clientId: Long, start: LocalDate, end: LocalDate): List<ServiceProjection> {
-        return serviceRepository.findSoloProjectionByClientAndStartAndEnd(clientId, start, end)
-    }
-
     fun getDtosByClientAndStartAndEnd(clientId: Long, start: LocalDate, end: LocalDate): List<ServiceDto> {
         return getByClientAndStartAndEnd(clientId, start, end)
                 .map { modelMapper.map(it, ServiceDto::class.java) }

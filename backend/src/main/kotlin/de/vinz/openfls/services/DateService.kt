@@ -2,8 +2,8 @@ package de.vinz.openfls.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeException
-import java.time.LocalDate
-import java.time.YearMonth
+import jdk.incubator.vector.LongVector
+import java.time.*
 import java.time.temporal.ChronoUnit
 
 class DateService {
@@ -81,6 +81,18 @@ class DateService {
             return ChronoUnit.DAYS.between(start, end) + 1
         }
 
+        fun countDaysOfYear(year: Int): Long {
+            return if (Year.of(year).isLeap) 366L else 365L
+        }
+
+        fun countDaysOfYearBetweenStartAndEnd(year: Int, start: LocalDate, end: LocalDate?): Long {
+            val startYear = LocalDate.of(year, 1, 1)
+            val startReal = if (start < startYear) startYear else start
+            val endReal = end ?: LocalDate.of(year, 12, 31)
+
+            return ChronoUnit.DAYS.between(startReal, endReal) + 1
+        }
+
         fun countDaysOfMonthAndYearBetweenStartAndEnd(year: Int, month: Int, start: LocalDate, end: LocalDate): Int {
             val calcStart = LocalDate.of(year, month, 1)
             val calcEnd = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
@@ -134,6 +146,74 @@ class DateService {
             val minutesPart = ((hour - hours) * 100).toInt()
 
             return hours * 60 + minutesPart
+        }
+
+        fun calculateWorkdaysInHesse(year: Int): Int {
+            return calculateWorkdaysInHesseBetween(LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31), year)
+        }
+
+        fun calculateWorkdaysInHesseBetween(startDate: LocalDate, endDate: LocalDate?, year: Int): Int {
+            var workdays = 0
+            val holidays = getHesseHolidays(startDate.year)
+
+            val startYear = LocalDate.of(year, 1, 1)
+            val startReal = if (startDate < startYear) startYear else startDate
+            val endReal = endDate ?: LocalDate.of(year, 12, 31)
+
+            // Alle Tage zwischen startDate und endDate durchlaufen
+            var currentDate = startReal
+            while (!currentDate.isAfter(endReal)) {
+                // Wenn es kein Wochenende und kein Feiertag ist, zähle ihn als Arbeitstag
+                if (!isWeekend(currentDate) && !isHoliday(currentDate, holidays)) {
+                    workdays++
+                }
+                // Zum nächsten Tag wechseln
+                currentDate = currentDate.plusDays(1)
+            }
+            return workdays
+        }
+
+        fun isWeekend(date: LocalDate): Boolean {
+            return date.dayOfWeek == DayOfWeek.SATURDAY || date.dayOfWeek == DayOfWeek.SUNDAY
+        }
+
+        fun isHoliday(date: LocalDate, holidays: List<LocalDate>): Boolean {
+            return holidays.contains(date)
+        }
+
+        // Feiertage für Hessen, dynamisch für ein bestimmtes Jahr
+        fun getHesseHolidays(year: Int): List<LocalDate> {
+            return listOf(
+                    LocalDate.of(year, Month.JANUARY, 1),   // Neujahr
+                    LocalDate.of(year, Month.MAY, 1),       // Tag der Arbeit
+                    getEasterSunday(year).minusDays(2),     // Karfreitag
+                    getEasterSunday(year).plusDays(1),      // Ostermontag
+                    LocalDate.of(year, Month.OCTOBER, 3),   // Tag der Deutschen Einheit
+                    getEasterSunday(year).plusDays(39),     // Christi Himmelfahrt
+                    getEasterSunday(year).plusDays(50),     // Pfingstmontag
+                    LocalDate.of(year, Month.NOVEMBER, 1),  // Allerheiligen
+                    LocalDate.of(year, Month.DECEMBER, 25), // 1. Weihnachtsfeiertag
+                    LocalDate.of(year, Month.DECEMBER, 26)  // 2. Weihnachtsfeiertag
+            )
+        }
+
+        // Berechnung des Ostersonntags für ein bestimmtes Jahr
+        fun getEasterSunday(year: Int): LocalDate {
+            val a = year % 19
+            val b = year / 100
+            val c = year % 100
+            val d = b / 4
+            val e = b % 4
+            val f = (b + 8) / 25
+            val g = (b - f + 1) / 3
+            val h = (19 * a + b - d - g + 15) % 30
+            val i = c / 4
+            val k = c % 4
+            val l = (32 + 2 * e + 2 * i - h - k) % 7
+            val m = (a + 11 * h + 22 * l) / 451
+            val month = (h + l - 7 * m + 114) / 31
+            val day = ((h + l - 7 * m + 114) % 31) + 1
+            return LocalDate.of(year, month, day)
         }
     }
 }
