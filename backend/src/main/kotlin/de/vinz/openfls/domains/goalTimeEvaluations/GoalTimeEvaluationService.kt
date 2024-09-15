@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.goalTimeEvaluations
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalsTimeEvaluationDto
@@ -28,66 +29,140 @@ class GoalTimeEvaluationService(
     fun getByAssistancePlanIdAndHourTypeIdAndYear(assistancePlanId: Long,
                                                   hourTypeId: Long,
                                                   year: Int): GoalsTimeEvaluationDto {
-        val assistancePlan =
-                assistancePlanRepository
-                        .findById(assistancePlanId)
-                        .orElseThrow{ AssistancePlanNotFoundException(assistancePlanId) }
-        val goalsWithHourType =
-                assistancePlan.goals.filter { it.hours.any { goalHour -> goalHour.hourType!!.id == hourTypeId } }
+        val assistancePlan = assistancePlanRepository
+                .findById(assistancePlanId)
+                .orElseThrow { AssistancePlanNotFoundException(assistancePlanId) }
+
+        val goalsWithHourType = assistancePlan.goals
+                .filter { it.hours.any { goalHour -> goalHour.hourType!!.id == hourTypeId } }
 
         if (goalsWithHourType.isEmpty()) {
             throw NoGoalFoundWithHourTypeException(hourTypeId)
         }
 
-        try {
+        val start = assistancePlan.start
+        val end = assistancePlan.end
+
+        return try {
             val services = serviceRepository.findServicesByAssistancePlanIdAndStartIsBetween(
                     assistancePlanId,
-                    LocalDateTime.of(assistancePlan.start, LocalTime.of(0, 0, 0)),
-                    LocalDateTime.of(assistancePlan.end, LocalTime.of(23, 59, 59)))
+                    LocalDateTime.of(start, LocalTime.of(0, 0, 0)),
+                    LocalDateTime.of(end, LocalTime.of(23, 59, 59))
+            )
 
-            return GoalsTimeEvaluationDto().also { goalTimeEvaluation ->
-                goalTimeEvaluation.assistancePlanId = assistancePlanId
-                goalTimeEvaluation.goalTimeEvaluations = goalsWithHourType
-                        .map { goal ->
-                            GoalTimeEvaluationDto().also {
-                                it.id = goal.id
-                                it.title = goal.title
-                                it.description = goal.description
-                                it.executedHours = getMonthlyExecutedHoursInYear(
-                                        goal, hourTypeId, assistancePlan.start, assistancePlan.end, year, services, false)
-                                it.summedExecutedHours = getMonthlyExecutedHoursInYear(
-                                        goal, hourTypeId, assistancePlan.start, assistancePlan.end, year, services, true)
-                                it.approvedHours = getMonthlyApprovedHoursInYear(
-                                        goal, hourTypeId, assistancePlan.start, assistancePlan.end, year, false)
-                                it.summedApprovedHours = getMonthlyApprovedHoursInYear(
-                                        goal, hourTypeId, assistancePlan.start, assistancePlan.end, year, true)
-                                it.approvedHoursLeft =
-                                        getApprovedHoursLeft(it.approvedHours, it.executedHours).toMutableList()
-                                it.summedApprovedHoursLeft =
-                                        getApprovedHoursLeft(it.summedApprovedHours, it.summedExecutedHours).toMutableList()
-                            }
-                        }
-                        .sortedBy { it.title }
-                        .toMutableList()
-            }
+            createGoalsTimeEvaluationDto(
+                    assistancePlan,
+                    goalsWithHourType,
+                    year,
+                    services,
+                    hourTypeId,
+                    start,
+                    end
+            )
         } catch (ex: YearOutOfRangeException) {
-            return GoalsTimeEvaluationDto().also { goalTimeEvaluation ->
-                goalTimeEvaluation.assistancePlanId = assistancePlanId
-                goalTimeEvaluation.goalTimeEvaluations = goalsWithHourType.map { goal ->
-                    GoalTimeEvaluationDto().also {
-                        it.id = goal.id
-                        it.title = goal.title
-                        it.description = goal.description
-                        it.executedHours = List(12) { 0.0 }
-                        it.summedExecutedHours = List(12) { 0.0 }
-                        it.approvedHours = List(12) { 0.0 }
-                        it.summedApprovedHours = List(12) { 0.0 }
-                        it.approvedHoursLeft = List(12) { 0.0 }
-                        it.summedApprovedHoursLeft = List(12) { 0.0 }
-                    }
-                }.sortedBy { it.title }.toMutableList()
-            }
+            createEmptyGoalsTimeEvaluationDto(assistancePlanId, goalsWithHourType)
         }
+    }
+
+    private fun createGoalsTimeEvaluationDto(
+            assistancePlan: AssistancePlan,
+            goalsWithHourType: List<Goal>,
+            year: Int,
+            services: List<de.vinz.openfls.domains.services.Service>,
+            hourTypeId: Long,
+            start: LocalDate,
+            end: LocalDate
+    ): GoalsTimeEvaluationDto {
+        val executedHours = getMonthlyExecutedHoursInYear(assistancePlan, hourTypeId, start, end, year, services, false)
+        val summedExecutedHours = getMonthlyExecutedHoursInYear(assistancePlan, hourTypeId, start, end, year, services, true)
+        val approvedHours = getMonthlyApprovedHoursInYear(assistancePlan, hourTypeId, start, end, year, false)
+        val summedApprovedHours = getMonthlyApprovedHoursInYear(assistancePlan, hourTypeId, start, end, year, true)
+
+        return GoalsTimeEvaluationDto().apply {
+            this.assistancePlanId = assistancePlan.id
+            this.executedHours = executedHours
+            this.summedExecutedHours = summedExecutedHours
+            this.approvedHours = approvedHours
+            this.summedApprovedHours = summedApprovedHours
+            this.approvedHoursLeft = getApprovedHoursLeft(approvedHours, executedHours).toMutableList()
+            this.summedApprovedHoursLeft = getApprovedHoursLeft(summedApprovedHours, summedExecutedHours).toMutableList()
+            this.goalTimeEvaluations = goalsWithHourType.map { goal ->
+                createGoalTimeEvaluationDto(goal, hourTypeId, start, end, year, services)
+            }.sortedBy { it.title }.toMutableList()
+        }
+    }
+
+    private fun createGoalTimeEvaluationDto(
+            goal: Goal,
+            hourTypeId: Long,
+            start: LocalDate,
+            end: LocalDate,
+            year: Int,
+            services: List<de.vinz.openfls.domains.services.Service>
+    ): GoalTimeEvaluationDto {
+        val executedHours = getMonthlyExecutedHoursInYear(goal, hourTypeId, start, end, year, services, false)
+        val summedExecutedHours = getMonthlyExecutedHoursInYear(goal, hourTypeId, start, end, year, services, true)
+        val approvedHours = getMonthlyApprovedHoursInYear(goal, hourTypeId, start, end, year, false)
+        val summedApprovedHours = getMonthlyApprovedHoursInYear(goal, hourTypeId, start, end, year, true)
+
+        return GoalTimeEvaluationDto().apply {
+            this.id = goal.id
+            this.title = goal.title
+            this.description = goal.description
+            this.executedHours = executedHours
+            this.summedExecutedHours = summedExecutedHours
+            this.approvedHours = approvedHours
+            this.summedApprovedHours = summedApprovedHours
+            this.approvedHoursLeft = getApprovedHoursLeft(approvedHours, executedHours).toMutableList()
+            this.summedApprovedHoursLeft = getApprovedHoursLeft(summedApprovedHours, summedExecutedHours).toMutableList()
+        }
+    }
+
+    private fun createEmptyGoalsTimeEvaluationDto(
+            assistancePlanId: Long,
+            goalsWithHourType: List<Goal>
+    ): GoalsTimeEvaluationDto {
+        val emptyHoursList = List(12) { 0.0 }
+
+        return GoalsTimeEvaluationDto().apply {
+            this.assistancePlanId = assistancePlanId
+            this.executedHours = emptyHoursList
+            this.summedExecutedHours = emptyHoursList
+            this.approvedHours = emptyHoursList
+            this.summedApprovedHours = emptyHoursList
+            this.approvedHoursLeft = emptyHoursList
+            this.summedApprovedHoursLeft = emptyHoursList
+            this.goalTimeEvaluations = goalsWithHourType.map { goal ->
+                createEmptyGoalTimeEvaluationDto(goal)
+            }.sortedBy { it.title }.toMutableList()
+        }
+    }
+
+    private fun createEmptyGoalTimeEvaluationDto(goal: Goal): GoalTimeEvaluationDto {
+        val emptyHoursList = List(12) { 0.0 }
+
+        return GoalTimeEvaluationDto().apply {
+            this.id = goal.id
+            this.title = goal.title
+            this.description = goal.description
+            this.executedHours = emptyHoursList
+            this.summedExecutedHours = emptyHoursList
+            this.approvedHours = emptyHoursList
+            this.summedApprovedHours = emptyHoursList
+            this.approvedHoursLeft = emptyHoursList
+            this.summedApprovedHoursLeft = emptyHoursList
+        }
+    }
+
+    fun getMonthlyExecutedHoursInYear(assistancePlan: AssistancePlan,
+                                      hourTypeId: Long,
+                                      start: LocalDate,
+                                      end: LocalDate,
+                                      year: Int,
+                                      services: List<de.vinz.openfls.domains.services.Service>,
+                                      sum: Boolean): List<Double> {
+        val executedMinutes = getExecutedMinutesMonthlyByYear(assistancePlan, hourTypeId, start, end, year, services, sum)
+        return executedMinutes.map { DateService.convertMinutesToHour(it) }
     }
 
     fun getMonthlyExecutedHoursInYear(goal: Goal,
@@ -101,6 +176,17 @@ class GoalTimeEvaluationService(
         return executedMinutes.map { DateService.convertMinutesToHour(it) }
     }
 
+    fun getExecutedMinutesMonthlyByYear(assistancePlan: AssistancePlan,
+                                        hourTypeId: Long,
+                                        start: LocalDate,
+                                        end: LocalDate,
+                                        year: Int,
+                                        services: List<de.vinz.openfls.domains.services.Service>,
+                                        sum: Boolean): List<Double> {
+        val executedHours = getExecutedMinutesMonthly(assistancePlan, hourTypeId, start, end, services, sum)
+        return getExecutedMinutesMonthlyByYear(year, executedHours)
+    }
+
     fun getExecutedMinutesMonthlyByYear(goal: Goal,
                                         hourTypeId: Long,
                                         start: LocalDate,
@@ -109,10 +195,37 @@ class GoalTimeEvaluationService(
                                         services: List<de.vinz.openfls.domains.services.Service>,
                                         sum: Boolean): List<Double> {
         val executedHours = getExecutedMinutesMonthly(goal, hourTypeId, start, end, services, sum)
+        return getExecutedMinutesMonthlyByYear(year, executedHours)
+    }
+
+    fun getExecutedMinutesMonthlyByYear(year: Int,
+                                        executedHours: List<YearMonthDoubleValue>): List<Double> {
         val executedHoursInYear = executedHours.filter { it.yearMonth.year == year }.sortedBy { it.yearMonth }
         val result = getYearMonthValuesByYear(executedHoursInYear, year)
 
         return result.map { it.value }
+    }
+
+    fun getExecutedMinutesMonthly(assistancePlan: AssistancePlan,
+                                  hourTypeId: Long,
+                                  start: LocalDate,
+                                  end: LocalDate,
+                                  services: List<de.vinz.openfls.domains.services.Service>,
+                                  sum: Boolean): List<YearMonthDoubleValue> {
+        val filterService: (service: de.vinz.openfls.domains.services.Service) -> Boolean =
+                { service -> service.assistancePlan?.id == assistancePlan.id }
+        val minuteAdjustment: (service: de.vinz.openfls.domains.services.Service) -> Double =
+                { service -> service.minutes.toDouble() }
+
+        return getExecutedMinutesMonthly(
+                start = start,
+                end = end,
+                services = services,
+                hourTypeId = hourTypeId,
+                sum = sum,
+                filterService = filterService,
+                minuteAdjustment = minuteAdjustment
+        )
     }
 
     fun getExecutedMinutesMonthly(goal: Goal,
@@ -121,33 +234,61 @@ class GoalTimeEvaluationService(
                                   end: LocalDate,
                                   services: List<de.vinz.openfls.domains.services.Service>,
                                   sum: Boolean): List<YearMonthDoubleValue> {
+        val filterService: (service: de.vinz.openfls.domains.services.Service) -> Boolean =
+                { service -> containsServiceGoal(service, goal) }
+        val minuteAdjustment: (service: de.vinz.openfls.domains.services.Service) -> Double =
+                { service -> (service.minutes.toDouble() / service.goals.size).roundToInt().toDouble() }
+
+        return getExecutedMinutesMonthly(
+                start = start,
+                end = end,
+                services = services,
+                hourTypeId = hourTypeId,
+                sum = sum,
+                filterService = filterService,
+                minuteAdjustment = minuteAdjustment
+        )
+    }
+
+    fun getExecutedMinutesMonthly(
+            start: LocalDate,
+            end: LocalDate,
+            services: List<de.vinz.openfls.domains.services.Service>,
+            hourTypeId: Long,
+            sum: Boolean,
+            filterService: (service: de.vinz.openfls.domains.services.Service) -> Boolean,
+            minuteAdjustment: (service: de.vinz.openfls.domains.services.Service) -> Double
+    ): List<YearMonthDoubleValue> {
         val executedHours = YearMonthDoubleValue.getEmpty(start, end)
-        val executedMinutesMap = HashMap<YearMonth, Double>()
-        executedHours.forEach { executedMinutesMap[it.yearMonth] = it.value }
+        val executedMinutesMap = executedHours.associate { it.yearMonth to it.value }.toMutableMap()
 
         val startTime = LocalDateTime.of(start, LocalTime.of(0, 0, 0))
         val endTime = LocalDateTime.of(end, LocalTime.of(23, 59, 59))
 
         for (service in services) {
             // invalid service
-            if (!isServiceInBetween(service, startTime, endTime) ||
-                    !isServiceHourType(service, hourTypeId) ||
-                    !containsServiceGoal(service, goal)) {
+            if (!isServiceInBetween(service, startTime, endTime) || !isServiceHourType(service, hourTypeId) || !filterService(service)) {
                 continue
             }
 
             val yearMonth = YearMonth.of(service.start.year, service.start.month)
-            val existingValue = if (executedMinutesMap.containsKey(yearMonth)) executedMinutesMap.getValue(yearMonth) else 0.0
-            executedMinutesMap[yearMonth] = existingValue + (service.minutes.toDouble() / service.goals.size).roundToInt()
+            val existingValue = executedMinutesMap.getOrDefault(yearMonth, 0.0)
+            executedMinutesMap[yearMonth] = existingValue + minuteAdjustment(service)
         }
 
         val yearMonthDoubleValues = executedMinutesMap.entries.map { YearMonthDoubleValue(it.key, it.value) }
 
-        if (sum) {
-            return sumYearMonthDoubleValues(yearMonthDoubleValues)
-        }
+        return if (sum) sumYearMonthDoubleValues(yearMonthDoubleValues) else yearMonthDoubleValues.sortedBy { it.yearMonth }
+    }
 
-        return yearMonthDoubleValues.sortedBy { it.yearMonth }
+    fun getMonthlyApprovedHoursInYear(assistancePlan: AssistancePlan,
+                                      hourTypeId: Long,
+                                      start: LocalDate,
+                                      end: LocalDate,
+                                      year: Int,
+                                      sum: Boolean): List<Double> {
+        val approvedMinutes = getApprovedHoursMonthly(assistancePlan, hourTypeId, start, end, sum)
+        return getMonthlyApprovedHoursInYear(approvedMinutes, year)
     }
 
     private fun getMonthlyApprovedHoursInYear(goal: Goal,
@@ -157,10 +298,24 @@ class GoalTimeEvaluationService(
                                               year: Int,
                                               sum: Boolean): List<Double> {
         val approvedMinutes = getApprovedHoursMonthly(goal, hourTypeId, start, end, sum)
+        return getMonthlyApprovedHoursInYear(approvedMinutes, year)
+    }
+
+    private fun getMonthlyApprovedHoursInYear(approvedMinutes: List<YearMonthDoubleValue>,
+                                              year: Int): List<Double> {
         val approvedMinutesInYear = approvedMinutes.filter { it.yearMonth.year == year }
-        val result = getYearMonthValuesByYear(approvedMinutesInYear ,year)
+        val result = getYearMonthValuesByYear(approvedMinutesInYear, year)
 
         return result.map { it.value }
+    }
+
+    private fun getApprovedHoursMonthly(assistancePlan: AssistancePlan,
+                                        hourTypeId: Long,
+                                        start: LocalDate,
+                                        end: LocalDate,
+                                        sum: Boolean): List<YearMonthDoubleValue> {
+        val dailyHours = ((assistancePlan.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
+        return getApprovedHoursMonthly(dailyHours, start, end, sum)
     }
 
     private fun getApprovedHoursMonthly(goal: Goal,
@@ -169,6 +324,13 @@ class GoalTimeEvaluationService(
                                         end: LocalDate,
                                         sum: Boolean): List<YearMonthDoubleValue> {
         val dailyHours = ((goal.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
+        return getApprovedHoursMonthly(dailyHours, start, end, sum)
+    }
+
+    private fun getApprovedHoursMonthly(dailyHours: Double,
+                                        start: LocalDate,
+                                        end: LocalDate,
+                                        sum: Boolean): List<YearMonthDoubleValue> {
         var resultList = YearMonthDoubleValue.getEmpty(start, end)
 
         for (value in resultList) {
@@ -189,19 +351,12 @@ class GoalTimeEvaluationService(
         return resultList.sortedBy { it.yearMonth }
     }
 
-    private fun getApprovedHoursLeft(approvedHours: List<Double>,
-                                     executedHours: List<Double>): List<Double> {
+    fun getApprovedHoursLeft(approvedHours: List<Double>,
+                             executedHours: List<Double>): List<Double> {
         val resultList = MutableList(approvedHours.size) { 0.0 }
 
         for (i in approvedHours.indices) {
-            val approvedMinutes = DateService.convertHourToMinutes(approvedHours[i])
-            val executedMinutes = DateService.convertHourToMinutes(executedHours[i])
-            if (approvedMinutes > 0) {
-                val differenceMinutes = approvedMinutes - executedMinutes
-                resultList[i] = DateService.convertMinutesToHour(differenceMinutes.toDouble())
-            } else {
-                resultList[i] = 0.0
-            }
+            resultList[i] = TimeDoubleService.diffTimeDoubles(approvedHours[i], executedHours[i])
         }
 
         return resultList
@@ -214,7 +369,7 @@ class GoalTimeEvaluationService(
             try {
                 val foundExecutedHour = values.first { it.yearMonth == resultExecutedHour.yearMonth }
                 resultExecutedHour.value = foundExecutedHour.value
-            } catch (ex: NoSuchElementException) {
+            } catch (_: NoSuchElementException) {
             }
         }
 
