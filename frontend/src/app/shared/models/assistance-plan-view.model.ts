@@ -4,4 +4,5 @@ export class AssistancePlanView {
   dto: AssistancePlanDto = new AssistancePlanDto();
   editable: boolean = false;
   favorite: boolean = false;
+  illegal: boolean = false;
 }

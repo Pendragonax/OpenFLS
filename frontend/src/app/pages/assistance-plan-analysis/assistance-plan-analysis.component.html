@@ -1,24 +1,28 @@
-<app-info-header [title]="'Zielauswertung von ' + assistancePlan.clientFirstName + ' ' + assistancePlan.clientLastName"></app-info-header>
+<app-info-header
+  [title]="'Auswertung des Hilfeplans von &quot;' + assistancePlan.client.firstName + ' ' + assistancePlan.client.lastName + '&quot;'"></app-info-header>
 
 <mat-tab-group [(selectedIndex)]="tabIndex" (selectedTabChange)="updateUrl()">
   <mat-tab label="Ziele">
-    <div *ngFor="let goal of assistancePlan.goals">
+    <div class="justify-content-center d-flex flex-wrap" *ngFor="let goal of assistancePlan.goals">
       <app-goal-single [goal]="goal"></app-goal-single>
     </div>
   </mat-tab>
+
   <mat-tab label="Zeitauswertung">
     <div class="container-fluid">
       <div class="row">
         <div class="min-width-350 col-3">
-          <app-goal-time-evaluation-filter (onEvaluationTypeSelectionChanged)="onGoalTimeEvaluationTypeChanged($event)"
-                                           (onHourTypeSelectionChanged)="onGoalTimeHourTypeChanged($event)"
-                                           (onDateSelectionChanged)="onGoalTimePeriodChanged($event)"
-                                           [disabled$]="isGenerating$"></app-goal-time-evaluation-filter>
+          <app-assistance-plan-time-evaluation-filter
+            (onEvaluationTypeSelectionChanged)="onGoalTimeEvaluationTypeChanged($event)"
+            (onHourTypeSelectionChanged)="onGoalTimeHourTypeChanged($event)"
+            (onDateSelectionChanged)="onGoalTimePeriodChanged($event)"
+            [disabled$]="isGenerating$"></app-assistance-plan-time-evaluation-filter>
         </div>
         <div class="col">
           <div class="my-3 mat-elevation-z8 example-container">
             <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
-            <app-error-icon *ngIf="goalTimesErrorOccurred" [description]="'Es konnten keine Werte gefunden werden'"></app-error-icon>
+            <app-error-icon *ngIf="goalTimesErrorOccurred"
+                            [description]="'Es konnten keine Werte gefunden werden'"></app-error-icon>
             <app-overview-table *ngIf="!goalTimesErrorOccurred && !isGenerating"
                                 [boldColumnIndices$]="boldColumnIndices$"
                                 [columns$]="columns$"
@@ -27,13 +31,14 @@
         </div>
       </div>
     </div>
-
   </mat-tab>
+
   <mat-tab label="Evaluationen">
     <div class="container-fluid">
       <div class="row justify-content-center">
         <div class="width-20-vw">
-          <app-goal-evaluation-filter (onDateSelectionChanged)="onEvaluationPeriodChanged($event)"></app-goal-evaluation-filter>
+          <app-assistance-plan-analysis-filter
+            (onDateSelectionChanged)="onEvaluationPeriodChanged($event)"></app-assistance-plan-analysis-filter>
         </div>
       </div>
       <div class="row">
@@ -47,5 +52,9 @@
         </div>
       </div>
     </div>
+  </mat-tab>
+
+  <mat-tab label="tab. Ansichten">
+    <app-assistance-plan-evaluation [assistancePlan]="assistancePlan"></app-assistance-plan-evaluation>
   </mat-tab>
 </mat-tab-group>

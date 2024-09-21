@@ -1,14 +1,13 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {Period} from "../../../../shared/components/year-month-selection/Period";
 import {UntypedFormGroup} from "@angular/forms";
-import {PeriodMode} from "../../../../shared/components/year-month-selection/PeriodMode";
 
 @Component({
-  selector: 'app-goal-evaluation-filter',
-  templateUrl: './goal-evaluation-filter.component.html',
-  styleUrls: ['./goal-evaluation-filter.component.css']
+  selector: 'app-assistance-plan-analysis-filter',
+  templateUrl: './assistance-plan-evaluation-filter.component.html',
+  styleUrls: ['./assistance-plan-evaluation-filter.component.css']
 })
-export class GoalEvaluationFilterComponent implements OnInit {
+export class AssistancePlanEvaluationFilterComponent implements OnInit {
 
   @Output() onDateSelectionChanged: EventEmitter<Period> = new EventEmitter<Period>();
 

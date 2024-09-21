@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GoalTimeEvaluationFilterComponent } from './goal-time-evaluation-filter.component';
+import { AssistancePlanTimeEvaluationFilterComponent } from './assistance-plan-time-evaluation-filter.component';
 
 describe('GoalTimeEvaluationFilterComponent', () => {
-  let component: GoalTimeEvaluationFilterComponent;
-  let fixture: ComponentFixture<GoalTimeEvaluationFilterComponent>;
+  let component: AssistancePlanTimeEvaluationFilterComponent;
+  let fixture: ComponentFixture<AssistancePlanTimeEvaluationFilterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GoalTimeEvaluationFilterComponent ]
+      declarations: [ AssistancePlanTimeEvaluationFilterComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(GoalTimeEvaluationFilterComponent);
+    fixture = TestBed.createComponent(AssistancePlanTimeEvaluationFilterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

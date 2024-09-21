@@ -9,11 +9,11 @@ import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {ConfirmationModalComponent} from "../../../../shared/modals/confirmation-modal/confirmation-modal.component";
 
 @Component({
-  selector: 'app-goal-evaluation-modal',
-  templateUrl: './goal-evaluation-modal.component.html',
-  styleUrls: ['./goal-evaluation-modal.component.css']
+  selector: 'app-assistance-plan-analysis-modal',
+  templateUrl: './assistance-plan-evaluation-modal.component.html',
+  styleUrls: ['./assistance-plan-evaluation-modal.component.css']
 })
-export class GoalEvaluationModalComponent implements OnInit {
+export class AssistancePlanEvaluationModalComponent implements OnInit {
   evaluation$: ReplaySubject<EvaluationDto> = new ReplaySubject();
   evaluation: EvaluationDto = new EvaluationDto();
   goalId$: ReplaySubject<number> = new ReplaySubject<number>();
@@ -42,7 +42,7 @@ export class GoalEvaluationModalComponent implements OnInit {
 
   constructor(
     private evaluationService: EvaluationsService,
-    private dialogRef: MatDialogRef<GoalEvaluationModalComponent>,
+    private dialogRef: MatDialogRef<AssistancePlanEvaluationModalComponent>,
     private matDialog: MatDialog,
     private dateService: DateService
   ) { }

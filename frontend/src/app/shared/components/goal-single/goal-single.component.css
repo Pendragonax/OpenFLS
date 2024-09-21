@@ -14,3 +14,8 @@
 .wrap-content {
   white-space: pre-line;
 }
+
+.width-350 {
+  width: 350px;
+  background-color: #e0e0e0;
+}

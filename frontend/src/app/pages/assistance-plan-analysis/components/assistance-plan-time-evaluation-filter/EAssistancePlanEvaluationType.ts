@@ -1,4 +1,4 @@
-export enum EGoalEvaluationType {
+export enum EAssistancePlanEvaluationType {
   Executed,
   SummedExecuted,
   Approved,

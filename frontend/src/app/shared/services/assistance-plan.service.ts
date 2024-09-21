@@ -15,6 +15,7 @@ import {SponsorService} from "./sponsor.service";
 import {SponsorDto} from "../dtos/sponsor-dto.model";
 import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
 import {AssistancePlanResponseDto} from "../dtos/assistance-plan-response-dto.model";
+import {AssistancePlan} from "../projections/assistance-plan.projection";
 
 @Injectable({
   providedIn: 'root'
@@ -35,14 +36,19 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
   override initialLoad() {
   }
 
-  getStrippedById(id: number): Observable<AssistancePlanResponseDto> {
+  getProjectionById(id: number): Observable<AssistancePlan> {
     return this.http
-      .get<AssistancePlanResponseDto>(`${environment.api_url}${this.url}/${id}`)
+      .get<AssistancePlan>(`${environment.api_url}${this.url}/projection//${id}`);
   }
 
   getByClientId(id: number): Observable<AssistancePlanDto[]> {
     return this.http
       .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/client/${id}`)
+  }
+
+  getIllegalByClientId(id: number): Observable<AssistancePlan[]> {
+    return this.http
+      .get<AssistancePlan[]>(`${environment.api_url}${this.url}/client/${id}/illegal`)
   }
 
   getCombinationByClientId(id: number): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
@@ -78,6 +84,11 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
   getByInstitutionId(id: number): Observable<AssistancePlanDto[]> {
     return this.http
       .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/institution/${id}`)
+  }
+
+  getIllegalByInstitutionId(id: number): Observable<AssistancePlan[]> {
+    return this.http
+      .get<AssistancePlan[]>(`${environment.api_url}${this.url}/institution/${id}/illegal`)
   }
 
   getCombinationByInstitutionId(id: number): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
@@ -141,6 +152,11 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
   getBySponsorId(id: number): Observable<AssistancePlanDto[]> {
     return this.http
       .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/sponsor/${id}`)
+  }
+
+  getIllegalBySponsorId(id: number): Observable<AssistancePlan[]> {
+    return this.http
+      .get<AssistancePlan[]>(`${environment.api_url}${this.url}/sponsor/${id}/illegal`)
   }
 
   getCombinationBySponsorId(id: number): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
