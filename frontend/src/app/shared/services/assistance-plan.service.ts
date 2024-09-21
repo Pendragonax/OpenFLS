@@ -46,6 +46,11 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
       .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/client/${id}`)
   }
 
+  getIllegalByClientId(id: number): Observable<AssistancePlan[]> {
+    return this.http
+      .get<AssistancePlan[]>(`${environment.api_url}${this.url}/client/${id}/illegal`)
+  }
+
   getCombinationByClientId(id: number): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
     return combineLatest([
       this.clientService.getById(id),
@@ -147,6 +152,11 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
   getBySponsorId(id: number): Observable<AssistancePlanDto[]> {
     return this.http
       .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/sponsor/${id}`)
+  }
+
+  getIllegalBySponsorId(id: number): Observable<AssistancePlan[]> {
+    return this.http
+      .get<AssistancePlan[]>(`${environment.api_url}${this.url}/sponsor/${id}/illegal`)
   }
 
   getCombinationBySponsorId(id: number): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {

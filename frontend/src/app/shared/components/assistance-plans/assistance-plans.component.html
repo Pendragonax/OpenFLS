@@ -69,13 +69,6 @@
                       <mat-icon>clear</mat-icon></button>
                   </mat-form-field>
               </div>
-
-              <div class="col-auto" [hidden]="!hideInstitutionFilter">
-                <button mat-fab extended color="primary">
-                  <mat-icon color="warn">new_releases</mat-icon>
-                  fehlerhafte Hilfepläne
-                </button>
-              </div>
             </div>
           </div>
         </form>
@@ -127,6 +120,7 @@
         <td mat-cell
             [hidden]="hideClientColumn"
             class="hide-on-small px-4"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination"> {{combination[0].lastName}} {{combination[0].firstName}}</td>
       </ng-container>
 
@@ -138,6 +132,7 @@
             [hidden]="hideInstitutionColumn"> Bereich </th>
         <td mat-cell
             class="hide-on-small px-2"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination"
             [hidden]="hideInstitutionColumn"> {{combination[1].name}}</td>
       </ng-container>
@@ -150,6 +145,7 @@
             [hidden]="hideInstitutionColumn"> Kostenträger </th>
         <td mat-cell
             *matCellDef="let combination"
+            [ngClass]="{'background-red': combination[3].illegal}"
             class="hide-on-small px-2"
             [hidden]="hideInstitutionColumn"> {{combination[2].name}}</td>
       </ng-container>
@@ -161,6 +157,7 @@
             *matHeaderCellDef> Beginn </th>
         <td mat-cell
             class="px-2"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination"> {{ getDateString(combination[3].dto.start) }}</td>
       </ng-container>
 
@@ -171,6 +168,7 @@
             *matHeaderCellDef> Ende </th>
         <td mat-cell
             class="px-2"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination"> {{getDateString(combination[3].dto.end)}}</td>
       </ng-container>
 
@@ -182,6 +180,7 @@
         <td mat-cell
             class="px-2"
             [matTooltip]="'h - Hilfeplan (h - Ziele)'"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination">
           {{sumWeeklyHoursByPlan(combination[3].dto)}} ({{sumGoalsWeeklyHoursByPlan(combination[3].dto)}})
         </td>
@@ -193,6 +192,7 @@
             class="text-center px-2"> Aktionen </th>
         <td mat-cell
             *matCellDef="let combination"
+            [ngClass]="{'background-red': combination[3].illegal}"
             class="text-center px-2">
           <div class="text-center">
             <button mat-icon-button

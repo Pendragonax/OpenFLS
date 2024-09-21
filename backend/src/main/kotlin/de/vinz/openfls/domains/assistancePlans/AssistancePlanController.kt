@@ -184,6 +184,31 @@ class AssistancePlanController(
         }
     }
 
+    @GetMapping("client/{id}/illegal")
+    fun getIllegalByClientId(@PathVariable id: Long): Any {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val dtos = assistancePlanService.getIllegalByClientId(id)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getIllegalByClientId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch(ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
     @GetMapping("sponsor/{id}")
     fun getBySponsorId(@PathVariable id: Long): Any {
         return try {
@@ -205,6 +230,31 @@ class AssistancePlanController(
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("sponsor/{id}/illegal")
+    fun getIllegalBySponsorId(@PathVariable id: Long): Any {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val dtos = assistancePlanService.getIllegalBySponsorId(id)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getIllegalBySponsorId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch(ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }
@@ -243,7 +293,7 @@ class AssistancePlanController(
             val dtos = assistancePlanService.getIllegalByInstitutionId(id)
 
             if (logPerformance) {
-                logger.info(String.format("%s getByInstitutionId took %s ms",
+                logger.info(String.format("%s getIllegalByInstitutionId took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs))
             }

@@ -30,7 +30,6 @@ import {MatDialog} from "@angular/material/dialog";
 import {Service} from "../../../../dtos/service.projection";
 import {ConfirmationModalComponent} from "../../../../modals/confirmation-modal/confirmation-modal.component";
 import {AssistancePlanHourService} from "../../../../services/assistance-plan-hour.service";
-import {AssistancePlanHour} from "../../../../projections/assistance-plan-hour.projection";
 
 @Component({
   selector: 'app-assistance-plan-detail',

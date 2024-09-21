@@ -160,7 +160,7 @@ export class GoalEvaluationComponent implements OnInit {
   }
 
   getGoalsTimeAsRow(goalsTime: GoalsTimeEvaluationDto, type: EGoalEvaluationType | null): string[] {
-    let cells = [this.truncateString("Hilfeplan ohne Ziel", 20)];
+    let cells = [this.truncateString("Hilfeplan: Stunden", 20)];
 
     for (let i = 0; i < goalsTime.approvedHours.length; i++) {
       switch (type) {

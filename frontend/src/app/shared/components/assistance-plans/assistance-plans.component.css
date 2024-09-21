@@ -11,3 +11,8 @@ td , th {
 .sidenav-height {
   height: 250px;
 }
+
+
+.background-red {
+  background: rgba(255, 33, 33, 0.24) !important;
+}

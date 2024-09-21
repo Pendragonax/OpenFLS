@@ -39,6 +39,10 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     fun findByClientId(@Param("clientId") id: Long): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.client.id = :clientId")
+    fun findProjectionsByClientId(@Param("clientId") id: Long): List<AssistancePlanProjection>
+
+    @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.sponsor.id = :sponsorId")
     fun findBySponsorId(@Param("sponsorId") id: Long): List<AssistancePlan>
 
@@ -53,6 +57,10 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
             " AND (YEAR(u.start) <= :year AND YEAR(u.end) >= :year)")
     fun findBySponsorIdAndYear(@Param("sponsorId") id: Long,
                                @Param("year") year: Int): List<AssistancePlan>
+
+    @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.sponsor.id = :sponsorId")
+    fun findProjectionsBySponsorId(@Param("sponsorId") id: Long): List<AssistancePlanProjection>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId")

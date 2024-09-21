@@ -185,6 +185,11 @@ class AssistancePlanService(
         return assistancePlanRepository.findByClientId(id)
     }
 
+    fun getIllegalByClientId(id: Long): List<AssistancePlanProjection> {
+        val assistancePlans = assistancePlanRepository.findProjectionsByClientId(id)
+        return assistancePlans.filter { isIllegalAssistancePlan(it) }
+    }
+
     fun getAssistancePlanDtosBySponsorId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findBySponsorId(id)
         return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
@@ -192,6 +197,11 @@ class AssistancePlanService(
 
     fun getBySponsorId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findBySponsorId(id)
+    }
+
+    fun getIllegalBySponsorId(id: Long): List<AssistancePlanProjection> {
+        val assistancePlans = assistancePlanRepository.findProjectionsBySponsorId(id)
+        return assistancePlans.filter { isIllegalAssistancePlan(it) }
     }
 
     fun getAssistancePlanDtosByInstitutionId(id: Long): List<AssistancePlanDto> {
