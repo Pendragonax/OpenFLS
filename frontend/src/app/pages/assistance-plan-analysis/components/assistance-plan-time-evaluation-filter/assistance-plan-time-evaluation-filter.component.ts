@@ -1,28 +1,28 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {Period} from "../../../../shared/components/year-month-selection/Period";
-import {EGoalEvaluationType} from "./EGoalEvaluationType";
+import {EAssistancePlanEvaluationType} from "./EAssistancePlanEvaluationType";
 import {MatSelectChange} from "@angular/material/select";
 import {HourTypeService} from "../../../../shared/services/hour-type.service";
 import {HourTypeDto} from "../../../../shared/dtos/hour-type-dto.model";
 import {ReplaySubject} from "rxjs";
 
 @Component({
-  selector: 'app-goal-time-evaluation-filter',
-  templateUrl: './goal-time-evaluation-filter.component.html',
-  styleUrls: ['./goal-time-evaluation-filter.component.css']
+  selector: 'app-assistance-plan-time-evaluation-filter',
+  templateUrl: './assistance-plan-time-evaluation-filter.component.html',
+  styleUrls: ['./assistance-plan-time-evaluation-filter.component.css']
 })
-export class GoalTimeEvaluationFilterComponent implements OnInit {
+export class AssistancePlanTimeEvaluationFilterComponent implements OnInit {
 
   @Input() disabled = false;
   @Input() disabled$: ReplaySubject<boolean> = new ReplaySubject<boolean>();
 
   @Output() onDateSelectionChanged: EventEmitter<Period> = new EventEmitter<Period>();
   @Output() onHourTypeSelectionChanged: EventEmitter<number> = new EventEmitter<number>();
-  @Output() onEvaluationTypeSelectionChanged: EventEmitter<EGoalEvaluationType> = new EventEmitter<EGoalEvaluationType>();
+  @Output() onEvaluationTypeSelectionChanged: EventEmitter<EAssistancePlanEvaluationType> = new EventEmitter<EAssistancePlanEvaluationType>();
 
-  evaluationTypes: [string, EGoalEvaluationType][] = this.getGoalEvaluationHourTypes()
-  selectedEvaluationType: EGoalEvaluationType = EGoalEvaluationType.Executed;
+  evaluationTypes: [string, EAssistancePlanEvaluationType][] = this.getGoalEvaluationHourTypes()
+  selectedEvaluationType: EAssistancePlanEvaluationType = EAssistancePlanEvaluationType.Executed;
   hourTypes: HourTypeDto[] = []
   selectedHourType: string = "";
 
@@ -86,28 +86,28 @@ export class GoalTimeEvaluationFilterComponent implements OnInit {
     this.onEvaluationTypeSelectionChanged.emit(event.value);
   }
 
-  getGoalEvaluationHourTypes(): [string, EGoalEvaluationType][] {
+  getGoalEvaluationHourTypes(): [string, EAssistancePlanEvaluationType][] {
     let result: [string, number][] = []
 
-    Object.values(EGoalEvaluationType).forEach((value) => {
+    Object.values(EAssistancePlanEvaluationType).forEach((value) => {
       switch (value) {
-        case EGoalEvaluationType.Approved:
-          result.push(["Genehmigt", EGoalEvaluationType.Approved])
+        case EAssistancePlanEvaluationType.Approved:
+          result.push(["Genehmigt", EAssistancePlanEvaluationType.Approved])
           break;
-        case EGoalEvaluationType.SummedApproved:
-          result.push(["Genehmigt summiert", EGoalEvaluationType.SummedApproved])
+        case EAssistancePlanEvaluationType.SummedApproved:
+          result.push(["Genehmigt summiert", EAssistancePlanEvaluationType.SummedApproved])
           break;
-        case EGoalEvaluationType.Executed:
-          result.push(["Geleistet", EGoalEvaluationType.Executed])
+        case EAssistancePlanEvaluationType.Executed:
+          result.push(["Geleistet", EAssistancePlanEvaluationType.Executed])
           break;
-        case EGoalEvaluationType.SummedExecuted:
-          result.push(["Geleistet summiert", EGoalEvaluationType.SummedExecuted])
+        case EAssistancePlanEvaluationType.SummedExecuted:
+          result.push(["Geleistet summiert", EAssistancePlanEvaluationType.SummedExecuted])
           break;
-        case EGoalEvaluationType.Left:
-          result.push(["Genehmigt übrig", EGoalEvaluationType.Left])
+        case EAssistancePlanEvaluationType.Left:
+          result.push(["Genehmigt übrig", EAssistancePlanEvaluationType.Left])
           break;
-        case EGoalEvaluationType.SummedLeft:
-          result.push(["Genehmigt übrig summiert", EGoalEvaluationType.SummedLeft])
+        case EAssistancePlanEvaluationType.SummedLeft:
+          result.push(["Genehmigt übrig summiert", EAssistancePlanEvaluationType.SummedLeft])
           break;
         default:
           break;

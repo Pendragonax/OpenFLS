@@ -10,6 +10,10 @@ import java.time.LocalDate
 interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
     @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.id = :id")
+    fun findProjectionById(id: Long): AssistancePlanProjection
+
+    @Query("SELECT u FROM AssistancePlan u " +
             "WHERE :end >= u.start AND :start <= u.end")
     fun findProjectionByStartAndEnd(start: LocalDate,
                                     end: LocalDate): List<AssistancePlanProjection>

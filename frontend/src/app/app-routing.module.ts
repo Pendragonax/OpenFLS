@@ -24,7 +24,7 @@ import {ServiceDetailComponent} from "./pages/service-detail/service-detail.comp
 import {
   ServiceEvaluationOverviewComponent
 } from "./pages/service-evaluation-overview/service-evaluation-overview.component";
-import {GoalEvaluationComponent} from "./pages/goal-evaluation/goal-evaluation.component";
+import {AssistancePlanAnalysisComponent} from "./pages/assistance-plan-analysis/assistance-plan-analysis.component";
 import {MyServicesComponent} from "./pages/my-services/my-services.component";
 import {AllServicesComponent} from "./pages/all-services/all-services.component";
 
@@ -48,8 +48,8 @@ const routes: Routes = [
   { path: 'assistance_plans/new/:id', component: AssistancePlanNewComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id/:tab', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
-  { path: 'assistance_plans/goals/:id', component: GoalEvaluationComponent, canActivate: [AuthGuard] },
-  { path: 'assistance_plans/goals/:id/:tab', component: GoalEvaluationComponent, canActivate: [AuthGuard] },
+  { path: 'assistance_plans/analysis/:id', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },
+  { path: 'assistance_plans/analysis/:id/:tab', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },
   { path: 'hour_types', component: HourTypeComponent, canActivate: [AuthGuard] },
   { path: 'services/my', component: MyServicesComponent, canActivate: [AuthGuard] },
   { path: 'services/my/:start/:end', component: MyServicesComponent, canActivate: [AuthGuard] },

@@ -140,7 +140,6 @@ class AssistancePlanController(
             val startMs = System.currentTimeMillis()
 
             val dto = assistancePlanService.getAssistancePlanDtoById(id)
-            dto?.hours?.forEach { logger.info(it.id.toString())}
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",
@@ -155,6 +154,31 @@ class AssistancePlanController(
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("projection/{id}")
+    fun getProjectionById(@PathVariable id: Long): Any {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val dto = assistancePlanService.getProjectionById(id)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getById took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(dto)
+        } catch(ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }

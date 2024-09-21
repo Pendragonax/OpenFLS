@@ -168,6 +168,10 @@ class AssistancePlanService(
         return modelMapper.map(entity, AssistancePlanDto::class.java)
     }
 
+    fun getProjectionById(id: Long): AssistancePlanProjection? {
+        return assistancePlanRepository.findProjectionById(id)
+    }
+
     override fun getById(id: Long): AssistancePlan? {
         return assistancePlanRepository.findByIdOrNull(id)
     }

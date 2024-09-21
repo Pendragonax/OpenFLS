@@ -345,11 +345,6 @@ export class AssistancePlansComponent
       });
   }
 
-  openAnalysisModal(content, id: number) {
-    this.modalService
-      .open(content, {ariaLabelledBy: 'modal-basic-delete-title', scrollable: true})
-  }
-
   sortData(sort: Sort) {
     const data = this.tableData.slice();
     if (!sort.active || sort.direction === '') {

@@ -78,9 +78,6 @@ import {
   AssistancePlanEvaluationComponent
 } from './shared/components/assistance-plans/components/assistance-plan-evaluation/assistance-plan-evaluation.component';
 import {MatRadioModule} from "@angular/material/radio";
-import {
-  AssistancePlanAnalysisComponent
-} from './shared/components/assistance-plans/components/assistance-plan-analysis/assistance-plan-analysis.component';
 import {OverviewTableComponent} from './shared/components/overview-table/overview-table.component';
 import {
   ServiceEvaluationOverviewComponent
@@ -92,20 +89,20 @@ import {MatDialogModule} from "@angular/material/dialog";
 import {
   OverviewPermissionInfoModalComponent
 } from './pages/service-evaluation-overview/modals/overview-permission-info-modal/overview-permission-info-modal.component';
-import {GoalEvaluationComponent} from './pages/goal-evaluation/goal-evaluation.component';
+import {AssistancePlanAnalysisComponent} from './pages/assistance-plan-analysis/assistance-plan-analysis.component';
 import {GoalSingleComponent} from './shared/components/goal-single/goal-single.component';
 import {MatChipsModule} from "@angular/material/chips";
 import {YearMonthSelectionComponent} from './shared/components/year-month-selection/year-month-selection.component';
 import {
-  GoalTimeEvaluationFilterComponent
-} from './pages/goal-evaluation/components/goal-time-evaluation-filter/goal-time-evaluation-filter.component';
+  AssistancePlanTimeEvaluationFilterComponent
+} from './pages/assistance-plan-analysis/components/assistance-plan-time-evaluation-filter/assistance-plan-time-evaluation-filter.component';
 import {TableButtonComponent} from './shared/components/table-button/table-button.component';
 import {
-  GoalEvaluationFilterComponent
-} from './pages/goal-evaluation/components/goal-evaluation-filter/goal-evaluation-filter.component';
+  AssistancePlanEvaluationFilterComponent
+} from './pages/assistance-plan-analysis/components/assistance-plan-evaluation-filter/assistance-plan-evaluation-filter.component';
 import {
-  GoalEvaluationModalComponent
-} from './pages/goal-evaluation/modals/goal-evaluation-modal/goal-evaluation-modal.component';
+  AssistancePlanEvaluationModalComponent
+} from './pages/assistance-plan-analysis/modals/assistance-plan-evaluation-modal/assistance-plan-evaluation-modal.component';
 import {ConfirmationModalComponent} from './shared/modals/confirmation-modal/confirmation-modal.component';
 import {LoadingSpinnerComponent} from './shared/components/loading-spinner/loading-spinner.component';
 import {ErrorIconComponent} from './shared/components/error-icon/error-icon.component';
@@ -165,18 +162,17 @@ const routes: Routes = [
         ContingentEvaluationComponent,
         WorkTimeCardComponent,
         AssistancePlanEvaluationComponent,
-        AssistancePlanAnalysisComponent,
         OverviewTableComponent,
         ServiceEvaluationOverviewComponent,
         OverviewValueTypeInfoModalComponent,
         OverviewPermissionInfoModalComponent,
-        GoalEvaluationComponent,
+        AssistancePlanAnalysisComponent,
         GoalSingleComponent,
         YearMonthSelectionComponent,
-        GoalTimeEvaluationFilterComponent,
+        AssistancePlanTimeEvaluationFilterComponent,
         TableButtonComponent,
-        GoalEvaluationFilterComponent,
-        GoalEvaluationModalComponent,
+        AssistancePlanEvaluationFilterComponent,
+        AssistancePlanEvaluationModalComponent,
         ConfirmationModalComponent,
         LoadingSpinnerComponent,
         ErrorIconComponent,
