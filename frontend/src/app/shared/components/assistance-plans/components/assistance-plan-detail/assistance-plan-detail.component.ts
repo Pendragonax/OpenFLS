@@ -29,6 +29,8 @@ import {DateService} from "../../../../services/date.service";
 import {MatDialog} from "@angular/material/dialog";
 import {Service} from "../../../../dtos/service.projection";
 import {ConfirmationModalComponent} from "../../../../modals/confirmation-modal/confirmation-modal.component";
+import {AssistancePlanHourService} from "../../../../services/assistance-plan-hour.service";
+import {AssistancePlanHour} from "../../../../projections/assistance-plan-hour.projection";
 
 @Component({
   selector: 'app-assistance-plan-detail',
@@ -66,6 +68,7 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
 
   constructor(
     private assistancePlanService: AssistancePlanService,
+    private assistancePlanHourService: AssistancePlanHourService,
     private sponsorService: SponsorService,
     private dateService: DateService,
     private serviceService: ServiceService,
@@ -226,22 +229,43 @@ export class AssistancePlanDetailComponent extends DetailPageComponent<Assistanc
   }
 
   addAssistancePlanHour(value: AssistancePlanHourDto) {
-    this.value.dto.hours.push(value);
-    this.update();
+    if (this.isSubmitting)
+      return;
+
+    this.isSubmitting = true;
+
+    value.assistancePlanId = this.value.dto.id
+
+    this.assistancePlanHourService.create(value).subscribe({
+      next: () => this.handleSuccess("Stunde hinzugefügt"),
+      error: () => this.handleFailure("Fehler beim Hinzufügen")
+    });
   }
 
   updateAssistancePlanHour(value: AssistancePlanHourDto) {
-    const index = this.value.dto.hours.findIndex(x => x.id == value.id);
+    if (this.isSubmitting)
+      return;
 
-    if (index >= 0) {
-      this.value.dto.hours[index] = value;
-      this.update();
-    }
+    this.isSubmitting = true;
+
+    value.assistancePlanId = this.value.dto.id
+
+    this.assistancePlanHourService.update(value).subscribe({
+      next: () => this.handleSuccess("Stunde geändert"),
+      error: () => this.handleFailure("Fehler beim Ändern")
+    });
   }
 
   deleteAssistancePlanHour(value: AssistancePlanHourDto) {
-    this.value.dto.hours = this.value.dto.hours.filter(x => x.id != value.id);
-    this.update();
+    if (this.isSubmitting)
+      return;
+
+    this.isSubmitting = true;
+
+    this.assistancePlanHourService.delete(value.id).subscribe({
+      next: () => this.handleSuccess("Stunde gelöscht"),
+      error: () => this.handleFailure("Fehler beim Löschen")
+    });
   }
 
   getInstitutionName(id: number): string {

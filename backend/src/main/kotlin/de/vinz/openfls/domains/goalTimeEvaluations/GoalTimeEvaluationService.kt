@@ -12,6 +12,8 @@ import de.vinz.openfls.domains.goalTimeEvaluations.models.YearMonthDoubleValue
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -25,6 +27,8 @@ class GoalTimeEvaluationService(
         private val assistancePlanRepository: AssistancePlanRepository
 ) {
 
+    private val logger: Logger = LoggerFactory.getLogger(GoalTimeEvaluationService::class.java)
+
     @Throws(AssistancePlanNotFoundException::class, NoGoalFoundWithHourTypeException::class)
     fun getByAssistancePlanIdAndHourTypeIdAndYear(assistancePlanId: Long,
                                                   hourTypeId: Long,
@@ -36,7 +40,7 @@ class GoalTimeEvaluationService(
         val goalsWithHourType = assistancePlan.goals
                 .filter { it.hours.any { goalHour -> goalHour.hourType!!.id == hourTypeId } }
 
-        if (goalsWithHourType.isEmpty()) {
+        if (goalsWithHourType.isEmpty() && assistancePlan.hours.none { it.hourType?.id == hourTypeId}) {
             throw NoGoalFoundWithHourTypeException(hourTypeId)
         }
 
@@ -78,6 +82,13 @@ class GoalTimeEvaluationService(
         val approvedHours = getMonthlyApprovedHoursInYear(assistancePlan, hourTypeId, start, end, year, false)
         val summedApprovedHours = getMonthlyApprovedHoursInYear(assistancePlan, hourTypeId, start, end, year, true)
 
+        val goalTimeEvaluations = if (goalsWithHourType.isNotEmpty()) {
+            goalsWithHourType.map { goal ->
+                createGoalTimeEvaluationDto(goal, hourTypeId, start, end, year, services)}.sortedBy { it.title }.toMutableList()
+        } else {
+            mutableListOf()
+        }
+
         return GoalsTimeEvaluationDto().apply {
             this.assistancePlanId = assistancePlan.id
             this.executedHours = executedHours
@@ -86,9 +97,7 @@ class GoalTimeEvaluationService(
             this.summedApprovedHours = summedApprovedHours
             this.approvedHoursLeft = getApprovedHoursLeft(approvedHours, executedHours).toMutableList()
             this.summedApprovedHoursLeft = getApprovedHoursLeft(summedApprovedHours, summedExecutedHours).toMutableList()
-            this.goalTimeEvaluations = goalsWithHourType.map { goal ->
-                createGoalTimeEvaluationDto(goal, hourTypeId, start, end, year, services)
-            }.sortedBy { it.title }.toMutableList()
+            this.goalTimeEvaluations = goalTimeEvaluations
         }
     }
 
@@ -124,6 +133,15 @@ class GoalTimeEvaluationService(
     ): GoalsTimeEvaluationDto {
         val emptyHoursList = List(12) { 0.0 }
 
+        val goalTimeEvaluations = if (goalsWithHourType.isNotEmpty()) {
+            goalsWithHourType.map { goal ->
+                createEmptyGoalTimeEvaluationDto(goal)
+            }.sortedBy { it.title }.toMutableList()
+        } else {
+            mutableListOf()
+        }
+
+        logger.info(goalTimeEvaluations.size.toString())
         return GoalsTimeEvaluationDto().apply {
             this.assistancePlanId = assistancePlanId
             this.executedHours = emptyHoursList
@@ -132,9 +150,7 @@ class GoalTimeEvaluationService(
             this.summedApprovedHours = emptyHoursList
             this.approvedHoursLeft = emptyHoursList
             this.summedApprovedHoursLeft = emptyHoursList
-            this.goalTimeEvaluations = goalsWithHourType.map { goal ->
-                createEmptyGoalTimeEvaluationDto(goal)
-            }.sortedBy { it.title }.toMutableList()
+            this.goalTimeEvaluations = goalTimeEvaluations
         }
     }
 
@@ -314,7 +330,14 @@ class GoalTimeEvaluationService(
                                         start: LocalDate,
                                         end: LocalDate,
                                         sum: Boolean): List<YearMonthDoubleValue> {
-        val dailyHours = ((assistancePlan.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
+        val hourTypeExists = assistancePlan.hours.any { it.hourType!!.id == hourTypeId }
+
+        val dailyHours = if (hourTypeExists) {
+            ((assistancePlan.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
+        } else {
+            0.0
+        }
+
         return getApprovedHoursMonthly(dailyHours, start, end, sum)
     }
 

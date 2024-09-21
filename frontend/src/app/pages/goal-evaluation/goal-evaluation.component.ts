@@ -148,6 +148,8 @@ export class GoalEvaluationComponent implements OnInit {
     let rows =
       this.goalTimesEvaluation.goalTimeEvaluations
         .map(it => this.getGoalTimesAsRow(it, this.selectedGoalEvaluationHourType))
+
+    rows = [...rows, this.getGoalsTimeAsRow(this.goalTimesEvaluation, this.selectedGoalEvaluationHourType)]
     this.data$.next(rows);
     this.columns$.next(this.dateService.getMonths(["Name"]));
   }
@@ -157,8 +159,56 @@ export class GoalEvaluationComponent implements OnInit {
     this.boldColumnIndices$.next([0])
   }
 
+  getGoalsTimeAsRow(goalsTime: GoalsTimeEvaluationDto, type: EGoalEvaluationType | null): string[] {
+    let cells = [this.truncateString("Hilfeplan ohne Ziel", 20)];
+
+    for (let i = 0; i < goalsTime.approvedHours.length; i++) {
+      switch (type) {
+        case EGoalEvaluationType.Approved:
+          if (goalsTime.approvedHours[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.approvedHours[i]).toFixed(2).toString());
+          break;
+        case EGoalEvaluationType.SummedApproved:
+          if (goalsTime.summedApprovedHours[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.summedApprovedHours[i]).toFixed(2).toString());
+          break;
+        case EGoalEvaluationType.Executed:
+          if (goalsTime.executedHours[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.executedHours[i]).toFixed(2).toString());
+          break;
+        case EGoalEvaluationType.SummedExecuted:
+          if (goalsTime.summedExecutedHours[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.summedExecutedHours[i]).toFixed(2).toString());
+          break;
+        case EGoalEvaluationType.Left:
+          if (goalsTime.approvedHoursLeft[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.approvedHoursLeft[i]).toFixed(2).toString());
+          break;
+        case EGoalEvaluationType.SummedLeft:
+          if (goalsTime.summedApprovedHoursLeft[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.summedApprovedHoursLeft[i]).toFixed(2).toString());
+          break;
+        default:
+          break;
+      }
+    }
+    return cells;
+  }
+
   getGoalTimesAsRow(goalTimes: GoalTimeEvaluationDto, type: EGoalEvaluationType | null): string[] {
-    let cells = [this.truncateString(goalTimes.title, 20)];
+    let cells = [this.truncateString("Ziel: " + goalTimes.title, 20)];
 
     for (let i = 0; i < goalTimes.approvedHours.length; i++) {
       switch (type) {

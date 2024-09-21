@@ -60,6 +60,10 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId")
+    fun findProjectionsByInstitutionId(@Param("institutionId") id: Long): List<AssistancePlanProjection>
+
+    @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.institution.id = :institutionId")
     fun findProjectionByInstitutionId(@Param("institutionId") institutionId: Long): List<AssistancePlanProjection>
 
     @Query("SELECT u FROM AssistancePlan u " +

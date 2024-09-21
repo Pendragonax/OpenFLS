@@ -2,13 +2,12 @@ package de.vinz.openfls.domains.assistancePlans
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
-import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -141,6 +140,7 @@ class AssistancePlanController(
             val startMs = System.currentTimeMillis()
 
             val dto = assistancePlanService.getAssistancePlanDtoById(id)
+            dto?.hours?.forEach { logger.info(it.id.toString())}
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",
@@ -230,6 +230,31 @@ class AssistancePlanController(
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("institution/{id}/illegal")
+    fun getIllegalByInstitutionId(@PathVariable id: Long): Any {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val dtos = assistancePlanService.getIllegalByInstitutionId(id)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getByInstitutionId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch(ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
             )
         }
     }

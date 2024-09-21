@@ -18,6 +18,8 @@ import de.vinz.openfls.domains.sponsors.SponsorService
 import de.vinz.openfls.services.*
 import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -34,6 +36,8 @@ class AssistancePlanService(
         private val hourTypeService: HourTypeService,
         private val modelMapper: ModelMapper
 ) : GenericService<AssistancePlan> {
+
+    private val logger: Logger = LoggerFactory.getLogger(AssistancePlanService::class.java)
 
     @Transactional
     fun create(valueDto: AssistancePlanDto): AssistancePlanDto {
@@ -115,7 +119,11 @@ class AssistancePlanService(
                 } }
                 .toMutableSet()
 
+        entity.hours.forEach { logger.info(it.id.toString())}
+
         val savedEntity = update(entity)
+
+        savedEntity.hours.forEach { logger.info(it.id.toString())}
 
         valueDto.apply {
             this.id = savedEntity.id
@@ -135,28 +143,10 @@ class AssistancePlanService(
             throw IllegalArgumentException("id not found")
 
         // backup hours
-        val hours = value.hours
+        value.hours.forEach { logger.info(it.id.toString())}
         value.goals = mutableSetOf()
-        value.hours = mutableSetOf()
 
-        val entity = assistancePlanRepository.save(value)
-
-        // delete goals
-        assistancePlanHourRepository
-                .findByAssistancePlanId(value.id)
-                .filter { !hours.any { hour -> hour.id == it.id } }
-                .forEach { assistancePlanHourRepository.deleteById(it.id) }
-
-        // add / update goals
-        entity.hours = hours
-                .map { hour ->
-                    assistancePlanHourRepository.save(hour.apply {
-                        assistancePlan = entity
-                    })
-                }
-                .toMutableSet()
-
-        return entity
+        return assistancePlanRepository.save(value)
     }
 
     @Transactional
@@ -211,6 +201,11 @@ class AssistancePlanService(
 
     fun getByInstitutionId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findByInstitutionId(id)
+    }
+
+    fun getIllegalByInstitutionId(id: Long): List<AssistancePlanProjection> {
+        val assistancePlans = assistancePlanRepository.findProjectionsByInstitutionId(id)
+        return assistancePlans.filter { isIllegalAssistancePlan(it) }
     }
 
     fun getProjectionByYearMonth(year: Int,
@@ -405,5 +400,13 @@ class AssistancePlanService(
         } else {
             return Triple(0, null, null)
         }
+    }
+
+    private fun isIllegalAssistancePlan(assistancePlan: AssistancePlanProjection): Boolean {
+        val containsHoursAndGoalHours = assistancePlan.hours.isNotEmpty() && assistancePlan.goals.isNotEmpty() && assistancePlan.goals.any { goal -> goal.hours.isNotEmpty() }
+        val containsNoHoursAndNoGoalHours = assistancePlan.hours.isEmpty() && (
+                (assistancePlan.goals.isNotEmpty() && assistancePlan.goals.all { goal -> goal.hours.isEmpty() }) ||
+                        assistancePlan.goals.isEmpty())
+        return containsHoursAndGoalHours || containsNoHoursAndNoGoalHours
     }
 }
