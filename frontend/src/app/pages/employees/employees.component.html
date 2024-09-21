@@ -36,12 +36,17 @@
       </div>
     </div>
 
-    <div class="container-fluid text-center m-2"
-         [hidden]="!isSubmitting">
-      <mat-spinner [strokeWidth]="2"
-                   [diameter]="100"
-                   class="center-spinner"></mat-spinner>
-      <p class="mt-1"><b>Lade Mitarbeiter</b></p>
+    <!--LOADING-->
+    <div class="row m-2"
+         *ngIf="isSubmitting">
+      <div class="d-flex justify-content-center">
+        <mat-spinner [strokeWidth]="2"
+                     [diameter]="70"
+                     class="center-spinner"></mat-spinner>
+      </div>
+      <div class="d-flex justify-content-center">
+        <p><b>Lade Mitarbeiter</b></p>
+      </div>
     </div>
 
     <div class="row"

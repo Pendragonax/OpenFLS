@@ -5,7 +5,8 @@
 
 <div class="container mt-3">
   <!--FILTER-->
-  <div class="row">
+  <div class="row"
+       *ngIf="!isSubmitting">
     <!--FILTER CONTAINER-->
     <form [formGroup]="filterForm">
       <div class="container-fluid text-center">
@@ -37,14 +38,14 @@
     </div>
 
     <!--LOADING-->
-    <div class="row  m-2"
-         [hidden]="!isSubmitting">
-      <div class="row justify-content-center">
+    <div class="row m-2"
+         *ngIf="isSubmitting">
+      <div class="d-flex justify-content-center">
         <mat-spinner [strokeWidth]="2"
-                     [diameter]="100"
+                     [diameter]="70"
                      class="center-spinner"></mat-spinner>
       </div>
-      <div class="row text-center">
+      <div class="d-flex justify-content-center">
         <p><b>Lade Stundentypen</b></p>
       </div>
     </div>

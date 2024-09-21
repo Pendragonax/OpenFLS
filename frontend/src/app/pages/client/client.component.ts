@@ -24,6 +24,7 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
 
   deleteServiceCount: number = 0;
   readableInstitutions: InstitutionSoloDto[] = [];
+  institutionId: number | null = null;
   selectedInstitution: InstitutionSoloDto | null = null;
 
   constructor(
@@ -133,6 +134,7 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
 
   onInstitutionChanged(institution: InstitutionSoloDto | null) {
     this.selectedInstitution = institution;
+    this.institutionId = institution?.id ?? null;
     this.loadClients();
   }
 

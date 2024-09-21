@@ -243,19 +243,6 @@ export class ContingentsComponent
     this.filterTableData();
   }
 
-  resetFilterInstitution() {
-    this.institutionFilterControl.setValue(null);
-  }
-
-  setFilterEmployee(value) {
-    this.filterEmployeeId = value != null ? value : null;
-    this.filterTableData();
-  }
-
-  resetFilterEmployee() {
-    this.employeeFilterControl.setValue(null);
-  }
-
   filterTableData() {
     let filterData = this.sourceTableData;
 
@@ -281,7 +268,7 @@ export class ContingentsComponent
 
     // filter by employee
     if (this.filterEmployeeId != null) {
-      filterData = filterData.filter(x =>x[0].id === this.filterEmployeeId);
+      filterData = filterData.filter(x => x[0].id == this.filterEmployeeId);
     }
 
     this.filteredTableData = filterData;
@@ -332,11 +319,6 @@ export class ContingentsComponent
         },
         error: () => this.handleFailure("Fehler beim löschen")
       })
-  }
-
-  fillTable(values : [EmployeeDto, InstitutionDto, ContingentDto, boolean][]) {
-    this.contingents = values;
-    this.tableSource.data = values
   }
 
   getLocalDateString(date: string | null) : string {

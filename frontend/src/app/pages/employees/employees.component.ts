@@ -43,7 +43,7 @@ export class EmployeesComponent extends TablePageComponent<EmployeeViewModel, Em
     combineLatest([
       this.userService.leadingInstitutions$,
       this.employeeService.allValues$,
-      this.institutionService.allValues$,
+      this.institutionService.getAll(),
       this.userService.isAdmin$]
     ).subscribe({
       next: ([leadingIds, employees, institutions, isAdmin]) => {

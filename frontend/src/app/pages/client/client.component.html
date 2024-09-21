@@ -19,6 +19,7 @@
           </div>
           <div class="col-auto">
             <app-institution-select [institutions]="readableInstitutions"
+                                    [institutionId]="institutionId"
                                     (institutionChanged)="onInstitutionChanged($event)"></app-institution-select>
           </div>
         </div>
@@ -44,12 +45,12 @@
     <!--LOADING-->
     <div class="row m-2"
          *ngIf="isSubmitting">
-      <div class="row justify-content-center">
+      <div class="d-flex justify-content-center">
         <mat-spinner [strokeWidth]="2"
                      [diameter]="70"
                      class="center-spinner"></mat-spinner>
       </div>
-      <div class="row text-center">
+      <div class="d-flex justify-content-center">
         <p><b>Lade Klienten</b></p>
       </div>
     </div>
