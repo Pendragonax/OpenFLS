@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {GoalsTimeEvaluationDto} from "../dtos/goals-time-evaluation-dto.model";
 import {environment} from "../../../environments/environment";
 import {Observable} from "rxjs";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'

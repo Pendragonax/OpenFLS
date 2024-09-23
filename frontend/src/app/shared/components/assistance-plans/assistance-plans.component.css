@@ -11,3 +11,12 @@ td , th {
 .sidenav-height {
   height: 250px;
 }
+
+.width-350 {
+  width: 350px;
+}
+
+
+.background-red {
+  background: rgba(255, 33, 33, 0.24) !important;
+}

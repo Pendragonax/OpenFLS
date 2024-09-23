@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
 import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
@@ -41,7 +41,8 @@ export class InstitutionSelectComponent {
     return this.selectionGroup.controls['institutionControl']
   }
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,
+              private cdr: ChangeDetectorRef) {
     this.selectionGroup = this.fb.group({
       institutionControl: new FormControl({value: '', disabled: this.disabled})
     });

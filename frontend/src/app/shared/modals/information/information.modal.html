@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>{{data.title}}</h1>
+<div mat-dialog-content>
+  <ng-container *ngFor="let singleContent of data.content">
+    <h4 class="fw-bold">{{singleContent.title}}</h4>
+    <p [innerHTML]="singleContent.content"></p>
+  </ng-container>
+</div>
+<div mat-dialog-actions>
+  <button mat-raised-button mat-dialog-close color="primary">{{CLOSE_BUTTON_DESCRIPTION}}</button>
+</div>

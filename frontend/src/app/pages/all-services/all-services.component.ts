@@ -87,8 +87,6 @@ export class AllServicesComponent implements OnInit {
           employeeId = parsedId;
         }
       }
-      console.log("[BEFORE] clientId: " + clientId + "\nemployeeId: " + employeeId + "\ninstitutionId: " + institutionId)
-
       if (start === null || start === '0' || end === null || start === '0') {
         this.navigate(this.start, this.end, institutionId, employeeId, clientId);
         return;
@@ -102,8 +100,6 @@ export class AllServicesComponent implements OnInit {
 
       this.paramEmployeeId = employeeId;
       this.urlEmployeeLoaded = !(this.paramEmployeeId != null && this.paramEmployeeId > 0);
-
-      console.log("[AFTER] paramClientId: " + this.paramClientId + "\nparamEmployeeId: " + this.paramEmployeeId + "\nparamInstitutionId: " + this.paramInstitutionId)
 
       this.start = this.dateService.convertDEDateStringToDate(start ?? "") ?? new Date();
       this.end = this.dateService.convertDEDateStringToDate(end ?? "") ?? new Date();
@@ -233,7 +229,6 @@ export class AllServicesComponent implements OnInit {
   }
 
   private navigate(start: Date, end: Date, institutionId: number, employeeId: number, clientId: number) {
-    console.log("[NAV] clientId: " + clientId + "\nemployeeId: " + employeeId + "\ninstitutionId: " + institutionId)
     this.router.navigate([
       this.baseUrl,
       this.dateService.formatDateToYearMonthDay(start),

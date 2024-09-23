@@ -2,92 +2,82 @@
 
 <mat-tab-group>
   <mat-tab label="Allgemein">
-    <mat-accordion>
-      <mat-expansion-panel class="mat-elevation-z2 m-2">
-        <mat-expansion-panel-header>
-          <mat-panel-title class="fw-bold">
-            Informationen
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-
-        <!--EDIT-->
-        <div class="container-fluid text-center"
-             [hidden]="!editValue.editable">
-          <form [formGroup]="infoForm">
-            <div>
-              <mat-form-field appearance="fill">
-                <mat-label>Vorname</mat-label>
-                <input matInput
-                       formControlName="firstName" required>
-              </mat-form-field>
-            </div>
-            <div>
-              <mat-form-field appearance="fill">
-                <mat-label>Nachname</mat-label>
-                <input matInput
-                       formControlName="lastName" required>
-              </mat-form-field>
-            </div>
-            <div>
-              <mat-form-field appearance="fill">
-                <mat-label>Telefonnummer</mat-label>
-                <input matInput
-                       formControlName="phone">
-              </mat-form-field>
-            </div>
-            <div>
-              <mat-form-field appearance="fill">
-                <mat-label>Email</mat-label>
-                <input matInput
-                       formControlName="email">
-              </mat-form-field>
-            </div>
-            <div>
-              <mat-form-field class="mt-2">
-                <mat-label>Bereich</mat-label>
-                <mat-select formControlName="institution"
-                            required>
-                  <mat-option *ngFor="let institution of institutions"
-                              [value]="institution.id">{{institution.name}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            <div>
-              <mat-form-field class="mt-2">
-                <mat-label>Kategorievorlage</mat-label>
-                <mat-select formControlName="categoryTemplate"
-                            required>
-                  <mat-option *ngFor="let categoryTemplate of categoryTemplates"
-                              [value]="categoryTemplate.id">{{categoryTemplate.title}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-          </form>
-          <div>
-            <button mat-button
-                    (click)="update()"
-                    [disabled]="!infoForm.valid || isSubmitting"
-                    color="primary"
-                    mat-raised-button>Speichern</button>
-          </div>
+    <!--EDIT-->
+    <div class="container-fluid text-center mt-1"
+         [hidden]="!editValue.editable">
+      <form [formGroup]="infoForm">
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Vorname</mat-label>
+            <input matInput
+                   formControlName="firstName" required>
+          </mat-form-field>
         </div>
-
-        <!--SHOW-->
-        <div class="container-fluid"
-             [hidden]="editValue.editable">
-          <app-information-row [title]="'Name'"
-                               [content]="editValue.dto.lastName + ', ' + editValue.dto.firstName"></app-information-row>
-          <app-information-row [title]="'Email'"
-                               [content]="editValue.dto.email"></app-information-row>
-          <app-information-row [title]="'Telefon'"
-                               [content]="editValue.dto.phoneNumber"></app-information-row>
-          <app-information-row [title]="'Vorlage'"
-                               [content]="editValue.dto.categoryTemplate.title"></app-information-row>
-          <app-information-row [title]="'Bereich'"
-                               [content]="editValue.dto.institution.name"></app-information-row>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Nachname</mat-label>
+            <input matInput
+                   formControlName="lastName" required>
+          </mat-form-field>
         </div>
-      </mat-expansion-panel>
-    </mat-accordion>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Telefonnummer</mat-label>
+            <input matInput
+                   formControlName="phone">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Email</mat-label>
+            <input matInput
+                   formControlName="email">
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="mt-2">
+            <mat-label>Bereich</mat-label>
+            <mat-select formControlName="institution"
+                        required>
+              <mat-option *ngFor="let institution of institutions"
+                          [value]="institution.id">{{institution.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field class="mt-2">
+            <mat-label>Kategorievorlage</mat-label>
+            <mat-select formControlName="categoryTemplate"
+                        required>
+              <mat-option *ngFor="let categoryTemplate of categoryTemplates"
+                          [value]="categoryTemplate.id">{{categoryTemplate.title}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+      <div>
+        <button mat-button
+                (click)="update()"
+                [disabled]="!infoForm.valid || isSubmitting"
+                color="primary"
+                mat-raised-button>Speichern</button>
+      </div>
+    </div>
+
+    <!--SHOW-->
+    <div class="container-fluid mt-1"
+         [hidden]="editValue.editable">
+      <app-information-row [title]="'Name'"
+                           [content]="editValue.dto.lastName + ', ' + editValue.dto.firstName"></app-information-row>
+      <app-information-row [title]="'Email'"
+                           [content]="editValue.dto.email"></app-information-row>
+      <app-information-row [title]="'Telefon'"
+                           [content]="editValue.dto.phoneNumber"></app-information-row>
+      <app-information-row [title]="'Vorlage'"
+                           [content]="editValue.dto.categoryTemplate.title"></app-information-row>
+      <app-information-row [title]="'Bereich'"
+                           [content]="editValue.dto.institution.name"></app-information-row>
+    </div>
   </mat-tab>
 
   <mat-tab label="Hilfepläne">

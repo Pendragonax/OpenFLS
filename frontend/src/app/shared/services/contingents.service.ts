@@ -6,7 +6,7 @@ import {environment} from "../../../environments/environment";
 import {EmployeeDto} from "../dtos/employee-dto.model";
 import {InstitutionDto} from "../dtos/institution-dto.model";
 import {map} from "rxjs/operators";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import {EmployeeService} from "./employee.service";
 import {InstitutionService} from "./institution.service";
 import {UserService} from "./user.service";

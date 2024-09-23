@@ -1,4 +1,4 @@
-<mat-card class="mat-elevation-z4 mx-4 mb-5 mt-1">
+<mat-card class="mat-elevation-z9 mx-auto mb-5 mt-1 width-350">
   <mat-card-header>
     <mat-card-title>
       <div>
@@ -15,14 +15,7 @@
     <div class="m-1">
       <mat-chip-set *ngIf="goal.hours.length > 0">
         <mat-chip class="mat-hour-chip" *ngFor="let hour of goal.hours">
-          <span>{{hour.weeklyHours}}h | {{hour.hourTypeTitle}}</span>
-        </mat-chip>
-      </mat-chip-set>
-    </div>
-    <div class="m-1">
-      <mat-chip-set>
-        <mat-chip *ngIf="goal.institutionName != null">
-          {{goal.institutionName}}
+          <span>{{hour.weeklyHours}}h | {{hour.hourType.title}}</span>
         </mat-chip>
       </mat-chip-set>
     </div>

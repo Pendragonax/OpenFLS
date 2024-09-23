@@ -23,7 +23,7 @@ import {
   OverviewValueTypeInfoModalComponent
 } from "./modals/overview-valuetype-info-modal/overview-value-type-info-modal.component";
 import {MatDialog} from "@angular/material/dialog";
-import {HttpErrorResponse, HttpStatusCode} from "@angular/common/http";
+import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
 import {
   OverviewPermissionInfoModalComponent
 } from "./modals/overview-permission-info-modal/overview-permission-info-modal.component";

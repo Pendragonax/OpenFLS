@@ -10,6 +10,10 @@ import java.time.LocalDate
 interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
     @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.id = :id")
+    fun findProjectionById(id: Long): AssistancePlanProjection
+
+    @Query("SELECT u FROM AssistancePlan u " +
             "WHERE :end >= u.start AND :start <= u.end")
     fun findProjectionByStartAndEnd(start: LocalDate,
                                     end: LocalDate): List<AssistancePlanProjection>
@@ -39,6 +43,10 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     fun findByClientId(@Param("clientId") id: Long): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.client.id = :clientId")
+    fun findProjectionsByClientId(@Param("clientId") id: Long): List<AssistancePlanProjection>
+
+    @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.sponsor.id = :sponsorId")
     fun findBySponsorId(@Param("sponsorId") id: Long): List<AssistancePlan>
 
@@ -55,8 +63,16 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                                @Param("year") year: Int): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.sponsor.id = :sponsorId")
+    fun findProjectionsBySponsorId(@Param("sponsorId") id: Long): List<AssistancePlanProjection>
+
+    @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId")
     fun findByInstitutionId(@Param("institutionId") id: Long): List<AssistancePlan>
+
+    @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.institution.id = :institutionId")
+    fun findProjectionsByInstitutionId(@Param("institutionId") id: Long): List<AssistancePlanProjection>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId")

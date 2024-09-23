@@ -73,12 +73,6 @@ class ServiceController(
             if (!accessService.isAdmin() &&
                     serviceService.getById(id)?.employee?.id != accessService.getId())
                 throw IllegalArgumentException("Your not the owner of this service or the admin")
-            if (serviceService.getById(id)
-                            ?.start
-                            ?.toLocalDate()
-                            ?.isBefore(LocalDate.now().minusDays(14)) == true) {
-                throw IllegalArgumentException("14 days edit period is over")
-            }
 
             val dto = serviceService.update(valueDto)
 
@@ -223,6 +217,99 @@ class ServiceController(
         }
     }
 
+    @GetMapping("assistance_plan/{id}/illegal")
+    fun getIllegalByAssistancePlan(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            if (id <= 0)
+                throw IllegalArgumentException("id is <= 0")
+            if (!assistancePlanService.existsById(id))
+                throw IllegalArgumentException("assistance plan not found")
+            if (!accessService.canModifyAssistancePlan(id))
+                throw IllegalArgumentException("no permission to load the services of this assistance plan")
+
+            val dtos = serviceService.getIllegalByAssistancePlan(id)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getIllegalByAssistancePlan took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("assistance_plan/{id}/not_between/{start}/{end}")
+    fun getByAssistancePlanAndNotBetweenStartAndEnd(@PathVariable id: Long,
+                                                    @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") start: LocalDate,
+                                                    @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            if (id <= 0)
+                throw IllegalArgumentException("id is <= 0")
+            if (!assistancePlanService.existsById(id))
+                throw IllegalArgumentException("assistance plan not found")
+            if (!accessService.canModifyAssistancePlan(id))
+                throw IllegalArgumentException("no permission to load the services of this assistance plan")
+
+            val dtos = serviceService.getByAssistancePlanAndNotBetweenStartAndEnd(id, start, end)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getByAssistancePlanAndStartAndEnd took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("employee/{id}/illegal")
+    fun getIllegalByEmployee(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            if (!accessService.isAdmin() && !accessService.canReadEmployee(id) && accessService.getId() != id) {
+                throw IllegalArgumentException("No permission to load the illegal services of this employee")
+            }
+
+            val dtos = serviceService.getIllegalByEmployee(id)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getIllegalByEmployee took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
     @GetMapping("employee/{id}/{date}")
     fun getByEmployeeAndDate(@PathVariable id: Long,
                              @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") date: LocalDate): Any {
@@ -333,6 +420,35 @@ class ServiceController(
 
             if (logPerformance) {
                 logger.info(String.format("%s getByInstitutionIdAndDate took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                        dtos.size))
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("institution/{id}/illegal")
+    fun getIllegalByInstitutionId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            if (!accessService.canReadEntries(id)) {
+                throw IllegalArgumentException("no permission to load the services of this institution")
+            }
+
+            val dtos = serviceService.getIllegalByInstitutionId(id)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getIllegalByInstitutionId took %s ms and found %d entities",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs,
                         dtos.size))

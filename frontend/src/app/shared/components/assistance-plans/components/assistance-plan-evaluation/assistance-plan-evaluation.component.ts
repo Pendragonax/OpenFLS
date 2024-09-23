@@ -1,8 +1,6 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {MatTableDataSource} from "@angular/material/table";
 import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
-import {ReplaySubject, switchMap} from "rxjs";
-import {AssistancePlanDto} from "../../../../dtos/assistance-plan-dto.model";
 import {ServiceService} from "../../../../services/service.service";
 import {ServiceDto} from "../../../../dtos/service-dto.model";
 import {EmployeeDto} from "../../../../dtos/employee-dto.model";
@@ -16,7 +14,7 @@ import {
 } from "@angular/material-moment-adapter";
 import {CsvService} from "../../../../services/csv.service";
 import {UnprofessionalDto} from "../../../../dtos/unprofessional-dto.model";
-import {EmployeeViewModel} from "../../../../models/employee-view.model";
+import {AssistancePlan} from "../../../../projections/assistance-plan.projection";
 
 @Component({
   selector: 'app-assistance-plan-evaluation',
@@ -32,8 +30,8 @@ import {EmployeeViewModel} from "../../../../models/employee-view.model";
     {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
   ],
 })
-export class AssistancePlanEvaluationComponent implements OnInit {
-  @Input() assistancePlan$ = new ReplaySubject<AssistancePlanDto>();
+export class AssistancePlanEvaluationComponent implements OnInit, OnChanges {
+  @Input() assistancePlan: AssistancePlan = new AssistancePlan();
 
   // STATES
   isSubmitting = false;
@@ -46,7 +44,6 @@ export class AssistancePlanEvaluationComponent implements OnInit {
     'Uhrzeit/Stunden/Kategorien/Inhalt/Mitarbeiter'];
 
   // VARs
-  assistancePlan: AssistancePlanDto = new AssistancePlanDto();
   services: ServiceDto[] = [];
   employees: EmployeeDto[] = [];
   tableSource: MatTableDataSource<any[]> = new MatTableDataSource<any[]>();
@@ -73,17 +70,18 @@ export class AssistancePlanEvaluationComponent implements OnInit {
     this.initFormSubscriptions();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['assistancePlan'] && this.assistancePlan.id > 0) {
+      this.serviceService.getByAssistancePlan(this.assistancePlan.id).subscribe({
+        next: (value) => {
+          this.services = value
+        }
+      });
+    }
+  }
+
   loadValues() {
     this.employeeService.allValues$.subscribe(values => this.employees = values);
-
-    this.assistancePlan$
-      .pipe(switchMap(value => {
-        this.assistancePlan = value;
-        return this.serviceService.getByAssistancePlan(value.id);
-      }))
-      .subscribe(value => {
-        this.services = value;
-      });
   }
 
   initFormSubscriptions() {
@@ -165,7 +163,7 @@ export class AssistancePlanEvaluationComponent implements OnInit {
   return this.services.filter(service =>
       this.isServiceProfessional(
         service,
-        this.assistancePlan.sponsorId,
+        this.assistancePlan.sponsor.id,
         this.getUnProfessionalStates(this.employees)));
   }
 
@@ -173,7 +171,7 @@ export class AssistancePlanEvaluationComponent implements OnInit {
     return this.services.filter(service =>
       this.isServiceUnProfessional(
         service,
-        this.assistancePlan.sponsorId,
+        this.assistancePlan.sponsor.id,
         this.getUnProfessionalStates(this.employees)
       ));
   }

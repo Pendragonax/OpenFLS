@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+## 1.3.0
+
+#### Features
+- add client filter
+- add assistance plan analysis
+- add illegal documentation and assistance plan option
+- enable modifying services without time constraints
+
+
 ## 1.2.0
 
 #### Features

@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { GoalEvaluationModalComponent } from './goal-evaluation-modal.component';
+import { AssistancePlanEvaluationModalComponent } from './assistance-plan-evaluation-modal.component';
 
 describe('GoalEvaluationModalComponent', () => {
-  let component: GoalEvaluationModalComponent;
-  let fixture: ComponentFixture<GoalEvaluationModalComponent>;
+  let component: AssistancePlanEvaluationModalComponent;
+  let fixture: ComponentFixture<AssistancePlanEvaluationModalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GoalEvaluationModalComponent ]
+      declarations: [ AssistancePlanEvaluationModalComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(GoalEvaluationModalComponent);
+    fixture = TestBed.createComponent(AssistancePlanEvaluationModalComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

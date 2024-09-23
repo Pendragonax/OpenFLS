@@ -13,11 +13,14 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.lang.IllegalArgumentException
+import java.sql.Time
 import java.time.LocalDate
 
 @Service
 class ContingentService(
-    private val contingentRepository: ContingentRepository
+    private val contingentRepository: ContingentRepository,
+    @Value("\${openfls.general.workdays.real}") private val workdaysReal: Long,
+    @Value("\${openfls.general.workdays.assumption}") private val workdaysAssumption: Long,
 ) : GenericService<Contingent> {
 
     private val logger: Logger = LoggerFactory.getLogger(ContingentService::class.java)
@@ -159,19 +162,27 @@ class ContingentService(
         val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
 
         for (contingent in contingents) {
+            val workdayDailyHours = TimeDoubleService.convertTimeDoubleToDouble(contingent.weeklyServiceHours) / 5
+            val workdays = DateService.countDaysOfYearBetweenStartAndEnd(year, contingent.start, contingent.end) * 5.0 / 7.0
+            val workdaysWithoutVacationInContingent = workdays * (workdaysAssumption.toDouble() / workdaysReal)
             for (month in 1..12) {
                 monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
                         monthlyHours[month],
                         getContingentHoursByYearAndMonth(year, month, contingent))
             }
-        }
 
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
+            monthlyHours[0] = TimeDoubleService.sumTimeDoubles(monthlyHours[0],
+                    TimeDoubleService.convertDoubleToTimeDouble(workdayDailyHours * workdaysWithoutVacationInContingent))
+        }
 
         return monthlyHours
     }
 
     fun getContingentHoursByYear(year: Int, contingent: ContingentProjection): List<Double> {
+        val workdayDailyHours = contingent.weeklyServiceHours / 5
+        val yearlyWorkdays = DateService.calculateWorkdaysInHesse(year)
+        val workdays = DateService.calculateWorkdaysInHesseBetween(contingent.start, contingent.end, year)
+        val workdaysWithoutVacationInContingent = workdays * (workdaysAssumption.toDouble() / yearlyWorkdays)
         val monthlyHours = ArrayList<Double>()
         monthlyHours.add(0.0)
 
@@ -179,7 +190,7 @@ class ContingentService(
             monthlyHours.add(getContingentHoursByYearAndMonth(year, month, contingent))
         }
 
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
+        monthlyHours[0] = TimeDoubleService.convertDoubleToTimeDouble(workdayDailyHours * workdaysWithoutVacationInContingent)
 
         return monthlyHours
     }

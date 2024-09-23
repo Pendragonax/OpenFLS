@@ -36,7 +36,7 @@ import {ConfirmationModalComponent} from "../../modals/confirmation-modal/confir
   templateUrl: './assistance-plans.component.html',
   styleUrls: ['./assistance-plans.component.css'],
   providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+    {provide: MAT_DATE_LOCALE, useValue: 'de-DE'},
     {
       provide: DateAdapter,
       useClass: MomentDateAdapter,
@@ -78,11 +78,12 @@ export class AssistancePlansComponent
   hourTypes: HourTypeDto[] = [];
   modalGoal: GoalDto = new GoalDto();
   addAvailable: boolean = false;
+  illegalAssistancePlans: number[] = [];
 
   // FILTER
-  filterDate : Date | null = null;
-  filterInstitutionId : number | null = null;
-  filterClientId : number | null = null;
+  filterDate: Date | null = null;
+  filterInstitutionId: number | null = null;
+  filterClientId: number | null = null;
 
   // FORMs
   override filterForm = new UntypedFormGroup({
@@ -92,11 +93,17 @@ export class AssistancePlansComponent
     client: new UntypedFormControl(),
   });
 
-  get dateControl() { return this.filterForm.controls['date']; }
+  get dateControl() {
+    return this.filterForm.controls['date'];
+  }
 
-  get institutionControl() { return this.filterForm.controls['institution']; }
+  get institutionControl() {
+    return this.filterForm.controls['institution'];
+  }
 
-  get clientControl() { return this.filterForm.controls['client']; }
+  get clientControl() {
+    return this.filterForm.controls['client'];
+  }
 
   constructor(
     override modalService: NgbModal,
@@ -161,31 +168,40 @@ export class AssistancePlansComponent
 
   loadValuesByClient() {
     this.isSubmitting = true;
-    this.assistancePlanService.getCombinationByClientId(this.client.dto.id).subscribe({
-      next: (values) => {
-        this.isSubmitting = false
-        this.setTableSource(values)
-      }
+
+    combineLatest([
+      this.assistancePlanService.getCombinationByClientId(this.client.dto.id),
+      this.assistancePlanService.getIllegalByClientId(this.client.dto.id)]
+    ).subscribe(([assistancePlans, illegalAssistancePlans]) => {
+      this.isSubmitting = false
+      assistancePlans.forEach(it => it[3].illegal = illegalAssistancePlans.some(illegal => illegal.id == it[3].dto.id))
+      this.setTableSource(assistancePlans)
     });
   }
 
   loadValuesBySponsor() {
     this.isSubmitting = true;
-    this.assistancePlanService.getCombinationBySponsorId(this.sponsor.id).subscribe({
-      next: (values) => {
-        this.isSubmitting = false
-        this.setTableSource(values)
-      }
+
+    combineLatest([
+      this.assistancePlanService.getCombinationBySponsorId(this.sponsor.id),
+      this.assistancePlanService.getIllegalBySponsorId(this.sponsor.id)]
+    ).subscribe(([assistancePlans, illegalAssistancePlans]) => {
+      this.isSubmitting = false
+      assistancePlans.forEach(it => it[3].illegal = illegalAssistancePlans.some(illegal => illegal.id == it[3].dto.id))
+      this.setTableSource(assistancePlans)
     });
   }
 
   loadValuesByInstitution() {
     this.isSubmitting = true;
-    this.assistancePlanService.getCombinationByInstitutionId(this.institution.dto.id).subscribe({
-      next: (values) => {
-        this.isSubmitting = false
-        this.setTableSource(values)
-      }
+
+    combineLatest([
+      this.assistancePlanService.getCombinationByInstitutionId(this.institution.dto.id),
+      this.assistancePlanService.getIllegalByInstitutionId(this.institution.dto.id)]
+    ).subscribe(([assistancePlans, illegalAssistancePlans]) => {
+      this.isSubmitting = false
+      assistancePlans.forEach(it => it[3].illegal = illegalAssistancePlans.some(illegal => illegal.id == it[3].dto.id))
+      this.setTableSource(assistancePlans)
     });
   }
 
@@ -281,9 +297,9 @@ export class AssistancePlansComponent
     // filter by searchString
     filteredData = filteredData.filter(x => {
       return x[0].firstName.toLowerCase().includes(this.searchString) ||
-      x[0].lastName.toLowerCase().includes(this.searchString) ||
-      x[1].name.toLowerCase().includes(this.searchString) ||
-      x[2].name.toLowerCase().includes(this.searchString)
+        x[0].lastName.toLowerCase().includes(this.searchString) ||
+        x[1].name.toLowerCase().includes(this.searchString) ||
+        x[2].name.toLowerCase().includes(this.searchString)
     });
 
     // filter by date
@@ -327,11 +343,6 @@ export class AssistancePlansComponent
       .subscribe({
         next: (value) => this.deleteServiceCount = value
       });
-  }
-
-  openAnalysisModal(content, id: number) {
-    this.modalService
-      .open(content, { ariaLabelledBy: 'modal-basic-delete-title', scrollable: true })
   }
 
   sortData(sort: Sort) {
@@ -387,7 +398,7 @@ export class AssistancePlansComponent
     })
   }
 
-  getDateString(date: string | null) : string {
+  getDateString(date: string | null): string {
     return this.converter.getLocalDateString(date);
   }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ClientsService} from "../../shared/services/clients.service";
 import {Sort} from "@angular/material/sort";
@@ -10,6 +10,8 @@ import {TablePageComponent} from "../../shared/components/table-page.component";
 import {HelperService} from "../../shared/services/helper.service";
 import {EmployeeViewModel} from "../../shared/models/employee-view.model";
 import {ServiceService} from "../../shared/services/service.service";
+import {InstitutionSoloDto} from "../../shared/dtos/institution-solo-dto.model";
+import {InstitutionService} from "../../shared/services/institution.service";
 
 @Component({
   selector: 'app-client',
@@ -21,8 +23,12 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
   tableColumns = ['name', 'institution', 'actions'];
 
   deleteServiceCount: number = 0;
+  readableInstitutions: InstitutionSoloDto[] = [];
+  institutionId: number | null = null;
+  selectedInstitution: InstitutionSoloDto | null = null;
 
   constructor(
+    private institutionService: InstitutionService,
     override modalService: NgbModal,
     override helperService: HelperService,
     private clientService: ClientsService,
@@ -36,8 +42,34 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
     this.isSubmitting = true;
 
     combineLatest([
-      this.clientService.allValues$,
-      this.userService.user$
+      this.clientService.getAll(),
+      this.userService.user$,
+      this.institutionService.getAllReadable()
+    ]).subscribe(([clients, user, readableInstitutions]) => {
+      if (this.readableInstitutions != null) {
+        this.readableInstitutions = readableInstitutions
+      }
+      this.values = clients
+        .map(client => <ClientViewModel> {
+          dto: client,
+          editable: user.permissions
+            .filter(perm => perm.affiliated)
+            .some(perm => perm.institutionId === client.institution.id)});
+      this.values.filter(value => this.readableInstitutions != null && this.readableInstitutions.some(it => it.id == value.dto.institution.id))
+      this.values$.next(this.values);
+      this.filteredTableData = this.values;
+      this.isSubmitting = false;
+
+      this.refreshTablePage();
+    });
+  }
+
+  loadClients() {
+    this.isSubmitting = true;
+
+    combineLatest([
+      this.clientService.getAll(),
+      this.userService.user$,
     ]).subscribe(([clients, user]) => {
       this.values = clients
         .map(client => <ClientViewModel> {
@@ -45,6 +77,7 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
           editable: user.permissions
             .filter(perm => perm.affiliated)
             .some(perm => perm.institutionId === client.institution.id)});
+      this.values = this.values.filter(value => (this.selectedInstitution != null && this.selectedInstitution.id == value.dto.institution.id) || this.selectedInstitution == null)
       this.values$.next(this.values);
       this.filteredTableData = this.values;
       this.isSubmitting = false;
@@ -97,6 +130,12 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
   onSearchStringChanges(searchString: string) {
     this.searchString = searchString
     this.filterTableData()
+  }
+
+  onInstitutionChanged(institution: InstitutionSoloDto | null) {
+    this.selectedInstitution = institution;
+    this.institutionId = institution?.id ?? null;
+    this.loadClients();
   }
 
   override handleDeleteModalOpen(value: ClientViewModel) {

@@ -1,29 +1,30 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {AssistancePlanService} from "../../shared/services/assistance-plan.service";
-import {AssistancePlanResponseDto} from "../../shared/dtos/assistance-plan-response-dto.model";
 import {PeriodMode} from "../../shared/components/year-month-selection/PeriodMode";
-import {ReplaySubject} from "rxjs";
+import {combineLatest, ReplaySubject} from "rxjs";
 import {DateService} from "../../shared/services/date.service";
 import {Period} from "../../shared/components/year-month-selection/Period";
 import {TableButtonCell} from "../../shared/components/table-button/TableButtonCell";
 import {MatDialog} from "@angular/material/dialog";
-import {GoalEvaluationModalComponent} from "./modals/goal-evaluation-modal/goal-evaluation-modal.component";
+import {AssistancePlanEvaluationModalComponent} from "./modals/assistance-plan-evaluation-modal/assistance-plan-evaluation-modal.component";
 import {Location} from "@angular/common";
 import {GoalTimeEvaluationService} from "../../shared/services/goal-time-evaluation.service";
 import {GoalsTimeEvaluationDto} from "../../shared/dtos/goals-time-evaluation-dto.model";
 import {GoalTimeEvaluationDto} from "../../shared/dtos/goal-time-evaluation-dto.model";
-import {EGoalEvaluationType} from "./components/goal-time-evaluation-filter/EGoalEvaluationType";
+import {EAssistancePlanEvaluationType} from "./components/assistance-plan-time-evaluation-filter/EAssistancePlanEvaluationType";
 import {EvaluationsService} from "../../shared/services/evaluations.service";
 import {GoalEvaluationYearDto} from "../../shared/dtos/goal-evaluation-year-dto.model";
 import {EvaluationDto} from "../../shared/dtos/evaluation-dto.model";
+import {ClientsService} from "../../shared/services/clients.service";
+import {AssistancePlan} from "../../shared/projections/assistance-plan.projection";
 
 @Component({
-  selector: 'app-goal-evaluation',
-  templateUrl: './goal-evaluation.component.html',
-  styleUrls: ['./goal-evaluation.component.css']
+  selector: 'app-assistance-plan-analysis',
+  templateUrl: './assistance-plan-analysis.component.html',
+  styleUrls: ['./assistance-plan-analysis.component.css']
 })
-export class GoalEvaluationComponent implements OnInit {
+export class AssistancePlanAnalysisComponent implements OnInit {
 
   // CONST
   private validTabIndices = [0,1,2];
@@ -41,10 +42,10 @@ export class GoalEvaluationComponent implements OnInit {
 
   // VAR
   assistancePlanId = 0;
-  assistancePlan: AssistancePlanResponseDto = new AssistancePlanResponseDto();
+  assistancePlan: AssistancePlan = new AssistancePlan();
   evaluations: GoalEvaluationYearDto = new GoalEvaluationYearDto();
   goalTimesEvaluation: GoalsTimeEvaluationDto = new GoalsTimeEvaluationDto();
-  selectedGoalEvaluationHourType: EGoalEvaluationType | null = null;
+  selectedGoalEvaluationHourType: EAssistancePlanEvaluationType | null = null;
   selectedGoalTimeHourTypeId: number = 0
   selectedGoalTimeYear: number = 0
   selectedEvaluationYear: number = 0
@@ -58,6 +59,7 @@ export class GoalEvaluationComponent implements OnInit {
   constructor(private assistancePlanService: AssistancePlanService,
               private goalTimeEvaluationService: GoalTimeEvaluationService,
               private evaluationService: EvaluationsService,
+              private clientService: ClientsService,
               private dateService: DateService,
               private dialog: MatDialog,
               private route: ActivatedRoute,
@@ -65,16 +67,17 @@ export class GoalEvaluationComponent implements OnInit {
 
   ngOnInit(): void {
     this.executeURLParams();
-    this.assistancePlanService.getStrippedById(this.assistancePlanId).subscribe({
-      next: value => {
-        this.assistancePlan = value;
+    combineLatest([
+      this.assistancePlanService.getProjectionById(this.assistancePlanId),
+      this.clientService.allValues$
+    ]).subscribe(([assistancePlan, clients]) => {
+        this.assistancePlan = assistancePlan;
         this.loadValues();
         this.onEvaluationPeriodChanged(new Period(PeriodMode.PERIOD_MODE_YEARLY, new Date().getFullYear(), 1));
-      }
-    });
+      });
   }
 
-  onGoalTimeEvaluationTypeChanged(type: EGoalEvaluationType) {
+  onGoalTimeEvaluationTypeChanged(type: EAssistancePlanEvaluationType) {
     this.selectedGoalEvaluationHourType = type
     this.updateGoalTimeTable()
   }
@@ -148,6 +151,8 @@ export class GoalEvaluationComponent implements OnInit {
     let rows =
       this.goalTimesEvaluation.goalTimeEvaluations
         .map(it => this.getGoalTimesAsRow(it, this.selectedGoalEvaluationHourType))
+
+    rows = [...rows, this.getGoalsTimeAsRow(this.goalTimesEvaluation, this.selectedGoalEvaluationHourType)]
     this.data$.next(rows);
     this.columns$.next(this.dateService.getMonths(["Name"]));
   }
@@ -157,42 +162,90 @@ export class GoalEvaluationComponent implements OnInit {
     this.boldColumnIndices$.next([0])
   }
 
-  getGoalTimesAsRow(goalTimes: GoalTimeEvaluationDto, type: EGoalEvaluationType | null): string[] {
-    let cells = [this.truncateString(goalTimes.title, 20)];
+  getGoalsTimeAsRow(goalsTime: GoalsTimeEvaluationDto, type: EAssistancePlanEvaluationType | null): string[] {
+    let cells = [this.truncateString("Hilfeplan", 20)];
+
+    for (let i = 0; i < goalsTime.approvedHours.length; i++) {
+      switch (type) {
+        case EAssistancePlanEvaluationType.Approved:
+          if (goalsTime.approvedHours[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.approvedHours[i]).toFixed(2).toString());
+          break;
+        case EAssistancePlanEvaluationType.SummedApproved:
+          if (goalsTime.summedApprovedHours[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.summedApprovedHours[i]).toFixed(2).toString());
+          break;
+        case EAssistancePlanEvaluationType.Executed:
+          if (goalsTime.executedHours[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.executedHours[i]).toFixed(2).toString());
+          break;
+        case EAssistancePlanEvaluationType.SummedExecuted:
+          if (goalsTime.summedExecutedHours[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.summedExecutedHours[i]).toFixed(2).toString());
+          break;
+        case EAssistancePlanEvaluationType.Left:
+          if (goalsTime.approvedHoursLeft[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.approvedHoursLeft[i]).toFixed(2).toString());
+          break;
+        case EAssistancePlanEvaluationType.SummedLeft:
+          if (goalsTime.summedApprovedHoursLeft[i] <= 0)
+            cells.push("-")
+          else
+            cells.push((goalsTime.summedApprovedHoursLeft[i]).toFixed(2).toString());
+          break;
+        default:
+          break;
+      }
+    }
+    return cells;
+  }
+
+  getGoalTimesAsRow(goalTimes: GoalTimeEvaluationDto, type: EAssistancePlanEvaluationType | null): string[] {
+    let cells = [this.truncateString("Ziel: " + goalTimes.title, 20)];
 
     for (let i = 0; i < goalTimes.approvedHours.length; i++) {
       switch (type) {
-        case EGoalEvaluationType.Approved:
+        case EAssistancePlanEvaluationType.Approved:
           if (goalTimes.approvedHours[i] <= 0)
             cells.push("-")
           else
             cells.push((goalTimes.approvedHours[i]).toFixed(2).toString());
           break;
-        case EGoalEvaluationType.SummedApproved:
+        case EAssistancePlanEvaluationType.SummedApproved:
           if (goalTimes.summedApprovedHours[i] <= 0)
             cells.push("-")
           else
             cells.push((goalTimes.summedApprovedHours[i]).toFixed(2).toString());
           break;
-        case EGoalEvaluationType.Executed:
+        case EAssistancePlanEvaluationType.Executed:
           if (goalTimes.executedHours[i] <= 0)
             cells.push("-")
           else
             cells.push((goalTimes.executedHours[i]).toFixed(2).toString());
           break;
-        case EGoalEvaluationType.SummedExecuted:
+        case EAssistancePlanEvaluationType.SummedExecuted:
           if (goalTimes.summedExecutedHours[i] <= 0)
             cells.push("-")
           else
             cells.push((goalTimes.summedExecutedHours[i]).toFixed(2).toString());
           break;
-        case EGoalEvaluationType.Left:
+        case EAssistancePlanEvaluationType.Left:
           if (goalTimes.approvedHoursLeft[i] <= 0)
             cells.push("-")
           else
             cells.push((goalTimes.approvedHoursLeft[i]).toFixed(2).toString());
           break;
-        case EGoalEvaluationType.SummedLeft:
+        case EAssistancePlanEvaluationType.SummedLeft:
           if (goalTimes.summedApprovedHoursLeft[i] <= 0)
             cells.push("-")
           else
@@ -230,7 +283,7 @@ export class GoalEvaluationComponent implements OnInit {
   }
 
   openEvaluationModal(payload: { goalId: number, date: Date, evaluation: EvaluationDto }) {
-    let dialogRef = this.dialog.open(GoalEvaluationModalComponent);
+    let dialogRef = this.dialog.open(AssistancePlanEvaluationModalComponent);
     let dialog = dialogRef.componentInstance;
     dialog.evaluation$.next(payload.evaluation);
     dialog.goalId$.next(payload.goalId);

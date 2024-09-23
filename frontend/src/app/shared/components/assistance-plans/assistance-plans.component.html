@@ -9,71 +9,58 @@
   </div>
 
   <!--FILTER-->
-  <div class="row mt-1">
-    <mat-accordion>
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title class="fw-bold">
-            Filter
-          </mat-panel-title>
-          <mat-panel-description>
-            klicken um aufzuklappen...
-          </mat-panel-description>
-        </mat-expansion-panel-header>
+  <div class="row mt-3">
+    <!--FILTER CONTAINER-->
+    <form [formGroup]="filterForm">
+      <div class="container-fluid">
+        <div class="row justify-content-center">
+          <div class="col-auto"
+               [hidden]="hideSearchStringFilter">
+            <app-search-field [isSubmitting]="isSubmitting"
+                              [placeholder]="'...'"
+                              (onSearchStringChanges)="onSearchStringChanges($event)"
+                              [onResetClick]="resetFilterSearchString"></app-search-field>
+          </div>
 
-        <!--FILTER CONTAINER-->
-        <form [formGroup]="filterForm">
-          <div class="container-fluid">
-            <div class="row justify-content-start">
-              <div class="col-auto"
-                   [hidden]="hideSearchStringFilter">
-                <app-search-field [isSubmitting]="isSubmitting"
-                                  [placeholder]="'...'"
-                                  (onSearchStringChanges)="onSearchStringChanges($event)"
-                                  [onResetClick]="resetFilterSearchString"></app-search-field>
-              </div>
-
-              <div class="col-auto">
-                <div class="input-field">
-                  <mat-form-field appearance="fill">
-                    <mat-label>Stichtag</mat-label>
-                    <input matInput
-                           formControlName="date"
-                           [matDatepicker]="filterPicker">
-                    <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
-                    <mat-datepicker-toggle matSuffix
-                                           [for]="filterPicker"></mat-datepicker-toggle>
-                    <mat-datepicker #filterPicker></mat-datepicker>
-                    <button mat-icon-button
-                            matPrefix
-                            class="my-1 mx-2"
-                            (click)="resetFilterDate()">
-                      <mat-icon>clear</mat-icon></button>
-                  </mat-form-field>
-                </div>
-              </div>
-
-              <div class="col-auto" [hidden]="hideInstitutionFilter">
-                  <mat-form-field appearance="fill">
-                    <mat-label>Bereich</mat-label>
-                    <mat-select formControlName="institution">
-                      <mat-option *ngFor="let value of institutions"
-                                  [value]="value.id">
-                        {{value.name}}
-                      </mat-option>
-                    </mat-select>
-                    <button mat-icon-button
-                            matPrefix
-                            class="my-1 mx-2"
-                            (click)="resetFilterInstitution()">
-                      <mat-icon>clear</mat-icon></button>
-                  </mat-form-field>
-              </div>
+          <div class="col-auto">
+            <div class="input-field">
+              <mat-form-field appearance="fill">
+                <mat-label>Stichtag</mat-label>
+                <input matInput
+                       formControlName="date"
+                       [matDatepicker]="filterPicker">
+                <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+                <mat-datepicker-toggle matSuffix
+                                       [for]="filterPicker"></mat-datepicker-toggle>
+                <mat-datepicker #filterPicker></mat-datepicker>
+                <button mat-icon-button
+                        matPrefix
+                        class="my-1 mx-2"
+                        (click)="resetFilterDate()">
+                  <mat-icon>clear</mat-icon></button>
+              </mat-form-field>
             </div>
           </div>
-        </form>
-      </mat-expansion-panel>
-    </mat-accordion>
+
+          <div class="col-auto" [hidden]="hideInstitutionFilter">
+            <mat-form-field appearance="fill" class="width-350">
+              <mat-label>Bereich</mat-label>
+              <mat-select formControlName="institution">
+                <mat-option *ngFor="let value of institutions"
+                            [value]="value.id">
+                  {{value.name}}
+                </mat-option>
+              </mat-select>
+              <button mat-icon-button
+                      matPrefix
+                      class="my-1 mx-2"
+                      (click)="resetFilterInstitution()">
+                <mat-icon>clear</mat-icon></button>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </form>
   </div>
 
   <!--TABLE-->
@@ -120,6 +107,7 @@
         <td mat-cell
             [hidden]="hideClientColumn"
             class="hide-on-small px-4"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination"> {{combination[0].lastName}} {{combination[0].firstName}}</td>
       </ng-container>
 
@@ -131,6 +119,7 @@
             [hidden]="hideInstitutionColumn"> Bereich </th>
         <td mat-cell
             class="hide-on-small px-2"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination"
             [hidden]="hideInstitutionColumn"> {{combination[1].name}}</td>
       </ng-container>
@@ -143,6 +132,7 @@
             [hidden]="hideInstitutionColumn"> Kostenträger </th>
         <td mat-cell
             *matCellDef="let combination"
+            [ngClass]="{'background-red': combination[3].illegal}"
             class="hide-on-small px-2"
             [hidden]="hideInstitutionColumn"> {{combination[2].name}}</td>
       </ng-container>
@@ -154,6 +144,7 @@
             *matHeaderCellDef> Beginn </th>
         <td mat-cell
             class="px-2"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination"> {{ getDateString(combination[3].dto.start) }}</td>
       </ng-container>
 
@@ -164,6 +155,7 @@
             *matHeaderCellDef> Ende </th>
         <td mat-cell
             class="px-2"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination"> {{getDateString(combination[3].dto.end)}}</td>
       </ng-container>
 
@@ -175,6 +167,7 @@
         <td mat-cell
             class="px-2"
             [matTooltip]="'h - Hilfeplan (h - Ziele)'"
+            [ngClass]="{'background-red': combination[3].illegal}"
             *matCellDef="let combination">
           {{sumWeeklyHoursByPlan(combination[3].dto)}} ({{sumGoalsWeeklyHoursByPlan(combination[3].dto)}})
         </td>
@@ -186,6 +179,7 @@
             class="text-center px-2"> Aktionen </th>
         <td mat-cell
             *matCellDef="let combination"
+            [ngClass]="{'background-red': combination[3].illegal}"
             class="text-center px-2">
           <div class="text-center">
             <button mat-icon-button
@@ -196,13 +190,6 @@
               <mat-icon>{{combination[3].favorite ? 'bookmark' : 'bookmark_border'}}</mat-icon></button>
             <button mat-icon-button
                     color="primary"
-                    [matTooltip]="'Zeitanalyse'"
-                    [matTooltipPosition]="'above'"
-                    [disabled]="!combination[3].editable"
-                    (click)="openAnalysisModal(analysisContent, combination[3].dto.id)">
-              <mat-icon>query_builder</mat-icon></button>
-            <button mat-icon-button
-                    color="primary"
                     [matTooltip]="'Bearbeiten'"
                     [matTooltipPosition]="'above'"
                     [disabled]="!combination[3].editable"
@@ -210,9 +197,9 @@
               <mat-icon>edit</mat-icon></button>
             <button mat-icon-button
                     color="primary"
-                    [matTooltip]="'Ziele'"
+                    [matTooltip]="'Auswertung'"
                     [matTooltipPosition]="'above'"
-                    [routerLink]="['/assistance_plans/goals', combination[3].dto.id, '0']">
+                    [routerLink]="['/assistance_plans/analysis', combination[3].dto.id, '0']">
               <mat-icon>view_module</mat-icon></button>
             <button mat-icon-button
                     color="warn"
@@ -245,19 +232,6 @@
                         class="btn btn-outline-dark"
                         (click)="modal.close(false)">Abbrechen</button>
               </div>
-            </ng-template>
-
-            <!--ANALYSIS MODAL-->
-            <ng-template #analysisContent let-modal>
-              <div class="modal-header">
-                <h2 class="modal-title"
-                    id="modal-basic-title-analysis">Zeitanalyse</h2>
-                <button type="button"
-                        class="btn-close"
-                        aria-label="Close"
-                        (click)="modal.dismiss('Cross click')"></button>
-              </div>
-              <app-assistance-plan-analysis [id]=combination[3].dto.id></app-assistance-plan-analysis>
             </ng-template>
           </div>
         </td>

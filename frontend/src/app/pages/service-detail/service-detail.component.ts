@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {NewPageComponent} from "../../shared/components/new-page.component";
 import {ServiceDto} from "../../shared/dtos/service-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
 import {ClientsService} from "../../shared/services/clients.service";
-import {AssistancePlanService} from "../../shared/services/assistance-plan.service";
 import {HourTypeService} from "../../shared/services/hour-type.service";
 import {CategoriesService} from "../../shared/services/categories.service";
 import {UserService} from "../../shared/services/user.service";
@@ -69,6 +68,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   assistancePlanSelected: boolean = false;
   timeNow = new Date(Date.now());
   minDate = new Date();
+  title: String = "";
 
   // FORMS
   firstForm = new UntypedFormGroup({
@@ -139,7 +139,6 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     private userService: UserService,
     private institutionService: InstitutionService,
     private clientService: ClientsService,
-    private assistancePlanService: AssistancePlanService,
     private hourTypeService: HourTypeService,
     private categoryService: CategoriesService,
     private sponsorService: SponsorService,
@@ -208,10 +207,10 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
             this.selectedServiceDate = this.converter.formatDate(startDate);
             this.minDate = startDate;
           } catch {
-            console.log("parsing failed");
           }
         }
 
+        this.reloadTitle();
         this.initFormSubscriptions();
       });
   }
@@ -244,7 +243,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
         // ASSISTANCE PLAN
         this.selectedAssistancePlan = client.assistancePlans.find(value => value.id == service.assistancePlanId);
-        this.filteredAssistancePlans = [this.selectedAssistancePlan ?? new AssistancePlanDto()];
+        this.filteredAssistancePlans = client.assistancePlans //[this.selectedAssistancePlan ?? new AssistancePlanDto()];
         this.assistancePlanSelected = true;
         this.setGoals(service.goals.map(value => value.id));
         if (this.selectedAssistancePlan != null) {
@@ -256,6 +255,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         // CATEGORIES
         this.categories = client.categoryTemplate.categories;
         this.selectedCategories = this.categories.filter(value => service.categorys.some(category => category.id == value.id));
+        this.reloadTitle();
 
         this.fillFormGroups();
         this.initFormSubscriptions();
@@ -267,6 +267,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       this.selectedClient = value;
       this.filteredAssistancePlans = this.getAssistancePlansByDateString(value.assistancePlans, this.serviceDateControl.value);
       this.categories = value.categoryTemplate.categories;
+      this.reloadTitle();
     })
   }
 
@@ -294,15 +295,6 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   override initFormSubscriptions() {
     // EDIT-MODE
     if (!this.editMode) {
-      this.serviceDateControl.enable();
-      this.serviceDateControl.valueChanges
-        .subscribe((value) => {
-          if (value != null) {
-            this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
-            // constraints for the end time and date
-            this.minDate = new Date(value.toString());
-          }
-        });
 
       this.clientControl.enable();
       this.clientControl.valueChanges.pipe(startWith('')).subscribe(value => {
@@ -333,20 +325,31 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
             this.clientSelected = false;
           }
         });
-
-      this.assistancePlansControl.enable();
-      this.assistancePlansControl.valueChanges
-        .subscribe((value: number[]) => {
-          this.resetGoals();
-          this.goalsControl.setValue("");
-
-          if (value.length > 0) {
-            this.selectAssistancePlan(this.selectedClient.assistancePlans.find(plan => plan.id == value[0]));
-          } else {
-            this.selectAssistancePlan(null);
-          }
-        });
     }
+
+    this.serviceDateControl.enable();
+    this.serviceDateControl.valueChanges
+      .subscribe((value) => {
+        if (value != null) {
+          this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
+          this.reloadTitle();
+          // constraints for the end time and date
+          this.minDate = new Date(value.toString());
+        }
+      });
+
+    this.assistancePlansControl.enable();
+    this.assistancePlansControl.valueChanges
+      .subscribe((value: number[]) => {
+        this.resetGoals();
+        this.goalsControl.setValue("");
+
+        if (value.length > 0) {
+          this.selectAssistancePlan(this.selectedClient.assistancePlans.find(plan => plan.id == value[0]));
+        } else {
+          this.selectAssistancePlan(null);
+        }
+      });
 
     // GENERAL
     // START HOUR
@@ -522,5 +525,15 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       .filter(client => client.firstName.toLowerCase().includes(filterValue) ||
         client.lastName.toLowerCase().includes(filterValue))
       .slice(0, 5);
+  }
+
+  private reloadTitle() {
+    if (this.selectedClient !== null) {
+      this.title = "Eintrag (" + this.converter.formatDateToGerman(new Date(this.selectedServiceDate.toString())) + ") " +
+        this.selectedClient.lastName + " " + this.selectedClient.firstName;
+    }
+    else {
+      this.title = "Eintrag (" + this.converter.formatDateToGerman(new Date(this.selectedServiceDate.toString())) + ")";
+    }
   }
 }

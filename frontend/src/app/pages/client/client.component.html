@@ -6,7 +6,7 @@
 <div class="container mt-3">
   <!--FILTER-->
   <div class="row"
-       [hidden]="isSubmitting">
+       *ngIf="!isSubmitting">
     <!--FILTER FORM-->
     <form [formGroup]="filterForm">
       <div class="container-fluid text-center">
@@ -17,6 +17,11 @@
                               (onSearchStringChanges)="onSearchStringChanges($event)"
                               [onResetClick]="resetFilterSearchString"></app-search-field>
           </div>
+          <div class="col-auto">
+            <app-institution-select [institutions]="readableInstitutions"
+                                    [institutionId]="institutionId"
+                                    (institutionChanged)="onInstitutionChanged($event)"></app-institution-select>
+          </div>
         </div>
       </div>
     </form>
@@ -26,7 +31,7 @@
   <div class="row">
     <!--ACTIONS-->
     <div class="row"
-         [hidden]="isSubmitting">
+         *ngIf="!isSubmitting">
       <div class="col">
         <mat-paginator class="paginator"
                        showFirstLastButtons
@@ -38,20 +43,20 @@
     </div>
 
     <!--LOADING-->
-    <div class="row  m-2"
-         [hidden]="!isSubmitting">
-      <div class="row justify-content-center">
+    <div class="row m-2"
+         *ngIf="isSubmitting">
+      <div class="d-flex justify-content-center">
         <mat-spinner [strokeWidth]="2"
-                     [diameter]="100"
+                     [diameter]="70"
                      class="center-spinner"></mat-spinner>
       </div>
-      <div class="row text-center">
+      <div class="d-flex justify-content-center">
         <p><b>Lade Klienten</b></p>
       </div>
     </div>
 
     <div class="row"
-         [hidden]="isSubmitting">
+         *ngIf="!isSubmitting">
       <table mat-table
              matSort
              (matSortChange)="sortData($event)"

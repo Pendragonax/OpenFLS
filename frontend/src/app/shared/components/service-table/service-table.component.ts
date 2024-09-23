@@ -18,6 +18,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   @Input() services: Service[] = [];
   @Input() editMode: boolean = false;
   @Input() adminMode: boolean = true;
+  @Input() redRows: boolean = false;
 
   @ViewChild(MatSort) sort!: MatSort;
 
