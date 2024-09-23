@@ -1,66 +1,46 @@
 package de.vinz.openfls.domains.sponsors
 
-import de.vinz.openfls.services.GenericService
-import org.springframework.stereotype.Service
 import jakarta.transaction.Transactional
-import org.modelmapper.ModelMapper
+import org.springframework.stereotype.Service
 
 @Service
-class SponsorService(
-        private val sponsorRepository: SponsorRepository,
-        private val modelMapper: ModelMapper
-) : GenericService<Sponsor> {
+class SponsorService(private val sponsorRepository: SponsorRepository) {
 
     @Transactional
     fun create(sponsorDto: SponsorDto): SponsorDto {
-        val entity = create(modelMapper.map(sponsorDto, Sponsor::class.java))
-        return modelMapper.map(entity, SponsorDto::class.java)
-    }
-
-    @Transactional
-    override fun create(value: Sponsor): Sponsor {
-        value.unprofessionals = null
-
-        return sponsorRepository.save(value)
+        sponsorDto.unprofessionals = null
+        val entity = sponsorRepository.save(Sponsor.from(sponsorDto))
+        return SponsorDto.from(entity)
     }
 
     @Transactional
     fun update(sponsorDto: SponsorDto): SponsorDto {
-        val entity = update(modelMapper.map(sponsorDto, Sponsor::class.java))
-        return modelMapper.map(entity, SponsorDto::class.java)
+        sponsorDto.unprofessionals = null
+        val entity = sponsorRepository.save(Sponsor.from(sponsorDto))
+        return SponsorDto.from(entity)
     }
 
     @Transactional
-    override fun update(value: Sponsor): Sponsor {
-        value.unprofessionals = null
-
-        return sponsorRepository.save(value)
-    }
-
-    @Transactional
-    override fun delete(id: Long) {
+    fun delete(id: Long) {
         sponsorRepository.deleteById(id)
     }
 
-    fun getAllDtos(): List<SponsorDto> {
-        return getAll()
-                .map { modelMapper.map(it, SponsorDto::class.java) }
+    fun getAll(): List<SponsorDto> {
+        val entities = sponsorRepository.findAll()
+        return entities.map { SponsorDto.from(it) }
                 .sortedBy { it.name.lowercase() }
     }
 
-    override fun getAll(): List<Sponsor> {
-        return sponsorRepository.findAll().toList()
-    }
-
     fun getDtoById(id: Long): SponsorDto? {
-        return modelMapper.map(sponsorRepository.findById(id).orElse(null), SponsorDto::class.java)
+        val entities = sponsorRepository.findById(id).orElse(null)
+        return SponsorDto.from(entities)
     }
 
-    override fun getById(id: Long): Sponsor? {
+    fun getById(id: Long): Sponsor? {
         return sponsorRepository.findById(id).orElse(null)
     }
 
-    override fun existsById(id: Long): Boolean {
+    fun existsById(id: Long): Boolean {
         return sponsorRepository.existsById(id)
     }
 }

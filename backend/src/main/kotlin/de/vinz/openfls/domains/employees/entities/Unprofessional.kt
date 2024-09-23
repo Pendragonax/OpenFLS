@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.employees.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
 import de.vinz.openfls.domains.sponsors.Sponsor
 import java.time.LocalDate
 import jakarta.persistence.*
@@ -37,5 +38,16 @@ class Unprofessional(
 
     override fun toString(): String {
         return "Unprofessional(employeeId = ${id?.employeeId}, sponsorId = ${id?.sponsorId}, end = $end)"
+    }
+
+    companion object {
+        fun from(unprofessionalDto: UnprofessionalDto): Unprofessional {
+            return Unprofessional(
+                    id = UnprofessionalKey(
+                            employeeId = unprofessionalDto.employeeId,
+                            sponsorId = unprofessionalDto.sponsorId),
+                    end = unprofessionalDto.end
+            )
+        }
     }
 }

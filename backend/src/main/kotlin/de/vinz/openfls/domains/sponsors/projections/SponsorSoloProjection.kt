@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.sponsors
+package de.vinz.openfls.domains.sponsors.projections
 
 interface SponsorSoloProjection {
     val id: Long
