@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.sponsors
 
+import de.vinz.openfls.domains.sponsors.exceptions.InvalidSponsorDtoException
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -11,9 +12,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/sponsors")
-class SponsorController(
-        val sponsorService: SponsorService
-) {
+class SponsorController(val sponsorService: SponsorService) {
 
     private val logger: Logger = LoggerFactory.getLogger(SponsorController::class.java)
 
@@ -22,136 +21,98 @@ class SponsorController(
 
     @PostMapping("")
     fun create(@Valid @RequestBody valueDto: SponsorDto): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = sponsorService.create(valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(sponsorService.create(valueDto))
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            getExceptionResponseEntity(ex)
+        } finally {
+            logPerformance("create", startMs)
         }
     }
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: SponsorDto): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        if (id != valueDto.id)
+            throw InvalidSponsorDtoException("path id and dto id are not the same")
+        if (!sponsorService.existsById(id))
+            throw InvalidSponsorDtoException("sponsor not found")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (id != valueDto.id)
-                throw IllegalArgumentException("path id and dto id are not the same")
-            if (!sponsorService.existsById(id))
-                throw IllegalArgumentException("sponsor not found")
-
-            val dto = sponsorService.update(valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(sponsorService.update(valueDto))
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            getExceptionResponseEntity(ex)
+        } finally {
+            logPerformance("update", startMs)
         }
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        if (!sponsorService.existsById(id))
+            throw InvalidSponsorDtoException("sponsor not found")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!sponsorService.existsById(id))
-                throw IllegalArgumentException("sponsor not found")
-
             val dto = sponsorService.getDtoById(id)
             sponsorService.delete(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            getExceptionResponseEntity(ex)
+        } finally {
+            logPerformance("delete", startMs)
         }
     }
 
     @GetMapping
     fun getAll(): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = sponsorService.getAllDtos()
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
+            ResponseEntity.ok(sponsorService.getAll())
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            getExceptionResponseEntity(ex)
+        } finally {
+            logPerformance("getAll", startMs)
         }
     }
 
     @GetMapping("{id}")
     fun getById(@PathVariable id: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = sponsorService.getDtoById(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(sponsorService.getDtoById(id))
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            getExceptionResponseEntity(ex)
+        } finally {
+            logPerformance("getById", startMs)
+        }
+    }
 
-            ResponseEntity(
-                ex.message,
+    private fun getExceptionResponseEntity(ex: Exception): ResponseEntity<String> {
+        logger.error(ex.message, ex)
+
+        return ResponseEntity(
+                "Es trat ein unbekannter Fehler auf. Bitte wenden sie sich an ihren Administrator",
                 HttpStatus.BAD_REQUEST
-            )
+        )
+    }
+
+    private fun logPerformance(method: String, startMs: Long) {
+        if (logPerformance) {
+            val elapsedMs = System.currentTimeMillis() - startMs
+            logger.info("${PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING} $method took $elapsedMs ms")
         }
     }
 }
