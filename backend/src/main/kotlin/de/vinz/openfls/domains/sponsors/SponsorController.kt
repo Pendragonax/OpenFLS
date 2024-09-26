@@ -1,23 +1,20 @@
 package de.vinz.openfls.domains.sponsors
 
 import de.vinz.openfls.domains.sponsors.exceptions.InvalidSponsorDtoException
-import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.services.ExceptionResponseService
+import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/sponsors")
-class SponsorController(val sponsorService: SponsorService) {
+class SponsorController(val sponsorService: SponsorService,
+                        val performanceLoggingService: PerformanceLoggingService) {
 
     private val logger: Logger = LoggerFactory.getLogger(SponsorController::class.java)
-
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
 
     @PostMapping("")
     fun create(@Valid @RequestBody valueDto: SponsorDto): Any {
@@ -27,9 +24,9 @@ class SponsorController(val sponsorService: SponsorService) {
         return try {
             ResponseEntity.ok(sponsorService.create(valueDto))
         } catch (ex: Exception) {
-            getExceptionResponseEntity(ex)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
-            logPerformance("create", startMs)
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
@@ -47,9 +44,9 @@ class SponsorController(val sponsorService: SponsorService) {
         return try {
             ResponseEntity.ok(sponsorService.update(valueDto))
         } catch (ex: Exception) {
-            getExceptionResponseEntity(ex)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
-            logPerformance("update", startMs)
+            performanceLoggingService.logPerformance("update", startMs, logger)
         }
     }
 
@@ -67,9 +64,9 @@ class SponsorController(val sponsorService: SponsorService) {
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            getExceptionResponseEntity(ex)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
-            logPerformance("delete", startMs)
+            performanceLoggingService.logPerformance("delete", startMs, logger)
         }
     }
 
@@ -80,9 +77,9 @@ class SponsorController(val sponsorService: SponsorService) {
         return try {
             ResponseEntity.ok(sponsorService.getAll())
         } catch (ex: Exception) {
-            getExceptionResponseEntity(ex)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
-            logPerformance("getAll", startMs)
+            performanceLoggingService.logPerformance("getAll", startMs, logger)
         }
     }
 
@@ -94,25 +91,9 @@ class SponsorController(val sponsorService: SponsorService) {
         return try {
             ResponseEntity.ok(sponsorService.getDtoById(id))
         } catch (ex: Exception) {
-            getExceptionResponseEntity(ex)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
-            logPerformance("getById", startMs)
-        }
-    }
-
-    private fun getExceptionResponseEntity(ex: Exception): ResponseEntity<String> {
-        logger.error(ex.message, ex)
-
-        return ResponseEntity(
-                "Es trat ein unbekannter Fehler auf. Bitte wenden sie sich an ihren Administrator",
-                HttpStatus.BAD_REQUEST
-        )
-    }
-
-    private fun logPerformance(method: String, startMs: Long) {
-        if (logPerformance) {
-            val elapsedMs = System.currentTimeMillis() - startMs
-            logger.info("${PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING} $method took $elapsedMs ms")
+            performanceLoggingService.logPerformance("getById", startMs, logger)
         }
     }
 }
