@@ -18,7 +18,7 @@ import jakarta.persistence.*
 @Table(name = "services")
 data class Service(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
         @field:NotNull

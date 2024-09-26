@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## 1.3.1
+
+#### Bug
+- fix service auto increment
+
+
 ## 1.3.0
 
 #### Features
