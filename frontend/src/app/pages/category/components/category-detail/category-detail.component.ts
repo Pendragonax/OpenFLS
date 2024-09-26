@@ -128,12 +128,14 @@ export class CategoryDetailComponent extends DetailPageComponent<CategoryTemplat
   }
 
   openCategoryEditModal(content, categoryDto: CategoryDto | null) {
-    if (categoryDto != null)
-      this.editCategory = <CategoryDto> {...categoryDto}
+    if (categoryDto != null) {
+      this.editCategory = <CategoryDto>{...categoryDto}
+    }
     else {
       this.editCategory = new CategoryDto()
     }
 
+    this.editCategory.categoryTemplateId = this.value.id
     this.refreshCategoryForm();
 
     this.modalService

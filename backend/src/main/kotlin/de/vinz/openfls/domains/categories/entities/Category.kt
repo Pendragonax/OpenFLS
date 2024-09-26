@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.categories.entities
 
+import de.vinz.openfls.domains.categories.dtos.CategoryDto
 import de.vinz.openfls.domains.services.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
@@ -10,7 +11,7 @@ import jakarta.validation.constraints.Size
 data class Category(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long? = null,
+        var id: Long = 0,
 
         @field:NotEmpty(message = "Title is required.")
         @Column(length = 124)
@@ -33,13 +34,26 @@ data class Category(
         @ManyToMany(fetch = FetchType.LAZY, mappedBy = "categorys")
         var services: MutableSet<Service> = mutableSetOf()
 ) {
-        override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (other !is Category) return false
-                return id == other.id
-        }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Category) return false
+        return id == other.id
+    }
 
-        override fun hashCode(): Int {
-                return id?.hashCode() ?: 0
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+
+    companion object {
+        fun from(categoryDto: CategoryDto): Category {
+            return Category(
+                    id = categoryDto.id,
+                    title = categoryDto.title,
+                    shortcut = categoryDto.shortcut,
+                    description = categoryDto.description,
+                    faceToFace = categoryDto.faceToFace,
+                    categoryTemplate = CategoryTemplate(id = categoryDto.categoryTemplateId)
+            )
         }
+    }
 }

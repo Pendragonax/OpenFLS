@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
-import de.vinz.openfls.domains.categories.services.CategoryTemplateService
+import de.vinz.openfls.domains.categories.CategoryTemplateService
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
 import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.domains.institutions.InstitutionService
@@ -107,7 +107,7 @@ class ClientService(
         clientDto.assistancePlans =
                 clientDto.assistancePlans.sortedBy { it.start }.toTypedArray()
         clientDto.categoryTemplate.categories =
-                clientDto.categoryTemplate.categories.sortedBy { it.shortcut }.toTypedArray()
+                clientDto.categoryTemplate.categories.sortedBy { it.shortcut }
         return clientDto
     }
 }

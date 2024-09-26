@@ -1,73 +1,46 @@
 package de.vinz.openfls.domains.hourTypes
 
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
-import de.vinz.openfls.services.GenericService
-import org.springframework.stereotype.Service
 import jakarta.transaction.Transactional
-import org.modelmapper.ModelMapper
+import org.springframework.stereotype.Service
 
 @Service
-class HourTypeService(
-    private val hourTypeRepository: HourTypeRepository,
-    private val modelMapper: ModelMapper
-): GenericService<HourType> {
+class HourTypeService(private val hourTypeRepository: HourTypeRepository) {
 
     @Transactional
-    fun create(value: HourTypeDto): HourTypeDto {
-        val entity = create(modelMapper.map(value, HourType::class.java))
-        return modelMapper.map(entity, HourTypeDto::class.java)
-    }
-
-    @Transactional
-    override fun create(value: HourType): HourType {
-        return hourTypeRepository.save(value)
+    fun create(hourTypeDto: HourTypeDto): HourTypeDto {
+        val entity = hourTypeRepository.save(HourType.from(hourTypeDto))
+        return HourTypeDto.from(entity)
     }
 
     @Transactional
     fun update(hourTypeDto: HourTypeDto): HourTypeDto {
-        if (!hourTypeRepository.existsById(hourTypeDto.id))
-            throw IllegalArgumentException("Type of hour with id ${hourTypeDto.id} does not exists.")
-
-        val entity = hourTypeRepository.save(modelMapper.map(hourTypeDto, HourType::class.java))
-
-        return modelMapper.map(entity, HourTypeDto::class.java);
+        val entity = hourTypeRepository.save(HourType.from(hourTypeDto))
+        return HourTypeDto.from(entity)
     }
 
     @Transactional
-    override fun update(value: HourType): HourType {
-        if (!hourTypeRepository.existsById(value.id))
-            throw IllegalArgumentException("Type of hour with id ${value.id} does not exists.")
-
-        return hourTypeRepository.save(value)
-    }
-
-    @Transactional
-    override fun delete(id: Long) {
-        if (!hourTypeRepository.existsById(id))
-            throw IllegalArgumentException("Type of hour with id $id does not exists.")
-
+    fun delete(id: Long) {
         hourTypeRepository.deleteById(id)
     }
 
-    fun getAllDtos(): List<HourTypeDto> {
-        val entities = getAll()
+    @Transactional
+    fun getAll(): List<HourTypeDto> {
+        val entities = hourTypeRepository.findAll()
+                .toList()
                 .sortedBy { it.title.lowercase() }
-        return entities.map { modelMapper.map(it, HourTypeDto::class.java) }
-    }
-
-    override fun getAll(): List<HourType> {
-        return hourTypeRepository.findAll().toList()
+        return entities.map { HourTypeDto.from(it) }
     }
 
     fun getDtoById(id: Long): HourTypeDto? {
-        return modelMapper.map(hourTypeRepository.findById(id).orElse(null), HourTypeDto::class.java)
+        val entity = hourTypeRepository.findById(id).orElse(null)
+        return entity?.let { HourTypeDto.from(it) }
     }
 
-    override fun getById(id: Long): HourType? {
+    fun getById(id: Long): HourType? {
         return hourTypeRepository.findById(id).orElse(null)
     }
 
-    override fun existsById(id: Long): Boolean {
+    fun existsById(id: Long): Boolean {
         return hourTypeRepository.existsById(id)
     }
 }
