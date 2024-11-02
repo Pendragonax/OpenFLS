@@ -6,13 +6,12 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.evaluations.Evaluation
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.institutions.Institution
+import jakarta.persistence.*
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
-import jakarta.persistence.*
 
 @Entity
 @Table(name = "services")
@@ -35,7 +34,7 @@ data class Service(
         @Column(length = 1024)
         var content: String = "",
 
-        var group: Boolean = false,
+        var groupService: Boolean = false,
 
         var unfinished: Boolean = false,
 
@@ -89,5 +88,17 @@ data class Service(
 
         override fun hashCode(): Int {
                 return id.hashCode() ?: 0
+        }
+
+        override fun toString(): String {
+                return "Service(" +
+                        "id=$id," +
+                        "start=$start," +
+                        "end=$end," +
+                        "minutes=$minutes," +
+                        "title='$title'," +
+                        "content='$content'," +
+                        "group=$groupService," +
+                        "unfinished=$unfinished"
         }
 }

@@ -23,6 +23,7 @@ class ServiceService(
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
         entity.employee?.unprofessionals = null
+        println(entity.toString())
         return modelMapper.map(create(entity), ServiceDto::class.java)
     }
 

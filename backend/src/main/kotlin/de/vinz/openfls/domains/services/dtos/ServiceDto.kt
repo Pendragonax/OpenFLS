@@ -22,7 +22,7 @@ class ServiceDto {
 
     var unfinished: Boolean = false
 
-    var group: Boolean = false
+    var groupService: Boolean = false
 
     var minutes: Int = 0
 

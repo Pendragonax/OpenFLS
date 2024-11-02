@@ -11,7 +11,7 @@ interface ServiceWithEmployeeAndInstitutionProjection {
     val minutes: Int
     val title: String
     val content: String
-    val group: Boolean
+    val groupService: Boolean
     val employee: EmployeeSoloProjection
     val institution: InstitutionSoloProjection
 }
