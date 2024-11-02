@@ -255,9 +255,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   }
 
   getMonthName(month: number): string {
-    const date = new Date();
-    date.setMonth(month - 1);
-    return date.toLocaleString('de-DE', { month: 'long' });
+    return new Date(0, month - 1).toLocaleString('de-DE', { month: 'long' });
   }
 
   openPermissionInfoModal(event) {
