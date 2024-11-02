@@ -35,6 +35,8 @@ data class Service(
         @Column(length = 1024)
         var content: String = "",
 
+        var group: Boolean = false,
+
         var unfinished: Boolean = false,
 
         @JsonIgnoreProperties(value = ["services", "categoryTemplate", "assistancePlans", "institution", "hibernateLazyInitializer"])

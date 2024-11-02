@@ -1,0 +1,2 @@
+ALTER TABLE `services`
+    ADD COLUMN `group` BOOLEAN DEFAULT FALSE;

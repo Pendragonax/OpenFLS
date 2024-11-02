@@ -10,4 +10,5 @@ interface ServiceSoloProjection {
     val title: String
     val content: String
     val unfinished: Boolean
+    val group: Boolean
 }
