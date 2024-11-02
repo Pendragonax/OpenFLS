@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull
 @Table(name = "sponsors")
 class Sponsor(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
         @field:NotEmpty

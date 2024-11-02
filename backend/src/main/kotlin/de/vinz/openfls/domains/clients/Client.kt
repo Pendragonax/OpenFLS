@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotBlank
 @Entity
 class Client(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
         @field:NotBlank
