@@ -30,6 +30,9 @@ class AssistancePlanAnalysisService(
         if (sponsorId <= 0) {
             return getAnalysisByInstitutionAndHourTypeInMonth(year, month, institutionId, hourTypeId)
         }
+        if (hourTypeId > 0 && institutionId <= 0) {
+            return getAnalysisBySponsorAndHourTypeInMonth(year, month, sponsorId, hourTypeId)
+        }
 
         val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionIdSponsorId(year, month, institutionId, sponsorId)
         val analysis = getAnalysisByHourTypeIdInMonth(year, month, assistancePlans, hourTypeId)
@@ -51,10 +54,32 @@ class AssistancePlanAnalysisService(
             return getAnalysisByInstitutionInMonth(year, month, institutionId)
         }
         if (institutionId <= 0) {
-            return getAnalysisByInstitutionInMonth(year, month, institutionId)
+            return getAnalysisByHourTypeInMonth(year, month, hourTypeId)
         }
 
         val assistancePlans = assistancePlanService.getProjectionByYearMonthInstitutionId(year, month, institutionId)
+        val analysis = getAnalysisByHourTypeIdInMonth(year, month, assistancePlans, hourTypeId)
+
+        return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
+    }
+
+    fun getAnalysisBySponsorAndHourTypeInMonth(year: Int,
+                                               month: Int,
+                                               sponsorId: Long,
+                                               hourTypeId: Long): AssistancePlanAnalysisMonthCollectionDto {
+        validateTime(year, month)
+
+        if (hourTypeId <= 0 && sponsorId <= 0) {
+            return getAnalysisInMonth(year, month)
+        }
+        if (hourTypeId <= 0) {
+            return getAnalysisBySponsorInMonth(year, month, sponsorId)
+        }
+        if (sponsorId <= 0) {
+            return getAnalysisByHourTypeInMonth(year, month, hourTypeId)
+        }
+
+        val assistancePlans = assistancePlanService.getProjectionByYearMonthSponsorId(year, month, sponsorId)
         val analysis = getAnalysisByHourTypeIdInMonth(year, month, assistancePlans, hourTypeId)
 
         return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
@@ -72,6 +97,19 @@ class AssistancePlanAnalysisService(
 
         val assistancePlans = assistancePlanService.getProjectionByYearMonth(year, month)
         val analysis = getAnalysisByHourTypeIdInMonth(year, month, assistancePlans, hourTypeId)
+
+        return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
+    }
+
+    fun getAnalysisBySponsorInMonth(year: Int,
+                                    month: Int,
+                                    sponsorId: Long): AssistancePlanAnalysisMonthCollectionDto {
+        if (sponsorId <= 0) {
+            return getAnalysisInMonth(year, month)
+        }
+
+        val assistancePlans = assistancePlanService.getProjectionByYearMonthSponsorId(year, month, sponsorId)
+        val analysis = getAnalysisInMonth(year, month, assistancePlans)
 
         return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
     }

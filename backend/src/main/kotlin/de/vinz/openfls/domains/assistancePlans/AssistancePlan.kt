@@ -14,7 +14,7 @@ import jakarta.persistence.*
 @Table(name = "assistance_plans")
 class AssistancePlan(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,  // Defaultwert, wird von Hibernate überschrieben
 
         var start: LocalDate = LocalDate.now(),

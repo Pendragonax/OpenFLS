@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotEmpty
 @Table(name = "goals")
 class Goal(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
         @field:NotEmpty(message = "title needed")

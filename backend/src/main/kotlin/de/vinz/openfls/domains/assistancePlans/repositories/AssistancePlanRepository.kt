@@ -19,6 +19,13 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                                     end: LocalDate): List<AssistancePlanProjection>
 
     @Query("SELECT u FROM AssistancePlan u " +
+            "WHERE u.sponsor.id = :sponsorId " +
+            "AND (:end >= u.start AND :start <= u.end)")
+    fun findProjectionBySponsorIdAndStartAndEnd(sponsorId: Long,
+                                                start: LocalDate,
+                                                end: LocalDate): List<AssistancePlanProjection>
+
+    @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId " +
             "AND (:end >= u.start AND :start <= u.end)")
     fun findProjectionByInstitutionIdAndStartAndEnd(institutionId: Long,

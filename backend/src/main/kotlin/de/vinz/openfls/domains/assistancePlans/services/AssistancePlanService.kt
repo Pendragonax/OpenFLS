@@ -230,6 +230,15 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByStartAndEnd(start, end)
     }
 
+    fun getProjectionByYearMonthSponsorId(year: Int,
+                                          month: Int,
+                                          sponsorId: Long): List<AssistancePlanProjection> {
+        val start = LocalDate.of(year, month, 1)
+        val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+        return assistancePlanRepository.findProjectionBySponsorIdAndStartAndEnd(sponsorId, start, end)
+    }
+
     fun getProjectionByYearMonthInstitutionId(year: Int,
                                               month: Int,
                                               institutionId: Long): List<AssistancePlanProjection> {
