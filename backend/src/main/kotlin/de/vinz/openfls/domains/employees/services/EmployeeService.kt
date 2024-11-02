@@ -150,11 +150,8 @@ class EmployeeService(
     fun updateRole(id: Long, role: Int): EmployeeDto {
         // load employee
         val employee = employeeRepository.findById(id).get()
-        employee.access?.role = role
-
-        employeeRepository.save(employee)
-
-        employee.access?.password = ""
+        employee.access?.password = "password"
+        employeeAccessRepository.changeRole(id, role)
 
         return modelMapper.map(
                 employee,
