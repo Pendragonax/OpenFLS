@@ -8,6 +8,7 @@ export class Service {
   minutes: number = 0;
   title: string = "";
   content: string = "";
+  groupOffer: boolean = false;
   institution: InstitutionSoloDto = new InstitutionSoloDto();
   employee: EmployeeSolo = new EmployeeSolo();
   client: ClientSolo = new ClientSolo();
