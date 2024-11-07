@@ -1,19 +1,17 @@
 package de.vinz.openfls.domains.overviews
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDTO
-import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
-import de.vinz.openfls.exceptions.IllegalTimeException
-import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientRepository
-import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
+import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDTO
 import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.exceptions.IllegalTimeException
+import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
 import org.modelmapper.ModelMapper
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -28,7 +26,6 @@ class OverviewService(
 ) {
 
     private val monthCount = 12
-    private val logger: Logger = LoggerFactory.getLogger(OverviewService::class.java)
 
 
     @Throws(UserNotAllowedException::class, IllegalTimeException::class)
@@ -41,7 +38,7 @@ class OverviewService(
         sponsorId: Long?
     ): List<AssistancePlanOverviewDTO> {
         checkAccess(areaId)
-        checkTime(year, month)
+        checkYearMonth(year, month)
 
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) };
 
@@ -68,7 +65,7 @@ class OverviewService(
         sponsorId: Long?
     ): List<AssistancePlanOverviewDTO> {
         checkAccess(areaId)
-        checkTime(year, month)
+        checkYearMonth(year, month)
 
         val services = getServices(
             year = year,
@@ -80,6 +77,7 @@ class OverviewService(
 
         return getExecutedHoursOverview(services, year, month, hourTypeId, areaId, sponsorId)
     }
+
     fun getExecutedHoursGroupServiceOverview(
         year: Int,
         month: Int?,
@@ -88,7 +86,7 @@ class OverviewService(
         sponsorId: Long?
     ): List<AssistancePlanOverviewDTO> {
         checkAccess(areaId)
-        checkTime(year, month)
+        checkYearMonth(year, month)
 
         val services = getServices(
             year = year,
@@ -96,7 +94,7 @@ class OverviewService(
             hourTypeId = hourTypeId,
             areaId = areaId,
             sponsorId = sponsorId,
-            groupServiceFilter = true
+            onlyGroupServices = true
         )
 
         return getExecutedHoursOverview(services, year, month, hourTypeId, areaId, sponsorId)
@@ -111,7 +109,7 @@ class OverviewService(
         sponsorId: Long?
     ): List<AssistancePlanOverviewDTO> {
         checkAccess(areaId)
-        checkTime(year, month)
+        checkYearMonth(year, month)
 
         val clientSimpleDTOs = clientRepository.findAll().map { modelMapper.map(it, ClientSimpleDto::class.java) }
 
@@ -138,7 +136,7 @@ class OverviewService(
         sponsorId: Long?
     ): List<AssistancePlanOverviewDTO> {
         checkAccess(areaId)
-        checkTime(year, month)
+        checkYearMonth(year, month)
 
         val services = getServices(
             year = year,
@@ -163,7 +161,7 @@ class OverviewService(
         return getDifferenceHoursYearly(services, assistancePlanDTOs, clientSimpleDTOs, hourTypeId, year)
     }
 
-    private fun getApprovedHoursMonthly(
+    internal fun getApprovedHoursMonthly(
         assistancePlanDTOs: List<AssistancePlanDto>,
         clientSimpleDTOs: List<ClientSimpleDto>,
         hourTypeId: Long?,
@@ -171,45 +169,43 @@ class OverviewService(
         month: Int,
         toTimeDouble: Boolean = true
     ): List<AssistancePlanOverviewDTO> {
+
         val daysInMonth = YearMonth.of(year, month).lengthOfMonth()
         val assistancePlanOverviewDTOs =
-            getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientSimpleDTOs, daysInMonth)
-        val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
-        allAssistancePlanOverviewDTO.assistancePlanDto.start =
-            LocalDate.of(year, month, 1)
-        allAssistancePlanOverviewDTO.assistancePlanDto.end =
-            LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+            getAssistancePlanOverviewDTOsWithoutValues(assistancePlanDTOs, clientSimpleDTOs, daysInMonth)
 
-        assistancePlanDTOs.forEach { assistancePlanDto ->
-            val assistancePlanOverviewDTO =
-                assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == assistancePlanDto.id }
-            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId)
+        // Set date range for the aggregated "all" DTO at the beginning of the list
+        val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs.first().apply {
+            assistancePlanDto.start = LocalDate.of(year, month, 1)
+            assistancePlanDto.end = assistancePlanDto.start.plusMonths(1).minusDays(1)
+        }
 
-            if (assistancePlanOverviewDTO != null) {
-                for (i in 1..daysInMonth) {
-                    if (DateService.isDateInAssistancePlan(
-                            LocalDate.of(year, month, i), assistancePlanDto
-                        )
-                    ) {
-                        assistancePlanOverviewDTO.values[0] += hoursPerDay
-                        assistancePlanOverviewDTO.values[i] = hoursPerDay
+        // Populate values for each assistance plan
+        assistancePlanDTOs.forEach { planDto ->
+            val overviewDTO =
+                assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == planDto.id } ?: return@forEach
+            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(planDto, hourTypeId)
 
-                        allAssistancePlanOverviewDTO.values[0] += hoursPerDay
-                        allAssistancePlanOverviewDTO.values[i] += hoursPerDay
-                    } else {
-                        assistancePlanOverviewDTO.values[i] = 0.0
-                    }
+            (1..daysInMonth).forEach { day ->
+                val date = LocalDate.of(year, month, day)
+                if (DateService.isDateInAssistancePlan(date, planDto)) {
+                    overviewDTO.values[0] += hoursPerDay
+                    overviewDTO.values[day] = hoursPerDay
+                    allAssistancePlanOverviewDTO.values[0] += hoursPerDay
+                    allAssistancePlanOverviewDTO.values[day] += hoursPerDay
+                } else {
+                    overviewDTO.values[day] = 0.0
                 }
             }
         }
 
-        // convert to minute double
+        // Optional conversion to minute double values
         if (toTimeDouble) convertDoubleToMinuteDouble(assistancePlanOverviewDTOs)
 
-        return assistancePlanOverviewDTOs;
+        return assistancePlanOverviewDTOs
     }
 
-    private fun getApprovedHoursYearly(
+    internal fun getApprovedHoursYearly(
         assistancePlanDTOs: List<AssistancePlanDto>,
         clientSimpleDTOs: List<ClientSimpleDto>,
         hourTypeId: Long?,
@@ -217,7 +213,7 @@ class OverviewService(
         toTimeDouble: Boolean = true
     ): List<AssistancePlanOverviewDTO> {
         val assistancePlanOverviewDTOs =
-            getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientSimpleDTOs, monthCount)
+            getAssistancePlanOverviewDTOsWithoutValues(assistancePlanDTOs, clientSimpleDTOs, monthCount)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
         assistancePlanDTOs.forEach { assistancePlanDto ->
@@ -244,14 +240,15 @@ class OverviewService(
         return assistancePlanOverviewDTOs;
     }
 
-    private fun getExecutedHoursYearly(
+    internal fun getExecutedHoursYearly(
         services: List<de.vinz.openfls.domains.services.Service>,
         assistancePlanDTOs: List<AssistancePlanDto>,
         clientDTOs: List<ClientSimpleDto>,
         year: Int,
         toTimeDouble: Boolean = true
     ): List<AssistancePlanOverviewDTO> {
-        val assistancePlanOverviewDTOs = getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientDTOs, monthCount)
+        val assistancePlanOverviewDTOs =
+            getAssistancePlanOverviewDTOsWithoutValues(assistancePlanDTOs, clientDTOs, monthCount)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
         allAssistancePlanOverviewDTO.assistancePlanDto.start = LocalDate.of(year, 1, 1)
         allAssistancePlanOverviewDTO.assistancePlanDto.end = LocalDate.of(year, 12, 31)
@@ -275,7 +272,7 @@ class OverviewService(
         return assistancePlanOverviewDTOs
     }
 
-    private fun getExecutedHoursMonthly(
+    internal fun getExecutedHoursMonthly(
         services: List<de.vinz.openfls.domains.services.Service>,
         assistancePlanDTOs: List<AssistancePlanDto>,
         clientDTOs: List<ClientSimpleDto>,
@@ -284,7 +281,8 @@ class OverviewService(
         toTimeDouble: Boolean = true
     ): List<AssistancePlanOverviewDTO> {
         val daysInMonth = YearMonth.of(year, month).lengthOfMonth();
-        val assistancePlanOverviewDTOs = getAssistancePlanOverviewDTOS(assistancePlanDTOs, clientDTOs, daysInMonth)
+        val assistancePlanOverviewDTOs =
+            getAssistancePlanOverviewDTOsWithoutValues(assistancePlanDTOs, clientDTOs, daysInMonth)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
         services.forEach { service ->
@@ -306,7 +304,7 @@ class OverviewService(
         return assistancePlanOverviewDTOs
     }
 
-    private fun getDifferenceHoursYearly(
+    internal fun getDifferenceHoursYearly(
         services: List<de.vinz.openfls.domains.services.Service>,
         assistancePlanDTOs: List<AssistancePlanDto>,
         clientSimpleDTOs: List<ClientSimpleDto>,
@@ -324,7 +322,7 @@ class OverviewService(
         return subtractApprovedFromExecutedOverview(executedOverviewDTOs, approvedOverviewDTOs, toTimeDouble)
     }
 
-    private fun getDifferenceHoursMonthly(
+    internal fun getDifferenceHoursMonthly(
         services: List<de.vinz.openfls.domains.services.Service>,
         assistancePlanDTOs: List<AssistancePlanDto>,
         clientSimpleDTOs: List<ClientSimpleDto>,
@@ -343,7 +341,7 @@ class OverviewService(
         return subtractApprovedFromExecutedOverview(executedOverviewDTOs, approvedOverviewDTOs, toTimeDouble)
     }
 
-    private fun subtractApprovedFromExecutedOverview(
+    internal fun subtractApprovedFromExecutedOverview(
         executedOverviewDTOs: List<AssistancePlanOverviewDTO>,
         approvedOverviewDTOs: List<AssistancePlanOverviewDTO>,
         toTimeDouble: Boolean
@@ -365,7 +363,7 @@ class OverviewService(
         return executedOverviewDTOs
     }
 
-    private fun convertDoubleToMinuteDouble(assistancePlanOverviewDTOs: List<AssistancePlanOverviewDTO>) {
+    internal fun convertDoubleToMinuteDouble(assistancePlanOverviewDTOs: List<AssistancePlanOverviewDTO>) {
         assistancePlanOverviewDTOs.forEach { assistancePlanOverviewDTO ->
             assistancePlanOverviewDTO.values[0] = 0.0
             for (i in 1 until assistancePlanOverviewDTO.values.size) {
@@ -380,7 +378,7 @@ class OverviewService(
         }
     }
 
-    private fun convertMinutesValuesToHourValues(
+    internal fun convertMinutesValuesToHourValues(
         assistancePlanOverviewDTOs: List<AssistancePlanOverviewDTO>,
         toTimeDouble: Boolean = true
     ) {
@@ -393,188 +391,142 @@ class OverviewService(
         }
     }
 
-    private fun getAssistancePlans(
+    internal fun getAssistancePlans(
         year: Int,
         month: Int?,
         institutionId: Long?,
         sponsorId: Long?
     ): List<AssistancePlanDto> {
-        if (institutionId != null && sponsorId != null) {
-            return if (month == null) {
-                assistancePlanRepository
-                    .findByInstitutionIdAndSponsorIdAndYear(institutionId, sponsorId, year)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-            } else {
-                assistancePlanRepository
-                    .findByInstitutionIdAndSponsorIdAndYear(institutionId, sponsorId, year)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-                    .filter {
-                        DateService.containsStartAndEndASpecificYearMonth(
-                            it.start,
-                            it.end,
-                            YearMonth.of(year, month)
-                        )
-                    }
-            }
-        } else if (institutionId != null) {
-            return if (month == null) {
-                assistancePlanRepository
-                    .findByInstitutionIdAndYear(institutionId, year)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-            } else {
-                assistancePlanRepository
-                    .findByInstitutionIdAndYear(institutionId, year)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-                    .filter {
-                        DateService.containsStartAndEndASpecificYearMonth(
-                            it.start,
-                            it.end,
-                            YearMonth.of(year, month)
-                        )
-                    }
-            }
-        } else if (sponsorId != null) {
-            return if (month == null) {
-                assistancePlanRepository
-                    .findBySponsorIdAndYear(sponsorId, year)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-            } else {
-                assistancePlanRepository
-                    .findBySponsorIdAndYear(sponsorId, year)
-                    .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-                    .filter {
-                        DateService.containsStartAndEndASpecificYearMonth(
-                            it.start,
-                            it.end,
-                            YearMonth.of(year, month)
-                        )
-                    }
-            }
+        val plans = when {
+            institutionId != null && sponsorId != null ->
+                assistancePlanRepository.findByInstitutionIdAndSponsorIdAndYear(institutionId, sponsorId, year)
+
+            institutionId != null ->
+                assistancePlanRepository.findByInstitutionIdAndYear(institutionId, year)
+
+            sponsorId != null ->
+                assistancePlanRepository.findBySponsorIdAndYear(sponsorId, year)
+
+            else ->
+                assistancePlanRepository.findAllByYear(year).toList()
         }
 
-        return if (month == null) {
-            assistancePlanRepository
-                .findAllByYear(year).toList()
-                .map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        val mappedPlans = plans.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+
+        return if (month != null) {
+            mappedPlans.filter {
+                DateService.containsStartAndEndASpecificYearMonth(
+                    it.start,
+                    it.end,
+                    YearMonth.of(year, month)
+                )
+            }
         } else {
-            assistancePlanRepository
-                .findAllByYear(year).toList()
-                .map { modelMapper.map(it, AssistancePlanDto::class.java) }
-                .filter {
-                    DateService.containsStartAndEndASpecificYearMonth(
-                        it.start,
-                        it.end,
-                        YearMonth.of(year, month)
-                    )
-                }
+            mappedPlans
         }
     }
 
-    private fun getServices(
+    internal fun getServices(
         year: Int,
         month: Int?,
         hourTypeId: Long,
         areaId: Long?,
         sponsorId: Long?,
-        groupServiceFilter: Boolean = false
+        onlyGroupServices: Boolean = false
     ): List<de.vinz.openfls.domains.services.Service> {
-        val services: List<de.vinz.openfls.domains.services.Service>
-        if (month == null) {
-            if (areaId != null && sponsorId != null) {
-                services = serviceRepository
-                    .findServiceByYearByHourTypeIdAndAreaIdAndSponsorId(
-                        year = year,
-                        hourTypeId = hourTypeId,
-                        areaId = areaId,
-                        sponsorId = sponsorId
-                    )
-            } else if (areaId != null) {
-                services = serviceRepository
-                    .findServiceByYearByHourTypeIdAndAreaId(
-                        year = year,
-                        hourTypeId = hourTypeId,
-                        areaId = areaId
-                    )
-            } else if (sponsorId != null) {
-                services = serviceRepository
-                    .findServiceByYearByHourTypeIdAndSponsorId(
-                        year = year,
-                        hourTypeId = hourTypeId,
-                        sponsorId = sponsorId
-                    )
-            } else {
-                services = serviceRepository
-                    .findServiceByYearByHourTypeId(
-                        year = year,
-                        hourTypeId = hourTypeId
-                    )
-            }
+        val services = when {
+            areaId != null && sponsorId != null && month != null ->
+                serviceRepository.findServiceByYearAndMonthAndHourTypeIdAndAreaIdAndSponsorId(
+                    year = year,
+                    month = month,
+                    hourTypeId = hourTypeId,
+                    areaId = areaId,
+                    sponsorId = sponsorId
+                )
+
+            areaId != null && sponsorId != null ->
+                serviceRepository.findServiceByYearByHourTypeIdAndAreaIdAndSponsorId(
+                    year = year,
+                    hourTypeId = hourTypeId,
+                    areaId = areaId,
+                    sponsorId = sponsorId
+                )
+
+            areaId != null && month != null ->
+                serviceRepository.findServiceByYearAndMonthAndHourTypeIdAndAreaId(
+                    year = year,
+                    month = month,
+                    hourTypeId = hourTypeId,
+                    areaId = areaId
+                )
+
+            sponsorId != null && month != null ->
+                serviceRepository.findServiceByYearAndMonthAndHourTypeIdAndSponsorId(
+                    year = year,
+                    month = month,
+                    hourTypeId = hourTypeId,
+                    sponsorId = sponsorId
+                )
+
+            areaId != null ->
+                serviceRepository.findServiceByYearByHourTypeIdAndAreaId(
+                    year = year,
+                    hourTypeId = hourTypeId,
+                    areaId = areaId
+                )
+
+            sponsorId != null ->
+                serviceRepository.findServiceByYearByHourTypeIdAndSponsorId(
+                    year = year,
+                    hourTypeId = hourTypeId,
+                    sponsorId = sponsorId
+                )
+
+            month != null ->
+                serviceRepository.findServiceByYearAndMonthAndHourTypeId(
+                    year = year,
+                    month = month,
+                    hourTypeId = hourTypeId
+                )
+
+            else ->
+                serviceRepository.findServiceByYearByHourTypeId(
+                    year = year,
+                    hourTypeId = hourTypeId
+                )
+        }
+
+        // Filter for group service if needed
+        return if (onlyGroupServices) {
+            services.filter { it.groupService }
         } else {
-            if (areaId != null && sponsorId != null) {
-                services = serviceRepository
-                    .findServiceByYearAndMonthAndHourTypeIdAndAreaIdAndSponsorId(
-                        year = year,
-                        month = month,
-                        hourTypeId = hourTypeId,
-                        areaId = areaId,
-                        sponsorId = sponsorId
-                    )
-            } else if (areaId != null) {
-                services = serviceRepository
-                    .findServiceByYearAndMonthAndHourTypeIdAndAreaId(
-                        year = year,
-                        month = month,
-                        hourTypeId = hourTypeId,
-                        areaId = areaId
-                    )
-            } else if (sponsorId != null) {
-                services = serviceRepository
-                    .findServiceByYearAndMonthAndHourTypeIdAndSponsorId(
-                        year = year,
-                        month = month,
-                        hourTypeId = hourTypeId,
-                        sponsorId = sponsorId
-                    )
-            } else {
-                services = serviceRepository
-                    .findServiceByYearAndMonthAndHourTypeId(
-                        year = year,
-                        month = month,
-                        hourTypeId = hourTypeId
-                    )
-            }
+            services
         }
-
-        if (groupServiceFilter) {
-            return services.filter { it.groupService }
-        }
-
-        return services
     }
 
-    private fun getAssistancePlanOverviewDTOS(
+    internal fun getAssistancePlanOverviewDTOsWithoutValues(
         assistancePlanDTOs: List<AssistancePlanDto>,
         clientDTOs: List<ClientSimpleDto>,
         valuesCount: Int
     ): MutableList<AssistancePlanOverviewDTO> {
-        val allClient = ClientSimpleDto()
-        allClient.lastName = "Gesamt"
 
-        val result = assistancePlanDTOs
-            .map {
-                AssistancePlanOverviewDTO(it,
-                    clientDTOs.find { client -> client.id == it.clientId } ?: throw IllegalArgumentException(),
-                    DoubleArray(valuesCount + 1) { 0.0 })
-            }
-            .sortedBy { it.clientDto.lastName }
+        val allClient = ClientSimpleDto().apply { lastName = "Gesamt" }
+        val defaultValuesArray = DoubleArray(valuesCount + 1) { 0.0 }
+
+        val result = assistancePlanDTOs.map { plan ->
+            val client = clientDTOs.find { it.id == plan.clientId }
+                ?: throw IllegalArgumentException("Client with ID ${plan.clientId} not found")
+
+            AssistancePlanOverviewDTO(plan, client, defaultValuesArray.copyOf())
+        }.sortedBy { it.clientDto.lastName }
             .toMutableList()
 
-        result.add(0, AssistancePlanOverviewDTO(AssistancePlanDto(), allClient, DoubleArray(valuesCount + 1) { 0.0 }))
+        result.add(0, AssistancePlanOverviewDTO(AssistancePlanDto(), allClient, defaultValuesArray))
 
-        return result;
+        return result
     }
 
-    private fun getDailyHoursOfAssistancePlanByHourType(
+    internal fun getDailyHoursOfAssistancePlanByHourType(
         assistancePlanDto: AssistancePlanDto,
         hourTypeId: Long?
     ): Double =
@@ -592,7 +544,7 @@ class OverviewService(
         }
 
     @Throws(IllegalTimeException::class)
-    private fun checkTime(year: Int, month: Int?) {
+    internal fun checkYearMonth(year: Int, month: Int?) {
         if (year < 0) {
             throw IllegalTimeException("Year is below 0")
         }
@@ -605,7 +557,7 @@ class OverviewService(
     }
 
     @Throws(UserNotAllowedException::class)
-    private fun checkAccess(areaId: Long?) {
+    internal fun checkAccess(areaId: Long?) {
         if (areaId == null && !accessService.isAdmin()) {
             throw UserNotAllowedException()
         }
