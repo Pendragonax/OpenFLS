@@ -2,160 +2,93 @@ package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
+import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
-import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.services.TimeDoubleService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import java.lang.IllegalArgumentException
-import java.sql.Time
 import java.time.LocalDate
 
 @Service
 class ContingentService(
     private val contingentRepository: ContingentRepository,
+    private val accessService: AccessService,
     @Value("\${openfls.general.workdays.real}") private val workdaysReal: Long,
     @Value("\${openfls.general.workdays.assumption}") private val workdaysAssumption: Long,
-) : GenericService<Contingent> {
+) {
 
-    private val logger: Logger = LoggerFactory.getLogger(ContingentService::class.java)
-
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
-    override fun create(value: Contingent): Contingent {
-        // performance
-        val startMs = System.currentTimeMillis()
-
-        val entity = contingentRepository.save(value)
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
+    @Transactional
+    fun create(contingentDto: ContingentDto): ContingentDto {
+        if (contingentDto.end != null && contingentDto.start >= contingentDto.end) {
+            throw IllegalArgumentException("end before start")
         }
 
-        return entity
+        val entity = contingentRepository.save(Contingent.from(contingentDto))
+        return ContingentDto.from(entity)
     }
 
-    override fun update(value: Contingent): Contingent {
-        // performance
-        val startMs = System.currentTimeMillis()
+    @Transactional
+    fun update(contingentDto: ContingentDto): ContingentDto {
+        if (!existsById(contingentDto.id))
+            throw IllegalArgumentException("contingent not found")
+        if (contingentDto.end != null && contingentDto.start >= contingentDto.end)
+            throw IllegalArgumentException("end before start")
 
-        if (!contingentRepository.existsById(value.id ?: 0))
-            throw IllegalArgumentException("id not found")
-
-        val entity = contingentRepository.save(value)
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        val entity = contingentRepository.save(Contingent.from(contingentDto))
+        return ContingentDto.from(entity)
     }
 
-    override fun delete(id: Long) {
-        // performance
-        val startMs = System.currentTimeMillis()
+    @Transactional
+    fun delete(id: Long) {
+        if (!existsById(id))
+            throw IllegalArgumentException("contingent not found")
 
-        val entity = contingentRepository.deleteById(id)
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        contingentRepository.deleteById(id)
     }
 
-    override fun getAll(): List<Contingent> {
-        // performance
-        val startMs = System.currentTimeMillis()
-
-        val entities = contingentRepository.findAll().toList()
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entities
+    fun getAll(): List<ContingentDto> {
+        val entities = contingentRepository.findAll()
+        return entities.map { ContingentDto.from(it) }
+            .sortedBy { it.start }
     }
 
     fun getAllByInstitutionAndYear(institutionId: Long, year: Int): List<ContingentProjection> {
         return contingentRepository.findByInstitutionIdAndStartAndEnd(
-                institutionId,
-                LocalDate.of(year, 1, 1),
-                LocalDate.of(year, 12, 31))
+            institutionId,
+            LocalDate.of(year, 1, 1),
+            LocalDate.of(year, 12, 31)
+        )
     }
 
-    override fun getById(id: Long): Contingent? {
-        // performance
-        val startMs = System.currentTimeMillis()
-
+    fun getById(id: Long): ContingentDto? {
         val entity = contingentRepository.findByIdOrNull(id)
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+        return entity?.let { ContingentDto.from(it) }
     }
 
-    override fun existsById(id: Long): Boolean {
-        // performance
-        val startMs = System.currentTimeMillis()
-
-        val entity = contingentRepository.existsById(id)
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entity
+    fun getDtoById(id: Long): ContingentDto? {
+        val entity = contingentRepository.findByIdOrNull(id)
+        return if (entity == null) null else ContingentDto.from(entity)
     }
 
-    fun getByEmployeeId(id: Long): List<Contingent> {
-        // performance
-        val startMs = System.currentTimeMillis()
+    fun existsById(id: Long): Boolean {
+        return contingentRepository.existsById(id)
+    }
 
+    @Transactional
+    fun getByEmployeeId(id: Long): List<ContingentDto> {
         val entities = contingentRepository.findAllByEmployeeId(id)
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entities
+        return entities.map { ContingentDto.from(it) }
+            .sortedBy { it.employeeId }
     }
 
-    fun getByInstitutionId(id: Long): List<Contingent> {
-        // performance
-        val startMs = System.currentTimeMillis()
-
+    fun getByInstitutionId(id: Long): List<ContingentDto> {
         val entities = contingentRepository.findAllByInstitutionId(id)
-
-        if (logPerformance) {
-            logger.info(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
-
-        return entities
+        return entities.map { ContingentDto.from(it) }
+            .sortedBy { it.institutionId }
     }
 
     fun getContingentHoursByYear(year: Int, contingents: List<ContingentProjection>): List<Double> {
@@ -163,16 +96,20 @@ class ContingentService(
 
         for (contingent in contingents) {
             val workdayDailyHours = TimeDoubleService.convertTimeDoubleToDouble(contingent.weeklyServiceHours) / 5
-            val workdays = DateService.countDaysOfYearBetweenStartAndEnd(year, contingent.start, contingent.end) * 5.0 / 7.0
+            val workdays =
+                DateService.countDaysOfYearBetweenStartAndEnd(year, contingent.start, contingent.end) * 5.0 / 7.0
             val workdaysWithoutVacationInContingent = workdays * (workdaysAssumption.toDouble() / workdaysReal)
             for (month in 1..12) {
                 monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
-                        monthlyHours[month],
-                        getContingentHoursByYearAndMonth(year, month, contingent))
+                    monthlyHours[month],
+                    getContingentHoursByYearAndMonth(year, month, contingent)
+                )
             }
 
-            monthlyHours[0] = TimeDoubleService.sumTimeDoubles(monthlyHours[0],
-                    TimeDoubleService.convertDoubleToTimeDouble(workdayDailyHours * workdaysWithoutVacationInContingent))
+            monthlyHours[0] = TimeDoubleService.sumTimeDoubles(
+                monthlyHours[0],
+                TimeDoubleService.convertDoubleToTimeDouble(workdayDailyHours * workdaysWithoutVacationInContingent)
+            )
         }
 
         return monthlyHours
@@ -190,7 +127,8 @@ class ContingentService(
             monthlyHours.add(getContingentHoursByYearAndMonth(year, month, contingent))
         }
 
-        monthlyHours[0] = TimeDoubleService.convertDoubleToTimeDouble(workdayDailyHours * workdaysWithoutVacationInContingent)
+        monthlyHours[0] =
+            TimeDoubleService.convertDoubleToTimeDouble(workdayDailyHours * workdaysWithoutVacationInContingent)
 
         return monthlyHours
     }
@@ -212,5 +150,20 @@ class ContingentService(
 
         return (contingent.start <= end) &&
                 ((contingent.end?.let { it >= start } ?: true))
+    }
+
+
+    fun canModifyContingent(contingentId: Long): Boolean {
+        return try {
+            // ADMIN
+            if (accessService.isAdmin())
+                return true
+
+            val institutionId = getById(contingentId)?.institutionId ?: 0
+
+            accessService.isLeader(accessService.getId(), institutionId)
+        } catch (ex: Exception) {
+            false
+        }
     }
 }

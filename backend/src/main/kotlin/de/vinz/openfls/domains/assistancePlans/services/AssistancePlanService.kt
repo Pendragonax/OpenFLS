@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
+import de.vinz.openfls.domains.hourTypes.HourTypeDto
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.services.ServiceService
 import de.vinz.openfls.domains.sponsors.SponsorService

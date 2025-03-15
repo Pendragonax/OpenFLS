@@ -1,158 +1,102 @@
 package de.vinz.openfls.domains.hourTypes
 
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDto
-import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.domains.hourTypes.exceptions.InvalidHourTypeDtoException
+import de.vinz.openfls.services.ExceptionResponseService
+import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/hour_types")
-class HourTypeController(
-        private val hourTypeService: HourTypeService
-) {
+class HourTypeController(private val hourTypeService: HourTypeService,
+                         private val performanceLoggingService: PerformanceLoggingService) {
 
     private val logger: Logger = LoggerFactory.getLogger(HourTypeController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping
     fun create(@Valid @RequestBody value: HourTypeDto): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        if (value.id > 0)
+            throw InvalidHourTypeDtoException("id is not 0")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = hourTypeService.create(value)
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(hourTypeService.create(value))
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
                @Valid @RequestBody valueDto: HourTypeDto): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        if (id != valueDto.id)
+            throw InvalidHourTypeDtoException("path id and dto id are not the same")
+        if (!hourTypeService.existsById(id))
+            throw InvalidHourTypeDtoException("Type of hour with id $id does not exists.")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (id != valueDto.id)
-                throw java.lang.IllegalArgumentException("path id and dto id are not the same")
-            if (!hourTypeService.existsById(id))
-                throw IllegalArgumentException("hour type not found")
-
-            val dto = hourTypeService.update(valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(hourTypeService.update(valueDto))
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("update", startMs, logger)
         }
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        if (!hourTypeService.existsById(id))
+            throw InvalidHourTypeDtoException("Type of hour with id $id does not exists.")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!hourTypeService.existsById(id))
-                throw IllegalArgumentException("hour type not found")
-
             val dto = hourTypeService.getDtoById(id)
             hourTypeService.delete(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("delete", startMs, logger)
         }
     }
 
     @GetMapping
     fun getAll(): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = hourTypeService.getAllDtos()
-
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
+            ResponseEntity.ok(hourTypeService.getAll())
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getAll", startMs, logger)
         }
     }
 
     @GetMapping("{id}")
     fun getById(@PathVariable id: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = hourTypeService.getDtoById(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(hourTypeService.getDtoById(id))
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getById", startMs, logger)
         }
     }
 }
