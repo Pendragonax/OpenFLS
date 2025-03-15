@@ -1,4 +1,13 @@
-import {AfterViewInit, Component, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import {MatTableDataSource} from "@angular/material/table";
 import {MatSort} from "@angular/material/sort";
 import {Service} from "../../dtos/service.projection";
@@ -8,6 +17,7 @@ import {UserService} from "../../services/user.service";
 import {ReplaySubject} from "rxjs";
 import {CsvService} from "../../services/csv.service";
 import {ServiceExport} from "./model/service-export.model";
+import {ServiceService} from "../../services/service.service";
 
 @Component({
   selector: 'app-service-table',
@@ -19,6 +29,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   @Input() editMode: boolean = false;
   @Input() adminMode: boolean = true;
   @Input() redRows: boolean = false;
+  @Output() tableUpdated = new EventEmitter();
 
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -46,6 +57,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
 
   constructor(private modalService: NgbModal,
               private userService: UserService,
+              private serviceService: ServiceService,
               private csvService: CsvService) {
     this.userService.isAdmin$.subscribe(value => this.isAdmin$.next(value))
   }
@@ -141,7 +153,10 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
       .result
       .then((result: Boolean) => {
         if (result)
-          console.log(value)
+          this.serviceService.delete(+value).subscribe({
+            next: () => this.tableUpdated.emit(),
+            error: () => console.log("Fehler beim speichern")
+          });
       })
   }
 
