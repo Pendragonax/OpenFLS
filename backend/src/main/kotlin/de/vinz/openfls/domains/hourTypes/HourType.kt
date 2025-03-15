@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull
 @Table(name = "hour_types")
 class HourType(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
         @field:NotEmpty(message = "Title is required.")
