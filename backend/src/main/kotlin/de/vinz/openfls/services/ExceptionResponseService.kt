@@ -14,5 +14,23 @@ class ExceptionResponseService {
                     HttpStatus.BAD_REQUEST
             )
         }
+
+        fun getIllegalArgumentExceptionResponseEntity(ex: Exception, logger: Logger): ResponseEntity<String> {
+            logger.error(ex.message, ex)
+
+            return ResponseEntity(
+                "Die übergebenen Parameter sind nicht korrekt. Bitte überprüfen sie ihre Eingabe",
+                HttpStatus.BAD_REQUEST
+            )
+        }
+
+        fun getPermissionDeniedResponseEntity(ex: Exception, logger: Logger): ResponseEntity<String> {
+            logger.error(ex.message, ex)
+
+            return ResponseEntity(
+                "Sie haben keine Berechtigung für diese Aktion",
+                HttpStatus.FORBIDDEN
+            )
+        }
     }
 }

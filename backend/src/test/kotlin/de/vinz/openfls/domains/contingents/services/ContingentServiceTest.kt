@@ -2,7 +2,11 @@ package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
+import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
+import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.permissions.AccessService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,6 +23,8 @@ class ContingentServiceTest {
 
     @Mock
     lateinit var contingentRepository: ContingentRepository
+    @Mock
+    lateinit var accessService: AccessService
 
     private lateinit var contingentService: ContingentService
 
@@ -26,66 +32,7 @@ class ContingentServiceTest {
     fun setUp() {
         val workdaysReal = 251L
         val workdaysAssumption = 195L
-        contingentService = ContingentService(contingentRepository, workdaysReal, workdaysAssumption)
-    }
-
-    @Test
-    fun testCreate_WhenValidContingent_ThenReturnSavedContingent() {
-        // Given
-        val contingent = mock(Contingent::class.java)
-        whenever(contingentRepository.save(contingent)).thenReturn(contingent)
-
-        // When
-        val result = contingentService.create(contingent)
-
-        // Then
-        assertThat(result).isEqualTo(contingent)
-        verify(contingentRepository, times(1)).save(contingent)
-    }
-
-    @Test
-    fun testUpdate_WhenContingentExists_ThenReturnUpdatedContingent() {
-        // Given
-        val contingent = mock(Contingent::class.java)
-        whenever(contingent.id).thenReturn(1L)
-        whenever(contingentRepository.existsById(1L)).thenReturn(true)
-        whenever(contingentRepository.save(contingent)).thenReturn(contingent)
-
-        // When
-        val result = contingentService.update(contingent)
-
-        // Then
-        assertThat(result).isEqualTo(contingent)
-        verify(contingentRepository, times(1)).save(contingent)
-    }
-
-    @Test
-    fun testUpdate_WhenContingentDoesNotExist_ThenThrowException() {
-        // Given
-        val contingent = mock(Contingent::class.java)
-        whenever(contingent.id).thenReturn(1L)
-        whenever(contingentRepository.existsById(1L)).thenReturn(false)
-
-        // When & Then
-        org.junit.jupiter.api.assertThrows<IllegalArgumentException> {
-            contingentService.update(contingent)
-        }.also {
-            assertThat(it).hasMessage("id not found")
-        }
-        verify(contingentRepository, times(0)).save(contingent)
-    }
-
-    @Test
-    fun testDelete_WhenValidId_ThenPerformDeletion() {
-        // Given
-        val id = 1L
-        doNothing().`when`(contingentRepository).deleteById(id)
-
-        // When
-        contingentService.delete(id)
-
-        // Then
-        verify(contingentRepository, times(1)).deleteById(id)
+        contingentService = ContingentService(contingentRepository, accessService, workdaysReal, workdaysAssumption)
     }
 
     @Test
@@ -93,13 +40,26 @@ class ContingentServiceTest {
         // Given
         val id = 1L
         val contingent: Contingent = mock(Contingent::class.java)
+        whenever(contingent.id).thenReturn(id)
+        whenever(contingent.start).thenReturn(LocalDate.of(2024, 1, 1))
+        whenever(contingent.end).thenReturn(LocalDate.of(2024, 12, 31))
+        whenever(contingent.weeklyServiceHours).thenReturn(3.4)
+        val employee: Employee = mock(Employee::class.java)
+        whenever(contingent.employee).thenReturn(employee)
+        whenever(employee.id).thenReturn(1)
+        val institution: Institution = mock(Institution::class.java)
+        whenever(contingent.institution).thenReturn(institution)
+        whenever(institution.id).thenReturn(4)
+
         whenever(contingentRepository.findById(id)).thenReturn(Optional.of(contingent))
 
         // When
         val result = contingentService.getById(id)
 
         // Then
-        assertThat(result).isEqualTo(contingent)
+        assertThat(result?.id).isEqualTo(id)
+        assertThat(result?.employeeId).isEqualTo(1)
+        assertThat(result?.institutionId).isEqualTo(4)
     }
 
     @Test

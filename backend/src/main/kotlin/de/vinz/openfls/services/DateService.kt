@@ -2,7 +2,6 @@ package de.vinz.openfls.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeException
-import jdk.incubator.vector.LongVector
 import java.time.*
 import java.time.temporal.ChronoUnit
 
@@ -76,7 +75,7 @@ class DateService {
             if (isAssistancePlanBetweenStartAndEnd(assistancePlanDto, end, start)) return 0
 
             start = if (assistancePlanDto.start < start) start else assistancePlanDto.start
-            end =  if (assistancePlanDto.end > end) end else assistancePlanDto.end
+            end = if (assistancePlanDto.end > end) end else assistancePlanDto.end
 
             return ChronoUnit.DAYS.between(start, end) + 1
         }
@@ -128,9 +127,11 @@ class DateService {
             return countDaysOfAssistancePlan(year, null, assistancePlanDto)
         }
 
-        private fun isAssistancePlanBetweenStartAndEnd(assistancePlanDto: AssistancePlanDto,
-                                                       start: LocalDate,
-                                                       end: LocalDate): Boolean {
+        private fun isAssistancePlanBetweenStartAndEnd(
+            assistancePlanDto: AssistancePlanDto,
+            start: LocalDate,
+            end: LocalDate
+        ): Boolean {
             return assistancePlanDto.start > start || assistancePlanDto.end < end
         }
 
@@ -173,32 +174,31 @@ class DateService {
             return workdays
         }
 
-        fun isWeekend(date: LocalDate): Boolean {
+        private fun isWeekend(date: LocalDate): Boolean {
             return date.dayOfWeek == DayOfWeek.SATURDAY || date.dayOfWeek == DayOfWeek.SUNDAY
         }
 
-        fun isHoliday(date: LocalDate, holidays: List<LocalDate>): Boolean {
+        private fun isHoliday(date: LocalDate, holidays: List<LocalDate>): Boolean {
             return holidays.contains(date)
         }
 
-        // Feiertage für Hessen, dynamisch für ein bestimmtes Jahr
-        fun getHesseHolidays(year: Int): List<LocalDate> {
+        private fun getHesseHolidays(year: Int): List<LocalDate> {
+            val easterSunday = getEasterSunday(year)
             return listOf(
-                    LocalDate.of(year, Month.JANUARY, 1),   // Neujahr
-                    LocalDate.of(year, Month.MAY, 1),       // Tag der Arbeit
-                    getEasterSunday(year).minusDays(2),     // Karfreitag
-                    getEasterSunday(year).plusDays(1),      // Ostermontag
-                    LocalDate.of(year, Month.OCTOBER, 3),   // Tag der Deutschen Einheit
-                    getEasterSunday(year).plusDays(39),     // Christi Himmelfahrt
-                    getEasterSunday(year).plusDays(50),     // Pfingstmontag
-                    LocalDate.of(year, Month.NOVEMBER, 1),  // Allerheiligen
-                    LocalDate.of(year, Month.DECEMBER, 25), // 1. Weihnachtsfeiertag
-                    LocalDate.of(year, Month.DECEMBER, 26)  // 2. Weihnachtsfeiertag
+                LocalDate.of(year, Month.JANUARY, 1),   // Neujahr
+                LocalDate.of(year, Month.MAY, 1),       // Tag der Arbeit
+                easterSunday.minusDays(2),  // Karfreitag
+                easterSunday.plusDays(1),      // Ostermontag
+                LocalDate.of(year, Month.OCTOBER, 3),   // Tag der Deutschen Einheit
+                easterSunday.plusDays(39),     // Christi Himmelfahrt
+                easterSunday.plusDays(50),     // Pfingstmontag
+                LocalDate.of(year, Month.NOVEMBER, 1),  // Allerheiligen
+                LocalDate.of(year, Month.DECEMBER, 25), // 1. Weihnachtsfeiertag
+                LocalDate.of(year, Month.DECEMBER, 26)  // 2. Weihnachtsfeiertag
             )
         }
 
-        // Berechnung des Ostersonntags für ein bestimmtes Jahr
-        fun getEasterSunday(year: Int): LocalDate {
+        private fun getEasterSunday(year: Int): LocalDate {
             val a = year % 19
             val b = year / 100
             val c = year % 100
