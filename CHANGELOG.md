@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## 2.0.0
+
+#### Features
+- add flyway for database migrations
+- group services
+- group service evaluation
+
+#### Bug
+- fix several overview bugs
+- fix bug by changing roles
+
+
 ## 1.3.1
 
 #### Bug

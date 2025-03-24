@@ -1,8 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.projections
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
-import de.vinz.openfls.domains.hourTypes.HourTypeSoloProjection
-import java.time.LocalDate
+import de.vinz.openfls.domains.hourTypes.projections.HourTypeSoloProjection
 
 interface AssistancePlanHourProjection {
     val id: Long

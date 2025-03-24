@@ -1,14 +1,11 @@
 package de.vinz.openfls.domains.contingents.services
 
-import de.vinz.openfls.domains.contingents.ContingentController
 import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
 import de.vinz.openfls.domains.services.ServiceService
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.services.TimeDoubleService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,8 +13,6 @@ class ContingentEvaluationService(
         private val contingentService: ContingentService,
         private val serviceService: ServiceService
 ) {
-
-    private val logger: Logger = LoggerFactory.getLogger(ContingentEvaluationService::class.java)
 
     fun getContingentEvaluationByYearAndInstitution(year: Int, institutionId: Long): ContingentEvaluationDto {
         val services = serviceService.getAllByInstitutionAndYear(institutionId, year)

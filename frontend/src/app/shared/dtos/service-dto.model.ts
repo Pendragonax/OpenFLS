@@ -9,6 +9,7 @@ export class ServiceDto {
   content: string = "";
   minutes: number = 0;
   unfinished: boolean = false;
+  groupService: boolean = false;
   employeeId: number = 0;
   clientId: number = 0;
   institutionId: number = 0;

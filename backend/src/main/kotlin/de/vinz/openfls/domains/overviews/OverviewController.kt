@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import java.time.LocalDate
 
@@ -137,6 +136,62 @@ class OverviewController(
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")
                 .contentType(MediaType.parseMediaType("application/csv"))
                 .body(file)
+    }
+
+    @GetMapping("year/{year}/{hourTypeId}/{areaId}/{sponsorId}/$VALUE_TYPE_EXECUTED_HOURS_GROUP_OFFER")
+    fun getExecutedHoursGroupServiceOverview(
+        @PathVariable year: Int,
+        @PathVariable hourTypeId: Long,
+        @PathVariable areaId: Long,
+        @PathVariable sponsorId: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        val result = overviewService.getExecutedHoursGroupServiceOverview(
+            year = year,
+            month = null,
+            hourTypeId = hourTypeId,
+            areaId = if (areaId.toInt() == 0) null else areaId,
+            sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
+
+        if (logPerformance) {
+            logger.info(String.format("%s getExecutedHoursGroupServiceOverview took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("year/csv/{year}/{hourTypeId}/{areaId}/{sponsorId}/$VALUE_TYPE_EXECUTED_HOURS_GROUP_OFFER")
+    fun getApprovedHoursGroupServiceAsCsv(
+        @PathVariable year: Int,
+        @PathVariable month: Int,
+        @PathVariable hourTypeId: Long,
+        @PathVariable areaId: Long,
+        @PathVariable sponsorId: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        val result = overviewService.getExecutedHoursGroupServiceOverview(
+            year = year,
+            month = month,
+            hourTypeId = hourTypeId,
+            areaId = if (areaId.toInt() == 0) null else areaId,
+            sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
+        val filename = "${LocalDate.now()}-executed-group-service-$year-$month-overview.csv"
+        val file = InputStreamResource(CsvService.getCsvFileStream(result))
+
+        if (logPerformance) {
+            logger.info(String.format("%s getApprovedHoursGroupServiceAsCsv took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
+        }
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")
+            .contentType(MediaType.parseMediaType("application/csv"))
+            .body(file)
     }
 
     @GetMapping("year/{year}/{hourTypeId}/{areaId}/{sponsorId}/$VALUE_TYPE_APPROVED_HOURS")
@@ -365,6 +420,7 @@ class OverviewController(
 
     companion object {
         const val VALUE_TYPE_EXECUTED_HOURS = "EXECUTED_HOURS"
+        const val VALUE_TYPE_EXECUTED_HOURS_GROUP_OFFER = "EXECUTED_HOURS_GROUP_OFFER"
         const val VALUE_TYPE_APPROVED_HOURS = "APPROVED_HOURS"
         const val VALUE_TYPE_DIFFERENCE_HOURS = "DIFFERENCE_HOURS"
     }

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service
 class AccessService(
         private val userService: UserService,
         private val goalService: GoalService,
-        private val contingentService: ContingentService,
         private val assistancePlanService: AssistancePlanService,
         private val permissionService: PermissionService,
         private val institutionService: InstitutionService,
@@ -119,20 +118,6 @@ class AccessService(
         }
     }
 
-    fun canModifyContingent(contingentId: Long): Boolean {
-        return try {
-            // ADMIN
-            if (isAdmin())
-                return true
-
-            val institutionId = contingentService.getById(contingentId)?.institution?.id ?: 0
-
-            isLeader(getId(), institutionId)
-        } catch (ex: Exception) {
-            false
-        }
-    }
-
     fun canModifyEmployee(employeeId: Long): Boolean {
         return try {
             isAdmin()
@@ -166,7 +151,7 @@ class AccessService(
         }
     }
 
-    private fun isLeader(userId: Long, institutionId: Long): Boolean {
+    fun isLeader(userId: Long, institutionId: Long): Boolean {
         return try {
             val institutions = this.getLeadingInstitutionIds(userId)
 

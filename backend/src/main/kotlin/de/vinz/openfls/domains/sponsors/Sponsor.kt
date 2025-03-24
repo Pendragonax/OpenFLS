@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull
 @Table(name = "sponsors")
 class Sponsor(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
         @field:NotEmpty
@@ -43,13 +43,25 @@ class Sponsor(
         )
         var assistancePlans: MutableSet<AssistancePlan>? = null
 ) {
-        override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (other !is Sponsor) return false
-                return id == other.id
-        }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Sponsor) return false
+        return id == other.id
+    }
 
-        override fun hashCode(): Int {
-                return id.hashCode() ?: 0
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+    companion object {
+        fun from(sponsorDto: SponsorDto): Sponsor {
+            return Sponsor(
+                    id = sponsorDto.id,
+                    name = sponsorDto.name,
+                    payExact = sponsorDto.payExact,
+                    payOverhang = sponsorDto.payOverhang,
+                    unprofessionals = sponsorDto.unprofessionals?.map { Unprofessional.from(it) }?.toMutableSet()
+            )
         }
+    }
 }

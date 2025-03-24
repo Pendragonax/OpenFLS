@@ -36,7 +36,7 @@
     </div>
   </div>
   <div class="row">
-    <app-service-table *ngIf="!isBusy && !errorOccurred" [services]="filteredServices" [editMode]="false"></app-service-table>
+    <app-service-table *ngIf="!isBusy && !errorOccurred" [services]="filteredServices" [editMode]="false" (tableUpdated)="loadServices()"></app-service-table>
     <app-loading-spinner *ngIf="isBusy" [description]="'Lade Einträge'"></app-loading-spinner>
     <div class="text-center"
          *ngIf="errorOccurred">

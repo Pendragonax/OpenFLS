@@ -101,7 +101,8 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       Validators.compose([Validators.max(64)])),
     content: new UntypedFormControl("",
       Validators.compose([Validators.max(1024)])),
-    unfinished: new UntypedFormControl(false)
+    unfinished: new UntypedFormControl(false),
+    groupService: new UntypedFormControl(false)
   });
 
   // GETTER
@@ -134,6 +135,8 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   get contentControl() { return this.thirdForm.controls['content']; }
 
   get unfinishedControl() { return this.thirdForm.controls['unfinished']; }
+
+  get groupServiceControl() { return this.thirdForm.controls['groupService']; }
 
   constructor(
     private userService: UserService,
@@ -290,6 +293,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     this.titleControl.setValue(this.value.title);
     this.contentControl.setValue(this.value.content);
     this.unfinishedControl.setValue(this.value.unfinished);
+    this.groupServiceControl.setValue(this.value.groupService);
   }
 
   override initFormSubscriptions() {
@@ -395,6 +399,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     this.contentControl.valueChanges.subscribe(value => this.value.content = value);
     this.titleControl.valueChanges.subscribe(value => this.value.title = value);
     this.unfinishedControl.valueChanges.subscribe(value => this.value.unfinished = value);
+    this.groupServiceControl.valueChanges.subscribe(value => this.value.groupService = value);
   }
 
   selectAssistancePlan(plan: AssistancePlanDto | undefined | null) {
