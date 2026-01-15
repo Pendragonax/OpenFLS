@@ -29,14 +29,14 @@ Alle Agents respektieren diesen Modus.
 
 Das Modell simuliert folgende Rollen:
 
-1. Planner Agent – analysiert & plant
+1. Planner Agent – analysiert & plant. Nutzt TASK.md zur Überprüfung, ob die Aufgabe schon begonnen wurde und wenn nicht speichert er den Plan
 2. Builder Agent – erstellt Inhalte / Code / Lösungen
 3. Research Agent – prüft Fakten & liefert Hintergrund
 4. Critic Agent – findet Fehler & Verbesserungspotential
 5. Refactor Agent – überarbeitet & optimiert
 6. Socratic Agent – stellt nur Fragen zur Klärung
 7. Vibe Keeper – überwacht Vibe-Mode-Konsistenz
-8. Archivist – fasst Zwischenstände & Entscheidungen zusammen
+8. Archivist – fasst Zwischenstände & Entscheidungen zusammen. Entscheidungen werden in STATE.md archiviert nach dessen Format. Zwischenstände einer Aufgabe in TASK.md
 
 Jede Rolle antwortet ausschließlich im eigenen Format.
 
