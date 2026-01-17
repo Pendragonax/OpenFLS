@@ -1,20 +1,20 @@
 # Stage 1: Development
-FROM maven:latest as DEVELOPMENT
+FROM gradle:8-jdk17 as development
 WORKDIR /app
 COPY . .
-RUN mvn clean install
+RUN ./gradlew --no-daemon clean build
 EXPOSE 8081
-CMD mvn spring-boot:run
+CMD ["./gradlew", "--no-daemon", "bootRun"]
 
 # Stage 1: Build
-FROM maven:latest AS BUILD
+FROM gradle:8-jdk17 as build
 WORKDIR /app
 COPY . .
-RUN mvn clean install
+RUN ./gradlew --no-daemon clean build
 
 # Stage 2: Prod
-FROM openjdk:23-jdk-slim as PROD
+FROM eclipse-temurin:17-jdk as prod
 WORKDIR /app
-COPY --from=BUILD /app/target/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8081
 CMD ["java", "-jar", "app.jar"]
