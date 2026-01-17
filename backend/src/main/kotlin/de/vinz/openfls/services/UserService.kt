@@ -23,6 +23,8 @@ class UserService(
     }
 
     fun getJwt(): Jwt {
-        return SecurityContextHolder.getContext().authentication.principal as Jwt
+        val authentication = SecurityContextHolder.getContext().authentication
+                ?: throw IllegalStateException("No authentication present")
+        return authentication.principal as Jwt
     }
 }

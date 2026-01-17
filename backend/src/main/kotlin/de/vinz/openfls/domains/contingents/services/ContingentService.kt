@@ -17,8 +17,8 @@ import java.time.LocalDate
 class ContingentService(
     private val contingentRepository: ContingentRepository,
     private val accessService: AccessService,
-    @Value("\${openfls.general.workdays.real}") private val workdaysReal: Long,
-    @Value("\${openfls.general.workdays.assumption}") private val workdaysAssumption: Long,
+    @param:Value("\${openfls.general.workdays.real}") private val workdaysReal: Long,
+    @param:Value("\${openfls.general.workdays.assumption}") private val workdaysAssumption: Long,
 ) {
 
     @Transactional

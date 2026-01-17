@@ -55,6 +55,6 @@ class AssistancePlan(
         }
 
         override fun hashCode(): Int {
-                return id.hashCode() ?: 0
+                return id.hashCode()
         }
 }

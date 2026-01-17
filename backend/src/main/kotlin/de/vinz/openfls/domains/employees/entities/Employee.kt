@@ -7,7 +7,6 @@ import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.evaluations.Evaluation
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.services.Service
-import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 
@@ -46,14 +45,12 @@ class Employee(
         @JsonIgnore
         var access: EmployeeAccess? = null,
 
-        @field:Nullable
         @OneToMany(
                 mappedBy = "employee",
                 cascade = [CascadeType.REMOVE],
                 fetch = FetchType.LAZY)
         var permissions: MutableSet<Permission>? = null,
 
-        @field:Nullable
         @JsonIgnoreProperties(value = ["sponsor", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "employee",
@@ -61,7 +58,6 @@ class Employee(
                 fetch = FetchType.LAZY)
         var unprofessionals: MutableSet<Unprofessional>? = null,
 
-        @field:Nullable
         @OneToMany(
                 mappedBy = "employee",
                 cascade = [CascadeType.REMOVE],

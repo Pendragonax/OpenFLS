@@ -47,10 +47,11 @@ class SecurityConfiguration {
     private val rsaPublicKey: RSAPublicKey? = null
 
     @Bean
-    fun authenticationProvider(userDetailsService: UserDetailsService,
-                               passwordEncoder: PasswordEncoder?): DaoAuthenticationProvider {
-        return DaoAuthenticationProvider().apply {
-            setUserDetailsService(userDetailsService)
+    fun authenticationProvider(
+        userDetailsService: UserDetailsService,
+        passwordEncoder: PasswordEncoder
+    ): DaoAuthenticationProvider {
+        return DaoAuthenticationProvider(userDetailsService).apply {
             setPasswordEncoder(passwordEncoder)
         }
     }
@@ -59,7 +60,7 @@ class SecurityConfiguration {
     fun modelMapper(): ModelMapper? = ModelMapper()
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder? = BCryptPasswordEncoder()
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
     @Throws(Exception::class)

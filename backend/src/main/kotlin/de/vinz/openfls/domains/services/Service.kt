@@ -10,7 +10,7 @@ import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.institutions.Institution
 import jakarta.persistence.*
-import org.jetbrains.annotations.NotNull
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 
 @Entity
@@ -87,7 +87,7 @@ data class Service(
         }
 
         override fun hashCode(): Int {
-                return id.hashCode() ?: 0
+                return id.hashCode()
         }
 
         override fun toString(): String {

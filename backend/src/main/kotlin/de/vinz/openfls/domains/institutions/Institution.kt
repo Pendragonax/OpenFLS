@@ -7,7 +7,6 @@ import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.services.Service
-import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotEmpty
@@ -31,14 +30,12 @@ class Institution(
         var email: String = "",
 
         @JsonIgnore
-        @field:Nullable
         @OneToMany(
                 mappedBy = "institution",
                 cascade = [CascadeType.REMOVE],
                 fetch = FetchType.LAZY)
         var permissions: MutableSet<Permission>? = null,
 
-        @field:Nullable
         @OneToMany(
                 mappedBy = "institution",
                 cascade = [CascadeType.REMOVE],
