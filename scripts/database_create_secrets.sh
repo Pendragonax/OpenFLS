@@ -1,9 +1,9 @@
 #!/bin/bash
 
-DIR="secrets"
+DIR="../secrets"
 
 if ! [ -d "$DIR"]; then
-	mkdir secrets
+	mkdir $DIR
 fi
 
 echo -e "\e[36m[INFO] create default secrets at ./secrets\e[0m"

@@ -7,8 +7,8 @@ echo -n "To proceed type in 'go': "
 read input
 
 if [ "$input" = "go" ]; then
-	/bin/bash create_database_secrets.sh
-	/bin/bash generate_backend_rsa_keys.sh
+	script/database_create_secrets.sh
+	script/backend_generate_rsa_keys.sh
 else
     echo -e "\e[31maborted\e[0m"
 fi
