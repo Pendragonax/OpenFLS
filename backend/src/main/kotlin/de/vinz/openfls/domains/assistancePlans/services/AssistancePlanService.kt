@@ -16,7 +16,7 @@ import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.services.ServiceService
 import de.vinz.openfls.domains.sponsors.SponsorService
 import de.vinz.openfls.services.*
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,7 +45,7 @@ class AssistancePlanService(
 
         entity.client = clientService.getById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
-        entity.institution = institutionService.getById(valueDto.institutionId)
+        entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
         entity.sponsor = sponsorService.getById(valueDto.sponsorId)
                 ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
@@ -107,7 +107,7 @@ class AssistancePlanService(
 
         entity.client = clientService.getById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
-        entity.institution = institutionService.getById(valueDto.institutionId)
+        entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
         entity.sponsor = sponsorService.getById(valueDto.sponsorId)
                 ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
@@ -154,74 +154,90 @@ class AssistancePlanService(
         return assistancePlanRepository.deleteById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getAllAssistancePlanDtos(): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findAll().toList()
         return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
     }
 
+    @Transactional(readOnly = true)
     override fun getAll(): List<AssistancePlan> {
         return assistancePlanRepository.findAll().toList()
     }
 
+    @Transactional(readOnly = true)
     fun getAssistancePlanDtoById(id: Long): AssistancePlanDto? {
         val entity = assistancePlanRepository.findByIdOrNull(id)
         return modelMapper.map(entity, AssistancePlanDto::class.java)
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionById(id: Long): AssistancePlanProjection? {
         return assistancePlanRepository.findProjectionById(id)
     }
 
+    @Transactional(readOnly = true)
     override fun getById(id: Long): AssistancePlan? {
         return assistancePlanRepository.findByIdOrNull(id)
     }
 
+    @Transactional(readOnly = true)
     override fun existsById(id: Long): Boolean {
         return assistancePlanRepository.existsById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getAssistancePlanDtosByClientId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByClientId(id)
         return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
     }
 
+    @Transactional(readOnly = true)
     fun getByClientId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findByClientId(id)
     }
 
+    @Transactional(readOnly = true)
     fun getIllegalByClientId(id: Long): List<AssistancePlanProjection> {
         val assistancePlans = assistancePlanRepository.findProjectionsByClientId(id)
         return assistancePlans.filter { isIllegalAssistancePlan(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getAssistancePlanDtosBySponsorId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findBySponsorId(id)
         return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
     }
 
+    @Transactional(readOnly = true)
     fun getBySponsorId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findBySponsorId(id)
     }
 
+    @Transactional(readOnly = true)
     fun getIllegalBySponsorId(id: Long): List<AssistancePlanProjection> {
         val assistancePlans = assistancePlanRepository.findProjectionsBySponsorId(id)
         return assistancePlans.filter { isIllegalAssistancePlan(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getAssistancePlanDtosByInstitutionId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByInstitutionId(id)
         return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
     }
 
+    @Transactional(readOnly = true)
     fun getByInstitutionId(id: Long): List<AssistancePlan> {
         return assistancePlanRepository.findByInstitutionId(id)
     }
 
+    @Transactional(readOnly = true)
     fun getIllegalByInstitutionId(id: Long): List<AssistancePlanProjection> {
         val assistancePlans = assistancePlanRepository.findProjectionsByInstitutionId(id)
         return assistancePlans.filter { isIllegalAssistancePlan(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionByYearMonth(year: Int,
                                  month: Int): List<AssistancePlanProjection> {
         val start = LocalDate.of(year, month, 1)
@@ -230,6 +246,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByStartAndEnd(start, end)
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionByYearMonthSponsorId(year: Int,
                                           month: Int,
                                           sponsorId: Long): List<AssistancePlanProjection> {
@@ -239,6 +256,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionBySponsorIdAndStartAndEnd(sponsorId, start, end)
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionByYearMonthInstitutionId(year: Int,
                                               month: Int,
                                               institutionId: Long): List<AssistancePlanProjection> {
@@ -248,6 +266,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionByYearMonthInstitutionIdSponsorId(year: Int,
                                                        month: Int,
                                                        institutionId: Long,
@@ -258,6 +277,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByInstitutionIdAndSponsorIdAndStartAndEnd(institutionId, sponsorId, start, end)
     }
 
+    @Transactional(readOnly = true)
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
         val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ") }
         val services = serviceService.getByAssistancePlan(id)

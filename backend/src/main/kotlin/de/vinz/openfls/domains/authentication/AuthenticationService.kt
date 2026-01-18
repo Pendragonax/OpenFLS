@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -36,6 +36,7 @@ class AuthenticationService(
         private val passwordEncoder: PasswordEncoder,
         private val modelMapper: ModelMapper
 ) {
+    @Transactional(readOnly = true)
     fun login(username: String, password: String): AuthenticationResponseDto {
         val authentication = authenticationManager
                 .authenticate(UsernamePasswordAuthenticationToken(username, password))
@@ -100,6 +101,7 @@ class AuthenticationService(
         return jwt.getClaimAsString("id").toLong()
     }
 
+    @Transactional(readOnly = true)
     fun getCurrentEmployeeDto(): Optional<EmployeeDto> {
         val employeeOptional = getCurrentEmployee()
 
@@ -120,6 +122,7 @@ class AuthenticationService(
         return Optional.empty()
     }
 
+    @Transactional(readOnly = true)
     fun getCurrentEmployee(): Optional<Employee> {
         val userId = getCurrentUserId()
 

@@ -12,6 +12,7 @@ import de.vinz.openfls.domains.goalTimeEvaluations.models.YearMonthDoubleValue
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
+import org.springframework.transaction.annotation.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -22,6 +23,7 @@ import java.time.YearMonth
 import kotlin.math.roundToInt
 
 @Service
+@Transactional(readOnly = true)
 class GoalTimeEvaluationService(
         private val serviceRepository: ServiceRepository,
         private val assistancePlanRepository: AssistancePlanRepository

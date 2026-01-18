@@ -12,4 +12,17 @@ class PermissionDto {
     var changeInstitution: Boolean = false
 
     var affiliated: Boolean = false
+
+    companion object {
+        fun of(permission: Permission): PermissionDto {
+            return PermissionDto().apply {
+                this.employeeId = permission.id.employeeId ?: 0
+                this.institutionId = permission.id.institutionId ?: 0
+                this.writeEntries = permission.writeEntries
+                this.readEntries = permission.readEntries
+                this.changeInstitution = permission.changeInstitution
+                this.affiliated = permission.affiliated
+            }
+        }
+    }
 }

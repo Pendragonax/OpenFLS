@@ -54,5 +54,11 @@ class Contingent(
                 institution = Institution(id = contingent.institutionId)
             )
         }
+
+        fun of(contingents: List<ContingentDto>): List<Contingent> {
+            return contingents.map {
+                from(it)
+            }
+        }
     }
 }

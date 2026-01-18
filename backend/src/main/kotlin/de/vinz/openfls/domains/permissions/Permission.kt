@@ -39,4 +39,23 @@ class Permission(
         override fun hashCode(): Int {
                 return id.hashCode()
         }
+
+        companion object {
+                fun of(permissionDTO: PermissionDto): Permission {
+                        return Permission(
+                                id = EmployeeInstitutionRightsKey(
+                                        employeeId = permissionDTO.employeeId,
+                                        institutionId = permissionDTO.institutionId
+                                ),
+                                readEntries = permissionDTO.readEntries,
+                                writeEntries = permissionDTO.writeEntries,
+                                changeInstitution = permissionDTO.changeInstitution,
+                                affiliated = permissionDTO.affiliated
+                        )
+                }
+
+                fun of(permissionDTOs: List<PermissionDto>): List<Permission> {
+                        return permissionDTOs.map { of(it) }
+                }
+        }
 }

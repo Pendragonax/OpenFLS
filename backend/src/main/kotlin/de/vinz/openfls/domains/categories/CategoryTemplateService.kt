@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.exceptions.InvalidCategoryTemplateDtoException
 import de.vinz.openfls.domains.categories.repositories.CategoryRepository
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
@@ -50,20 +50,24 @@ class CategoryTemplateService(private val categoryTemplateRepository: CategoryTe
         categoryTemplateRepository.deleteById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getAll(): List<CategoryTemplateDto> {
         val entities = categoryTemplateRepository.findAll()
         return entities.map { CategoryTemplateDto.from(it) }.sortedBy { it.title }
     }
 
+    @Transactional(readOnly = true)
     fun getDtoById(id: Long): CategoryTemplateDto? {
         val entity = categoryTemplateRepository.findById(id).orElse(null)
         return entity?.let { CategoryTemplateDto.from(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getById(id: Long): CategoryTemplate? {
         return categoryTemplateRepository.findByIdOrNull(id)
     }
 
+    @Transactional(readOnly = true)
     fun existsById(id: Long): Boolean {
         return categoryTemplateRepository.existsById(id)
     }

@@ -2,7 +2,6 @@ package de.vinz.openfls.domains.permissions
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.goals.services.GoalService
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.services.UserService
@@ -204,7 +203,7 @@ class AccessService(
 
     fun getReadRightsInstitutionIds(): List<Long> {
         if (isAdmin()) {
-            return institutionService.getAllDtos().map { it.id }
+            return institutionService.getAllDTOs().map { it.id }
         }
 
         return permissionService

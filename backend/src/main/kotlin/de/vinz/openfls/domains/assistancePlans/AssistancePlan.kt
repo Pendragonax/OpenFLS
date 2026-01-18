@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.goals.entities.Goal
@@ -57,4 +58,18 @@ class AssistancePlan(
         override fun hashCode(): Int {
                 return id.hashCode()
         }
+
+    companion object {
+            fun of(assistancePlanDto: AssistancePlanDto): AssistancePlan {
+                return AssistancePlan().apply {
+                    this.id = assistancePlanDto.id
+                    this.start = assistancePlanDto.start
+                    this.end = assistancePlanDto.end
+                }
+            }
+
+            fun of(assistancePlans: List<AssistancePlanDto>) {
+
+            }
+    }
 }

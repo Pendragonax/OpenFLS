@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.institutions
 
-import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDTO
+import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDTO
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
@@ -24,7 +25,7 @@ class InstitutionController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: InstitutionDto): Any {
+    fun create(@Valid @RequestBody valueDto: CreateInstitutionDTO): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -49,7 +50,7 @@ class InstitutionController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: InstitutionDto): Any {
+               @Valid @RequestBody valueDto: UpdateInstitutionDTO): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -86,7 +87,7 @@ class InstitutionController(
             if (!institutionService.existsById(id))
                 throw IllegalArgumentException("institution not found")
 
-            val dto = institutionService.getDtoById(id)
+            val dto = institutionService.getDTOById(id)
             institutionService.delete(id)
 
             if (logPerformance) {
@@ -111,7 +112,7 @@ class InstitutionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = institutionService.getAllDtos()
+            val dtos = institutionService.getAllDTOs()
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms",
@@ -160,7 +161,7 @@ class InstitutionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dto = institutionService.getDtoById(id)
+            val dto = institutionService.getDTOById(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",

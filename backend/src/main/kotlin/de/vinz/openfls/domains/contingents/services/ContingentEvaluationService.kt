@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.contingents.projections.ContingentProjection
 import de.vinz.openfls.domains.services.ServiceService
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.services.TimeDoubleService
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,6 +15,7 @@ class ContingentEvaluationService(
         private val serviceService: ServiceService
 ) {
 
+    @Transactional(readOnly = true)
     fun getContingentEvaluationByYearAndInstitution(year: Int, institutionId: Long): ContingentEvaluationDto {
         val services = serviceService.getAllByInstitutionAndYear(institutionId, year)
         val contingents = contingentService.getAllByInstitutionAndYear(institutionId, year)
