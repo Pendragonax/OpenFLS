@@ -47,8 +47,8 @@ class InstitutionService(
 
     @Transactional(readOnly = true)
     fun getAllSoloDTOs(): List<InstitutionSoloDto> {
-        val projections = institutionRepository.findInstitutionSoloProjectionOrderedByName()
-        return projections.map { value -> modelMapper.map(value, InstitutionSoloDto::class.java) }
+        val institutions = institutionRepository.findInstitutionSoloProjectionOrderedByName()
+        return institutions.map { InstitutionSoloDto.of(it) }.sortedBy { it.name }
     }
 
     @Transactional(readOnly = true)
@@ -60,7 +60,7 @@ class InstitutionService(
 
     @Transactional(readOnly = true)
     fun getAllEntities(): List<Institution> {
-        return institutionRepository.findAll().toList()
+        return institutionRepository.findAll().sortedBy { it.name }.toList()
     }
 
     @Transactional(readOnly = true)

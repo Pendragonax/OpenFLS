@@ -173,3 +173,10 @@ Research:
 Socratic:  
 Archive:  
 Vibe Check
+
+## 6. Unit-Tests
+Unit-Tests sollen folgenden Formatierung haben: methode_vorbedingung_erwartung.
+Beispiel: `add_positiveNumbers_correctSum`
+Der Inhalt der einzelnen Test soll außerdem in die Abschnitte `Given`, `When`, `Then` unterteilt werden.
+Es wird assertJ verwendet.
+Unit-Tests sollen so erstellt werden, dass sie alle möglichen Szenarien abdecken.
