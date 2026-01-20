@@ -12,9 +12,10 @@ import {Location} from "@angular/common";
 import {CreateInstitutionDto} from "../../../../shared/dtos/institution-create-dto";
 
 @Component({
-  selector: 'app-institution-new',
-  templateUrl: './institution-new.component.html',
-  styleUrls: ['./institution-new.component.css']
+    selector: 'app-institution-new',
+    templateUrl: './institution-new.component.html',
+    styleUrls: ['./institution-new.component.css'],
+    standalone: false
 })
 export class InstitutionNewComponent extends NewPageComponent<CreateInstitutionDto> implements OnInit {
 

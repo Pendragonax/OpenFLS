@@ -2,9 +2,10 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ReplaySubject} from "rxjs";
 
 @Component({
-  selector: 'app-error-icon',
-  templateUrl: './error-icon.component.html',
-  styleUrls: ['./error-icon.component.css']
+    selector: 'app-error-icon',
+    templateUrl: './error-icon.component.html',
+    styleUrls: ['./error-icon.component.css'],
+    standalone: false
 })
 export class ErrorIconComponent implements OnInit {
 

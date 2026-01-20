@@ -32,18 +32,19 @@ import {HelperService} from "../../shared/services/helper.service";
 import {createStartTimeEndTimeValidator} from "../../shared/validators/startTimeEndTimeValidator";
 
 @Component({
-  selector: 'app-service-detail',
-  templateUrl: './service-detail.component.html',
-  styleUrls: ['./service-detail.component.css'],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ]
+    selector: 'app-service-detail',
+    templateUrl: './service-detail.component.html',
+    styleUrls: ['./service-detail.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class ServiceDetailComponent extends NewPageComponent<ServiceDto> implements OnInit {
 

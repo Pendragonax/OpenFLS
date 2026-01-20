@@ -3,9 +3,10 @@ import {ReplaySubject} from "rxjs";
 import {TableButtonCell} from "./TableButtonCell";
 
 @Component({
-  selector: 'app-table-button',
-  templateUrl: './table-button.component.html',
-  styleUrls: ['./table-button.component.css']
+    selector: 'app-table-button',
+    templateUrl: './table-button.component.html',
+    styleUrls: ['./table-button.component.css'],
+    standalone: false
 })
 export class TableButtonComponent implements OnInit {
   @Input() columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>();

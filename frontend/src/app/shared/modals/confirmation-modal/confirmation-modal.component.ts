@@ -2,9 +2,10 @@ import {Component, Input, OnInit, Output} from '@angular/core';
 import {MatDialogRef} from "@angular/material/dialog";
 
 @Component({
-  selector: 'app-confirmation-modal',
-  templateUrl: './confirmation-modal.component.html',
-  styleUrls: ['./confirmation-modal.component.css']
+    selector: 'app-confirmation-modal',
+    templateUrl: './confirmation-modal.component.html',
+    styleUrls: ['./confirmation-modal.component.css'],
+    standalone: false
 })
 export class ConfirmationModalComponent implements OnInit {
   readonly CONFIRM_BUTTON_DESCRIPTION: string = "Bestätigen"

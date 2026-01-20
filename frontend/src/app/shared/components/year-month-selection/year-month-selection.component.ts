@@ -5,9 +5,10 @@ import {Period} from "./Period";
 import {ReplaySubject} from "rxjs";
 
 @Component({
-  selector: 'app-year-month-selection',
-  templateUrl: './year-month-selection.component.html',
-  styleUrls: ['./year-month-selection.component.css']
+    selector: 'app-year-month-selection',
+    templateUrl: './year-month-selection.component.html',
+    styleUrls: ['./year-month-selection.component.css'],
+    standalone: false
 })
 export class YearMonthSelectionComponent implements OnInit {
 

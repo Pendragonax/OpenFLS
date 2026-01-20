@@ -6,9 +6,10 @@ import {ReplaySubject, Subject} from "rxjs";
 import {UnprofessionalDto} from "../../../../shared/dtos/unprofessional-dto.model";
 
 @Component({
-  selector: 'app-sponsor-detail',
-  templateUrl: './sponsor-detail.component.html',
-  styleUrls: ['./sponsor-detail.component.css']
+    selector: 'app-sponsor-detail',
+    templateUrl: './sponsor-detail.component.html',
+    styleUrls: ['./sponsor-detail.component.css'],
+    standalone: false
 })
 export class SponsorDetailComponent implements OnInit {
   sponsor: SponsorDto | null = null;

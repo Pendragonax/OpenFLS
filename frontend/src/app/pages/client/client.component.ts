@@ -14,9 +14,10 @@ import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto
 import {InstitutionService} from "../../shared/services/institution.service";
 
 @Component({
-  selector: 'app-client',
-  templateUrl: './client.component.html',
-  styleUrls: ['./client.component.css']
+    selector: 'app-client',
+    templateUrl: './client.component.html',
+    styleUrls: ['./client.component.css'],
+    standalone: false
 })
 export class ClientComponent extends TablePageComponent<ClientViewModel, ClientViewModel> implements OnInit {
   // VARs

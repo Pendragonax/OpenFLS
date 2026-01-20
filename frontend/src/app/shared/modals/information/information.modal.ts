@@ -4,15 +4,14 @@ import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/
 import {NgForOf} from "@angular/common";
 
 @Component({
-  selector: 'app-information',
-  standalone: true,
-  imports: [
-    MatButtonModule,
-    MatDialogModule,
-    NgForOf
-  ],
-  templateUrl: './information.modal.html',
-  styleUrl: './information.modal.css'
+    selector: 'app-information',
+    imports: [
+        MatButtonModule,
+        MatDialogModule,
+        NgForOf
+    ],
+    templateUrl: './information.modal.html',
+    styleUrl: './information.modal.css'
 })
 export class InformationModal {
 

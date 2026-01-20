@@ -11,9 +11,10 @@ import {NewPageComponent} from "../../../../shared/components/new-page.component
 import {Location} from "@angular/common";
 
 @Component({
-  selector: 'app-client-new',
-  templateUrl: './client-new.component.html',
-  styleUrls: ['./client-new.component.css']
+    selector: 'app-client-new',
+    templateUrl: './client-new.component.html',
+    styleUrls: ['./client-new.component.css'],
+    standalone: false
 })
 export class ClientNewComponent extends NewPageComponent<ClientDto> implements OnInit {
   // VARs

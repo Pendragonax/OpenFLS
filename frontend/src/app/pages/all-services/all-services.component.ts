@@ -13,9 +13,10 @@ import {EmployeeSolo} from "../../shared/dtos/employee-solo.projection";
 import {EmployeeService} from "../../shared/services/employee.service";
 
 @Component({
-  selector: 'app-all-services',
-  templateUrl: './all-services.component.html',
-  styleUrl: './all-services.component.css'
+    selector: 'app-all-services',
+    templateUrl: './all-services.component.html',
+    styleUrl: './all-services.component.css',
+    standalone: false
 })
 export class AllServicesComponent implements OnInit {
 

@@ -11,9 +11,10 @@ import {UserService} from "../../shared/services/user.service";
 import {ReplaySubject, switchMap} from "rxjs";
 
 @Component({
-  selector: 'app-my-my-services',
-  templateUrl: './my-services.component.html',
-  styleUrls: ['./my-services.component.css']
+    selector: 'app-my-my-services',
+    templateUrl: './my-services.component.html',
+    styleUrls: ['./my-services.component.css'],
+    standalone: false
 })
 export class MyServicesComponent implements OnInit {
 

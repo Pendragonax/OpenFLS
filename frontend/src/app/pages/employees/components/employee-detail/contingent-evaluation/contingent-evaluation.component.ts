@@ -11,9 +11,10 @@ import {Router} from "@angular/router";
 import {DateService} from "../../../../../shared/services/date.service";
 
 @Component({
-  selector: 'app-contingent-evaluation',
-  templateUrl: './contingent-evaluation.component.html',
-  styleUrls: ['./contingent-evaluation.component.css']
+    selector: 'app-contingent-evaluation',
+    templateUrl: './contingent-evaluation.component.html',
+    styleUrls: ['./contingent-evaluation.component.css'],
+    standalone: false
 })
 export class ContingentEvaluationComponent implements OnInit {
   @Input() employee$: ReplaySubject<EmployeeDto> = new ReplaySubject<EmployeeDto>();

@@ -13,11 +13,12 @@ import {HelperService} from "../../shared/services/helper.service";
 import {ServiceService} from "../../shared/services/service.service";
 
 @Component({
-  selector: 'app-employees',
-  templateUrl: './employees.component.html',
-  styleUrls: [
-    './employees.component.css'
-  ]
+    selector: 'app-employees',
+    templateUrl: './employees.component.html',
+    styleUrls: [
+        './employees.component.css'
+    ],
+    standalone: false
 })
 export class EmployeesComponent extends TablePageComponent<EmployeeViewModel, EmployeeViewModel> implements OnInit {
   // VARs

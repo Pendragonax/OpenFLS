@@ -8,9 +8,10 @@ import {HourTypeDto} from "../../../../shared/dtos/hour-type-dto.model";
 import {ReplaySubject} from "rxjs";
 
 @Component({
-  selector: 'app-assistance-plan-time-evaluation-filter',
-  templateUrl: './assistance-plan-time-evaluation-filter.component.html',
-  styleUrls: ['./assistance-plan-time-evaluation-filter.component.css']
+    selector: 'app-assistance-plan-time-evaluation-filter',
+    templateUrl: './assistance-plan-time-evaluation-filter.component.html',
+    styleUrls: ['./assistance-plan-time-evaluation-filter.component.css'],
+    standalone: false
 })
 export class AssistancePlanTimeEvaluationFilterComponent implements OnInit {
 

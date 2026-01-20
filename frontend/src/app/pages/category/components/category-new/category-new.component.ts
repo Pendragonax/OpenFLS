@@ -9,9 +9,10 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {MatTableDataSource} from "@angular/material/table";
 
 @Component({
-  selector: 'app-category-new',
-  templateUrl: './category-new.component.html',
-  styleUrls: ['./category-new.component.css']
+    selector: 'app-category-new',
+    templateUrl: './category-new.component.html',
+    styleUrls: ['./category-new.component.css'],
+    standalone: false
 })
 export class CategoryNewComponent implements OnInit {
 

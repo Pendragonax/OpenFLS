@@ -19,18 +19,19 @@ import {
 } from "@angular/material-moment-adapter";
 
 @Component({
-  selector: 'app-unprofesssional',
-  templateUrl: './unprofesssional.component.html',
-  styleUrls: ['./unprofesssional.component.css'],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ],
+    selector: 'app-unprofesssional',
+    templateUrl: './unprofesssional.component.html',
+    styleUrls: ['./unprofesssional.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class UnprofesssionalComponent implements OnInit {
 

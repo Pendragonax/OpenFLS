@@ -17,9 +17,10 @@ import {DetailPageComponent} from "../../../../shared/components/detail-page.com
 import {EmployeeViewModel} from "../../../../shared/models/employee-view.model";
 
 @Component({
-  selector: 'app-employee-detail',
-  templateUrl: './employee-detail.component.html',
-  styleUrls: ['./employee-detail.component.css']
+    selector: 'app-employee-detail',
+    templateUrl: './employee-detail.component.html',
+    styleUrls: ['./employee-detail.component.css'],
+    standalone: false
 })
 export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> implements OnInit {
   // VARs

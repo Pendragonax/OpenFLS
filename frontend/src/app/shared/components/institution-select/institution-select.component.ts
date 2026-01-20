@@ -9,22 +9,21 @@ import {MatSelectModule} from "@angular/material/select";
 import {ReadableInstitutionDto} from "../../dtos/institution-readable-dto.model";
 
 @Component({
-  selector: 'app-institution-select',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    FormsModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatOptionModule,
-    MatSelectModule,
-    NgForOf,
-    NgIf,
-    ReactiveFormsModule
-  ],
-  templateUrl: './institution-select.component.html',
-  styleUrl: './institution-select.component.css'
+    selector: 'app-institution-select',
+    imports: [
+        AsyncPipe,
+        FormsModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatOptionModule,
+        MatSelectModule,
+        NgForOf,
+        NgIf,
+        ReactiveFormsModule
+    ],
+    templateUrl: './institution-select.component.html',
+    styleUrl: './institution-select.component.css'
 })
 export class InstitutionSelectComponent {
 

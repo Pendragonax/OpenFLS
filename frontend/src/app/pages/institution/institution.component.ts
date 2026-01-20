@@ -13,9 +13,10 @@ import {TablePageComponent} from "../../shared/components/table-page.component";
 import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
-  selector: 'app-institution',
-  templateUrl: './institution.component.html',
-  styleUrls: ['./institution.component.css']
+    selector: 'app-institution',
+    templateUrl: './institution.component.html',
+    styleUrls: ['./institution.component.css'],
+    standalone: false
 })
 export class InstitutionComponent extends TablePageComponent<InstitutionViewModel, InstitutionViewModel> implements OnInit {
   // VARs

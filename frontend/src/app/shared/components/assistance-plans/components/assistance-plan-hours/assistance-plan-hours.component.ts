@@ -12,9 +12,10 @@ import {HelperService} from "../../../../services/helper.service";
 import {Sort} from "@angular/material/sort";
 
 @Component({
-  selector: 'app-assistance-plan-hours',
-  templateUrl: './assistance-plan-hours.component.html',
-  styleUrls: ['./assistance-plan-hours.component.css']
+    selector: 'app-assistance-plan-hours',
+    templateUrl: './assistance-plan-hours.component.html',
+    styleUrls: ['./assistance-plan-hours.component.css'],
+    standalone: false
 })
 export class AssistancePlanHoursComponent
   extends TablePageComponent<AssistancePlanHourDto, [AssistancePlanHourDto, HourTypeDto | null]>

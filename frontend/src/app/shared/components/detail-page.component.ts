@@ -3,9 +3,10 @@ import {ReplaySubject, Subject} from "rxjs";
 import {HelperService} from "../services/helper.service";
 
 @Component({
-  selector: 'app-detail-page',
-  template: ``,
-  styleUrls: []
+    selector: 'app-detail-page',
+    template: ``,
+    styleUrls: [],
+    standalone: false
 })
 export abstract class DetailPageComponent<T> implements OnInit {
 

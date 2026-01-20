@@ -4,9 +4,10 @@ import {GoalResponseDto} from "../../dtos/goal-response-dto.model";
 import {Goal} from "../../projections/goal.projection";
 
 @Component({
-  selector: 'app-goal-single',
-  templateUrl: './goal-single.component.html',
-  styleUrls: ['./goal-single.component.css']
+    selector: 'app-goal-single',
+    templateUrl: './goal-single.component.html',
+    styleUrls: ['./goal-single.component.css'],
+    standalone: false
 })
 export class GoalSingleComponent implements OnInit {
 

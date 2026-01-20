@@ -2,9 +2,10 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ReplaySubject} from "rxjs";
 
 @Component({
-  selector: 'app-overview-value-type-info-modal',
-  templateUrl: './overview-value-type-info-modal.component.html',
-  styleUrls: ['./overview-value-type-info-modal.component.css']
+    selector: 'app-overview-value-type-info-modal',
+    templateUrl: './overview-value-type-info-modal.component.html',
+    styleUrls: ['./overview-value-type-info-modal.component.css'],
+    standalone: false
 })
 export class OverviewValueTypeInfoModalComponent implements OnInit {
   readonly TITLE: string = "Wertermittlung"

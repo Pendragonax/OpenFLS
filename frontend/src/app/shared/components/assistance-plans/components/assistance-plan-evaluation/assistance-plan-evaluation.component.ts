@@ -17,18 +17,19 @@ import {UnprofessionalDto} from "../../../../dtos/unprofessional-dto.model";
 import {AssistancePlan} from "../../../../projections/assistance-plan.projection";
 
 @Component({
-  selector: 'app-assistance-plan-evaluation',
-  templateUrl: './assistance-plan-evaluation.component.html',
-  styleUrls: ['./assistance-plan-evaluation.component.css'],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ],
+    selector: 'app-assistance-plan-evaluation',
+    templateUrl: './assistance-plan-evaluation.component.html',
+    styleUrls: ['./assistance-plan-evaluation.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class AssistancePlanEvaluationComponent implements OnInit, OnChanges {
   @Input() assistancePlan: AssistancePlan = new AssistancePlan();

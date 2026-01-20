@@ -8,9 +8,10 @@ import {TablePageComponent} from "../../shared/components/table-page.component";
 import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
-  selector: 'app-category',
-  templateUrl: './category.component.html',
-  styleUrls: ['./category.component.css']
+    selector: 'app-category',
+    templateUrl: './category.component.html',
+    styleUrls: ['./category.component.css'],
+    standalone: false
 })
 export class CategoryComponent extends TablePageComponent<CategoryTemplateDto, CategoryTemplateDto> implements OnInit {
   // CONFIG
