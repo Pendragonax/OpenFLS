@@ -9,16 +9,17 @@ import {InstitutionInfoForm} from "../../forms/institution-info-form";
 import {NewPageComponent} from "../../../../shared/components/new-page.component";
 import {HelperService} from "../../../../shared/services/helper.service";
 import {Location} from "@angular/common";
+import {CreateInstitutionDto} from "../../../../shared/dtos/institution-create-dto";
 
 @Component({
   selector: 'app-institution-new',
   templateUrl: './institution-new.component.html',
   styleUrls: ['./institution-new.component.css']
 })
-export class InstitutionNewComponent extends NewPageComponent<InstitutionDto> implements OnInit {
+export class InstitutionNewComponent extends NewPageComponent<CreateInstitutionDto> implements OnInit {
 
   // configs
-  permissions: [InstitutionDto, EmployeeDto, PermissionDto][] = [];
+  permissions: [CreateInstitutionDto, EmployeeDto, PermissionDto][] = [];
   permissionTableColumns: string[] = ['name', 'lead', 'write', 'read', 'affiliated'];
 
   infoForm = new InstitutionInfoForm();
@@ -58,8 +59,8 @@ export class InstitutionNewComponent extends NewPageComponent<InstitutionDto> im
     })
   }
 
-  getNewValue(): InstitutionDto {
-    return new InstitutionDto();
+  getNewValue(): CreateInstitutionDto {
+    return new CreateInstitutionDto();
   }
 
   initFormSubscriptions() {

@@ -44,20 +44,18 @@ class Contingent(
     }
 
     companion object {
-        fun from(contingent: ContingentDto): Contingent {
+        fun of(contingent: ContingentDto): Contingent {
             return Contingent(
                 id = contingent.id,
                 start = contingent.start,
                 end = contingent.end,
-                weeklyServiceHours = contingent.weeklyServiceHours,
-                employee = Employee(id = contingent.employeeId),
-                institution = Institution(id = contingent.institutionId)
+                weeklyServiceHours = contingent.weeklyServiceHours
             )
         }
 
         fun of(contingents: List<ContingentDto>): List<Contingent> {
             return contingents.map {
-                from(it)
+                of(it)
             }
         }
     }

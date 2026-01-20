@@ -4,6 +4,10 @@ import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
+import de.vinz.openfls.domains.employees.EmployeeRepository
+import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.institutions.InstitutionRepository
+import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
@@ -16,6 +20,8 @@ import java.time.LocalDate
 @Service
 class ContingentService(
     private val contingentRepository: ContingentRepository,
+    private val institutionService: InstitutionService,
+    private val employeeService: EmployeeService,
     private val accessService: AccessService,
     @param:Value("\${openfls.general.workdays.real}") private val workdaysReal: Long,
     @param:Value("\${openfls.general.workdays.assumption}") private val workdaysAssumption: Long,
@@ -27,8 +33,11 @@ class ContingentService(
             throw IllegalArgumentException("end before start")
         }
 
-        val entity = contingentRepository.save(Contingent.from(contingentDto))
-        return ContingentDto.from(entity)
+        val entity = Contingent.of(contingentDto)
+        entity.employee = employeeService.getById(contingentDto.employeeId, true)
+        entity.institution = institutionService.getEntityById(contingentDto.institutionId)
+
+        return ContingentDto.from(contingentRepository.save(entity))
     }
 
     @Transactional
@@ -38,7 +47,7 @@ class ContingentService(
         if (contingentDto.end != null && contingentDto.start >= contingentDto.end)
             throw IllegalArgumentException("end before start")
 
-        val entity = contingentRepository.save(Contingent.from(contingentDto))
+        val entity = contingentRepository.save(Contingent.of(contingentDto))
         return ContingentDto.from(entity)
     }
 
