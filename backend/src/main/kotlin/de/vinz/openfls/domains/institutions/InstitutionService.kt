@@ -1,9 +1,6 @@
 package de.vinz.openfls.domains.institutions
 
-import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDTO
-import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
-import de.vinz.openfls.domains.institutions.dtos.InstitutionSoloDto
-import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDTO
+import de.vinz.openfls.domains.institutions.dtos.*
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionDto
 import org.modelmapper.ModelMapper
@@ -12,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class InstitutionService(
-        private val institutionRepository: InstitutionRepository,
-        private val modelMapper: ModelMapper
+    private val institutionRepository: InstitutionRepository,
+    private val modelMapper: ModelMapper
 ) {
 
     @Transactional
@@ -46,16 +43,16 @@ class InstitutionService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllSoloDTOs(): List<InstitutionSoloDto> {
+    fun getAllSoloDTOs(): List<ResponseAllReadableInstitutionDTO> {
         val institutions = institutionRepository.findInstitutionSoloProjectionOrderedByName()
-        return institutions.map { InstitutionSoloDto.of(it) }.sortedBy { it.name }
+        return institutions.map { ResponseAllReadableInstitutionDTO.of(it) }.sortedBy { it.name }
     }
 
     @Transactional(readOnly = true)
-    fun getAllDTOs(): List<InstitutionDto> {
+    fun getAllDTOs(): List<ResponseAllInstitutionDTO> {
         return getAllEntities()
-                .sortedBy { it.name.lowercase() }
-                .map { value -> modelMapper.map(value, InstitutionDto::class.java) }
+            .map { ResponseAllInstitutionDTO.of(it) }
+            .sortedBy { it.name }
     }
 
     @Transactional(readOnly = true)
@@ -64,9 +61,9 @@ class InstitutionService(
     }
 
     @Transactional(readOnly = true)
-    fun getDTOById(id: Long): InstitutionDto? {
+    fun getDTOById(id: Long): ResponseByIDInstitutionDTO? {
         val entity = institutionRepository.findById(id).orElse(null)
-        return modelMapper.map(entity, InstitutionDto::class.java)
+        return modelMapper.map(entity, ResponseByIDInstitutionDTO::class.java)
     }
 
     @Transactional(readOnly = true)
@@ -85,7 +82,8 @@ class InstitutionService(
     ): List<Permission> {
         val newPermissions = mutableListOf<Permission>()
         for (permissionDTO in permissions) {
-            val permission = entity.permissions?.find { it.id.employeeId == permissionDTO.employeeId && it.id.institutionId == permissionDTO.institutionId }
+            val permission =
+                entity.permissions?.find { it.id.employeeId == permissionDTO.employeeId && it.id.institutionId == permissionDTO.institutionId }
             if (permission != null) {
                 continue
             }
@@ -102,7 +100,8 @@ class InstitutionService(
         }
 
         for (permission in entity.permissions) {
-            val permissionDTO = permissions.find { it.employeeId == permission.id.employeeId && it.institutionId == permission.id.institutionId }
+            val permissionDTO =
+                permissions.find { it.employeeId == permission.id.employeeId && it.institutionId == permission.id.institutionId }
             if (permissionDTO == null) {
                 continue
             }

@@ -10,7 +10,7 @@ import {TablePageComponent} from "../../shared/components/table-page.component";
 import {HelperService} from "../../shared/services/helper.service";
 import {EmployeeViewModel} from "../../shared/models/employee-view.model";
 import {ServiceService} from "../../shared/services/service.service";
-import {InstitutionSoloDto} from "../../shared/dtos/institution-solo-dto.model";
+import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
 
 @Component({
@@ -23,9 +23,9 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
   tableColumns = ['name', 'institution', 'actions'];
 
   deleteServiceCount: number = 0;
-  readableInstitutions: InstitutionSoloDto[] = [];
+  readableInstitutions: ReadableInstitutionDto[] = [];
   institutionId: number | null = null;
-  selectedInstitution: InstitutionSoloDto | null = null;
+  selectedInstitution: ReadableInstitutionDto | null = null;
 
   constructor(
     private institutionService: InstitutionService,
@@ -132,7 +132,7 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
     this.filterTableData()
   }
 
-  onInstitutionChanged(institution: InstitutionSoloDto | null) {
+  onInstitutionChanged(institution: ReadableInstitutionDto | null) {
     this.selectedInstitution = institution;
     this.institutionId = institution?.id ?? null;
     this.loadClients();

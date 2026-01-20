@@ -6,7 +6,7 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatIconModule} from "@angular/material/icon";
 import {MatOptionModule} from "@angular/material/core";
 import {MatSelectModule} from "@angular/material/select";
-import {InstitutionSoloDto} from "../../dtos/institution-solo-dto.model";
+import {ReadableInstitutionDto} from "../../dtos/institution-readable-dto.model";
 
 @Component({
   selector: 'app-institution-select',
@@ -28,13 +28,13 @@ import {InstitutionSoloDto} from "../../dtos/institution-solo-dto.model";
 })
 export class InstitutionSelectComponent {
 
-  @Input() institutions: InstitutionSoloDto[] = [];
+  @Input() institutions: ReadableInstitutionDto[] = [];
   @Input() disabled: boolean = false;
   @Input() institutionId: number | null = null;
 
-  @Output() institutionChanged: EventEmitter<InstitutionSoloDto | null> = new EventEmitter<InstitutionSoloDto | null>()
+  @Output() institutionChanged: EventEmitter<ReadableInstitutionDto | null> = new EventEmitter<ReadableInstitutionDto | null>()
 
-  institution: InstitutionSoloDto | null = null;
+  institution: ReadableInstitutionDto | null = null;
   selectionGroup: FormGroup;
 
   get institutionControl() {

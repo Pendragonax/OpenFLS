@@ -23,7 +23,7 @@ data class InstitutionSoloDto(
                         return institutions.map { of(it) }
                 }
 
-                fun of(institutionSoloProjection: InstitutionSoloProjection): InstitutionSoloDto {
+                fun ofSoloProjection(institutionSoloProjection: InstitutionSoloProjection): InstitutionSoloDto {
                         return InstitutionSoloDto(
                                 id = institutionSoloProjection.id ?: 0,
                                 name = institutionSoloProjection.name,
@@ -32,8 +32,8 @@ data class InstitutionSoloDto(
                         )
                 }
 
-                fun of(institutionSoloProjections: List<InstitutionSoloProjection>): List<InstitutionSoloDto> {
-                        return institutionSoloProjections.map { of(it) }
+                fun ofSoloProjection(institutionSoloProjections: List<InstitutionSoloProjection>): List<InstitutionSoloDto> {
+                        return institutionSoloProjections.map { ofSoloProjection(it) }
                 }
         }
 }

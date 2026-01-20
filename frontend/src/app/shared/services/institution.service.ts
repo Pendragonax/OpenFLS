@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import {InstitutionDto} from "../dtos/institution-dto.model";
 import {Base} from "./base.service";
-import {Observable} from "rxjs";
-import {InstitutionSoloDto} from "../dtos/institution-solo-dto.model";
+import {Observable, tap} from "rxjs";
+import {ReadableInstitutionDto} from "../dtos/institution-readable-dto.model";
 import {environment} from "../../../environments/environment";
 
+// TODO: Refactor service
 @Injectable({
   providedIn: 'root'
 })
@@ -25,8 +26,8 @@ export class InstitutionService extends Base<InstitutionDto> {
     });
   }
 
-  getAllReadable(): Observable<InstitutionSoloDto[]> {
+  getAllReadable(): Observable<ReadableInstitutionDto[]> {
     return this.http
-      .get<InstitutionSoloDto[]>(`${environment.api_url}${this.url}/readable`);
+      .get<ReadableInstitutionDto[]>(`${environment.api_url}${this.url}/readable`);
   }
 }
