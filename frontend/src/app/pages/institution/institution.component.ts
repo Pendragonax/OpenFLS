@@ -123,7 +123,7 @@ export class InstitutionComponent extends TablePageComponent<InstitutionViewMode
   }
 
   private isAdmin(employee: EmployeeDto): boolean {
-    return (employee.access?.role ?? 99) <= 1 ?? false
+    return (employee.access?.role ?? 99) <= 1
   }
 
   private isEditable(leadingIds: number[], institution: InstitutionDto | null): boolean {

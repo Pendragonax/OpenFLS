@@ -51,8 +51,8 @@ export class EmployeesComponent extends TablePageComponent<EmployeeViewModel, Em
         this.values = employees.map(value => <EmployeeViewModel>{
           dto: value,
           editable: isAdmin || this.isEmployeeEditable(leadingIds, value),
-          administrator: (value?.access?.role ?? 99) <= 1 ?? false,
-          leader: (value?.access?.role ?? 99) <= 2 ?? false,
+          administrator: (value?.access?.role ?? 99) <= 1,
+          leader: (value?.access?.role ?? 99) <= 2,
           institutions: institutions
             .filter(institution =>
               value.permissions

@@ -140,7 +140,7 @@ export class ContingentsComponent
       next: (value) => {
         this.institutionView = null;
         this.employeeView = value;
-        this.hideAddButton = !this.employeeView?.editable ?? true;
+        this.hideAddButton = !this.employeeView?.editable;
 
         this.loadContingents();
       }
@@ -151,7 +151,7 @@ export class ContingentsComponent
       next: (value) => {
         this.institutionView = value;
         this.employeeView = null;
-        this.hideAddButton = !this.institutionView?.editable ?? true;
+        this.hideAddButton = !this.institutionView?.editable;
 
         this.loadContingents();
       }
