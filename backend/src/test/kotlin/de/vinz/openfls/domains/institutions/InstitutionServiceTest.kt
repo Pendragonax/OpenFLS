@@ -2,8 +2,7 @@ package de.vinz.openfls.domains.institutions
 
 import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
 import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDTO
-import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
-import de.vinz.openfls.domains.institutions.dtos.InstitutionSoloDto
+import de.vinz.openfls.domains.institutions.dtos.ResponseByIDInstitutionDTO
 import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDTO
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import de.vinz.openfls.domains.permissions.Permission
@@ -19,6 +18,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import java.util.Optional
 
@@ -153,9 +153,11 @@ class InstitutionServiceTest {
     @Test
     fun getAllSoloDTOs_whenProjectionsExist_returnsSortedMappedDTOs() {
         // Given
-        val entity1 = Institution(id = 1L, name = "beta", email = "b@x", phonenumber = "1")
-        val entity2 = Institution(id = 2L, name = "Alpha", email = "a@x", phonenumber = "2")
-        whenever(institutionRepository.findAll()).thenReturn(listOf(entity1, entity2))
+        val projection1 = mockSoloProjection(id = 1L, name = "beta", email = "b@x", phonenumber = "1")
+        val projection2 = mockSoloProjection(id = 2L, name = "Alpha", email = "a@x", phonenumber = "2")
+        whenever(institutionRepository.findInstitutionSoloProjectionOrderedByName()).thenReturn(
+            listOf(projection1, projection2)
+        )
 
         // When
         val result = institutionService.getAllSoloDTOs()
@@ -172,9 +174,6 @@ class InstitutionServiceTest {
         val entity1 = Institution(id = 1L, name = "beta", email = "b@x", phonenumber = "1")
         val entity2 = Institution(id = 2L, name = "Alpha", email = "a@x", phonenumber = "2")
         whenever(institutionRepository.findAll()).thenReturn(listOf(entity1, entity2))
-        whenever(modelMapper.map(entity1, InstitutionDto::class.java)).thenReturn(InstitutionDto(1L, "beta", "b@x", "1"))
-        whenever(modelMapper.map(entity2, InstitutionDto::class.java)).thenReturn(InstitutionDto(2L, "Alpha", "a@x", "2"))
-
         // When
         val result = institutionService.getAllDTOs()
 
@@ -202,9 +201,9 @@ class InstitutionServiceTest {
     fun getDTOById_whenEntityExists_returnsMappedDto() {
         // Given
         val entity = Institution(id = 7L, name = "Alpha")
-        val dto = InstitutionDto(7L, "Alpha", "", "")
+        val dto = ResponseByIDInstitutionDTO(id = 7L, name = "Alpha")
         whenever(institutionRepository.findById(7L)).thenReturn(Optional.of(entity))
-        whenever(modelMapper.map(entity, InstitutionDto::class.java)).thenReturn(dto)
+        whenever(modelMapper.map(eq(entity), eq(ResponseByIDInstitutionDTO::class.java))).thenReturn(dto)
 
         // When
         val result = institutionService.getDTOById(7L)

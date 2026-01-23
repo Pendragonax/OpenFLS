@@ -2,10 +2,11 @@ package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
-import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
 import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -24,6 +25,10 @@ class ContingentServiceTest {
     @Mock
     lateinit var contingentRepository: ContingentRepository
     @Mock
+    lateinit var institutionService: InstitutionService
+    @Mock
+    lateinit var employeeService: EmployeeService
+    @Mock
     lateinit var accessService: AccessService
 
     private lateinit var contingentService: ContingentService
@@ -32,7 +37,14 @@ class ContingentServiceTest {
     fun setUp() {
         val workdaysReal = 251L
         val workdaysAssumption = 195L
-        contingentService = ContingentService(contingentRepository, accessService, workdaysReal, workdaysAssumption)
+        contingentService = ContingentService(
+            contingentRepository,
+            institutionService,
+            employeeService,
+            accessService,
+            workdaysReal,
+            workdaysAssumption
+        )
     }
 
     @Test
@@ -46,10 +58,10 @@ class ContingentServiceTest {
         whenever(contingent.weeklyServiceHours).thenReturn(3.4)
         val employee: Employee = mock(Employee::class.java)
         whenever(contingent.employee).thenReturn(employee)
-        whenever(employee.id).thenReturn(1)
+        whenever(employee.id).thenReturn(1L)
         val institution: Institution = mock(Institution::class.java)
         whenever(contingent.institution).thenReturn(institution)
-        whenever(institution.id).thenReturn(4)
+        whenever(institution.id).thenReturn(4L)
 
         whenever(contingentRepository.findById(id)).thenReturn(Optional.of(contingent))
 
@@ -137,7 +149,7 @@ class ContingentServiceTest {
         val hours = contingentService.getContingentHoursByYear(2024, contingents)
 
         // Then
-        assertThat(hours).isNotEmpty
+        assertThat(hours).isNotEmpty()
         assertThat(hours[0]).isEqualTo(284.21)
         assertThat(hours[1]).isEqualTo(31.00)
         assertThat(hours[2]).isEqualTo(29.00)
@@ -165,7 +177,7 @@ class ContingentServiceTest {
         val hours = contingentService.getContingentHoursByYear(2024, contingent)
 
         // Then
-        assertThat(hours).isNotEmpty
+        assertThat(hours).isNotEmpty()
         assertThat(hours[0]).isEqualTo(46.35)
         assertThat(hours[1]).isEqualTo(31.00)
         assertThat(hours[2]).isEqualTo(29.00)
@@ -182,7 +194,7 @@ class ContingentServiceTest {
         val hours = contingentService.getContingentHoursByYear(2024, contingent)
 
         // Then
-        assertThat(hours).isNotEmpty
+        assertThat(hours).isNotEmpty()
         assertThat(hours[0]).isEqualTo(273.0)
         assertThat(hours[1]).isEqualTo(31.00)
         assertThat(hours[2]).isEqualTo(29.00)
@@ -209,7 +221,7 @@ class ContingentServiceTest {
         val hours = contingentService.getContingentHoursByYear(2024, contingent)
 
         // Then
-        assertThat(hours).isNotEmpty
+        assertThat(hours).isNotEmpty()
         assertThat(hours[0]).isEqualTo(1180.32)
         assertThat(hours[1]).isEqualTo(134.03)
         assertThat(hours[12]).isEqualTo(134.03)

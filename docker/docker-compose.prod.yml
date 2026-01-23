@@ -25,7 +25,7 @@ services:
     build: 
       context: ../backend
       dockerfile: Dockerfile
-      target: PROD
+      target: prod
     restart: always
     env_file: docker-compose.env
     volumes:
@@ -44,7 +44,7 @@ services:
     build: 
       context: ../frontend
       dockerfile: Dockerfile
-      target: PROD
+      target: prod
     restart: always
     volumes:
       - ../proxy/nginx.frontend.conf:/etc/nginx/nginx.conf

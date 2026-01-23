@@ -1,5 +1,5 @@
 # Stage 1: Development
-FROM gradle:8-jdk17 as development
+FROM gradle:9-jdk21 AS development
 WORKDIR /app
 COPY . .
 RUN ./gradlew --no-daemon clean build
@@ -7,13 +7,13 @@ EXPOSE 8081
 CMD ["./gradlew", "--no-daemon", "bootRun"]
 
 # Stage 1: Build
-FROM gradle:8-jdk17 as build
+FROM gradle:9-jdk21 AS build
 WORKDIR /app
 COPY . .
 RUN ./gradlew --no-daemon clean build
 
 # Stage 2: Prod
-FROM eclipse-temurin:17-jdk as prod
+FROM eclipse-temurin:21-jre AS prod
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
 EXPOSE 8081

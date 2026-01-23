@@ -49,7 +49,7 @@ class SecurityConfiguration {
     @Value("\${jwt.public-key}")
     private val rsaPublicKey: RSAPublicKey? = null
 
-    @Value("\${openfls.cors.allowed-origin-patterns}")
+    @Value("\${openfls.cors.allowed-origin-patterns:}")
     private val corsAllowedOriginPatterns: List<String> = listOf()
 
     @Bean
