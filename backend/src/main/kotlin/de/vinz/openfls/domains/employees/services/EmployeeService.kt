@@ -42,6 +42,7 @@ class EmployeeService(
             password = if (username.isNotEmpty()) passwordEncoder.encode(username).toString() else ""
         }
 
+        entity.id = null
         entity.permissions = permissionService.convertToPermissions(valueDto.permissions, -1)
         entity.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, -1)
 
