@@ -32,18 +32,19 @@ import {MatDialog} from "@angular/material/dialog";
 import {ConfirmationModalComponent} from "../../modals/confirmation-modal/confirmation-modal.component";
 
 @Component({
-  selector: 'app-assistance-plans',
-  templateUrl: './assistance-plans.component.html',
-  styleUrls: ['./assistance-plans.component.css'],
-  providers: [
-    {provide: MAT_DATE_LOCALE, useValue: 'de-DE'},
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ],
+    selector: 'app-assistance-plans',
+    templateUrl: './assistance-plans.component.html',
+    styleUrls: ['./assistance-plans.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class AssistancePlansComponent
   extends TablePageComponent<AssistancePlanDto, [ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>

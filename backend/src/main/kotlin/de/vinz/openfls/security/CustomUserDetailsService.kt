@@ -16,8 +16,8 @@ class CustomUserDetailsService(
         private val passwordEncoder: PasswordEncoder
 ): UserDetailsService {
 
-    override fun loadUserByUsername(username: String?): UserDetails {
-        val user = employeeAccessRepository.getEmployeeByUsername(username!!)
+    override fun loadUserByUsername(username: String): UserDetails {
+        val user = employeeAccessRepository.getEmployeeByUsername(username)
 
         // user found
         if (user != null) {
@@ -36,7 +36,7 @@ class CustomUserDetailsService(
         return EmployeeAccess(
                 id = 0,
                 username = "admin",
-                password = passwordEncoder.encode("admin"),
+                password = passwordEncoder.encode("admin").orEmpty(),
                 role = EUserRoles.ADMIN.id,
                 employee = Employee(
                         id = 0,

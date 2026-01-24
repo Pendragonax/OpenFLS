@@ -1,5 +1,3 @@
-version: '3.6'
-
 services:
   db:
     container_name: open_fls_db
@@ -30,11 +28,11 @@ networks:
 
 secrets:
   db_password:
-    file: secrets/db_password.secret
+    file: ../secrets/db_password.secret
   db_root_password:
-    file: secrets/db_root_password.secret
+    file: ../secrets/db_root_password.secret
   db_user:
-    file: secrets/db_user.secret
+    file: ../secrets/db_user.secret
 
 volumes:
   open-fls-db:

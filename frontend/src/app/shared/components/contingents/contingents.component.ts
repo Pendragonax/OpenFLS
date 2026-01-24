@@ -25,18 +25,19 @@ import {EmployeeViewModel} from "../../models/employee-view.model";
 import {createStartEndValidator} from "../../validators/start-end-validator";
 
 @Component({
-  selector: 'app-contingents',
-  templateUrl: './contingents.component.html',
-  styleUrls: ['./contingents.component.css'],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ],
+    selector: 'app-contingents',
+    templateUrl: './contingents.component.html',
+    styleUrls: ['./contingents.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class ContingentsComponent
   extends TablePageComponent<ContingentDto, [EmployeeDto, InstitutionDto, ContingentDto, boolean]>
@@ -139,7 +140,7 @@ export class ContingentsComponent
       next: (value) => {
         this.institutionView = null;
         this.employeeView = value;
-        this.hideAddButton = !this.employeeView?.editable ?? true;
+        this.hideAddButton = !this.employeeView?.editable;
 
         this.loadContingents();
       }
@@ -150,7 +151,7 @@ export class ContingentsComponent
       next: (value) => {
         this.institutionView = value;
         this.employeeView = null;
-        this.hideAddButton = !this.institutionView?.editable ?? true;
+        this.hideAddButton = !this.institutionView?.editable;
 
         this.loadContingents();
       }

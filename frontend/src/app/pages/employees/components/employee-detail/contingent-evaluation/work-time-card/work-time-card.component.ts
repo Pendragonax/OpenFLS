@@ -1,9 +1,10 @@
 import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
-  selector: 'app-work-time-card',
-  templateUrl: './work-time-card.component.html',
-  styleUrls: ['./work-time-card.component.css']
+    selector: 'app-work-time-card',
+    templateUrl: './work-time-card.component.html',
+    styleUrls: ['./work-time-card.component.css'],
+    standalone: false
 })
 export class WorkTimeCardComponent implements OnInit {
   @Input() time: [number, number, number, number, number] = [0, 0, 0, 0, 0];

@@ -13,28 +13,27 @@ import {
 } from "@angular/material-moment-adapter";
 
 @Component({
-  selector: 'app-date-complete-selection',
-  standalone: true,
-  imports: [
-    FormsModule,
-    MatButtonModule,
-    MatDatepickerModule,
-    MatFormFieldModule,
-    MatIconModule,
-    ReactiveFormsModule,
-    MatTooltipModule
-  ],
-  templateUrl: './date-complete-selection.component.html',
-  styleUrl: './date-complete-selection.component.css',
-  providers: [
-    {provide: MAT_DATE_LOCALE, useValue: 'de-DE'},
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ]
+    selector: 'app-date-complete-selection',
+    imports: [
+        FormsModule,
+        MatButtonModule,
+        MatDatepickerModule,
+        MatFormFieldModule,
+        MatIconModule,
+        ReactiveFormsModule,
+        MatTooltipModule
+    ],
+    templateUrl: './date-complete-selection.component.html',
+    styleUrl: './date-complete-selection.component.css',
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ]
 })
 export class DateCompleteSelectionComponent {
 

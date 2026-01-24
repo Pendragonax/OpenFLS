@@ -6,13 +6,14 @@ import de.vinz.openfls.domains.services.dtos.ServiceXLDto
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import de.vinz.openfls.services.GenericService
-import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.LocalDate
 
 @org.springframework.stereotype.Service
+@Transactional(readOnly = true)
 class ServiceService(
         private val serviceRepository: ServiceRepository,
         private val modelMapper: ModelMapper
@@ -78,7 +79,7 @@ class ServiceService(
     fun getProjectionsByInstitutionIdsAndStartAndEnd(institutionIds: List<Long>,
                                                      start: LocalDate,
                                                      end: LocalDate): List<ServiceProjection> {
-        return serviceRepository.findProjectionsByInstitutionIdsAndStartAndEnd(institutionIds, start, end);
+        return serviceRepository.findProjectionsByInstitutionIdsAndStartAndEnd(institutionIds, start, end)
     }
 
     fun getAllByInstitutionAndYear(institutionId: Long, year: Int): List<ServiceProjection> {
@@ -193,7 +194,7 @@ class ServiceService(
                        start: LocalDate,
                        end: LocalDate,
                        allowedInstitutionIds: List<Long>): List<ServiceProjection> {
-        return serviceRepository.findProjectionsBy(institutionId, allowedInstitutionIds, employeeId, clientId, start, end);
+        return serviceRepository.findProjectionsBy(institutionId, allowedInstitutionIds, employeeId, clientId, start, end)
     }
 
     fun getDtosByClientAndDate(clientId: Long, date: LocalDate): List<ServiceDto> {

@@ -12,15 +12,16 @@ import {Location} from "@angular/common";
 import {HelperService} from "../../../../shared/services/helper.service";
 
 @Component({
-  selector: 'app-employee-new',
-  templateUrl: './employee-new.component.html',
-  styleUrls: ['./employee-new.component.css'],
-  providers: [
-    {
-      provide: STEPPER_GLOBAL_OPTIONS,
-      useValue: {showError: true},
-    },
-  ],
+    selector: 'app-employee-new',
+    templateUrl: './employee-new.component.html',
+    styleUrls: ['./employee-new.component.css'],
+    providers: [
+        {
+            provide: STEPPER_GLOBAL_OPTIONS,
+            useValue: { showError: true },
+        },
+    ],
+    standalone: false
 })
 export class EmployeeNewComponent extends NewPageComponent<EmployeeDto> implements OnInit {
 

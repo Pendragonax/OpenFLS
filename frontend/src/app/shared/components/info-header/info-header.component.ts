@@ -1,9 +1,10 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 @Component({
-  selector: 'app-info-header',
-  templateUrl: './info-header.component.html',
-  styleUrls: ['./info-header.component.css']
+    selector: 'app-info-header',
+    templateUrl: './info-header.component.html',
+    styleUrls: ['./info-header.component.css'],
+    standalone: false
 })
 export class InfoHeaderComponent implements OnInit {
 

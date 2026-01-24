@@ -4,10 +4,10 @@ import {ReplaySubject} from "rxjs";
 import {HelperService} from "../services/helper.service";
 
 @Component({
-  selector: 'app-new-page',
-  template: ``,
-  styles: [
-  ]
+    selector: 'app-new-page',
+    template: ``,
+    styles: [],
+    standalone: false
 })
 export abstract class NewPageComponent<T> implements OnInit {
 

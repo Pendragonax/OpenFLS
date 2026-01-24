@@ -32,18 +32,19 @@ import {ConfirmationModalComponent} from "../../../../modals/confirmation-modal/
 import {AssistancePlanHourService} from "../../../../services/assistance-plan-hour.service";
 
 @Component({
-  selector: 'app-assistance-plan-detail',
-  templateUrl: './assistance-plan-detail.component.html',
-  styleUrls: ['./assistance-plan-detail.component.css'],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ],
+    selector: 'app-assistance-plan-detail',
+    templateUrl: './assistance-plan-detail.component.html',
+    styleUrls: ['./assistance-plan-detail.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class AssistancePlanDetailComponent extends DetailPageComponent<AssistancePlanView> implements OnInit {
 

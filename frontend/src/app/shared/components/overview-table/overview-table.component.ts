@@ -2,9 +2,10 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ReplaySubject} from "rxjs";
 
 @Component({
-  selector: 'app-overview-table',
-  templateUrl: './overview-table.component.html',
-  styleUrls: ['./overview-table.component.css']
+    selector: 'app-overview-table',
+    templateUrl: './overview-table.component.html',
+    styleUrls: ['./overview-table.component.css'],
+    standalone: false
 })
 export class OverviewTableComponent implements OnInit {
   @Input() columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>();

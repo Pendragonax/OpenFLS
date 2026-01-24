@@ -3,9 +3,10 @@ import {ReplaySubject} from "rxjs";
 import {CsvService} from "../../services/csv.service";
 
 @Component({
-  selector: 'app-object-table',
-  templateUrl: './object-table.component.html',
-  styleUrls: ['./object-table.component.css']
+    selector: 'app-object-table',
+    templateUrl: './object-table.component.html',
+    styleUrls: ['./object-table.component.css'],
+    standalone: false
 })
 export class ObjectTableComponent implements OnInit {
   @Input() header$: ReplaySubject<string[]> = new ReplaySubject<string[]>()

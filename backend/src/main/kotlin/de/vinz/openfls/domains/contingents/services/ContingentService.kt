@@ -4,10 +4,14 @@ import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
+import de.vinz.openfls.domains.employees.EmployeeRepository
+import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.institutions.InstitutionRepository
+import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -16,9 +20,11 @@ import java.time.LocalDate
 @Service
 class ContingentService(
     private val contingentRepository: ContingentRepository,
+    private val institutionService: InstitutionService,
+    private val employeeService: EmployeeService,
     private val accessService: AccessService,
-    @Value("\${openfls.general.workdays.real}") private val workdaysReal: Long,
-    @Value("\${openfls.general.workdays.assumption}") private val workdaysAssumption: Long,
+    @param:Value("\${openfls.general.workdays.real}") private val workdaysReal: Long,
+    @param:Value("\${openfls.general.workdays.assumption}") private val workdaysAssumption: Long,
 ) {
 
     @Transactional
@@ -27,8 +33,11 @@ class ContingentService(
             throw IllegalArgumentException("end before start")
         }
 
-        val entity = contingentRepository.save(Contingent.from(contingentDto))
-        return ContingentDto.from(entity)
+        val entity = Contingent.of(contingentDto)
+        entity.employee = employeeService.getById(contingentDto.employeeId, true)
+        entity.institution = institutionService.getEntityById(contingentDto.institutionId)
+
+        return ContingentDto.from(contingentRepository.save(entity))
     }
 
     @Transactional
@@ -38,7 +47,7 @@ class ContingentService(
         if (contingentDto.end != null && contingentDto.start >= contingentDto.end)
             throw IllegalArgumentException("end before start")
 
-        val entity = contingentRepository.save(Contingent.from(contingentDto))
+        val entity = contingentRepository.save(Contingent.of(contingentDto))
         return ContingentDto.from(entity)
     }
 
@@ -50,12 +59,14 @@ class ContingentService(
         contingentRepository.deleteById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getAll(): List<ContingentDto> {
         val entities = contingentRepository.findAll()
         return entities.map { ContingentDto.from(it) }
             .sortedBy { it.start }
     }
 
+    @Transactional(readOnly = true)
     fun getAllByInstitutionAndYear(institutionId: Long, year: Int): List<ContingentProjection> {
         return contingentRepository.findByInstitutionIdAndStartAndEnd(
             institutionId,
@@ -64,27 +75,31 @@ class ContingentService(
         )
     }
 
+    @Transactional(readOnly = true)
     fun getById(id: Long): ContingentDto? {
         val entity = contingentRepository.findByIdOrNull(id)
         return entity?.let { ContingentDto.from(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getDtoById(id: Long): ContingentDto? {
         val entity = contingentRepository.findByIdOrNull(id)
         return if (entity == null) null else ContingentDto.from(entity)
     }
 
+    @Transactional(readOnly = true)
     fun existsById(id: Long): Boolean {
         return contingentRepository.existsById(id)
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     fun getByEmployeeId(id: Long): List<ContingentDto> {
         val entities = contingentRepository.findAllByEmployeeId(id)
         return entities.map { ContingentDto.from(it) }
             .sortedBy { it.employeeId }
     }
 
+    @Transactional(readOnly = true)
     fun getByInstitutionId(id: Long): List<ContingentDto> {
         val entities = contingentRepository.findAllByInstitutionId(id)
         return entities.map { ContingentDto.from(it) }
@@ -152,7 +167,7 @@ class ContingentService(
                 ((contingent.end?.let { it >= start } ?: true))
     }
 
-
+    @Transactional(readOnly = true)
     fun canModifyContingent(contingentId: Long): Boolean {
         return try {
             // ADMIN

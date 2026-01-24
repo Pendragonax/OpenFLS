@@ -20,9 +20,10 @@ import {ServiceExport} from "./model/service-export.model";
 import {ServiceService} from "../../services/service.service";
 
 @Component({
-  selector: 'app-service-table',
-  templateUrl: './service-table.component.html',
-  styleUrl: './service-table.component.css'
+    selector: 'app-service-table',
+    templateUrl: './service-table.component.html',
+    styleUrl: './service-table.component.css',
+    standalone: false
 })
 export class ServiceTableComponent implements AfterViewInit, OnChanges {
   @Input() services: Service[] = [];

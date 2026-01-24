@@ -9,9 +9,10 @@ import {Converter} from "../../shared/services/converter.helper";
 import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
-  selector: 'app-hour-type',
-  templateUrl: './hour-type.component.html',
-  styleUrls: ['./hour-type.component.css']
+    selector: 'app-hour-type',
+    templateUrl: './hour-type.component.html',
+    styleUrls: ['./hour-type.component.css'],
+    standalone: false
 })
 export class HourTypeComponent extends TablePageComponent<HourTypeDto, HourTypeDto> implements OnInit {
   tableColumns: string[] = ['title', 'price', 'actions']

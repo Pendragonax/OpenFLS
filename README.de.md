@@ -23,14 +23,14 @@ In diesem werden die Standard Zugangsdaten erstellt und die für die Verschlüss
 ```
 
 Stellen sie sicher, dass Sie die Zugangsdaten im Ordner *secrets* ändern (achten sie darauf keine leere Zeile am Ende zu belassen).
-In der Datei *.env* können sie noch weitere Konfigurationen tätigen wie dem Pfad zum Zertifikat, dem weitergeleiteten Port etc.
+In der Datei *docker/.env* können sie noch weitere Konfigurationen tätigen wie dem Pfad zum Zertifikat, dem weitergeleiteten Port etc.
 Um die Anwendung zu starten, nutzen sie folgenden Befehl:
 
 ``` console
 # DEVELOPMENT-MODE
-docker-compose up
+docker-compose --env-file docker/.env -f docker/docker-compose.yml up
 # PRODUCTION-MODE
-docker-compose -f docker-compose.prod.yml up
+docker-compose --env-file docker/.env -f docker/docker-compose.prod.yml up
 ```
 
 ## Betrieb

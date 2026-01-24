@@ -13,9 +13,10 @@ import {TablePageComponent} from "../../shared/components/table-page.component";
 import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
-  selector: 'app-institution',
-  templateUrl: './institution.component.html',
-  styleUrls: ['./institution.component.css']
+    selector: 'app-institution',
+    templateUrl: './institution.component.html',
+    styleUrls: ['./institution.component.css'],
+    standalone: false
 })
 export class InstitutionComponent extends TablePageComponent<InstitutionViewModel, InstitutionViewModel> implements OnInit {
   // VARs
@@ -122,7 +123,7 @@ export class InstitutionComponent extends TablePageComponent<InstitutionViewMode
   }
 
   private isAdmin(employee: EmployeeDto): boolean {
-    return (employee.access?.role ?? 99) <= 1 ?? false
+    return (employee.access?.role ?? 99) <= 1
   }
 
   private isEditable(leadingIds: number[], institution: InstitutionDto | null): boolean {

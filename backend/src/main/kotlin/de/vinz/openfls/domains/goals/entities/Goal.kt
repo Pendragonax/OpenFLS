@@ -6,7 +6,6 @@ import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.evaluations.Evaluation
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.services.Service
-import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 
@@ -25,7 +24,6 @@ class Goal(
         var description: String = "",
 
         @JsonIgnore
-        @field:Nullable
         @ManyToOne(
                 cascade = [CascadeType.PERSIST],
                 fetch = FetchType.LAZY
@@ -63,6 +61,6 @@ class Goal(
         }
 
         override fun hashCode(): Int {
-                return id.hashCode() ?: 0
+                return id.hashCode()
         }
 }

@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.services.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
-import org.jetbrains.annotations.NotNull
+import jakarta.validation.constraints.NotNull
 
 @Entity
 @Table(name = "hour_types")
@@ -36,7 +36,7 @@ class HourType(
     }
 
     override fun hashCode(): Int {
-        return id.hashCode() ?: 0
+        return id.hashCode()
     }
 
     companion object {

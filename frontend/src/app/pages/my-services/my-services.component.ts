@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Converter} from "../../shared/services/converter.helper";
 import {InstitutionService} from "../../shared/services/institution.service";
-import {InstitutionSoloDto} from "../../shared/dtos/institution-solo-dto.model";
+import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {ServiceService} from "../../shared/services/service.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {DateService} from "../../shared/services/date.service";
@@ -11,9 +11,10 @@ import {UserService} from "../../shared/services/user.service";
 import {ReplaySubject, switchMap} from "rxjs";
 
 @Component({
-  selector: 'app-my-my-services',
-  templateUrl: './my-services.component.html',
-  styleUrls: ['./my-services.component.css']
+    selector: 'app-my-my-services',
+    templateUrl: './my-services.component.html',
+    styleUrls: ['./my-services.component.css'],
+    standalone: false
 })
 export class MyServicesComponent implements OnInit {
 
@@ -25,7 +26,7 @@ export class MyServicesComponent implements OnInit {
   title: String = "Meine";
 
   services: Service[] = [];
-  selectedInstitution: InstitutionSoloDto | undefined = undefined;
+  selectedInstitution: ReadableInstitutionDto | undefined = undefined;
   start: Date = new Date(Date.now());
   end: Date = new Date(Date.now());
   searchString: string = "";

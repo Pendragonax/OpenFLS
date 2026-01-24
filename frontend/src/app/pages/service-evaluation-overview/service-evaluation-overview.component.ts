@@ -36,18 +36,19 @@ import {
 } from "./dtos/assistance-plans-analysis-month-dto";
 
 @Component({
-  selector: 'app-service-evaluation-overview',
-  templateUrl: './service-evaluation-overview.component.html',
-  styleUrls: ['./service-evaluation-overview.component.css'],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ]
+    selector: 'app-service-evaluation-overview',
+    templateUrl: './service-evaluation-overview.component.html',
+    styleUrls: ['./service-evaluation-overview.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class ServiceEvaluationOverviewComponent implements OnInit {
   readonly FIXED_COLUMN_FROM_INDEX: number = 2

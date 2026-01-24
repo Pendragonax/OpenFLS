@@ -8,9 +8,10 @@ import {MatDialog} from "@angular/material/dialog";
 import {InformationModal} from "../../../../../shared/modals/information/information.modal";
 
 @Component({
-  selector: 'app-contingent-overview',
-  templateUrl: './contingent-overview.component.html',
-  styleUrls: ['./contingent-overview.component.css']
+    selector: 'app-contingent-overview',
+    templateUrl: './contingent-overview.component.html',
+    styleUrls: ['./contingent-overview.component.css'],
+    standalone: false
 })
 export class ContingentOverviewComponent implements OnInit {
 

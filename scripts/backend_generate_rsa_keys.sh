@@ -9,11 +9,11 @@ openssl rsa -in keypair.pem -pubout -out public.key
 echo -e "\e[36m[INFO] generate temporary private-key\e[0m"
 openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out private.key
 
-echo -e "\e[36m[INFO] copy private-key to ./backend/src/main/resources/private.key\e[0m"
-cp private.key backend/src/main/resources/private.key
+echo -e "\e[36m[INFO] copy private-key to ../backend/src/main/resources/private.key\e[0m"
+cp private.key ../backend/src/main/resources/private.key
 
-echo -e "\e[36m[INFO] copy public-key to ./backend/src/main/resources/public.key\e[0m"
-cp public.key backend/src/main/resources/public.key
+echo -e "\e[36m[INFO] copy public-key to ../backend/src/main/resources/public.key\e[0m"
+cp public.key ../backend/src/main/resources/public.key
 
 echo -e "\e[36m[INFO] remove temporary generated keys\e[0m"
 rm private.key

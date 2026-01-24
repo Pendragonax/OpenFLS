@@ -1,5 +1,5 @@
 import {EmployeeSolo} from "./employee-solo.projection";
-import {InstitutionSoloDto} from "./institution-solo-dto.model";
+import {ReadableInstitutionDto} from "./institution-readable-dto.model";
 import {ClientSolo} from "./client-solo.projection";
 
 export class Service {
@@ -9,7 +9,7 @@ export class Service {
   title: string = "";
   content: string = "";
   groupOffer: boolean = false;
-  institution: InstitutionSoloDto = new InstitutionSoloDto();
+  institution: ReadableInstitutionDto = new ReadableInstitutionDto();
   employee: EmployeeSolo = new EmployeeSolo();
   client: ClientSolo = new ClientSolo();
 }

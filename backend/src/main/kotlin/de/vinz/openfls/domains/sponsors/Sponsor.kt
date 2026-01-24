@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.employees.entities.Unprofessional
-import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
@@ -27,7 +26,6 @@ class Sponsor(
         @field:NotNull
         var payExact: Boolean = false,
 
-        @field:Nullable
         @JsonIgnoreProperties(value = ["employee", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "sponsor",

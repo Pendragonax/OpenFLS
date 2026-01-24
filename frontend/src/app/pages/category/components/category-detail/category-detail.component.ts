@@ -10,9 +10,10 @@ import {DetailPageComponent} from "../../../../shared/components/detail-page.com
 import {HelperService} from "../../../../shared/services/helper.service";
 
 @Component({
-  selector: 'app-category-detail',
-  templateUrl: './category-detail.component.html',
-  styleUrls: ['./category-detail.component.css']
+    selector: 'app-category-detail',
+    templateUrl: './category-detail.component.html',
+    styleUrls: ['./category-detail.component.css'],
+    standalone: false
 })
 export class CategoryDetailComponent extends DetailPageComponent<CategoryTemplateDto> implements OnInit {
 

@@ -26,18 +26,19 @@ import {AssistancePlanView} from "../../../../models/assistance-plan-view.model"
 import {AssistancePlanHourDto} from "../../../../dtos/assistance-plan-hour-dto.model";
 
 @Component({
-  selector: 'app-assistance-plan-new',
-  templateUrl: './assistance-plan-new.component.html',
-  styleUrls: ['./assistance-plan-new.component.css'],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ],
+    selector: 'app-assistance-plan-new',
+    templateUrl: './assistance-plan-new.component.html',
+    styleUrls: ['./assistance-plan-new.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: MomentDateAdapter,
+            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class AssistancePlanNewComponent extends NewPageComponent<AssistancePlanDto> implements OnInit {
   // VARs

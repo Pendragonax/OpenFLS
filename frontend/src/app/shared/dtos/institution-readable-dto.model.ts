@@ -1,6 +1,6 @@
-export class InstitutionSolo {
+export class ReadableInstitutionDto {
   id: number = 0;
   name: string = "";
-  email: string = "";
   phonenumber: string = "";
+  email: string = "";
 }

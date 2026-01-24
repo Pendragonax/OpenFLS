@@ -23,14 +23,14 @@ This will create the default credentials and the keys needed to encrypt the toke
 ```
 
 Make sure you change the credentials in the *secrets* folder (be sure not to leave an empty line at the end).
-In the *.env* file you can make further configurations like the path to the certificate, the forwarded port, etc.
+In the *docker/.env* file you can make further configurations like the path to the certificate, the forwarded port, etc.
 To start the application use the following command:
 
 ``` console
 # DEVELOPMENT-MODE
-docker-compose up
+docker-compose --env-file docker/.env -f docker/docker-compose.yml up
 # PRODUCTION-MODE
-docker-compose -f docker-compose.prod.yml up
+docker-compose --env-file docker/.env -f docker/docker-compose.prod.yml up
 ```
 
 ## Operation

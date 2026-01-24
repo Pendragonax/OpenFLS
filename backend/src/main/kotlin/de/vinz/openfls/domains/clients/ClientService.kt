@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.categories.CategoryTemplateService
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
 import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.domains.institutions.InstitutionService
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 
@@ -28,7 +28,7 @@ class ClientService(
 
     @Transactional
     override fun create(value: Client): Client {
-        value.institution = institutionService.getById(value.institution?.id ?: 0)
+        value.institution = institutionService.getEntityById(value.institution?.id ?: 0)
                 ?: throw IllegalArgumentException("institution not found")
         value.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate?.id ?: 0)
                 ?: throw IllegalArgumentException("category template not found")
@@ -49,7 +49,7 @@ class ClientService(
         if (!clientRepository.existsById(value.id))
             throw IllegalArgumentException("client not found")
 
-        value.institution = institutionService.getById(value.institution?.id ?: 0)
+        value.institution = institutionService.getEntityById(value.institution?.id ?: 0)
                 ?: throw IllegalArgumentException("institution not found")
         value.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate?.id ?: 0)
                 ?: throw IllegalArgumentException("category template not found")
@@ -62,10 +62,12 @@ class ClientService(
         clientRepository.deleteById(id)
     }
 
+    @Transactional(readOnly = true)
     override fun getAll(): List<Client> {
         return clientRepository.findAll().toList()
     }
 
+    @Transactional(readOnly = true)
     fun getAllClientSimpleDto(): List<ClientSimpleDto> {
         val clientInstitutionDtos = clientRepository.findAllClientSimpleDto()
         return clientInstitutionDtos
@@ -73,6 +75,7 @@ class ClientService(
                 .sortedBy { it.lastName.lowercase() }
     }
 
+    @Transactional(readOnly = true)
     fun getAllClientSoloDto(): List<ClientSoloDto> {
         val clientSoloProjections = clientRepository.findAllClientSoloProjectionBy()
         return clientSoloProjections
@@ -80,6 +83,7 @@ class ClientService(
                 .sortedBy { it.lastName.lowercase() }
     }
 
+    @Transactional(readOnly = true)
     fun getDtoById(id: Long): ClientDto? {
         val entity = getById(id)
 
@@ -91,14 +95,17 @@ class ClientService(
         return null
     }
 
+    @Transactional(readOnly = true)
     override fun getById(id: Long): Client? {
         return clientRepository.findById(id).orElse(null)
     }
 
+    @Transactional(readOnly = true)
     override fun existsById(id: Long): Boolean {
         return clientRepository.existsById(id)
     }
 
+    @Transactional(readOnly = true)
     fun existById(id: Long): Boolean {
         return clientRepository.existsById(id)
     }

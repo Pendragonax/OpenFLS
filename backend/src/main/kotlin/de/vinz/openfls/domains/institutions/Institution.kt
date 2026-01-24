@@ -2,12 +2,14 @@ package de.vinz.openfls.domains.institutions
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.institutions.Institution.Companion.of
+import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDTO
+import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDTO
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.services.Service
-import org.springframework.lang.Nullable
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotEmpty
@@ -31,14 +33,12 @@ class Institution(
         var email: String = "",
 
         @JsonIgnore
-        @field:Nullable
         @OneToMany(
                 mappedBy = "institution",
                 cascade = [CascadeType.REMOVE],
                 fetch = FetchType.LAZY)
         var permissions: MutableSet<Permission>? = null,
 
-        @field:Nullable
         @OneToMany(
                 mappedBy = "institution",
                 cascade = [CascadeType.REMOVE],
@@ -74,5 +74,29 @@ class Institution(
 
         override fun hashCode(): Int {
                 return id?.hashCode() ?: 0
+        }
+
+        companion object {
+                fun of(dto: CreateInstitutionDTO): Institution {
+                        return Institution(
+                                id = null,
+                                name = dto.name,
+                                phonenumber = dto.phonenumber,
+                                email = dto.email,
+                                permissions = Permission.of(dto.permissions).toMutableSet())
+                }
+
+                fun of(dtos: List<CreateInstitutionDTO>): List<Institution> {
+                        return dtos.map { of(it) }
+                }
+
+                fun of(dto: UpdateInstitutionDTO): Institution {
+                        return Institution(
+                                id = null,
+                                name = dto.name,
+                                phonenumber = dto.phonenumber,
+                                email = dto.email
+                        )
+                }
         }
 }

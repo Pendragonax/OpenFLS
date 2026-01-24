@@ -10,6 +10,7 @@ import de.vinz.openfls.domains.goals.repositories.GoalRepository
 import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.institutions.InstitutionService
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -24,6 +25,7 @@ class GoalService(
         private val modelMapper: ModelMapper
 ): GenericService<Goal> {
 
+    @Transactional
     fun create(valueDto: GoalDto): GoalDto {
         val entity = modelMapper.map(valueDto, Goal::class.java)
 
@@ -31,7 +33,7 @@ class GoalService(
                 ?: throw IllegalArgumentException("assistance plan [id = ${valueDto.assistancePlanId}] not found")
 
         if (valueDto.institutionId != null) {
-            entity.institution = institutionService.getById(valueDto.institutionId!!)
+            entity.institution = institutionService.getEntityById(valueDto.institutionId!!)
                     ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
         }
 
@@ -54,6 +56,7 @@ class GoalService(
         return valueDto
     }
 
+    @Transactional
     override fun create(value: Goal): Goal {
         if (value.id > 0)
             throw IllegalArgumentException("id is set")
@@ -77,6 +80,7 @@ class GoalService(
         return entity
     }
 
+    @Transactional
     fun update(valueDto: GoalDto): GoalDto {
         val entity = modelMapper.map(valueDto, Goal::class.java)
 
@@ -84,7 +88,7 @@ class GoalService(
                 ?: throw IllegalArgumentException("assistance plan [id = ${valueDto.assistancePlanId}] not found")
 
         if (valueDto.institutionId != null) {
-            entity.institution = institutionService.getById(valueDto.institutionId!!)
+            entity.institution = institutionService.getEntityById(valueDto.institutionId!!)
                     ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
         }
 
@@ -107,6 +111,7 @@ class GoalService(
         return valueDto
     }
 
+    @Transactional
     override fun update(value: Goal): Goal {
         if (value.id <= 0)
             throw IllegalArgumentException("id is not set")
@@ -136,6 +141,7 @@ class GoalService(
         return entity
     }
 
+    @Transactional
     override fun delete(id: Long) {
         if (id <= 0)
             throw IllegalArgumentException("id is not set")
@@ -145,22 +151,27 @@ class GoalService(
         goalRepository.deleteById(id)
     }
 
+    @Transactional(readOnly = true)
     override fun getAll(): List<Goal> {
         return goalRepository.findAll().toList()
     }
 
+    @Transactional(readOnly = true)
     fun getDtoById(id: Long): GoalDto? {
         return modelMapper.map(getById(id), GoalDto::class.java)
     }
 
+    @Transactional(readOnly = true)
     override fun getById(id: Long): Goal? {
         return goalRepository.findByIdOrNull(id)
     }
 
+    @Transactional(readOnly = true)
     override fun existsById(id: Long): Boolean {
         return goalRepository.existsById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getByAssistancePlanId(id: Long): List<GoalDto> {
         val entities = goalRepository.findByAssistancePlanId(id)
 

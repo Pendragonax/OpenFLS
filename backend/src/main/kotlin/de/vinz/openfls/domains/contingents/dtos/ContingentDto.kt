@@ -25,7 +25,7 @@ class ContingentDto {
     companion object {
         fun from(entity: Contingent): ContingentDto {
             val dto = ContingentDto()
-            dto.id = entity.id ?: 0
+            dto.id = entity.id
             dto.start = entity.start
             dto.end = entity.end
             dto.weeklyServiceHours = entity.weeklyServiceHours

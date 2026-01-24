@@ -20,9 +20,10 @@ import {ClientsService} from "../../shared/services/clients.service";
 import {AssistancePlan} from "../../shared/projections/assistance-plan.projection";
 
 @Component({
-  selector: 'app-assistance-plan-analysis',
-  templateUrl: './assistance-plan-analysis.component.html',
-  styleUrls: ['./assistance-plan-analysis.component.css']
+    selector: 'app-assistance-plan-analysis',
+    templateUrl: './assistance-plan-analysis.component.html',
+    styleUrls: ['./assistance-plan-analysis.component.css'],
+    standalone: false
 })
 export class AssistancePlanAnalysisComponent implements OnInit {
 

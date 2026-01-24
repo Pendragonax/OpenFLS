@@ -16,7 +16,7 @@ import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.domains.permissions.PermissionService
 import jakarta.persistence.EntityNotFoundException
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -42,6 +42,7 @@ class EmployeeService(
             password = if (username.isNotEmpty()) passwordEncoder.encode(username).toString() else ""
         }
 
+        entity.id = null
         entity.permissions = permissionService.convertToPermissions(valueDto.permissions, -1)
         entity.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, -1)
 
@@ -177,6 +178,7 @@ class EmployeeService(
         employeeAccessRepository.deleteById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getAssistancePlanAsFavorites(employeeId: Long): List<AssistancePlanResponseDto> {
         val employee = employeeRepository.findById(employeeId)
                 .orElseThrow { EntityNotFoundException() }
@@ -210,6 +212,7 @@ class EmployeeService(
         }
     }
 
+    @Transactional(readOnly = true)
     fun getAllEmployeeDtos(): List<EmployeeDto> {
         return getAll()
                 .sortedBy { it.lastname.lowercase() }
@@ -218,6 +221,7 @@ class EmployeeService(
                 } }
     }
 
+    @Transactional(readOnly = true)
     override fun getAll(): List<Employee> {
         return employeeRepository.findAll().map {
             it.apply {
@@ -226,26 +230,31 @@ class EmployeeService(
         }.toList()
     }
 
+    @Transactional(readOnly = true)
     fun getAllProjections(): List<EmployeeSoloProjection> {
         return employeeRepository.findAllProjectionsBy().sortedBy { it.lastname }
     }
 
+    @Transactional(readOnly = true)
     override fun getById(id: Long): Employee? {
         return this.getById(id, false)?.apply {
             this.access?.password = ""
         }
     }
 
+    @Transactional(readOnly = true)
     override fun existsById(id: Long): Boolean {
         return employeeRepository.existsById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getEmployeeDtoById(id: Long, adminMode: Boolean): EmployeeDto? {
         val entity = getById(id)
 
         return modelMapper.map(entity, EmployeeDto::class.java)
     }
 
+    @Transactional(readOnly = true)
     fun getById(id: Long, adminMode: Boolean): Employee? {
         val value = employeeRepository.findById(id).orElse(null)?.apply {
             if (!adminMode) {

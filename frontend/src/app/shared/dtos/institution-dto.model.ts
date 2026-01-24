@@ -7,7 +7,6 @@ export class InstitutionDto {
   phonenumber: string = "";
   email: string = "";
   permissions: PermissionDto[] = [];
-  contingents: ContingentDto[] = [];
 
   public constructor(init?:Partial<InstitutionDto>) {
     Object.assign(this, init);

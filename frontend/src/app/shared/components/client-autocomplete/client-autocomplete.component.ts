@@ -5,9 +5,10 @@ import {FormControl} from "@angular/forms";
 import {ClientSoloDto} from "../../dtos/client-solo-dto.model";
 
 @Component({
-  selector: 'app-client-autocomplete',
-  templateUrl: './client-autocomplete.component.html',
-  styleUrl: './client-autocomplete.component.css'
+    selector: 'app-client-autocomplete',
+    templateUrl: './client-autocomplete.component.html',
+    styleUrl: './client-autocomplete.component.css',
+    standalone: false
 })
 export class ClientAutocompleteComponent implements OnInit {
 

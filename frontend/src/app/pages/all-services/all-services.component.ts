@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {catchError, of, tap} from "rxjs";
-import {InstitutionSoloDto} from "../../shared/dtos/institution-solo-dto.model";
+import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
 import {ServiceService} from "../../shared/services/service.service";
 import {Converter} from "../../shared/services/converter.helper";
@@ -13,23 +13,24 @@ import {EmployeeSolo} from "../../shared/dtos/employee-solo.projection";
 import {EmployeeService} from "../../shared/services/employee.service";
 
 @Component({
-  selector: 'app-all-services',
-  templateUrl: './all-services.component.html',
-  styleUrl: './all-services.component.css'
+    selector: 'app-all-services',
+    templateUrl: './all-services.component.html',
+    styleUrl: './all-services.component.css',
+    standalone: false
 })
 export class AllServicesComponent implements OnInit {
 
   filterDateStart: Date = new Date(Date.now());
   baseUrl: string = "services/all";
 
-  readableInstitutions: InstitutionSoloDto[] = [];
+  readableInstitutions: ReadableInstitutionDto[] = [];
   clients: ClientSoloDto[] = [];
   employees: EmployeeSolo[] = [];
   title: String = "Meine";
 
   services: Service[] = [];
   filteredServices: Service[] = [];
-  selectedInstitution: InstitutionSoloDto | null = null;
+  selectedInstitution: ReadableInstitutionDto | null = null;
   selectedClient: ClientSoloDto | null = null;
   selectedEmployee: EmployeeSolo | null = null;
   paramClientId: number | null = null;
@@ -117,7 +118,7 @@ export class AllServicesComponent implements OnInit {
     this.navigate(this.start, this.end, this.paramInstitutionId ?? 0, this.selectedEmployee?.id ?? 0, this.paramClientId ?? 0);
   }
 
-  onInstitutionChanged(institution: InstitutionSoloDto | null) {
+  onInstitutionChanged(institution: ReadableInstitutionDto | null) {
     this.selectedInstitution = institution;
     this.paramInstitutionId = institution?.id ?? 0;
 

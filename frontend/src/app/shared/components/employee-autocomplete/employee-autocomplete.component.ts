@@ -12,8 +12,7 @@ import {map, startWith} from "rxjs/operators";
 import {EmployeeSolo} from "../../dtos/employee-solo.projection";
 
 @Component({
-  selector: 'app-employee-autocomplete',
-  standalone: true,
+    selector: 'app-employee-autocomplete',
     imports: [
         AsyncPipe,
         MatAutocompleteModule,
@@ -26,8 +25,8 @@ import {EmployeeSolo} from "../../dtos/employee-solo.projection";
         NgIf,
         ReactiveFormsModule
     ],
-  templateUrl: './employee-autocomplete.component.html',
-  styleUrl: './employee-autocomplete.component.css'
+    templateUrl: './employee-autocomplete.component.html',
+    styleUrl: './employee-autocomplete.component.css'
 })
 export class EmployeeAutocompleteComponent implements OnInit {
 

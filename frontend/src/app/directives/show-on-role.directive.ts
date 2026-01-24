@@ -3,7 +3,8 @@ import {UserService} from "../shared/services/user.service";
 import {Subject, takeUntil} from "rxjs";
 
 @Directive({
-  selector: '[showOnRole]'
+    selector: '[showOnRole]',
+    standalone: false
 })
 export class ShowOnRoleDirective implements OnInit, OnDestroy {
 
