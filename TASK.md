@@ -2,10 +2,10 @@
 
 ## 1. Aufgabe
 Kurzbeschreibung der Aufgabe:
-- Frontend-Dependencies ueberpruefen und Update-Plan erstellen.
+- Dockerfile so anpassen, dass beim Build RSA-Keys per Script generiert werden.
 
 Ziel der Aufgabe (Outcome, nicht nur Output):
-- Klarer, priorisierter Plan fuer Updates, Risiken und Tests im Frontend.
+- Build erzeugt `backend/src/main/resources/private.key` und `public.key` reproduzierbar vor dem JAR-Build.
 
 Prioritaet:
 - Mittel
@@ -15,13 +15,13 @@ Deadline / Zeitrahmen (falls relevant):
 
 ## 2. Kontext fuer diese Aufgabe
 Relevante Infos aus DOMAIN und STATE:
-- Frontend ist Angular-basiert (vgl. `frontend/` Struktur).
+- Script: `scripts/backend_generate_rsa_keys.sh`.
+- Backend-Dockerfile nutzt Gradle Build-Stage.
 
 ## 3. Erwarteter Output
 Formate / Artefakte, die am Ende vorliegen sollen:
-- Liste aller relevanten Dependency-Dateien (z. B. `package.json`, Lockfile).
-- Bewertung der Update-Reife (Major/Minor/Patch) inkl. Risiken.
-- Konkreter Update-Plan (Reihenfolge, Tests, Fallback).
+- Angepasste `backend/Dockerfile` (ggf. Script- oder Build-Stage angepasst).
+- Falls noetig: Script oder Pfade angepasst, damit Keys korrekt landen.
 
 ## 4. Vorschlag fuer Ablauf (optional)
 - Schritt 1: Plan

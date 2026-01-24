@@ -1,3 +1,4 @@
+import '@testbed';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AllServicesComponent } from './all-services.component';
@@ -8,7 +9,7 @@ describe('AllServicesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AllServicesComponent]
+      declarations: [AllServicesComponent]
     })
     .compileComponents();
     

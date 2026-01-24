@@ -1,3 +1,4 @@
+import '@testbed';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServiceEvaluationOverviewComponent } from './service-evaluation-overview.component';

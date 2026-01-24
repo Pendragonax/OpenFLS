@@ -24,7 +24,6 @@ import {MatSelectModule} from "@angular/material/select";
 export class SearchFieldComponent {
 
   @Input() label: string = "Suchtext"
-  @Input() onResetClick!: () => void
   @Input() placeholder: string = "..."
   @Input() isSubmitting: boolean = false
 
