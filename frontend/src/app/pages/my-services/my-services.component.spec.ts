@@ -1,3 +1,4 @@
+import '@testbed';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MyServicesComponent } from './my-services.component';
@@ -8,7 +9,7 @@ describe('ServicesComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MyServicesComponent]
+      declarations: [MyServicesComponent]
     })
     .compileComponents();
 

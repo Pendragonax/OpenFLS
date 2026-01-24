@@ -1,3 +1,4 @@
+import '@testbed';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AssistancePlanEvaluationModalComponent } from './assistance-plan-evaluation-modal.component';
