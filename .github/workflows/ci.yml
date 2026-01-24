@@ -44,7 +44,7 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
-          npm run test -- --watch=false --browsers=ChromeHeadless
+          npx ng test --watch=false --browsers=ChromeHeadless
 
       - name: Run frontend build
         working-directory: frontend
