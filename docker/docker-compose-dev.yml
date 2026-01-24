@@ -37,18 +37,18 @@ services:
 
   proxy:
     container_name: open_fls_proxy
-    image: nginx
+    image: nginx:1.28.1
     env_file: docker-compose.env
     restart: always
     volumes:
       - ../proxy/nginx-dev.conf:/etc/nginx/nginx.conf
-      - ${LOG_PATH}:/var/log/nginx/
+      - ./logs:/var/log/nginx/
     depends_on:
       - db
       - frontend
       - adminer
     ports:
-      - ${PORT}:8000
+      - "8000:8000"
     networks:
       - open-fls-network
 

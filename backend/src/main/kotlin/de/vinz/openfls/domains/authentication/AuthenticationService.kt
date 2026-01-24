@@ -23,7 +23,9 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.security.oauth2.jwt.JwtEncoder
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters
 import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Value
 import java.time.Instant
+import java.time.Duration
 import java.util.*
 import java.util.stream.Collectors
 
@@ -34,7 +36,8 @@ class AuthenticationService(
         private val authenticationManager: AuthenticationManager,
         private val jwtEncoder: JwtEncoder,
         private val passwordEncoder: PasswordEncoder,
-        private val modelMapper: ModelMapper
+        private val modelMapper: ModelMapper,
+        @param:Value("\${server.servlet.session.timeout}") private val sessionTimeout: Duration
 ) {
     @Transactional(readOnly = true)
     fun login(username: String, password: String): AuthenticationResponseDto {
@@ -44,7 +47,7 @@ class AuthenticationService(
         val user = authentication.principal as CustomUserDetails
 
         val now = Instant.now()
-        val expireAfterSeconds = System.getenv("SESSION_TIMEOUT").toLong()
+        val expireAfterSeconds = sessionTimeout.seconds
 
         val scope = authentication.authorities.stream()
                 .map(GrantedAuthority::getAuthority)
