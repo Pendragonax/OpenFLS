@@ -23,27 +23,28 @@
 
   <div class="row justify-content-center">
     <div class="col">
-      <div class="row my-2">
-        <app-work-time-card [time]="time1"
-                            [title]="'Heute'"></app-work-time-card>
-      </div>
-      <div class="row my-2">
-        <app-work-time-card [time]="time7"
-                            [title]="'7 Tage'"></app-work-time-card>
-      </div>
-      <div class="row my-2">
-        <app-work-time-card [time]="time30"
-                            [title]="'30 Tage'"></app-work-time-card>
-      </div>
-    </div>
-
-    <div class="col">
-      <div class="calendar-card mx-auto mt-3">
+      <div class="calendar-card mx-auto mt-3" (mousedown)="onCalendarMouseDown($event)">
         <mat-calendar #serviceCalendar
                       [dateClass]="dateClass()"
                       (selectedChange)="onDateClicked($event)"
                       class="contingent-calendar"
                       readonly></mat-calendar>
+
+        <button #menuTrigger="matMenuTrigger"
+                class="calendar-menu-anchor"
+                mat-icon-button
+                [matMenuTriggerFor]="calendarMenu"
+                [style.left.px]="menuPosition.x"
+                [style.top.px]="menuPosition.y"></button>
+
+        <mat-menu #calendarMenu="matMenu" [overlapTrigger]="false" class="calendar-menu-panel">
+          <button mat-menu-item (click)="onGoToDocumentation()">
+            Gehe zu Dokumentationen
+          </button>
+          <button mat-menu-item (click)="onMarkAbsent()">
+            Markiere als abwesend
+          </button>
+        </mat-menu>
 
         <div class="calendar-legend">
           <div class="legend-item">
@@ -69,6 +70,21 @@
         </div>
 
         <div class="calendar-note">Es sind nur die letzten 365 Tage ausgewertet</div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="row my-2">
+        <app-work-time-card [time]="time1"
+                            [title]="'Heute'"></app-work-time-card>
+      </div>
+      <div class="row my-2">
+        <app-work-time-card [time]="time7"
+                            [title]="'7 Tage'"></app-work-time-card>
+      </div>
+      <div class="row my-2">
+        <app-work-time-card [time]="time30"
+                            [title]="'30 Tage'"></app-work-time-card>
       </div>
     </div>
   </div>

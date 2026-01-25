@@ -65,6 +65,57 @@
   color: #8b93a1;
 }
 
+.calendar-menu-anchor {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+::ng-deep .calendar-menu-panel.mat-menu-panel {
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.16);
+  border: 1px solid #e6ebf2;
+  min-width: 220px;
+  padding: 4px 0;
+}
+
+::ng-deep .calendar-menu-panel .mat-menu-content {
+  padding: 4px 0;
+}
+
+::ng-deep .calendar-menu-panel .mat-menu-item {
+  font-size: 14px;
+  color: #1f2933;
+  height: 40px;
+  line-height: 40px;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
+
+::ng-deep .calendar-menu-panel .mat-menu-item:hover {
+  background: #113a6e;
+}
+
+::ng-deep .calendar-menu-panel .mat-menu-item.cdk-focused,
+::ng-deep .calendar-menu-panel .mat-menu-item.cdk-program-focused,
+::ng-deep .calendar-menu-panel .mat-menu-item.cdk-mouse-focused {
+  background: #eef2f7;
+  outline: none;
+}
+
+::ng-deep .calendar-menu-panel .mat-menu-item .mat-menu-item-text {
+  font-weight: 500;
+  color: #1f2933;
+}
+
+::ng-deep .calendar-menu-panel .mat-menu-item + .mat-menu-item {
+  border-top: 1px solid #edf1f6;
+}
+
 ::ng-deep .contingent-calendar .mat-calendar-header {
   padding: 0 4px 6px;
 }
@@ -120,7 +171,8 @@
 }
 
 ::ng-deep .contingent-calendar .mat-calendar-body-cell:hover .mat-calendar-body-cell-content {
-  background: #e5e9f0;
+  background: #0f264e !important;
+  color: #c0c6d1 !important;
 }
 
 ::ng-deep .contingent-calendar .mat-calendar-body-disabled .mat-calendar-body-cell-content {

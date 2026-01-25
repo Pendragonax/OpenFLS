@@ -6,7 +6,7 @@ import {Converter} from "../../../../../shared/services/converter.helper";
 import {ServiceService} from "../../../../../shared/services/service.service";
 import {ServiceTimeDayDto} from "../../../../../shared/dtos/service-time-day-dto.model";
 import {MatCalendarCellCssClasses} from "@angular/material/datepicker";
-import {UserService} from "../../../../../shared/services/user.service";
+import {MatMenuTrigger} from "@angular/material/menu";
 import {Router} from "@angular/router";
 import {DateService} from "../../../../../shared/services/date.service";
 
@@ -23,6 +23,7 @@ export class ContingentEvaluationComponent implements OnInit {
   @Output() onRefreshClick = new EventEmitter<any>();
 
   @ViewChild('serviceCalendar') serviceCalendar;
+  @ViewChild('menuTrigger') menuTrigger!: MatMenuTrigger;
 
   // STATEs
   isSubmitting = false;
@@ -35,6 +36,8 @@ export class ContingentEvaluationComponent implements OnInit {
   serviceDates: [Date, number][] = [];
   serviceAllBaseUrl = "services/all"
   serviceMyBaseUrl = "services/my"
+  menuPosition = { x: 0, y: 0 };
+  lastSelectedDate: Date | null = null;
 
   constructor(
     private serviceService: ServiceService,
@@ -107,7 +110,7 @@ export class ContingentEvaluationComponent implements OnInit {
       if (serviceDate != null) {
         return serviceDate[1] < 1 ? serviceDate[1] < 0.95 ? 'red-date' : 'yellow-date' : 'green-date';
       } else {
-        return 'grey-date';
+        return '';
       }
     };
   }
@@ -172,21 +175,46 @@ export class ContingentEvaluationComponent implements OnInit {
   }
 
   onDateClicked(date) {
+    this.lastSelectedDate = new Date(date);
+    this.openMenu();
+  }
+
+  onCalendarMouseDown(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.menuPosition = { x: event.clientX, y: event.clientY };
+  }
+
+  onGoToDocumentation() {
+    if (!this.lastSelectedDate) {
+      return;
+    }
+
+    const formattedDate = this.dateService.formatDateToYearMonthDay(this.lastSelectedDate);
+
     if (!this.navigateToMyServices) {
       this.router.navigate([
         this.serviceAllBaseUrl,
-        this.dateService.formatDateToYearMonthDay(new Date(date)),
-        this.dateService.formatDateToYearMonthDay(new Date(date)),
+        formattedDate,
+        formattedDate,
         0,
         this.employee.id,
         0
-      ])
+      ]);
     } else {
       this.router.navigate([
         this.serviceMyBaseUrl,
-        this.dateService.formatDateToYearMonthDay(new Date(date)),
-        this.dateService.formatDateToYearMonthDay(new Date(date))
-      ])
+        formattedDate,
+        formattedDate
+      ]);
     }
+  }
+
+  onMarkAbsent() {
+    console.log('calendar mark absent', this.lastSelectedDate);
+  }
+
+  private openMenu() {
+    setTimeout(() => this.menuTrigger?.openMenu());
   }
 }
