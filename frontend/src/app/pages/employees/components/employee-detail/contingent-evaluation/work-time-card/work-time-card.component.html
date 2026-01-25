@@ -1,14 +1,20 @@
-<mat-card class="mat-elevation-z4 min-width-250 min-height-150 m-2"
-          [ngClass]="time[3] < 100 ? time[3] < 95 ? 'bg-red' : 'bg-yellow' : 'bg-green'">
-  <mat-card-title class="mx-auto"><b>{{title}}</b></mat-card-title>
-
-  <div class="container-fluid align-content-center my-auto">
-    <div class="row fw-normal justify-content-center">{{time[0]}}h Soll</div>
-    <div class="row fw-normal justify-content-center">{{time[1]}}h Ist</div>
-    <div class="row fw-light">
-      <div class="col h1 my-auto text-center"
-           [matTooltip]="time[3].toString() + '%'"
-           [matTooltipPosition]="'below'"><b>{{time[2]}}h</b> / <b>{{time[4]}}min</b></div>
+<mat-card class="work-time-card mat-elevation-z4"
+          [ngClass]="time[3] < 100 ? time[3] < 95 ? 'work-time-card--bad' : 'work-time-card--warn' : 'work-time-card--ok'">
+  <div class="work-time-card__status"></div>
+  <div class="work-time-card__content">
+    <div class="work-time-card__left">
+      <div class="work-time-card__title">{{title}}</div>
+      <div class="work-time-card__meta">
+        <div>Erfasst: <span>{{time[1]}} h</span></div>
+        <div>Soll: <span>{{time[0]}} h</span></div>
+        <div>Differenz: <span [class.is-negative]="time[2] < 0">{{time[2]}} h</span></div>
+      </div>
+    </div>
+    <div class="work-time-card__right"
+         [matTooltip]="time[3].toString() + '%'"
+         [matTooltipPosition]="'below'">
+      <div class="work-time-card__ratio">{{time[1]}} / {{time[0]}} <span>h</span></div>
+      <div class="work-time-card__delta" [class.is-negative]="time[2] < 0">{{time[2]}} h</div>
     </div>
   </div>
 </mat-card>
