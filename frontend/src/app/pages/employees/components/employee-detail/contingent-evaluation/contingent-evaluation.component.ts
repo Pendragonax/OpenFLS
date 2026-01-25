@@ -38,7 +38,6 @@ export class ContingentEvaluationComponent implements OnInit {
 
   constructor(
     private serviceService: ServiceService,
-    private userService: UserService,
     private converter: Converter,
     private router: Router,
     private dateService: DateService
@@ -108,7 +107,7 @@ export class ContingentEvaluationComponent implements OnInit {
       if (serviceDate != null) {
         return serviceDate[1] < 1 ? serviceDate[1] < 0.95 ? 'red-date' : 'yellow-date' : 'green-date';
       } else {
-        return '';
+        return 'grey-date';
       }
     };
   }

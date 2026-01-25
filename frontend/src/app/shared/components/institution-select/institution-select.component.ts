@@ -11,7 +11,6 @@ import {ReadableInstitutionDto} from "../../dtos/institution-readable-dto.model"
 @Component({
     selector: 'app-institution-select',
     imports: [
-        AsyncPipe,
         FormsModule,
         MatButtonModule,
         MatFormFieldModule,
