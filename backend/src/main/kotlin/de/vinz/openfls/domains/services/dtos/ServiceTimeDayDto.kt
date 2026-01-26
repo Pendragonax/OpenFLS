@@ -5,7 +5,9 @@ import java.time.LocalDate
 class ServiceTimeDayDto {
     var date: LocalDate = LocalDate.now()
 
-    var hours: Double = 0.0
+    var hours: Int = 0
+
+    var minutes: Int = 0
 
     var serviceCount: Int = 0
 }

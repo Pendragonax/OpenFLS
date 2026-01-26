@@ -9,6 +9,7 @@ import {MatCalendarCellCssClasses} from "@angular/material/datepicker";
 import {MatMenuTrigger} from "@angular/material/menu";
 import {Router} from "@angular/router";
 import {DateService} from "../../../../../shared/services/date.service";
+import {CalendarInformationDTO} from "../../../../../shared/dtos/calendar-information-dto.model";
 
 @Component({
     selector: 'app-contingent-evaluation',
@@ -30,6 +31,7 @@ export class ContingentEvaluationComponent implements OnInit {
 
   // VARs
   employee: EmployeeDto = new EmployeeDto();
+  calendarInformation: CalendarInformationDTO = new CalendarInformationDTO();
   time1: [number, number, number, number, number] = [0, 0, 0, 0, 0];
   time7: [number, number, number, number, number] = [0, 0, 0, 0, 0];
   time30: [number, number, number, number, number] = [0, 0, 0, 0, 0];
@@ -48,6 +50,24 @@ export class ContingentEvaluationComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadValues();
+    this.loadValue2();
+  }
+
+  loadValue2() {
+    this.isSubmitting = true;
+
+    this.employee$
+      .pipe(switchMap((value: EmployeeDto) => {
+        this.employee = value;
+        return this.serviceService.getCalendarInformation(value.id, new Date(Date.now()))
+      }))
+      .subscribe({
+        next: (value) => {
+          this.calendarInformation = value;
+          this.isSubmitting = false;
+        },
+        error: () => this.isSubmitting = false
+      });
   }
 
   loadValues() {

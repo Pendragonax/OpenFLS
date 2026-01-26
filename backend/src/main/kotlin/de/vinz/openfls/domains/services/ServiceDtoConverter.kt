@@ -21,7 +21,10 @@ class ServiceDtoConverter {
                     .map { ServiceTimeDayDto().apply {
                         this.date = it.key
                         this.serviceCount = it.value.size
-                        this.hours = it.value.sumOf { service -> service.minutes } / 60.0
+
+                        val minutes = it.value.sumOf { service -> service.minutes }
+                        this.hours = minutes / 60
+                        this.minutes = minutes % 60
                     } }
                     .toMutableSet()
 

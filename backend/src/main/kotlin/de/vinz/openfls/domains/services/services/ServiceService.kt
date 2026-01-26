@@ -1,25 +1,24 @@
-package de.vinz.openfls.domains.services
+package de.vinz.openfls.domains.services.services
 
+import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.dtos.ServiceXLDto
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
-import de.vinz.openfls.services.GenericService
-import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.LocalDate
 
 @org.springframework.stereotype.Service
-@Transactional(readOnly = true)
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 class ServiceService(
-        private val serviceRepository: ServiceRepository,
-        private val modelMapper: ModelMapper
-) : GenericService<Service> {
+    private val serviceRepository: ServiceRepository,
+    private val modelMapper: org.modelmapper.ModelMapper
+) : de.vinz.openfls.services.GenericService<Service> {
 
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     fun create(serviceDto: ServiceDto): ServiceDto {
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
@@ -28,7 +27,7 @@ class ServiceService(
         return modelMapper.map(create(entity), ServiceDto::class.java)
     }
 
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     override fun create(value: Service): Service {
         if (value.id > 0)
             throw IllegalArgumentException("id is greater than 0")
@@ -40,7 +39,7 @@ class ServiceService(
         return serviceRepository.save(value)
     }
 
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     fun update(serviceDto: ServiceDto): ServiceDto {
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
@@ -49,7 +48,7 @@ class ServiceService(
         return modelMapper.map(savedEntity, ServiceDto::class.java)
     }
 
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     override fun update(value: Service): Service {
         if (value.id <= 0)
             throw IllegalArgumentException("id is set")
@@ -63,7 +62,7 @@ class ServiceService(
         return serviceRepository.save(value)
     }
 
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     override fun delete(id: Long) {
         serviceRepository.deleteById(id)
     }
@@ -78,7 +77,8 @@ class ServiceService(
 
     fun getProjectionsByInstitutionIdsAndStartAndEnd(institutionIds: List<Long>,
                                                      start: LocalDate,
-                                                     end: LocalDate): List<ServiceProjection> {
+                                                     end: LocalDate
+    ): List<ServiceProjection> {
         return serviceRepository.findProjectionsByInstitutionIdsAndStartAndEnd(institutionIds, start, end)
     }
 
@@ -161,13 +161,15 @@ class ServiceService(
 
     fun getDtosByInstitutionIdAndStartAndEnd(institutionId: Long,
                                              start: LocalDate,
-                                             end: LocalDate): List<ServiceProjection> {
+                                             end: LocalDate
+    ): List<ServiceProjection> {
         return getByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
     fun getByInstitutionIdAndStartAndEnd(institutionId: Long,
                                          start: LocalDate,
-                                         end: LocalDate): List<ServiceProjection> {
+                                         end: LocalDate
+    ): List<ServiceProjection> {
         return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end).sortedBy { it.start }
     }
 

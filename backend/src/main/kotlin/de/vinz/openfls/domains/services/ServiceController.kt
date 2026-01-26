@@ -7,6 +7,8 @@ import de.vinz.openfls.domains.permissions.PermissionService
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
+import de.vinz.openfls.domains.services.services.CalendarService
+import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -21,11 +23,12 @@ import java.time.LocalDate
 @RestController
 @RequestMapping("/services")
 class ServiceController(
-        private val serviceService: ServiceService,
-        private val employeeService: EmployeeService,
-        private val accessService: AccessService,
-        private val permissionService: PermissionService,
-        private val assistancePlanService: AssistancePlanService
+    private val serviceService: ServiceService,
+    private val calendarService: CalendarService,
+    private val employeeService: EmployeeService,
+    private val accessService: AccessService,
+    private val permissionService: PermissionService,
+    private val assistancePlanService: AssistancePlanService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(ServiceController::class.java)
@@ -665,6 +668,35 @@ class ServiceController(
             ResponseEntity(
                     ex.message,
                     HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("times2/{id}/{end}")
+    fun getTimes2ByEmployee(@PathVariable id: Long,
+                           @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            if (accessService.getId() != id &&
+                !accessService.isAdmin() &&
+                !accessService.canReadEmployee(id))
+                throw IllegalArgumentException("No permission to get the times of this employee")
+
+            val calendarDto = calendarService.getServiceCalendarInformation(id, end)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getTimesByEmployee took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(calendarDto)
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
             )
         }
     }

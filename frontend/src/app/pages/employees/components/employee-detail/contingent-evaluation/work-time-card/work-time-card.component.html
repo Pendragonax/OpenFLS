@@ -1,20 +1,18 @@
 <mat-card class="work-time-card mat-elevation-z4"
-          [ngClass]="time[3] < 100 ? time[3] < 95 ? 'work-time-card--bad' : 'work-time-card--warn' : 'work-time-card--ok'">
+          [ngClass]="statusClass">
   <div class="work-time-card__status"></div>
   <div class="work-time-card__content">
     <div class="work-time-card__left">
       <div class="work-time-card__title">{{title}}</div>
       <div class="work-time-card__meta">
-        <div>Erfasst: <span>{{time[1]}} h</span></div>
-        <div>Soll: <span>{{time[0]}} h</span></div>
-        <div>Differenz: <span [class.is-negative]="time[2] < 0">{{time[2]}} h</span></div>
+        <div>Erfasst: <span>{{contingentInformation.executedHours}}h {{contingentInformation.executedMinutes}}min</span></div>
+        <div>Kontingent: <span>{{contingentInformation.contingentHours}}h {{contingentInformation.contingentMinutes}}min</span></div>
+        <div>Differenz: <span [class.is-negative]="isNegativeDifference">{{contingentInformation.differenceHours}}h {{contingentInformation.differenceMinutes}}min</span></div>
       </div>
     </div>
-    <div class="work-time-card__right"
-         [matTooltip]="time[3].toString() + '%'"
-         [matTooltipPosition]="'below'">
-      <div class="work-time-card__ratio">{{time[1]}} / {{time[0]}} <span>h</span></div>
-      <div class="work-time-card__delta" [class.is-negative]="time[2] < 0">{{time[2]}} h</div>
+    <div class="work-time-card__right">
+      <div class="work-time-card__ratio">{{executedHoursLabel}} / {{contingentHoursLabel}} <span>h</span></div>
+      <div class="work-time-card__delta" [class.is-negative]="isNegativeDifference">{{differenceHoursLabel}} h</div>
     </div>
   </div>
 </mat-card>

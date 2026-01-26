@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.services
 
+import de.vinz.openfls.domains.services.projections.ServiceCalendarProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import org.springframework.data.jpa.repository.Query
@@ -153,6 +154,14 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     fun findSoloProjectionByClientAndStartAndEnd(@Param("clientId") clientId: Long,
                                                  @Param("start") start: LocalDate,
                                                  @Param("end") end: LocalDate): List<ServiceProjection>
+
+    @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId " +
+            "AND cast(u.start as LocalDate) >= :start " +
+            "AND cast(u.start as LocalDate) <= :end " +
+            "ORDER BY u.start ASC")
+    fun findServiceCalendarProjection(@Param("employeeId") employeeId: Long,
+                                                 @Param("start") start: LocalDate,
+                                                 @Param("end") end: LocalDate): List<ServiceCalendarProjection>
 
     @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId AND " +
             "u.client.id = :clientId AND " +

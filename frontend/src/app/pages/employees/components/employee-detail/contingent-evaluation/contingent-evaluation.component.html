@@ -75,15 +75,15 @@
 
     <div class="col">
       <div class="row my-2">
-        <app-work-time-card [time]="time1"
+        <app-work-time-card [contingentInformation]="calendarInformation.today"
                             [title]="'Heute'"></app-work-time-card>
       </div>
       <div class="row my-2">
-        <app-work-time-card [time]="time7"
+        <app-work-time-card [contingentInformation]="calendarInformation.lastWeek"
                             [title]="'7 Tage'"></app-work-time-card>
       </div>
       <div class="row my-2">
-        <app-work-time-card [time]="time30"
+        <app-work-time-card [contingentInformation]="calendarInformation.lastMonth"
                             [title]="'30 Tage'"></app-work-time-card>
       </div>
     </div>

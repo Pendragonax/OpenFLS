@@ -180,3 +180,4 @@ Beispiel: `add_positiveNumbers_correctSum`
 Der Inhalt der einzelnen Test soll außerdem in die Abschnitte `Given`, `When`, `Then` unterteilt werden.
 Es wird assertJ verwendet.
 Unit-Tests sollen so erstellt werden, dass sie alle möglichen Szenarien abdecken.
+Die Methoden-Namen sollen in Englisch sein.

@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
-import de.vinz.openfls.domains.services.ServiceService
+import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.services.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
