@@ -27,18 +27,18 @@ class CalendarService(
             .map {
                 val minutes = it.value.sumOf { service -> service.minutes }
                 val contingentMinutes = ceil(getContingentMinutesForWorkday(it.key, contingents)).toInt()
-                generate(minutes, contingentMinutes)
+                generate(it.key, minutes, contingentMinutes)
             }
-        val todayInformation = getTodayContingentInformation(end, calendarDays, contingents)
+        val todayInformation = getTodayContingentInformation(calendarDays, contingents)
         val lastWeekInformation = getLastWeekContingentInformation(end, calendarDays, contingents)
         val lastMonthInformation = getLastMonthContingentInformation(end, calendarDays, contingents)
 
         return ServiceCalendarInformation(employeeId, calendarDays, todayInformation, lastWeekInformation, lastMonthInformation)
     }
 
-    private fun getTodayContingentInformation(end: LocalDate, calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>): CalendarContingentInformationDTO {
-        val contingentMinutes = ceil(getContingentMinutesForWorkday(end, contingents)).toInt()
-        val todayCalendarDay = calendarDays.firstOrNull { it.date.isEqual(end) }
+    private fun getTodayContingentInformation(calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>): CalendarContingentInformationDTO {
+        val contingentMinutes = ceil(getContingentMinutesForWorkday(LocalDate.now(), contingents)).toInt()
+        val todayCalendarDay = calendarDays.firstOrNull { it.date.isEqual(LocalDate.now()) }
         val executedMinutes = todayCalendarDay?.let { it.executedHours * 60 + it.executedMinutes } ?: 0
 
         return generateContingentInformationDTO(executedMinutes, contingentMinutes)
@@ -117,11 +117,11 @@ class CalendarService(
         }
     }
 
-    private fun generate(executedMinutes: Int, contingentMinutes: Int): ServiceCalendarDayInformation {
+    private fun generate(date: LocalDate, executedMinutes: Int, contingentMinutes: Int): ServiceCalendarDayInformation {
         val differenceMinutes = executedMinutes - contingentMinutes
 
         return ServiceCalendarDayInformation(
-            date = LocalDate.now(),
+            date = date,
             serviceCount = 0,
             executedHours = executedMinutes / 60,
             executedMinutes = executedMinutes % 60,
@@ -141,7 +141,7 @@ class CalendarService(
         }
 
         return CalendarContingentInformationDTO(
-            executedPercentage = executedPercentage,
+            executedPercentage = round(executedPercentage * 10000) / 100,
             warningPercent = warningPercent,
             executedHours = executedMinutes / 60,
             executedMinutes = executedMinutes % 60,

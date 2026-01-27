@@ -2,87 +2,139 @@
   position: relative;
   border-radius: 10px;
   background: #ffffff;
-  border: 1px solid #e6ebf2;
-  padding: 16px 18px 16px 24px;
-  min-width: 280px;
-  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.12);
+  border: 1px solid #e7ebf3;
+  padding: 18px 22px 20px;
+  min-width: 300px;
+  box-shadow: 0 12px 30px rgba(20, 35, 70, 0.12);
 }
 
-.work-time-card__status {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  border-radius: 10px 0 0 10px;
-  background: #4a8c6f;
-}
-
-.work-time-card--ok .work-time-card__status {
-  background: #4a8c6f;
-}
-
-.work-time-card--warn .work-time-card__status {
-  background: #d5a83a;
-}
-
-.work-time-card--bad .work-time-card__status {
-  background: #e05555;
-}
-
-.work-time-card__content {
+.work-time-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-}
-
-.work-time-card__left {
-  flex: 1;
+  gap: 12px;
 }
 
 .work-time-card__title {
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
   font-weight: 600;
-  color: #1f2933;
-  margin-bottom: 10px;
+  color: #2f3a4b;
 }
 
-.work-time-card__meta {
-  font-size: 14px;
-  color: #4b5563;
-  display: grid;
-  gap: 4px;
+.work-time-card__title-icon {
+  font-size: 22px;
+  color: #3f4b5e;
 }
 
-.work-time-card__meta span {
-  color: #1f2933;
+.work-time-card__title-sep {
+  color: #c0c7d4;
+  margin: 0 2px;
 }
 
-.work-time-card__right {
-  text-align: right;
-}
-
-.work-time-card__ratio {
-  font-size: 34px;
+.work-time-card__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
-  line-height: 1;
+  color: #ffffff;
+  background: #4a8c6f;
+  box-shadow: 0 8px 18px rgba(74, 140, 111, 0.35);
 }
 
-.work-time-card__ratio span {
+.work-time-card--bad .work-time-card__pill,
+.work-time-card__pill.is-negative {
+  background: #e95c54;
+  box-shadow: 0 8px 18px rgba(233, 92, 84, 0.35);
+}
+
+.work-time-card__pill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  line-height: 28px;
   font-size: 18px;
+  border-radius: 50%;
+  color: #e95c54;
+  background: #ffffff;
+}
+
+.work-time-card__divider {
+  height: 1px;
+  background: #e9edf4;
+  margin: 16px 0 14px;
+}
+
+.work-time-card__progress {
+  margin-top: 0;
+  padding: 14px 16px 12px;
+  border-radius: 10px;
+  border: 1px solid #e7ebf3;
+  background: #f8f9fc;
+}
+
+.work-time-card__progress-header,
+.work-time-card__progress-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 600;
+  color: #6a7386;
+}
+
+.work-time-card__progress-bar {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: repeating-linear-gradient(
+      90deg,
+      #e2e6ef 0,
+      #e2e6ef 14px,
+      #f8f9fc 14px,
+      #f8f9fc 18px
+  );
+  overflow: hidden;
+  margin: 10px 0 12px;
+}
+
+.work-time-card__progress-fill {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f06b63 0%, #e95c54 100%);
+  box-shadow: 0 6px 12px rgba(233, 92, 84, 0.25);
+}
+
+.work-time-card--ok .work-time-card__progress-fill {
+  background: linear-gradient(90deg, #5fb38a 0%, #4a8c6f 100%);
+  box-shadow: 0 6px 12px rgba(74, 140, 111, 0.25);
+}
+
+.work-time-card__progress-target {
+  position: absolute;
+  right: 6px;
+  top: -6px;
+  width: 3px;
+  height: 24px;
+  border-radius: 999px;
+  background: #4a5a73;
+}
+
+.work-time-card__progress-footer {
+  font-size: 15px;
   font-weight: 500;
-  color: #6b7280;
 }
 
-.work-time-card__delta {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2d3748;
-  margin-top: 6px;
-}
-
-.is-negative {
-  color: #e05555;
+.work-time-card__progress-target-label {
+  transform: translateX(6px);
+  color: #8a94a8;
 }

@@ -1,18 +1,32 @@
 <mat-card class="work-time-card mat-elevation-z4"
           [ngClass]="statusClass">
-  <div class="work-time-card__status"></div>
-  <div class="work-time-card__content">
-    <div class="work-time-card__left">
-      <div class="work-time-card__title">{{title}}</div>
-      <div class="work-time-card__meta">
-        <div>Erfasst: <span>{{contingentInformation.executedHours}}h {{contingentInformation.executedMinutes}}min</span></div>
-        <div>Kontingent: <span>{{contingentInformation.contingentHours}}h {{contingentInformation.contingentMinutes}}min</span></div>
-        <div>Differenz: <span [class.is-negative]="isNegativeDifference">{{contingentInformation.differenceHours}}h {{contingentInformation.differenceMinutes}}min</span></div>
-      </div>
+  <div class="work-time-card__header">
+    <div class="work-time-card__title">
+      <mat-icon class="work-time-card__title-icon">watch_later</mat-icon>
+      <span>{{title}}</span>
+      <span class="work-time-card__title-sep">•</span>
     </div>
-    <div class="work-time-card__right">
-      <div class="work-time-card__ratio">{{executedHoursLabel}} / {{contingentHoursLabel}} <span>h</span></div>
-      <div class="work-time-card__delta" [class.is-negative]="isNegativeDifference">{{differenceHoursLabel}} h</div>
+    <div class="work-time-card__pill"
+         [class.is-negative]="isNegativeDifference">
+      <span>{{this.contingentInformation.differenceHours}}h {{this.contingentInformation.differenceMinutes}}min</span>
+    </div>
+  </div>
+
+  <div class="work-time-card__divider"></div>
+
+  <div class="work-time-card__progress">
+    <div class="work-time-card__progress-header">
+      <span>Erfasst</span>
+      <span>{{this.contingentInformation.executedPercentage}}%</span>
+    </div>
+    <div class="work-time-card__progress-bar">
+      <div class="work-time-card__progress-fill"
+           [style.width.%]="this.contingentInformation.executedPercentage"></div>
+      <div class="work-time-card__progress-target"></div>
+    </div>
+    <div class="work-time-card__progress-footer">
+      <span>{{this.contingentInformation.executedHours}}h {{this.contingentInformation.executedMinutes}}min</span>
+      <span class="work-time-card__progress-target-label">Ziel</span>
     </div>
   </div>
 </mat-card>
