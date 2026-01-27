@@ -7,7 +7,8 @@
       <span class="work-time-card__title-sep">•</span>
     </div>
     <div class="work-time-card__pill"
-         [class.is-negative]="isNegativeDifference">
+         [class.is-bad]="isBad"
+         [class.is-warning]="isWarning">
       <span>{{this.contingentInformation.differenceHours}}h {{this.contingentInformation.differenceMinutes}}min</span>
     </div>
   </div>

@@ -22,8 +22,7 @@ class AbsenceService(private val absenceRepository: AbsenceRepository,
 
     @Transactional
     fun remove(absenceDate: LocalDate) {
-        val entity = absenceRepository.findByEmployeeIdAndAbsenceDate(accessService.getId(), absenceDate)
-            ?: throw IllegalArgumentException("Absence not found")
+        val entity = absenceRepository.findByEmployeeIdAndAbsenceDate(accessService.getId(), absenceDate) ?: return
 
         absenceRepository.remove(entity.id)
     }

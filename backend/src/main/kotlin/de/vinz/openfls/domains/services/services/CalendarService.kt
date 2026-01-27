@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.services.services
 
+import de.vinz.openfls.domains.absence.AbsenceService
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.services.ServiceRepository
@@ -14,50 +15,73 @@ import kotlin.math.round
 @org.springframework.transaction.annotation.Transactional(readOnly = true)
 class CalendarService(
     private val serviceRepository: ServiceRepository,
-    private val contingentService: ContingentService
+    private val contingentService: ContingentService,
+    private val absenceService: AbsenceService
 ) {
 
-    private val warningPercent = 0.95
+    private val warningPercent = 95.0
 
     fun getServiceCalendarInformation(employeeId: Long, end: LocalDate): ServiceCalendarInformation {
         val start = end.minusYears(1)
         val contingents = contingentService.getByEmployeeId(employeeId)
+        val absenceDates = absenceService.getAllByEmployeeId(employeeId).absenceDates.toMutableList()
         val calendarDays = serviceRepository.findServiceCalendarProjection(employeeId, start, end)
             .groupBy { it.start.toLocalDate() }
             .map {
                 val minutes = it.value.sumOf { service -> service.minutes }
                 val contingentMinutes = ceil(getContingentMinutesForWorkday(it.key, contingents)).toInt()
-                generate(it.key, minutes, contingentMinutes)
+                val absentFound = absenceDates.contains(it.key)
+                if (absentFound) {
+                    absenceDates.remove(it.key)
+                }
+                generate(it.key, minutes, contingentMinutes, absentFound)
             }
-        val todayInformation = getTodayContingentInformation(calendarDays, contingents)
-        val lastWeekInformation = getLastWeekContingentInformation(end, calendarDays, contingents)
-        val lastMonthInformation = getLastMonthContingentInformation(end, calendarDays, contingents)
+        val absenceDays = absenceDates.map { date ->
+            generate(date, 0, 0, true)
+        }
 
-        return ServiceCalendarInformation(employeeId, calendarDays, todayInformation, lastWeekInformation, lastMonthInformation)
+        val todayInformation = getTodayContingentInformation(calendarDays, contingents, absenceDates)
+        val lastWeekInformation = getLastWeekContingentInformation(end, calendarDays, contingents, absenceDates)
+        val lastMonthInformation = getLastMonthContingentInformation(end, calendarDays, contingents, absenceDates)
+
+
+        val allDays = (calendarDays + absenceDays).sortedBy { it.date }
+        return ServiceCalendarInformation(employeeId, allDays, todayInformation, lastWeekInformation, lastMonthInformation)
     }
 
-    private fun getTodayContingentInformation(calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>): CalendarContingentInformationDTO {
+    private fun getTodayContingentInformation(calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>, absenceDates: List<LocalDate>): CalendarContingentInformationDTO {
         val contingentMinutes = ceil(getContingentMinutesForWorkday(LocalDate.now(), contingents)).toInt()
+
+        if (absenceDates.contains(LocalDate.now())) {
+            return generateContingentInformationDTO(0, 0)
+        }
+
         val todayCalendarDay = calendarDays.firstOrNull { it.date.isEqual(LocalDate.now()) }
         val executedMinutes = todayCalendarDay?.let { it.executedHours * 60 + it.executedMinutes } ?: 0
 
         return generateContingentInformationDTO(executedMinutes, contingentMinutes)
     }
 
-    private fun getLastWeekContingentInformation(end: LocalDate, calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>): CalendarContingentInformationDTO {
+    private fun getLastWeekContingentInformation(end: LocalDate, calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>, absenceDates: List<LocalDate>): CalendarContingentInformationDTO {
         val lastWeekStart = end.minusDays(6)
-        val contingentMinutes = getContingentMinutesFor(lastWeekStart, end, contingents)
-        val todayExecutedMinutes = getExecutedMinutesFor(lastWeekStart, end, calendarDays)
 
-        return generateContingentInformationDTO(todayExecutedMinutes, contingentMinutes)
+        return getStartToEndContingentInformation(lastWeekStart, end, calendarDays, contingents, absenceDates)
     }
 
-    private fun getLastMonthContingentInformation(end: LocalDate, calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>): CalendarContingentInformationDTO {
-        val lastWeekStart = end.minusMonths(1).plusDays(1)
-        val contingentMinutes = getContingentMinutesFor(lastWeekStart, end, contingents)
-        val todayExecutedMinutes = getExecutedMinutesFor(lastWeekStart, end, calendarDays)
+    private fun getLastMonthContingentInformation(end: LocalDate, calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>, absenceDates: List<LocalDate>): CalendarContingentInformationDTO {
+        val lastMonthStart = end.minusMonths(1).plusDays(1)
 
-        return generateContingentInformationDTO(todayExecutedMinutes, contingentMinutes)
+        return getStartToEndContingentInformation(lastMonthStart, end, calendarDays, contingents, absenceDates)
+    }
+
+    private fun getStartToEndContingentInformation(start: LocalDate, end: LocalDate, calendarDays: List<ServiceCalendarDayInformation>, contingents: List<ContingentDto>, absenceDates: List<LocalDate>): CalendarContingentInformationDTO {
+        val contingentMinutes = getContingentMinutesFor(start, end, contingents)
+        val executedMinutes = getExecutedMinutesFor(start, end, calendarDays)
+        val absenceMinutes = absenceDates
+            .filter { !it.isBefore(start) && !it.isAfter(end) }
+            .sumOf { getContingentMinutesForWorkday(it, contingents).toInt() }
+
+        return generateContingentInformationDTO(executedMinutes, contingentMinutes - absenceMinutes)
     }
 
     private fun getExecutedMinutesFor(
@@ -117,11 +141,18 @@ class CalendarService(
         }
     }
 
-    private fun generate(date: LocalDate, executedMinutes: Int, contingentMinutes: Int): ServiceCalendarDayInformation {
+    private fun generate(date: LocalDate, executedMinutes: Int, contingentMinutes: Int, absence: Boolean): ServiceCalendarDayInformation {
         val differenceMinutes = executedMinutes - contingentMinutes
+        val executedPercentage = if (contingentMinutes == 0) {
+            1.0
+        } else {
+            executedMinutes.toDouble() / contingentMinutes.toDouble()
+        }
 
         return ServiceCalendarDayInformation(
             date = date,
+            absence = absence,
+            executedPercentage = round(executedPercentage * 10000) / 100,
             serviceCount = 0,
             executedHours = executedMinutes / 60,
             executedMinutes = executedMinutes % 60,

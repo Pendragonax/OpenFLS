@@ -48,9 +48,15 @@
 }
 
 .work-time-card--bad .work-time-card__pill,
-.work-time-card__pill.is-negative {
+.work-time-card__pill.is-bad {
   background: #e95c54;
   box-shadow: 0 8px 18px rgba(233, 92, 84, 0.35);
+}
+
+.work-time-card--critical .work-time-card__pill,
+.work-time-card__pill.is-warning {
+  background: #d5a83a;
+  box-shadow: 0 8px 18px rgba(126, 100, 60, 0.35);
 }
 
 .work-time-card__pill-icon {
@@ -116,6 +122,11 @@
 
 .work-time-card--ok .work-time-card__progress-fill {
   background: linear-gradient(90deg, #5fb38a 0%, #4a8c6f 100%);
+  box-shadow: 0 6px 12px rgba(74, 140, 111, 0.25);
+}
+
+.work-time-card--critical .work-time-card__progress-fill {
+  background: linear-gradient(90deg, #d5a83a 0%, #ba8e24 100%);
   box-shadow: 0 6px 12px rgba(74, 140, 111, 0.25);
 }
 

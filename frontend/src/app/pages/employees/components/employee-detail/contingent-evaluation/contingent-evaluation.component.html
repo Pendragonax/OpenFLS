@@ -1,29 +1,20 @@
-<!--LOADING-->
-<div class="container-fluid my-2"
-     [hidden]="!isSubmitting">
-  <div class="row justify-content-center">
-    <mat-spinner [strokeWidth]="2"
-                 [diameter]="100"
-                 class="center-spinner"></mat-spinner>
-  </div>
-  <div class="row text-center">
-    <p><b>Lade Stundenübersicht</b></p>
-  </div>
-</div>
-
 <!--CONTENT-->
-<div class="container justify-content-center align-items-center" [hidden]="isSubmitting">
-  <div class="position-relative start-0"
-       [hidden]="hideRefresh">
-    <button mat-icon-button
-            (click)="refresh()">
-      <mat-icon>autorenew</mat-icon>
-    </button>
-  </div>
-
+<div class="container justify-content-center align-items-center">
   <div class="row justify-content-center">
     <div class="col">
       <div class="calendar-card mx-auto mt-3" (mousedown)="onCalendarMouseDown($event)">
+        <div class="start-0 d-flex align-items-center justify-content-between w-100"
+             [hidden]="hideRefresh">
+          <button mat-icon-button
+                  (click)="refresh()">
+            <mat-icon>autorenew</mat-icon>
+          </button>
+          <mat-spinner [diameter]="25"
+                       class="loading"
+                       [color]="'primary'"
+                       [hidden]="!isSubmitting"></mat-spinner>
+        </div>
+
         <mat-calendar #serviceCalendar
                       [dateClass]="dateClass()"
                       (selectedChange)="onDateClicked($event)"
@@ -34,6 +25,7 @@
                 class="calendar-menu-anchor"
                 mat-icon-button
                 [matMenuTriggerFor]="calendarMenu"
+                (menuOpened)="onMenuOpened()"
                 [style.left.px]="menuPosition.x"
                 [style.top.px]="menuPosition.y"></button>
 
@@ -41,8 +33,12 @@
           <button mat-menu-item (click)="onGoToDocumentation()">
             Gehe zu Dokumentationen
           </button>
-          <button mat-menu-item (click)="onMarkAbsent()">
-            Markiere als abwesend
+          <mat-divider class="calendar-menu-divider"></mat-divider>
+          <button mat-menu-item class="calendar-menu-item--after-divider" [disabled]="isSubmitting" (click)="onMarkAbsent()">
+            Abwesenheitstag
+          </button>
+          <button mat-menu-item [disabled]="isSubmitting" (click)="onRemoveAbsent()">
+            Abwesenheit löschen
           </button>
         </mat-menu>
 
@@ -53,11 +49,15 @@
           </div>
           <div class="legend-item">
             <span class="legend-dot legend-dot--partial"></span>
-            <span>teilweise</span>
+            <span>teilweise erfüllt</span>
           </div>
           <div class="legend-item">
             <span class="legend-dot legend-dot--bad"></span>
             <span>nicht erfüllt</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--failure"></span>
+            <span [matTooltip]="'An dem Tag sind Sie abwesend, aber haben trotzdem Dokumentationseinträge.'">fehlerhaft</span>
           </div>
           <div class="legend-item">
             <span class="legend-dot legend-dot--absent"></span>
@@ -74,7 +74,7 @@
     </div>
 
     <div class="col">
-      <div class="row my-2">
+      <div class="row my-2 mt-3">
         <app-work-time-card [contingentInformation]="calendarInformation.today"
                             [title]="'Heute'"></app-work-time-card>
       </div>

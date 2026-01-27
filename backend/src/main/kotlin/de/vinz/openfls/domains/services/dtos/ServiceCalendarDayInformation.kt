@@ -4,6 +4,8 @@ import java.time.LocalDate
 
 data class ServiceCalendarDayInformation(
     var date: LocalDate,
+    var absence: Boolean,
+    val executedPercentage: Double,
     var serviceCount: Int,
     var executedHours: Int,
     var executedMinutes: Int,

@@ -16,11 +16,23 @@ export class WorkTimeCardComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  get isNegativeDifference(): boolean {
+  get isBad(): boolean {
     return this.contingentInformation.differenceHours < 0 || this.contingentInformation.differenceMinutes < 0;
   }
 
+  get isWarning(): boolean {
+    return this.contingentInformation.executedPercentage > this.contingentInformation.warningPercent && this.contingentInformation.executedPercentage < 100.0
+  }
+
   get statusClass(): string {
-    return this.isNegativeDifference ? 'work-time-card--bad' : 'work-time-card--ok';
+    if (this.contingentInformation.executedPercentage < this.contingentInformation.warningPercent) {
+      return 'work-time-card--bad';
+    }
+
+    if (this.contingentInformation.executedPercentage < 100.0) {
+      return 'work-time-card--critical';
+    }
+
+    return 'work-time-card--ok';
   }
 }

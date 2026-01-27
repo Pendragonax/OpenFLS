@@ -1,9 +1,7 @@
-import {AssistancePlanHourResponseDto} from "./assistance-plan-hour-response-dto.model";
-import {GoalResponseDto} from "./goal-response-dto.model";
-
-
-class CalendarDayInformationDTO {
+export class CalendarDayInformationDTO {
   date: string = "";
+  absence: boolean = false;
+  executedPercentage: number = 0;
   serviceCount: number = 0;
   executedHours: number = 0;
   executedMinutes: number = 0;
@@ -30,4 +28,14 @@ export class CalendarInformationDTO {
   today: ContingentInformationDTO = new ContingentInformationDTO();
   lastWeek: ContingentInformationDTO = new ContingentInformationDTO()
   lastMonth: ContingentInformationDTO = new ContingentInformationDTO();
+}
+
+export class CreateAbsenceDTO {
+  employeeId: number = 0;
+  absenceDate: string = "";
+}
+
+export class EmployeeAbsenceDTO {
+  employeeId: number = 0;
+  absenceDates: string[] = [];
 }
