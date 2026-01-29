@@ -1,7 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {ReplaySubject, switchMap} from "rxjs";
 import {EmployeeDto} from "../../../../../shared/dtos/employee-dto.model";
-import {ServiceService} from "../../../../../shared/services/service.service";
 import {MatCalendarCellCssClasses} from "@angular/material/datepicker";
 import {MatMenuTrigger} from "@angular/material/menu";
 import {Router} from "@angular/router";
@@ -9,6 +8,7 @@ import {DateService} from "../../../../../shared/services/date.service";
 import {CalendarInformationDTO} from "../../../../../shared/dtos/calendar-information-dto.model";
 import {AbsenceService} from "../../../../../shared/services/absence.service";
 import {UserService} from "../../../../../shared/services/user.service";
+import {ContingentsService} from "../../../../../shared/services/contingents.service";
 
 @Component({
     selector: 'app-contingent-evaluation',
@@ -38,7 +38,7 @@ export class ContingentEvaluationComponent implements OnInit {
   userId: number = 0;
 
   constructor(
-    private serviceService: ServiceService,
+    private contingentService: ContingentsService,
     private router: Router,
     private dateService: DateService,
     private absenceService: AbsenceService,
@@ -56,7 +56,7 @@ export class ContingentEvaluationComponent implements OnInit {
     this.employee$
       .pipe(switchMap((value: EmployeeDto) => {
         this.employee = value;
-        return this.serviceService.getCalendarInformation(value.id, new Date(Date.now()))
+        return this.contingentService.getCalendarInformation(value.id, new Date(Date.now()))
       }))
       .subscribe({
         next: (value) => {
@@ -83,7 +83,7 @@ export class ContingentEvaluationComponent implements OnInit {
           return serviceDate.executedMinutes > 0 || serviceDate.executedHours > 0 ? 'error-date' : 'grey-date';
         }
 
-        return serviceDate.executedPercentage <= this.calendarInformation.today.warningPercent ? 'red-date' : serviceDate.executedPercentage <= 100 ? 'yellow-date' : 'green-date';
+        return serviceDate.executedPercentage < this.calendarInformation.today.warningPercent ? 'red-date' : serviceDate.executedPercentage < 100 ? 'yellow-date' : 'green-date';
       } else {
         return '';
       }

@@ -1,6 +1,6 @@
-package de.vinz.openfls.domains.services.dtos
+package de.vinz.openfls.domains.contingents.dtos
 
-data class CalendarContingentInformationDTO(
+data class ContingentCalendarInformationDTO(
     val executedPercentage: Double,
     val warningPercent: Double,
     val executedHours: Int,

@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.services.services
 
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
+import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
 import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.projections.ServiceCalendarProjection
@@ -12,13 +13,13 @@ import org.mockito.kotlin.whenever
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class CalendarServiceTest {
+class ContingentCalendarServiceTest {
     private val serviceRepository: ServiceRepository = mock()
     private val contingentService: ContingentService = mock()
-    private val calendarService = CalendarService(serviceRepository, contingentService)
+    private val contingentCalendarService = ContingentCalendarService(serviceRepository, contingentService)
 
     @Test
-    fun getServiceCalendarInformation_multipleServicesSameDay_aggregatesMinutesAndContingent() {
+    fun generateServiceCalendarInformation_For_multipleServicesSameDay_aggregatesMinutesAndContingent() {
         // Given
         val employeeId = 7L
         val end = LocalDate.now()
@@ -49,7 +50,7 @@ class CalendarServiceTest {
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, end)).thenReturn(projections)
 
         // When
-        val result = calendarService.getServiceCalendarInformation(employeeId, end)
+        val result = contingentCalendarService.generateContingentCalendarInformationFor(employeeId, end)
 
         // Then
         assertThat(result.employeeId).isEqualTo(employeeId)
@@ -79,7 +80,7 @@ class CalendarServiceTest {
     }
 
     @Test
-    fun getServiceCalendarInformation_noContingent_returnsZeroContingentValues() {
+    fun generateServiceCalendarInformation_For_noContingent_returnsZeroContingentValues() {
         // Given
         val employeeId = 11L
         val end = LocalDate.now()
@@ -93,7 +94,7 @@ class CalendarServiceTest {
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, end)).thenReturn(listOf(projection))
 
         // When
-        val result = calendarService.getServiceCalendarInformation(employeeId, end)
+        val result = contingentCalendarService.generateContingentCalendarInformationFor(employeeId, end)
 
         // Then
         assertThat(result.days).hasSize(1)
@@ -122,7 +123,7 @@ class CalendarServiceTest {
     }
 
     @Test
-    fun getServiceCalendarInformation_activeContingent_calculatesTodayLastWeekLastMonth() {
+    fun generateServiceCalendarInformation_For_activeContingent_calculatesTodayLastWeekLastMonth() {
         // Given
         val employeeId = 3L
         val end = LocalDate.now()
@@ -153,7 +154,7 @@ class CalendarServiceTest {
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, end)).thenReturn(projections)
 
         // When
-        val result = calendarService.getServiceCalendarInformation(employeeId, end)
+        val result = contingentCalendarService.generateContingentCalendarInformationFor(employeeId, end)
 
         // Then
         val expectedTodayExecutedMinutes = 180

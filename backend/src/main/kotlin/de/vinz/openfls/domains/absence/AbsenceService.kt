@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.absence
 
 import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDTO
+import de.vinz.openfls.domains.absence.dtos.YearAbsenceDTO
 import de.vinz.openfls.domains.permissions.AccessService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -33,6 +34,25 @@ class AbsenceService(private val absenceRepository: AbsenceRepository,
         return EmployeeAbsenceResponseDTO(
             employeeId = employeeId,
             absenceDates = entities.map { it.absenceDate }
+        )
+    }
+
+    @Transactional
+    fun getAllByYear(year: Int): YearAbsenceDTO {
+        val entities = absenceRepository.findAllByYear(year)
+        val employeeIds = entities.map { it.employeeId }.distinct()
+
+        val employeeAbsences = mutableListOf<EmployeeAbsenceResponseDTO>()
+        for (employeeId in employeeIds) {
+            val absenceDates = entities.filter { it.employeeId == employeeId }.map { it.absenceDate }
+            employeeAbsences.add(EmployeeAbsenceResponseDTO(
+                employeeId = employeeId,
+                absenceDates = absenceDates
+            ))
+        }
+        return YearAbsenceDTO(
+            year = year,
+            employeeAbsences = employeeAbsences
         )
     }
 }

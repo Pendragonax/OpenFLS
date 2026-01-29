@@ -123,6 +123,37 @@ class DateService {
             return 0
         }
 
+        fun countWorkDaysOfMonthAndYearBetweenStartAndEnd(year: Int, month: Int, start: LocalDate, end: LocalDate): Int {
+            val calcStart = LocalDate.of(year, month, 1)
+            val calcEnd = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+            if (start > calcEnd || end < calcStart) {
+                return 0
+            }
+
+            if (start == calcEnd || end == calcStart) {
+                return if (isWorkday(start)) 1 else 0
+            }
+
+            if (start < calcStart && end > calcEnd) {
+                return calculateWorkdaysInHesseBetween(calcStart, calcEnd)
+            }
+
+            if (start >= calcStart && end <= calcEnd) {
+                return calculateWorkdaysInHesseBetween(start, end)
+            }
+
+            if (start >= calcStart) {
+                return calculateWorkdaysInHesseBetween(start, calcEnd)
+            }
+
+            if (end <= calcEnd) {
+                return calculateWorkdaysInHesseBetween(calcStart, end)
+            }
+
+            return 0
+        }
+
         fun countDaysOfAssistancePlan(year: Int, assistancePlanDto: AssistancePlanDto): Long {
             return countDaysOfAssistancePlan(year, null, assistancePlanDto)
         }
@@ -153,6 +184,25 @@ class DateService {
             return calculateWorkdaysInHesseBetween(LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31), year)
         }
 
+        fun calculateWorkdaysInHesseBetween(startDate: LocalDate, endDate: LocalDate): Int {
+            var workdays = 0
+
+            var currentDate = startDate
+            var holidays = getHesseHolidays(startDate.year)
+            while (!currentDate.isAfter(endDate)) {
+                if (currentDate.year != holidays.first().year) {
+                    holidays = getHesseHolidays(currentDate.year)
+                }
+
+                if (!isWeekend(currentDate) && !isHoliday(currentDate, holidays)) {
+                    workdays++
+                }
+
+                currentDate = currentDate.plusDays(1)
+            }
+            return workdays
+        }
+
         fun calculateWorkdaysInHesseBetween(startDate: LocalDate, endDate: LocalDate?, year: Int): Int {
             var workdays = 0
             val holidays = getHesseHolidays(startDate.year)
@@ -172,6 +222,11 @@ class DateService {
                 currentDate = currentDate.plusDays(1)
             }
             return workdays
+        }
+
+        fun isWorkday(date: LocalDate): Boolean {
+            val holidays = getHesseHolidays(date.year)
+            return !holidays.contains(date) && !isWeekend(date)
         }
 
         private fun isWeekend(date: LocalDate): Boolean {

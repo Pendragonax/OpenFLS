@@ -1,8 +1,8 @@
-package de.vinz.openfls.domains.services.dtos
+package de.vinz.openfls.domains.contingents.dtos
 
 import java.time.LocalDate
 
-data class ServiceCalendarDayInformation(
+data class ContingentCalendarDayInformation(
     var date: LocalDate,
     var absence: Boolean,
     val executedPercentage: Double,

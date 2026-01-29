@@ -5,8 +5,10 @@ import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.dtos.ServiceXLDto
+import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
+import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
@@ -65,6 +67,14 @@ class ServiceService(
     @org.springframework.transaction.annotation.Transactional
     override fun delete(id: Long) {
         serviceRepository.deleteById(id)
+    }
+
+    @Transactional
+    fun getContingentEvaluationServiceDTOsBy(institutionId: Long, year: Int): List<ContingentEvaluationServiceProjection> {
+        val start = LocalDate.of(year, 1, 1)
+        val end = LocalDate.of(year, 12, 31)
+        return serviceRepository.findContingentEvaluationServiceProjectionByInstitutionIdsAndStartAndEnd(
+            institutionId, start, end)
     }
 
     fun getAllDtos(): List<ServiceDto> {

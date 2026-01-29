@@ -1,13 +1,12 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Base} from "./base.service";
 import {ServiceDto} from "../dtos/service-dto.model";
 import {Observable} from "rxjs";
 import {environment} from "../../../environments/environment";
-import { HttpClient } from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {Converter} from "./converter.helper";
 import {ServiceTimeDto} from "../dtos/service-time-dto.model";
 import {Service} from "../dtos/service.projection";
-import {CalendarInformationDTO} from "../dtos/calendar-information-dto.model";
 
 @Injectable({
   providedIn: 'root'
@@ -107,12 +106,6 @@ export class ServiceService extends Base<ServiceDto> {
   getCountByGoalId(goalId: number): Observable<number> {
     return this.http
       .get<number>(`${environment.api_url}${this.url}/count/goal/${goalId}`)
-
-  }
-
-  getCalendarInformation(employeeId: number, end: Date): Observable<CalendarInformationDTO> {
-    return this.http
-      .get<CalendarInformationDTO>(`${environment.api_url}${this.url}/times2/${employeeId}/${this.converter.formatDate(end)}`)
 
   }
 }

@@ -39,4 +39,8 @@ class AbsenceRepository {
         return db.entries.filter { it.value.employeeId == employeeId }.map { it.value }
     }
 
+    fun findAllByYear(year: Int): List<Absence> {
+        return db.entries.filter { it.value.absenceDate.year == year }.map { it.value }
+    }
+
 }

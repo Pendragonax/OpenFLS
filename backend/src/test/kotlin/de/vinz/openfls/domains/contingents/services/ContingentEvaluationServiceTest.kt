@@ -36,7 +36,7 @@ class ContingentEvaluationServiceTest {
     lateinit var contingentEvaluationService: ContingentEvaluationService
 
     @Test
-    fun testGetContingentEvaluationByYearAndInstitution_WhenMultipleYearlyContingents_ThenReturnMatchingEvaluation() {
+    fun testGenerateContingentEvaluationByYearAndInstitution_WhenMultipleYearlyContingents_ThenReturnMatchingEvaluation() {
         // Given
         val year = 2024
         val institutionId: Long = 1
@@ -96,7 +96,7 @@ class ContingentEvaluationServiceTest {
         whenever(contingentService.getContingentHoursByYear(year, contingent3)).thenReturn(contingentHours3)
 
         // When
-        val evaluation: ContingentEvaluationDto = contingentEvaluationService.getContingentEvaluationByYearAndInstitution(year, institutionId)
+        val evaluation: ContingentEvaluationDto = contingentEvaluationService.generateContingentEvaluationFor(year, institutionId)
 
         // Then
         assertThat(evaluation).isNotNull
