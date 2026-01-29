@@ -1,0 +1,45 @@
+<div class="overview-toolbar">
+  <div class="toolbar-group">
+    <mat-form-field appearance="outline" class="toolbar-field">
+      <mat-label>Jahr</mat-label>
+      <mat-select
+        [value]="selectedYear"
+        (selectionChange)="onYearSelection($event.value)"
+        [disabled]="loading">
+        <mat-option *ngFor="let year of years" [value]="year">{{ year }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="toolbar-field">
+      <mat-label>Auswertung</mat-label>
+      <mat-select
+        [value]="selectedHourType"
+        (selectionChange)="onHourTypeSelection($event.value)"
+        [disabled]="loading">
+        <mat-option *ngFor="let value of hourTypes" [value]="value.value">
+          {{ value.name }}
+        </mat-option>
+      </mat-select>
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        class="info-button mx-1"
+        aria-label="Informationen"
+        (click)="infoClicked.emit($event)"
+        [disabled]="loading">
+        <mat-icon>info</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <button
+    mat-flat-button
+    type="button"
+    class="export-button"
+    (click)="exportClicked.emit()"
+    [disabled]="exportDisabled || loading">
+    <mat-icon>file_download</mat-icon>
+    Exportieren
+  </button>
+</div>

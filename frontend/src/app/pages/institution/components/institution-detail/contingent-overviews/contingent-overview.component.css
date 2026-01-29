@@ -1,3 +1,36 @@
-mat-form-field {
-  min-width: 300px !important;
+.contingent-overview {
+  padding: 1.25rem;
+}
+
+.overview-card {
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(19, 42, 76, 0.08);
+}
+
+.table-divider {
+  margin: 1rem 0 1.25rem;
+}
+
+.table-wrapper {
+  position: relative;
+}
+
+::ng-deep .contingent-overview .mat-card-header-text {
+  margin: 0;
+}
+
+::ng-deep .contingent-overview .mat-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2e3a59;
+}
+
+::ng-deep .contingent-overview app-object-table .fixed-button {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .contingent-overview {
+    padding: 0.75rem;
+  }
 }

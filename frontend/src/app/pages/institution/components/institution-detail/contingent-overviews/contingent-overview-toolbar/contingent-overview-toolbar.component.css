@@ -1,0 +1,70 @@
+.overview-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  flex: 1 1 auto;
+}
+
+.toolbar-field {
+  min-width: 190px;
+}
+
+.info-button {
+  color: #2f6fed;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-button mat-icon {
+  font-size: 32px;
+  line-height: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+::ng-deep .info-button.mat-icon-button .mat-button-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.export-button {
+  background: linear-gradient(135deg, #78c66d, #5bb15f);
+  color: #fff !important;
+  padding: 0 1.5rem;
+  height: 44px;
+}
+
+.export-button mat-icon {
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .overview-toolbar {
+    align-items: stretch;
+  }
+
+  .toolbar-group {
+    width: 100%;
+  }
+
+  .export-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

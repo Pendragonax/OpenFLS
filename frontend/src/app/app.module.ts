@@ -92,6 +92,7 @@ import {
 import {AssistancePlanAnalysisComponent} from './pages/assistance-plan-analysis/assistance-plan-analysis.component';
 import {GoalSingleComponent} from './shared/components/goal-single/goal-single.component';
 import {MatChipsModule} from "@angular/material/chips";
+import {MatDividerModule} from "@angular/material/divider";
 import {YearMonthSelectionComponent} from './shared/components/year-month-selection/year-month-selection.component';
 import {
   AssistancePlanTimeEvaluationFilterComponent
@@ -113,6 +114,9 @@ import {
 import {
   ContingentOverviewComponent
 } from "./pages/institution/components/institution-detail/contingent-overviews/contingent-overview.component";
+import {
+  ContingentOverviewToolbarComponent
+} from "./pages/institution/components/institution-detail/contingent-overviews/contingent-overview-toolbar/contingent-overview-toolbar.component";
 import {SearchFieldComponent} from "./shared/components/search-field/search-field.component";
 import {MyServicesComponent} from "./pages/my-services/my-services.component";
 import {InstitutionSelectComponent} from "./shared/components/institution-select/institution-select.component";
@@ -180,6 +184,7 @@ const routes: Routes = [
         ObjectTableComponent,
         ContingentEvaluationComponent,
         ContingentOverviewComponent,
+        ContingentOverviewToolbarComponent,
         MyServicesComponent,
         AllServicesComponent,
         ClientAutocompleteComponent,
@@ -220,6 +225,7 @@ const routes: Routes = [
     MatRadioModule,
     MatDialogModule,
     MatChipsModule,
+    MatDividerModule,
     SearchFieldComponent,
     InstitutionSelectComponent,
     DateCompleteSelectionComponent,

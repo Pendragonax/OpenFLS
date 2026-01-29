@@ -1,33 +1,31 @@
-<div class="container-fluid">
-  <div class="container-fluid">
-    <div class="row justify-content-center">
-      <div class="width-20-vw">
-        <div class="text-center">
-          <app-year-month-selection [withoutMonth]="true" (periodChangedEvent)="onDateSelectionChanged($event)"></app-year-month-selection>
-        </div>
-      </div>
-      <div class="text-center" [formGroup]="filterForm">
-        <mat-form-field appearance="fill">
-          <mat-label>Stundentyp</mat-label>
-          <mat-select formControlName="hourType"
-                      required>
-            <mat-option *ngFor="let value of hourTypes"
-                        [value]="value.value">
-              {{value.name}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <button mat-icon-button matSuffix color="primary" class="ms-1" (click)="openValueTypeInfoModal($event)"><mat-icon>info</mat-icon></button>
-      </div>
-    </div>
-    <div class="row">
+<div class="contingent-overview">
+  <mat-card class="overview-card">
+    <mat-card-content>
+      <app-contingent-overview-toolbar
+        [years]="years"
+        [selectedYear]="year"
+        [hourTypes]="hourTypes"
+        [selectedHourType]="selectedHourType"
+        [exportDisabled]="tableData.length === 0"
+        [loading]="isGenerating"
+        (yearChanged)="onYearChanged($event)"
+        (hourTypeChanged)="onHourTypeChanged($event)"
+        (infoClicked)="openValueTypeInfoModal($event)"
+        (exportClicked)="exportTable()">
+      </app-contingent-overview-toolbar>
+
+      <mat-divider class="table-divider"></mat-divider>
+
+      <div class="table-wrapper">
         <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
-        <app-object-table [boldColumnIndices]="[0,1]"
-                          [exportFilename]="'ContingentOverview'"
-                          [columnFixedWidthFromIndex]="1"
-                          [data$]="data$"
-                          [header$]="header$"
-                          *ngIf="!isGenerating && isLoadedInitially"></app-object-table>
-    </div>
-  </div>
+        <app-object-table
+          *ngIf="!isGenerating && isLoadedInitially"
+          [boldColumnIndices]="[0,1]"
+          [exportFilename]="'ContingentOverview'"
+          [columnFixedWidthFromIndex]="1"
+          [data$]="data$"
+          [header$]="header$"></app-object-table>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>
