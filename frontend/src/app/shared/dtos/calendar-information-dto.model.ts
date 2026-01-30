@@ -26,8 +26,8 @@ export class CalendarInformationDTO {
   employeeId: number = 0;
   days: CalendarDayInformationDTO[] = [];
   today: ContingentInformationDTO = new ContingentInformationDTO();
-  lastWeek: ContingentInformationDTO = new ContingentInformationDTO()
-  lastMonth: ContingentInformationDTO = new ContingentInformationDTO();
+  thisWeek: ContingentInformationDTO = new ContingentInformationDTO()
+  thisMonth: ContingentInformationDTO = new ContingentInformationDTO();
 }
 
 export class CreateAbsenceDTO {

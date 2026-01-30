@@ -10,6 +10,7 @@ import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class ContingentEvaluationService(
@@ -42,7 +43,7 @@ class ContingentEvaluationService(
 
             // employee got NO evaluation
             if (employeeEvaluations.none { it.employeeId == contingent.employee.id }) {
-                val executedEmployeeHours = getExecutedHoursByYearAndEmployee(year, contingent.employee.id, services)
+                val executedEmployeeHours = getExecutedHoursByYearAndEmployee(year, contingent.employee.id, services, yearlyAbsences)
                 val summedExecutedPercent = getSummedExecutedPercent(contingentHours, executedEmployeeHours)
                 val executedPercent = getExecutedPercent(contingentHours, executedEmployeeHours)
                 val missingHours = getMissingHours(contingentHours, executedEmployeeHours)
@@ -99,13 +100,18 @@ class ContingentEvaluationService(
     fun getExecutedHoursByYearAndEmployee(
         year: Int,
         employeeId: Long,
-        services: List<ContingentEvaluationServiceProjection>
+        services: List<ContingentEvaluationServiceProjection>,
+        yearlyAbsences: YearAbsenceDTO
     ): List<Double> {
         val employeeServices = services.filter { it.employeeId == employeeId }
         val monthlyHours = List(13) { 0 }.toMutableList()
 
         for (month in 1..12) {
             for (service in employeeServices) {
+                if (isAbsent(employeeId, service.start, yearlyAbsences)) {
+                    continue
+                }
+
                 if ((service.start.year == year) && (service.start.monthValue == month)) {
                     monthlyHours[month] += service.minutes
                     monthlyHours[0] += service.minutes
@@ -171,5 +177,10 @@ class ContingentEvaluationService(
 
         return TimeDoubleService.convertTimeDoubleToDouble(summedTimeDoubles) * 100 /
                 TimeDoubleService.convertTimeDoubleToDouble(summedTimeDoublesOf)
+    }
+
+    private fun isAbsent(employeeId: Long, date: LocalDateTime, yearlyAbsences: YearAbsenceDTO): Boolean {
+        val absencesForEmployee = yearlyAbsences.employeeAbsences.filter { it.employeeId == employeeId }
+        return absencesForEmployee.any { it.absenceDates.contains(date.toLocalDate()) }
     }
 }

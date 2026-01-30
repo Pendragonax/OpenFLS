@@ -110,14 +110,14 @@ class ContingentCalendarServiceTest {
         assertThat(result.today.executedMinutes).isEqualTo(1)
         assertThat(result.today.contingentHours).isEqualTo(0)
         assertThat(result.today.contingentMinutes).isEqualTo(0)
-        assertThat(result.lastWeek.executedHours).isEqualTo(1)
-        assertThat(result.lastWeek.executedMinutes).isEqualTo(1)
-        assertThat(result.lastWeek.contingentHours).isEqualTo(0)
-        assertThat(result.lastWeek.contingentMinutes).isEqualTo(0)
-        assertThat(result.lastMonth.executedHours).isEqualTo(1)
-        assertThat(result.lastMonth.executedMinutes).isEqualTo(1)
-        assertThat(result.lastMonth.contingentHours).isEqualTo(0)
-        assertThat(result.lastMonth.contingentMinutes).isEqualTo(0)
+        assertThat(result.thisWeek.executedHours).isEqualTo(1)
+        assertThat(result.thisWeek.executedMinutes).isEqualTo(1)
+        assertThat(result.thisWeek.contingentHours).isEqualTo(0)
+        assertThat(result.thisWeek.contingentMinutes).isEqualTo(0)
+        assertThat(result.thisMonth.executedHours).isEqualTo(1)
+        assertThat(result.thisMonth.executedMinutes).isEqualTo(1)
+        assertThat(result.thisMonth.contingentHours).isEqualTo(0)
+        assertThat(result.thisMonth.contingentMinutes).isEqualTo(0)
         verify(serviceRepository).findServiceCalendarProjection(employeeId, start, end)
         verify(contingentService).getByEmployeeId(employeeId)
     }
@@ -172,22 +172,22 @@ class ContingentCalendarServiceTest {
         val lastWeekDays = 7
         val expectedLastWeekContingentMinutes = lastWeekDays * contingentMinutesPerDay
         val expectedLastWeekDifferenceMinutes = expectedRangeExecutedMinutes - expectedLastWeekContingentMinutes
-        assertThat(result.lastWeek.executedHours).isEqualTo(expectedRangeExecutedMinutes / 60)
-        assertThat(result.lastWeek.executedMinutes).isEqualTo(expectedRangeExecutedMinutes % 60)
-        assertThat(result.lastWeek.contingentHours).isEqualTo(expectedLastWeekContingentMinutes / 60)
-        assertThat(result.lastWeek.contingentMinutes).isEqualTo(expectedLastWeekContingentMinutes % 60)
-        assertThat(result.lastWeek.differenceHours).isEqualTo(expectedLastWeekDifferenceMinutes / 60)
-        assertThat(result.lastWeek.differenceMinutes).isEqualTo(expectedLastWeekDifferenceMinutes % 60)
+        assertThat(result.thisWeek.executedHours).isEqualTo(expectedRangeExecutedMinutes / 60)
+        assertThat(result.thisWeek.executedMinutes).isEqualTo(expectedRangeExecutedMinutes % 60)
+        assertThat(result.thisWeek.contingentHours).isEqualTo(expectedLastWeekContingentMinutes / 60)
+        assertThat(result.thisWeek.contingentMinutes).isEqualTo(expectedLastWeekContingentMinutes % 60)
+        assertThat(result.thisWeek.differenceHours).isEqualTo(expectedLastWeekDifferenceMinutes / 60)
+        assertThat(result.thisWeek.differenceMinutes).isEqualTo(expectedLastWeekDifferenceMinutes % 60)
 
         val lastMonthDays = java.time.temporal.ChronoUnit.DAYS.between(end.minusMonths(1), end) + 1
         val expectedLastMonthContingentMinutes = lastMonthDays.toInt() * contingentMinutesPerDay
         val expectedLastMonthDifferenceMinutes = expectedRangeExecutedMinutes - expectedLastMonthContingentMinutes
-        assertThat(result.lastMonth.executedHours).isEqualTo(expectedRangeExecutedMinutes / 60)
-        assertThat(result.lastMonth.executedMinutes).isEqualTo(expectedRangeExecutedMinutes % 60)
-        assertThat(result.lastMonth.contingentHours).isEqualTo(expectedLastMonthContingentMinutes / 60)
-        assertThat(result.lastMonth.contingentMinutes).isEqualTo(expectedLastMonthContingentMinutes % 60)
-        assertThat(result.lastMonth.differenceHours).isEqualTo(expectedLastMonthDifferenceMinutes / 60)
-        assertThat(result.lastMonth.differenceMinutes).isEqualTo(expectedLastMonthDifferenceMinutes % 60)
+        assertThat(result.thisMonth.executedHours).isEqualTo(expectedRangeExecutedMinutes / 60)
+        assertThat(result.thisMonth.executedMinutes).isEqualTo(expectedRangeExecutedMinutes % 60)
+        assertThat(result.thisMonth.contingentHours).isEqualTo(expectedLastMonthContingentMinutes / 60)
+        assertThat(result.thisMonth.contingentMinutes).isEqualTo(expectedLastMonthContingentMinutes % 60)
+        assertThat(result.thisMonth.differenceHours).isEqualTo(expectedLastMonthDifferenceMinutes / 60)
+        assertThat(result.thisMonth.differenceMinutes).isEqualTo(expectedLastMonthDifferenceMinutes % 60)
         verify(serviceRepository).findServiceCalendarProjection(employeeId, start, end)
         verify(contingentService).getByEmployeeId(employeeId)
     }

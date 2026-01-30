@@ -17,14 +17,17 @@
       <mat-divider class="table-divider"></mat-divider>
 
       <div class="table-wrapper">
-        <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
-        <app-object-table
-          *ngIf="!isGenerating && isLoadedInitially"
-          [boldColumnIndices]="[0,1]"
-          [exportFilename]="'ContingentOverview'"
-          [columnFixedWidthFromIndex]="1"
-          [data$]="data$"
-          [header$]="header$"></app-object-table>
+        @if (isGenerating) {
+          <app-loading-spinner></app-loading-spinner>
+        }
+        @if (!isGenerating && isLoadedInitially) {
+          <app-object-table
+            [boldColumnIndices]="[0,1]"
+            [exportFilename]="'ContingentOverview'"
+            [columnFixedWidthFromIndex]="1"
+            [data$]="data$"
+            [header$]="header$"></app-object-table>
+        }
       </div>
     </mat-card-content>
   </mat-card>
