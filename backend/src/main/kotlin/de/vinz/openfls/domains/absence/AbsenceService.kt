@@ -14,7 +14,9 @@ class AbsenceService(private val absenceRepository: AbsenceRepository,
 
     @Transactional
     fun create(absenceDate: LocalDate): EmployeeAbsenceResponseDTO {
-        val entity = absenceRepository.save(Absence(id = 0, absenceDate, accessService.getId()))
+        val employeeId = accessService.getId()
+        val existing = absenceRepository.findByEmployeeIdAndAbsenceDate(employeeId, absenceDate)
+        val entity = existing ?: absenceRepository.save(Absence(id = 0, absenceDate, employeeId))
         return EmployeeAbsenceResponseDTO(
             employeeId = entity.employeeId,
             absenceDates = listOf(entity.absenceDate)
@@ -24,8 +26,7 @@ class AbsenceService(private val absenceRepository: AbsenceRepository,
     @Transactional
     fun remove(absenceDate: LocalDate) {
         val entity = absenceRepository.findByEmployeeIdAndAbsenceDate(accessService.getId(), absenceDate) ?: return
-
-        absenceRepository.remove(entity.id)
+        absenceRepository.deleteById(entity.id)
     }
 
     @Transactional
