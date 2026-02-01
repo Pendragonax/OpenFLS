@@ -5,6 +5,7 @@ secrets/
 .gradle/
 .kotlin/
 .angular/
+.mockups/
 
 HELP.md
 target/
