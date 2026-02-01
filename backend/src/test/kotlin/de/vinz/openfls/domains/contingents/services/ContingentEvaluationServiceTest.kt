@@ -1,29 +1,28 @@
 package de.vinz.openfls.domains.contingents.services
 
-import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
+import de.vinz.openfls.domains.absence.AbsenceService
+import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDTO
+import de.vinz.openfls.domains.absence.dtos.YearAbsenceDTO
 import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
+import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
 import de.vinz.openfls.domains.services.services.ServiceService
-import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.services.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import org.mockito.quality.Strictness
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class ContingentEvaluationServiceTest {
 
     @Mock
@@ -32,285 +31,241 @@ class ContingentEvaluationServiceTest {
     @Mock
     lateinit var serviceService: ServiceService
 
+    @Mock
+    lateinit var absenceService: AbsenceService
+
     @InjectMocks
     lateinit var contingentEvaluationService: ContingentEvaluationService
 
     @Test
-    fun testGenerateContingentEvaluationByYearAndInstitution_WhenMultipleYearlyContingents_ThenReturnMatchingEvaluation() {
+    fun generateContingentEvaluationFor_singleEmployeeSingleContingent_returnsExpectedTotals() {
         // Given
         val year = 2024
-        val institutionId: Long = 1
+        val institutionId = 1L
+        val institution = mockInstitution()
+        val employee = mockEmployee(10L, "Hans", "Meiser")
+        val contingent = mockContingent(
+            id = 1L,
+            employee = employee,
+            institution = institution,
+            start = LocalDate.of(year, 1, 1),
+            end = null,
+            weeklyHours = 7.0
+        )
+        val service = mockService(
+            id = 21L,
+            start = LocalDateTime.of(year, 1, 5, 10, 0),
+            minutes = 60,
+            employeeId = employee.id
+        )
+        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val contingentHours = listOf(2.0, 2.0) + List(11) { 0.0 }
 
-        val institution = mockInstitution(1L, "Apple")
-        val client = mockClient(1L, "Sie", "Client")
-        val employee1 = mockEmployee(1L, "Hans", "Meiser")
-        val employee2 = mockEmployee(2L, "Angela", "Merkel")
-        val contingent1 = mockContingent(
-                id = 1L,
-                employee = employee1,
-                institution = institution,
-                start = LocalDate.of(year, 1, 1),
-                end = LocalDate.of(year, 2, 29),
-                weeklyHours = 7.0)
-        val contingent2 = mockContingent(
-                id = 2L,
-                employee = employee1,
-                institution = institution,
-                start = LocalDate.of(year, 3, 1),
-                end = null,
-                weeklyHours = 7.0)
-        val contingent3 = mockContingent(
-                id = 3L,
-                employee = employee2,
-                institution = institution,
-                start = LocalDate.of(year, 11, 2),
-                end = null,
-                weeklyHours = 7.0)
-        val service1 = mockService(
-                id = 1L,
-                start = LocalDateTime.of(year, 9, 13, 10, 0),
-                minutes = 60,
-                institution = institution,
-                employee = employee1,
-                client = client)
-        val service2 = mockService(
-                id = 2L,
-                start = LocalDateTime.of(year, 6, 13, 10, 0),
-                minutes = 60,
-                institution = institution,
-                employee = employee2,
-                client = client)
-
-        val contingents = listOf(contingent1, contingent2, contingent3)
-        val services = listOf(service1, service2)  // Mocked services
-
-        whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(contingents)
-        whenever(serviceService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(services)
-
-        val contingentHours1 = listOf(46.37, 31.0, 29.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        val contingentHours2 = listOf(237.44, 0.0, 0.0, 31.0, 30.0, 31.0, 30.0, 31.0, 31.0, 30.0, 31.0, 30.0, 31.0)
-        val contingentHours3 = listOf(46.37, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 29.0, 31.0)
-
-        whenever(contingentService.getContingentHoursByYear(year, contingent1)).thenReturn(contingentHours1)
-        whenever(contingentService.getContingentHoursByYear(year, contingent2)).thenReturn(contingentHours2)
-        whenever(contingentService.getContingentHoursByYear(year, contingent3)).thenReturn(contingentHours3)
+        whenever(serviceService.getContingentEvaluationServiceDTOsBy(institutionId, year)).thenReturn(listOf(service))
+        whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(listOf(contingent))
+        whenever(absenceService.getAllByYear(year)).thenReturn(yearlyAbsences)
+        whenever(contingentService.calculateContingentHoursBy(year, contingent, yearlyAbsences))
+            .thenReturn(contingentHours)
 
         // When
-        val evaluation: ContingentEvaluationDto = contingentEvaluationService.generateContingentEvaluationFor(year, institutionId)
+        val evaluation: ContingentEvaluationDto =
+            contingentEvaluationService.generateContingentEvaluationFor(year, institutionId)
 
         // Then
-        assertThat(evaluation).isNotNull
-        assertThat(evaluation.employees).hasSize(2)
-
-        val evaluations = evaluation.employees
-        assertThat(evaluations[0].employeeId).isEqualTo(1L)
-        assertThat(evaluations[1].employeeId).isEqualTo(2L)
-        assertThat(evaluations[0].contingentHours[0]).isEqualTo(284.21)
-        assertThat(evaluations[1].contingentHours[0]).isEqualTo(46.37)
-        assertThat(evaluations[0].executedHours[0]).isEqualTo(1.0)
-        assertThat(evaluations[1].executedHours[0]).isEqualTo(1.0)
-        assertThat(evaluations[0].executedPercent[0]).isEqualTo(0.35)
-        assertThat(evaluations[1].executedPercent[0]).isEqualTo(2.15)
-        assertThat(evaluations[0].summedExecutedPercent[0]).isEqualTo(0.35)
-        assertThat(evaluations[0].summedExecutedPercent[9]).isEqualTo(0.47)
-        assertThat(evaluations[0].summedExecutedPercent[12]).isEqualTo(0.35)
-        assertThat(evaluations[1].summedExecutedPercent[0]).isEqualTo(2.15)
-        assertThat(evaluations[1].summedExecutedPercent[11]).isEqualTo(4.44)
-        assertThat(evaluations[1].summedExecutedPercent[12]).isEqualTo(2.15)
-        assertThat(evaluations[0].missingHours[0]).isEqualTo(283.21)
-        assertThat(evaluations[1].missingHours[0]).isEqualTo(45.37)
+        assertThat(evaluation.institutionId).isEqualTo(institutionId)
+        assertThat(evaluation.employees).hasSize(1)
+        val employeeEvaluation = evaluation.employees.first()
+        assertThat(employeeEvaluation.employeeId).isEqualTo(employee.id)
+        assertThat(employeeEvaluation.executedHours[0]).isEqualTo(1.0)
+        assertThat(employeeEvaluation.executedPercent[0]).isEqualTo(50.0)
+        assertThat(employeeEvaluation.missingHours[0]).isEqualTo(1.0)
     }
 
     @Test
-    fun testGetEmployeeContingentEvaluations_WhenMultipleYearlyContingents_ThenReturnMatchingEvaluation() {
+    fun getEmployeeContingentEvaluations_twoContingentsForSameEmployee_mergesContingentHours() {
         // Given
         val year = 2024
-        val institutionId: Long = 1
+        val institution = mockInstitution()
+        val employee = mockEmployee(2L, "Anna", "Alpha")
+        val contingentOne = mockContingent(
+            id = 1L,
+            employee = employee,
+            institution = institution,
+            start = LocalDate.of(year, 1, 1),
+            end = LocalDate.of(year, 6, 30),
+            weeklyHours = 7.0
+        )
+        val contingentTwo = mockContingent(
+            id = 2L,
+            employee = employee,
+            institution = institution,
+            start = LocalDate.of(year, 7, 1),
+            end = null,
+            weeklyHours = 7.0
+        )
+        val service = mockService(
+            id = 31L,
+            start = LocalDateTime.of(year, 1, 10, 9, 0),
+            minutes = 60,
+            employeeId = employee.id
+        )
+        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val contingentHoursOne = listOf(1.0, 1.0) + List(11) { 0.0 }
+        val contingentHoursTwo = listOf(2.0, 1.0, 1.0) + List(10) { 0.0 }
 
-        val institution = mockInstitution(1L, "Apple")
-        val client = mockClient(1L, "Sie", "Client")
-        val employee1 = mockEmployee(1L, "Hans", "Meiser")
-        val employee2 = mockEmployee(2L, "Angela", "Merkel")
-        val contingent1 = mockContingent(
-                id = 1L,
-                start = LocalDate.of(year, 1, 1),
-                end = LocalDate.of(year, 2, 29),
-                weeklyHours = 7.0,
-                employee = employee1,
-                institution = institution)
-        val contingent2 = mockContingent(
-                id = 1L,
-                start = LocalDate.of(year, 3, 1),
-                end = null,
-                weeklyHours = 7.0,
-                employee = employee1,
-                institution = institution)
-        val contingent3 = mockContingent(
-                id = 1L,
-                start = LocalDate.of(year, 11, 2),
-                end = null,
-                weeklyHours = 7.0,
-                employee = employee2,
-                institution = institution)
-        val service1 = mockService(
-                id = 1L,
-                start = LocalDateTime.of(year, 9, 13, 10, 0),
-                minutes = 60,
-                institution = institution,
-                employee = employee1,
-                client = client)
-        val service2 = mockService(
-                id = 2L,
-                start = LocalDateTime.of(year, 6, 13, 10, 0),
-                minutes = 60,
-                institution = institution,
-                employee = employee2,
-                client = client)
-
-        val contingents = listOf(contingent1, contingent2, contingent3)
-        val services = listOf(service1, service2)
-
-        whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(contingents)
-        whenever(serviceService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(services)
-
-        val contingentHours1 = listOf(46.37, 31.0, 29.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-        val contingentHours2 = listOf(237.44, 0.0, 0.0, 31.0, 30.0, 31.0, 30.0, 31.0, 31.0, 30.0, 31.0, 30.0, 31.0)
-        val contingentHours3 = listOf(46.37, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 29.0, 31.0)
-
-        whenever(contingentService.getContingentHoursByYear(year, contingent1)).thenReturn(contingentHours1)
-        whenever(contingentService.getContingentHoursByYear(year, contingent2)).thenReturn(contingentHours2)
-        whenever(contingentService.getContingentHoursByYear(year, contingent3)).thenReturn(contingentHours3)
+        whenever(contingentService.calculateContingentHoursBy(year, contingentOne, yearlyAbsences))
+            .thenReturn(contingentHoursOne)
+        whenever(contingentService.calculateContingentHoursBy(year, contingentTwo, yearlyAbsences))
+            .thenReturn(contingentHoursTwo)
 
         // When
         val evaluations: List<EmployeeContingentEvaluationDto> =
-                contingentEvaluationService.getEmployeeContingentEvaluations(year, contingents, services)
+            contingentEvaluationService.getEmployeeContingentEvaluations(
+                year,
+                listOf(contingentOne, contingentTwo),
+                listOf(service),
+                yearlyAbsences
+            )
 
         // Then
-        assertThat(evaluations).isNotNull
-        assertThat(evaluations).hasSize(2)
-        assertThat(evaluations[0].employeeId).isEqualTo(1L)
-        assertThat(evaluations[1].employeeId).isEqualTo(2L)
-        assertThat(evaluations[0].contingentHours[0]).isEqualTo(284.21)
-        assertThat(evaluations[1].contingentHours[0]).isEqualTo(46.37)
-        assertThat(evaluations[0].executedHours[0]).isEqualTo(1.0)
-        assertThat(evaluations[1].executedHours[0]).isEqualTo(1.0)
-        assertThat(evaluations[0].executedPercent[0]).isEqualTo(0.35)
-        assertThat(evaluations[1].executedPercent[0]).isEqualTo(2.15)
-        assertThat(evaluations[0].summedExecutedPercent[0]).isEqualTo(0.35)
-        assertThat(evaluations[0].summedExecutedPercent[9]).isEqualTo(0.47)
-        assertThat(evaluations[0].summedExecutedPercent[12]).isEqualTo(0.35)
-        assertThat(evaluations[1].summedExecutedPercent[0]).isEqualTo(2.15)
-        assertThat(evaluations[1].summedExecutedPercent[11]).isEqualTo(4.44)
-        assertThat(evaluations[1].summedExecutedPercent[12]).isEqualTo(2.15)
-        assertThat(evaluations[0].missingHours[0]).isEqualTo(283.21)
-        assertThat(evaluations[1].missingHours[0]).isEqualTo(45.37)
+        assertThat(evaluations).hasSize(1)
+        val evaluation = evaluations.first()
+        assertThat(evaluation.employeeId).isEqualTo(employee.id)
+        assertThat(evaluation.contingentHours[0]).isEqualTo(3.0)
+        assertThat(evaluation.contingentHours[1]).isEqualTo(2.0)
+        assertThat(evaluation.executedHours[0]).isEqualTo(1.0)
+        assertThat(evaluation.executedPercent[0]).isEqualTo(33.33)
     }
 
     @Test
-    fun testGetExecutedHoursByYearAndEmployee_WhenServicesExist_ThenReturnExecutedHours() {
+    fun getEmployeeContingentEvaluations_multipleEmployees_sortedByLastname() {
         // Given
         val year = 2024
-        val employeeId: Long = 1
-        val service = mock(ServiceProjection::class.java)
-        val employee = mock(EmployeeSoloProjection::class.java)
-        val start = LocalDateTime.of(year, 1, 1, 1, 1, 1)
-        whenever(employee.id).thenReturn(employeeId)
-        whenever(service.employee).thenReturn(employee)
-        whenever(service.start).thenReturn(start)
-        whenever(service.minutes).thenReturn(60)
+        val institution = mockInstitution()
+        val employeeA = mockEmployee(1L, "Anna", "Alpha")
+        val employeeB = mockEmployee(2L, "Zoe", "Zulu")
+        val contingentA = mockContingent(
+            id = 1L,
+            employee = employeeA,
+            institution = institution,
+            start = LocalDate.of(year, 1, 1),
+            end = null,
+            weeklyHours = 7.0
+        )
+        val contingentB = mockContingent(
+            id = 2L,
+            employee = employeeB,
+            institution = institution,
+            start = LocalDate.of(year, 1, 1),
+            end = null,
+            weeklyHours = 7.0
+        )
+        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val contingentHours = listOf(1.0, 1.0) + List(11) { 0.0 }
 
-        val services = listOf(service)
+        whenever(contingentService.calculateContingentHoursBy(year, contingentA, yearlyAbsences))
+            .thenReturn(contingentHours)
+        whenever(contingentService.calculateContingentHoursBy(year, contingentB, yearlyAbsences))
+            .thenReturn(contingentHours)
 
         // When
-        val executedHours: List<Double> = contingentEvaluationService.getExecutedHoursByYearAndEmployee(year, employeeId, services)
+        val evaluations = contingentEvaluationService.getEmployeeContingentEvaluations(
+            year,
+            listOf(contingentB, contingentA),
+            emptyList(),
+            yearlyAbsences
+        )
 
         // Then
-        assertThat(executedHours[1]).isEqualTo(TimeDoubleService.convertMinutesToTimeDouble(60))
-        assertThat(executedHours[0]).isEqualTo(TimeDoubleService.convertMinutesToTimeDouble(60))
+        assertThat(evaluations).hasSize(2)
+        assertThat(evaluations[0].employeeId).isEqualTo(employeeA.id)
+        assertThat(evaluations[1].employeeId).isEqualTo(employeeB.id)
     }
 
     @Test
-    fun testGetMissingHours_WhenExecutedLessThenContingent_ThenReturnPositiveMissingHours() {
+    fun getExecutedHoursByYearAndEmployee_servicesAcrossMonthsAndAbsence_skipsAbsentServices() {
         // Given
-        val contingentHours = listOf(10.0, 20.0)
-        val executedHours = listOf(5.0, 15.0)
+        val year = 2024
+        val employeeId = 7L
+        val otherEmployeeId = 9L
+        val janService = mock<ContingentEvaluationServiceProjection>()
+        whenever(janService.employeeId).thenReturn(employeeId)
+        whenever(janService.start).thenReturn(LocalDateTime.of(year, 1, 5, 8, 0))
+
+        val febService = mock<ContingentEvaluationServiceProjection>()
+        whenever(febService.employeeId).thenReturn(employeeId)
+        whenever(febService.start).thenReturn(LocalDateTime.of(year, 2, 6, 8, 0))
+        whenever(febService.minutes).thenReturn(30)
+
+        val otherService = mock<ContingentEvaluationServiceProjection>()
+        whenever(otherService.employeeId).thenReturn(otherEmployeeId)
+        val yearlyAbsences = YearAbsenceDTO.of(
+            year,
+            listOf(
+                EmployeeAbsenceResponseDTO(
+                    employeeId = employeeId,
+                    absenceDates = listOf(LocalDate.of(year, 1, 5))
+                )
+            )
+        )
 
         // When
-        val missingHours: List<Double> = contingentEvaluationService.getMissingHours(contingentHours, executedHours)
+        val executedHours = contingentEvaluationService.getExecutedHoursByYearAndEmployee(
+            year,
+            employeeId,
+            listOf(janService, febService, otherService),
+            yearlyAbsences
+        )
 
         // Then
-        assertThat(missingHours).containsExactly(5.0, 5.0)
+        assertThat(executedHours[0]).isEqualTo(TimeDoubleService.convertMinutesToTimeDouble(30))
+        assertThat(executedHours[1]).isEqualTo(0.0)
+        assertThat(executedHours[2]).isEqualTo(TimeDoubleService.convertMinutesToTimeDouble(30))
     }
 
     @Test
-    fun testGetExecutedPercent_GivenExecutedLessThenContingent_ThenReturnCorrectPercent() {
+    fun getMissingHours_contingentZeroOrNegative_returnsZero() {
         // Given
-        val contingentHours = listOf(10.0, 20.0)
-        val executedHours = listOf(5.0, 15.0)
+        val contingentHours = listOf(0.0, -1.0, 2.0)
+        val executedHours = listOf(1.0, 1.0, 0.0)
 
         // When
-        val executedPercent: List<Double> = contingentEvaluationService.getExecutedPercent(contingentHours, executedHours)
+        val missingHours = contingentEvaluationService.getMissingHours(contingentHours, executedHours)
 
         // Then
-        assertThat(executedPercent).containsExactly(50.0, 75.0)
+        assertThat(missingHours).containsExactly(0.0, 0.0, 2.0)
     }
 
     @Test
-    fun testGetSummedExecutedPercent_GivenSummedExecutedLessThenContingent_ThenReturnCorrectSummedPercent() {
+    fun getExecutedPercent_contingentZero_returnsZero() {
         // Given
-        val contingentHours = listOf(90.0, 10.0, 20.0, 15.0, 30.0, 15.0)
-        val executedHours = listOf(30.0, 5.0, 15.0, 0.0, 0.0, 10.0)
+        val contingentHours = listOf(0.0, 2.0)
+        val executedHours = listOf(1.0, 1.0)
 
         // When
-        val summedExecutedPercent: List<Double> =
-                contingentEvaluationService.getSummedExecutedPercent(contingentHours, executedHours)
+        val executedPercent = contingentEvaluationService.getExecutedPercent(contingentHours, executedHours)
 
         // Then
-        assertThat(summedExecutedPercent).containsExactly(33.33, 64.35, 85.84, 57.22, 34.32, 42.91)
+        assertThat(executedPercent).containsExactly(0.0, 50.0)
     }
 
     @Test
-    fun testGetSummedExecutedPercent_GivenContingentAndExecutedHours_ThenReturnCorrectSummedPercent() {
+    fun getSummedExecutedPercent_constantRatio_returnsExpectedSummedValues() {
         // Given
-        val contingentHours = listOf(284.21, 31.0, 29.0, 31.0, 30.0, 31.0, 30.0, 31.0, 31.0, 30.0, 31.0, 30.0, 31.0)
-        val executedHours = listOf(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        val contingentHours = listOf(2.0, 1.0, 1.0)
+        val executedHours = listOf(1.0, 0.30, 0.30)
 
         // When
-        val summedExecutedPercent: List<Double> =
-                contingentEvaluationService.getSummedExecutedPercent(contingentHours, executedHours)
+        val summedExecutedPercent = contingentEvaluationService.getSummedExecutedPercent(contingentHours, executedHours)
 
         // Then
-        assertThat(summedExecutedPercent).containsExactly(0.35, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6, 0.53, 0.47, 0.42, 0.38, 0.35)
+        assertThat(summedExecutedPercent).containsExactly(50.0, 50.0, 50.0)
     }
 
-    @Test
-    fun testCalculatePercent_GivenContingentZero_ThenReturnZero() {
-        // When
-        val percent = contingentEvaluationService.getExecutedPercent(listOf(0.0), listOf(10.0))
-
-        // Then
-        assertThat(percent[0]).isEqualTo(0.0)
-    }
-
-
-    // Helper methods
-    private fun mockInstitution(id: Long, name: String): InstitutionSoloProjection {
-        val institution = mock(InstitutionSoloProjection::class.java)
-        whenever(institution.id).thenReturn(id)
-        whenever(institution.name).thenReturn(name)
-        return institution
-    }
-
-    private fun mockClient(id: Long, firstName: String, lastName: String): ClientSoloProjection {
-        val client = mock(ClientSoloProjection::class.java)
-        whenever(client.id).thenReturn(id)
-        whenever(client.firstName).thenReturn(firstName)
-        whenever(client.lastName).thenReturn(lastName)
-        return client
-    }
+    private fun mockInstitution(): InstitutionSoloProjection = mock()
 
     private fun mockEmployee(id: Long, firstName: String, lastName: String): EmployeeSoloProjection {
-        val employee = mock(EmployeeSoloProjection::class.java)
+        val employee = mock<EmployeeSoloProjection>()
         whenever(employee.id).thenReturn(id)
         whenever(employee.firstname).thenReturn(firstName)
         whenever(employee.lastname).thenReturn(lastName)
@@ -318,38 +273,29 @@ class ContingentEvaluationServiceTest {
     }
 
     private fun mockContingent(
-            employee: EmployeeSoloProjection,
-            institution: InstitutionSoloProjection,
-            start: LocalDate,
-            end: LocalDate?,
-            weeklyHours: Double,
-            id: Long
+        id: Long,
+        employee: EmployeeSoloProjection,
+        institution: InstitutionSoloProjection,
+        start: LocalDate,
+        end: LocalDate?,
+        weeklyHours: Double
     ): ContingentProjection {
-        val contingent = mock(ContingentProjection::class.java)
-        whenever(contingent.id).thenReturn(id)
+        val contingent = mock<ContingentProjection>()
         whenever(contingent.employee).thenReturn(employee)
-        whenever(contingent.institution).thenReturn(institution)
-        whenever(contingent.start).thenReturn(start)
-        whenever(contingent.end).thenReturn(end)
-        whenever(contingent.weeklyServiceHours).thenReturn(weeklyHours)
         return contingent
     }
 
     private fun mockService(
-            id: Long,
-            employee: EmployeeSoloProjection,
-            institution: InstitutionSoloProjection,
-            client: ClientSoloProjection,
-            start: LocalDateTime,
-            minutes: Int
-    ): ServiceProjection {
-        val service = mock(ServiceProjection::class.java)
-        whenever(service.id).thenReturn(id)
-        whenever(service.employee).thenReturn(employee)
-        whenever(service.institution).thenReturn(institution)
-        whenever(service.client).thenReturn(client)
+        id: Long,
+        start: LocalDateTime,
+        minutes: Int,
+        employeeId: Long
+    ): ContingentEvaluationServiceProjection {
+        val service = mock<ContingentEvaluationServiceProjection>()
+        whenever(service.employeeId).thenReturn(employeeId)
         whenever(service.start).thenReturn(start)
         whenever(service.minutes).thenReturn(minutes)
         return service
     }
+
 }

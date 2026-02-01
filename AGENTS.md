@@ -181,3 +181,7 @@ Der Inhalt der einzelnen Test soll außerdem in die Abschnitte `Given`, `When`, 
 Es wird assertJ verwendet.
 Unit-Tests sollen so erstellt werden, dass sie alle möglichen Szenarien abdecken.
 Die Methoden-Namen sollen in Englisch sein.
+Es soll pro Methode mindestens ein Unit-Test erstellt werden.
+Bitte nutze keine Reflections in den Unit-Tests.
+Die Tests sollen nicht per verify alle aufrufe überprüfen, sondern nur die Endergebnisse.
+Ziel ist es alle möglichen Wege und Szenarien abzudecken.

@@ -10,7 +10,6 @@ import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,9 +21,7 @@ class ContingentService(
     private val contingentRepository: ContingentRepository,
     private val institutionService: InstitutionService,
     private val employeeService: EmployeeService,
-    private val accessService: AccessService,
-    @param:Value("\${openfls.general.workdays.real}") private val workdaysReal: Long,
-    @param:Value("\${openfls.general.workdays.assumption}") private val workdaysAssumption: Long,
+    private val accessService: AccessService
 ) {
 
     @Transactional
@@ -116,36 +113,16 @@ class ContingentService(
             val institutionId = getById(contingentId)?.institutionId ?: 0
 
             accessService.isLeader(accessService.getId(), institutionId)
-        } catch (ex: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
 
-    fun getContingentHoursByYear(year: Int, contingents: List<ContingentProjection>, absences: YearAbsenceDTO): List<Double> {
-        val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
-
-        for (contingent in contingents) {
-            val workdayDailyHours = TimeDoubleService.convertTimeDoubleToDouble(contingent.weeklyServiceHours) / 5
-            val workdays =
-                DateService.countDaysOfYearBetweenStartAndEnd(year, contingent.start, contingent.end) * 5.0 / 7.0
-            val workdaysWithoutVacationInContingent = workdays * (workdaysAssumption.toDouble() / workdaysReal)
-            for (month in 1..12) {
-                monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
-                    monthlyHours[month],
-                    getContingentHoursByYearAndMonth(year, month, contingent, absences)
-                )
-            }
-
-            monthlyHours[0] = TimeDoubleService.sumTimeDoubles(
-                monthlyHours[0],
-                TimeDoubleService.convertDoubleToTimeDouble(workdayDailyHours * workdaysWithoutVacationInContingent)
-            )
-        }
-
-        return monthlyHours
-    }
-
-    fun getContingentHoursByYear(year: Int, contingent: ContingentProjection, absences: YearAbsenceDTO): List<Double> {
+    fun calculateContingentHoursBy(
+        year: Int,
+        contingent: ContingentProjection,
+        absences: YearAbsenceDTO
+    ): List<Double> {
         val workdayDailyHours = contingent.weeklyServiceHours / 5
         val workdays = DateService.calculateWorkdaysInHesseBetween(contingent.start, contingent.end, year)
         val absenceDays = countAbsenceDaysInContingentForYear(year, contingent, absences)
@@ -155,16 +132,20 @@ class ContingentService(
         monthlyHours.add(0.0)
 
         for (month in 1..12) {
-            monthlyHours.add(getContingentHoursByYearAndMonth(year, month, contingent, absences))
+            monthlyHours.add(calculateContingentHoursBy(year, month, contingent, absences))
         }
 
-        monthlyHours[0] =
-            TimeDoubleService.convertDoubleToTimeDouble(realWorkDays * workdayDailyHours)
+        monthlyHours[0] = TimeDoubleService.convertDoubleToTimeDouble(realWorkDays * workdayDailyHours)
 
         return monthlyHours
     }
 
-    fun getContingentHoursByYearAndMonth(year: Int, month: Int, contingent: ContingentProjection, absences: YearAbsenceDTO): Double {
+    fun calculateContingentHoursBy(
+        year: Int,
+        month: Int,
+        contingent: ContingentProjection,
+        absences: YearAbsenceDTO
+    ): Double {
         if (!isContingentInYearMonth(year, month, contingent)) {
             return 0.0
         }
@@ -172,11 +153,11 @@ class ContingentService(
         // end date or the last day of the year when there is no end set
         val end = contingent.end ?: LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
         val workdays = DateService.countWorkDaysOfMonthAndYearBetweenStartAndEnd(year, month, contingent.start, end)
-        val absenceDays = countAbsenceDaysInContingentForYearAndMonth(year, month, contingent, absences)
+        val absenceDays = countAbsenceDaysBy(year, month, contingent, absences)
         return TimeDoubleService.convertDoubleToTimeDouble((workdays - absenceDays) * (contingent.weeklyServiceHours / 5))
     }
 
-    private fun countAbsenceDaysInContingentForYearAndMonth(
+    fun countAbsenceDaysBy(
         year: Int,
         month: Int,
         contingent: ContingentProjection,
@@ -186,17 +167,12 @@ class ContingentService(
             absence.employeeId == contingent.employee.id
         }.flatMap { it.absenceDates }
 
-        val absenceDaysInMonth = employeeAbsences
-            .filter { absence ->
-                absence.year == year && absence.monthValue == month && absence >= contingent.start &&
-                        (contingent.end?.let { absence <= it } ?: true)
-            }
-            .count()
+        val absenceDaysInMonth = employeeAbsences.count { isAbsenceIn(year, month, contingent, it) }
 
         return absenceDaysInMonth
     }
 
-    private fun countAbsenceDaysInContingentForYear(
+    fun countAbsenceDaysInContingentForYear(
         year: Int,
         contingent: ContingentProjection,
         absences: YearAbsenceDTO
@@ -206,11 +182,7 @@ class ContingentService(
         }.flatMap { it.absenceDates }
 
         val absenceDaysInMonth = employeeAbsences
-            .filter { absence ->
-                absence.year == year && absence >= contingent.start &&
-                        (contingent.end?.let { absence <= it } ?: true)
-            }
-            .count()
+            .count { isAbsenceIn(year, contingent, it) }
 
         return absenceDaysInMonth
     }
@@ -223,7 +195,7 @@ class ContingentService(
                 ((contingent.end?.let { it >= start } ?: true))
     }
 
-    fun getContingentMinutesForWorkday(
+    fun calculateContingentMinutesForWorkdayBy(
         date: LocalDate,
         contingents: List<ContingentDto>
     ): Double {
@@ -243,7 +215,7 @@ class ContingentService(
         }
     }
 
-    fun getContingentMinutesFor(
+    fun calculateContingentMinutesFor(
         start: LocalDate,
         end: LocalDate,
         contingents: List<ContingentDto>
@@ -252,10 +224,28 @@ class ContingentService(
         var currentDate = start
 
         while (!currentDate.isAfter(end)) {
-            totalContingentMinutes += getContingentMinutesForWorkday(currentDate, contingents)
+            totalContingentMinutes += calculateContingentMinutesForWorkdayBy(currentDate, contingents)
             currentDate = currentDate.plusDays(1)
         }
 
         return ceil(totalContingentMinutes).toInt()
+    }
+
+    private fun isAbsenceIn(
+        year: Int,
+        contingent: ContingentProjection,
+        absence: LocalDate
+    ): Boolean {
+        return absence.year == year && absence >= contingent.start && (contingent.end?.let { absence <= it } ?: true)
+    }
+
+    private fun isAbsenceIn(
+        year: Int,
+        month: Int,
+        contingent: ContingentProjection,
+        absence: LocalDate
+    ): Boolean {
+        return absence.year == year && absence.monthValue == month && absence >= contingent.start &&
+                (contingent.end?.let { absence <= it } ?: true)
     }
 }

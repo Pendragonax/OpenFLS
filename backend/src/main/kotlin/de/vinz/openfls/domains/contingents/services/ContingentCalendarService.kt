@@ -56,7 +56,7 @@ class ContingentCalendarService(
         absenceDates: List<LocalDate>
     ): ContingentCalendarInformationDTO {
         val contingentMinutes =
-            ceil(contingentService.getContingentMinutesForWorkday(LocalDate.now(), contingents)).toInt()
+            ceil(contingentService.calculateContingentMinutesForWorkdayBy(LocalDate.now(), contingents)).toInt()
 
         if (absenceDates.contains(LocalDate.now())) {
             return generateContingentInformationDTO(0, 0)
@@ -97,11 +97,11 @@ class ContingentCalendarService(
         contingents: List<ContingentDto>,
         absenceDates: List<LocalDate>
     ): ContingentCalendarInformationDTO {
-        val contingentMinutes = contingentService.getContingentMinutesFor(start, end, contingents)
+        val contingentMinutes = contingentService.calculateContingentMinutesFor(start, end, contingents)
         val executedMinutes = sumExecutedMinutesFor(start, end, calendarDayInformations)
         val absenceMinutes = absenceDates
             .filter { !it.isBefore(start) && !it.isAfter(end) }
-            .sumOf { contingentService.getContingentMinutesForWorkday(it, contingents).toInt() }
+            .sumOf { contingentService.calculateContingentMinutesForWorkdayBy(it, contingents).toInt() }
 
         return generateContingentInformationDTO(executedMinutes, contingentMinutes - absenceMinutes)
     }
@@ -118,7 +118,7 @@ class ContingentCalendarService(
             .map {
                 val minutes = it.value.sumOf { service -> service.minutes }
                 val contingentMinutes =
-                    ceil(contingentService.getContingentMinutesForWorkday(it.key, contingents)).toInt()
+                    ceil(contingentService.calculateContingentMinutesForWorkdayBy(it.key, contingents)).toInt()
                 val absentFound = absenceDates.contains(it.key)
                 if (absentFound) {
                     absenceDates.remove(it.key)

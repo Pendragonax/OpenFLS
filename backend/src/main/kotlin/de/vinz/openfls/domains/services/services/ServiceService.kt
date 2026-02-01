@@ -14,13 +14,13 @@ import java.time.Duration
 import java.time.LocalDate
 
 @org.springframework.stereotype.Service
-@org.springframework.transaction.annotation.Transactional(readOnly = true)
+@Transactional
 class ServiceService(
     private val serviceRepository: ServiceRepository,
     private val modelMapper: org.modelmapper.ModelMapper
 ) : de.vinz.openfls.services.GenericService<Service> {
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     fun create(serviceDto: ServiceDto): ServiceDto {
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
@@ -29,7 +29,7 @@ class ServiceService(
         return modelMapper.map(create(entity), ServiceDto::class.java)
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     override fun create(value: Service): Service {
         if (value.id > 0)
             throw IllegalArgumentException("id is greater than 0")
@@ -41,7 +41,7 @@ class ServiceService(
         return serviceRepository.save(value)
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     fun update(serviceDto: ServiceDto): ServiceDto {
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
@@ -50,7 +50,7 @@ class ServiceService(
         return modelMapper.map(savedEntity, ServiceDto::class.java)
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     override fun update(value: Service): Service {
         if (value.id <= 0)
             throw IllegalArgumentException("id is set")
@@ -64,7 +64,7 @@ class ServiceService(
         return serviceRepository.save(value)
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     override fun delete(id: Long) {
         serviceRepository.deleteById(id)
     }

@@ -39,7 +39,7 @@ class ContingentEvaluationService(
         val employeeEvaluations = ArrayList<EmployeeContingentEvaluationDto>()
 
         for (contingent in contingents) {
-            val contingentHours = contingentService.getContingentHoursByYear(year, contingent, yearlyAbsences)
+            val contingentHours = contingentService.calculateContingentHoursBy(year, contingent, yearlyAbsences)
 
             // employee got NO evaluation
             if (employeeEvaluations.none { it.employeeId == contingent.employee.id }) {
@@ -152,7 +152,7 @@ class ContingentEvaluationService(
 
     fun getSummedExecutedPercent(contingentHours: List<Double>, executedHours: List<Double>): List<Double> {
         val contingentsHoursWithoutAll = contingentHours.drop(1)
-            .map { TimeDoubleService.convertDoubleToTimeDouble(TimeDoubleService.convertTimeDoubleToDouble(it) * 0.777) }
+            .map { TimeDoubleService.convertDoubleToTimeDouble(TimeDoubleService.convertTimeDoubleToDouble(it)) }
         val executedHoursWithoutAll = executedHours.drop(1)
         val monthlyPercent = contingentsHoursWithoutAll.indices
             .map { index -> calculateSummedPercent(executedHoursWithoutAll, contingentsHoursWithoutAll, index) }
