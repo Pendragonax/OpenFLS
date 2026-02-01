@@ -39,7 +39,7 @@ class Employee(
 
         @OneToOne(
                 mappedBy = "employee",
-                cascade = [CascadeType.MERGE],
+                cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         @PrimaryKeyJoinColumn
         @JsonIgnore

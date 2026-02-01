@@ -40,7 +40,10 @@ class AbsenceService(private val absenceRepository: AbsenceRepository,
 
     @Transactional
     fun getAllByYear(year: Int): YearAbsenceDTO {
-        val entities = absenceRepository.findAllByYear(year)
+        val entities = absenceRepository.findAllByAbsenceDateBetween(
+            LocalDate.of(year, 1, 1),
+            LocalDate.of(year, 12, 31)
+        )
         val employeeIds = entities.map { it.employeeId }.distinct()
 
         val employeeAbsences = mutableListOf<EmployeeAbsenceResponseDTO>()

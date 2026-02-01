@@ -5,7 +5,10 @@ import jakarta.validation.constraints.NotNull
 import java.time.LocalDate
 
 @Entity
-@Table(name = "absences")
+@Table(
+    name = "absences",
+    uniqueConstraints = [UniqueConstraint(name = "UQ_ABSENCES_EMPLOYEE_DATE", columnNames = ["employee_id", "absence_date"])]
+)
 data class Absence(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,24 +2,24 @@ package de.vinz.openfls.domains.employees.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.EmployeeAccess
-import de.vinz.openfls.domains.permissions.Permission
-import de.vinz.openfls.domains.employees.entities.Unprofessional
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
-import de.vinz.openfls.domains.permissions.PermissionDto
 import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
+import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entities.EmployeeAccess
+import de.vinz.openfls.domains.employees.entities.Unprofessional
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
 import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.services.GenericService
+import de.vinz.openfls.domains.permissions.Permission
+import de.vinz.openfls.domains.permissions.PermissionDto
 import de.vinz.openfls.domains.permissions.PermissionService
+import de.vinz.openfls.services.GenericService
 import jakarta.persistence.EntityNotFoundException
-import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class EmployeeService(
@@ -35,30 +35,35 @@ class EmployeeService(
 
     @Transactional
     fun create(valueDto: EmployeeDto): EmployeeDto {
-        // convert employee
-        val entity = modelMapper.map(valueDto, Employee::class.java)
-        // convert access
-        entity.access = modelMapper.map(valueDto.access, EmployeeAccess::class.java)?.apply {
-            password = if (username.isNotEmpty()) passwordEncoder.encode(username).toString() else ""
+        val employee = modelMapper.map(valueDto, Employee::class.java).apply {
+            id = null
+            permissions = null
+            unprofessionals = null
+            contingents = null
+            access = EmployeeAccess(
+                id = null,
+                username = valueDto.access?.username.orEmpty(),
+                password = passwordEncoder.encode(valueDto.access?.username.orEmpty()),
+                role = valueDto.access?.role ?: 3,
+                employee = this
+            )
         }
+        var savedEmployee = employeeRepository.save(employee)
 
-        entity.id = null
-        entity.permissions = permissionService.convertToPermissions(valueDto.permissions, -1)
-        entity.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, -1)
-
-        val savedEntity = create(entity)
+        savedEmployee.permissions = permissionService.convertToPermissions(valueDto.permissions, savedEmployee)
+        savedEmployee.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, savedEmployee)
+        savedEmployee = employeeRepository.save(savedEmployee)
 
         // set id to dto
-        valueDto.id = savedEntity.id!!
-        valueDto.access?.id = savedEntity.id!!
-
+        valueDto.id = savedEmployee.id!!
+        valueDto.access?.id = savedEmployee.id!!
         valueDto.permissions = valueDto.permissions
-                ?.filter { savedEntity.permissions
+                ?.filter { savedEmployee.permissions
                         ?.any { permission -> permission.id.institutionId == it.institutionId } ?: false }
-                ?.map { it.apply { employeeId = savedEntity.id!! } }
+                ?.map { it.apply { employeeId = savedEmployee.id!! } }
                 ?.toTypedArray()
         valueDto.unprofessionals = valueDto.unprofessionals
-                ?.map { it.apply { employeeId = savedEntity.id!! } }
+                ?.map { it.apply { employeeId = savedEmployee.id!! } }
                 ?.toTypedArray()
 
         return valueDto
@@ -100,19 +105,26 @@ class EmployeeService(
 
     @Transactional
     fun update(id: Long, valueDto: EmployeeDto): EmployeeDto {
-        // convert employee
-        val entity = modelMapper.map(valueDto, Employee::class.java)
+        val employee = getById(id) ?: throw EntityNotFoundException()
+
+        employee.apply {
+            if (valueDto.access != null) {
+                access?.username = valueDto.access!!.username
+                access?.role = valueDto.access!!.role
+            }
+            firstname = valueDto.firstName
+            lastname = valueDto.lastName
+            email = valueDto.email
+            phonenumber = valueDto.phonenumber
+        }
 
         if (accessService.isAdmin()) {
-            entity.permissions = permissionService.convertToPermissions(valueDto.permissions, id)
-            entity.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, id)
-        } else {
-            entity.permissions = mutableSetOf()
-            entity.unprofessionals = mutableSetOf()
+            employee.permissions = permissionService.convertToPermissions(valueDto.permissions, employee)
+            employee.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, employee)
         }
 
         // update employee
-        val savedEntity = update(entity)
+        val savedEntity = update(employee)
 
         // permissions
         valueDto.permissions = savedEntity.permissions
