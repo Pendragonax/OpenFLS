@@ -30,6 +30,7 @@ services:
       dockerfile: Dockerfile
       target: development
     restart: always
+    user: "${UID}:${GID}"
     volumes:
       - ../frontend:/app
     networks:

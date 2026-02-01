@@ -21,12 +21,14 @@ try {
 } catch (error) {
   if (
     error instanceof Error &&
-    error.message.includes('Cannot reinitialize the TestBed')
+    (error.message.includes('Cannot reinitialize the TestBed') ||
+      error.message.includes('Cannot set base providers'))
   ) {
     // TestBed already initialized in this worker.
     // No-op.
+  } else {
+    throw error;
   }
-  throw error;
 }
 
 beforeEach(() => {

@@ -1,5 +1,6 @@
 import '@testbed';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { ContingentEvaluationComponent } from './contingent-evaluation.component';
 
@@ -9,7 +10,8 @@ describe('ContingentEvaluationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ContingentEvaluationComponent ]
+      imports: [MatMenuModule],
+      declarations: [ContingentEvaluationComponent]
     })
     .compileComponents();
   });
