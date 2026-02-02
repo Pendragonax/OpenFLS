@@ -35,9 +35,9 @@ class Institution(
         @JsonIgnore
         @OneToMany(
                 mappedBy = "institution",
-                cascade = [CascadeType.REMOVE],
+                cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
-        var permissions: MutableSet<Permission>? = null,
+        var permissions: MutableSet<Permission> = mutableSetOf(),
 
         @OneToMany(
                 mappedBy = "institution",

@@ -55,7 +55,16 @@ class Permission(
                 }
 
                 fun of(permissionDTOs: List<PermissionDto>): List<Permission> {
-                        return permissionDTOs.map { of(it) }
+                        return permissionDTOs.map { Permission(
+                                id = EmployeeInstitutionRightsKey(
+                                        employeeId = it.employeeId,
+                                        institutionId = null
+                                ),
+                                readEntries = it.readEntries,
+                                writeEntries = it.writeEntries,
+                                changeInstitution = it.changeInstitution,
+                                affiliated = it.affiliated
+                        ) }
                 }
         }
 }

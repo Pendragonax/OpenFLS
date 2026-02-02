@@ -47,14 +47,14 @@ class Employee(
 
         @OneToMany(
                 mappedBy = "employee",
-                cascade = [CascadeType.REMOVE],
+                cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var permissions: MutableSet<Permission>? = null,
 
         @JsonIgnoreProperties(value = ["sponsor", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "employee",
-                cascade = [CascadeType.REMOVE],
+                cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var unprofessionals: MutableSet<Unprofessional>? = null,
 

@@ -57,7 +57,9 @@ class ServiceController(
             logger.error(ex.message)
 
             ResponseEntity(
-                    employeeService.getById(valueDto.employeeId),
+                    employeeService.getById(valueDto.employeeId).apply {
+                        this?.access?.password = ""
+                    },
                     HttpStatus.BAD_REQUEST
             )
         }

@@ -15,11 +15,11 @@ class InstitutionDto {
 
     var phonenumber: String = ""
 
-    var permissions: Array<PermissionDto>? = null
+    var permissions: List<PermissionDto> = emptyList()
 
-    var contingents: Array<ContingentDto>? = null
+    var contingents: List<ContingentDto>? = emptyList()
 
-    var assistancePlans: Array<AssistancePlanDto>? = null
+    var assistancePlans: List<AssistancePlanDto>? = emptyList()
 
     constructor(id: Long, name: String, email: String, phonenumber: String) {
         this.id = id

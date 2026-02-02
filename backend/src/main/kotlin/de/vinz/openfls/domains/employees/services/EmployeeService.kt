@@ -31,7 +31,7 @@ class EmployeeService(
         private val accessService: AccessService,
         private val passwordEncoder: PasswordEncoder,
         private val modelMapper: ModelMapper
-) : GenericService<Employee> {
+) {
 
     @Transactional
     fun create(valueDto: EmployeeDto): EmployeeDto {
@@ -70,7 +70,7 @@ class EmployeeService(
     }
 
     @Transactional
-    override fun create(value: Employee): Employee {
+    fun create(value: Employee): Employee {
         if (value.access == null)
             throw IllegalArgumentException("employee access is null")
         if (value.access!!.password.isEmpty())
@@ -108,10 +108,6 @@ class EmployeeService(
         val employee = getById(id) ?: throw EntityNotFoundException()
 
         employee.apply {
-            if (valueDto.access != null) {
-                access?.username = valueDto.access!!.username
-                access?.role = valueDto.access!!.role
-            }
             firstname = valueDto.firstName
             lastname = valueDto.lastName
             email = valueDto.email
@@ -123,8 +119,21 @@ class EmployeeService(
             employee.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, employee)
         }
 
-        // update employee
-        val savedEntity = update(employee)
+        val tmpPermissions = employee.permissions
+        val tmpUnprofessionals = employee.unprofessionals
+
+        employee.permissions = null
+        employee.access = null
+        employee.contingents = null
+        employee.unprofessionals = null
+
+        // save employee
+        val savedEntity = employeeRepository.save(employee).apply {
+            access = null
+            permissions = savePermissions(this, tmpPermissions)
+            permissions = permissionService.getPermissionByEmployee(this.id ?: 0).toMutableSet()
+            unprofessionals = saveUnprofessionals(this, tmpUnprofessionals)
+        }
 
         // permissions
         valueDto.permissions = savedEntity.permissions
@@ -136,27 +145,6 @@ class EmployeeService(
                 ?.toTypedArray()
 
         return valueDto
-    }
-
-    @Transactional
-    override fun update(value: Employee): Employee {
-        val tmpPermissions = value.permissions
-        val tmpUnprofessionals = value.unprofessionals
-
-        value.permissions = null
-        value.access = null
-        value.contingents = null
-        value.unprofessionals = null
-
-        // save employee
-        val employeeEntity = employeeRepository.save(value).apply {
-            access = null
-            permissions = savePermissions(this, tmpPermissions)
-            permissions = permissionService.getPermissionByEmployee(this.id ?: 0).toMutableSet()
-            unprofessionals = saveUnprofessionals(this, tmpUnprofessionals)
-        }
-
-        return employeeEntity
     }
 
     @Transactional
@@ -186,7 +174,7 @@ class EmployeeService(
     }
 
     @Transactional
-    override fun delete(id: Long) {
+    fun delete(id: Long) {
         employeeAccessRepository.deleteById(id)
     }
 
@@ -234,7 +222,7 @@ class EmployeeService(
     }
 
     @Transactional(readOnly = true)
-    override fun getAll(): List<Employee> {
+    fun getAll(): List<Employee> {
         return employeeRepository.findAll().map {
             it.apply {
                 access?.password = ""
@@ -248,14 +236,12 @@ class EmployeeService(
     }
 
     @Transactional(readOnly = true)
-    override fun getById(id: Long): Employee? {
-        return this.getById(id, false)?.apply {
-            this.access?.password = ""
-        }
+    fun getById(id: Long): Employee? {
+        return this.getById(id, false)
     }
 
     @Transactional(readOnly = true)
-    override fun existsById(id: Long): Boolean {
+    fun existsById(id: Long): Boolean {
         return employeeRepository.existsById(id)
     }
 
@@ -268,13 +254,7 @@ class EmployeeService(
 
     @Transactional(readOnly = true)
     fun getById(id: Long, adminMode: Boolean): Employee? {
-        val value = employeeRepository.findById(id).orElse(null)?.apply {
-            if (!adminMode) {
-                this.access?.password = ""
-            }
-        }
-
-        return value
+        return employeeRepository.findById(id).orElse(null)
     }
 
     private fun savePermissions(employee: Employee,

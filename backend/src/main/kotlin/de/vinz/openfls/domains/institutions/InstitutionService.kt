@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.institutions
 
+import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.institutions.dtos.*
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionDto
@@ -10,12 +11,14 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class InstitutionService(
     private val institutionRepository: InstitutionRepository,
+    private val employeeRepository: EmployeeRepository,
     private val modelMapper: ModelMapper
 ) {
 
     @Transactional
     fun create(dto: CreateInstitutionDTO): CreateInstitutionDTO {
         val entityToCreate = Institution.of(dto)
+        entityToCreate.permissions = createPermissions(dto, entityToCreate)
         val entity = institutionRepository.save(entityToCreate)
         return CreateInstitutionDTO.of(entity)
     }
@@ -24,8 +27,8 @@ class InstitutionService(
     fun update(dto: UpdateInstitutionDTO): UpdateInstitutionDTO {
         val entity = getEntityById(dto.id) ?: throw IllegalArgumentException("Institution with id ${dto.id} not found")
 
-        entity.permissions?.removeIf { dto.permissions.none { p -> p.employeeId == it.id.employeeId && p.institutionId == it.id.institutionId } }
-        entity.permissions?.addAll(getNewPermissions(entity, dto.permissions))
+        entity.permissions.removeIf { dto.permissions.none { p -> p.employeeId == it.id.employeeId && p.institutionId == it.id.institutionId } }
+        entity.permissions.addAll(getNewPermissions(entity, dto.permissions))
         updatePermissions(entity, dto.permissions)
 
         entity.name = dto.name
@@ -83,7 +86,7 @@ class InstitutionService(
         val newPermissions = mutableListOf<Permission>()
         for (permissionDTO in permissions) {
             val permission =
-                entity.permissions?.find { it.id.employeeId == permissionDTO.employeeId && it.id.institutionId == permissionDTO.institutionId }
+                entity.permissions.find { it.id.employeeId == permissionDTO.employeeId && it.id.institutionId == permissionDTO.institutionId }
             if (permission != null) {
                 continue
             }
@@ -95,10 +98,6 @@ class InstitutionService(
     }
 
     private fun updatePermissions(entity: Institution, permissions: List<PermissionDto>): Institution {
-        if (entity.permissions == null) {
-            return entity
-        }
-
         for (permission in entity.permissions) {
             val permissionDTO =
                 permissions.find { it.employeeId == permission.id.employeeId && it.institutionId == permission.id.institutionId }
@@ -114,4 +113,13 @@ class InstitutionService(
 
         return entity
     }
+
+    private fun createPermissions(
+        dto: CreateInstitutionDTO,
+        entityToCreate: Institution
+    ): MutableSet<Permission> = Permission.of(dto.permissions).map {
+        it.institution = entityToCreate
+        it.employee = employeeRepository.findById(it.id.employeeId ?: 0).orElse(null)
+        it
+    }.toMutableSet()
 }
