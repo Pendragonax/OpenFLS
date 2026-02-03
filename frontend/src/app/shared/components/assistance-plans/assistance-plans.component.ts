@@ -23,7 +23,6 @@ import {InstitutionViewModel} from "../../models/institution-view.model";
 import {TablePageComponent} from "../table-page.component";
 import {HelperService} from "../../services/helper.service";
 import {Converter} from "../../services/converter.helper";
-import {GoalDto} from "../../dtos/goal-dto.model";
 import {HourTypeDto} from "../../dtos/hour-type-dto.model";
 import {HourTypeService} from "../../services/hour-type.service";
 import {ServiceService} from "../../services/service.service";
@@ -77,7 +76,6 @@ export class AssistancePlansComponent
   tableData: [ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][] = [];
   institutions: InstitutionDto[] = [];
   hourTypes: HourTypeDto[] = [];
-  modalGoal: GoalDto = new GoalDto();
   addAvailable: boolean = false;
   illegalAssistancePlans: number[] = [];
 
@@ -231,9 +229,6 @@ export class AssistancePlansComponent
     this.clientControl.valueChanges.subscribe((value) => this.setFilterInstitution(value));
   }
 
-  setModalGoal(goal: GoalDto) {
-    this.modalGoal = goal;
-  }
 
   setFilterDate(value) {
     if (value != null) {
@@ -335,9 +330,6 @@ export class AssistancePlansComponent
     this.refreshTablePage();
   }
 
-  override handleInformationModalClosed() {
-    this.modalGoal = new GoalDto();
-  }
 
   override handleDeleteModalOpen(value: AssistancePlanDto) {
     this.serviceService.getCountByAssistancePlanId(value.id)
