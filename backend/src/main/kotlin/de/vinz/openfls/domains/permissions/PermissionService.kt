@@ -134,7 +134,7 @@ class PermissionService(
             .toList()
     }
 
-    fun convertToPermissions(permissionDtos: Array<PermissionDto>?, employee: Employee): MutableSet<Permission> {
+    fun convertToPermissions(permissionDtos: List<PermissionDto>?, employee: Employee): MutableSet<Permission> {
         val entities = permissionDtos
                 ?.map {
                     modelMapper

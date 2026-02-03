@@ -55,7 +55,7 @@ class UnprofessionalService(
         return unprofessionalRepository.findByEmployeeId(id)
     }
 
-    fun convertToUnprofessionals(dtos: Array<UnprofessionalDto>?, employee: Employee): MutableSet<Unprofessional> {
+    fun convertToUnprofessionals(dtos: List<UnprofessionalDto>?, employee: Employee): MutableSet<Unprofessional> {
         val entities = dtos
                 ?.map {
                     modelMapper

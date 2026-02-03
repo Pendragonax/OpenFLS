@@ -14,7 +14,6 @@ import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionDto
 import de.vinz.openfls.domains.permissions.PermissionService
-import de.vinz.openfls.services.GenericService
 import jakarta.persistence.EntityNotFoundException
 import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -61,10 +60,10 @@ class EmployeeService(
                 ?.filter { savedEmployee.permissions
                         ?.any { permission -> permission.id.institutionId == it.institutionId } ?: false }
                 ?.map { it.apply { employeeId = savedEmployee.id!! } }
-                ?.toTypedArray()
+                ?.toList()
         valueDto.unprofessionals = valueDto.unprofessionals
                 ?.map { it.apply { employeeId = savedEmployee.id!! } }
-                ?.toTypedArray()
+                ?.toList()
 
         return valueDto
     }
@@ -123,13 +122,11 @@ class EmployeeService(
         val tmpUnprofessionals = employee.unprofessionals
 
         employee.permissions = null
-        employee.access = null
         employee.contingents = null
         employee.unprofessionals = null
 
         // save employee
         val savedEntity = employeeRepository.save(employee).apply {
-            access = null
             permissions = savePermissions(this, tmpPermissions)
             permissions = permissionService.getPermissionByEmployee(this.id ?: 0).toMutableSet()
             unprofessionals = saveUnprofessionals(this, tmpUnprofessionals)
@@ -138,11 +135,12 @@ class EmployeeService(
         // permissions
         valueDto.permissions = savedEntity.permissions
                 ?.map { modelMapper.map(it, PermissionDto::class.java) }
-                ?.toTypedArray()
+                ?.toList()
         // unprofessionals
         valueDto.unprofessionals = savedEntity.unprofessionals
                 ?.map { modelMapper.map(it, UnprofessionalDto::class.java) }
-                ?.toTypedArray()
+                ?.toList()
+        valueDto.access = null
 
         return valueDto
     }
