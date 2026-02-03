@@ -30,7 +30,7 @@ services:
   
   backend:
     container_name: open_fls_backend
-    image: ghcr.io/pendragonax/openfls-backend:latest
+    image: ghcr.io/pendragonax/openfls-backend:local
     restart: always
     env_file: docker-compose.env
     volumes:
@@ -47,7 +47,7 @@ services:
 
   frontend:
     container_name: open_fls_frontend
-    image: ghcr.io/pendragonax/openfls-frontend:latest
+    image: ghcr.io/pendragonax/openfls-frontend:local
     volumes:
       - ../proxy/nginx.frontend.conf:/etc/nginx/nginx.conf
     restart: always

@@ -38,7 +38,7 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
 
   getProjectionById(id: number): Observable<AssistancePlan> {
     return this.http
-      .get<AssistancePlan>(`${environment.api_url}${this.url}/projection//${id}`);
+      .get<AssistancePlan>(`${environment.api_url}${this.url}/projection/${id}`);
   }
 
   getByClientId(id: number): Observable<AssistancePlanDto[]> {

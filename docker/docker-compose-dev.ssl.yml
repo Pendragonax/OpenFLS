@@ -26,7 +26,11 @@ services:
       context: ../backend
       dockerfile: Dockerfile
       target: development
+      args:
+        UID: ${UID}
+        GID: ${GID}
     restart: always
+    user: "${UID}:${GID}"
     env_file: docker-compose.env
     volumes:
       - ../backend:/app
@@ -42,11 +46,15 @@ services:
 
   frontend:
     container_name: open_fls_frontend
-    build: 
+    build:
       context: ../frontend
       dockerfile: Dockerfile
       target: development
+      args:
+        UID: ${UID}
+        GID: ${GID}
     restart: always
+    user: "${UID}:${GID}"
     volumes:
       - ../frontend:/app
       - frontend-node-modules:/app/node_modules

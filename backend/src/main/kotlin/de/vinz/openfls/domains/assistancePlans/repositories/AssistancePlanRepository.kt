@@ -9,8 +9,13 @@ import java.time.LocalDate
 
 interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
-    @Query("SELECT u FROM AssistancePlan u " +
-            "WHERE u.id = :id")
+    @Query(
+        "SELECT DISTINCT ap from AssistancePlan ap " +
+            "left join fetch ap.goals g " +
+            "left join fetch g.hours " +
+            "left join fetch ap.hours " +
+            "where ap.id=:id"
+    )
     fun findProjectionById(id: Long): AssistancePlanProjection
 
     @Query("SELECT u FROM AssistancePlan u " +

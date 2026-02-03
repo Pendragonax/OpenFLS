@@ -29,6 +29,9 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       target: development
+      args:
+        UID: ${UID}
+        GID: ${GID}
     restart: always
     user: "${UID}:${GID}"
     volumes:
