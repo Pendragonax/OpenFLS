@@ -47,6 +47,11 @@ class ContingentEvaluationService(
                 val summedExecutedPercent = getSummedExecutedPercent(contingentHours, executedEmployeeHours)
                 val executedPercent = getExecutedPercent(contingentHours, executedEmployeeHours)
                 val missingHours = getMissingHours(contingentHours, executedEmployeeHours)
+                val absenceDays = getAbsenceDaysByYearAndEmployee(
+                    year,
+                    contingent.employee.id,
+                    yearlyAbsences
+                )
 
                 employeeEvaluations.add(
                     EmployeeContingentEvaluationDto(
@@ -57,7 +62,8 @@ class ContingentEvaluationService(
                         executedHours = executedEmployeeHours,
                         executedPercent = executedPercent,
                         summedExecutedPercent = summedExecutedPercent,
-                        missingHours = missingHours
+                        missingHours = missingHours,
+                        absenceDays = absenceDays
                     )
                 )
             }
@@ -88,13 +94,39 @@ class ContingentEvaluationService(
                         executedHours = contingentEmployeeEvaluation.executedHours,
                         executedPercent = employeeExecutedPercent,
                         summedExecutedPercent = employeeSummedExecutedPercent,
-                        missingHours = employeeMissingHours
+                        missingHours = employeeMissingHours,
+                        absenceDays = contingentEmployeeEvaluation.absenceDays
                     )
                 )
             }
         }
 
         return employeeEvaluations.sortedBy { it.lastname }
+    }
+
+    private fun getAbsenceDaysByYearAndEmployee(
+        year: Int,
+        employeeId: Long,
+        yearlyAbsences: YearAbsenceDTO
+    ): List<Int> {
+        val absencesForEmployee = yearlyAbsences.employeeAbsences.filter { it.employeeId == employeeId }
+        val monthlyAbsenceDays = List(13) { 0 }.toMutableList()
+
+        for (month in 1..12) {
+            val absenceDaysInMonth = absencesForEmployee
+                .flatMap { absence ->
+                    absence.absenceDates.filter {
+                        it.year == year && it.monthValue == month
+                    }
+                }
+                .distinct()
+                .count()
+
+            monthlyAbsenceDays[month] = absenceDaysInMonth
+            monthlyAbsenceDays[0] += absenceDaysInMonth
+        }
+
+        return monthlyAbsenceDays
     }
 
     fun getExecutedHoursByYearAndEmployee(

@@ -43,7 +43,7 @@ export class ContingentOverviewComponent implements OnInit {
   year: number = new Date(Date.now()).getFullYear()
   years: number[] = []
   hourTypes: { name: string, value: number }[] =
-    [{name: "Kontingent [h]", value: 1}, {name: "Geleistet [h]", value: 2}, {name: "Geleistet [%]", value: 3}, {name: "Geleistet summiert [%]", value: 4}, {name: "Nicht geleistet [h]", value: 5}]
+    [{name: "Kontingent [h]", value: 1}, {name: "Geleistet [h]", value: 2}, {name: "Geleistet [%]", value: 3}, {name: "Geleistet summiert [%]", value: 4}, {name: "Nicht geleistet [h]", value: 5}, {name: "Abwesenheitstage", value: 6}]
   selectedHourType: number = 0
 
   constructor(private contingentEvaluationService: ContingentEvaluationService,
@@ -128,6 +128,10 @@ export class ContingentOverviewComponent implements OnInit {
           }
           case 5: {
             values = employee.missingHours
+            break
+          }
+          case 6: {
+            values = employee.absenceDays
             break
           }
           default: {
