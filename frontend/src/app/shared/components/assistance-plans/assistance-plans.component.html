@@ -140,14 +140,12 @@
     </div>
 
     <!--LOADING-->
-    <div class="row  m-2"
+    <div class="row"
          [hidden]="!isSubmitting">
-      <div class="row justify-content-center">
+      <div class="loading-container">
         <mat-spinner [strokeWidth]="2"
                      [diameter]="100"
                      class="center-spinner"></mat-spinner>
-      </div>
-      <div class="row text-center">
         <p><b>Lade Hilfepläne</b></p>
       </div>
     </div>

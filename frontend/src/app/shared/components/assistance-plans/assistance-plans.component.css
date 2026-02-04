@@ -98,6 +98,16 @@ td , th {
   border-top: 1px solid #e9edf4;
 }
 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  width: 100%;
+  text-align: center;
+}
+
 @media (max-width: 800px) {
   .filters-desktop {
     display: none;
