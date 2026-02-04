@@ -1,10 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
-import {
-  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
-  MAT_MOMENT_DATE_FORMATS,
-  MomentDateAdapter
-} from "@angular/material-moment-adapter";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {InstitutionDto} from "../../../../dtos/institution-dto.model";
 import {SponsorDto} from "../../../../dtos/sponsor-dto.model";
 import {AssistancePlanService} from "../../../../services/assistance-plan.service";
@@ -39,10 +34,10 @@ import {AssistancePlanHourService} from "../../../../services/assistance-plan-ho
         { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
         {
             provide: DateAdapter,
-            useClass: MomentDateAdapter,
-            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+            useClass: NativeDateAdapter,
+            deps: [MAT_DATE_LOCALE],
         },
-        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
     ],
     standalone: false
 })

@@ -9,15 +9,9 @@ import {Sort} from "@angular/material/sort";
 import {Comparer} from "../../services/comparer.helper";
 import {InstitutionService} from "../../services/institution.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import * as moment from "moment";
 import {AssistancePlanView} from "../../models/assistance-plan-view.model";
 import {ClientViewModel} from "../../models/client-view.model";
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
-import {
-  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
-  MAT_MOMENT_DATE_FORMATS,
-  MomentDateAdapter
-} from "@angular/material-moment-adapter";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {SponsorDto} from "../../dtos/sponsor-dto.model";
 import {InstitutionViewModel} from "../../models/institution-view.model";
 import {TablePageComponent} from "../table-page.component";
@@ -38,10 +32,10 @@ import {ConfirmationModalComponent} from "../../modals/confirmation-modal/confir
         { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
         {
             provide: DateAdapter,
-            useClass: MomentDateAdapter,
-            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+            useClass: NativeDateAdapter,
+            deps: [MAT_DATE_LOCALE],
         },
-        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
     ],
     standalone: false
 })
@@ -300,16 +294,14 @@ export class AssistancePlansComponent
 
     // filter by date
     if (this.filterDate != null) {
+      const filterDay = this.toDateOnly(this.filterDate);
       filteredData = filteredData.filter(x => {
-        if (this.filterDate == null)
-          return true
-
-        if (x[3].dto.end != null)
-          return moment(this.filterDate)
-            .isBetween(new Date(x[3].dto.start), new Date(x[3].dto.end), "date", "[]")
-
-        return moment(this.filterDate)
-          .isAfter(new Date(x[3].dto.start), "date")
+        const startDay = this.toDateOnly(new Date(x[3].dto.start));
+        if (x[3].dto.end != null) {
+          const endDay = this.toDateOnly(new Date(x[3].dto.end));
+          return filterDay >= startDay && filterDay <= endDay;
+        }
+        return filterDay > startDay;
       })
     }
 
@@ -328,6 +320,12 @@ export class AssistancePlansComponent
     this.filteredTableData = filteredData;
 
     this.refreshTablePage();
+  }
+
+  private toDateOnly(value: Date): number {
+    const date = new Date(value);
+    date.setHours(0, 0, 0, 0);
+    return date.getTime();
   }
 
 
