@@ -2,8 +2,8 @@
 
 <mat-tab-group dynamicHeight [(selectedIndex)]="tabIndex">
   <mat-tab label="Allgemein">
-    <div class="container-fluid text-center mt-2"
-         [hidden]="!value.editable">
+  @if (value.editable) {
+    <div class="container-fluid text-center mt-2">
       <form [formGroup]="infoForm">
         <mat-form-field appearance="outline">
           <mat-label>Beginn</mat-label>
@@ -50,10 +50,11 @@
         </div>
       </form>
     </div>
+    }
 
     <!--SHOW-->
-    <div class="container-fluid text-center mt-2"
-         [hidden]="value.editable">
+    @if (!value.editable) {
+      <div class="container-fluid text-center mt-2">
       <app-information-row [title]="'Beginn'"
                            [content]="value.dto.start"></app-information-row>
       <app-information-row [title]="'Ende'"
@@ -62,7 +63,8 @@
                            [content]="getInstitutionName(value.dto.institutionId)"></app-information-row>
       <app-information-row [title]="'Kostenträger'"
                            [content]="getSponsorName(value.dto.sponsorId)"></app-information-row>
-    </div>
+      </div>
+    }
   </mat-tab>
 
   <mat-tab label="Stunden">

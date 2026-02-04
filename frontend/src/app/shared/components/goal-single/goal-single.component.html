@@ -13,7 +13,7 @@
   </mat-card-content>
   <mat-card-footer>
     <div class="m-1">
-      @if (goal.hours.length > 0) {
+    @if (goal.hours.length > 0) {
         <mat-chip-set>
           @for (hour of goal.hours; track $index) {
             <mat-chip class="mat-hour-chip">

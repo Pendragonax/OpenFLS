@@ -36,7 +36,7 @@
     </div>
   </div>
   <div class="row">
-    @if (!isBusy && !errorOccurred) {
+  @if (!isBusy && !errorOccurred) {
       <app-service-table [services]="filteredServices" [editMode]="false" (tableUpdated)="loadServices()"></app-service-table>
     }
     @if (isBusy) {

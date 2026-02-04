@@ -3,8 +3,8 @@
 <mat-tab-group>
   <mat-tab label="Allgemein">
     <!--EDIT-->
-    <div class="container-fluid text-center mt-1"
-         [hidden]="!editValue.editable">
+    @if (editValue.editable) {
+      <div class="container-fluid text-center mt-1">
       <form [formGroup]="infoForm">
         <div>
           <mat-form-field appearance="fill">
@@ -64,11 +64,12 @@
                 color="primary"
                 mat-raised-button>Speichern</button>
       </div>
-    </div>
+      </div>
+    }
 
     <!--SHOW-->
-    <div class="container-fluid mt-1"
-         [hidden]="editValue.editable">
+    @if (!editValue.editable) {
+      <div class="container-fluid mt-1">
       <app-information-row [title]="'Name'"
                            [content]="editValue.dto.lastName + ', ' + editValue.dto.firstName"></app-information-row>
       <app-information-row [title]="'Email'"
@@ -79,7 +80,8 @@
                            [content]="editValue.dto.categoryTemplate.title"></app-information-row>
       <app-information-row [title]="'Bereich'"
                            [content]="editValue.dto.institution.name"></app-information-row>
-    </div>
+      </div>
+    }
   </mat-tab>
 
   <mat-tab label="Hilfepläne">

@@ -8,11 +8,11 @@
          [matAutocomplete]="auto">
   <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
                     [displayWith]="displayFn">
-    @if (filteredClients$ | async; as clients) {
-      @for (client of clients; track client.id) {
-        <mat-option [value]="client">
-          {{ getFullName(client) }}
-        </mat-option>
+                    @if (filteredClients$ | async; as clients) {
+                      @for (client of clients; track client.id) {
+                      <mat-option [value]="client">
+                      {{ getFullName(client) }}
+                      </mat-option>
       }
     }
   </mat-autocomplete>

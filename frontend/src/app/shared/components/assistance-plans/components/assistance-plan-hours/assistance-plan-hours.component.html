@@ -1,11 +1,12 @@
 <div class="container-fluid my-2">
   <div class="row">
     <div class="container-fluid text-center">
+    @if (editable) {
       <button mat-raised-button
               color="primary"
-              [hidden]="!editable"
               (click)="openEditModal(editContent, null)">
         Stunden hinzufügen</button>
+      }
     </div>
   </div>
 

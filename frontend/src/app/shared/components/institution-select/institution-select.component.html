@@ -4,12 +4,12 @@
     <mat-select class="text-start"
                 placeholder="..."
                 formControlName="institutionControl">
-      @if (institutions) {
-        @for (institution of institutions; track institution.id) {
-          <mat-option [disabled]="disabled"
+                @if (institutions) {
+                  @for (institution of institutions; track institution.id) {
+                  <mat-option [disabled]="disabled"
                       [value]="institution">
-            {{institution.name}}
-          </mat-option>
+                  {{institution.name}}
+                  </mat-option>
         }
       }
     </mat-select>

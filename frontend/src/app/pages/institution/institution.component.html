@@ -52,8 +52,8 @@
       </div>
     }
 
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+      <div class="row">
       <table mat-table
              matSort
              (matSortChange)="sortData($event)"
@@ -133,6 +133,7 @@
         <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
       </table>
-    </div>
+      </div>
+    }
   </div>
 </div>

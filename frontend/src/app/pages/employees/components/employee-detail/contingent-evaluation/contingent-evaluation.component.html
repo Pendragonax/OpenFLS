@@ -3,17 +3,19 @@
   <div class="row justify-content-center">
     <div class="col">
       <div class="calendar-card mx-auto mt-3" (mousedown)="onCalendarMouseDown($event)">
-        <div class="start-0 d-flex align-items-center justify-content-between w-100"
-             [hidden]="hideRefresh">
+      @if (!hideRefresh) {
+        <div class="start-0 d-flex align-items-center justify-content-between w-100">
           <button mat-icon-button
                   (click)="refresh()">
             <mat-icon>autorenew</mat-icon>
           </button>
-          <mat-spinner [diameter]="25"
+          @if (isSubmitting) {
+            <mat-spinner [diameter]="25"
                        class="loading"
-                       [color]="'primary'"
-                       [hidden]="!isSubmitting"></mat-spinner>
+                       [color]="'primary'"></mat-spinner>
+          }
         </div>
+        }
 
         <mat-calendar #serviceCalendar
                       [dateClass]="dateClass()"
@@ -82,7 +84,7 @@
         <app-work-time-card [contingentInformation]="calendarInformation.thisWeek"
                             [title]="'diese Woche'"></app-work-time-card>
       </div>
-      <div class="row my-2">
+      <div class="row my-2 mb-5">
         <app-work-time-card [contingentInformation]="calendarInformation.thisMonth"
                             [title]="'dieser Monat'"></app-work-time-card>
       </div>

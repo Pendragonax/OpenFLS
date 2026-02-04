@@ -25,8 +25,8 @@
   <!--MAIN-->
   <div class="row">
     <!--ACTIONS-->
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+      <div class="row">
       <div class="col">
         <mat-paginator class="paginator"
                        showFirstLastButtons
@@ -35,7 +35,8 @@
                        [pageIndex]="pageIndex"
                        [pageSize]="pageSize"></mat-paginator>
       </div>
-    </div>
+      </div>
+    }
 
     <!--LOADING-->
     @if (isSubmitting) {
@@ -52,8 +53,8 @@
     }
 
     <!--TABLE-->
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+      <div class="row">
       <table mat-table
              matSort
              (matSortChange)="sortData($event)"
@@ -127,6 +128,7 @@
         <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
       </table>
-    </div>
+      </div>
+    }
   </div>
 </div>

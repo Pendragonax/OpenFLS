@@ -89,16 +89,20 @@
 
     <div class="col test">
       <div class="my-3 mat-elevation-z8 example-container">
-        <div class="text-center" [hidden]="!isGenerating">
+      @if (isGenerating) {
+        <div class="text-center">
           <mat-spinner [strokeWidth]="2"
                        [diameter]="100"
                        class="m-auto mt-2"></mat-spinner>
           <p class="mt-1"><b>Generiere Daten</b></p>
         </div>
-        <div class="text-center" [hidden]="!forbiddenRequest">
+        }
+        @if (forbiddenRequest) {
+          <div class="text-center">
           <mat-icon [color]="'warn'" class="m-auto mt-2">remove_circle_outline</mat-icon>
           <p class="mt-1"><b>Sie haben keine Berechtigung für diese Anfrage.</b></p>
-        </div>
+          </div>
+        }
         @if (!isGenerating && !forbiddenRequest) {
           <app-object-table [header$]="columns$"
                             [data$]="data$"

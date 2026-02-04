@@ -135,8 +135,8 @@
                          type="password"
                          formControlName="password1"
                          required>
-                  @if (password1Control.invalid) {
-                    <mat-error>{{ getControlErrorMessage(password1Control) }}</mat-error>
+                         @if (password1Control.invalid) {
+                           <mat-error>{{ getControlErrorMessage(password1Control) }}</mat-error>
                   }
                 </mat-form-field><br>
 
@@ -145,8 +145,8 @@
                   <input matInput
                          type="password"
                          formControlName="password2" required>
-                  @if (password2Control.invalid) {
-                    <mat-error>{{ getControlErrorMessage(password2Control) }}</mat-error>
+                         @if (password2Control.invalid) {
+                           <mat-error>{{ getControlErrorMessage(password2Control) }}</mat-error>
                   }
                 </mat-form-field><br>
 

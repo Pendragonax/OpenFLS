@@ -3,12 +3,13 @@
   <div class="row"
        *showOnRole="'leader'">
     <div class="container-fluid text-center">
+    @if (!hideAddButton) {
       <button mat-raised-button
               color="primary"
               (click)="openValueModal(editContent)"
               [disabled]="sponsors.length <= 0"
-              [hidden]="hideAddButton"
               *showOnRole="'admin'"> nicht Fachkraftstatus hinzufügen </button>
+      }
     </div>
   </div>
 

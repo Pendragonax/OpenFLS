@@ -24,7 +24,7 @@
     </div>
   </div>
   <div class="row">
-    @if (!isBusy) {
+  @if (!isBusy) {
       <app-service-table [redRows]="illegalMode" [services]="services" [editMode]="true"></app-service-table>
     }
     @if (isBusy) {

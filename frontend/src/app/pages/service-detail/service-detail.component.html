@@ -115,8 +115,8 @@
         <div class="container-fluid text-center">
           <form [formGroup]="secondForm">
             <div class="container">
-              <div class="row justify-content-center"
-                   [hidden]="editMode">
+            @if (!editMode) {
+              <div class="row justify-content-center">
                 <mat-form-field appearance="fill" class="mt-2">
                   <mat-label>Klientensuche</mat-label>
                   <input type="text"
@@ -125,6 +125,7 @@
                          formControlName="client">
                 </mat-form-field>
               </div>
+              }
 
               <!--CLIENTS-->
               <div class="row my-4">
@@ -170,7 +171,7 @@
                         </div>
 
                         <div class="row">
-                          @if (filteredAssistancePlans.length > 0) {
+                        @if (filteredAssistancePlans.length > 0) {
                             <mat-selection-list [multiple]="false"
                                                 color="primary"
                                                 formControlName="assistancePlanList">
@@ -184,7 +185,7 @@
                                           <span><b>{{getDateString(value)}}</b></span>
                                         </div>
                                         <div class="row">
-                                          @if (value.hours.length != 0) {
+                                        @if (value.hours.length != 0) {
                                             <span class="fw-light"><small>{{sumAssistancePlanHours(value.hours)}} h/Woche</small></span>
                                           }
                                         </div></div>
@@ -217,7 +218,7 @@
                             <mat-divider></mat-divider>
                           </div>
                           <div class="row">
-                            @if (selectedAssistancePlan != null) {
+                          @if (selectedAssistancePlan != null) {
                               <mat-selection-list class="text-start"
                                                   formControlName="goalList">
                                 @for (value of selectedAssistancePlan.goals; track value.id) {
