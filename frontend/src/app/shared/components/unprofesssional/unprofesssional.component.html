@@ -88,10 +88,11 @@
             <mat-label>Kostenträger</mat-label>
             <mat-select formControlName="sponsor"
                         required>
-              <mat-option *ngFor="let value of sponsors"
-                          [value]="value.id">
-                {{value.name}}
-              </mat-option>
+              @for (value of sponsors; track value.id) {
+                <mat-option [value]="value.id">
+                  {{value.name}}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
 

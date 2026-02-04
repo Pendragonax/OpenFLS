@@ -9,9 +9,11 @@
   <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
                     [displayWith]="displayFn">
     @if (filteredEmployees$ | async; as employees) {
-      <mat-option *ngFor="let employee of employees" [value]="employee">
-        {{ getFullName(employee) }}
-      </mat-option>
+      @for (employee of employees; track employee.id) {
+        <mat-option [value]="employee">
+          {{ getFullName(employee) }}
+        </mat-option>
+      }
     }
   </mat-autocomplete>
   <button mat-icon-button

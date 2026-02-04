@@ -46,10 +46,11 @@
             <mat-form-field appearance="fill" class="width-350">
               <mat-label>Bereich</mat-label>
               <mat-select formControlName="institution">
-                <mat-option *ngFor="let value of institutions"
-                            [value]="value.id">
-                  {{value.name}}
-                </mat-option>
+                @for (value of institutions; track value.id) {
+                  <mat-option [value]="value.id">
+                    {{value.name}}
+                  </mat-option>
+                }
               </mat-select>
               <button mat-icon-button
                       matPrefix
@@ -103,10 +104,11 @@
                 <mat-form-field appearance="fill" class="w-100">
                   <mat-label>Bereich</mat-label>
                   <mat-select formControlName="institution">
-                    <mat-option *ngFor="let value of institutions"
-                                [value]="value.id">
-                      {{value.name}}
-                    </mat-option>
+                    @for (value of institutions; track value.id) {
+                      <mat-option [value]="value.id">
+                        {{value.name}}
+                      </mat-option>
+                    }
                   </mat-select>
                   <button mat-icon-button
                           matPrefix
@@ -278,66 +280,68 @@
     </div>
 
     <div class="assistance-timeline" [hidden]="isSubmitting">
-      <div class="timeline-item" *ngFor="let combination of tableSource.data">
-        <div class="timeline-card mat-elevation-z2"
-             [ngClass]="{'timeline-illegal': combination[3].illegal}">
-          <div class="timeline-header">
-            <div class="timeline-date">
-              {{ getDateString(combination[3].dto.start) }} – {{ getDateString(combination[3].dto.end) }}
+      @for (combination of tableSource.data; track $index) {
+        <div class="timeline-item">
+          <div class="timeline-card mat-elevation-z2"
+               [ngClass]="{'timeline-illegal': combination[3].illegal}">
+            <div class="timeline-header">
+              <div class="timeline-date">
+                {{ getDateString(combination[3].dto.start) }} – {{ getDateString(combination[3].dto.end) }}
+              </div>
             </div>
-          </div>
 
-          <div class="timeline-body">
-            <div class="timeline-row" [hidden]="hideClientColumn">
-              <span class="timeline-label">Klient</span>
-              <span class="timeline-value">{{combination[0].lastName}} {{combination[0].firstName}}</span>
+            <div class="timeline-body">
+              <div class="timeline-row" [hidden]="hideClientColumn">
+                <span class="timeline-label">Klient</span>
+                <span class="timeline-value">{{combination[0].lastName}} {{combination[0].firstName}}</span>
+              </div>
+              <div class="timeline-row" [hidden]="hideInstitutionColumn">
+                <span class="timeline-label">Bereich</span>
+                <span class="timeline-value-light">{{combination[1].name}}</span>
+              </div>
+              <div class="timeline-row" [hidden]="hideSponsorColumn">
+                <span class="timeline-label">Kostenträger</span>
+                <span class="timeline-value-light">{{combination[2].name}}</span>
+              </div>
+              <div class="timeline-row">
+                <span class="timeline-label">h/Woche</span>
+                <span class="timeline-value-light">
+                  {{sumWeeklyHoursByPlan(combination[3].dto)}} ({{sumGoalsWeeklyHoursByPlan(combination[3].dto)}})
+                </span>
+              </div>
             </div>
-            <div class="timeline-row" [hidden]="hideInstitutionColumn">
-              <span class="timeline-label">Bereich</span>
-              <span class="timeline-value-light">{{combination[1].name}}</span>
-            </div>
-            <div class="timeline-row" [hidden]="hideSponsorColumn">
-              <span class="timeline-label">Kostenträger</span>
-              <span class="timeline-value-light">{{combination[2].name}}</span>
-            </div>
-            <div class="timeline-row">
-              <span class="timeline-label">h/Woche</span>
-              <span class="timeline-value-light">
-                {{sumWeeklyHoursByPlan(combination[3].dto)}} ({{sumGoalsWeeklyHoursByPlan(combination[3].dto)}})
-              </span>
-            </div>
-          </div>
 
-          <div class="timeline-actions">
-            <button mat-icon-button
-                    color="primary"
-                    [matTooltip]="'Favorit'"
-                    [matTooltipPosition]="'above'"
-                    (click)="combination[3].favorite ? deleteAssistancePlanAsFavorite(combination[3].dto.id) : addAssistancePlanAsFavorite(combination[3].dto.id)">
-              <mat-icon>{{combination[3].favorite ? 'bookmark' : 'bookmark_border'}}</mat-icon></button>
-            <button mat-icon-button
-                    color="primary"
-                    [matTooltip]="'Bearbeiten'"
-                    [matTooltipPosition]="'above'"
-                    [disabled]="!combination[3].editable"
-                    [routerLink]="['/assistance_plans/detail', combination[3].dto.id]">
-              <mat-icon>edit</mat-icon></button>
-            <button mat-icon-button
-                    color="primary"
-                    [matTooltip]="'Auswertung'"
-                    [matTooltipPosition]="'above'"
-                    [routerLink]="['/assistance_plans/analysis', combination[3].dto.id, '0']">
-              <mat-icon>view_module</mat-icon></button>
-            <button mat-icon-button
-                    color="warn"
-                    *showOnRole="'admin'"
-                    [matTooltip]="'Löschen'"
-                    [matTooltipPosition]="'above'"
-                    (click)="openDeleteConfirmation(deleteContent, combination[3].dto)">
-              <mat-icon>delete</mat-icon></button>
+            <div class="timeline-actions">
+              <button mat-icon-button
+                      color="primary"
+                      [matTooltip]="'Favorit'"
+                      [matTooltipPosition]="'above'"
+                      (click)="combination[3].favorite ? deleteAssistancePlanAsFavorite(combination[3].dto.id) : addAssistancePlanAsFavorite(combination[3].dto.id)">
+                <mat-icon>{{combination[3].favorite ? 'bookmark' : 'bookmark_border'}}</mat-icon></button>
+              <button mat-icon-button
+                      color="primary"
+                      [matTooltip]="'Bearbeiten'"
+                      [matTooltipPosition]="'above'"
+                      [disabled]="!combination[3].editable"
+                      [routerLink]="['/assistance_plans/detail', combination[3].dto.id]">
+                <mat-icon>edit</mat-icon></button>
+              <button mat-icon-button
+                      color="primary"
+                      [matTooltip]="'Auswertung'"
+                      [matTooltipPosition]="'above'"
+                      [routerLink]="['/assistance_plans/analysis', combination[3].dto.id, '0']">
+                <mat-icon>view_module</mat-icon></button>
+              <button mat-icon-button
+                      color="warn"
+                      *showOnRole="'admin'"
+                      [matTooltip]="'Löschen'"
+                      [matTooltipPosition]="'above'"
+                      (click)="openDeleteConfirmation(deleteContent, combination[3].dto)">
+                <mat-icon>delete</mat-icon></button>
+            </div>
           </div>
         </div>
-      </div>
+      }
     </div>
   </div>
 

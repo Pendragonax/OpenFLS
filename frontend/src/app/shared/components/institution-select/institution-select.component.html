@@ -5,11 +5,12 @@
                 placeholder="..."
                 formControlName="institutionControl">
       @if (institutions) {
-        <mat-option *ngFor="let institution of institutions"
-                    [disabled]="disabled"
-                    [value]="institution">
-          {{institution.name}}
-        </mat-option>
+        @for (institution of institutions; track institution.id) {
+          <mat-option [disabled]="disabled"
+                      [value]="institution">
+            {{institution.name}}
+          </mat-option>
+        }
       }
     </mat-select>
     <button mat-icon-button

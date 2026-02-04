@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
-import {AsyncPipe, NgForOf} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -17,7 +17,6 @@ import {ReadableInstitutionDto} from "../../dtos/institution-readable-dto.model"
         MatIconModule,
         MatOptionModule,
         MatSelectModule,
-        NgForOf,
         ReactiveFormsModule
     ],
     templateUrl: './institution-select.component.html',

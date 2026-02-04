@@ -6,7 +6,9 @@
         [value]="selectedYear"
         (selectionChange)="onYearSelection($event.value)"
         [disabled]="loading">
-        <mat-option *ngFor="let year of years" [value]="year">{{ year }}</mat-option>
+        @for (year of years; track year) {
+          <mat-option [value]="year">{{ year }}</mat-option>
+        }
       </mat-select>
     </mat-form-field>
 
@@ -16,9 +18,11 @@
         [value]="selectedHourType"
         (selectionChange)="onHourTypeSelection($event.value)"
         [disabled]="loading">
-        <mat-option *ngFor="let value of hourTypes" [value]="value.value">
-          {{ value.name }}
-        </mat-option>
+        @for (value of hourTypes; track value.value) {
+          <mat-option [value]="value.value">
+            {{ value.name }}
+          </mat-option>
+        }
       </mat-select>
       <button
         mat-icon-button

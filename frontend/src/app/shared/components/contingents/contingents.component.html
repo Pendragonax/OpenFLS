@@ -187,10 +187,11 @@
             <mat-label>Bereich</mat-label>
             <mat-select formControlName="institution"
                         required>
-              <mat-option *ngFor="let value of leadingInstitutions"
-                          [value]="value.id">
-                {{value.name}}
-              </mat-option>
+              @for (value of leadingInstitutions; track value.id) {
+                <mat-option [value]="value.id">
+                  {{value.name}}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
 

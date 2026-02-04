@@ -94,7 +94,9 @@
           <td mat-cell
               class="hide-on-small"
               *matCellDef="let employee">
-            <p *ngFor="let institution of employee.institutions">{{institution.name}}</p>
+            @for (institution of employee.institutions; track $index) {
+              <p>{{institution.name}}</p>
+            }
           </td>
         </ng-container>
 

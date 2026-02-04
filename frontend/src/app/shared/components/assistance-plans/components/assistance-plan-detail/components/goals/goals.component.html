@@ -129,10 +129,11 @@
               <mat-form-field appearance="fill" class="w-100">
                 <mat-label>Bereich</mat-label>
                 <mat-select formControlName="institution">
-                  <mat-option *ngFor="let institution of institutions"
-                              [value]="institution.id">
-                    {{institution.name}}
-                  </mat-option>
+                  @for (institution of institutions; track institution.id) {
+                    <mat-option [value]="institution.id">
+                      {{institution.name}}
+                    </mat-option>
+                  }
                 </mat-select>
 
                 <button mat-icon-button
@@ -151,10 +152,11 @@
                 <mat-form-field appearance="fill" class="w-100">
                   <mat-label>Stundentyp</mat-label>
                   <mat-select formControlName="hourType">
-                    <mat-option *ngFor="let type of filteredHourTypes"
-                                [value]="type.id">
-                      {{type.title}}
-                    </mat-option>
+                    @for (type of filteredHourTypes; track type.id) {
+                      <mat-option [value]="type.id">
+                        {{type.title}}
+                      </mat-option>
+                    }
                   </mat-select>
                 </mat-form-field><br>
 

@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output, SimpleChanges} from '@angular/core';
-import {AsyncPipe, NgForOf} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatButtonModule} from "@angular/material/button";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -21,7 +21,6 @@ import {EmployeeSolo} from "../../dtos/employee-solo.projection";
         MatIconModule,
         MatInputModule,
         MatOptionModule,
-        NgForOf,
         ReactiveFormsModule
     ],
     templateUrl: './employee-autocomplete.component.html',

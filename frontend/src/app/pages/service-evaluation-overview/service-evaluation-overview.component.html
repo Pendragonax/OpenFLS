@@ -30,9 +30,11 @@
         <mat-form-field>
           <mat-label>Stundentypen</mat-label>
           <mat-select formControlName="hourTypeControl">
-            <mat-option *ngFor="let hourType of hourTypes" [value]="hourType.id">
-              {{hourType.title}}
-            </mat-option>
+            @for (hourType of hourTypes; track hourType.id) {
+              <mat-option [value]="hourType.id">
+                {{hourType.title}}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </div>
@@ -41,9 +43,11 @@
         <mat-form-field>
           <mat-label>Bereich</mat-label>
           <mat-select formControlName="areaControl">
-            <mat-option *ngFor="let area of areas" [value]="area.id">
-              {{area.name}}
-            </mat-option>
+            @for (area of areas; track area.id) {
+              <mat-option [value]="area.id">
+                {{area.name}}
+              </mat-option>
+            }
           </mat-select>
           <button mat-icon-button matSuffix color="primary" (click)="openPermissionInfoModal($event)">
             <mat-icon>info</mat-icon>
@@ -54,9 +58,11 @@
         <mat-form-field>
           <mat-label>Kostenträger</mat-label>
           <mat-select formControlName="sponsorControl">
-            <mat-option *ngFor="let sponsor of sponsors" [value]="sponsor.id">
-              {{sponsor.name}}
-            </mat-option>
+            @for (sponsor of sponsors; track sponsor.id) {
+              <mat-option [value]="sponsor.id">
+                {{sponsor.name}}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </div>
@@ -65,9 +71,11 @@
           <mat-form-field>
             <mat-label>anzuzeigender Wert</mat-label>
             <mat-select formControlName="valueTypeControl">
-              <mat-option *ngFor="let valueType of valueTypes" [value]="valueType">
+            @for (valueType of valueTypes; track valueType) {
+              <mat-option [value]="valueType">
                 {{valueType}}
               </mat-option>
+            }
             </mat-select>
             <button mat-icon-button matSuffix color="primary" (click)="openValueTypeInfoModal($event)"><mat-icon>info</mat-icon></button>
           </mat-form-field>

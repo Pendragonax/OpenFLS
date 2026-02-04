@@ -39,8 +39,9 @@
             <mat-label>Bereich</mat-label>
             <mat-select formControlName="institution"
                         required>
-              <mat-option *ngFor="let institution of institutions"
-                          [value]="institution.id">{{institution.name}}</mat-option>
+              @for (institution of institutions; track institution.id) {
+                <mat-option [value]="institution.id">{{institution.name}}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -49,8 +50,9 @@
             <mat-label>Kategorievorlage</mat-label>
             <mat-select formControlName="categoryTemplate"
                         required>
-              <mat-option *ngFor="let categoryTemplate of categoryTemplates"
-                          [value]="categoryTemplate.id">{{categoryTemplate.title}}</mat-option>
+              @for (categoryTemplate of categoryTemplates; track categoryTemplate.id) {
+                <mat-option [value]="categoryTemplate.id">{{categoryTemplate.title}}</mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>

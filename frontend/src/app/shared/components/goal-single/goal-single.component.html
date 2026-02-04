@@ -15,9 +15,11 @@
     <div class="m-1">
       @if (goal.hours.length > 0) {
         <mat-chip-set>
-          <mat-chip class="mat-hour-chip" *ngFor="let hour of goal.hours">
-            <span>{{hour.weeklyHours}}h | {{hour.hourType.title}}</span>
-          </mat-chip>
+          @for (hour of goal.hours; track $index) {
+            <mat-chip class="mat-hour-chip">
+              <span>{{hour.weeklyHours}}h | {{hour.hourType.title}}</span>
+            </mat-chip>
+          }
         </mat-chip-set>
       }
     </div>

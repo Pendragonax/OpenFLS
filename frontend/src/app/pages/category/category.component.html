@@ -77,7 +77,9 @@
               class="hide-on-small"
               *matCellDef="let template">
             <div class="pt-2">
-              <p *ngFor="let category of template.categories">{{category.title}} <b>({{category.shortcut}})</b></p>
+              @for (category of template.categories; track $index) {
+                <p>{{category.title}} <b>({{category.shortcut}})</b></p>
+              }
             </div></td>
         </ng-container>
 

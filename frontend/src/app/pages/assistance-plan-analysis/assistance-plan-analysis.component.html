@@ -3,9 +3,11 @@
 
 <mat-tab-group [(selectedIndex)]="tabIndex" (selectedTabChange)="updateUrl()">
   <mat-tab label="Ziele">
-    <div class="justify-content-center d-flex flex-wrap" *ngFor="let goal of assistancePlan.goals">
-      <app-goal-single [goal]="goal"></app-goal-single>
-    </div>
+    @for (goal of assistancePlan.goals; track $index) {
+      <div class="justify-content-center d-flex flex-wrap">
+        <app-goal-single [goal]="goal"></app-goal-single>
+      </div>
+    }
   </mat-tab>
 
   <mat-tab label="Zeitauswertung">

@@ -35,19 +35,23 @@
           <app-loading-spinner></app-loading-spinner>
         }
         @if (!isGenerating && isLoadedInitially) {
-          <div class="contingent-card" *ngFor="let row of tableData">
-            <div class="contingent-card__header">
-              <div class="contingent-card__name">{{row[0]}}</div>
-              <div class="contingent-card__total">{{tableHeader[1]}}: {{row[1]}}</div>
-            </div>
-            <div class="contingent-card__grid">
-              <div class="contingent-card__item" *ngFor="let col of tableHeader.slice(2); let i = index">
-                <span class="contingent-card__label">{{col}}</span>
-                <span class="contingent-card__sep">•</span>
-                <span class="contingent-card__value">{{row[i + 2]}}</span>
+          @for (row of tableData; track $index) {
+            <div class="contingent-card">
+              <div class="contingent-card__header">
+                <div class="contingent-card__name">{{row[0]}}</div>
+                <div class="contingent-card__total">{{tableHeader[1]}}: {{row[1]}}</div>
+              </div>
+              <div class="contingent-card__grid">
+                @for (col of tableHeader.slice(2); track $index; let i = $index) {
+                  <div class="contingent-card__item">
+                    <span class="contingent-card__label">{{col}}</span>
+                    <span class="contingent-card__sep">•</span>
+                    <span class="contingent-card__value">{{row[i + 2]}}</span>
+                  </div>
+                }
               </div>
             </div>
-          </div>
+          }
         }
       </div>
     </mat-card-content>

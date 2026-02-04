@@ -91,10 +91,11 @@
               <mat-label>ausführender Bereich</mat-label>
               <mat-select formControlName="institution"
                           required>
-                <mat-option *ngFor="let institution of institutions"
-                            [value]="institution.id">
-                  {{institution.name}}
-                </mat-option>
+                @for (institution of institutions; track institution.id) {
+                  <mat-option [value]="institution.id">
+                    {{institution.name}}
+                  </mat-option>
+                }
               </mat-select>
             </mat-form-field><br>
 
@@ -142,11 +143,12 @@
                         <mat-selection-list [multiple]="false"
                                             color="primary"
                                             formControlName="clientList">
-                          <mat-list-option *ngFor="let value of filteredClients"
-                                           [value]="value.id">
-                            {{value.lastName}} {{value.firstName}}
-                            <mat-divider></mat-divider>
-                          </mat-list-option>
+                          @for (value of filteredClients; track value.id) {
+                            <mat-list-option [value]="value.id">
+                              {{value.lastName}} {{value.firstName}}
+                              <mat-divider></mat-divider>
+                            </mat-list-option>
+                          }
                         </mat-selection-list>
                       </div>
                     </div>
@@ -172,27 +174,28 @@
                             <mat-selection-list [multiple]="false"
                                                 color="primary"
                                                 formControlName="assistancePlanList">
-                              <mat-list-option *ngFor="let value of filteredAssistancePlans"
-                                               class="list-option-large"
-                                               [value]="value.id">
-                                <div class="container">
-                                  <div class="row">
-                                    <div class="col">
-                                      <div class="row">
-                                        <span><b>{{getDateString(value)}}</b></span>
+                              @for (value of filteredAssistancePlans; track value.id) {
+                                <mat-list-option class="list-option-large"
+                                                 [value]="value.id">
+                                  <div class="container">
+                                    <div class="row">
+                                      <div class="col">
+                                        <div class="row">
+                                          <span><b>{{getDateString(value)}}</b></span>
+                                        </div>
+                                        <div class="row">
+                                          @if (value.hours.length != 0) {
+                                            <span class="fw-light"><small>{{sumAssistancePlanHours(value.hours)}} h/Woche</small></span>
+                                          }
+                                        </div></div>
+                                      <div class="col">
+                                        <span class="fw-light">{{getSponsorName(value)}}</span>
                                       </div>
-                                      <div class="row">
-                                        @if (value.hours.length != 0) {
-                                          <span class="fw-light"><small>{{sumAssistancePlanHours(value.hours)}} h/Woche</small></span>
-                                        }
-                                      </div></div>
-                                    <div class="col">
-                                      <span class="fw-light">{{getSponsorName(value)}}</span>
                                     </div>
                                   </div>
-                                </div>
-                                <mat-divider></mat-divider>
-                              </mat-list-option>
+                                  <mat-divider></mat-divider>
+                                </mat-list-option>
+                              }
                             </mat-selection-list>
                           }
                           @if (filteredAssistancePlans.length == 0) {
@@ -217,15 +220,16 @@
                             @if (selectedAssistancePlan != null) {
                               <mat-selection-list class="text-start"
                                                   formControlName="goalList">
-                                <mat-list-option *ngFor="let value of selectedAssistancePlan.goals"
-                                                 color="primary"
-                                                 [value]="value.id">
-                                  {{value.title}}
-                                  @if (value.hours.length != 0) {
-                                    <span class="fw-light"><small>{{sumGoalHours(value.hours)}} h/Woche</small></span>
-                                  }
-                                  <mat-divider></mat-divider>
-                                </mat-list-option>
+                                @for (value of selectedAssistancePlan.goals; track value.id) {
+                                  <mat-list-option color="primary"
+                                                   [value]="value.id">
+                                    {{value.title}}
+                                    @if (value.hours.length != 0) {
+                                      <span class="fw-light"><small>{{sumGoalHours(value.hours)}} h/Woche</small></span>
+                                    }
+                                    <mat-divider></mat-divider>
+                                  </mat-list-option>
+                                }
                               </mat-selection-list>
                             }
                             @if (selectedAssistancePlan == null) {
@@ -242,10 +246,11 @@
               <mat-label>Stundentyp</mat-label>
               <mat-select formControlName="hourType"
                           required>
-                <mat-option *ngFor="let value of assistancePlanHourTypes"
-                            [value]="value.id">
-                  {{value.title}}
-                </mat-option>
+                @for (value of assistancePlanHourTypes; track value.id) {
+                  <mat-option [value]="value.id">
+                    {{value.title}}
+                  </mat-option>
+                }
               </mat-select>
             </mat-form-field><br>
 
@@ -283,11 +288,12 @@
                     <div class="row">
                       <mat-selection-list class="text-start"
                                           formControlName="categoryList">
-                        <mat-list-option *ngFor="let value of categories"
-                                         color="primary"
-                                         [value]="value.id">
-                          {{value.title}}
-                        </mat-list-option>
+                        @for (value of categories; track value.id) {
+                          <mat-list-option color="primary"
+                                           [value]="value.id">
+                            {{value.title}}
+                          </mat-list-option>
+                        }
                         @if (categories.length == 0) {
                           <mat-error><br><b>keine Kategorien gefunden</b></mat-error>
                         }

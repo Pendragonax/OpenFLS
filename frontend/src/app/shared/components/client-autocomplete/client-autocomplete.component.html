@@ -9,9 +9,11 @@
   <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
                     [displayWith]="displayFn">
     @if (filteredClients$ | async; as clients) {
-      <mat-option *ngFor="let client of clients" [value]="client">
-        {{ getFullName(client) }}
-      </mat-option>
+      @for (client of clients; track client.id) {
+        <mat-option [value]="client">
+          {{ getFullName(client) }}
+        </mat-option>
+      }
     }
   </mat-autocomplete>
   <button mat-icon-button
