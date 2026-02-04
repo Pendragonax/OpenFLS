@@ -1,26 +1,18 @@
 # Stage 1: Development
-# Zweck: Entwicklungs-Container mit Hot-Run (bootRun)
+# Zweck: Dev-Container mit Hot-Run (bootRun)
 FROM gradle:9-jdk21 AS development
 # Build-Args für lokalen Nutzer (Standard: 1000:1000)
 ARG UID=1000
 ARG GID=1000
-# Nutzer/Gruppe im Image anlegen, falls nicht vorhanden
-RUN set -e; \
-    if ! getent group "${GID}" >/dev/null 2>&1; then \
-      groupadd -g "${GID}" app; \
-    fi; \
-    if ! getent passwd "${UID}" >/dev/null 2>&1; then \
-      useradd -m -u "${UID}" -g "${GID}" app; \
-    fi
-# Arbeitsverzeichnis setzen und Quellcode kopieren (mit korrektem Owner)
+
+# Arbeitsverzeichnis setzen
 WORKDIR /app
-RUN mkdir -p /app && chown ${UID}:${GID} /app
-COPY --chown=${UID}:${GID} . /app/
 USER ${UID}:${GID}
-# Build und Start-Konfiguration für Development
-RUN ./gradlew --no-daemon clean build
+
+# Dev-Port freigeben
 EXPOSE 8081
 CMD ["./gradlew", "--no-daemon", "bootRun"]
+
 
 # Stage 2: Build
 # Zweck: Artifact-Build für das Prod-Image

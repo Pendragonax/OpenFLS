@@ -1,20 +1,18 @@
 # Stage 1: Development
-# Zweck: Dev-Container für `ng serve`
+# Zweck: Dev-Container
 FROM node:22.12-alpine AS development
 # Build-Args für lokalen Nutzer (Standard: 1000:1000)
 ARG UID=1000
 ARG GID=1000
+
 # Entwicklungsmodus setzen
 ENV NODE_ENV=development
 
 # Arbeitsverzeichnis setzen und Abhängigkeiten installieren
 WORKDIR /app
-COPY --chown=${UID}:${GID} package*.json ./
-RUN npm ci
 RUN npm install -g @angular/cli@21.1.0
-# Quellcode kopieren (mit korrektem Owner)
-COPY --chown=${UID}:${GID} . /app/
 USER ${UID}:${GID}
+
 # Dev-Ports freigeben
 EXPOSE 4200 49153
 ENTRYPOINT ["sh", "entrypoint.sh"]
