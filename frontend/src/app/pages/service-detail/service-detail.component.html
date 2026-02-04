@@ -168,32 +168,36 @@
                         </div>
 
                         <div class="row">
-                          <mat-selection-list [multiple]="false"
-                                              color="primary"
-                                              *ngIf="filteredAssistancePlans.length > 0"
-                                              formControlName="assistancePlanList">
-                            <mat-list-option *ngFor="let value of filteredAssistancePlans"
-                                             class="list-option-large"
-                                             [value]="value.id">
-                              <div class="container">
-                                <div class="row">
-                                  <div class="col">
-                                    <div class="row">
-                                      <span><b>{{getDateString(value)}}</b></span>
+                          @if (filteredAssistancePlans.length > 0) {
+                            <mat-selection-list [multiple]="false"
+                                                color="primary"
+                                                formControlName="assistancePlanList">
+                              <mat-list-option *ngFor="let value of filteredAssistancePlans"
+                                               class="list-option-large"
+                                               [value]="value.id">
+                                <div class="container">
+                                  <div class="row">
+                                    <div class="col">
+                                      <div class="row">
+                                        <span><b>{{getDateString(value)}}</b></span>
+                                      </div>
+                                      <div class="row">
+                                        @if (value.hours.length != 0) {
+                                          <span class="fw-light"><small>{{sumAssistancePlanHours(value.hours)}} h/Woche</small></span>
+                                        }
+                                      </div></div>
+                                    <div class="col">
+                                      <span class="fw-light">{{getSponsorName(value)}}</span>
                                     </div>
-                                    <div class="row">
-                                      <span class="fw-light"
-                                            *ngIf="value.hours.length != 0"><small>{{sumAssistancePlanHours(value.hours)}} h/Woche</small></span>
-                                    </div></div>
-                                  <div class="col">
-                                    <span class="fw-light">{{getSponsorName(value)}}</span>
                                   </div>
                                 </div>
-                              </div>
-                              <mat-divider></mat-divider>
-                            </mat-list-option>
-                          </mat-selection-list>
-                          <mat-error *ngIf="filteredAssistancePlans.length == 0"><br><b>kein Hilfepläne gefunden</b></mat-error>
+                                <mat-divider></mat-divider>
+                              </mat-list-option>
+                            </mat-selection-list>
+                          }
+                          @if (filteredAssistancePlans.length == 0) {
+                            <mat-error><br><b>kein Hilfepläne gefunden</b></mat-error>
+                          }
                         </div>
                       </div>
                     </mat-card>
@@ -210,19 +214,23 @@
                             <mat-divider></mat-divider>
                           </div>
                           <div class="row">
-                            <mat-selection-list *ngIf="selectedAssistancePlan != null"
-                                                class="text-start"
-                                                formControlName="goalList">
-                              <mat-list-option *ngFor="let value of selectedAssistancePlan.goals"
-                                               color="primary"
-                                               [value]="value.id">
-                                {{value.title}}
-                                <span class="fw-light"
-                                      *ngIf="value.hours.length != 0"><small>{{sumGoalHours(value.hours)}} h/Woche</small></span>
-                                <mat-divider></mat-divider>
-                              </mat-list-option>
-                            </mat-selection-list>
-                            <mat-error *ngIf="selectedAssistancePlan == null"><br><b>keine Ziele gefunden</b></mat-error>
+                            @if (selectedAssistancePlan != null) {
+                              <mat-selection-list class="text-start"
+                                                  formControlName="goalList">
+                                <mat-list-option *ngFor="let value of selectedAssistancePlan.goals"
+                                                 color="primary"
+                                                 [value]="value.id">
+                                  {{value.title}}
+                                  @if (value.hours.length != 0) {
+                                    <span class="fw-light"><small>{{sumGoalHours(value.hours)}} h/Woche</small></span>
+                                  }
+                                  <mat-divider></mat-divider>
+                                </mat-list-option>
+                              </mat-selection-list>
+                            }
+                            @if (selectedAssistancePlan == null) {
+                              <mat-error><br><b>keine Ziele gefunden</b></mat-error>
+                            }
                           </div>
                         </div>
                       </mat-card>
@@ -280,7 +288,9 @@
                                          [value]="value.id">
                           {{value.title}}
                         </mat-list-option>
-                        <mat-error *ngIf="categories.length == 0"><br><b>keine Kategorien gefunden</b></mat-error>
+                        @if (categories.length == 0) {
+                          <mat-error><br><b>keine Kategorien gefunden</b></mat-error>
+                        }
                       </mat-selection-list>
                     </div>
                   </div>

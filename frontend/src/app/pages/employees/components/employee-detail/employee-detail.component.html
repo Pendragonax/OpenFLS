@@ -257,11 +257,11 @@
   </mat-tab>
 
   <!--CONTINGENTS-->
-  <mat-tab label="Stunden"
-           *ngIf="(employeeView$ | async)?.editable">
-    <app-contingent-evaluation [employee$]="employee$"
-                               [navigateToMyServices]=false
-                               [hideRefresh]="true"></app-contingent-evaluation>
-  </mat-tab>
+  @if ((employeeView$ | async)?.editable) {
+    <mat-tab label="Stunden">
+      <app-contingent-evaluation [employee$]="employee$"
+                                 [navigateToMyServices]=false
+                                 [hideRefresh]="true"></app-contingent-evaluation>
+    </mat-tab>
+  }
 </mat-tab-group>
-

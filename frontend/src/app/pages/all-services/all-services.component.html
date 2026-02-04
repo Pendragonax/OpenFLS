@@ -36,12 +36,17 @@
     </div>
   </div>
   <div class="row">
-    <app-service-table *ngIf="!isBusy && !errorOccurred" [services]="filteredServices" [editMode]="false" (tableUpdated)="loadServices()"></app-service-table>
-    <app-loading-spinner *ngIf="isBusy" [description]="'Lade Einträge'"></app-loading-spinner>
-    <div class="text-center"
-         *ngIf="errorOccurred">
-      <mat-icon [color]="'warn'" class="m-auto mt-2">remove_circle_outline</mat-icon>
-      <p class="mt-1"><b>{{permissionDeniedMessage}}</b></p>
-    </div>
+    @if (!isBusy && !errorOccurred) {
+      <app-service-table [services]="filteredServices" [editMode]="false" (tableUpdated)="loadServices()"></app-service-table>
+    }
+    @if (isBusy) {
+      <app-loading-spinner [description]="'Lade Einträge'"></app-loading-spinner>
+    }
+    @if (errorOccurred) {
+      <div class="text-center">
+        <mat-icon [color]="'warn'" class="m-auto mt-2">remove_circle_outline</mat-icon>
+        <p class="mt-1"><b>{{permissionDeniedMessage}}</b></p>
+      </div>
+    }
   </div>
 </div>

@@ -5,22 +5,23 @@
 
 <div class="container mt-3">
   <!--FILTER-->
-  <div class="row"
-       *ngIf="!isSubmitting">
-    <!--FILTER CONTAINER-->
-    <form [formGroup]="filterForm">
-      <div class="container-fluid text-center">
-        <div class="row justify-content-center">
-          <div class="col-auto">
-            <app-search-field [isSubmitting]="isSubmitting"
-                              [placeholder]="'...'"
-                              (onSearchStringChanges)="onSearchStringChanges($event)"
-                              ></app-search-field>
+  @if (!isSubmitting) {
+    <div class="row">
+      <!--FILTER CONTAINER-->
+      <form [formGroup]="filterForm">
+        <div class="container-fluid text-center">
+          <div class="row justify-content-center">
+            <div class="col-auto">
+              <app-search-field [isSubmitting]="isSubmitting"
+                                [placeholder]="'...'"
+                                (onSearchStringChanges)="onSearchStringChanges($event)"
+                                ></app-search-field>
+            </div>
           </div>
         </div>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
+  }
 
   <!--TABLE-->
   <div class="row">
@@ -38,17 +39,18 @@
     </div>
 
     <!--LOADING-->
-    <div class="row m-2"
-         *ngIf="isSubmitting">
-      <div class="d-flex justify-content-center">
-        <mat-spinner [strokeWidth]="2"
-                     [diameter]="70"
-                     class="center-spinner"></mat-spinner>
+    @if (isSubmitting) {
+      <div class="row m-2">
+        <div class="d-flex justify-content-center">
+          <mat-spinner [strokeWidth]="2"
+                       [diameter]="70"
+                       class="center-spinner"></mat-spinner>
+        </div>
+        <div class="d-flex justify-content-center">
+          <p><b>Lade Kostenträger</b></p>
+        </div>
       </div>
-      <div class="d-flex justify-content-center">
-        <p><b>Lade Kostenträger</b></p>
-      </div>
-    </div>
+    }
 
     <div class="row"
          [hidden]="isSubmitting">

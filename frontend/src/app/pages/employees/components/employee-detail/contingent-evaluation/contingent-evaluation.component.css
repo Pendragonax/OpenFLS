@@ -38,7 +38,7 @@
 }
 
 .legend-dot--failure {
-  background: linear-gradient(70deg, #e05555, #234aac) !important;
+  background: linear-gradient(70deg,#e05555,#234aac) !important;
   border: #2f3a4b;
 }
 
@@ -114,7 +114,6 @@
 
 ::ng-deep .calendar-menu-panel .mat-menu-item .mat-menu-item-text {
   font-weight: 500;
-  color: #1f2933;
 }
 
 ::ng-deep .calendar-menu-panel .mat-menu-item + .mat-menu-item {
@@ -225,7 +224,7 @@
 }
 
 ::ng-deep .contingent-calendar .error-date .mat-calendar-body-cell-content {
-  background: linear-gradient(70deg, #e05555, #234aac) !important;
+  background: linear-gradient(70deg,#e05555,#234aac) !important;
   border: #2f3a4b;
   color: #ffffff;
 }

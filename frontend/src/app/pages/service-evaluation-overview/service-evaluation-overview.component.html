@@ -9,17 +9,21 @@
           <mat-radio-button class="ms-2" value="2">Monat</mat-radio-button>
         </mat-radio-group>
 
-        <div class="d-flex justify-content-center mt-2" *ngIf="selectedPeriodMode == 1">
-          <button mat-mini-fab (click)="prevYear()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_left</mat-icon></button>
-          <p class="my-auto w-50 fw-bold">{{year}}</p>
-          <button mat-mini-fab (click)="nextYear()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_right</mat-icon></button>
-        </div>
+        @if (selectedPeriodMode == 1) {
+          <div class="d-flex justify-content-center mt-2">
+            <button mat-mini-fab (click)="prevYear()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_left</mat-icon></button>
+            <p class="my-auto w-50 fw-bold">{{year}}</p>
+            <button mat-mini-fab (click)="nextYear()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_right</mat-icon></button>
+          </div>
+        }
 
-        <div class="d-flex justify-content-center mt-2" *ngIf="selectedPeriodMode == 2">
-          <button mat-mini-fab (click)="prevMonth()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_left</mat-icon></button>
-          <p class="my-auto w-50 fw-bold">{{getMonthName(month)}} - {{year}}</p>
-          <button mat-mini-fab (click)="nextMonth()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_right</mat-icon></button>
-        </div>
+        @if (selectedPeriodMode == 2) {
+          <div class="d-flex justify-content-center mt-2">
+            <button mat-mini-fab (click)="prevMonth()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_left</mat-icon></button>
+            <p class="my-auto w-50 fw-bold">{{getMonthName(month)}} - {{year}}</p>
+            <button mat-mini-fab (click)="nextMonth()" class="button-color" [disabled]="isGenerating"><mat-icon>arrow_right</mat-icon></button>
+          </div>
+        }
       </div>
 
       <div class="row my-3 justify-content-center">
@@ -56,17 +60,19 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div *ngIf="selectedPeriodMode==this.PERIOD_MODE_YEARLY" class="row my-3 justify-content-center">
-        <mat-form-field>
-          <mat-label>anzuzeigender Wert</mat-label>
-          <mat-select formControlName="valueTypeControl">
-            <mat-option *ngFor="let valueType of valueTypes" [value]="valueType">
-              {{valueType}}
-            </mat-option>
-          </mat-select>
-          <button mat-icon-button matSuffix color="primary" (click)="openValueTypeInfoModal($event)"><mat-icon>info</mat-icon></button>
-        </mat-form-field>
-      </div>
+      @if (selectedPeriodMode==this.PERIOD_MODE_YEARLY) {
+        <div class="row my-3 justify-content-center">
+          <mat-form-field>
+            <mat-label>anzuzeigender Wert</mat-label>
+            <mat-select formControlName="valueTypeControl">
+              <mat-option *ngFor="let valueType of valueTypes" [value]="valueType">
+                {{valueType}}
+              </mat-option>
+            </mat-select>
+            <button mat-icon-button matSuffix color="primary" (click)="openValueTypeInfoModal($event)"><mat-icon>info</mat-icon></button>
+          </mat-form-field>
+        </div>
+      }
       <div class="row justify-content-center my-3">
         <button mat-raised-button color="asc" class="button-color w-50"
                 [disabled]="!generationAllowed || isGenerating" (click)="loadTable()">Anzeigen</button>
@@ -85,11 +91,12 @@
           <mat-icon [color]="'warn'" class="m-auto mt-2">remove_circle_outline</mat-icon>
           <p class="mt-1"><b>Sie haben keine Berechtigung für diese Anfrage.</b></p>
         </div>
-        <app-object-table *ngIf="!isGenerating && !forbiddenRequest"
-                          [header$]="columns$"
-                          [data$]="data$"
-                          [columnFixedWidthFromIndex]="columnFixedWidthFromIndex"
-                          [boldColumnIndices]="boldColumnIndices"></app-object-table>
+        @if (!isGenerating && !forbiddenRequest) {
+          <app-object-table [header$]="columns$"
+                            [data$]="data$"
+                            [columnFixedWidthFromIndex]="columnFixedWidthFromIndex"
+                            [boldColumnIndices]="boldColumnIndices"></app-object-table>
+        }
       </div>
     </div>
   </div>

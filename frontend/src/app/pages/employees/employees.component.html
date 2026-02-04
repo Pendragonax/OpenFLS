@@ -37,17 +37,18 @@
     </div>
 
     <!--LOADING-->
-    <div class="row m-2"
-         *ngIf="isSubmitting">
-      <div class="d-flex justify-content-center">
-        <mat-spinner [strokeWidth]="2"
-                     [diameter]="70"
-                     class="center-spinner"></mat-spinner>
+    @if (isSubmitting) {
+      <div class="row m-2">
+        <div class="d-flex justify-content-center">
+          <mat-spinner [strokeWidth]="2"
+                       [diameter]="70"
+                       class="center-spinner"></mat-spinner>
+        </div>
+        <div class="d-flex justify-content-center">
+          <p><b>Lade Mitarbeiter</b></p>
+        </div>
       </div>
-      <div class="d-flex justify-content-center">
-        <p><b>Lade Mitarbeiter</b></p>
-      </div>
-    </div>
+    }
 
     <div class="row"
          [hidden]="isSubmitting">

@@ -79,7 +79,6 @@
 }
 
 .work-time-card__progress {
-  margin-top: 0;
   padding: 14px 16px 12px;
   border-radius: 10px;
   border: 1px solid #e7ebf3;
@@ -100,13 +99,7 @@
   position: relative;
   height: 12px;
   border-radius: 999px;
-  background: repeating-linear-gradient(
-      90deg,
-      #e2e6ef 0,
-      #e2e6ef 14px,
-      #f8f9fc 14px,
-      #f8f9fc 18px
-  );
+  background: repeating-linear-gradient(90deg,#e2e6ef 0,#e2e6ef 14px,#f8f9fc 14px,#f8f9fc 18px);
   overflow: hidden;
   margin: 10px 0 12px;
 }
@@ -116,17 +109,17 @@
   inset: 0;
   width: 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, #f06b63 0%, #e95c54 100%);
+  background: linear-gradient(90deg,#f06b63 0%,#e95c54 100%);
   box-shadow: 0 6px 12px rgba(233, 92, 84, 0.25);
 }
 
 .work-time-card--ok .work-time-card__progress-fill {
-  background: linear-gradient(90deg, #5fb38a 0%, #4a8c6f 100%);
+  background: linear-gradient(90deg,#5fb38a 0%,#4a8c6f 100%);
   box-shadow: 0 6px 12px rgba(74, 140, 111, 0.25);
 }
 
 .work-time-card--critical .work-time-card__progress-fill {
-  background: linear-gradient(90deg, #d5a83a 0%, #ba8e24 100%);
+  background: linear-gradient(90deg,#d5a83a 0%,#ba8e24 100%);
   box-shadow: 0 6px 12px rgba(74, 140, 111, 0.25);
 }
 

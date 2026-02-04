@@ -9,7 +9,9 @@
         <mat-form-field appearance="fill">
           <mat-label>Benutzername</mat-label>
           <input matInput formControlName="username" required>
-          <mat-error *ngIf="usernameControl.invalid">{{ getControlErrorMessage(usernameControl) }}</mat-error>
+          @if (usernameControl.invalid) {
+            <mat-error>{{ getControlErrorMessage(usernameControl) }}</mat-error>
+          }
         </mat-form-field><br><br>
 
         <mat-form-field>
@@ -35,13 +37,17 @@
         <mat-form-field appearance="fill">
           <mat-label>Vorname</mat-label>
           <input matInput formControlName="firstName" required>
-          <mat-error *ngIf="firstNameControl.invalid">{{ getControlErrorMessage(firstNameControl) }}</mat-error>
+          @if (firstNameControl.invalid) {
+            <mat-error>{{ getControlErrorMessage(firstNameControl) }}</mat-error>
+          }
         </mat-form-field><br><br>
 
         <mat-form-field appearance="fill">
           <mat-label>Nachname</mat-label>
           <input matInput formControlName="lastName" required>
-          <mat-error *ngIf="lastNameControl.invalid">{{ getControlErrorMessage(lastNameControl) }}</mat-error>
+          @if (lastNameControl.invalid) {
+            <mat-error>{{ getControlErrorMessage(lastNameControl) }}</mat-error>
+          }
         </mat-form-field><br><br>
 
         <mat-form-field appearance="fill">

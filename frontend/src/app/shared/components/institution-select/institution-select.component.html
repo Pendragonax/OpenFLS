@@ -4,13 +4,13 @@
     <mat-select class="text-start"
                 placeholder="..."
                 formControlName="institutionControl">
-      <ng-container *ngIf="institutions">
+      @if (institutions) {
         <mat-option *ngFor="let institution of institutions"
                     [disabled]="disabled"
                     [value]="institution">
           {{institution.name}}
         </mat-option>
-      </ng-container>
+      }
     </mat-select>
     <button mat-icon-button
             class="my-1 mx-2"
