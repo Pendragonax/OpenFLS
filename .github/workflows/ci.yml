@@ -51,6 +51,49 @@ jobs:
         run: |
           npm run build
 
+  publish-dev:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Extract backend version
+        id: vars
+        run: |
+          VERSION=$(grep -E '^version\s*=\s*"' backend/build.gradle.kts | head -n1 | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push dev backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: backend
+          file: backend/Dockerfile
+          target: prod
+          push: true
+          tags: |
+            ghcr.io/pendragonax/openfls-backend:dev
+
+      - name: Build and push dev frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          file: frontend/Dockerfile
+          target: prod
+          push: true
+          tags: |
+            ghcr.io/pendragonax/openfls-frontend:dev
+
+
   publish:
     runs-on: ubuntu-latest
     needs: test
