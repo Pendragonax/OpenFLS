@@ -7,6 +7,8 @@ import de.vinz.openfls.domains.permissions.PermissionService
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
+import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
+import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -21,11 +23,12 @@ import java.time.LocalDate
 @RestController
 @RequestMapping("/services")
 class ServiceController(
-        private val serviceService: ServiceService,
-        private val employeeService: EmployeeService,
-        private val accessService: AccessService,
-        private val permissionService: PermissionService,
-        private val assistancePlanService: AssistancePlanService
+    private val serviceService: ServiceService,
+    private val contingentCalendarService: ContingentCalendarService,
+    private val employeeService: EmployeeService,
+    private val accessService: AccessService,
+    private val permissionService: PermissionService,
+    private val assistancePlanService: AssistancePlanService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(ServiceController::class.java)
@@ -54,7 +57,9 @@ class ServiceController(
             logger.error(ex.message)
 
             ResponseEntity(
-                    employeeService.getById(valueDto.employeeId),
+                    employeeService.getById(valueDto.employeeId).apply {
+                        this?.access?.password = ""
+                    },
                     HttpStatus.BAD_REQUEST
             )
         }

@@ -4,8 +4,8 @@
 
 <div class="container mt-3">
   <!--FILTER-->
-  <div class="row"
-       [hidden]="isSubmitting">
+  @if (!isSubmitting) {
+  <div class="row">
     <!--FILTER FORM-->
     <form [formGroup]="filterForm">
       <div class="container-fluid text-center">
@@ -20,12 +20,13 @@
       </div>
     </form>
   </div>
+  }
 
   <!--TABLE-->
   <div class="row">
     <!--ACTIONS-->
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+    <div class="row">
       <div class="col">
         <mat-paginator class="paginator"
                        showFirstLastButtons
@@ -35,22 +36,24 @@
                        [pageSize]="pageSize"></mat-paginator>
       </div>
     </div>
+    }
 
     <!--LOADING-->
-    <div class="row m-2"
-         *ngIf="isSubmitting">
-      <div class="d-flex justify-content-center">
-        <mat-spinner [strokeWidth]="2"
-                     [diameter]="70"
-                     class="center-spinner"></mat-spinner>
+    @if (isSubmitting) {
+      <div class="row m-2">
+        <div class="d-flex justify-content-center">
+          <mat-spinner [strokeWidth]="2"
+                       [diameter]="70"
+                       class="center-spinner"></mat-spinner>
+        </div>
+        <div class="d-flex justify-content-center">
+          <p><b>Lade Mitarbeiter</b></p>
+        </div>
       </div>
-      <div class="d-flex justify-content-center">
-        <p><b>Lade Mitarbeiter</b></p>
-      </div>
-    </div>
+    }
 
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+    <div class="row">
       <table mat-table
              matSort
              (matSortChange)="sortData($event)"
@@ -63,18 +66,20 @@
           <td mat-cell
               class="text-center"
               *matCellDef="let employee">
-            <mat-icon aria-hidden="false"
-                      matTooltip="Administrator"
-                      matTooltipHideDelay="300"
-                      [hidden]="!employee.administrator">
-              stars
-            </mat-icon>
-            <mat-icon aria-hidden="false"
-                      matTooltip="Leitungskraft"
-                      matTooltipHideDelay="300"
-                      [hidden]="!employee.leader">
-              accessibility
-            </mat-icon>
+            @if (employee.administrator) {
+              <mat-icon aria-hidden="false"
+                        matTooltip="Administrator"
+                        matTooltipHideDelay="300">
+                stars
+              </mat-icon>
+            }
+            @if (employee.leader) {
+              <mat-icon aria-hidden="false"
+                        matTooltip="Leitungskraft"
+                        matTooltipHideDelay="300">
+                accessibility
+              </mat-icon>
+            }
           </td>
         </ng-container>
 
@@ -93,7 +98,9 @@
           <td mat-cell
               class="hide-on-small"
               *matCellDef="let employee">
-            <p *ngFor="let institution of employee.institutions">{{institution.name}}</p>
+            @for (institution of employee.institutions; track $index) {
+              <p>{{institution.name}}</p>
+            }
           </td>
         </ng-container>
 
@@ -163,6 +170,7 @@
         <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
       </table>
     </div>
+    }
 
     <!--INFORMATION MODAL-->
     <ng-template #informationModal let-modal>

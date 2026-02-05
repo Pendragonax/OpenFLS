@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.permissions
 
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
+import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
 import org.springframework.transaction.annotation.Transactional
@@ -133,13 +134,20 @@ class PermissionService(
             .toList()
     }
 
-    fun convertToPermissions(permissionDtos: Array<PermissionDto>?, employeeId: Long): MutableSet<Permission> {
-        return permissionDtos
+    fun convertToPermissions(permissionDtos: List<PermissionDto>?, employee: Employee): MutableSet<Permission> {
+        val entities = permissionDtos
                 ?.map {
                     modelMapper
                             .map(it, Permission::class.java)
-                            .apply { it.employeeId = employeeId } }
+                }
                 ?.toMutableSet() ?: mutableSetOf()
+
+        for (permission in entities) {
+            permission.employee = employee
+            permission.institution = institutionRepository.findById(permission.id.institutionId!!).get()
+        }
+
+        return entities
     }
 
     @Transactional(readOnly = true)

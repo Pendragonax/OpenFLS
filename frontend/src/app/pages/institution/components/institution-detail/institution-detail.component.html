@@ -11,8 +11,8 @@
         </mat-expansion-panel-header>
 
         <!--EDIT FORM-->
-        <div class="container-fluid text-center"
-             [hidden]="!adminMode">
+        @if (adminMode) {
+          <div class="container-fluid text-center">
           <form [formGroup]="infoForm">
             <div>
               <mat-form-field appearance="fill">
@@ -45,18 +45,20 @@
                       [disabled]="infoForm.invalid || isSubmitting || !editMode">Speichern</button>
             </div>
           </form>
-        </div>
+          </div>
+        }
 
         <!--SHOW-->
-        <div class="container-fluid"
-             [hidden]="adminMode">
+        @if (!adminMode) {
+          <div class="container-fluid">
           <app-information-row [title]="'Name'"
                                [content]="value.dto.name"></app-information-row>
           <app-information-row [title]="'Email'"
                                [content]="value.dto.email"></app-information-row>
           <app-information-row [title]="'Telefon'"
                                [content]="value.dto.phonenumber"></app-information-row>
-        </div>
+          </div>
+        }
       </mat-expansion-panel>
 
       <mat-expansion-panel class="mx-2 mb-2">

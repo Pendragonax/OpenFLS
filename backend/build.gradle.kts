@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "4.0.1"
+    id("org.springframework.boot") version "3.5.10"
     id("io.spring.dependency-management") version "1.1.6"
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.spring") version "2.3.0"
@@ -23,7 +23,7 @@ repositories {
     mavenCentral()
 }
 
-val flywayVersion = "10.15.2"
+val flywayVersion = "11.20.3"
 val modelMapperVersion = "3.1.0"
 val mysqlConnectorVersion = "9.0.0"
 val commonsCsvVersion = "1.10.0"
@@ -51,6 +51,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
+    testImplementation("com.h2database:h2")
 }
 
 tasks.withType<KotlinCompile>().configureEach {

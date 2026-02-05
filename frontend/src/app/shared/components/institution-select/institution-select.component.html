@@ -4,13 +4,14 @@
     <mat-select class="text-start"
                 placeholder="..."
                 formControlName="institutionControl">
-      <ng-container *ngIf="institutions">
-        <mat-option *ngFor="let institution of institutions"
-                    [disabled]="disabled"
-                    [value]="institution">
-          {{institution.name}}
-        </mat-option>
-      </ng-container>
+                @if (institutions) {
+                  @for (institution of institutions; track institution.id) {
+                  <mat-option [disabled]="disabled"
+                      [value]="institution">
+                  {{institution.name}}
+                  </mat-option>
+        }
+      }
     </mat-select>
     <button mat-icon-button
             class="my-1 mx-2"

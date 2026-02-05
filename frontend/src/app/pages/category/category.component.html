@@ -4,28 +4,29 @@
 
 <div class="container mt-3">
   <!--FILTER-->
-  <div class="row"
-       *ngIf="!isSubmitting">
-    <!--FILTER FORM-->
-    <form [formGroup]="filterForm">
-      <div class="container-fluid text-center">
-        <div class="row justify-content-center">
-          <div class="col-auto">
-            <app-search-field [isSubmitting]="isSubmitting"
-                              [placeholder]="'...'"
-                              (onSearchStringChanges)="onSearchStringChanges($event)"
-                              ></app-search-field>
+  @if (!isSubmitting) {
+    <div class="row">
+      <!--FILTER FORM-->
+      <form [formGroup]="filterForm">
+        <div class="container-fluid text-center">
+          <div class="row justify-content-center">
+            <div class="col-auto">
+              <app-search-field [isSubmitting]="isSubmitting"
+                                [placeholder]="'...'"
+                                (onSearchStringChanges)="onSearchStringChanges($event)"
+                                ></app-search-field>
+            </div>
           </div>
         </div>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
+  }
 
   <!--MAIN-->
   <div class="row">
     <!--ACTIONS-->
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+      <div class="row">
       <div class="col">
         <mat-paginator class="paginator"
                        showFirstLastButtons
@@ -34,24 +35,26 @@
                        [pageIndex]="pageIndex"
                        [pageSize]="pageSize"></mat-paginator>
       </div>
-    </div>
+      </div>
+    }
 
     <!--LOADING-->
-    <div class="row m-2"
-         *ngIf="isSubmitting">
-      <div class="d-flex justify-content-center">
-        <mat-spinner [strokeWidth]="2"
-                     [diameter]="70"
-                     class="center-spinner"></mat-spinner>
+    @if (isSubmitting) {
+      <div class="row m-2">
+        <div class="d-flex justify-content-center">
+          <mat-spinner [strokeWidth]="2"
+                       [diameter]="70"
+                       class="center-spinner"></mat-spinner>
+        </div>
+        <div class="d-flex justify-content-center">
+          <p><b>Lade Kategorien</b></p>
+        </div>
       </div>
-      <div class="d-flex justify-content-center">
-        <p><b>Lade Kategorien</b></p>
-      </div>
-    </div>
+    }
 
     <!--TABLE-->
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+      <div class="row">
       <table mat-table
              matSort
              (matSortChange)="sortData($event)"
@@ -75,7 +78,9 @@
               class="hide-on-small"
               *matCellDef="let template">
             <div class="pt-2">
-              <p *ngFor="let category of template.categories">{{category.title}} <b>({{category.shortcut}})</b></p>
+              @for (category of template.categories; track $index) {
+                <p>{{category.title}} <b>({{category.shortcut}})</b></p>
+              }
             </div></td>
         </ng-container>
 
@@ -123,6 +128,7 @@
         <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
       </table>
-    </div>
+      </div>
+    }
   </div>
 </div>

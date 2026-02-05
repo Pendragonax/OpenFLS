@@ -17,7 +17,9 @@ try {
     error instanceof Error &&
     error.message.includes('Cannot reinitialize the TestBed')
   ) {
-    return;
+    // TestBed already initialized in this worker.
+    // No-op.
+  } else {
+    throw error;
   }
-  throw error;
 }

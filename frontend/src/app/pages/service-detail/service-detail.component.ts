@@ -10,12 +10,7 @@ import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {combineLatest, startWith} from "rxjs";
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ClientDto} from "../../shared/dtos/client-dto.model";
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
-import {
-  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
-  MAT_MOMENT_DATE_FORMATS,
-  MomentDateAdapter
-} from "@angular/material-moment-adapter";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {AssistancePlanDto} from "../../shared/dtos/assistance-plan-dto.model";
 import {Converter} from "../../shared/services/converter.helper";
 import {GoalDto} from "../../shared/dtos/goal-dto.model";
@@ -39,10 +34,10 @@ import {createStartTimeEndTimeValidator} from "../../shared/validators/startTime
         { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
         {
             provide: DateAdapter,
-            useClass: MomentDateAdapter,
-            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+            useClass: NativeDateAdapter,
+            deps: [MAT_DATE_LOCALE],
         },
-        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
     ],
     standalone: false
 })

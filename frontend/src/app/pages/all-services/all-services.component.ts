@@ -26,7 +26,7 @@ export class AllServicesComponent implements OnInit {
   readableInstitutions: ReadableInstitutionDto[] = [];
   clients: ClientSoloDto[] = [];
   employees: EmployeeSolo[] = [];
-  title: String = "Meine";
+  title: String = "Alle";
 
   services: Service[] = [];
   filteredServices: Service[] = [];

@@ -3,9 +3,11 @@
 
 <mat-tab-group [(selectedIndex)]="tabIndex" (selectedTabChange)="updateUrl()">
   <mat-tab label="Ziele">
-    <div class="justify-content-center d-flex flex-wrap" *ngFor="let goal of assistancePlan.goals">
-      <app-goal-single [goal]="goal"></app-goal-single>
-    </div>
+    @for (goal of assistancePlan.goals; track $index) {
+      <div class="justify-content-center d-flex flex-wrap">
+        <app-goal-single [goal]="goal"></app-goal-single>
+      </div>
+    }
   </mat-tab>
 
   <mat-tab label="Zeitauswertung">
@@ -20,13 +22,17 @@
         </div>
         <div class="col">
           <div class="my-3 mat-elevation-z8 example-container">
-            <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
-            <app-error-icon *ngIf="goalTimesErrorOccurred"
-                            [description]="'Es konnten keine Werte gefunden werden'"></app-error-icon>
-            <app-overview-table *ngIf="!goalTimesErrorOccurred && !isGenerating"
-                                [boldColumnIndices$]="boldColumnIndices$"
-                                [columns$]="columns$"
-                                [data$]="data$"></app-overview-table>
+          @if (isGenerating) {
+              <app-loading-spinner></app-loading-spinner>
+            }
+            @if (goalTimesErrorOccurred) {
+              <app-error-icon [description]="'Es konnten keine Werte gefunden werden'"></app-error-icon>
+            }
+            @if (!goalTimesErrorOccurred && !isGenerating) {
+              <app-overview-table [boldColumnIndices$]="boldColumnIndices$"
+                                  [columns$]="columns$"
+                                  [data$]="data$"></app-overview-table>
+            }
           </div>
         </div>
       </div>
@@ -43,12 +49,15 @@
       </div>
       <div class="row">
         <div class="my-3">
-          <app-loading-spinner *ngIf="isGenerating"></app-loading-spinner>
-          <app-table-button *ngIf="!errorOccurred && !isGenerating"
-                            [boldColumnIndices$]="boldColumnIndices$"
-                            [columns$]="columnsEvaluation$"
-                            [data$]="dataEvaluation$"
-                            (evaluationEvent)="openEvaluationModal($event)"></app-table-button>
+        @if (isGenerating) {
+            <app-loading-spinner></app-loading-spinner>
+          }
+          @if (!errorOccurred && !isGenerating) {
+            <app-table-button [boldColumnIndices$]="boldColumnIndices$"
+                              [columns$]="columnsEvaluation$"
+                              [data$]="dataEvaluation$"
+                              (evaluationEvent)="openEvaluationModal($event)"></app-table-button>
+          }
         </div>
       </div>
     </div>

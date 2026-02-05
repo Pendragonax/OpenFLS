@@ -3,12 +3,13 @@
   <div class="row"
        *showOnRole="'leader'">
     <div class="container-fluid text-center">
+    @if (!hideAddButton) {
       <button mat-raised-button
               color="primary"
               (click)="openValueModal(editContent)"
               [disabled]="sponsors.length <= 0"
-              [hidden]="hideAddButton"
               *showOnRole="'admin'"> nicht Fachkraftstatus hinzufügen </button>
+      }
     </div>
   </div>
 
@@ -88,10 +89,11 @@
             <mat-label>Kostenträger</mat-label>
             <mat-select formControlName="sponsor"
                         required>
-              <mat-option *ngFor="let value of sponsors"
-                          [value]="value.id">
-                {{value.name}}
-              </mat-option>
+              @for (value of sponsors; track value.id) {
+                <mat-option [value]="value.id">
+                  {{value.name}}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
 

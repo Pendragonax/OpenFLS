@@ -11,8 +11,8 @@
         </mat-expansion-panel-header>
 
         <!--EDIT-->
-        <div class="container-fluid text-center"
-             [hidden]="!editMode">
+        @if (editMode) {
+          <div class="container-fluid text-center">
           <form [formGroup]="detailForm">
             <div>
               <mat-form-field appearance="fill">
@@ -64,18 +64,20 @@
                       [disabled]="!detailForm.valid || isSubmitting">Speichern</button>
             </div>
           </form>
-        </div>
+          </div>
+        }
 
         <!--SHOW-->
-        <div class="container-fluid"
-             [hidden]="editMode">
+        @if (!editMode) {
+          <div class="container-fluid">
           <app-information-row [title]="'Name'"
                                [content]="editValue.lastName + ', ' + editValue.firstName"></app-information-row>
           <app-information-row [title]="'Email'"
                                [content]="editValue.email"></app-information-row>
           <app-information-row [title]="'Telefon'"
                                [content]="editValue.phonenumber"></app-information-row>
-        </div>
+          </div>
+        }
       </mat-expansion-panel>
 
       <!--PERMISSIONS-->
@@ -257,11 +259,11 @@
   </mat-tab>
 
   <!--CONTINGENTS-->
-  <mat-tab label="Stunden"
-           *ngIf="(employeeView$ | async)?.editable">
-    <app-contingent-evaluation [employee$]="employee$"
-                               [navigateToMyServices]=false
-                               [hideRefresh]="true"></app-contingent-evaluation>
-  </mat-tab>
+  @if ((employeeView$ | async)?.editable) {
+    <mat-tab label="Stunden">
+      <app-contingent-evaluation [employee$]="employee$"
+                                 [navigateToMyServices]=false
+                                 [hideRefresh]="true"></app-contingent-evaluation>
+    </mat-tab>
+  }
 </mat-tab-group>
-

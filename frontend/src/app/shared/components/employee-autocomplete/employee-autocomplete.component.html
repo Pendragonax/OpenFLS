@@ -8,11 +8,13 @@
          [matAutocomplete]="auto">
   <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
                     [displayWith]="displayFn">
-    <ng-container *ngIf="filteredEmployees$ | async as employees">
-      <mat-option *ngFor="let employee of employees" [value]="employee">
-        {{ getFullName(employee) }}
-      </mat-option>
-    </ng-container>
+                    @if (filteredEmployees$ | async; as employees) {
+                      @for (employee of employees; track employee.id) {
+                      <mat-option [value]="employee">
+                      {{ getFullName(employee) }}
+                      </mat-option>
+      }
+    }
   </mat-autocomplete>
   <button mat-icon-button
           class="my-1 mx-2"

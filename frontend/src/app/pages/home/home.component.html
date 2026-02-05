@@ -8,6 +8,12 @@
   <mat-tab label="Hilfeplan Favoriten">
     <app-assistance-plans class="m-2"
                           [favorites$]="favorite$"></app-assistance-plans></mat-tab>
+
+  <mat-tab label="Stunden">
+    <app-contingent-evaluation [employee$]="currentEmployee$"
+                               (onRefreshClick)="refreshUser()" ></app-contingent-evaluation>
+  </mat-tab>
+
   <mat-tab label="Allgemein">
     <mat-accordion>
       <!--INFORMATIONS-->
@@ -129,7 +135,9 @@
                          type="password"
                          formControlName="password1"
                          required>
-                  <mat-error *ngIf="password1Control.invalid">{{ getControlErrorMessage(password1Control) }}</mat-error>
+                         @if (password1Control.invalid) {
+                           <mat-error>{{ getControlErrorMessage(password1Control) }}</mat-error>
+                  }
                 </mat-form-field><br>
 
                 <mat-form-field appearance="fill">
@@ -137,7 +145,9 @@
                   <input matInput
                          type="password"
                          formControlName="password2" required>
-                  <mat-error *ngIf="password2Control.invalid">{{ getControlErrorMessage(password2Control) }}</mat-error>
+                         @if (password2Control.invalid) {
+                           <mat-error>{{ getControlErrorMessage(password2Control) }}</mat-error>
+                  }
                 </mat-form-field><br>
 
                 <button mat-raised-button
@@ -151,9 +161,5 @@
         </div>
       </mat-expansion-panel>
     </mat-accordion>
-  </mat-tab>
-  <mat-tab label="Stunden">
-    <app-contingent-evaluation [employee$]="currentEmployee$"
-                               (onRefreshClick)="refreshUser()" ></app-contingent-evaluation>
   </mat-tab>
 </mat-tab-group>

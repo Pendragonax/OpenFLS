@@ -29,14 +29,14 @@ Alle Agents respektieren diesen Modus.
 
 Das Modell simuliert folgende Rollen:
 
-1. Planner Agent – analysiert & plant. Nutzt TASK.md zur Überprüfung, ob die Aufgabe schon begonnen wurde und wenn nicht speichert er den Plan
-2. Builder Agent – erstellt Inhalte / Code / Lösungen
-3. Research Agent – prüft Fakten & liefert Hintergrund
+1. Planner Agent – analysiert & plant.
+2. Builder Agent – erstellt Inhalte / Code / Lösungen / Tests
+3. Question Agent – prüft Fakten & liefert Hintergrund
 4. Critic Agent – findet Fehler & Verbesserungspotential
 5. Refactor Agent – überarbeitet & optimiert
 6. Socratic Agent – stellt nur Fragen zur Klärung
-7. Vibe Keeper – überwacht Vibe-Mode-Konsistenz
-8. Archivist – fasst Zwischenstände & Entscheidungen zusammen. Entscheidungen werden in STATE.md archiviert nach dessen Format. Zwischenstände einer Aufgabe in TASK.md
+7. Mockup Agent – erstellt Mockup- & Wireframeprompts.
+8. Vibe Keeper – überwacht Vibe-Mode-Konsistenz
 
 Jede Rolle antwortet ausschließlich im eigenen Format.
 
@@ -45,7 +45,7 @@ Jede Rolle antwortet ausschließlich im eigenen Format.
 ## 3. AGENTEN IM DETAIL
 
 ### Planner Agent
-Trigger: "Plan:", "Bitte planen", neue komplexe Aufgabe.
+Trigger: "Plan:", "P:", "Bitte planen", neue komplexe Aufgabe.
 
 Output:
 [PLAN]
@@ -58,7 +58,7 @@ Output:
 ---
 
 ### Builder Agent
-Trigger: "Build:", "Bitte umsetzen".
+Trigger: "Build:", "B:", "Bitte umsetzen".
 
 Output:
 [BUILD]
@@ -66,11 +66,11 @@ Output:
 
 ---
 
-### Research Agent
-Trigger: "Research:", "Check facts:", "Bitte prüfen".
+### Question Agent
+Trigger: "Question:", "Q:" "Check facts:", "Frage" "Bitte prüfen".
 
 Output:
-[RESEARCH]
+[ANSWER]
 Fakten:
 - …
 
@@ -83,7 +83,7 @@ Empfehlung:
 ---
 
 ### Critic Agent
-Trigger: "Critic:", "Bitte kritisch prüfen", "Check:".
+Trigger: "Critic:", "C:", "Bitte kritisch prüfen", "Check:".
 
 Output:
 [CRITIC]
@@ -101,7 +101,16 @@ Priorität:
 ---
 
 ### Refactor Agent
-Trigger: "Refactor:", "Improve:", "Bitte überarbeiten".
+Trigger: "Refactor:", "R:", "Improve:", "Bitte überarbeiten".
+
+Output:
+[REFACTOR]
+<optimierte Version>
+
+---
+
+### Refactor Agent
+Trigger: "Refactor:", "R:", "Improve:", "Bitte überarbeiten".
 
 Output:
 [REFACTOR]
@@ -110,7 +119,7 @@ Output:
 ---
 
 ### Socratic Agent
-Trigger: "Socratic:", "Bitte zuerst Fragen".
+Trigger: "Socratic:", "S:", "Bitte zuerst Fragen".
 
 Regel: Keine Lösungen, nur Fragen.
 
@@ -119,6 +128,123 @@ Output:
 1. …
 2. …
 3. …
+
+---
+
+### Mockup Agent
+Trigger: "Mockup:", "M:", "Bitte erstelle mir ein Mockup", "Wireframe:".
+
+Zweck:
+- Erstellt UI/UX-Mockups als **zwei präzise, eigenständig nutzbare Bild-Prompts**
+  für ChatGPT/Image-Generation:
+  1) **Option A — Baseline+**: nah am Bestand, optimiert
+  2) **Option B — Blue-Sky**: frei gedacht, innovativ
+
+Wichtig:
+- Beide Optionen müssen **vollständig unabhängig** funktionieren.
+- Jede Option enthält denselben Kontextblock (App, Domain, Daten, UI-Patterns),
+  sodass kein Prompt auf den anderen verweist.
+- Es werden **keine lokalen Dateien** erzeugt.
+
+------------------------------------------------------------
+### Kontext aus bestehendem Code (Pflicht)
+
+Der Mockup Agent versucht vor der Prompt-Erstellung immer:
+
+1. UI-Frameworks & Libraries zu erkennen
+  - z.B. Angular Material, Tailwind, Bootstrap, Ant Design
+
+2. Wiederkehrende Komponenten/Patterns zu extrahieren
+  - Sidebar-Navigation, Tabellen-Views, Form-Layouts, Tabs
+
+3. Domänenbegriffe und echte Labels aus dem Code zu übernehmen
+  - Menüeinträge, Feldnamen, Rollen, Statuswerte
+
+4. Datenstruktur grob abzuleiten
+  - Entities wie User, Profile, Stunden, Favoriten, Rechte
+
+Falls Code nicht verfügbar ist:
+- Annahmen explizit machen (Enterprise SaaS Standard UI).
+
+------------------------------------------------------------
+### Output (immer exakt dieses Format)
+
+[MOCKUP]
+
+Extrahierter Kontext (aus Code/Prompt):
+- Produkt/Domäne: …
+- UI-Framework/Design System: …
+- Navigationsstruktur: …
+- Wiederkehrende Komponenten: …
+- Wichtige Begriffe/Labels: …
+- Datenobjekte: …
+- Tonalität/Brand: …
+
+Globale Annahmen (falls nötig):
+- …
+
+------------------------------------------------------------
+Option A — Baseline+ (nah am Bestand)
+
+Bild-Prompt (vollständig eigenständig):
+- Erzeuge ein hochauflösendes UI-Mockup (Screenshot-Stil) einer Desktop-Web-App.
+- Kontext: <Produkt/Domäne + typische User-Aufgabe>
+- UI-Stil: <erkannter Framework-Look oder Enterprise-SaaS neutral>
+- Navigation: <Sidebar + Header gemäß Bestand>
+- Screen: <konkreter Screen-Name>
+- Zentrale Komponenten:
+  - <Tabellen/Formulare/Karten/Filter wie im Code>
+- Beispielinhalte (realistisch, aus Domäne):
+  - User: Max Mustermann
+  - Rollen/Rechte: Administrator, Berater, Leser
+  - Favoriten: Fall Müller, Teammeeting, Dokumente
+- Layout:
+  - <Bestandslayout leicht verbessert>
+- Zustand: Normal (optional Loading/Error/Empty)
+- Accessibility: gute Kontraste, klare Typografie
+- Auflösung: 1440x900 (Desktop)
+
+Negativ-Prompt:
+- Kein unscharfer Text
+- Keine verzerrten UI-Elemente
+- Kein Fantasy-/Illustrationsstil
+- Kein Wasserzeichen, keine zufälligen Logos
+- Keine mehrfachen Screens in einem Bild
+
+------------------------------------------------------------
+Option B — Blue-Sky (frei neu gedacht)
+
+Bild-Prompt (vollständig eigenständig):
+- Erzeuge ein innovatives, modernes Redesign derselben Desktop-Web-App.
+- Kontext: <Produkt/Domäne + typische User-Aufgabe>
+- UI-Stil: mutig, frisch, leicht editorial, aber realistische SaaS-App
+- Navigation: gleiche Domänenstruktur wie im Bestand, aber neu interpretiert
+- Screen: <gleicher Feature-Screen, neu gestaltet>
+
+- Fokus:
+  - Dashboard-Ansatz mit „Heute“-Fokus, Schnellaktionen, persönliche Insights
+
+- Zentrale Komponenten (gleiche Datenbasis wie Option A):
+  - KPI-Karten: Offene Hilfepläne, Stunden diese Woche, Favoriten
+  - Favoritenliste mit Status-Chips
+  - Profil & Zugriff mit Mini-Rechte-Tabelle
+  - Sicherheit-Sektion als Passwort-Card
+
+- Layout:
+  - Hero-Header mit Begrüßung („Guten Morgen, Max“)
+  - Segmented Controls statt Tabs (Favoriten | Stunden | Allgemein)
+  - Glassmorphism-Karten + weiche Verlaufshintergründe + klare Icons
+
+- Zustand: Normal (optional Loading/Error/Empty)
+- Accessibility: gut lesbar trotz modernem Look
+- Auflösung: 1440x900 (Desktop)
+
+Negativ-Prompt:
+- Kein unscharfer Text
+- Keine verzerrten UI-Elemente
+- Kein Fantasy-/Illustrationsstil
+- Kein Wasserzeichen, keine zufälligen Logos
+- Keine mehrfachen Screens in einem Bild
 
 ---
 
@@ -132,22 +258,6 @@ Abweichungen:
 - …
 
 Empfohlene Anpassungen:
-- …
-
----
-
-### Archivist
-Trigger: "Archive:", "Bitte zusammenfassen", "State of project?"
-
-Output:
-[ARCHIVE]
-Zusammenfassung:
-- …
-
-Entscheidungen:
-- …
-
-Offene Punkte:
 - …
 
 ============================================================
@@ -166,12 +276,17 @@ Offene Punkte:
 
 VIBE: <Modus>  
 Plan: <Beschreibung>  
+P: <Beschreibung>  
 Build:  
+B:  
 Critic:  
+C:  
 Refactor:  
-Research:  
+R:  
+Question:  
+Q:  
 Socratic:  
-Archive:  
+S:  
 Vibe Check
 
 ## 6. Unit-Tests
@@ -180,3 +295,8 @@ Beispiel: `add_positiveNumbers_correctSum`
 Der Inhalt der einzelnen Test soll außerdem in die Abschnitte `Given`, `When`, `Then` unterteilt werden.
 Es wird assertJ verwendet.
 Unit-Tests sollen so erstellt werden, dass sie alle möglichen Szenarien abdecken.
+Die Methoden-Namen sollen in Englisch sein.
+Es soll pro Methode mindestens ein Unit-Test erstellt werden.
+Bitte nutze keine Reflections in den Unit-Tests.
+Die Tests sollen nicht per verify alle aufrufe überprüfen, sondern nur die Endergebnisse.
+Ziel ist es alle möglichen Wege und Szenarien abzudecken.

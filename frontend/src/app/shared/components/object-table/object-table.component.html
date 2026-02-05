@@ -1,28 +1,30 @@
 <div class="table-container">
-  <button mat-mini-fab class="fixed-button"
-          *ngIf="data.length > 0"
-          (click)="exportAsCSV()"
-          [matTooltip]="'.csv speichern'">
-    <mat-icon>save</mat-icon>
-  </button>
+  @if (data.length > 0) {
+    <button mat-mini-fab class="fixed-button"
+            (click)="exportAsCSV()"
+            [matTooltip]="'.csv speichern'">
+      <mat-icon>save</mat-icon>
+    </button>
+  }
   <table mat-table [dataSource]="data" class="w-100">
-    <ng-container [matColumnDef]="column" *ngFor="let column of header; let columnIndex = index">
-      <th mat-header-cell *matHeaderCellDef class="table-font-size"
-          [ngClass]="{'overview-fixed-column-width text-center': columnIndex >= columnFixedWidthFromIndex,
-                    'fw-bold': boldIndicesContains(columnIndex)}">
-        {{ column }}
-      </th>
-      <td mat-cell *matCellDef="let element" class="table-font-size"
-          [ngClass]="{'overview-fixed-column-width text-center': columnIndex >= columnFixedWidthFromIndex,
-                    'fw-bold': boldIndicesContains(columnIndex)}">
-        <ng-container *ngIf="isNumberColumn(columnIndex); else stringTemplate">
-          {{ element[columnIndex] | number }}
-        </ng-container>
-        <ng-template #stringTemplate>
-          {{ element[columnIndex] }}
-        </ng-template>
-      </td>
-    </ng-container>
+    @for (column of header; track $index; let columnIndex = $index) {
+      <ng-container [matColumnDef]="column">
+        <th mat-header-cell *matHeaderCellDef class="table-font-size"
+            [ngClass]="{'overview-fixed-column-width text-center': columnIndex >= columnFixedWidthFromIndex,
+                      'fw-bold': boldIndicesContains(columnIndex)}">
+          {{ column }}
+        </th>
+        <td mat-cell *matCellDef="let element" class="table-font-size"
+            [ngClass]="{'overview-fixed-column-width text-center': columnIndex >= columnFixedWidthFromIndex,
+                      'fw-bold': boldIndicesContains(columnIndex)}">
+          @if (isNumberColumn(columnIndex)) {
+            {{ element[columnIndex] | number }}
+          } @else {
+            {{ element[columnIndex] }}
+          }
+        </td>
+      </ng-container>
+    }
 
     <tr mat-header-row *matHeaderRowDef="header"></tr>
     <tr mat-row *matRowDef="let row; columns: header;" class="overview-row-height"></tr>

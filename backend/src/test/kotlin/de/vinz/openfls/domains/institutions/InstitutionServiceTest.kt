@@ -7,6 +7,7 @@ import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDTO
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionDto
+import de.vinz.openfls.domains.employees.EmployeeRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -29,13 +30,16 @@ class InstitutionServiceTest {
     lateinit var institutionRepository: InstitutionRepository
 
     @Mock
+    lateinit var employeeRepository: EmployeeRepository
+
+    @Mock
     lateinit var modelMapper: ModelMapper
 
     private lateinit var institutionService: InstitutionService
 
     @BeforeEach
     fun setUp() {
-        institutionService = InstitutionService(institutionRepository, modelMapper)
+        institutionService = InstitutionService(institutionRepository, employeeRepository, modelMapper)
     }
 
     @Test

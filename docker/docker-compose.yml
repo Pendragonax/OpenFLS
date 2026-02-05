@@ -13,6 +13,13 @@ services:
     networks:
       - open-fls-network
     command: --innodb-fast-shutdown=0
+    healthcheck:
+        # Wartet, bis MySQL wirklich bereit ist (reduziert Backend-Neustarts)
+        test: ["CMD-SHELL", "mysql -h localhost -u root -p$$(cat /run/secrets/db_root_password) -e 'SELECT 1' openfls || exit 1"]
+        interval: 5s
+        timeout: 3s
+        retries: 20
+        start_period: 40s
 
   adminer:
     container_name: open_fls_adminer
@@ -29,7 +36,8 @@ services:
     volumes:
       - ./logs:/app/logs/
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     secrets:
       - db_root_password
       - db_password

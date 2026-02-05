@@ -9,7 +9,7 @@ import {EOverviewType} from "../../pages/service-evaluation-overview/enums/EOver
   providedIn: 'root'
 })
 export class OverviewService {
-  url = "/overviews"
+  url = "overviews"
 
   constructor(
     protected http: HttpClient) {

@@ -39,7 +39,7 @@ class Employee(
 
         @OneToOne(
                 mappedBy = "employee",
-                cascade = [CascadeType.MERGE],
+                cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         @PrimaryKeyJoinColumn
         @JsonIgnore
@@ -47,14 +47,14 @@ class Employee(
 
         @OneToMany(
                 mappedBy = "employee",
-                cascade = [CascadeType.REMOVE],
+                cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var permissions: MutableSet<Permission>? = null,
 
         @JsonIgnoreProperties(value = ["sponsor", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "employee",
-                cascade = [CascadeType.REMOVE],
+                cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var unprofessionals: MutableSet<Unprofessional>? = null,
 

@@ -1,14 +1,33 @@
-<mat-card class="mat-elevation-z4 min-width-250 min-height-150 m-2"
-          [ngClass]="time[3] < 100 ? time[3] < 95 ? 'bg-red' : 'bg-yellow' : 'bg-green'">
-  <mat-card-title class="mx-auto"><b>{{title}}</b></mat-card-title>
+<mat-card class="work-time-card mat-elevation-z4"
+          [ngClass]="statusClass">
+  <div class="work-time-card__header">
+    <div class="work-time-card__title">
+      <mat-icon class="work-time-card__title-icon">watch_later</mat-icon>
+      <span>{{title}}</span>
+      <span class="work-time-card__title-sep">•</span>
+    </div>
+    <div class="work-time-card__pill"
+         [class.is-bad]="isBad"
+         [class.is-warning]="isWarning">
+      <span>{{this.contingentInformation.differenceHours}}h {{this.contingentInformation.differenceMinutes}}min</span>
+    </div>
+  </div>
 
-  <div class="container-fluid align-content-center my-auto">
-    <div class="row fw-normal justify-content-center">{{time[0]}}h Soll</div>
-    <div class="row fw-normal justify-content-center">{{time[1]}}h Ist</div>
-    <div class="row fw-light">
-      <div class="col h1 my-auto text-center"
-           [matTooltip]="time[3].toString() + '%'"
-           [matTooltipPosition]="'below'"><b>{{time[2]}}h</b> / <b>{{time[4]}}min</b></div>
+  <div class="work-time-card__divider"></div>
+
+  <div class="work-time-card__progress">
+    <div class="work-time-card__progress-header">
+      <span>Erfasst</span>
+      <span>{{this.contingentInformation.executedPercentage}}%</span>
+    </div>
+    <div class="work-time-card__progress-bar">
+      <div class="work-time-card__progress-fill"
+           [style.width.%]="this.contingentInformation.executedPercentage"></div>
+      <div class="work-time-card__progress-target"></div>
+    </div>
+    <div class="work-time-card__progress-footer">
+      <span>{{this.contingentInformation.executedHours}}h {{this.contingentInformation.executedMinutes}}min</span>
+      <span class="work-time-card__progress-target-label">Ziel</span>
     </div>
   </div>
 </mat-card>

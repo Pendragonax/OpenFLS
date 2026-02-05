@@ -1,53 +1,92 @@
-<!--LOADING-->
-<div class="container-fluid my-2"
-     [hidden]="!isSubmitting">
-  <div class="row justify-content-center">
-    <mat-spinner [strokeWidth]="2"
-                 [diameter]="100"
-                 class="center-spinner"></mat-spinner>
-  </div>
-  <div class="row text-center">
-    <p><b>Lade Stundenübersicht</b></p>
-  </div>
-</div>
-
 <!--CONTENT-->
-<div class="container justify-content-center align-items-center" [hidden]="isSubmitting">
-  <div class="position-relative start-0"
-       [hidden]="hideRefresh">
-    <button mat-icon-button
-            (click)="refresh()">
-      <mat-icon>autorenew</mat-icon>
-    </button>
-  </div>
-
+<div class="container justify-content-center align-items-center">
   <div class="row justify-content-center">
     <div class="col">
-      <div class="row my-2">
-        <app-work-time-card [time]="time1"
-                            [title]="'Heute'"></app-work-time-card>
-      </div>
-      <div class="row my-2">
-        <app-work-time-card [time]="time7"
-                            [title]="'7 Tage'"></app-work-time-card>
-      </div>
-      <div class="row my-2">
-        <app-work-time-card [time]="time30"
-                            [title]="'30 Tage'"></app-work-time-card>
-      </div>
-    </div>
+      <div class="calendar-card mx-auto mt-3" (mousedown)="onCalendarMouseDown($event)">
+      @if (!hideRefresh) {
+        <div class="start-0 d-flex align-items-center justify-content-between w-100">
+          <button mat-icon-button
+                  (click)="refresh()">
+            <mat-icon>autorenew</mat-icon>
+          </button>
+          @if (isSubmitting) {
+            <mat-spinner [diameter]="25"
+                       class="loading"
+                       [color]="'primary'"></mat-spinner>
+          }
+        </div>
+        }
 
-    <div class="col text-center">
-      <div class="row">
         <mat-calendar #serviceCalendar
                       [dateClass]="dateClass()"
                       (selectedChange)="onDateClicked($event)"
-                      class="width-350 mat-elevation-z9 mt-3 mx-auto"
+                      class="contingent-calendar"
                       readonly></mat-calendar>
-      </div>
 
-      <div class="row mt-3">
-        <mat-hint>es sind nur die letzten 365 Tage ausgewertet</mat-hint>
+        <button #menuTrigger="matMenuTrigger"
+                class="calendar-menu-anchor"
+                mat-icon-button
+                [matMenuTriggerFor]="calendarMenu"
+                (menuOpened)="onMenuOpened()"
+                [style.left.px]="menuPosition.x"
+                [style.top.px]="menuPosition.y"></button>
+
+        <mat-menu #calendarMenu="matMenu" [overlapTrigger]="false" class="calendar-menu-panel">
+          <button mat-menu-item (click)="onGoToDocumentation()">
+            Gehe zu Dokumentationen
+          </button>
+          <mat-divider class="calendar-menu-divider"></mat-divider>
+          <button mat-menu-item class="calendar-menu-item--after-divider" [disabled]="isSubmitting" (click)="onMarkAbsent()">
+            Abwesenheitstag
+          </button>
+          <button mat-menu-item [disabled]="isSubmitting" (click)="onRemoveAbsent()">
+            Abwesenheit löschen
+          </button>
+        </mat-menu>
+
+        <div class="calendar-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--ok"></span>
+            <span>erfüllt</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--partial"></span>
+            <span>teilweise erfüllt</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--bad"></span>
+            <span>nicht erfüllt</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--failure"></span>
+            <span [matTooltip]="'An dem Tag sind Sie abwesend, aber haben trotzdem Dokumentationseinträge.'">fehlerhaft</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--absent"></span>
+            <span>abwesend</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-dot--empty"></span>
+            <span>keine Daten</span>
+          </div>
+        </div>
+
+        <div class="calendar-note">Es sind nur die letzten 365 Tage ausgewertet</div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="row my-2 mt-3">
+        <app-work-time-card [contingentInformation]="calendarInformation.today"
+                            [title]="'Heute'"></app-work-time-card>
+      </div>
+      <div class="row my-2">
+        <app-work-time-card [contingentInformation]="calendarInformation.thisWeek"
+                            [title]="'diese Woche'"></app-work-time-card>
+      </div>
+      <div class="row my-2 mb-5">
+        <app-work-time-card [contingentInformation]="calendarInformation.thisMonth"
+                            [title]="'dieser Monat'"></app-work-time-card>
       </div>
     </div>
   </div>

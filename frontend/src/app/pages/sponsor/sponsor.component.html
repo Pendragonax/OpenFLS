@@ -5,28 +5,29 @@
 
 <div class="container mt-3">
   <!--FILTER-->
-  <div class="row"
-       *ngIf="!isSubmitting">
-    <!--FILTER CONTAINER-->
-    <form [formGroup]="filterForm">
-      <div class="container-fluid text-center">
-        <div class="row justify-content-center">
-          <div class="col-auto">
-            <app-search-field [isSubmitting]="isSubmitting"
-                              [placeholder]="'...'"
-                              (onSearchStringChanges)="onSearchStringChanges($event)"
-                              ></app-search-field>
+  @if (!isSubmitting) {
+    <div class="row">
+      <!--FILTER CONTAINER-->
+      <form [formGroup]="filterForm">
+        <div class="container-fluid text-center">
+          <div class="row justify-content-center">
+            <div class="col-auto">
+              <app-search-field [isSubmitting]="isSubmitting"
+                                [placeholder]="'...'"
+                                (onSearchStringChanges)="onSearchStringChanges($event)"
+                                ></app-search-field>
+            </div>
           </div>
         </div>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
+  }
 
   <!--TABLE-->
   <div class="row">
     <!--ACTIONS-->
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+      <div class="row">
       <div class="col">
         <mat-paginator class="paginator"
                        showFirstLastButtons
@@ -35,23 +36,25 @@
                        [pageIndex]="pageIndex"
                        [pageSize]="pageSize"></mat-paginator>
       </div>
-    </div>
+      </div>
+    }
 
     <!--LOADING-->
-    <div class="row m-2"
-         *ngIf="isSubmitting">
-      <div class="d-flex justify-content-center">
-        <mat-spinner [strokeWidth]="2"
-                     [diameter]="70"
-                     class="center-spinner"></mat-spinner>
+    @if (isSubmitting) {
+      <div class="row m-2">
+        <div class="d-flex justify-content-center">
+          <mat-spinner [strokeWidth]="2"
+                       [diameter]="70"
+                       class="center-spinner"></mat-spinner>
+        </div>
+        <div class="d-flex justify-content-center">
+          <p><b>Lade Kostenträger</b></p>
+        </div>
       </div>
-      <div class="d-flex justify-content-center">
-        <p><b>Lade Kostenträger</b></p>
-      </div>
-    </div>
+    }
 
-    <div class="row"
-         [hidden]="isSubmitting">
+    @if (!isSubmitting) {
+      <div class="row">
       <table mat-table
              matSort
              (matSortChange)="sortData($event)"
@@ -147,37 +150,38 @@
         <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
       </table>
 
-      <!--EDIT MODAL-->
-      <ng-template #editableModal let-modal>
-        <div class="modal-header">
-          <h2 class="modal-title" id="modal-basic-title">Kostenträger</h2>
-          <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+      </div>
+    }
+    <!--EDIT MODAL-->
+    <ng-template #editableModal let-modal>
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-basic-title">Kostenträger</h2>
+        <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid text-center">
+          <form [formGroup]="editForm">
+            <mat-form-field appearance="fill" class="w-100">
+              <mat-label>Name</mat-label>
+              <input matInput
+                     formControlName="name"
+                     required>
+            </mat-form-field><br>
+            <mat-checkbox formControlName="payOverhead">bezahlt Mehrleistung?</mat-checkbox><br><br>
+            <mat-checkbox formControlName="payExact">bezahlt exakt?</mat-checkbox>
+          </form>
         </div>
-        <div class="modal-body">
-          <div class="container-fluid text-center">
-            <form [formGroup]="editForm">
-              <mat-form-field appearance="fill" class="w-100">
-                <mat-label>Name</mat-label>
-                <input matInput
-                       formControlName="name"
-                       required>
-              </mat-form-field><br>
-              <mat-checkbox formControlName="payOverhead">bezahlt Mehrleistung?</mat-checkbox><br><br>
-              <mat-checkbox formControlName="payExact">bezahlt exakt?</mat-checkbox>
-            </form>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button mat-raised-button
-                  color="primary"
-                  class="mx-1"
-                  [disabled]="editForm.invalid || isSubmitting"
-                  (click)="modal.close(true)">Speichern</button>
-          <button mat-raised-button
-                  class="mx-1"
-                  (click)="modal.close(false)">Abbrechen</button>
-        </div>
-      </ng-template>
-    </div>
+      </div>
+      <div class="modal-footer">
+        <button mat-raised-button
+                color="primary"
+                class="mx-1"
+                [disabled]="editForm.invalid || isSubmitting"
+                (click)="modal.close(true)">Speichern</button>
+        <button mat-raised-button
+                class="mx-1"
+                (click)="modal.close(false)">Abbrechen</button>
+      </div>
+    </ng-template>
   </div>
 </div>

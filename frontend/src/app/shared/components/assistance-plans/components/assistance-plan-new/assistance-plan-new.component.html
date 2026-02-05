@@ -37,10 +37,11 @@
             <mat-label>Kostenträger</mat-label>
             <mat-select formControlName="sponsor"
                         required>
-              <mat-option *ngFor="let value of sponsors"
-                          [value]="value.id">
-                {{value.name}}
-              </mat-option>
+              @for (value of sponsors; track value.id) {
+                <mat-option [value]="value.id">
+                  {{value.name}}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field><br>
 
@@ -48,10 +49,11 @@
             <mat-label>Bereich</mat-label>
             <mat-select formControlName="institution"
                         required>
-              <mat-option *ngFor="let institution of affiliatedInstitutions"
-                          [value]="institution.id">
-                {{institution.name}}
-              </mat-option>
+              @for (institution of affiliatedInstitutions; track institution.id) {
+                <mat-option [value]="institution.id">
+                  {{institution.name}}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
 

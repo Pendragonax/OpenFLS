@@ -11,12 +11,7 @@ import {InstitutionService} from "../../shared/services/institution.service";
 import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {SponsorService} from "../../shared/services/sponsor.service";
 import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
-import {
-  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
-  MAT_MOMENT_DATE_FORMATS,
-  MomentDateAdapter
-} from "@angular/material-moment-adapter";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {EOverviewType} from "./enums/EOverviewType";
 import {Converter} from "../../shared/services/converter.helper";
 import {
@@ -43,10 +38,10 @@ import {
         { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
         {
             provide: DateAdapter,
-            useClass: MomentDateAdapter,
-            deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
+            useClass: NativeDateAdapter,
+            deps: [MAT_DATE_LOCALE],
         },
-        { provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
     ],
     standalone: false
 })

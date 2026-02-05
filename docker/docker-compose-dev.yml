@@ -29,7 +29,11 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
     restart: always
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ../frontend:/app
     networks:

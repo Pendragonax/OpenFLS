@@ -3,6 +3,7 @@ package de.vinz.openfls.domains.employees.services
 import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
 import de.vinz.openfls.domains.employees.entities.Unprofessional
 import de.vinz.openfls.domains.employees.UnprofessionalRepository
+import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.services.GenericService
 import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
@@ -54,12 +55,16 @@ class UnprofessionalService(
         return unprofessionalRepository.findByEmployeeId(id)
     }
 
-    fun convertToUnprofessionals(dtos: Array<UnprofessionalDto>?, employeeId: Long): MutableSet<Unprofessional> {
-        return dtos
+    fun convertToUnprofessionals(dtos: List<UnprofessionalDto>?, employee: Employee): MutableSet<Unprofessional> {
+        val entities = dtos
                 ?.map {
                     modelMapper
-                            .map(it, Unprofessional::class.java)
-                            .apply { it.employeeId = employeeId } }
+                            .map(it, Unprofessional::class.java) }
                 ?.toMutableSet() ?: mutableSetOf()
+        for (unprofessional in entities) {
+            unprofessional.employee = employee
+        }
+
+        return entities
     }
 }

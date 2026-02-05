@@ -6,18 +6,22 @@
   <mat-form-field class="w-100">
     <mat-label>Auswertungstyp</mat-label>
     <mat-select formControlName="evaluationTypeControl" (selectionChange)="evaluationTypeSelectionChanged($event)">
-      <mat-option *ngFor="let evaluationType of evaluationTypes" [value]="evaluationType[1]">
-        {{evaluationType[0]}}
-      </mat-option>
+      @for (evaluationType of evaluationTypes; track $index) {
+        <mat-option [value]="evaluationType[1]">
+          {{evaluationType[0]}}
+        </mat-option>
+      }
     </mat-select>
   </mat-form-field>
 
   <mat-form-field class="w-100">
     <mat-label>Stundentyp</mat-label>
     <mat-select formControlName="hourTypeControl" (selectionChange)="hourTypeSelectionChanged($event)">
-      <mat-option *ngFor="let hourType of hourTypes" [value]="hourType.id">
-        {{hourType.title}}
-      </mat-option>
+      @for (hourType of hourTypes; track hourType.id) {
+        <mat-option [value]="hourType.id">
+          {{hourType.title}}
+        </mat-option>
+      }
     </mat-select>
   </mat-form-field>
 </div>

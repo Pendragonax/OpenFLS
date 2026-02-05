@@ -1,11 +1,12 @@
 <div class="container-fluid my-2">
   <div class="row">
     <div class="container-fluid text-center">
+    @if (editable) {
       <button mat-raised-button
               color="primary"
-              [hidden]="!editable"
               (click)="openEditModal(editContent, null)">
         Stunden hinzufügen</button>
+      }
     </div>
   </div>
 
@@ -100,10 +101,11 @@
           <mat-label>Stundentyp</mat-label>
           <mat-select formControlName="type"
                       [disabled]="modalEditMode">
-            <mat-option *ngFor="let type of filteredHourTypes"
-                        [value]="type.id">
-              {{type.title}}
-            </mat-option>
+            @for (type of filteredHourTypes; track type.id) {
+              <mat-option [value]="type.id">
+                {{type.title}}
+              </mat-option>
+            }
           </mat-select>
 
           <button mat-icon-button

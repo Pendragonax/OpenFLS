@@ -1,3 +1,106 @@
-mat-form-field {
-  min-width: 300px !important;
+.contingent-overview {
+  padding: 1.25rem;
+}
+
+.overview-card {
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(19, 42, 76, 0.08);
+}
+
+.table-divider {
+  margin: 1rem 0 1.25rem;
+}
+
+.table-wrapper {
+  position: relative;
+}
+
+.contingent-cards {
+  display: none;
+}
+
+.contingent-card {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(20, 35, 70, 0.12);
+}
+
+.contingent-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.contingent-card__name {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #2f3a4b;
+}
+
+.contingent-card__total {
+  font-size: 0.95rem;
+  color: #5a667a;
+}
+
+.contingent-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e9edf4;
+}
+
+.contingent-card__item {
+  display: grid;
+  grid-template-columns: 64px 10px minmax(0, 1fr);
+  column-gap: 6px;
+  font-size: 0.9rem;
+  align-items: baseline;
+}
+
+.contingent-card__label {
+  color: #6a7386;
+  text-align: left;
+}
+
+.contingent-card__sep {
+  color: #b2bac8;
+  text-align: center;
+}
+
+.contingent-card__value {
+  font-weight: 600;
+  color: #2f3a4b;
+}
+
+::ng-deep .contingent-overview .mat-card-header-text {
+  margin: 0;
+}
+
+::ng-deep .contingent-overview .mat-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2e3a59;
+}
+
+::ng-deep .contingent-overview app-object-table .fixed-button {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .contingent-overview {
+    padding: 0.75rem;
+  }
+
+  .contingent-table {
+    display: none;
+  }
+
+  .contingent-cards {
+    display: block;
+  }
 }

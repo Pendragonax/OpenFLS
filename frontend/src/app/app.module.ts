@@ -92,6 +92,7 @@ import {
 import {AssistancePlanAnalysisComponent} from './pages/assistance-plan-analysis/assistance-plan-analysis.component';
 import {GoalSingleComponent} from './shared/components/goal-single/goal-single.component';
 import {MatChipsModule} from "@angular/material/chips";
+import {MatDividerModule} from "@angular/material/divider";
 import {YearMonthSelectionComponent} from './shared/components/year-month-selection/year-month-selection.component';
 import {
   AssistancePlanTimeEvaluationFilterComponent
@@ -113,6 +114,9 @@ import {
 import {
   ContingentOverviewComponent
 } from "./pages/institution/components/institution-detail/contingent-overviews/contingent-overview.component";
+import {
+  ContingentOverviewToolbarComponent
+} from "./pages/institution/components/institution-detail/contingent-overviews/contingent-overview-toolbar/contingent-overview-toolbar.component";
 import {SearchFieldComponent} from "./shared/components/search-field/search-field.component";
 import {MyServicesComponent} from "./pages/my-services/my-services.component";
 import {InstitutionSelectComponent} from "./shared/components/institution-select/institution-select.component";
@@ -123,6 +127,7 @@ import {AllServicesComponent} from "./pages/all-services/all-services.component"
 import {ClientAutocompleteComponent} from "./shared/components/client-autocomplete/client-autocomplete.component";
 import {ServiceTableComponent} from "./shared/components/service-table/service-table.component";
 import {EmployeeAutocompleteComponent} from "./shared/components/employee-autocomplete/employee-autocomplete.component";
+import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -179,6 +184,7 @@ const routes: Routes = [
         ObjectTableComponent,
         ContingentEvaluationComponent,
         ContingentOverviewComponent,
+        ContingentOverviewToolbarComponent,
         MyServicesComponent,
         AllServicesComponent,
         ClientAutocompleteComponent,
@@ -188,41 +194,42 @@ const routes: Routes = [
         ShowOnRoleDirective
     ],
     bootstrap: [AppComponent], imports: [RouterModule.forRoot(routes),
-        BrowserModule,
-        AppRoutingModule,
-        ReactiveFormsModule,
-        NgbModule,
-        FormsModule,
-        BrowserAnimationsModule,
-        MatIconModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatStepperModule,
-        MatInputModule,
-        MatTabsModule,
-        MatCheckboxModule,
-        MatSelectModule,
-        MatTableModule,
-        MatCardModule,
-        MatProgressSpinnerModule,
-        MatTooltipModule,
-        MatListModule,
-        MatSidenavModule,
-        MatSnackBarModule,
-        MatExpansionModule,
-        MatSortModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatAutocompleteModule,
-        MatToolbarModule,
-        MatPaginatorModule,
-        MatRadioModule,
-        MatDialogModule,
-        MatChipsModule,
-        SearchFieldComponent,
-        InstitutionSelectComponent,
-        DateCompleteSelectionComponent,
-        EmployeeAutocompleteComponent], providers: [
+    BrowserModule,
+    AppRoutingModule,
+    ReactiveFormsModule,
+    NgbModule,
+    FormsModule,
+    BrowserAnimationsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatStepperModule,
+    MatInputModule,
+    MatTabsModule,
+    MatCheckboxModule,
+    MatSelectModule,
+    MatTableModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatListModule,
+    MatSidenavModule,
+    MatSnackBarModule,
+    MatExpansionModule,
+    MatSortModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatAutocompleteModule,
+    MatToolbarModule,
+    MatPaginatorModule,
+    MatRadioModule,
+    MatDialogModule,
+    MatChipsModule,
+    MatDividerModule,
+    SearchFieldComponent,
+    InstitutionSelectComponent,
+    DateCompleteSelectionComponent,
+    EmployeeAutocompleteComponent, MatMenu, MatMenuTrigger, MatMenuItem], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: MatPaginatorIntl, useValue: getGermanPaginatorIntl() },
         TokenStorageService,

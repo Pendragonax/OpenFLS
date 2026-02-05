@@ -118,7 +118,7 @@ class AuthenticationService(
                 }
                 permissions = employee.permissions
                         ?.map { modelMapper.map(it, PermissionDto::class.java) }
-                        ?.toTypedArray()
+                        ?.toList()
             })
         }
 

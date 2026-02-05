@@ -27,9 +27,9 @@ class EmployeeDto {
     @Valid
     var access: EmployeeAccessDto? = null
 
-    var permissions: Array<PermissionDto>? = null
+    var permissions: List<PermissionDto>? = null
 
-    var unprofessionals: Array<UnprofessionalDto>? = null
+    var unprofessionals: List<UnprofessionalDto>? = null
 
-    var contingents: Array<ContingentDto>? = null
+    var contingents: List<ContingentDto>? = null
 }

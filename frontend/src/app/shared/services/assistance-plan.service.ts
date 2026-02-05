@@ -1,11 +1,10 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Base} from "./base.service";
 import {AssistancePlanDto} from "../dtos/assistance-plan-dto.model";
-import { HttpClient } from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 import {environment} from "../../../environments/environment";
-import {Observable} from "rxjs";
+import {combineLatest, map, Observable} from "rxjs";
 import {InstitutionDto} from "../dtos/institution-dto.model";
-import {combineLatest, map} from "rxjs";
 import {ClientDto} from "../dtos/client-dto.model";
 import {InstitutionService} from "./institution.service";
 import {ClientsService} from "./clients.service";
@@ -14,7 +13,6 @@ import {AssistancePlanView} from "../models/assistance-plan-view.model";
 import {SponsorService} from "./sponsor.service";
 import {SponsorDto} from "../dtos/sponsor-dto.model";
 import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
-import {AssistancePlanResponseDto} from "../dtos/assistance-plan-response-dto.model";
 import {AssistancePlan} from "../projections/assistance-plan.projection";
 
 @Injectable({
@@ -38,7 +36,7 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
 
   getProjectionById(id: number): Observable<AssistancePlan> {
     return this.http
-      .get<AssistancePlan>(`${environment.api_url}${this.url}/projection//${id}`);
+      .get<AssistancePlan>(`${environment.api_url}${this.url}/projection/${id}`);
   }
 
   getByClientId(id: number): Observable<AssistancePlanDto[]> {

@@ -1,23 +1,24 @@
-package de.vinz.openfls.domains.services
+package de.vinz.openfls.domains.services.services
 
+import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.dtos.ServiceXLDto
+import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
-import de.vinz.openfls.services.GenericService
-import org.modelmapper.ModelMapper
+import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.LocalDate
 
 @org.springframework.stereotype.Service
-@Transactional(readOnly = true)
+@Transactional
 class ServiceService(
-        private val serviceRepository: ServiceRepository,
-        private val modelMapper: ModelMapper
-) : GenericService<Service> {
+    private val serviceRepository: ServiceRepository,
+    private val modelMapper: org.modelmapper.ModelMapper
+) : de.vinz.openfls.services.GenericService<Service> {
 
     @Transactional
     fun create(serviceDto: ServiceDto): ServiceDto {
@@ -68,6 +69,14 @@ class ServiceService(
         serviceRepository.deleteById(id)
     }
 
+    @Transactional
+    fun getContingentEvaluationServiceDTOsBy(institutionId: Long, year: Int): List<ContingentEvaluationServiceProjection> {
+        val start = LocalDate.of(year, 1, 1)
+        val end = LocalDate.of(year, 12, 31)
+        return serviceRepository.findContingentEvaluationServiceProjectionByInstitutionIdsAndStartAndEnd(
+            institutionId, start, end)
+    }
+
     fun getAllDtos(): List<ServiceDto> {
         return getAll().map { modelMapper.map(it, ServiceDto::class.java) }
     }
@@ -78,7 +87,8 @@ class ServiceService(
 
     fun getProjectionsByInstitutionIdsAndStartAndEnd(institutionIds: List<Long>,
                                                      start: LocalDate,
-                                                     end: LocalDate): List<ServiceProjection> {
+                                                     end: LocalDate
+    ): List<ServiceProjection> {
         return serviceRepository.findProjectionsByInstitutionIdsAndStartAndEnd(institutionIds, start, end)
     }
 
@@ -161,13 +171,15 @@ class ServiceService(
 
     fun getDtosByInstitutionIdAndStartAndEnd(institutionId: Long,
                                              start: LocalDate,
-                                             end: LocalDate): List<ServiceProjection> {
+                                             end: LocalDate
+    ): List<ServiceProjection> {
         return getByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
     fun getByInstitutionIdAndStartAndEnd(institutionId: Long,
                                          start: LocalDate,
-                                         end: LocalDate): List<ServiceProjection> {
+                                         end: LocalDate
+    ): List<ServiceProjection> {
         return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end).sortedBy { it.start }
     }
 
