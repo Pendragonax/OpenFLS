@@ -2,6 +2,7 @@ name: CI/CD
 
 on:
   push:
+    branches: [ main, develop ]
   pull_request:
 
 jobs:
@@ -52,8 +53,8 @@ jobs:
 
   publish-dev:
     runs-on: ubuntu-latest
-    #needs: test
-    #if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
 
     steps:
       - name: Checkout
