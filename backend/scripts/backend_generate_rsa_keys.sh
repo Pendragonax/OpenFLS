@@ -1,23 +1,29 @@
 #!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+DEST_DIR="${REPO_ROOT}/backend/src/main/resources"
+
+TMP_DIR="$(mktemp -d)"
+cleanup() {
+  rm -rf "${TMP_DIR}"
+}
+trap cleanup EXIT
 
 echo -e "\e[36m[INFO] generate temporary keypair\e[0m"
-openssl genrsa -out keypair.pem 2048
+openssl genrsa -out "${TMP_DIR}/keypair.pem" 2048
 
 echo -e "\e[36m[INFO] generate temporary public-key\e[0m"
-openssl rsa -in keypair.pem -pubout -out public.key
+openssl rsa -in "${TMP_DIR}/keypair.pem" -pubout -out "${TMP_DIR}/public.key"
 
 echo -e "\e[36m[INFO] generate temporary private-key\e[0m"
-openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out private.key
+openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in "${TMP_DIR}/keypair.pem" -out "${TMP_DIR}/private.key"
 
-echo -e "\e[36m[INFO] copy private-key to ../backend/src/main/resources/private.key\e[0m"
-cp private.key ../src/main/resources/private.key
+echo -e "\e[36m[INFO] copy private-key to ${DEST_DIR}/private.key\e[0m"
+cp "${TMP_DIR}/private.key" "${DEST_DIR}/private.key"
 
-echo -e "\e[36m[INFO] copy public-key to ../backend/src/main/resources/public.key\e[0m"
-cp public.key ../src/main/resources/public.key
-
-echo -e "\e[36m[INFO] remove temporary generated keys\e[0m"
-rm private.key
-rm public.key
-rm keypair.pem
+echo -e "\e[36m[INFO] copy public-key to ${DEST_DIR}/public.key\e[0m"
+cp "${TMP_DIR}/public.key" "${DEST_DIR}/public.key"
 
 echo -e "\e[36m[INFO] generated backend keys\e[0m"
