@@ -32,6 +32,7 @@ RUN npm ci
 RUN npm install -g @angular/cli@21.1.0
 # Quellcode kopieren (mit korrektem Owner)
 COPY --chown=${UID}:${GID} . /app/
+RUN chown -R ${UID}:${GID} /app
 USER ${UID}:${GID}
 # Prod-Build erzeugen
 RUN ["ng", "build"]
