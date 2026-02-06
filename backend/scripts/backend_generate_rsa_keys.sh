@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKEND_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+BACKEND_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DEST_DIR="${BACKEND_DIR}/src/main/resources"
 
 TMP_DIR="$(mktemp -d)"
