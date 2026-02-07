@@ -1,4 +1,5 @@
 import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from "@angular/router";
 import {UserService} from "../../shared/services/user.service";
 import {combineLatest, map, Observable, ReplaySubject, shareReplay, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -30,6 +31,8 @@ export class HomeComponent implements OnInit {
   private readonly pwdPattern = '(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&].{8,}';
   readonly favorite$ = new ReplaySubject<boolean>(1);
   readonly currentEmployee$ = new ReplaySubject<EmployeeDto>(1);
+  private readonly tabKeys = ['favorites', 'hours', 'general'] as const;
+  selectedTabIndex = 0;
 
   readonly homeVm$: Observable<HomeViewModel>;
 
@@ -52,7 +55,9 @@ export class HomeComponent implements OnInit {
     private helperService: HelperService,
     private userService: UserService,
     private institutionService: InstitutionService,
-    private dtoCombinerService: DtoCombinerService
+    private dtoCombinerService: DtoCombinerService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     this.homeVm$ = combineLatest([
       this.userService.user$,
@@ -80,6 +85,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.initFormSubscriptions();
     this.favorite$.next(true);
+    this.initTabSync();
   }
 
   refreshUser() {
@@ -93,6 +99,32 @@ export class HomeComponent implements OnInit {
     this.password1Control.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => this.passwordDto.newPassword = value);
+  }
+
+  private initTabSync() {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        const tabKey = params.get('tab');
+        const index = tabKey ? this.tabKeys.indexOf(tabKey as (typeof this.tabKeys)[number]) : -1;
+        const nextIndex = index >= 0 ? index : 0;
+        if (nextIndex !== this.selectedTabIndex) {
+          this.selectedTabIndex = nextIndex;
+        }
+      });
+  }
+
+  onTabIndexChange(index: number) {
+    const tabKey = this.tabKeys[index] ?? this.tabKeys[0];
+    const currentTab = this.route.snapshot.queryParamMap.get('tab');
+    if (currentTab === tabKey) {
+      return;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: tabKey },
+      queryParamsHandling: 'merge'
+    });
   }
 
   resetPasswordForm() {
