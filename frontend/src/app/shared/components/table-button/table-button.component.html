@@ -10,23 +10,32 @@
           [ngClass]="{'overview-fixed-column-width text-center': columnIndex >= columnFixedWidthFromIndex,
           'fw-bold': this.arrayContainsNumber(columnIndex)}">
         <p>{{element.type}}</p>
-
-          <p class="text-start">{{element[columnIndex].content}}</p>
-          <button mat-icon-button [disabled]="true">
-            <mat-icon>crop_free</mat-icon>
-          </button>
-          <button mat-icon-button color="primary"
-                  (click)="evaluationEvent.emit(element[columnIndex].payload)">
-            <mat-icon>check_box_outline_blank</mat-icon>
-          </button>
-          <button mat-icon-button color="warn"
-                  (click)="evaluationEvent.emit(element[columnIndex].payload)">
-            <mat-icon>indeterminate_check_box</mat-icon>
-          </button>
-          <button mat-icon-button color="primary"
-                  (click)="evaluationEvent.emit(element[columnIndex].payload)">
-            <mat-icon>check_box</mat-icon>
-          </button>
+          @if (columnIndex == 0) {
+            <p class="text-start">{{element[columnIndex].content}}</p>
+          }
+          @if (!element[columnIndex].enabled && columnIndex > 0) {
+            <button mat-icon-button [disabled]="true">
+              <mat-icon>crop_free</mat-icon>
+            </button>
+          }
+          @if (element[columnIndex].enabled && !element[columnIndex].exists && columnIndex > 0) {
+            <button mat-icon-button color="primary"
+                    (click)="evaluationEvent.emit(element[columnIndex].payload)">
+              <mat-icon>check_box_outline_blank</mat-icon>
+            </button>
+          }
+          @if (!element[columnIndex].checked && element[columnIndex].exists && element[columnIndex].enabled && columnIndex > 0) {
+            <button mat-icon-button color="warn"
+                    (click)="evaluationEvent.emit(element[columnIndex].payload)">
+              <mat-icon>indeterminate_check_box</mat-icon>
+            </button>
+          }
+          @if (element[columnIndex].checked && element[columnIndex].exists && element[columnIndex].enabled && columnIndex > 0) {
+            <button mat-icon-button color="primary"
+                    (click)="evaluationEvent.emit(element[columnIndex].payload)">
+              <mat-icon>check_box</mat-icon>
+            </button>
+          }
       </td>
     </ng-container>
   }
