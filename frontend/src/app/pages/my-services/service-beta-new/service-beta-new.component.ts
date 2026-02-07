@@ -78,6 +78,63 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     this.clientsControl.setValue(client.id);
   }
 
+  private normalizeTime(hour: number, minute: number) {
+    let nextHour = hour;
+    let nextMinute = minute;
+
+    if (nextMinute < 0) {
+      nextHour -= 1;
+      nextMinute = 59;
+    }
+    if (nextMinute > 59) {
+      nextHour += 1;
+      nextMinute = 0;
+    }
+
+    if (nextHour < 0) {
+      nextHour = 0;
+      nextMinute = 59;
+    }
+    if (nextHour > 23) {
+      nextHour = 23;
+      nextMinute = 0;
+    }
+
+    return { hour: nextHour, minute: nextMinute };
+  }
+
+  adjustStartMinute(delta: number) {
+    const hour = Number(this.startHourControl.value ?? 0);
+    const minute = Number(this.startMinuteControl.value ?? 0) + delta;
+    const normalized = this.normalizeTime(hour, minute);
+    this.startHourControl.setValue(normalized.hour);
+    this.startMinuteControl.setValue(normalized.minute);
+  }
+
+  adjustEndMinute(delta: number) {
+    const hour = Number(this.endHourControl.value ?? 0);
+    const minute = Number(this.endMinuteControl.value ?? 0) + delta;
+    const normalized = this.normalizeTime(hour, minute);
+    this.endHourControl.setValue(normalized.hour);
+    this.endMinuteControl.setValue(normalized.minute);
+  }
+
+  clampTime(kind: 'start' | 'end') {
+    if (kind === 'start') {
+      const hour = Number(this.startHourControl.value ?? 0);
+      const minute = Number(this.startMinuteControl.value ?? 0);
+      const normalized = this.normalizeTime(hour, minute);
+      this.startHourControl.setValue(normalized.hour);
+      this.startMinuteControl.setValue(normalized.minute);
+    } else {
+      const hour = Number(this.endHourControl.value ?? 0);
+      const minute = Number(this.endMinuteControl.value ?? 0);
+      const normalized = this.normalizeTime(hour, minute);
+      this.endHourControl.setValue(normalized.hour);
+      this.endMinuteControl.setValue(normalized.minute);
+    }
+  }
+
   removeGoal(goalId: number) {
     const remainingIds = this.selectedGoals
       .filter(goal => goal.id !== goalId)

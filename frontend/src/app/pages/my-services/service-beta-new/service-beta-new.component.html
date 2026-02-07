@@ -5,9 +5,8 @@
     <div class="beta-section">
       <div class="beta-section-title">Basisdaten</div>
       <form [formGroup]="firstForm">
-        <div class="beta-grid beta-grid-3">
+        <div class="beta-grid beta-grid-time">
           <mat-form-field appearance="outline" class="beta-field">
-            <mat-icon matPrefix>calendar_today</mat-icon>
             <mat-label>Datum</mat-label>
             <input matInput
                    formControlName="serviceDate"
@@ -16,31 +15,61 @@
             <mat-datepicker #serviceDatePicker></mat-datepicker>
           </mat-form-field>
 
-          <div class="beta-time-group">
+          <div class="beta-time-group beta-time-group--from">
             <div class="beta-time-label">Von</div>
-            <div class="beta-time-fields">
-              <mat-form-field appearance="outline" class="beta-time-field">
-                <mat-icon matPrefix>schedule</mat-icon>
-                <input matInput type="number" formControlName="startHour" min="0" max="23">
-              </mat-form-field>
+            <div class="beta-time-control beta-time-pill" [formGroup]="firstForm">
+              <input type="number"
+                     class="beta-time-input"
+                     formControlName="startHour"
+                     min="0"
+                     max="23"
+                     (blur)="clampTime('start')">
               <span class="beta-time-sep">:</span>
-              <mat-form-field appearance="outline" class="beta-time-field">
-                <input matInput type="number" formControlName="startMinute" min="0" max="59">
-              </mat-form-field>
+              <input type="number"
+                     class="beta-time-input"
+                     formControlName="startMinute"
+                     min="0"
+                     max="59"
+                     (blur)="clampTime('start')">
+              <div class="beta-time-buttons">
+                <button type="button" class="beta-time-btn" (click)="adjustStartMinute(1)">
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button type="button" class="beta-time-btn" (click)="adjustStartMinute(-1)">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="beta-time-group">
+          <div class="beta-time-arrow" aria-hidden="true">
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+
+          <div class="beta-time-group beta-time-group--to">
             <div class="beta-time-label">Bis</div>
-            <div class="beta-time-fields">
-              <mat-form-field appearance="outline" class="beta-time-field">
-                <mat-icon matPrefix>schedule</mat-icon>
-                <input matInput type="number" formControlName="endHour" min="0" max="23">
-              </mat-form-field>
+            <div class="beta-time-control beta-time-pill" [formGroup]="firstForm">
+              <input type="number"
+                     class="beta-time-input"
+                     formControlName="endHour"
+                     min="0"
+                     max="23"
+                     (blur)="clampTime('end')">
               <span class="beta-time-sep">:</span>
-              <mat-form-field appearance="outline" class="beta-time-field">
-                <input matInput type="number" formControlName="endMinute" min="0" max="59">
-              </mat-form-field>
+              <input type="number"
+                     class="beta-time-input"
+                     formControlName="endMinute"
+                     min="0"
+                     max="59"
+                     (blur)="clampTime('end')">
+              <div class="beta-time-buttons">
+                <button type="button" class="beta-time-btn" (click)="adjustEndMinute(1)">
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button type="button" class="beta-time-btn" (click)="adjustEndMinute(-1)">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
             </div>
           </div>
         </div>

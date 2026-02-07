@@ -51,6 +51,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.beta-grid-time {
+  grid-template-columns: minmax(180px, 1.2fr) auto 24px auto;
+  align-items: center;
+}
+
 .beta-field {
   width: 100%;
 }
@@ -85,23 +90,86 @@
   gap: 4px;
 }
 
+.beta-time-group--from {
+  justify-self: end;
+}
+
+.beta-time-group--to {
+  justify-self: start;
+}
+
 .beta-time-label {
   font-size: 12px;
   color: #5d6678;
 }
 
-.beta-time-fields {
-  display: flex;
+.beta-time-control {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid #e1e6ef;
+  border-radius: 999px;
+  background: #f7f8fb;
+  box-shadow: inset 0 0 0 1px rgba(225, 230, 239, 0.2);
+  width: fit-content;
 }
 
-.beta-time-field {
-  width: 72px;
+.beta-time-pill {
+  min-height: 30px;
+}
+
+.beta-time-input {
+  width: 32px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  outline: none;
+  text-align: center;
+  font-size: 18px;
+  line-height: 1;
+  color: #2f3a4b;
+  background: transparent;
+}
+
+.beta-time-input::-webkit-outer-spin-button,
+.beta-time-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .beta-time-sep {
   color: #8790a3;
+}
+
+.beta-time-buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid #e1e6ef;
+}
+
+.beta-time-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  line-height: 1;
+  cursor: pointer;
+  color: #6a7386;
+}
+
+.beta-time-btn mat-icon {
+  font-size: 26px;
+}
+
+.beta-time-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6a7386;
+  width: 24px;
+  justify-self: center;
+  align-self: center;
+  margin-top: 24px;
 }
 
 .beta-empty {
@@ -179,15 +247,20 @@
   .beta-grid-2 {
     grid-template-columns: 1fr;
   }
+
+  .beta-grid-time {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
   .beta-grid-3,
-  .beta-grid-2 {
+  .beta-grid-2,
+  .beta-grid-time {
     grid-template-columns: 1fr;
   }
 
-  .beta-time-field {
-    width: 100%;
+  .beta-time-arrow {
+    display: none;
   }
 }
