@@ -146,7 +146,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     private serviceService: ServiceService,
     private router: Router,
     private route: ActivatedRoute,
-    private converter: Converter,
+    protected converter: Converter,
     override helperService: HelperService,
     override location: Location
   ) {
@@ -266,7 +266,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       });
   }
 
-  private loadClient(id: number) {
+  protected loadClient(id: number) {
     this.clientService.getById(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => {
@@ -558,7 +558,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       .slice(0, 5);
   }
 
-  private reloadTitle() {
+  protected reloadTitle() {
     if (this.selectedClient !== null) {
       this.title = "Eintrag (" + this.converter.formatDateToGerman(new Date(this.selectedServiceDate.toString())) + ") " +
         this.selectedClient.lastName + " " + this.selectedClient.firstName;

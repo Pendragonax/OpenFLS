@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, DestroyRef, inject} from '@angular/core';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {ServiceDetailComponent} from "../../service-detail/service-detail.component";
 import {UserService} from "../../../shared/services/user.service";
@@ -12,6 +12,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {Converter} from "../../../shared/services/converter.helper";
 import {HelperService} from "../../../shared/services/helper.service";
 import {Location} from "@angular/common";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-service-beta-new',
@@ -29,6 +30,8 @@ import {Location} from "@angular/common";
   standalone: false
 })
 export class ServiceBetaNewComponent extends ServiceDetailComponent {
+  private readonly betaDestroyRef = inject(DestroyRef);
+  private lastServiceDate = '';
   constructor(
     userService: UserService,
     institutionService: InstitutionService,
@@ -73,6 +76,145 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     this.categoriesControl.setValue(remainingIds);
   }
 
+  override ngOnInit() {
+    super.ngOnInit();
+    const initialDate = this.serviceDateControl.value;
+    this.lastServiceDate = initialDate ? new Date(initialDate.toString()).toDateString() : '';
+
+    this.serviceDateControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe((value) => {
+        if (!value) {
+          return;
+        }
+        const nextDate = new Date(value.toString()).toDateString();
+        if (nextDate === this.lastServiceDate) {
+          return;
+        }
+        this.lastServiceDate = nextDate;
+        this.assistancePlansControl.setValue(null);
+        this.resetAssistancePlan();
+        this.goalsControl.setValue([]);
+        this.resetGoals();
+        if (this.value.clientId) {
+          this.loadClient(this.value.clientId);
+        }
+      });
+  }
+
+  override initFormSubscriptions() {
+    if (!this.editMode) {
+      this.clientsControl.enable();
+      this.clientsControl.valueChanges
+        .pipe(takeUntilDestroyed(this.betaDestroyRef))
+        .subscribe((value: number | null) => {
+          this.assistancePlansControl.setValue(null);
+          this.resetAssistancePlan();
+          this.goalsControl.setValue([]);
+          this.resetGoals();
+          this.resetCategories();
+          this.categoriesControl.setValue([]);
+
+          if (value != null) {
+            this.value.clientId = value;
+            this.clientSelected = true;
+            this.loadClient(value);
+          } else {
+            this.value.clientId = 0;
+            this.clientSelected = false;
+            this.filteredAssistancePlans = [];
+          }
+        });
+    }
+
+    this.serviceDateControl.enable();
+    this.serviceDateControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe((value) => {
+        if (value != null) {
+          this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
+          this.reloadTitle();
+          this.minDate = new Date(value.toString());
+        }
+      });
+
+    this.assistancePlansControl.enable();
+    this.assistancePlansControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe((value: number | null) => {
+        this.resetGoals();
+        this.goalsControl.setValue([]);
+
+        if (value != null) {
+          this.selectAssistancePlan(this.selectedClient.assistancePlans.find(plan => plan.id == value));
+        } else {
+          this.selectAssistancePlan(null);
+        }
+      });
+
+    this.startHourControl.enable();
+    this.startHourControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(value => {
+        if (value != null && !this.editMode) {
+          this.endHourControl.setValue(value);
+        }
+      });
+
+    this.startMinuteControl.enable();
+    this.startMinuteControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(value => {
+        if (value != null && !this.editMode) {
+          this.endMinuteControl.setValue(value);
+        }
+      });
+
+    this.endHourControl.enable();
+    this.endMinuteControl.enable();
+
+    this.hourTypeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(value => this.value.hourTypeId = value);
+
+    this.institutionControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(value => this.value.institutionId = value);
+
+    this.goalsControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe((value: number[]) => {
+        if (value.length > 0) {
+          this.setGoals(value);
+        } else {
+          this.resetGoals();
+        }
+      });
+
+    this.categoriesControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe((value: number[]) => {
+        if (value.length > 0) {
+          this.setCategories(value);
+        } else {
+          this.resetCategories();
+        }
+      });
+
+    this.contentControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(value => this.value.content = value);
+    this.titleControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(value => this.value.title = value);
+    this.unfinishedControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(value => this.value.unfinished = value);
+    this.groupServiceControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(value => this.value.groupService = value);
+  }
+
   resetAll() {
     this.firstForm.reset({
       serviceDate: this.timeNow,
@@ -85,8 +227,8 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
 
     this.secondForm.reset({
       client: '',
-      clientList: [],
-      assistancePlanList: [],
+      clientList: null,
+      assistancePlanList: null,
       goalList: [],
       hourType: null
     });

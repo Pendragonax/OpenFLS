@@ -5,8 +5,9 @@
     <div class="beta-section">
       <div class="beta-section-title">Basisdaten</div>
       <form [formGroup]="firstForm">
-        <div class="beta-grid">
+        <div class="beta-grid beta-grid-3">
           <mat-form-field appearance="outline" class="beta-field">
+            <mat-icon matPrefix>calendar_today</mat-icon>
             <mat-label>Datum</mat-label>
             <input matInput
                    formControlName="serviceDate"
@@ -19,6 +20,7 @@
             <div class="beta-time-label">Von</div>
             <div class="beta-time-fields">
               <mat-form-field appearance="outline" class="beta-time-field">
+                <mat-icon matPrefix>schedule</mat-icon>
                 <input matInput type="number" formControlName="startHour" min="0" max="23">
               </mat-form-field>
               <span class="beta-time-sep">:</span>
@@ -32,6 +34,7 @@
             <div class="beta-time-label">Bis</div>
             <div class="beta-time-fields">
               <mat-form-field appearance="outline" class="beta-time-field">
+                <mat-icon matPrefix>schedule</mat-icon>
                 <input matInput type="number" formControlName="endHour" min="0" max="23">
               </mat-form-field>
               <span class="beta-time-sep">:</span>
@@ -40,18 +43,18 @@
               </mat-form-field>
             </div>
           </div>
-
         </div>
       </form>
     </div>
 
     <div class="beta-section">
       <div class="beta-section-title">Klient, Bereich & Stundentyp</div>
-      <div class="beta-grid">
+      <div class="beta-grid beta-grid-3">
         <form [formGroup]="secondForm">
           <mat-form-field appearance="outline" class="beta-field">
+            <mat-icon matPrefix>person</mat-icon>
             <mat-label>Klient</mat-label>
-            <mat-select formControlName="clientList" multiple>
+            <mat-select formControlName="clientList">
               @for (client of filteredClients; track client.id) {
                 <mat-option [value]="client.id">{{ client.lastName }} {{ client.firstName }}</mat-option>
               }
@@ -61,6 +64,7 @@
 
         <form [formGroup]="firstForm">
           <mat-form-field appearance="outline" class="beta-field">
+            <mat-icon matPrefix>apartment</mat-icon>
             <mat-label>Bereich</mat-label>
             <mat-select formControlName="institution">
               @for (institution of institutions; track institution.id) {
@@ -72,6 +76,7 @@
 
         <form [formGroup]="secondForm">
           <mat-form-field appearance="outline" class="beta-field">
+            <mat-icon matPrefix>watch_later</mat-icon>
             <mat-label>Stundentyp</mat-label>
             <mat-select formControlName="hourType">
               @for (hourType of assistancePlanHourTypes.length > 0 ? assistancePlanHourTypes : hourTypes; track hourType.id) {
@@ -86,11 +91,12 @@
     <div class="beta-section">
       <div class="beta-section-title">Hilfeplan & Ziele</div>
       <form [formGroup]="secondForm">
-        <div class="beta-grid">
+        <div class="beta-grid beta-grid-2">
           @if (clientSelected && filteredAssistancePlans.length > 0) {
             <mat-form-field appearance="outline" class="beta-field beta-field-wide">
+              <mat-icon matPrefix>event</mat-icon>
               <mat-label>Hilfeplan</mat-label>
-              <mat-select formControlName="assistancePlanList" multiple>
+              <mat-select formControlName="assistancePlanList">
                 @for (plan of filteredAssistancePlans; track plan.id) {
                   <mat-option [value]="plan.id">
                     <div class="beta-plan-option">
@@ -107,6 +113,7 @@
 
           @if (assistancePlanSelected) {
             <mat-form-field appearance="outline" class="beta-field beta-field-wide">
+              <mat-icon matPrefix>flag</mat-icon>
               <mat-label>Ziele auswählen</mat-label>
               <mat-select formControlName="goalList" multiple>
                 @for (goal of selectedAssistancePlan?.goals ?? []; track goal.id) {
@@ -138,6 +145,7 @@
       <div class="beta-section-title">Kategorien</div>
       <form [formGroup]="thirdForm">
         <mat-form-field appearance="outline" class="beta-field">
+          <mat-icon matPrefix>local_offer</mat-icon>
           <mat-label>Kategorien auswählen</mat-label>
           <mat-select formControlName="categoryList" multiple>
             @for (category of categories; track category.id) {
