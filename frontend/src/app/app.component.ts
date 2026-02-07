@@ -1,9 +1,10 @@
-import { Component } from '@angular/core'
+import { Component, DestroyRef, inject } from '@angular/core'
 import {UserService} from "./shared/services/user.service";
 import {Router} from "@angular/router";
 import {EmployeeDto} from "./shared/dtos/employee-dto.model";
 import {interval, ReplaySubject} from "rxjs";
 import {TokenStorageService} from "./shared/services/token.storage.service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-root',
@@ -13,6 +14,7 @@ import {TokenStorageService} from "./shared/services/token.storage.service";
 })
 
 export class AppComponent {
+  private readonly destroyRef = inject(DestroyRef);
   public isMenuCollapsed = true;
   test = false;
 
@@ -29,7 +31,9 @@ export class AppComponent {
     private router: Router) { }
 
   ngOnInit() {
-    this.userService.isAuthenticated$.subscribe({
+    this.userService.isAuthenticated$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (auth) => {
         this.isAuthenticated = auth;
 
@@ -39,9 +43,13 @@ export class AppComponent {
       }
     });
 
-    this.tokenService.expireTimeString$.subscribe(value => this.timeLeft$.next(value));
+    this.tokenService.expireTimeString$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.timeLeft$.next(value));
 
-    this.userService.user$.subscribe({
+    this.userService.user$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (employee) => {
         this.employee = employee
 
