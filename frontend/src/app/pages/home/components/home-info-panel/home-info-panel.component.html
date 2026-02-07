@@ -1,0 +1,20 @@
+<mat-expansion-panel class="mat-elevation-z2 mx-2 mt-2">
+  <mat-expansion-panel-header>
+    <mat-panel-title class="fw-bold">
+      Informationen
+    </mat-panel-title>
+  </mat-expansion-panel-header>
+
+  <div class="container-fluid">
+    <app-information-row [title]="'Benutzername'"
+                         [content]="username"></app-information-row>
+    <app-information-row [title]="'Name'"
+                         [content]="employee.firstName + ' ' + employee.lastName"></app-information-row>
+    <app-information-row [title]="'Email'"
+                         [content]="employee.email"></app-information-row>
+    <app-information-row [title]="'Telefon'"
+                         [content]="employee.phonenumber"></app-information-row>
+    <app-information-row [title]="'Rolle'"
+                         [content]="role"></app-information-row>
+  </div>
+</mat-expansion-panel>

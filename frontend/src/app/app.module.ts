@@ -8,6 +8,10 @@ import {LoginComponent} from './pages/login/login.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AuthInterceptor} from "./interceptors/auth.interceptor";
 import {HomeComponent} from './pages/home/home.component';
+import {HomeHeaderComponent} from "./pages/home/components/home-header/home-header.component";
+import {HomeInfoPanelComponent} from "./pages/home/components/home-info-panel/home-info-panel.component";
+import {HomePermissionsTableComponent} from "./pages/home/components/home-permissions-table/home-permissions-table.component";
+import {HomePasswordPanelComponent} from "./pages/home/components/home-password-panel/home-password-panel.component";
 import {UserService} from "./shared/services/user.service";
 import {TokenStorageService} from "./shared/services/token.storage.service";
 import {EmployeesComponent} from './pages/employees/employees.component';
@@ -138,6 +142,10 @@ const routes: Routes = [
         AppComponent,
         LoginComponent,
         HomeComponent,
+        HomeHeaderComponent,
+        HomeInfoPanelComponent,
+        HomePermissionsTableComponent,
+        HomePasswordPanelComponent,
         EmployeesComponent,
         EmployeeNewComponent,
         InstitutionComponent,

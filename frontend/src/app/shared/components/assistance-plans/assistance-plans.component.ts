@@ -47,7 +47,7 @@ export class AssistancePlansComponent
   @Input() client$: ReplaySubject<ClientViewModel> = new ReplaySubject<ClientViewModel>();
   @Input() sponsor$: ReplaySubject<SponsorDto> = new ReplaySubject<SponsorDto>();
   @Input() institution$: ReplaySubject<InstitutionViewModel> = new ReplaySubject<InstitutionViewModel>();
-  @Input() favorites$: ReplaySubject<Boolean> = new ReplaySubject<Boolean>();
+  @Input() favorites$: ReplaySubject<boolean> = new ReplaySubject<boolean>();
   @Input() hideInstitutionColumn: boolean = false;
   @Input() hideClientColumn: boolean = false;
   @Input() hideSponsorColumn: boolean = false;
