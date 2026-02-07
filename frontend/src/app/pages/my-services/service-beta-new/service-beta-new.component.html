@@ -88,11 +88,16 @@
       <form [formGroup]="secondForm">
         <div class="beta-grid">
           @if (clientSelected && filteredAssistancePlans.length > 0) {
-            <mat-form-field appearance="outline" class="beta-field">
+            <mat-form-field appearance="outline" class="beta-field beta-field-wide">
               <mat-label>Hilfeplan</mat-label>
               <mat-select formControlName="assistancePlanList" multiple>
                 @for (plan of filteredAssistancePlans; track plan.id) {
-                  <mat-option [value]="plan.id">{{ getDateString(plan) }}</mat-option>
+                  <mat-option [value]="plan.id">
+                    <div class="beta-plan-option">
+                      <div class="beta-plan-date">{{ getDateString(plan) }}</div>
+                      <div class="beta-plan-sponsor">{{ getSponsorName(plan) }}</div>
+                    </div>
+                  </mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -101,11 +106,11 @@
           }
 
           @if (assistancePlanSelected) {
-            <mat-form-field appearance="outline" class="beta-field">
+            <mat-form-field appearance="outline" class="beta-field beta-field-wide">
               <mat-label>Ziele auswählen</mat-label>
               <mat-select formControlName="goalList" multiple>
                 @for (goal of selectedAssistancePlan?.goals ?? []; track goal.id) {
-                  <mat-option [value]="goal.id">{{ goal.title }}</mat-option>
+                  <mat-option [value]="goal.id">{{ goal.title.length > 50 ? (goal.title | slice:0:50) + '…' : goal.title }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -113,6 +118,19 @@
             <div class="beta-empty">Ziele werden angezeigt, sobald ein Hilfeplan gewählt wurde.</div>
           }
         </div>
+
+        @if (selectedGoals.length > 0) {
+          <mat-chip-set class="beta-chips">
+            @for (goal of selectedGoals; track goal.id) {
+              <mat-chip class="beta-chip" removable (removed)="removeGoal(goal.id)">
+                <span class="beta-chip-text">{{ goal.title.length > 20 ? (goal.title | slice:0:20) + '…' : goal.title }}</span>
+                <button matChipRemove aria-label="Ziel entfernen">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-chip>
+            }
+          </mat-chip-set>
+        }
       </form>
     </div>
 
@@ -127,6 +145,19 @@
             }
           </mat-select>
         </mat-form-field>
+
+        @if (selectedCategories.length > 0) {
+          <mat-chip-set class="beta-chips">
+            @for (category of selectedCategories; track category.id) {
+              <mat-chip class="beta-chip" removable (removed)="removeCategory(category.id)">
+                {{ category.title }}
+                <button matChipRemove aria-label="Kategorie entfernen">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-chip>
+            }
+          </mat-chip-set>
+        }
       </form>
     </div>
 

@@ -42,6 +42,25 @@
   width: 100%;
 }
 
+.beta-field-wide {
+  grid-column: span 2;
+}
+
+.beta-plan-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.beta-plan-date {
+  font-weight: 600;
+}
+
+.beta-plan-sponsor {
+  color: #6a7386;
+  font-size: 12px;
+}
+
 .beta-time-group {
   display: flex;
   flex-direction: column;
@@ -73,6 +92,34 @@
   color: #7a8396;
   padding: 12px 14px;
   border-radius: 4px;
+}
+
+.beta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.beta-chip {
+  background: #f2f4f8;
+  border: 1px solid #d8dde8;
+  border-radius: 16px;
+  font-size: 12px;
+  max-width: 200px;
+}
+
+.beta-chip .beta-chip-text {
+  display: inline-block;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.beta-chip mat-icon {
+  font-size: 16px;
 }
 
 .beta-footer {

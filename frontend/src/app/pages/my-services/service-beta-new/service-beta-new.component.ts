@@ -59,6 +59,20 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     );
   }
 
+  removeGoal(goalId: number) {
+    const remainingIds = this.selectedGoals
+      .filter(goal => goal.id !== goalId)
+      .map(goal => goal.id);
+    this.goalsControl.setValue(remainingIds);
+  }
+
+  removeCategory(categoryId: number) {
+    const remainingIds = this.selectedCategories
+      .filter(category => category.id !== categoryId)
+      .map(category => category.id);
+    this.categoriesControl.setValue(remainingIds);
+  }
+
   resetAll() {
     this.firstForm.reset({
       serviceDate: this.timeNow,
