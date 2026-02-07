@@ -54,6 +54,14 @@ td , th {
   font-weight: 600;
   font-size: 20px;
   color: #2f3a4b;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeline-date-icon {
+  font-size: 20px;
+  color: #6a7386;
 }
 
 .timeline-body {
@@ -115,6 +123,11 @@ td , th {
 
   .filters-mobile {
     display: block;
+  }
+
+  .filters-mobile app-search-field {
+    display: block;
+    width: 100%;
   }
 
   .assistance-table {

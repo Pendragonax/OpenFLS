@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
 import {AssistancePlanService} from "../../shared/services/assistance-plan.service";
 import {PeriodMode} from "../../shared/components/year-month-selection/PeriodMode";
@@ -18,6 +18,7 @@ import {GoalEvaluationYearDto} from "../../shared/dtos/goal-evaluation-year-dto.
 import {EvaluationDto} from "../../shared/dtos/evaluation-dto.model";
 import {ClientsService} from "../../shared/services/clients.service";
 import {AssistancePlan} from "../../shared/projections/assistance-plan.projection";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-assistance-plan-analysis',
@@ -26,6 +27,7 @@ import {AssistancePlan} from "../../shared/projections/assistance-plan.projectio
     standalone: false
 })
 export class AssistancePlanAnalysisComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   // CONST
   private validTabIndices = [0,1,2];
@@ -71,7 +73,9 @@ export class AssistancePlanAnalysisComponent implements OnInit {
     combineLatest([
       this.assistancePlanService.getProjectionById(this.assistancePlanId),
       this.clientService.allValues$
-    ]).subscribe(([assistancePlan, clients]) => {
+    ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(([assistancePlan, clients]) => {
         this.assistancePlan = assistancePlan;
         this.loadValues();
         this.onEvaluationPeriodChanged(new Period(PeriodMode.PERIOD_MODE_YEARLY, new Date().getFullYear(), 1));
@@ -104,7 +108,9 @@ export class AssistancePlanAnalysisComponent implements OnInit {
     this.isGenerating = true
     this.isGenerating$.next(this.isGenerating)
 
-    this.evaluationService.getByAssistancePlanIdAndYear(this.assistancePlanId, this.selectedEvaluationYear).subscribe({
+    this.evaluationService.getByAssistancePlanIdAndYear(this.assistancePlanId, this.selectedEvaluationYear)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: value => {
         let rows = value.values.map(it => this.getTableButtonsAsRow(it, this.selectedEvaluationYear));
         this.dataEvaluation$.next(rows);
@@ -128,6 +134,7 @@ export class AssistancePlanAnalysisComponent implements OnInit {
 
     this.goalTimeEvaluationService
       .getByYear(this.assistancePlanId, this.selectedGoalTimeHourTypeId, this.selectedGoalTimeYear)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (value) => {
           this.goalTimesEvaluation = value
@@ -289,13 +296,17 @@ export class AssistancePlanAnalysisComponent implements OnInit {
     dialog.evaluation$.next(payload.evaluation);
     dialog.goalId$.next(payload.goalId);
     dialog.date$.next(payload.date);
-    dialogRef.afterClosed().subscribe({
+    dialogRef.afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: _ => this.loadEvaluations()
     })
   }
 
   executeURLParams() {
-    this.route.params.subscribe(params => {
+    this.route.params
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
       // tab
       if (params[this.tabParamName]) {
         const urlTabIndex = +params[this.tabParamName]

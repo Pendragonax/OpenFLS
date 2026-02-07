@@ -1,0 +1,4 @@
+[mcp_servers.local]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/vinz/projects/OpenFLS"]
+enabled = true

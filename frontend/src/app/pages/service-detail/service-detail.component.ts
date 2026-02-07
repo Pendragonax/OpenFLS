@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {NewPageComponent} from "../../shared/components/new-page.component";
 import {ServiceDto} from "../../shared/dtos/service-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
@@ -25,6 +25,7 @@ import {AssistancePlanHourDto} from "../../shared/dtos/assistance-plan-hour-dto.
 import {Location} from "@angular/common";
 import {HelperService} from "../../shared/services/helper.service";
 import {createStartTimeEndTimeValidator} from "../../shared/validators/startTimeEndTimeValidator";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-service-detail',
@@ -42,6 +43,7 @@ import {createStartTimeEndTimeValidator} from "../../shared/validators/startTime
     standalone: false
 })
 export class ServiceDetailComponent extends NewPageComponent<ServiceDto> implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   // STATESs
   editMode = false;
@@ -167,6 +169,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     if (id != null) {
       this.editMode = true;
       this.serviceService.getById(+id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (value) => this.loadEditBaseValues(value),
           error: () => this.handleFailure("Fehler beim laden der Dokumentation", true)
@@ -185,6 +188,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       this.userService.user$,
       this.sponsorService.allValues$
     ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([writeableInstitutions, institutions, clients, hourTypes, user, sponsors]) => {
         // base
         this.institutions = institutions.filter(value => writeableInstitutions.some(inst => inst == value.id));
@@ -223,6 +227,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       this.sponsorService.allValues$,
       this.clientService.getById(service.clientId),
     ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([writeableInstitutions, institutions, clients, hourTypes, sponsors, client]) => {
         // base
         this.institutions = institutions.filter(value => writeableInstitutions.some(inst => inst == value.id));
@@ -262,7 +267,9 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
   }
 
   private loadClient(id: number) {
-    this.clientService.getById(id).subscribe(value => {
+    this.clientService.getById(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
       this.selectedClient = value;
       this.filteredAssistancePlans = this.getAssistancePlansByDateString(value.assistancePlans, this.serviceDateControl.value);
       this.categories = value.categoryTemplate.categories;
@@ -297,7 +304,9 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     if (!this.editMode) {
 
       this.clientControl.enable();
-      this.clientControl.valueChanges.pipe(startWith('')).subscribe(value => {
+      this.clientControl.valueChanges
+        .pipe(startWith(''), takeUntilDestroyed(this.destroyRef))
+        .subscribe(value => {
         this.filteredClients = this._getClients(value || '');
         this.clientsControl.setValue(0);
         this.value.clientId = 0;
@@ -308,6 +317,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
       this.clientsControl.enable();
       this.clientsControl.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((value: number[]) => {
           this.resetAssistancePlan();
           this.assistancePlansControl.setValue("")
@@ -329,6 +339,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
     this.serviceDateControl.enable();
     this.serviceDateControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
         if (value != null) {
           this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
@@ -340,6 +351,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
     this.assistancePlansControl.enable();
     this.assistancePlansControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value: number[]) => {
         this.resetGoals();
         this.goalsControl.setValue("");
@@ -354,7 +366,9 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     // GENERAL
     // START HOUR
     this.startHourControl.enable()
-    this.startHourControl.valueChanges.subscribe(value => {
+    this.startHourControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
       if (value != null && !this.editMode) {
         this.endHourControl.setValue(value);
       }
@@ -362,7 +376,9 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
     // START MINUTE
     this.startMinuteControl.enable()
-    this.startMinuteControl.valueChanges.subscribe(value => {
+    this.startMinuteControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
       if (value != null && !this.editMode) {
         this.endMinuteControl.setValue(value);
       }
@@ -371,10 +387,15 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     this.endHourControl.enable()
     this.endMinuteControl.enable()
 
-    this.hourTypeControl.valueChanges.subscribe(value => this.value.hourTypeId = value);
-    this.institutionControl.valueChanges.subscribe(value => this.value.institutionId = value);
+    this.hourTypeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.value.hourTypeId = value);
+    this.institutionControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.value.institutionId = value);
 
     this.goalsControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value: number[]) => {
         if (value.length > 0) {
           this.setGoals(value);
@@ -384,6 +405,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       });
 
     this.categoriesControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value: number[]) => {
         if (value.length > 0) {
           this.setCategories(value);
@@ -392,10 +414,18 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         }
       });
 
-    this.contentControl.valueChanges.subscribe(value => this.value.content = value);
-    this.titleControl.valueChanges.subscribe(value => this.value.title = value);
-    this.unfinishedControl.valueChanges.subscribe(value => this.value.unfinished = value);
-    this.groupServiceControl.valueChanges.subscribe(value => this.value.groupService = value);
+    this.contentControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.value.content = value);
+    this.titleControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.value.title = value);
+    this.unfinishedControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.value.unfinished = value);
+    this.groupServiceControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.value.groupService = value);
   }
 
   selectAssistancePlan(plan: AssistancePlanDto | undefined | null) {

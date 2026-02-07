@@ -80,7 +80,8 @@
             <div class="row justify-content-center">
             @if (!hideSearchStringFilter) {
               <div class="col-12 mb-2">
-                <app-search-field [isSubmitting]="isSubmitting"
+                <app-search-field class="w-100"
+                                  [isSubmitting]="isSubmitting"
                                   [placeholder]="'...'"
                                   (onSearchStringChanges)="onSearchStringChanges($event)"></app-search-field>
               </div>
@@ -296,6 +297,7 @@
                [ngClass]="{'timeline-illegal': combination[3].illegal}">
             <div class="timeline-header">
               <div class="timeline-date">
+                <mat-icon class="timeline-date-icon">watch_later</mat-icon>
                 {{ getDateString(combination[3].dto.start) }} – {{ getDateString(combination[3].dto.end) }}
               </div>
             </div>
