@@ -13,6 +13,7 @@ import {Converter} from "../../../shared/services/converter.helper";
 import {HelperService} from "../../../shared/services/helper.service";
 import {Location} from "@angular/common";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ClientDto} from "../../../shared/dtos/client-dto.model";
 
 @Component({
   selector: 'app-service-beta-new',
@@ -62,6 +63,21 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     );
   }
 
+  displayClient = (client: ClientDto | string | null): string => {
+    if (!client || typeof client === 'string') {
+      return client ?? '';
+    }
+    return `${client.lastName} ${client.firstName}`;
+  };
+
+  onClientSelected(client: ClientDto) {
+    if (!client) {
+      return;
+    }
+    this.clientControl.setValue(client);
+    this.clientsControl.setValue(client.id);
+  }
+
   removeGoal(goalId: number) {
     const remainingIds = this.selectedGoals
       .filter(goal => goal.id !== goalId)
@@ -104,6 +120,26 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
 
   override initFormSubscriptions() {
     if (!this.editMode) {
+      this.clientControl.enable();
+      this.clientControl.valueChanges
+        .pipe(takeUntilDestroyed(this.betaDestroyRef))
+        .subscribe((value: ClientDto | string | null) => {
+          const isString = typeof value === 'string';
+          const search = isString ? value : (value ? `${value.firstName} ${value.lastName}` : '');
+          this.filteredClients = this._getClients(search || '');
+
+          if (isString) {
+            this.clientsControl.setValue(null);
+            this.value.clientId = 0;
+            this.clientSelected = false;
+            this.filteredAssistancePlans = [];
+            this.assistancePlansControl.setValue(null);
+            this.resetAssistancePlan();
+            this.goalsControl.setValue([]);
+            this.resetGoals();
+          }
+        });
+
       this.clientsControl.enable();
       this.clientsControl.valueChanges
         .pipe(takeUntilDestroyed(this.betaDestroyRef))

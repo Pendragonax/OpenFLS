@@ -549,7 +549,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       .toFixed(2);
   }
 
-  private _getClients(searchString: string): ClientDto[] {
+  protected _getClients(searchString: string): ClientDto[] {
     let filterValue = searchString.toLowerCase();
 
     return this.clients
