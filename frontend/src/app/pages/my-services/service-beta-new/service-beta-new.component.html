@@ -1,0 +1,152 @@
+<div class="beta-service-page">
+  <div class="beta-card">
+    <div class="beta-title">Neuer Eintrag</div>
+
+    <div class="beta-section">
+      <div class="beta-section-title">Basisdaten</div>
+      <form [formGroup]="firstForm">
+        <div class="beta-grid">
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Datum</mat-label>
+            <input matInput
+                   formControlName="serviceDate"
+                   [matDatepicker]="serviceDatePicker">
+            <mat-datepicker-toggle matSuffix [for]="serviceDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #serviceDatePicker></mat-datepicker>
+          </mat-form-field>
+
+          <div class="beta-time-group">
+            <div class="beta-time-label">Von</div>
+            <div class="beta-time-fields">
+              <mat-form-field appearance="outline" class="beta-time-field">
+                <input matInput type="number" formControlName="startHour" min="0" max="23">
+              </mat-form-field>
+              <span class="beta-time-sep">:</span>
+              <mat-form-field appearance="outline" class="beta-time-field">
+                <input matInput type="number" formControlName="startMinute" min="0" max="59">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="beta-time-group">
+            <div class="beta-time-label">Bis</div>
+            <div class="beta-time-fields">
+              <mat-form-field appearance="outline" class="beta-time-field">
+                <input matInput type="number" formControlName="endHour" min="0" max="23">
+              </mat-form-field>
+              <span class="beta-time-sep">:</span>
+              <mat-form-field appearance="outline" class="beta-time-field">
+                <input matInput type="number" formControlName="endMinute" min="0" max="59">
+              </mat-form-field>
+            </div>
+          </div>
+
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Bereich</mat-label>
+            <mat-select formControlName="institution">
+              @for (institution of institutions; track institution.id) {
+                <mat-option [value]="institution.id">{{ institution.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+
+    <div class="beta-section">
+      <div class="beta-section-title">2) Klient & Hilfeplan</div>
+      <form [formGroup]="secondForm">
+        <div class="beta-grid">
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Klient</mat-label>
+            <mat-select formControlName="clientList" multiple>
+              @for (client of filteredClients; track client.id) {
+                <mat-option [value]="client.id">{{ client.lastName }} {{ client.firstName }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Hilfeplan</mat-label>
+            <mat-select formControlName="assistancePlanList" multiple>
+              @for (plan of filteredAssistancePlans; track plan.id) {
+                <mat-option [value]="plan.id">{{ getDateString(plan) }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>Bitte Datum und Klient wählen.</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Leistungsart</mat-label>
+            <mat-select formControlName="hourType">
+              @for (hourType of assistancePlanHourTypes.length > 0 ? assistancePlanHourTypes : hourTypes; track hourType.id) {
+                <mat-option [value]="hourType.id">{{ hourType.title }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+
+    <div class="beta-section">
+      <div class="beta-section-title">3) Ziele</div>
+      <form [formGroup]="secondForm">
+        @if (assistancePlanSelected) {
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Ziele auswählen</mat-label>
+            <mat-select formControlName="goalList" multiple>
+              @for (goal of selectedAssistancePlan?.goals ?? []; track goal.id) {
+                <mat-option [value]="goal.id">{{ goal.title }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <div class="beta-empty">Ziele werden angezeigt, sobald ein Hilfeplan gewählt wurde.</div>
+        }
+      </form>
+    </div>
+
+    <div class="beta-section">
+      <div class="beta-section-title">4) Kategorien</div>
+      <form [formGroup]="thirdForm">
+        <mat-form-field appearance="outline" class="beta-field">
+          <mat-label>Kategorien auswählen</mat-label>
+          <mat-select formControlName="categoryList" multiple>
+            @for (category of categories; track category.id) {
+              <mat-option [value]="category.id">{{ category.title }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </div>
+
+    <div class="beta-section">
+      <div class="beta-section-title">5) Freitext</div>
+      <form [formGroup]="thirdForm">
+        <mat-form-field appearance="outline" class="beta-field">
+          <mat-label>Titel</mat-label>
+          <input matInput formControlName="title" placeholder="Titel eingeben">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="beta-field">
+          <mat-label>Inhalt</mat-label>
+          <textarea matInput rows="5" formControlName="content" placeholder="Text hier eingeben..."></textarea>
+        </mat-form-field>
+      </form>
+    </div>
+
+    <div class="beta-footer">
+      <div class="beta-status">
+        <div class="beta-status-title">Status:</div>
+        <div>Hilfeplan: {{ assistancePlanSelected ? 'Gewählt' : 'Nicht gewählt' }}</div>
+        <div>Ziele: {{ selectedGoals.length > 0 ? selectedGoals.length : 'Keine' }}</div>
+        <div>Kategorien: {{ selectedCategories.length > 0 ? selectedCategories.length : 'Keine' }}</div>
+      </div>
+
+      <div class="beta-actions">
+        <button mat-raised-button color="primary" (click)="create()">Speichern</button>
+        <button mat-stroked-button (click)="location.back()">Abbrechen</button>
+        <button mat-stroked-button (click)="resetAll()">Zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+</div>
