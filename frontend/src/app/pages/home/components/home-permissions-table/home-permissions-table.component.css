@@ -29,6 +29,10 @@ table {
   font-weight: 500;
 }
 
+.home-panel-title mat-icon {
+  color: #6a7386;
+}
+
 .permissions-mobile {
   display: none;
 }

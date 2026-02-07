@@ -1,0 +1,10 @@
+.home-general-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.home-general-accordion {
+  width: 100%;
+  max-width: 1000px;
+}

@@ -16,3 +16,7 @@
   gap: 10px;
   font-weight: 500;
 }
+
+.home-panel-title mat-icon {
+  color: #6a7386;
+}
