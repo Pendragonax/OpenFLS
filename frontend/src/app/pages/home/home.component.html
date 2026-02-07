@@ -1,9 +1,7 @@
 @if (homeVm$ | async; as homeVm) {
-  <app-home-header [employee]="homeVm.employee"></app-home-header>
-
   <mat-tab-group [selectedIndex]="selectedTabIndex"
                  (selectedIndexChange)="onTabIndexChange($event)">
-    <mat-tab label="Hilfeplan Favoriten">
+    <mat-tab label="Favoriten">
       <app-assistance-plans class="m-2"
                             [favorites$]="favorite$"></app-assistance-plans></mat-tab>
 
