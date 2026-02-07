@@ -80,7 +80,8 @@
             <div class="row justify-content-center">
             @if (!hideSearchStringFilter) {
               <div class="col-12 mb-2">
-                <app-search-field [isSubmitting]="isSubmitting"
+                <app-search-field class="w-100"
+                                  [isSubmitting]="isSubmitting"
                                   [placeholder]="'...'"
                                   (onSearchStringChanges)="onSearchStringChanges($event)"></app-search-field>
               </div>

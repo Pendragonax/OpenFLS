@@ -117,6 +117,11 @@ td , th {
     display: block;
   }
 
+  .filters-mobile app-search-field {
+    display: block;
+    width: 100%;
+  }
+
   .assistance-table {
     display: none;
   }
