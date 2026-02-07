@@ -5,9 +5,10 @@
     </mat-panel-title>
   </mat-expansion-panel-header>
   <div class="container-fluid">
-    <table mat-table
-           [dataSource]="permissions"
-           class="mat-elevation-z4">
+    <div class="permissions-table">
+      <table mat-table
+             [dataSource]="permissions"
+             class="mat-elevation-z4">
       <ng-container matColumnDef="name">
         <th mat-header-cell
             *matHeaderCellDef
@@ -59,6 +60,39 @@
 
       <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
-    </table>
+      </table>
+    </div>
+
+    <div class="permissions-mobile">
+      @for (permission of permissions; track permission[0].id) {
+        <div class="permission-card mat-elevation-z2">
+          <div class="permission-header">{{ permission[0].name }}</div>
+          <div class="permission-row">
+            <span class="permission-label">Leitung</span>
+            <mat-checkbox class="permission-checkbox"
+                          [disabled]="true"
+                          [checked]="permission[2].changeInstitution"></mat-checkbox>
+          </div>
+          <div class="permission-row">
+            <span class="permission-label">Schreibrecht</span>
+            <mat-checkbox class="permission-checkbox"
+                          [disabled]="true"
+                          [checked]="permission[2].writeEntries"></mat-checkbox>
+          </div>
+          <div class="permission-row">
+            <span class="permission-label">Leserecht</span>
+            <mat-checkbox class="permission-checkbox"
+                          [disabled]="true"
+                          [checked]="permission[2].readEntries"></mat-checkbox>
+          </div>
+          <div class="permission-row">
+            <span class="permission-label">Zugehörigkeit</span>
+            <mat-checkbox class="permission-checkbox"
+                          [disabled]="true"
+                          [checked]="permission[2].affiliated"></mat-checkbox>
+          </div>
+        </div>
+      }
+    </div>
   </div>
 </mat-expansion-panel>
