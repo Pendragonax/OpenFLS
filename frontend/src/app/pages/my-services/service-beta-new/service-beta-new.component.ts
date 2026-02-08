@@ -97,6 +97,14 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     return endTotal > startTotal;
   }
 
+  get canSave(): boolean {
+    return this.isTimeValid &&
+      this.clientSelected &&
+      !!this.institutionControl.value &&
+      !!this.hourTypeControl.value &&
+      this.assistancePlanSelected;
+  }
+
   toggleDuration(useDuration: boolean) {
     this.useDuration = useDuration;
     if (this.useDuration) {
