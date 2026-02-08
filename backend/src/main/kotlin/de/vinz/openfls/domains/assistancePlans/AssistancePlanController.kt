@@ -369,7 +369,6 @@ class AssistancePlanController(
 
             val response = assistancePlanEvaluationLeftService.createAssistancePlanHourTypeAnalysis(LocalDate.now(), id)
 
-            Thread.sleep(3000)
             if (logPerformance) {
                 logger.info(
                     String.format(

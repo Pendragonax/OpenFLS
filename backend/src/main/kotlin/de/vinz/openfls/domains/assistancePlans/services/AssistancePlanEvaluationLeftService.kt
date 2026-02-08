@@ -26,16 +26,16 @@ class AssistancePlanEvaluationLeftService(
         val hourTypes = getDistinctHourTypesIn(assistancePlan)
 
         val hourTypeEvaluation = hourTypes.map { hourType ->
-            val approvedHoursLeftInWeek = getApprovedHoursLeftIn(date, assistancePlan, hourType.id)
-            val approvedHoursLeftInMonth =
-                getApprovedHoursLeftIn(date.year, date.monthValue, assistancePlan, hourType.id)
-            val approvedHoursLeftInYear = getApprovedHoursLeftIn(date.year, assistancePlan, hourType.id)
+            val approvedMinutesLeftInWeek = getApprovedMinutesLeftIn(date, assistancePlan, hourType.id)
+            val approvedMinutesLeftInMonth =
+                getApprovedMinutesLeftIn(date.year, date.monthValue, assistancePlan, hourType.id)
+            val approvedMinutesLeftInYear = getApprovedMinutesLeftIn(date.year, assistancePlan, hourType.id)
 
             HourTypeEvaluationDTO(
                 hourTypeName = hourType.title,
-                leftThisWeek = approvedHoursLeftInWeek,
-                leftThisMonth = approvedHoursLeftInMonth,
-                leftThisYear = approvedHoursLeftInYear
+                leftThisWeek = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInWeek / 60.0),
+                leftThisMonth = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInMonth / 60.0),
+                leftThisYear = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInYear / 60.0)
             )
         }
 
@@ -53,33 +53,33 @@ class AssistancePlanEvaluationLeftService(
         return hourTypeIdsFromHours + hourTypeIdsFromGoals
     }
 
-    private fun getApprovedHoursLeftIn(date: LocalDate, assistancePlan: AssistancePlan, hourTypeId: Long): Double {
+    private fun getApprovedMinutesLeftIn(date: LocalDate, assistancePlan: AssistancePlan, hourTypeId: Long): Double {
         val weekDates = getWeekStartAndEnd(date)
         val startOfTheWeek = weekDates.first
         val endOfTheWeek = weekDates.second
-        val approvedHours = getApprovedHoursByHourTypeIdIn(startOfTheWeek, endOfTheWeek, assistancePlan, hourTypeId)
-        val executedHours = getExecutedHoursByHourTypeIdIn(startOfTheWeek, endOfTheWeek, assistancePlan, hourTypeId)
-        return TimeDoubleService.diffTimeDoubles(approvedHours, executedHours)
+        val approvedMinutes = getApprovedMinutesByHourTypeIdIn(startOfTheWeek, endOfTheWeek, assistancePlan, hourTypeId)
+        val executedMinutes = getExecutedMinutesByHourTypeIdIn(startOfTheWeek, endOfTheWeek, assistancePlan, hourTypeId)
+        return approvedMinutes - executedMinutes
     }
 
-    private fun getApprovedHoursLeftIn(year: Int, assistancePlan: AssistancePlan, hourTypeId: Long): Double {
-        val approvedHours = getApprovedHoursByHourTypeIdIn(year, assistancePlan, hourTypeId)
-        val executedHours = getExecutedHoursByHourTypeIdIn(year, assistancePlan, hourTypeId)
-        return TimeDoubleService.diffTimeDoubles(approvedHours, executedHours)
+    private fun getApprovedMinutesLeftIn(year: Int, assistancePlan: AssistancePlan, hourTypeId: Long): Double {
+        val approvedMinutes = getApprovedMinutesByHourTypeIdIn(year, assistancePlan, hourTypeId)
+        val executedMinutes = getExecutedMinutesByHourTypeIdIn(year, assistancePlan, hourTypeId)
+        return approvedMinutes - executedMinutes
     }
 
-    private fun getApprovedHoursLeftIn(
+    private fun getApprovedMinutesLeftIn(
         year: Int,
         month: Int,
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
-        val approvedHours = getApprovedHoursByHourTypeIdIn(year, month, assistancePlan, hourTypeId)
-        val executedHours = getExecutedHoursByHourTypeIdIn(year, month, assistancePlan, hourTypeId)
-        return TimeDoubleService.diffTimeDoubles(approvedHours, executedHours)
+        val approvedMinutes = getApprovedMinutesByHourTypeIdIn(year, month, assistancePlan, hourTypeId)
+        val executedMinutes = getExecutedMinutesByHourTypeIdIn(year, month, assistancePlan, hourTypeId)
+        return approvedMinutes - executedMinutes
     }
 
-    private fun getApprovedHoursByHourTypeIdIn(
+    private fun getApprovedMinutesByHourTypeIdIn(
         start: LocalDate,
         end: LocalDate,
         assistancePlan: AssistancePlan,
@@ -87,16 +87,16 @@ class AssistancePlanEvaluationLeftService(
     ): Double {
         val days = countMatchingDaysIn(start, end, assistancePlan)
 
-        val approvedHours = if (assistancePlan.hours.isEmpty()) {
-            sumGoalsHoursByHourTypeId(assistancePlan.goals, days, hourTypeId)
+        val approvedMinutes = if (assistancePlan.hours.isEmpty()) {
+            sumGoalsMinutesByHourTypeId(assistancePlan.goals, days, hourTypeId)
         } else {
-            sumHoursByHourTypeId(assistancePlan, days, hourTypeId)
+            sumMinutesByHourTypeId(assistancePlan, days, hourTypeId)
         }
 
-        return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
+        return approvedMinutes
     }
 
-    private fun getApprovedHoursByHourTypeIdIn(
+    private fun getApprovedMinutesByHourTypeIdIn(
         year: Int,
         assistancePlan: AssistancePlan,
         hourTypeId: Long
@@ -104,14 +104,14 @@ class AssistancePlanEvaluationLeftService(
         val days = countMatchingDaysIn(year, assistancePlan)
 
         val approvedHours = if (assistancePlan.hours.isEmpty()) {
-            sumGoalsHoursByHourTypeId(assistancePlan.goals, days, hourTypeId)
+            sumGoalsMinutesByHourTypeId(assistancePlan.goals, days, hourTypeId)
         } else {
-            sumHoursByHourTypeId(assistancePlan, days, hourTypeId)
+            sumMinutesByHourTypeId(assistancePlan, days, hourTypeId)
         }
         return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
     }
 
-    private fun getApprovedHoursByHourTypeIdIn(
+    private fun getApprovedMinutesByHourTypeIdIn(
         year: Int,
         month: Int,
         assistancePlan: AssistancePlan,
@@ -120,9 +120,9 @@ class AssistancePlanEvaluationLeftService(
         val days = countMatchingDaysIn(year, month, assistancePlan)
 
         val approvedHours = if (assistancePlan.hours.isEmpty()) {
-            sumGoalsHoursByHourTypeId(assistancePlan.goals, days, hourTypeId)
+            sumGoalsMinutesByHourTypeId(assistancePlan.goals, days, hourTypeId)
         } else {
-            sumHoursByHourTypeId(assistancePlan, days, hourTypeId)
+            sumMinutesByHourTypeId(assistancePlan, days, hourTypeId)
         }
         return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
     }
@@ -182,71 +182,65 @@ class AssistancePlanEvaluationLeftService(
         return assistancePlan.start <= end && assistancePlan.end >= start
     }
 
-    private fun sumHoursByHourTypeId(assistancePlan: AssistancePlan, days: Int, hourTypeId: Long): Double {
+    private fun sumMinutesByHourTypeId(assistancePlan: AssistancePlan, numberOfDays: Int, hourTypeId: Long): Double {
         return assistancePlan.hours.filter { it.hourType?.id == hourTypeId }
-            .sumOf { hour -> (hour.weeklyHours / 7) * days }
+            .sumOf { hour -> (hour.weeklyHours / 7) * numberOfDays * 60.0 }
     }
 
-    private fun sumGoalsHoursByHourTypeId(goals: Set<Goal>, numberOfDays: Int, hourTypeId: Long): Double {
-        return goals.sumOf { sumGoalHoursByHourTypeId(it, numberOfDays, hourTypeId) }
+    private fun sumGoalsMinutesByHourTypeId(goals: Set<Goal>, numberOfDays: Int, hourTypeId: Long): Double {
+        return goals.sumOf { sumGoalMinutesByHourTypeId(it, numberOfDays, hourTypeId) }
     }
 
-    private fun sumGoalHoursByHourTypeId(goal: Goal, numberOfDays: Int, hourTypeId: Long): Double {
+    private fun sumGoalMinutesByHourTypeId(goal: Goal, numberOfDays: Int, hourTypeId: Long): Double {
         if (goal.hours.isEmpty()) {
             return 0.0
         }
 
         val hours = goal.hours.filter { it.hourType?.id == hourTypeId }
-        return hours.sumOf { hour -> (hour.weeklyHours / 7) * numberOfDays }
+        return hours.sumOf { hour -> (hour.weeklyHours / 7) * numberOfDays * 60.0 }
     }
 
-    private fun getExecutedHoursByHourTypeIdIn(
+    private fun getExecutedMinutesByHourTypeIdIn(
         start: LocalDate,
         end: LocalDate,
         assistancePlan: AssistancePlan,
         hourTypeId: Long
-    ): Double {
+    ): Int {
         val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
             start = start,
             end = end,
             assistancePlanId = assistancePlan.id,
             hourTypeId = hourTypeId
         )
-        val hours = services.sumOf { it.minutes.toDouble() } / 60
-
-        return TimeDoubleService.convertDoubleToTimeDouble(hours)
+        return services.sumOf { it.minutes }
     }
 
-    private fun getExecutedHoursByHourTypeIdIn(
+    private fun getExecutedMinutesByHourTypeIdIn(
         year: Int,
         assistancePlan: AssistancePlan,
         hourTypeId: Long
-    ): Double {
+    ): Int {
         val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
             assistancePlanId = assistancePlan.id,
             hourTypeId = hourTypeId,
             year = year
         )
-        val hours = services.sumOf { it.minutes.toDouble() } / 60
-
-        return TimeDoubleService.convertDoubleToTimeDouble(hours)
+        return services.sumOf { it.minutes }
     }
 
-    private fun getExecutedHoursByHourTypeIdIn(
+    private fun getExecutedMinutesByHourTypeIdIn(
         year: Int,
         month: Int,
         assistancePlan: AssistancePlan,
         hourTypeId: Long
-    ): Double {
+    ): Int {
         val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
             assistancePlanId = assistancePlan.id,
             hourTypeId = hourTypeId,
             year = year,
             month = month
         )
-        val hours = services.sumOf { it.minutes.toDouble() } / 60
-
-        return TimeDoubleService.convertDoubleToTimeDouble(hours)
+        return services.sumOf { it.minutes }
     }
 
     private fun getWeekStartAndEnd(date: LocalDate): Pair<LocalDate, LocalDate> {
