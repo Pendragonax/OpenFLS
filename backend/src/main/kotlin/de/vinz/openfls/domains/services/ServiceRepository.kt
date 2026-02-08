@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.services
 
 import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
+import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceCalendarProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
@@ -104,6 +105,18 @@ interface ServiceRepository : CrudRepository<Service, Long> {
         start: LocalDate,
         end: LocalDate
     ): List<ServiceProjection>
+
+    @Query(
+        "SELECT u.start AS start, u.end AS end, e.firstname AS employeeFirstname, e.lastname AS employeeLastname " +
+                "FROM Service u JOIN u.employee e " +
+                "WHERE u.client.id = :clientId " +
+                "AND cast(u.start as LocalDate) = :date " +
+                "ORDER BY u.start"
+    )
+    fun findFromTillEmployeeServiceProjectionByClientIdAndStartIsBetween(
+        clientId: Long,
+        date: LocalDate,
+    ): List<FromTillEmployeeServiceProjection>
 
     @Query(
         "SELECT u FROM Service u " +

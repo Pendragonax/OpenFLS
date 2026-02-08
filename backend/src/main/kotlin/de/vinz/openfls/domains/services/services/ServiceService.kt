@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.dtos.ServiceXLDto
 import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
+import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import jakarta.transaction.Transactional
@@ -212,6 +213,10 @@ class ServiceService(
     fun getDtosByClientAndDate(clientId: Long, date: LocalDate): List<ServiceDto> {
         return getByClientAndDate(clientId, date)
                 .map { modelMapper.map(it, ServiceDto::class.java) }
+    }
+
+    fun getFromTillEmployeeNameProjectionByClientAndDate(clientId: Long, date: LocalDate): List<FromTillEmployeeServiceProjection> {
+        return serviceRepository.findFromTillEmployeeServiceProjectionByClientIdAndStartIsBetween(clientId, date)
     }
 
     fun getByClientAndDate(clientId: Long, date: LocalDate): List<Service> {
