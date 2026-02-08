@@ -313,11 +313,30 @@
   .beta-time-group--to {
     justify-self: center;
   }
+
+  .beta-status {
+    width: 100%;
+  }
 }
 
 @media (max-width: 640px) {
   .beta-grid-3,
   .beta-grid-2 {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  .beta-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .beta-actions button:first-child {
+    width: 100%;
+  }
+
+  .beta-actions button:not(:first-child) {
+    width: calc(50% - 5px);
   }
 }
