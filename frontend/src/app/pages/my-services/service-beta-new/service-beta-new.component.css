@@ -273,6 +273,22 @@
   margin-bottom: 6px;
 }
 
+.beta-status-ok {
+  color: #3b9332;
+}
+
+.beta-status-bad {
+  color: #c62828;
+}
+
+.beta-status mat-icon {
+  margin-bottom: 5px;
+  vertical-align: middle;
+  font-size: 17px;
+  height: 17px;
+  width: 17px;
+}
+
 .beta-actions {
   display: flex;
   align-items: center;

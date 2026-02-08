@@ -248,7 +248,30 @@
     <div class="beta-footer">
       <div class="beta-status">
         <div class="beta-status-title">Status:</div>
-        <div>Hilfeplan: {{ assistancePlanSelected ? 'Gewählt' : 'Nicht gewählt' }}</div>
+        <div>
+          Klient:
+          <mat-icon [class.beta-status-ok]="clientSelected" [class.beta-status-bad]="!clientSelected">
+            {{ clientSelected ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
+        <div>
+          Bereich:
+          <mat-icon [class.beta-status-ok]="institutionControl.value" [class.beta-status-bad]="!institutionControl.value">
+            {{ institutionControl.value ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
+        <div>
+          Stundentyp:
+          <mat-icon [class.beta-status-ok]="hourTypeControl.value" [class.beta-status-bad]="!hourTypeControl.value">
+            {{ hourTypeControl.value ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
+        <div>
+          Hilfeplan:
+          <mat-icon [class.beta-status-ok]="assistancePlanSelected" [class.beta-status-bad]="!assistancePlanSelected">
+            {{ assistancePlanSelected ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
         <div>Ziele: {{ selectedGoals.length > 0 ? selectedGoals.length : 'Keine' }}</div>
         <div>Kategorien: {{ selectedCategories.length > 0 ? selectedCategories.length : 'Keine' }}</div>
       </div>
