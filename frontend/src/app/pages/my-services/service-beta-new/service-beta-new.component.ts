@@ -17,6 +17,8 @@ import {ClientDto} from "../../../shared/dtos/client-dto.model";
 import {ServiceService} from "../../../shared/services/service.service";
 import {ClientAndDateServiceDto} from "../../../shared/dtos/client-and-date-response-dto.model";
 import {catchError, combineLatest, finalize, map, of, startWith, switchMap} from "rxjs";
+import {AssistancePlanService} from "../../../shared/services/assistance-plan.service";
+import {AssistancePlanHourTypeEvaluationLeftDto} from "../../../shared/dtos/assistance-plan-evaluation-left.dto";
 
 @Component({
   selector: 'app-service-beta-new',
@@ -37,9 +39,12 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
   private readonly betaDestroyRef = inject(DestroyRef);
   private lastServiceDate = '';
   private clientEntriesSetup = false;
+  private assistanceInfoSetup = false;
   useDuration = false;
   clientEntries: ClientAndDateServiceDto[] = [];
   clientEntriesLoading = false;
+  assistanceInfo: AssistancePlanHourTypeEvaluationLeftDto[] = [];
+  assistanceInfoLoading = false;
   constructor(
     userService: UserService,
     institutionService: InstitutionService,
@@ -48,6 +53,7 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     categoryService: CategoriesService,
     sponsorService: SponsorService,
     private readonly betaServiceService: ServiceService,
+    private readonly betaAssistancePlanService: AssistancePlanService,
     router: Router,
     route: ActivatedRoute,
     converter: Converter,
@@ -398,6 +404,7 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       .subscribe(value => this.value.groupService = value);
 
     this.setupClientEntriesStream();
+    this.setupAssistanceInfoStream();
   }
 
   private setupClientEntriesStream() {
@@ -434,6 +441,39 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       )
       .subscribe(entries => {
         this.clientEntries = entries;
+      });
+  }
+
+  private setupAssistanceInfoStream() {
+    if (this.assistanceInfoSetup) {
+      return;
+    }
+    this.assistanceInfoSetup = true;
+
+    const assistancePlanId$ = this.assistancePlansControl.valueChanges.pipe(startWith(this.assistancePlansControl.value));
+
+    assistancePlanId$
+      .pipe(
+        takeUntilDestroyed(this.betaDestroyRef),
+        switchMap((assistancePlanId) => {
+          if (!assistancePlanId) {
+            this.assistanceInfo = [];
+            this.assistanceInfoLoading = false;
+            return of([]);
+          }
+
+          this.assistanceInfoLoading = true;
+          return this.betaAssistancePlanService.getEvaluationLeftById(Number(assistancePlanId)).pipe(
+            map(response => response.hourTypeEvaluation ?? []),
+            catchError(() => of([])),
+            finalize(() => {
+              this.assistanceInfoLoading = false;
+            })
+          );
+        })
+      )
+      .subscribe(info => {
+        this.assistanceInfo = info;
       });
   }
 
