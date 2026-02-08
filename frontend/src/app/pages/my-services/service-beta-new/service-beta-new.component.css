@@ -80,6 +80,11 @@
   color: #6a7386;
 }
 
+:host ::ng-deep .beta-field-count .mat-mdc-form-field-hint {
+  font-size: 10px;
+  color: #5d6678;
+}
+
 .beta-field-wide {
   grid-column: 1 / -1;
 }
