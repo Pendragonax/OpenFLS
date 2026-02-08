@@ -228,6 +228,8 @@
   color: #7a8396;
   padding: 10px 12px;
   border-radius: 6px;
+  width: 100%;
+  grid-column: 1 / -1;
 }
 
 .beta-entries {

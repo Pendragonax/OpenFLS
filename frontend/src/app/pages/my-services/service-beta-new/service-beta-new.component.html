@@ -195,7 +195,7 @@
             <div class="beta-empty">Hilfeplan ist auswählbar, wenn ein Klient und Datum gewählt wurden.</div>
           }
 
-          @if (assistancePlanSelected) {
+          @if (assistancePlanSelected && (selectedAssistancePlan?.goals?.length ?? 0) > 0) {
             <mat-form-field appearance="outline" class="beta-field beta-field-wide">
               <mat-icon matPrefix>flag</mat-icon>
               <mat-label>Ziele auswählen</mat-label>
@@ -206,7 +206,9 @@
               </mat-select>
             </mat-form-field>
           } @else {
-            <div class="beta-empty">Ziele werden angezeigt, sobald ein Hilfeplan gewählt wurde.</div>
+            <div class="beta-empty">
+              {{ assistancePlanSelected ? 'Für diesen Hilfeplan sind keine Ziele vorhanden.' : 'Ziele werden angezeigt, sobald ein Hilfeplan gewählt wurde.' }}
+            </div>
           }
         </div>
 
