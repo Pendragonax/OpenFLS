@@ -13,6 +13,7 @@ import {AssistancePlanView} from "../models/assistance-plan-view.model";
 import {SponsorService} from "./sponsor.service";
 import {SponsorDto} from "../dtos/sponsor-dto.model";
 import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
+import {AssistancePlanEvaluationLeftDto} from "../dtos/assistance-plan-evaluation-left.dto";
 import {AssistancePlan} from "../projections/assistance-plan.projection";
 
 @Injectable({
@@ -190,5 +191,10 @@ export class AssistancePlanService extends Base<AssistancePlanDto>{
   getEvaluationById(id: number): Observable<AssistancePlanEvaluation> {
     return this.http
       .get<AssistancePlanEvaluation>(`${environment.api_url}${this.url}/eval/${id}`)
+  }
+
+  getEvaluationLeftById(id: number): Observable<AssistancePlanEvaluationLeftDto> {
+    return this.http
+      .get<AssistancePlanEvaluationLeftDto>(`${environment.api_url}${this.url}/eval/left/${id}`)
   }
 }
