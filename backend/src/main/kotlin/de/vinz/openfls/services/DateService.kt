@@ -84,12 +84,12 @@ class DateService {
             return if (Year.of(year).isLeap) 366L else 365L
         }
 
-        fun countDaysOfYearBetweenStartAndEnd(year: Int, start: LocalDate, end: LocalDate?): Long {
+        fun countDaysOfYearBetweenStartAndEnd(year: Int, start: LocalDate, end: LocalDate?): Int {
             val startYear = LocalDate.of(year, 1, 1)
             val startReal = if (start < startYear) startYear else start
             val endReal = end ?: LocalDate.of(year, 12, 31)
 
-            return ChronoUnit.DAYS.between(startReal, endReal) + 1
+            return (ChronoUnit.DAYS.between(startReal, endReal) + 1).toInt()
         }
 
         fun countDaysOfMonthAndYearBetweenStartAndEnd(year: Int, month: Int, start: LocalDate, end: LocalDate): Int {
