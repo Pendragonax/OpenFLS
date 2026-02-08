@@ -405,6 +405,15 @@
   .beta-status {
     width: 100%;
   }
+
+  .beta-plan-row {
+    grid-template-columns: 1fr;
+  }
+
+  .beta-plan-metric {
+    display: flex;
+    justify-content: space-between;
+  }
 }
 
 @media (max-width: 640px) {
