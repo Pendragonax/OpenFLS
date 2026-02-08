@@ -228,7 +228,20 @@
     <div class="beta-section">
       <div class="beta-section-title">Hilfeplaninformationen</div>
       @if (assistancePlanSelected) {
-        <div class="beta-empty">Hilfeplaninformationen werden hier angezeigt.</div>
+        <div class="beta-plan-info">
+          <div class="beta-plan-row">
+            <div class="beta-plan-type">qualifizierte Assistenz</div>
+            <div class="beta-plan-metric">übrig diese Woche: 3,50h</div>
+            <div class="beta-plan-metric">übrig diesen Monat: 12,00h</div>
+            <div class="beta-plan-metric">übrig dieses Jahr: 64,00h</div>
+          </div>
+          <div class="beta-plan-row">
+            <div class="beta-plan-type">kompensatorische Assistenz</div>
+            <div class="beta-plan-metric">übrig diese Woche: 1,75h</div>
+            <div class="beta-plan-metric">übrig diesen Monat: 6,25h</div>
+            <div class="beta-plan-metric">übrig dieses Jahr: 28,50h</div>
+          </div>
+        </div>
       } @else {
         <div class="beta-empty">Hilfeplaninformationen sind erst sichtbar, wenn ein Hilfeplan ausgewählt wurde.</div>
       }
