@@ -24,6 +24,7 @@
                      inputmode="numeric"
                      min="0"
                      max="23"
+                     (focus)="selectAll($event)"
                      (blur)="clampTime('start')">
               <span class="beta-time-sep">:</span>
               <input type="number"
@@ -32,6 +33,7 @@
                      inputmode="numeric"
                      min="0"
                      max="59"
+                     (focus)="selectAll($event)"
                      (blur)="clampTime('start')">
               <div class="beta-time-buttons">
                 <button type="button" class="beta-time-btn" (click)="adjustStartMinute(1)">
@@ -60,6 +62,7 @@
                        inputmode="numeric"
                        min="0"
                        max="23"
+                       (focus)="selectAll($event)"
                        (blur)="clampTime('end')">
                 <span class="beta-time-sep">:</span>
                 <input type="number"
@@ -68,6 +71,7 @@
                        inputmode="numeric"
                        min="0"
                        max="59"
+                       (focus)="selectAll($event)"
                        (blur)="clampTime('end')">
                 <div class="beta-time-buttons">
                   <button type="button" class="beta-time-btn" (click)="adjustEndMinute(1)">
@@ -91,6 +95,7 @@
                        inputmode="numeric"
                        min="0"
                        max="1439"
+                       (focus)="selectAll($event)"
                        (blur)="clampDuration()">
                 <span class="beta-time-unit">min</span>
               </div>

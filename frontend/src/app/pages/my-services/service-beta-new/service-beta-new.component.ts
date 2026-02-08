@@ -109,6 +109,14 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     return this.converter.formatDateToGerman(new Date(this.selectedServiceDate.toString()));
   }
 
+  selectAll(event: FocusEvent) {
+    const target = event.target as HTMLInputElement | null;
+    if (!target) {
+      return;
+    }
+    target.select();
+  }
+
   toggleDuration(useDuration: boolean) {
     this.useDuration = useDuration;
     if (this.useDuration) {
