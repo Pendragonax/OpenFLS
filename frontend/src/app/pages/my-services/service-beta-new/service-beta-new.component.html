@@ -158,7 +158,16 @@
     <div class="beta-section">
       <div class="beta-section-title">Klienteneinträge am {{ selectedServiceDateDisplay }}</div>
       @if (clientSelected) {
-        <div class="beta-empty">Klienteneinträge werden hier angezeigt.</div>
+        <div class="beta-entries">
+          <div class="beta-entry-row">
+            <div class="beta-entry-time">08:30 – 09:15</div>
+            <div class="beta-entry-employee">M. Schuster</div>
+          </div>
+          <div class="beta-entry-row">
+            <div class="beta-entry-time">11:00 – 11:45</div>
+            <div class="beta-entry-employee">A. Becker</div>
+          </div>
+        </div>
       } @else {
         <div class="beta-empty">Klienteneinträge erst sichtbar, wenn ein Klient ausgewählt wurde.</div>
       }
