@@ -145,7 +145,7 @@ class AssistancePlanEvaluationLeftService(
         }
 
         return DateService.countDaysOfYearBetweenStartAndEnd(
-            2024,
+            start.year,
             start,
             end
         )

@@ -87,7 +87,15 @@ class DateService {
         fun countDaysOfYearBetweenStartAndEnd(year: Int, start: LocalDate, end: LocalDate?): Int {
             val startYear = LocalDate.of(year, 1, 1)
             val startReal = if (start < startYear) startYear else start
-            val endReal = end ?: LocalDate.of(year, 12, 31)
+            val endYear = LocalDate.of(year, 12, 31)
+
+            val endReal = if (end == null) {
+                LocalDate.of(year, 12, 31)
+            } else if (end < endYear) {
+                end
+            } else {
+                endYear
+            }
 
             return (ChronoUnit.DAYS.between(startReal, endReal) + 1).toInt()
         }

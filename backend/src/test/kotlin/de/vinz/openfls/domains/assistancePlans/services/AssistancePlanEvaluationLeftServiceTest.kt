@@ -165,7 +165,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         val plan = AssistancePlan(
             id = 4,
             start = LocalDate.of(2024, 1, 1),
-            end = LocalDate.of(2024, 12, 31),
+            end = LocalDate.of(2025, 12, 31),
             hours = mutableSetOf(AssistancePlanHour(weeklyHours = 7.0, hourType = hourType))
         )
         whenever(assistancePlanService.getById(4)).thenReturn(plan)
