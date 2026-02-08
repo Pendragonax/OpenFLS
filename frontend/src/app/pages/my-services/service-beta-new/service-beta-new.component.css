@@ -63,6 +63,7 @@
 
 .beta-date-field {
   align-self: end;
+  min-width: 140px;
 }
 
 :host ::ng-deep .beta-date-field .mat-mdc-form-field-subscript-wrapper {
@@ -288,18 +289,35 @@
   }
 
   .beta-grid-time {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(160px, 1fr) auto 20px auto;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 700px) {
+  .beta-grid-time {
+    grid-template-columns: 1fr 24px 1fr;
+    gap: 8px;
+  }
+
+  .beta-date-field {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .beta-grid-time .beta-field {
+    width: 100%;
+  }
+
+  .beta-time-group--from,
+  .beta-time-group--to {
+    justify-self: center;
   }
 }
 
 @media (max-width: 640px) {
   .beta-grid-3,
-  .beta-grid-2,
-  .beta-grid-time {
+  .beta-grid-2 {
     grid-template-columns: 1fr;
-  }
-
-  .beta-time-arrow {
-    display: none;
   }
 }
