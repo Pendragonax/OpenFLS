@@ -156,6 +156,15 @@
     </div>
 
     <div class="beta-section">
+      <div class="beta-section-title">Klienteneinträge am {{ selectedServiceDateDisplay }}</div>
+      @if (clientSelected) {
+        <div class="beta-empty">Klienteneinträge werden hier angezeigt.</div>
+      } @else {
+        <div class="beta-empty">Klienteneinträge erst sichtbar, wenn ein Klient ausgewählt wurde.</div>
+      }
+    </div>
+
+    <div class="beta-section">
       <div class="beta-section-title">Hilfeplan & Ziele</div>
       <form [formGroup]="secondForm">
         <div class="beta-grid beta-grid-2">

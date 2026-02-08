@@ -105,6 +105,10 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       this.assistancePlanSelected;
   }
 
+  get selectedServiceDateDisplay(): string {
+    return this.converter.formatDateToGerman(new Date(this.selectedServiceDate.toString()));
+  }
+
   toggleDuration(useDuration: boolean) {
     this.useDuration = useDuration;
     if (this.useDuration) {
