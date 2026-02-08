@@ -321,6 +321,14 @@
 }
 
 @media (max-width: 700px) {
+  .beta-service-page {
+    padding: 0;
+  }
+
+  .beta-card {
+    padding: 16px 4px 20px;
+  }
+
   .beta-grid-time {
     grid-template-columns: 1fr 24px 1fr;
     gap: 8px;
