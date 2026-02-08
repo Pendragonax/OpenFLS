@@ -51,7 +51,9 @@
           @if (!useDuration) {
             <div class="beta-time-group beta-time-group--to">
               <div class="beta-time-label">Bis</div>
-              <div class="beta-time-control beta-time-pill" [formGroup]="firstForm">
+              <div class="beta-time-control beta-time-pill"
+                   [class.beta-time-pill--invalid]="!isTimeValid"
+                   [formGroup]="firstForm">
                 <input type="number"
                        class="beta-time-input"
                        formControlName="endHour"
@@ -80,7 +82,9 @@
           } @else {
             <div class="beta-time-group beta-time-group--to beta-time-group--duration">
               <div class="beta-time-label">Dauer (Min)</div>
-              <div class="beta-time-control beta-duration-pill" [formGroup]="firstForm">
+              <div class="beta-time-control beta-time-pill beta-duration-pill"
+                   [class.beta-time-pill--invalid]="(durationControl.value ?? 0) <= 0"
+                   [formGroup]="firstForm">
                 <input type="number"
                        class="beta-time-input beta-duration-input"
                        formControlName="durationMinutes"
@@ -248,6 +252,12 @@
     <div class="beta-footer">
       <div class="beta-status">
         <div class="beta-status-title">Status:</div>
+        <div>
+          Zeitangabe:
+          <mat-icon [class.beta-status-ok]="isTimeValid" [class.beta-status-bad]="!isTimeValid">
+            {{ isTimeValid ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
         <div>
           Klient:
           <mat-icon [class.beta-status-ok]="clientSelected" [class.beta-status-bad]="!clientSelected">

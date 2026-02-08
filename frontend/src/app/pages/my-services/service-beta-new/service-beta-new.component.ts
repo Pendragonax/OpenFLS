@@ -87,6 +87,16 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
 
   get durationControl() { return this.firstForm.controls['durationMinutes']; }
 
+  get isTimeValid(): boolean {
+    const startHour = Number(this.startHourControl.value ?? 0);
+    const startMinute = Number(this.startMinuteControl.value ?? 0);
+    const endHour = Number(this.endHourControl.value ?? 0);
+    const endMinute = Number(this.endMinuteControl.value ?? 0);
+    const startTotal = startHour * 60 + startMinute;
+    const endTotal = endHour * 60 + endMinute;
+    return endTotal > startTotal;
+  }
+
   toggleDuration(useDuration: boolean) {
     this.useDuration = useDuration;
     if (this.useDuration) {
