@@ -251,10 +251,21 @@
           <div class="beta-plan-info">
             @for (info of assistanceInfo; track info.hourTypeName) {
               <div class="beta-plan-row">
-                <div class="beta-plan-type">{{ info.hourTypeName }}</div>
-                <div class="beta-plan-metric">übrig diese Woche: {{ info.leftThisWeek }}h</div>
-                <div class="beta-plan-metric">übrig diesen Monat: {{ info.leftThisMonth }}h</div>
-                <div class="beta-plan-metric">übrig dieses Jahr: {{ info.leftThisYear }}h</div>
+                <div class="beta-plan-type">
+                  {{ info.hourTypeName.length > 20 ? (info.hourTypeName | slice:0:20) + '…' : info.hourTypeName }}
+                </div>
+                <div class="beta-plan-metric">
+                  übrig diese Woche:
+                  <span class="beta-plan-pill">{{ info.leftThisWeek }}h</span>
+                </div>
+                <div class="beta-plan-metric">
+                  übrig diesen Monat:
+                  <span class="beta-plan-pill">{{ info.leftThisMonth }}h</span>
+                </div>
+                <div class="beta-plan-metric">
+                  übrig dieses Jahr:
+                  <span class="beta-plan-pill">{{ info.leftThisYear }}h</span>
+                </div>
               </div>
             }
           </div>
