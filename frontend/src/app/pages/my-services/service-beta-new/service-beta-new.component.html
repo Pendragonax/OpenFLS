@@ -210,15 +210,19 @@
     <div class="beta-section">
       <div class="beta-section-title">Kategorien</div>
       <form [formGroup]="thirdForm">
-        <mat-form-field appearance="outline" class="beta-field beta-field-count">
-          <mat-icon matPrefix>local_offer</mat-icon>
-          <mat-label>Kategorien auswählen</mat-label>
-          <mat-select formControlName="categoryList" multiple>
-            @for (category of categories; track category.id) {
-              <mat-option [value]="category.id">{{ category.title }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        @if (clientSelected) {
+          <mat-form-field appearance="outline" class="beta-field beta-field-count">
+            <mat-icon matPrefix>local_offer</mat-icon>
+            <mat-label>Kategorien auswählen</mat-label>
+            <mat-select formControlName="categoryList" multiple>
+              @for (category of categories; track category.id) {
+                <mat-option [value]="category.id">{{ category.title }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <div class="beta-empty">Kategorien sind auswählbar, wenn ein Klient gewählt wurde.</div>
+        }
 
         @if (selectedCategories.length > 0) {
           <mat-chip-set class="beta-chips">
