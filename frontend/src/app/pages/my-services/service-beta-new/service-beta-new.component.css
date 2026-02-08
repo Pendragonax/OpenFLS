@@ -53,7 +53,21 @@
 
 .beta-grid-time {
   grid-template-columns: minmax(180px, 1.2fr) auto 24px auto;
-  align-items: center;
+  align-items: end;
+}
+
+.beta-grid-time .beta-field {
+  align-self: end;
+  width: 50%;
+}
+
+.beta-date-field {
+  align-self: end;
+}
+
+:host ::ng-deep .beta-date-field .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+  height: 0;
 }
 
 .beta-field {
@@ -92,10 +106,12 @@
 
 .beta-time-group--from {
   justify-self: end;
+  align-self: end;
 }
 
 .beta-time-group--to {
   justify-self: start;
+  align-self: end;
 }
 
 .beta-time-label {
