@@ -217,6 +217,15 @@
     </div>
 
     <div class="beta-section">
+      <div class="beta-section-title">Hilfeplaninformationen</div>
+      @if (assistancePlanSelected) {
+        <div class="beta-empty">Hilfeplaninformationen werden hier angezeigt.</div>
+      } @else {
+        <div class="beta-empty">Hilfeplaninformationen sind erst sichtbar, wenn ein Hilfeplan ausgewählt wurde.</div>
+      }
+    </div>
+
+    <div class="beta-section">
       <div class="beta-section-title">Kategorien</div>
       <form [formGroup]="thirdForm">
         @if (clientSelected) {
