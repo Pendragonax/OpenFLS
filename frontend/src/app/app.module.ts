@@ -133,6 +133,7 @@ import {ClientAutocompleteComponent} from "./shared/components/client-autocomple
 import {ServiceTableComponent} from "./shared/components/service-table/service-table.component";
 import {EmployeeAutocompleteComponent} from "./shared/components/employee-autocomplete/employee-autocomplete.component";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -236,6 +237,7 @@ const routes: Routes = [
     MatDialogModule,
     MatChipsModule,
     MatDividerModule,
+    MatSlideToggleModule,
     SearchFieldComponent,
     InstitutionSelectComponent,
     DateCompleteSelectionComponent,

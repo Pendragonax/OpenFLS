@@ -21,6 +21,7 @@
               <input type="number"
                      class="beta-time-input"
                      formControlName="startHour"
+                     inputmode="numeric"
                      min="0"
                      max="23"
                      (blur)="clampTime('start')">
@@ -28,6 +29,7 @@
               <input type="number"
                      class="beta-time-input"
                      formControlName="startMinute"
+                     inputmode="numeric"
                      min="0"
                      max="59"
                      (blur)="clampTime('start')">
@@ -46,32 +48,58 @@
             <mat-icon>arrow_forward</mat-icon>
           </div>
 
-          <div class="beta-time-group beta-time-group--to">
-            <div class="beta-time-label">Bis</div>
-            <div class="beta-time-control beta-time-pill" [formGroup]="firstForm">
-              <input type="number"
-                     class="beta-time-input"
-                     formControlName="endHour"
-                     min="0"
-                     max="23"
-                     (blur)="clampTime('end')">
-              <span class="beta-time-sep">:</span>
-              <input type="number"
-                     class="beta-time-input"
-                     formControlName="endMinute"
-                     min="0"
-                     max="59"
-                     (blur)="clampTime('end')">
-              <div class="beta-time-buttons">
-                <button type="button" class="beta-time-btn" (click)="adjustEndMinute(1)">
-                  <mat-icon>keyboard_arrow_up</mat-icon>
-                </button>
-                <button type="button" class="beta-time-btn" (click)="adjustEndMinute(-1)">
-                  <mat-icon>keyboard_arrow_down</mat-icon>
-                </button>
+          @if (!useDuration) {
+            <div class="beta-time-group beta-time-group--to">
+              <div class="beta-time-label">Bis</div>
+              <div class="beta-time-control beta-time-pill" [formGroup]="firstForm">
+                <input type="number"
+                       class="beta-time-input"
+                       formControlName="endHour"
+                       inputmode="numeric"
+                       min="0"
+                       max="23"
+                       (blur)="clampTime('end')">
+                <span class="beta-time-sep">:</span>
+                <input type="number"
+                       class="beta-time-input"
+                       formControlName="endMinute"
+                       inputmode="numeric"
+                       min="0"
+                       max="59"
+                       (blur)="clampTime('end')">
+                <div class="beta-time-buttons">
+                  <button type="button" class="beta-time-btn" (click)="adjustEndMinute(1)">
+                    <mat-icon>keyboard_arrow_up</mat-icon>
+                  </button>
+                  <button type="button" class="beta-time-btn" (click)="adjustEndMinute(-1)">
+                    <mat-icon>keyboard_arrow_down</mat-icon>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          } @else {
+            <div class="beta-time-group beta-time-group--to beta-time-group--duration">
+              <div class="beta-time-label">Dauer (Min)</div>
+              <div class="beta-time-control beta-duration-pill" [formGroup]="firstForm">
+                <input type="number"
+                       class="beta-time-input beta-duration-input"
+                       formControlName="durationMinutes"
+                       inputmode="numeric"
+                       min="0"
+                       max="1439"
+                       (blur)="clampDuration()">
+                <span class="beta-time-unit">min</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="beta-duration-toggle">
+          <mat-slide-toggle
+            [checked]="useDuration"
+            (change)="toggleDuration($event.checked)">
+            Dauer statt Bis
+          </mat-slide-toggle>
         </div>
       </form>
     </div>

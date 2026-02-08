@@ -1,4 +1,5 @@
 import {Component, DestroyRef, inject} from '@angular/core';
+import {UntypedFormControl, Validators} from "@angular/forms";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {ServiceDetailComponent} from "../../service-detail/service-detail.component";
 import {UserService} from "../../../shared/services/user.service";
@@ -33,6 +34,7 @@ import {ClientDto} from "../../../shared/dtos/client-dto.model";
 export class ServiceBetaNewComponent extends ServiceDetailComponent {
   private readonly betaDestroyRef = inject(DestroyRef);
   private lastServiceDate = '';
+  useDuration = false;
   constructor(
     userService: UserService,
     institutionService: InstitutionService,
@@ -61,6 +63,11 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       helperService,
       location
     );
+
+    this.firstForm.addControl(
+      'durationMinutes',
+      new UntypedFormControl(0, Validators.compose([Validators.min(0), Validators.max(1439)]))
+    );
   }
 
   displayClient = (client: ClientDto | string | null): string => {
@@ -76,6 +83,33 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     }
     this.clientControl.setValue(client);
     this.clientsControl.setValue(client.id);
+  }
+
+  get durationControl() { return this.firstForm.controls['durationMinutes']; }
+
+  toggleDuration(useDuration: boolean) {
+    this.useDuration = useDuration;
+    if (this.useDuration) {
+      this.updateEndFromDuration();
+    }
+  }
+
+  private updateEndFromDuration() {
+    if (!this.useDuration) {
+      return;
+    }
+
+    const hour = Number(this.startHourControl.value ?? 0);
+    const minute = Number(this.startMinuteControl.value ?? 0);
+    const duration = Number(this.durationControl.value ?? 0);
+    const safeDuration = Number.isFinite(duration) ? Math.max(0, Math.min(1439, Math.floor(duration))) : 0;
+    const startTotal = hour * 60 + minute;
+    const totalMinutes = startTotal + safeDuration;
+    const clampedTotal = Math.max(0, Math.min(1439, totalMinutes));
+    const nextHour = Math.floor(clampedTotal / 60);
+    const nextMinute = clampedTotal % 60;
+    this.endHourControl.setValue(nextHour);
+    this.endMinuteControl.setValue(nextMinute);
   }
 
   private normalizeTime(hour: number, minute: number) {
@@ -109,6 +143,7 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     const normalized = this.normalizeTime(hour, minute);
     this.startHourControl.setValue(normalized.hour);
     this.startMinuteControl.setValue(normalized.minute);
+    this.updateEndFromDuration();
   }
 
   adjustEndMinute(delta: number) {
@@ -126,6 +161,7 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       const normalized = this.normalizeTime(hour, minute);
       this.startHourControl.setValue(normalized.hour);
       this.startMinuteControl.setValue(normalized.minute);
+      this.updateEndFromDuration();
     } else {
       const hour = Number(this.endHourControl.value ?? 0);
       const minute = Number(this.endMinuteControl.value ?? 0);
@@ -133,6 +169,13 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       this.endHourControl.setValue(normalized.hour);
       this.endMinuteControl.setValue(normalized.minute);
     }
+  }
+
+  clampDuration() {
+    const duration = Number(this.durationControl.value ?? 0);
+    const safeDuration = Number.isFinite(duration) ? Math.max(0, Math.min(1439, Math.floor(duration))) : 0;
+    this.durationControl.setValue(safeDuration);
+    this.updateEndFromDuration();
   }
 
   removeGoal(goalId: number) {
@@ -250,7 +293,11 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       .pipe(takeUntilDestroyed(this.betaDestroyRef))
       .subscribe(value => {
         if (value != null && !this.editMode) {
-          this.endHourControl.setValue(value);
+          if (this.useDuration) {
+            this.updateEndFromDuration();
+          } else {
+            this.endHourControl.setValue(value);
+          }
         }
       });
 
@@ -259,12 +306,20 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       .pipe(takeUntilDestroyed(this.betaDestroyRef))
       .subscribe(value => {
         if (value != null && !this.editMode) {
-          this.endMinuteControl.setValue(value);
+          if (this.useDuration) {
+            this.updateEndFromDuration();
+          } else {
+            this.endMinuteControl.setValue(value);
+          }
         }
       });
 
     this.endHourControl.enable();
     this.endMinuteControl.enable();
+
+    this.durationControl.valueChanges
+      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .subscribe(() => this.updateEndFromDuration());
 
     this.hourTypeControl.valueChanges
       .pipe(takeUntilDestroyed(this.betaDestroyRef))
@@ -315,6 +370,7 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       startMinute: this.timeNow.getMinutes(),
       endHour: this.timeNow.getHours(),
       endMinute: this.timeNow.getMinutes(),
+      durationMinutes: 0,
       institution: null
     });
 
@@ -339,5 +395,6 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     this.selectedCategories = [];
     this.clientSelected = false;
     this.assistancePlanSelected = false;
+    this.useDuration = false;
   }
 }
