@@ -8,13 +8,15 @@ import {ClientsService} from "../../../shared/services/clients.service";
 import {HourTypeService} from "../../../shared/services/hour-type.service";
 import {CategoriesService} from "../../../shared/services/categories.service";
 import {SponsorService} from "../../../shared/services/sponsor.service";
-import {ServiceService} from "../../../shared/services/service.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Converter} from "../../../shared/services/converter.helper";
 import {HelperService} from "../../../shared/services/helper.service";
 import {Location} from "@angular/common";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ClientDto} from "../../../shared/dtos/client-dto.model";
+import {ServiceService} from "../../../shared/services/service.service";
+import {ClientAndDateServiceDto} from "../../../shared/dtos/client-and-date-response-dto.model";
+import {catchError, combineLatest, finalize, map, of, startWith, switchMap} from "rxjs";
 
 @Component({
   selector: 'app-service-beta-new',
@@ -34,7 +36,10 @@ import {ClientDto} from "../../../shared/dtos/client-dto.model";
 export class ServiceBetaNewComponent extends ServiceDetailComponent {
   private readonly betaDestroyRef = inject(DestroyRef);
   private lastServiceDate = '';
+  private clientEntriesSetup = false;
   useDuration = false;
+  clientEntries: ClientAndDateServiceDto[] = [];
+  clientEntriesLoading = false;
   constructor(
     userService: UserService,
     institutionService: InstitutionService,
@@ -42,7 +47,7 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     hourTypeService: HourTypeService,
     categoryService: CategoriesService,
     sponsorService: SponsorService,
-    serviceService: ServiceService,
+    private readonly betaServiceService: ServiceService,
     router: Router,
     route: ActivatedRoute,
     converter: Converter,
@@ -56,7 +61,7 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
       hourTypeService,
       categoryService,
       sponsorService,
-      serviceService,
+      betaServiceService,
       router,
       route,
       converter,
@@ -391,6 +396,45 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     this.groupServiceControl.valueChanges
       .pipe(takeUntilDestroyed(this.betaDestroyRef))
       .subscribe(value => this.value.groupService = value);
+
+    this.setupClientEntriesStream();
+  }
+
+  private setupClientEntriesStream() {
+    if (this.clientEntriesSetup) {
+      return;
+    }
+    this.clientEntriesSetup = true;
+
+    const clientId$ = this.clientsControl.valueChanges.pipe(startWith(this.clientsControl.value));
+    const date$ = this.serviceDateControl.valueChanges.pipe(startWith(this.serviceDateControl.value));
+
+    combineLatest([clientId$, date$])
+      .pipe(
+        takeUntilDestroyed(this.betaDestroyRef),
+        switchMap(([clientId, date]) => {
+          if (!clientId || !date) {
+            this.clientEntries = [];
+            this.clientEntriesLoading = false;
+            return of([]);
+          }
+
+          this.clientEntriesLoading = true;
+          return this.betaServiceService.getClientAndDateServices(
+            Number(clientId),
+            new Date(date.toString())
+          ).pipe(
+            map(response => response.services ?? []),
+            catchError(() => of([])),
+            finalize(() => {
+              this.clientEntriesLoading = false;
+            })
+          );
+        })
+      )
+      .subscribe(entries => {
+        this.clientEntries = entries;
+      });
   }
 
   resetAll() {

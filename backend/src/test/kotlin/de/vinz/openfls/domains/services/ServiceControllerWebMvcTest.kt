@@ -18,7 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -66,7 +66,7 @@ class ServiceControllerWebMvcTest {
         val payload = mapOf("clientId" to 1, "date" to date.toString())
 
         // When
-        val result = mockMvc.get("/services/client-and-date") {
+        val result = mockMvc.post("/services/client-and-date") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(payload)
         }.andReturn()
@@ -90,7 +90,7 @@ class ServiceControllerWebMvcTest {
         val payload = mapOf("clientId" to 1, "date" to date.toString())
 
         // When
-        val result = mockMvc.get("/services/client-and-date") {
+        val result = mockMvc.post("/services/client-and-date") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(payload)
         }.andReturn()

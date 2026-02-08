@@ -238,6 +238,14 @@
   gap: 8px;
 }
 
+.beta-entries-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6a7386;
+  font-size: 12px;
+}
+
 .beta-entry-row {
   display: flex;
   align-items: center;

@@ -117,9 +117,9 @@ export class ServiceService extends Base<ServiceDto> {
       date: this.converter.formatDate(date)
     };
 
-    return this.http.request<ClientAndDateResponseDto>('GET',
+    return this.http.post<ClientAndDateResponseDto>(
       `${environment.api_url}${this.url}/client-and-date`,
-      { body: payload }
+      payload
     );
   }
 }

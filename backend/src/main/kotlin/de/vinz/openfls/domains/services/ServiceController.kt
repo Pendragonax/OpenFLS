@@ -733,7 +733,7 @@ class ServiceController(
         }
     }
 
-    @GetMapping("client-and-date")
+    @PostMapping("client-and-date")
     fun getByClientAndDate(@RequestBody request: ClientAndDateRequestDTO): ResponseEntity<Any> {
         return try {
             val startMs = System.currentTimeMillis()
