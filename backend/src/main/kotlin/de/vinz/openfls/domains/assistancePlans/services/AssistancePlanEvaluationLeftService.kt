@@ -85,7 +85,6 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
-
         val days = countMatchingDaysIn(start, end, assistancePlan)
 
         val approvedHours = if (assistancePlan.hours.isEmpty()) {
@@ -102,12 +101,13 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
-        if (assistancePlan.goals.isEmpty()) {
-            return 0.0
-        }
+        val days = countMatchingDaysIn(year, assistancePlan)
 
-        val numberOfDays = countMatchingDaysIn(year, assistancePlan)
-        val approvedHours = sumGoalsHoursByHourTypeId(assistancePlan.goals, numberOfDays, hourTypeId)
+        val approvedHours = if (assistancePlan.hours.isEmpty()) {
+            sumGoalsHoursByHourTypeId(assistancePlan.goals, days, hourTypeId)
+        } else {
+            sumHoursByHourTypeId(assistancePlan, days, hourTypeId)
+        }
         return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
     }
 
@@ -117,12 +117,13 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
-        if (assistancePlan.goals.isEmpty()) {
-            return 0.0
-        }
+        val days = countMatchingDaysIn(year, month, assistancePlan)
 
-        val numberOfDays = countMatchingDaysIn(year, month, assistancePlan)
-        val approvedHours = sumGoalsHoursByHourTypeId(assistancePlan.goals, numberOfDays, hourTypeId)
+        val approvedHours = if (assistancePlan.hours.isEmpty()) {
+            sumGoalsHoursByHourTypeId(assistancePlan.goals, days, hourTypeId)
+        } else {
+            sumHoursByHourTypeId(assistancePlan, days, hourTypeId)
+        }
         return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
     }
 

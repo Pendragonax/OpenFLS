@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.hourTypes.HourType
@@ -154,6 +155,48 @@ class AssistancePlanEvaluationLeftServiceTest {
         assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
         assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
         assertThat(evaluation.leftThisYear).isEqualTo(expectedLeftYear)
+    }
+
+    @Test
+    fun createAssistancePlanHourTypeAnalysis_leftThisWeekWithHoursOnAssistancePlan_returnsCorrectAmount() {
+        // Given
+        val date = LocalDate.of(2024, 3, 13) // Mittwoch
+        val hourType = HourType(id = 12, title = "Einzel")
+        val plan = AssistancePlan(
+            id = 4,
+            start = LocalDate.of(2024, 1, 1),
+            end = LocalDate.of(2024, 12, 31),
+            hours = mutableSetOf(AssistancePlanHour(weeklyHours = 7.0, hourType = hourType))
+        )
+        whenever(assistancePlanService.getById(4)).thenReturn(plan)
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(listOf(generateService(date, 60)))
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+            .thenReturn(listOf(generateService(date, 60)))
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(listOf(generateService(date, 60)))
+
+        // When
+        val result = evaluationService.createAssistancePlanHourTypeAnalysis(date, 4)
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(6.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(30.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(365.0)
+    }
+
+    private fun generateService(start: LocalDate, minutes: Int): ServiceSoloProjection {
+        return object : ServiceSoloProjection {
+            override val id: Long = (Math.random() * 10000).toLong()
+            override val start: LocalDateTime = start.atTime(8, 0)
+            override val end: LocalDateTime = start.atTime(8, 0).plusMinutes(minutes.toLong())
+            override val minutes: Int = minutes
+            override val title: String = ""
+            override val content: String = ""
+            override val unfinished: Boolean = false
+            override val groupService: Boolean = false
+        }
     }
 
     private fun goalWithHourType(hourType: HourType, weeklyHours: Double): Goal {
