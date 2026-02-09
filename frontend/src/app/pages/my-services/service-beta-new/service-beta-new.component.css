@@ -164,6 +164,7 @@
   line-height: 1;
   color: #2f3a4b;
   background: transparent;
+  -moz-appearance: textfield;
 }
 
 .beta-duration-input {
