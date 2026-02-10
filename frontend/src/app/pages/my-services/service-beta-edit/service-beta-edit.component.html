@@ -16,9 +16,8 @@
             <mat-label>Datum</mat-label>
             <input matInput
                    formControlName="serviceDate"
-                   [disabled]="true"
                    [matDatepicker]="serviceDatePicker">
-            <mat-datepicker-toggle matSuffix [for]="serviceDatePicker" [disabled]="true"></mat-datepicker-toggle>
+            <mat-datepicker-toggle matSuffix [for]="serviceDatePicker" [disabled]="serviceDateControl.disabled"></mat-datepicker-toggle>
             <mat-datepicker #serviceDatePicker></mat-datepicker>
           </mat-form-field>
 
