@@ -1,14 +1,19 @@
 import {Component, DestroyRef, inject} from '@angular/core';
 import {UntypedFormControl, Validators} from "@angular/forms";
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MAT_NATIVE_DATE_FORMATS,
+  NativeDateAdapter
+} from "@angular/material/core";
 import {ServiceFormBase} from "../service-form.base";
 import {UserService} from "../../../shared/services/user.service";
 import {InstitutionService} from "../../../shared/services/institution.service";
 import {ClientsService} from "../../../shared/services/clients.service";
 import {HourTypeService} from "../../../shared/services/hour-type.service";
-import {CategoriesService} from "../../../shared/services/categories.service";
 import {SponsorService} from "../../../shared/services/sponsor.service";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute} from "@angular/router";
 import {Converter} from "../../../shared/services/converter.helper";
 import {HelperService} from "../../../shared/services/helper.service";
 import {Location} from "@angular/common";
@@ -36,10 +41,11 @@ import {AssistancePlanHourTypeEvaluationLeftDto} from "../../../shared/dtos/assi
   standalone: false
 })
 export class ServiceNewComponent extends ServiceFormBase {
-  private readonly betaDestroyRef = inject(DestroyRef);
+  pageTitle = 'Neuer Eintrag';
+  override readonly destroyRef = inject(DestroyRef);
   private lastServiceDate = '';
-  private clientEntriesSetup = false;
-  private assistanceInfoSetup = false;
+  private clientEntriesInitialized = false;
+  private assistanceInfoInitialized = false;
   useDuration = false;
   clientEntries: ClientAndDateServiceDto[] = [];
   clientEntriesLoading = false;
@@ -50,11 +56,9 @@ export class ServiceNewComponent extends ServiceFormBase {
     institutionService: InstitutionService,
     clientService: ClientsService,
     hourTypeService: HourTypeService,
-    categoryService: CategoriesService,
     sponsorService: SponsorService,
-    protected readonly betaServiceService: ServiceService,
-    private readonly betaAssistancePlanService: AssistancePlanService,
-    router: Router,
+    serviceService: ServiceService,
+    private readonly assistancePlanService: AssistancePlanService,
     route: ActivatedRoute,
     converter: Converter,
     helperService: HelperService,
@@ -65,10 +69,8 @@ export class ServiceNewComponent extends ServiceFormBase {
       institutionService,
       clientService,
       hourTypeService,
-      categoryService,
       sponsorService,
-      betaServiceService,
-      router,
+      serviceService,
       route,
       converter,
       helperService,
@@ -239,7 +241,7 @@ export class ServiceNewComponent extends ServiceFormBase {
     this.lastServiceDate = initialDate ? new Date(initialDate.toString()).toDateString() : '';
 
     this.serviceDateControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value) => {
         if (!value) {
           return;
@@ -263,7 +265,7 @@ export class ServiceNewComponent extends ServiceFormBase {
     if (!this.editMode) {
       this.clientControl.enable();
       this.clientControl.valueChanges
-        .pipe(takeUntilDestroyed(this.betaDestroyRef))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((value: ClientDto | string | null) => {
           const isString = typeof value === 'string';
           const search = isString ? value : (value ? `${value.firstName} ${value.lastName}` : '');
@@ -283,7 +285,7 @@ export class ServiceNewComponent extends ServiceFormBase {
 
       this.clientsControl.enable();
       this.clientsControl.valueChanges
-        .pipe(takeUntilDestroyed(this.betaDestroyRef))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((value: number | null) => {
           this.assistancePlansControl.setValue(null);
           this.resetAssistancePlan();
@@ -304,34 +306,11 @@ export class ServiceNewComponent extends ServiceFormBase {
         });
     }
 
-    this.serviceDateControl.enable();
-    this.serviceDateControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe((value) => {
-        if (value != null) {
-          this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
-          this.reloadTitle();
-          this.minDate = new Date(value.toString());
-        }
-      });
-
-    this.assistancePlansControl.enable();
-    this.assistancePlansControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe((value: number | null) => {
-        this.resetGoals();
-        this.goalsControl.setValue([]);
-
-        if (value != null) {
-          this.selectAssistancePlan(this.selectedClient.assistancePlans.find(plan => plan.id == value));
-        } else {
-          this.selectAssistancePlan(null);
-        }
-      });
+    this.setupDateAndAssistancePlanSubscriptions();
 
     this.startHourControl.enable();
     this.startHourControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => {
         if (value != null && !this.editMode) {
           if (this.useDuration) {
@@ -344,7 +323,7 @@ export class ServiceNewComponent extends ServiceFormBase {
 
     this.startMinuteControl.enable();
     this.startMinuteControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => {
         if (value != null && !this.editMode) {
           if (this.useDuration) {
@@ -359,66 +338,27 @@ export class ServiceNewComponent extends ServiceFormBase {
     this.endMinuteControl.enable();
 
     this.durationControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateEndFromDuration());
 
-    this.hourTypeControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe(value => this.value.hourTypeId = value);
+    this.setupValueSyncSubscriptions();
 
-    this.institutionControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe(value => this.value.institutionId = value);
-
-    this.goalsControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe((value: number[]) => {
-        if (value.length > 0) {
-          this.setGoals(value);
-        } else {
-          this.resetGoals();
-        }
-      });
-
-    this.categoriesControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe((value: number[]) => {
-        if (value.length > 0) {
-          this.setCategories(value);
-        } else {
-          this.resetCategories();
-        }
-      });
-
-    this.contentControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe(value => this.value.content = value);
-    this.titleControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe(value => this.value.title = value);
-    this.unfinishedControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe(value => this.value.unfinished = value);
-    this.groupServiceControl.valueChanges
-      .pipe(takeUntilDestroyed(this.betaDestroyRef))
-      .subscribe(value => this.value.groupService = value);
-
-    this.setupClientEntriesStream();
-    this.setupAssistanceInfoStream();
+    this.initClientEntriesStream();
+    this.initAssistanceInfoStream();
   }
 
-  private setupClientEntriesStream() {
-    if (this.clientEntriesSetup) {
+  private initClientEntriesStream() {
+    if (this.clientEntriesInitialized) {
       return;
     }
-    this.clientEntriesSetup = true;
+    this.clientEntriesInitialized = true;
 
     const clientId$ = this.clientsControl.valueChanges.pipe(startWith(this.clientsControl.value));
     const date$ = this.serviceDateControl.valueChanges.pipe(startWith(this.serviceDateControl.value));
 
     combineLatest([clientId$, date$])
       .pipe(
-        takeUntilDestroyed(this.betaDestroyRef),
+        takeUntilDestroyed(this.destroyRef),
         switchMap(([clientId, date]) => {
           if (!clientId || !date) {
             this.clientEntries = [];
@@ -427,7 +367,7 @@ export class ServiceNewComponent extends ServiceFormBase {
           }
 
           this.clientEntriesLoading = true;
-          return this.betaServiceService.getClientAndDateServices(
+          return this.serviceService.getClientAndDateServices(
             Number(clientId),
             new Date(date.toString())
           ).pipe(
@@ -444,17 +384,17 @@ export class ServiceNewComponent extends ServiceFormBase {
       });
   }
 
-  private setupAssistanceInfoStream() {
-    if (this.assistanceInfoSetup) {
+  private initAssistanceInfoStream() {
+    if (this.assistanceInfoInitialized) {
       return;
     }
-    this.assistanceInfoSetup = true;
+    this.assistanceInfoInitialized = true;
 
     const assistancePlanId$ = this.assistancePlansControl.valueChanges.pipe(startWith(this.assistancePlansControl.value));
 
     assistancePlanId$
       .pipe(
-        takeUntilDestroyed(this.betaDestroyRef),
+        takeUntilDestroyed(this.destroyRef),
         switchMap((assistancePlanId) => {
           if (!assistancePlanId) {
             this.assistanceInfo = [];
@@ -463,7 +403,7 @@ export class ServiceNewComponent extends ServiceFormBase {
           }
 
           this.assistanceInfoLoading = true;
-          return this.betaAssistancePlanService.getEvaluationLeftById(Number(assistancePlanId)).pipe(
+          return this.assistancePlanService.getEvaluationLeftById(Number(assistancePlanId)).pipe(
             map(response => response.hourTypeEvaluation ?? []),
             catchError(() => of([])),
             finalize(() => {

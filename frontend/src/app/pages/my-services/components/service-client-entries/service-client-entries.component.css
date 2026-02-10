@@ -1,0 +1,44 @@
+.beta-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.beta-entries-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6a7386;
+  font-size: 12px;
+}
+
+.beta-entry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f7f8fb;
+  border: 1px solid #e1e6ef;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #4a5366;
+}
+
+.beta-entry-time {
+  font-weight: 600;
+  color: #2f3a4b;
+}
+
+.beta-entry-employee {
+  color: #6a7386;
+}
+
+.beta-empty {
+  background: #f7f8fb;
+  border: 1px dashed #d7dbe5;
+  color: #7a8396;
+  padding: 10px 12px;
+  border-radius: 6px;
+  width: 100%;
+  grid-column: 1 / -1;
+}

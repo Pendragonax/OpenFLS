@@ -1,0 +1,37 @@
+<div class="beta-section">
+  <div class="beta-section-title">Hilfeplaninformationen</div>
+  @if (assistancePlanSelected) {
+    @if (loading) {
+      <div class="beta-entries-loading">
+        <mat-spinner [diameter]="28" [strokeWidth]="3"></mat-spinner>
+        <span>Hilfeplaninformationen werden geladen…</span>
+      </div>
+    } @else if (info.length > 0) {
+      <div class="beta-plan-info">
+        @for (item of info; track item.hourTypeName) {
+          <div class="beta-plan-row">
+            <div class="beta-plan-type">
+              {{ item.hourTypeName.length > 20 ? (item.hourTypeName | slice:0:20) + '…' : item.hourTypeName }}
+            </div>
+            <div class="beta-plan-metric">
+              übrig diese Woche:
+              <span class="beta-plan-pill">{{ item.leftThisWeek }}h</span>
+            </div>
+            <div class="beta-plan-metric">
+              übrig diesen Monat:
+              <span class="beta-plan-pill">{{ item.leftThisMonth }}h</span>
+            </div>
+            <div class="beta-plan-metric">
+              übrig dieses Jahr:
+              <span class="beta-plan-pill">{{ item.leftThisYear }}h</span>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="beta-empty">Keine Hilfeplaninformationen verfügbar.</div>
+    }
+  } @else {
+    <div class="beta-empty">Hilfeplaninformationen sind erst sichtbar, wenn ein Hilfeplan ausgewählt wurde.</div>
+  }
+</div>

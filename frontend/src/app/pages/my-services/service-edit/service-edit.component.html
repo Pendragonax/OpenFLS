@@ -157,30 +157,11 @@
       </div>
     </div>
 
-    <div class="beta-section">
-      <div class="beta-section-title">Klienteneinträge am {{ selectedServiceDateDisplay }}</div>
-      @if (clientSelected) {
-        @if (clientEntriesLoading) {
-          <div class="beta-entries-loading">
-            <mat-spinner [diameter]="28" [strokeWidth]="3"></mat-spinner>
-            <span>Klienteneinträge werden geladen…</span>
-          </div>
-        } @else if (clientEntries.length > 0) {
-          <div class="beta-entries">
-            @for (entry of clientEntries; track entry.timepoint + entry.employeeName) {
-              <div class="beta-entry-row">
-                <div class="beta-entry-time">{{ entry.timepoint }}</div>
-                <div class="beta-entry-employee">{{ entry.employeeName }}</div>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="beta-empty">Keine Klienteneinträge für das gewählte Datum.</div>
-        }
-      } @else {
-        <div class="beta-empty">Klienteneinträge erst sichtbar, wenn ein Klient ausgewählt wurde.</div>
-      }
-    </div>
+    <app-service-client-entries
+      [clientSelected]="clientSelected"
+      [dateDisplay]="selectedServiceDateDisplay"
+      [entriesLoading]="clientEntriesLoading"
+      [entries]="clientEntries"></app-service-client-entries>
 
     <div class="beta-section">
       <div class="beta-section-title">Hilfeplan & Ziele</div>
@@ -236,43 +217,10 @@
       </form>
     </div>
 
-    <div class="beta-section">
-      <div class="beta-section-title">Hilfeplaninformationen</div>
-      @if (assistancePlanSelected) {
-        @if (assistanceInfoLoading) {
-          <div class="beta-entries-loading">
-            <mat-spinner [diameter]="28" [strokeWidth]="3"></mat-spinner>
-            <span>Hilfeplaninformationen werden geladen…</span>
-          </div>
-        } @else if (assistanceInfo.length > 0) {
-          <div class="beta-plan-info">
-            @for (info of assistanceInfo; track info.hourTypeName) {
-              <div class="beta-plan-row">
-                <div class="beta-plan-type">
-                  {{ info.hourTypeName.length > 20 ? (info.hourTypeName | slice:0:20) + '…' : info.hourTypeName }}
-                </div>
-                <div class="beta-plan-metric">
-                  übrig diese Woche:
-                  <span class="beta-plan-pill">{{ info.leftThisWeek }}h</span>
-                </div>
-                <div class="beta-plan-metric">
-                  übrig diesen Monat:
-                  <span class="beta-plan-pill">{{ info.leftThisMonth }}h</span>
-                </div>
-                <div class="beta-plan-metric">
-                  übrig dieses Jahr:
-                  <span class="beta-plan-pill">{{ info.leftThisYear }}h</span>
-                </div>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="beta-empty">Keine Hilfeplaninformationen verfügbar.</div>
-        }
-      } @else {
-        <div class="beta-empty">Hilfeplaninformationen sind erst sichtbar, wenn ein Hilfeplan ausgewählt wurde.</div>
-      }
-    </div>
+    <app-service-assistance-info
+      [assistancePlanSelected]="assistancePlanSelected"
+      [loading]="assistanceInfoLoading"
+      [info]="assistanceInfo"></app-service-assistance-info>
 
     <div class="beta-section">
       <div class="beta-section-title">Kategorien</div>

@@ -4,7 +4,6 @@ import {ServiceDto} from "../../shared/dtos/service-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
 import {ClientsService} from "../../shared/services/clients.service";
 import {HourTypeService} from "../../shared/services/hour-type.service";
-import {CategoriesService} from "../../shared/services/categories.service";
 import {UserService} from "../../shared/services/user.service";
 import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {combineLatest, startWith} from "rxjs";
@@ -17,10 +16,8 @@ import {HourTypeDto} from "../../shared/dtos/hour-type-dto.model";
 import {CategoryDto} from "../../shared/dtos/category-dto.model";
 import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
 import {SponsorService} from "../../shared/services/sponsor.service";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute} from "@angular/router";
 import {ServiceService} from "../../shared/services/service.service";
-import {GoalHourDto} from "../../shared/dtos/goal-hour-dto.model";
-import {AssistancePlanHourDto} from "../../shared/dtos/assistance-plan-hour-dto.model";
 import {Location} from "@angular/common";
 import {HelperService} from "../../shared/services/helper.service";
 import {createStartTimeEndTimeValidator} from "../../shared/validators/startTimeEndTimeValidator";
@@ -28,7 +25,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Directive()
 export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnInit {
-  private readonly destroyRef = inject(DestroyRef);
+  protected readonly destroyRef = inject(DestroyRef);
 
   // STATES
   editMode = false;
@@ -126,10 +123,8 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
     private institutionService: InstitutionService,
     private clientService: ClientsService,
     private hourTypeService: HourTypeService,
-    private categoryService: CategoriesService,
     private sponsorService: SponsorService,
-    private serviceService: ServiceService,
-    private router: Router,
+    protected serviceService: ServiceService,
     private route: ActivatedRoute,
     protected converter: Converter,
     override helperService: HelperService,
@@ -305,11 +300,11 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((value: number[]) => {
           this.resetAssistancePlan();
-          this.assistancePlansControl.setValue("")
+          this.assistancePlansControl.setValue(null)
           this.resetGoals();
-          this.goalsControl.setValue("");
+          this.goalsControl.setValue([]);
           this.resetCategories();
-          this.categoriesControl.setValue("");
+          this.categoriesControl.setValue([]);
 
           if (value.length > 0) {
             this.value.clientId = value[0];
@@ -322,31 +317,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
         });
     }
 
-    this.serviceDateControl.enable();
-    this.serviceDateControl.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        if (value != null) {
-          this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
-          this.reloadTitle();
-          // constraints for the end time and date
-          this.minDate = new Date(value.toString());
-        }
-      });
-
-    this.assistancePlansControl.enable();
-    this.assistancePlansControl.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value: number[]) => {
-        this.resetGoals();
-        this.goalsControl.setValue("");
-
-        if (value.length > 0) {
-          this.selectAssistancePlan(this.selectedClient.assistancePlans.find(plan => plan.id == value[0]));
-        } else {
-          this.selectAssistancePlan(null);
-        }
-      });
+    this.setupDateAndAssistancePlanSubscriptions();
 
     // GENERAL
     // START HOUR
@@ -372,6 +343,42 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
     this.endHourControl.enable()
     this.endMinuteControl.enable()
 
+    this.setupValueSyncSubscriptions();
+  }
+
+  protected setupDateAndAssistancePlanSubscriptions() {
+    this.serviceDateControl.enable();
+    this.serviceDateControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        if (value != null) {
+          this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
+          this.reloadTitle();
+          this.minDate = new Date(value.toString());
+        }
+      });
+
+    this.assistancePlansControl.enable();
+    this.assistancePlansControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value: number[] | number | null) => {
+        this.resetGoals();
+        this.goalsControl.setValue([]);
+
+        const selectedIds = Array.isArray(value)
+          ? value
+          : (value != null ? [value] : []);
+
+        if (selectedIds.length > 0) {
+          this.selectAssistancePlan(this.selectedClient.assistancePlans.find(plan => plan.id == selectedIds[0]));
+          return;
+        }
+
+        this.selectAssistancePlan(null);
+      });
+  }
+
+  protected setupValueSyncSubscriptions() {
     this.hourTypeControl.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => this.value.hourTypeId = value);
@@ -512,26 +519,6 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
     }
 
     return "n/a";
-  }
-
-  sumGoalHours(hours: GoalHourDto[]) {
-    if (hours.length == 0)
-      return "n/a";
-
-    return hours
-      .map(value => value.weeklyHours)
-      .reduce((sum, current) => sum + current)
-      .toFixed(2);
-  }
-
-  sumAssistancePlanHours(hours: AssistancePlanHourDto[]) {
-    if (hours.length == 0)
-      return "n/a";
-
-    return hours
-      .map(value => value.weeklyHours)
-      .reduce((sum, current) => sum + current)
-      .toFixed(2);
   }
 
   protected _getClients(searchString: string): ClientDto[] {

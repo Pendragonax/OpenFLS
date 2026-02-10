@@ -70,6 +70,12 @@ import {
 } from './shared/components/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component';
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
+import {
+  ServiceClientEntriesComponent
+} from "./pages/my-services/components/service-client-entries/service-client-entries.component";
+import {
+  ServiceAssistanceInfoComponent
+} from "./pages/my-services/components/service-assistance-info/service-assistance-info.component";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatPaginatorIntl, MatPaginatorModule} from "@angular/material/paginator";
@@ -173,6 +179,8 @@ const routes: Routes = [
         AssistancePlanHoursComponent,
         ServiceNewComponent,
         ServiceEditComponent,
+        ServiceClientEntriesComponent,
+        ServiceAssistanceInfoComponent,
         UnprofesssionalComponent,
         InformationRowComponent,
         ContingentEvaluationComponent,

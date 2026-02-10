@@ -1,0 +1,24 @@
+<div class="beta-section">
+  <div class="beta-section-title">Klienteneinträge am {{ dateDisplay }}</div>
+  @if (clientSelected) {
+    @if (entriesLoading) {
+      <div class="beta-entries-loading">
+        <mat-spinner [diameter]="28" [strokeWidth]="3"></mat-spinner>
+        <span>Klienteneinträge werden geladen…</span>
+      </div>
+    } @else if (entries.length > 0) {
+      <div class="beta-entries">
+        @for (entry of entries; track entry.timepoint + entry.employeeName) {
+          <div class="beta-entry-row">
+            <div class="beta-entry-time">{{ entry.timepoint }}</div>
+            <div class="beta-entry-employee">{{ entry.employeeName }}</div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="beta-empty">Keine Klienteneinträge für das gewählte Datum.</div>
+    }
+  } @else {
+    <div class="beta-empty">Klienteneinträge erst sichtbar, wenn ein Klient ausgewählt wurde.</div>
+  }
+</div>
