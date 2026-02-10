@@ -24,6 +24,12 @@
   color: #4a5366;
 }
 
+.beta-entry-row--highlight {
+  border-color: #13a3e6;
+  background: #e6f6ff;
+  box-shadow: 0 0 0 1px rgba(19, 163, 230, 0.2);
+}
+
 .beta-entry-time {
   font-weight: 600;
   color: #2f3a4b;
@@ -41,4 +47,21 @@
   border-radius: 6px;
   width: 100%;
   grid-column: 1 / -1;
+}
+.beta-section {
+  background: #ffffff;
+  border: 1px solid #edf0f6;
+  border-radius: 8px;
+  padding: 10px 12px 12px;
+  margin-bottom: 10px;
+}
+
+.beta-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6a7386;
+  background: #f2f4f8;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 0 0 10px;
 }

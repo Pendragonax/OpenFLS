@@ -12,4 +12,5 @@ export class ServiceClientEntriesComponent {
   @Input() dateDisplay = '';
   @Input() entriesLoading = false;
   @Input() entries: ClientAndDateServiceDto[] = [];
+  @Input() highlightId: number | null = null;
 }

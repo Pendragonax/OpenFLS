@@ -72,3 +72,20 @@
     justify-content: space-between;
   }
 }
+.beta-section {
+  background: #ffffff;
+  border: 1px solid #edf0f6;
+  border-radius: 8px;
+  padding: 10px 12px 12px;
+  margin-bottom: 10px;
+}
+
+.beta-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6a7386;
+  background: #f2f4f8;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 0 0 10px;
+}

@@ -9,7 +9,7 @@
     } @else if (entries.length > 0) {
       <div class="beta-entries">
         @for (entry of entries; track entry.timepoint + entry.employeeName) {
-          <div class="beta-entry-row">
+          <div class="beta-entry-row" [class.beta-entry-row--highlight]="highlightId != null && entry.id === highlightId">
             <div class="beta-entry-time">{{ entry.timepoint }}</div>
             <div class="beta-entry-employee">{{ entry.employeeName }}</div>
           </div>
