@@ -1,4 +1,4 @@
-import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {DestroyRef, Directive, inject, OnInit} from '@angular/core';
 import {NewPageComponent} from "../../shared/components/new-page.component";
 import {ServiceDto} from "../../shared/dtos/service-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
@@ -10,7 +10,6 @@ import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {combineLatest, startWith} from "rxjs";
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ClientDto} from "../../shared/dtos/client-dto.model";
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {AssistancePlanDto} from "../../shared/dtos/assistance-plan-dto.model";
 import {Converter} from "../../shared/services/converter.helper";
 import {GoalDto} from "../../shared/dtos/goal-dto.model";
@@ -27,25 +26,11 @@ import {HelperService} from "../../shared/services/helper.service";
 import {createStartTimeEndTimeValidator} from "../../shared/validators/startTimeEndTimeValidator";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
-@Component({
-    selector: 'app-service-detail',
-    templateUrl: './service-detail.component.html',
-    styleUrls: ['./service-detail.component.css'],
-    providers: [
-        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-        {
-            provide: DateAdapter,
-            useClass: NativeDateAdapter,
-            deps: [MAT_DATE_LOCALE],
-        },
-        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
-    ],
-    standalone: false
-})
-export class ServiceDetailComponent extends NewPageComponent<ServiceDto> implements OnInit {
+@Directive()
+export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
-  // STATESs
+  // STATES
   editMode = false;
 
   // VARs
@@ -247,7 +232,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
         // ASSISTANCE PLAN
         this.selectedAssistancePlan = client.assistancePlans.find(value => value.id == service.assistancePlanId);
-        this.filteredAssistancePlans = client.assistancePlans //[this.selectedAssistancePlan ?? new AssistancePlanDto()];
+        this.filteredAssistancePlans = client.assistancePlans;
         this.assistancePlanSelected = true;
         this.setGoals(service.goals.map(value => value.id));
         if (this.selectedAssistancePlan != null) {

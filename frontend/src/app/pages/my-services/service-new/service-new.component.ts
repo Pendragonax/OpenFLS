@@ -1,7 +1,7 @@
 import {Component, DestroyRef, inject} from '@angular/core';
 import {UntypedFormControl, Validators} from "@angular/forms";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
-import {ServiceDetailComponent} from "../../service-detail/service-detail.component";
+import {ServiceFormBase} from "../service-form.base";
 import {UserService} from "../../../shared/services/user.service";
 import {InstitutionService} from "../../../shared/services/institution.service";
 import {ClientsService} from "../../../shared/services/clients.service";
@@ -21,9 +21,9 @@ import {AssistancePlanService} from "../../../shared/services/assistance-plan.se
 import {AssistancePlanHourTypeEvaluationLeftDto} from "../../../shared/dtos/assistance-plan-evaluation-left.dto";
 
 @Component({
-  selector: 'app-service-beta-new',
-  templateUrl: './service-beta-new.component.html',
-  styleUrls: ['./service-beta-new.component.css'],
+  selector: 'app-service-new',
+  templateUrl: './service-new.component.html',
+  styleUrls: ['./service-new.component.css'],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
     {
@@ -35,7 +35,7 @@ import {AssistancePlanHourTypeEvaluationLeftDto} from "../../../shared/dtos/assi
   ],
   standalone: false
 })
-export class ServiceBetaNewComponent extends ServiceDetailComponent {
+export class ServiceNewComponent extends ServiceFormBase {
   private readonly betaDestroyRef = inject(DestroyRef);
   private lastServiceDate = '';
   private clientEntriesSetup = false;
