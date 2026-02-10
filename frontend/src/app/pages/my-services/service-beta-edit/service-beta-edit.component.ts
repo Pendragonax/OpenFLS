@@ -41,20 +41,6 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
     const effectiveGoalIds = preservedGoalIds.length > 0 ? preservedGoalIds : valueGoalIds;
 
     if (this.editMode) {
-      console.log('[service-beta-edit] initFormSubscriptions editMode start', {
-        clientSelected: this.clientSelected,
-        selectedClientId: this.selectedClient?.id,
-        assistancePlanSelected: this.assistancePlanSelected,
-        selectedAssistancePlanId: this.selectedAssistancePlan?.id,
-        valueAssistancePlanId: (this as any).value?.assistancePlanId,
-        preservedGoalIds,
-        valueGoalIds,
-        clientsControlValue: this.clientsControl.value,
-        assistancePlansControlValue: this.assistancePlansControl.value,
-        filteredAssistancePlans: this.filteredAssistancePlans?.length ?? 0,
-        effectiveGoalIds
-      });
-
       const clientValue = this.clientsControl.value;
       if (Array.isArray(clientValue)) {
         const nextClientId = clientValue[0] ?? null;
@@ -66,11 +52,6 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
         const nextPlanId = planValue[0] ?? null;
         this.assistancePlansControl.setValue(nextPlanId != null ? Number(nextPlanId) : null, { emitEvent: false });
       }
-
-      console.log('[service-beta-edit] initFormSubscriptions normalized', {
-        clientsControlValue: this.clientsControl.value,
-        assistancePlansControlValue: this.assistancePlansControl.value
-      });
     }
 
     super.initFormSubscriptions();
@@ -84,26 +65,13 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
       if ((!planValue || Number(planValue) === 0) && fallbackPlanId != null) {
         this.assistancePlansControl.setValue(Number(fallbackPlanId), { emitEvent: false });
       }
-      console.log('[service-beta-edit] post-initFormSubscriptions plan check', {
-        planValue,
-        planId,
-        filteredAssistancePlans: this.filteredAssistancePlans?.length ?? 0,
-        assistancePlanSelected: this.assistancePlanSelected
-      });
       if (planId != null && Number.isFinite(planId) && planId > 0) {
         const plan = this.filteredAssistancePlans.find(value => value.id === planId);
         if (plan) {
           this.selectAssistancePlan(plan);
           this.assistancePlansControl.setValue(planId, { emitEvent: false });
-          console.log('[service-beta-edit] plan selected from filtered list', {
-            planId,
-            assistancePlanSelected: this.assistancePlanSelected
-          });
         } else {
           this.assistancePlansControl.setValue(planId, { emitEvent: true });
-          console.log('[service-beta-edit] plan not found in filtered list, emitted value', {
-            planId
-          });
         }
       } else if ((this.filteredAssistancePlans?.length ?? 0) > 0) {
         const byDate = this.getAssistancePlansByDateString(
@@ -114,15 +82,20 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
         if (fallbackPlan) {
           this.selectAssistancePlan(fallbackPlan);
           this.assistancePlansControl.setValue(fallbackPlan.id, { emitEvent: false });
-          console.log('[service-beta-edit] fallback plan selected', {
-            planId: fallbackPlan.id,
-            assistancePlanSelected: this.assistancePlanSelected
-          });
         }
       }
 
       const finalPlanIdRaw = this.assistancePlansControl.value;
       const finalPlanId = finalPlanIdRaw != null ? Number(finalPlanIdRaw) : null;
+      if (finalPlanId != null && Number.isFinite(finalPlanId) && finalPlanId > 0) {
+        this.assistancePlansControl.setValue(finalPlanId, { emitEvent: true });
+        if (effectiveGoalIds.length > 0) {
+          setTimeout(() => {
+            this.goalsControl.setValue(effectiveGoalIds, { emitEvent: false });
+            this.setGoals(effectiveGoalIds);
+          });
+        }
+      }
 
       if (effectiveGoalIds.length > 0) {
         this.goalsControl.setValue(effectiveGoalIds, { emitEvent: false });
@@ -139,28 +112,10 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
               if ((this as any).value?.assistancePlanId === 0 && match?.assistancePlanId) {
                 (this as any).value.assistancePlanId = match.assistancePlanId;
               }
-              console.log('[service-beta-edit] goals loaded from assistance plan services', {
-                planId: finalPlanId,
-                serviceId: match?.id,
-                matchGoalIds
-              });
-            } else {
-              console.log('[service-beta-edit] no goals found in assistance plan services', {
-                planId: finalPlanId,
-                serviceId: (this as any).value?.id
-              });
             }
           },
           error: () => {
-            console.log('[service-beta-edit] failed to load goals from assistance plan services', {
-              planId: finalPlanId
-            });
           }
-        });
-      } else {
-        console.log('[service-beta-edit] skipped goal fetch due to missing plan id', {
-          finalPlanId,
-          planId
         });
       }
 
@@ -170,16 +125,6 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
         this.clientsControl.setValue(Number(fallbackClientId), { emitEvent: false });
       }
 
-      console.log('[service-beta-edit] initFormSubscriptions editMode end', {
-        clientSelected: this.clientSelected,
-        selectedClientId: this.selectedClient?.id,
-        assistancePlanSelected: this.assistancePlanSelected,
-        selectedAssistancePlanId: this.selectedAssistancePlan?.id,
-        filteredAssistancePlans: this.filteredAssistancePlans?.length ?? 0,
-        assistancePlansControlValue: this.assistancePlansControl.value,
-        selectedGoals: this.selectedGoals.map(goal => goal.id),
-        goalsControlValue: this.goalsControl.value
-      });
     }
   }
 }
