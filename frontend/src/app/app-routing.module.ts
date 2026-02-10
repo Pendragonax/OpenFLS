@@ -22,6 +22,7 @@ import {AssistancePlanDetailComponent} from "./shared/components/assistance-plan
 import {HourTypeComponent} from "./pages/hour-type/hour-type.component";
 import {ServiceDetailComponent} from "./pages/service-detail/service-detail.component";
 import {ServiceBetaNewComponent} from "./pages/my-services/service-beta-new/service-beta-new.component";
+import {ServiceBetaEditComponent} from "./pages/my-services/service-beta-edit/service-beta-edit.component";
 import {
   ServiceEvaluationOverviewComponent
 } from "./pages/service-evaluation-overview/service-evaluation-overview.component";
@@ -62,7 +63,7 @@ const routes: Routes = [
   { path: 'services/betanew/:date', component: ServiceBetaNewComponent, canActivate: [AuthGuard] },
   { path: 'betanew', redirectTo: 'services/betanew', pathMatch: 'full' },
   { path: 'betanew/:date', redirectTo: 'services/betanew/:date', pathMatch: 'full' },
-  { path: 'services/edit/:id', component: ServiceDetailComponent, canActivate: [AuthGuard] },
+  { path: 'services/edit/:id', component: ServiceBetaEditComponent, canActivate: [AuthGuard] },
   { path: 'overview', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] },
   { path: 'overview/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] }
 ];

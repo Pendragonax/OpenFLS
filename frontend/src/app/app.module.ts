@@ -70,6 +70,7 @@ import {
 } from './shared/components/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component';
 import {ServiceDetailComponent} from './pages/service-detail/service-detail.component';
 import {ServiceBetaNewComponent} from "./pages/my-services/service-beta-new/service-beta-new.component";
+import {ServiceBetaEditComponent} from "./pages/my-services/service-beta-edit/service-beta-edit.component";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatPaginatorIntl, MatPaginatorModule} from "@angular/material/paginator";
@@ -173,6 +174,7 @@ const routes: Routes = [
         AssistancePlanHoursComponent,
         ServiceDetailComponent,
         ServiceBetaNewComponent,
+        ServiceBetaEditComponent,
         UnprofesssionalComponent,
         InformationRowComponent,
         ContingentEvaluationComponent,
