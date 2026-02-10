@@ -52,7 +52,7 @@ export class ServiceBetaNewComponent extends ServiceDetailComponent {
     hourTypeService: HourTypeService,
     categoryService: CategoriesService,
     sponsorService: SponsorService,
-    private readonly betaServiceService: ServiceService,
+    protected readonly betaServiceService: ServiceService,
     private readonly betaAssistancePlanService: AssistancePlanService,
     router: Router,
     route: ActivatedRoute,

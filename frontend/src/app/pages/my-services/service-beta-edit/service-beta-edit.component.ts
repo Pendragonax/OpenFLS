@@ -37,6 +37,8 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
 
   override initFormSubscriptions() {
     const preservedGoalIds = this.selectedGoals.map(goal => goal.id);
+    const valueGoalIds = ((this as any).value?.goals ?? []).map((goal: any) => goal.id);
+    const effectiveGoalIds = preservedGoalIds.length > 0 ? preservedGoalIds : valueGoalIds;
 
     if (this.editMode) {
       console.log('[service-beta-edit] initFormSubscriptions editMode start', {
@@ -45,10 +47,12 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
         assistancePlanSelected: this.assistancePlanSelected,
         selectedAssistancePlanId: this.selectedAssistancePlan?.id,
         valueAssistancePlanId: (this as any).value?.assistancePlanId,
+        preservedGoalIds,
+        valueGoalIds,
         clientsControlValue: this.clientsControl.value,
         assistancePlansControlValue: this.assistancePlansControl.value,
         filteredAssistancePlans: this.filteredAssistancePlans?.length ?? 0,
-        preservedGoalIds
+        effectiveGoalIds
       });
 
       const clientValue = this.clientsControl.value;
@@ -117,9 +121,47 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
         }
       }
 
-      if (preservedGoalIds.length > 0) {
-        this.goalsControl.setValue(preservedGoalIds, { emitEvent: false });
-        this.setGoals(preservedGoalIds);
+      const finalPlanIdRaw = this.assistancePlansControl.value;
+      const finalPlanId = finalPlanIdRaw != null ? Number(finalPlanIdRaw) : null;
+
+      if (effectiveGoalIds.length > 0) {
+        this.goalsControl.setValue(effectiveGoalIds, { emitEvent: false });
+        this.setGoals(effectiveGoalIds);
+      } else if (finalPlanId != null && Number.isFinite(finalPlanId) && finalPlanId > 0) {
+        this.betaServiceService.getByAssistancePlan(finalPlanId).subscribe({
+          next: (services) => {
+            const match = services.find(service => service.id === (this as any).value?.id);
+            const matchGoalIds = (match?.goals ?? []).map(goal => goal.id);
+            if (matchGoalIds.length > 0) {
+              this.goalsControl.setValue(matchGoalIds, { emitEvent: false });
+              this.setGoals(matchGoalIds);
+              (this as any).value.goals = match?.goals ?? [];
+              if ((this as any).value?.assistancePlanId === 0 && match?.assistancePlanId) {
+                (this as any).value.assistancePlanId = match.assistancePlanId;
+              }
+              console.log('[service-beta-edit] goals loaded from assistance plan services', {
+                planId: finalPlanId,
+                serviceId: match?.id,
+                matchGoalIds
+              });
+            } else {
+              console.log('[service-beta-edit] no goals found in assistance plan services', {
+                planId: finalPlanId,
+                serviceId: (this as any).value?.id
+              });
+            }
+          },
+          error: () => {
+            console.log('[service-beta-edit] failed to load goals from assistance plan services', {
+              planId: finalPlanId
+            });
+          }
+        });
+      } else {
+        console.log('[service-beta-edit] skipped goal fetch due to missing plan id', {
+          finalPlanId,
+          planId
+        });
       }
 
       const clientValue = this.clientsControl.value;
@@ -134,7 +176,9 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
         assistancePlanSelected: this.assistancePlanSelected,
         selectedAssistancePlanId: this.selectedAssistancePlan?.id,
         filteredAssistancePlans: this.filteredAssistancePlans?.length ?? 0,
-        assistancePlansControlValue: this.assistancePlansControl.value
+        assistancePlansControlValue: this.assistancePlansControl.value,
+        selectedGoals: this.selectedGoals.map(goal => goal.id),
+        goalsControlValue: this.goalsControl.value
       });
     }
   }
