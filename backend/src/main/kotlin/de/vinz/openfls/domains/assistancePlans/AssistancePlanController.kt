@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
@@ -11,11 +12,13 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/assistance_plans")
 class AssistancePlanController(
         private val assistancePlanService: AssistancePlanService,
+        private val assistancePlanEvaluationLeftService: AssistancePlanEvaluationLeftService,
         private val accessService: AccessService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanController::class.java)
@@ -349,6 +352,35 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("eval/left/{id}")
+    fun getEvaluationLeftById(@PathVariable id: Long): ResponseEntity<Any> {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val response = assistancePlanEvaluationLeftService.createAssistancePlanHourTypeAnalysis(LocalDate.now(), id)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getEvaluationLeftById took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(response)
+        } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
             ResponseEntity(

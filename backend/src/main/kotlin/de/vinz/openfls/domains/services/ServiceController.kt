@@ -8,9 +8,12 @@ import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
 import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
+import de.vinz.openfls.domains.services.dtos.ClientAndDateRequestDTO
+import de.vinz.openfls.domains.services.dtos.ClientAndDateResponseDTO
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
+import org.apache.coyote.Response
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -720,6 +723,32 @@ class ServiceController(
     fun countByGoal(@PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByGoal(id))
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @PostMapping("client-and-date")
+    fun getByClientAndDate(@RequestBody request: ClientAndDateRequestDTO): ResponseEntity<Any> {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            val result = serviceService.getFromTillEmployeeNameProjectionByClientAndDate(request.clientId, request.date)
+            val response = ClientAndDateResponseDTO.of(request.clientId, result)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getByClientAndDate took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                    result.size))
+            }
+
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             logger.error(ex.message)
 

@@ -1,0 +1,320 @@
+<div class="beta-service-page">
+  <div class="beta-card">
+    <div class="beta-title">{{ pageTitle }}</div>
+
+    <div class="beta-section">
+      <div class="beta-section-title">Basisdaten</div>
+      <form [formGroup]="firstForm">
+        <div class="beta-grid beta-grid-time">
+          <mat-form-field appearance="outline" class="beta-field beta-date-field">
+            <mat-label>Datum</mat-label>
+            <input matInput
+                   formControlName="serviceDate"
+                   [matDatepicker]="serviceDatePicker">
+            <mat-datepicker-toggle matSuffix [for]="serviceDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #serviceDatePicker></mat-datepicker>
+          </mat-form-field>
+
+          <div class="beta-time-group beta-time-group--from">
+            <div class="beta-time-label">Von</div>
+            <div class="beta-time-control beta-time-pill" [formGroup]="firstForm">
+              <input type="number"
+                     class="beta-time-input"
+                     formControlName="startHour"
+                     inputmode="numeric"
+                     min="0"
+                     max="23"
+                     (focus)="selectAll($event)"
+                     (blur)="clampTime('start')">
+              <span class="beta-time-sep">:</span>
+              <input type="number"
+                     class="beta-time-input"
+                     formControlName="startMinute"
+                     inputmode="numeric"
+                     min="0"
+                     max="59"
+                     (focus)="selectAll($event)"
+                     (blur)="clampTime('start')">
+              <div class="beta-time-buttons">
+                <button type="button" class="beta-time-btn" (click)="adjustStartMinute(1)">
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button type="button" class="beta-time-btn" (click)="adjustStartMinute(-1)">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="beta-time-arrow" aria-hidden="true">
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+
+          @if (!useDuration) {
+            <div class="beta-time-group beta-time-group--to">
+              <div class="beta-time-label">Bis</div>
+              <div class="beta-time-control beta-time-pill"
+                   [class.beta-time-pill--invalid]="!isTimeValid"
+                   [formGroup]="firstForm">
+                <input type="number"
+                       class="beta-time-input"
+                       formControlName="endHour"
+                       inputmode="numeric"
+                       min="0"
+                       max="23"
+                       (focus)="selectAll($event)"
+                       (blur)="clampTime('end')">
+                <span class="beta-time-sep">:</span>
+                <input type="number"
+                       class="beta-time-input"
+                       formControlName="endMinute"
+                       inputmode="numeric"
+                       min="0"
+                       max="59"
+                       (focus)="selectAll($event)"
+                       (blur)="clampTime('end')">
+                <div class="beta-time-buttons">
+                  <button type="button" class="beta-time-btn" (click)="adjustEndMinute(1)">
+                    <mat-icon>keyboard_arrow_up</mat-icon>
+                  </button>
+                  <button type="button" class="beta-time-btn" (click)="adjustEndMinute(-1)">
+                    <mat-icon>keyboard_arrow_down</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="beta-time-group beta-time-group--to beta-time-group--duration">
+              <div class="beta-time-label">Dauer (Min)</div>
+              <div class="beta-time-control beta-time-pill beta-duration-pill"
+                   [class.beta-time-pill--invalid]="(durationControl.value ?? 0) <= 0"
+                   [formGroup]="firstForm">
+                <input type="number"
+                       class="beta-time-input beta-duration-input"
+                       formControlName="durationMinutes"
+                       inputmode="numeric"
+                       min="0"
+                       max="1439"
+                       (focus)="selectAll($event)"
+                       (blur)="clampDuration()">
+                <span class="beta-time-unit">min</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="beta-duration-toggle">
+          <mat-slide-toggle
+            [checked]="useDuration"
+            (change)="toggleDuration($event.checked)">
+            Dauer statt Bis
+          </mat-slide-toggle>
+        </div>
+      </form>
+    </div>
+
+    <div class="beta-section">
+      <div class="beta-section-title">Klient, Bereich & Stundentyp</div>
+      <div class="beta-grid beta-grid-3">
+        <form [formGroup]="secondForm">
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-label>Klient</mat-label>
+            <input matInput
+                   type="text"
+                   formControlName="client"
+                   [matAutocomplete]="clientAuto">
+            <mat-autocomplete #clientAuto="matAutocomplete"
+                              [displayWith]="displayClient"
+                              (optionSelected)="onClientSelected($event.option.value)">
+              @for (client of filteredClients; track client.id) {
+                <mat-option [value]="client">{{ client.lastName }} {{ client.firstName }}</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        </form>
+
+        <form [formGroup]="firstForm">
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-icon matPrefix>apartment</mat-icon>
+            <mat-label>Bereich</mat-label>
+            <mat-select formControlName="institution">
+              @for (institution of institutions; track institution.id) {
+                <mat-option [value]="institution.id">{{ institution.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </form>
+
+        <form [formGroup]="secondForm">
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-icon matPrefix>watch_later</mat-icon>
+            <mat-label>Stundentyp</mat-label>
+            <mat-select formControlName="hourType">
+              @for (hourType of assistancePlanHourTypes.length > 0 ? assistancePlanHourTypes : hourTypes; track hourType.id) {
+                <mat-option [value]="hourType.id">{{ hourType.title }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </div>
+    </div>
+
+    <app-service-client-entries
+      [clientSelected]="clientSelected"
+      [dateDisplay]="selectedServiceDateDisplay"
+      [entriesLoading]="clientEntriesLoading"
+      [entries]="clientEntries"></app-service-client-entries>
+
+    <div class="beta-section">
+      <div class="beta-section-title">Hilfeplan & Ziele</div>
+      <form [formGroup]="secondForm">
+        <div class="beta-grid beta-grid-2">
+          @if (clientSelected && filteredAssistancePlans.length > 0) {
+            <mat-form-field appearance="outline" class="beta-field beta-field-wide">
+              <mat-icon matPrefix>event</mat-icon>
+              <mat-label>Hilfeplan</mat-label>
+              <mat-select formControlName="assistancePlanList">
+                @for (plan of filteredAssistancePlans; track plan.id) {
+                  <mat-option [value]="plan.id">
+                    <div class="beta-plan-option">
+                      <div class="beta-plan-date">{{ getDateString(plan) }} | {{ getSponsorName(plan) }}</div>
+                    </div>
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          } @else {
+            <div class="beta-empty">Hilfeplan ist auswählbar, wenn ein Klient und Datum gewählt wurden.</div>
+          }
+
+          @if (assistancePlanSelected && (selectedAssistancePlan?.goals?.length ?? 0) > 0) {
+            <mat-form-field appearance="outline" class="beta-field beta-field-wide">
+              <mat-icon matPrefix>flag</mat-icon>
+              <mat-label>Ziele auswählen</mat-label>
+              <mat-select formControlName="goalList" multiple>
+                @for (goal of selectedAssistancePlan?.goals ?? []; track goal.id) {
+                  <mat-option [value]="goal.id">{{ goal.title.length > 50 ? (goal.title | slice:0:50) + '…' : goal.title }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          } @else {
+            <div class="beta-empty">
+              {{ assistancePlanSelected ? 'Für diesen Hilfeplan sind keine Ziele vorhanden.' : 'Ziele werden angezeigt, sobald ein Hilfeplan gewählt wurde.' }}
+            </div>
+          }
+        </div>
+
+        @if (selectedGoals.length > 0) {
+          <mat-chip-set class="beta-chips">
+            @for (goal of selectedGoals; track goal.id) {
+              <mat-chip class="beta-chip" removable (removed)="removeGoal(goal.id)">
+                <span class="beta-chip-text">{{ goal.title.length > 20 ? (goal.title | slice:0:20) + '…' : goal.title }}</span>
+                <button matChipRemove aria-label="Ziel entfernen">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-chip>
+            }
+          </mat-chip-set>
+        }
+      </form>
+    </div>
+
+    <app-service-assistance-info
+      [assistancePlanSelected]="assistancePlanSelected"
+      [loading]="assistanceInfoLoading"
+      [info]="assistanceInfo"></app-service-assistance-info>
+
+    <div class="beta-section">
+      <div class="beta-section-title">Kategorien</div>
+      <form [formGroup]="thirdForm">
+        @if (clientSelected) {
+          <mat-form-field appearance="outline" class="beta-field beta-field-count">
+            <mat-icon matPrefix>local_offer</mat-icon>
+            <mat-label>Kategorien auswählen</mat-label>
+            <mat-select formControlName="categoryList" multiple>
+              @for (category of categories; track category.id) {
+                <mat-option [value]="category.id">{{ category.title }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <div class="beta-empty">Kategorien sind auswählbar, wenn ein Klient gewählt wurde.</div>
+        }
+
+        @if (selectedCategories.length > 0) {
+          <mat-chip-set class="beta-chips">
+            @for (category of selectedCategories; track category.id) {
+              <mat-chip class="beta-chip" removable (removed)="removeCategory(category.id)">
+                {{ category.title }}
+                <button matChipRemove aria-label="Kategorie entfernen">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-chip>
+            }
+          </mat-chip-set>
+        }
+      </form>
+    </div>
+
+    <div class="beta-section">
+      <div class="beta-section-title">Beschreibung</div>
+      <form [formGroup]="thirdForm">
+        <mat-form-field appearance="outline" class="beta-field beta-field-count">
+          <mat-label>Titel</mat-label>
+          <input matInput formControlName="title" placeholder="Titel eingeben" maxlength="64">
+          <mat-hint>{{ 64 - (titleControl.value?.length ?? 0) }} Zeichen übrig</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="beta-field beta-field-count">
+          <mat-label>Inhalt</mat-label>
+          <textarea matInput rows="5" formControlName="content" placeholder="Text hier eingeben..." maxlength="1024"></textarea>
+          <mat-hint>{{ 1024 - (contentControl.value?.length ?? 0) }} Zeichen übrig</mat-hint>
+        </mat-form-field>
+      </form>
+    </div>
+
+    <div class="beta-footer">
+      <div class="beta-status">
+        <div class="beta-status-title">Status:</div>
+        <div>
+          Zeitangabe:
+          <mat-icon [class.beta-status-ok]="isTimeValid" [class.beta-status-bad]="!isTimeValid">
+            {{ isTimeValid ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
+        <div>
+          Klient:
+          <mat-icon [class.beta-status-ok]="clientSelected" [class.beta-status-bad]="!clientSelected">
+            {{ clientSelected ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
+        <div>
+          Bereich:
+          <mat-icon [class.beta-status-ok]="institutionControl.value" [class.beta-status-bad]="!institutionControl.value">
+            {{ institutionControl.value ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
+        <div>
+          Stundentyp:
+          <mat-icon [class.beta-status-ok]="hourTypeControl.value" [class.beta-status-bad]="!hourTypeControl.value">
+            {{ hourTypeControl.value ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
+        <div>
+          Hilfeplan:
+          <mat-icon [class.beta-status-ok]="assistancePlanSelected" [class.beta-status-bad]="!assistancePlanSelected">
+            {{ assistancePlanSelected ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </div>
+        <div>Ziele: {{ selectedGoals.length > 0 ? selectedGoals.length : 'Keine' }}</div>
+        <div>Kategorien: {{ selectedCategories.length > 0 ? selectedCategories.length : 'Keine' }}</div>
+      </div>
+
+      <div class="beta-actions">
+        <button mat-raised-button color="primary" (click)="create()" [disabled]="!canSave">Speichern</button>
+        <button mat-stroked-button (click)="location.back()">Abbrechen</button>
+        <button mat-stroked-button (click)="resetAll()">Zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+</div>

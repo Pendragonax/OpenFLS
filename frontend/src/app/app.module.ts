@@ -68,7 +68,14 @@ import {HourTypeComponent} from './pages/hour-type/hour-type.component';
 import {
   AssistancePlanHoursComponent
 } from './shared/components/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component';
-import {ServiceDetailComponent} from './pages/service-detail/service-detail.component';
+import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
+import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
+import {
+  ServiceClientEntriesComponent
+} from "./pages/my-services/components/service-client-entries/service-client-entries.component";
+import {
+  ServiceAssistanceInfoComponent
+} from "./pages/my-services/components/service-assistance-info/service-assistance-info.component";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatPaginatorIntl, MatPaginatorModule} from "@angular/material/paginator";
@@ -132,6 +139,7 @@ import {ClientAutocompleteComponent} from "./shared/components/client-autocomple
 import {ServiceTableComponent} from "./shared/components/service-table/service-table.component";
 import {EmployeeAutocompleteComponent} from "./shared/components/employee-autocomplete/employee-autocomplete.component";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -169,7 +177,10 @@ const routes: Routes = [
         GoalsComponent,
         HourTypeComponent,
         AssistancePlanHoursComponent,
-        ServiceDetailComponent,
+        ServiceNewComponent,
+        ServiceEditComponent,
+        ServiceClientEntriesComponent,
+        ServiceAssistanceInfoComponent,
         UnprofesssionalComponent,
         InformationRowComponent,
         ContingentEvaluationComponent,
@@ -234,6 +245,7 @@ const routes: Routes = [
     MatDialogModule,
     MatChipsModule,
     MatDividerModule,
+    MatSlideToggleModule,
     SearchFieldComponent,
     InstitutionSelectComponent,
     DateCompleteSelectionComponent,

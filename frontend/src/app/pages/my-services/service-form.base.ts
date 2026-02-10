@@ -1,16 +1,14 @@
-import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {DestroyRef, Directive, inject, OnInit} from '@angular/core';
 import {NewPageComponent} from "../../shared/components/new-page.component";
 import {ServiceDto} from "../../shared/dtos/service-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
 import {ClientsService} from "../../shared/services/clients.service";
 import {HourTypeService} from "../../shared/services/hour-type.service";
-import {CategoriesService} from "../../shared/services/categories.service";
 import {UserService} from "../../shared/services/user.service";
 import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {combineLatest, startWith} from "rxjs";
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ClientDto} from "../../shared/dtos/client-dto.model";
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {AssistancePlanDto} from "../../shared/dtos/assistance-plan-dto.model";
 import {Converter} from "../../shared/services/converter.helper";
 import {GoalDto} from "../../shared/dtos/goal-dto.model";
@@ -18,34 +16,18 @@ import {HourTypeDto} from "../../shared/dtos/hour-type-dto.model";
 import {CategoryDto} from "../../shared/dtos/category-dto.model";
 import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
 import {SponsorService} from "../../shared/services/sponsor.service";
-import {ActivatedRoute, Router} from "@angular/router";
+import {ActivatedRoute} from "@angular/router";
 import {ServiceService} from "../../shared/services/service.service";
-import {GoalHourDto} from "../../shared/dtos/goal-hour-dto.model";
-import {AssistancePlanHourDto} from "../../shared/dtos/assistance-plan-hour-dto.model";
 import {Location} from "@angular/common";
 import {HelperService} from "../../shared/services/helper.service";
 import {createStartTimeEndTimeValidator} from "../../shared/validators/startTimeEndTimeValidator";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
-@Component({
-    selector: 'app-service-detail',
-    templateUrl: './service-detail.component.html',
-    styleUrls: ['./service-detail.component.css'],
-    providers: [
-        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-        {
-            provide: DateAdapter,
-            useClass: NativeDateAdapter,
-            deps: [MAT_DATE_LOCALE],
-        },
-        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
-    ],
-    standalone: false
-})
-export class ServiceDetailComponent extends NewPageComponent<ServiceDto> implements OnInit {
-  private readonly destroyRef = inject(DestroyRef);
+@Directive()
+export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnInit {
+  protected readonly destroyRef = inject(DestroyRef);
 
-  // STATESs
+  // STATES
   editMode = false;
 
   // VARs
@@ -141,12 +123,10 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     private institutionService: InstitutionService,
     private clientService: ClientsService,
     private hourTypeService: HourTypeService,
-    private categoryService: CategoriesService,
     private sponsorService: SponsorService,
-    private serviceService: ServiceService,
-    private router: Router,
+    protected serviceService: ServiceService,
     private route: ActivatedRoute,
-    private converter: Converter,
+    protected converter: Converter,
     override helperService: HelperService,
     override location: Location
   ) {
@@ -247,7 +227,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
 
         // ASSISTANCE PLAN
         this.selectedAssistancePlan = client.assistancePlans.find(value => value.id == service.assistancePlanId);
-        this.filteredAssistancePlans = client.assistancePlans //[this.selectedAssistancePlan ?? new AssistancePlanDto()];
+        this.filteredAssistancePlans = client.assistancePlans;
         this.assistancePlanSelected = true;
         this.setGoals(service.goals.map(value => value.id));
         if (this.selectedAssistancePlan != null) {
@@ -266,7 +246,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       });
   }
 
-  private loadClient(id: number) {
+  protected loadClient(id: number) {
     this.clientService.getById(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => {
@@ -320,11 +300,11 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((value: number[]) => {
           this.resetAssistancePlan();
-          this.assistancePlansControl.setValue("")
+          this.assistancePlansControl.setValue(null)
           this.resetGoals();
-          this.goalsControl.setValue("");
+          this.goalsControl.setValue([]);
           this.resetCategories();
-          this.categoriesControl.setValue("");
+          this.categoriesControl.setValue([]);
 
           if (value.length > 0) {
             this.value.clientId = value[0];
@@ -337,31 +317,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
         });
     }
 
-    this.serviceDateControl.enable();
-    this.serviceDateControl.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value) => {
-        if (value != null) {
-          this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
-          this.reloadTitle();
-          // constraints for the end time and date
-          this.minDate = new Date(value.toString());
-        }
-      });
-
-    this.assistancePlansControl.enable();
-    this.assistancePlansControl.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((value: number[]) => {
-        this.resetGoals();
-        this.goalsControl.setValue("");
-
-        if (value.length > 0) {
-          this.selectAssistancePlan(this.selectedClient.assistancePlans.find(plan => plan.id == value[0]));
-        } else {
-          this.selectAssistancePlan(null);
-        }
-      });
+    this.setupDateAndAssistancePlanSubscriptions();
 
     // GENERAL
     // START HOUR
@@ -387,6 +343,42 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     this.endHourControl.enable()
     this.endMinuteControl.enable()
 
+    this.setupValueSyncSubscriptions();
+  }
+
+  protected setupDateAndAssistancePlanSubscriptions() {
+    this.serviceDateControl.enable();
+    this.serviceDateControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        if (value != null) {
+          this.selectedServiceDate = this.converter.formatDate(new Date(value.toString()));
+          this.reloadTitle();
+          this.minDate = new Date(value.toString());
+        }
+      });
+
+    this.assistancePlansControl.enable();
+    this.assistancePlansControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value: number[] | number | null) => {
+        this.resetGoals();
+        this.goalsControl.setValue([]);
+
+        const selectedIds = Array.isArray(value)
+          ? value
+          : (value != null ? [value] : []);
+
+        if (selectedIds.length > 0) {
+          this.selectAssistancePlan(this.selectedClient.assistancePlans.find(plan => plan.id == selectedIds[0]));
+          return;
+        }
+
+        this.selectAssistancePlan(null);
+      });
+  }
+
+  protected setupValueSyncSubscriptions() {
     this.hourTypeControl.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => this.value.hourTypeId = value);
@@ -529,27 +521,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
     return "n/a";
   }
 
-  sumGoalHours(hours: GoalHourDto[]) {
-    if (hours.length == 0)
-      return "n/a";
-
-    return hours
-      .map(value => value.weeklyHours)
-      .reduce((sum, current) => sum + current)
-      .toFixed(2);
-  }
-
-  sumAssistancePlanHours(hours: AssistancePlanHourDto[]) {
-    if (hours.length == 0)
-      return "n/a";
-
-    return hours
-      .map(value => value.weeklyHours)
-      .reduce((sum, current) => sum + current)
-      .toFixed(2);
-  }
-
-  private _getClients(searchString: string): ClientDto[] {
+  protected _getClients(searchString: string): ClientDto[] {
     let filterValue = searchString.toLowerCase();
 
     return this.clients
@@ -558,7 +530,7 @@ export class ServiceDetailComponent extends NewPageComponent<ServiceDto> impleme
       .slice(0, 5);
   }
 
-  private reloadTitle() {
+  protected reloadTitle() {
     if (this.selectedClient !== null) {
       this.title = "Eintrag (" + this.converter.formatDateToGerman(new Date(this.selectedServiceDate.toString())) + ") " +
         this.selectedClient.lastName + " " + this.selectedClient.firstName;

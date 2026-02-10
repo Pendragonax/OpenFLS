@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.dtos.ServiceXLDto
 import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
+import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import jakarta.transaction.Transactional
@@ -70,11 +71,15 @@ class ServiceService(
     }
 
     @Transactional
-    fun getContingentEvaluationServiceDTOsBy(institutionId: Long, year: Int): List<ContingentEvaluationServiceProjection> {
+    fun getContingentEvaluationServiceDTOsBy(
+        institutionId: Long,
+        year: Int
+    ): List<ContingentEvaluationServiceProjection> {
         val start = LocalDate.of(year, 1, 1)
         val end = LocalDate.of(year, 12, 31)
         return serviceRepository.findContingentEvaluationServiceProjectionByInstitutionIdsAndStartAndEnd(
-            institutionId, start, end)
+            institutionId, start, end
+        )
     }
 
     fun getAllDtos(): List<ServiceDto> {
@@ -85,9 +90,10 @@ class ServiceService(
         return serviceRepository.findAll().toList()
     }
 
-    fun getProjectionsByInstitutionIdsAndStartAndEnd(institutionIds: List<Long>,
-                                                     start: LocalDate,
-                                                     end: LocalDate
+    fun getProjectionsByInstitutionIdsAndStartAndEnd(
+        institutionIds: List<Long>,
+        start: LocalDate,
+        end: LocalDate
     ): List<ServiceProjection> {
         return serviceRepository.findProjectionsByInstitutionIdsAndStartAndEnd(institutionIds, start, end)
     }
@@ -112,7 +118,8 @@ class ServiceService(
 
     fun getXLDtosByAssistancePlan(id: Long): List<ServiceXLDto> {
         return getByAssistancePlan(id).map {
-            modelMapper.map(it, ServiceXLDto::class.java) }
+            modelMapper.map(it, ServiceXLDto::class.java)
+        }
     }
 
     fun getByAssistancePlan(id: Long): List<Service> {
@@ -123,7 +130,11 @@ class ServiceService(
         return serviceRepository.findIllegalByAssistancePlan(id)
     }
 
-    fun getByAssistancePlanAndNotBetweenStartAndEnd(id: Long, start: LocalDate, end: LocalDate): List<ServiceProjection> {
+    fun getByAssistancePlanAndNotBetweenStartAndEnd(
+        id: Long,
+        start: LocalDate,
+        end: LocalDate
+    ): List<ServiceProjection> {
         return serviceRepository.findByAssistancePlanAndNotBetweenStartAndEnd(id, start, end)
     }
 
@@ -141,7 +152,7 @@ class ServiceService(
 
     fun getDtosByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<ServiceDto> {
         return getByEmployeeAndStartAndEnd(employeeId, start, end)
-                .map { modelMapper.map(it, ServiceDto::class.java) }
+            .map { modelMapper.map(it, ServiceDto::class.java) }
     }
 
     fun getByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<ServiceProjection> {
@@ -150,7 +161,7 @@ class ServiceService(
 
     fun getDtosByEmployeeAndStartEndDate(employeeId: Long, start: LocalDate, end: LocalDate): List<ServiceDto> {
         return getByEmployeeAndStartEndDate(employeeId, start, end)
-                .map { modelMapper.map(it, ServiceDto::class.java) }
+            .map { modelMapper.map(it, ServiceDto::class.java) }
     }
 
     fun getByEmployeeAndStartEndDate(employeeId: Long, start: LocalDate, end: LocalDate): List<Service> {
@@ -169,66 +180,90 @@ class ServiceService(
         return serviceRepository.findByInstitutionIdAndDate(institutionId, date)
     }
 
-    fun getDtosByInstitutionIdAndStartAndEnd(institutionId: Long,
-                                             start: LocalDate,
-                                             end: LocalDate
+    fun getDtosByInstitutionIdAndStartAndEnd(
+        institutionId: Long,
+        start: LocalDate,
+        end: LocalDate
     ): List<ServiceProjection> {
         return getByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
-    fun getByInstitutionIdAndStartAndEnd(institutionId: Long,
-                                         start: LocalDate,
-                                         end: LocalDate
+    fun getByInstitutionIdAndStartAndEnd(
+        institutionId: Long,
+        start: LocalDate,
+        end: LocalDate
     ): List<ServiceProjection> {
         return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end).sortedBy { it.start }
     }
 
-    fun getProjections(institutionId: Long,
-                       clientId: Long,
-                       start: LocalDate,
-                       end: LocalDate,
-                       allowedInstitutionIds: List<Long>): List<ServiceProjection> {
+    fun getProjections(
+        institutionId: Long,
+        clientId: Long,
+        start: LocalDate,
+        end: LocalDate,
+        allowedInstitutionIds: List<Long>
+    ): List<ServiceProjection> {
         return if (institutionId > 0 && clientId > 0) {
             serviceRepository.findByInstitutionIdAndClientIdAndStartAndEnd(institutionId, clientId, start, end)
         } else if (institutionId > 0) {
             getDtosByInstitutionIdAndStartAndEnd(institutionId, start, end)
         } else if (clientId > 0) {
             getProjectionsByInstitutionIdsAndClientIdAndStartAndEnd(
-                    allowedInstitutionIds, clientId, start, end)
+                allowedInstitutionIds, clientId, start, end
+            )
         } else {
             getProjectionsByInstitutionIdsAndStartAndEnd(allowedInstitutionIds, start, end)
         }
     }
 
-    fun getProjections(institutionId: Long,
-                       employeeId: Long,
-                       clientId: Long,
-                       start: LocalDate,
-                       end: LocalDate,
-                       allowedInstitutionIds: List<Long>): List<ServiceProjection> {
-        return serviceRepository.findProjectionsBy(institutionId, allowedInstitutionIds, employeeId, clientId, start, end)
+    fun getProjections(
+        institutionId: Long,
+        employeeId: Long,
+        clientId: Long,
+        start: LocalDate,
+        end: LocalDate,
+        allowedInstitutionIds: List<Long>
+    ): List<ServiceProjection> {
+        return serviceRepository.findProjectionsBy(
+            institutionId,
+            allowedInstitutionIds,
+            employeeId,
+            clientId,
+            start,
+            end
+        )
     }
 
     fun getDtosByClientAndDate(clientId: Long, date: LocalDate): List<ServiceDto> {
         return getByClientAndDate(clientId, date)
-                .map { modelMapper.map(it, ServiceDto::class.java) }
+            .map { modelMapper.map(it, ServiceDto::class.java) }
+    }
+
+    fun getFromTillEmployeeNameProjectionByClientAndDate(
+        clientId: Long,
+        date: LocalDate
+    ): List<FromTillEmployeeServiceProjection> {
+        return serviceRepository.findFromTillEmployeeServiceProjectionByClientIdAndStartIsBetween(clientId, date)
     }
 
     fun getByClientAndDate(clientId: Long, date: LocalDate): List<Service> {
         return serviceRepository.findByClientAndDate(clientId, date)
     }
 
-    fun getProjectionsByInstitutionIdsAndClientIdAndStartAndEnd(institutionIds: List<Long>,
-                                                                clientId: Long,
-                                                                start: LocalDate,
-                                                                end: LocalDate): List<ServiceProjection> {
+    fun getProjectionsByInstitutionIdsAndClientIdAndStartAndEnd(
+        institutionIds: List<Long>,
+        clientId: Long,
+        start: LocalDate,
+        end: LocalDate
+    ): List<ServiceProjection> {
         return serviceRepository.findProjectionsByInstitutionIdsAndClientIdAndStartAndEnd(
-                institutionIds, clientId, start, end)
+            institutionIds, clientId, start, end
+        )
     }
 
     fun getDtosByClientAndStartAndEnd(clientId: Long, start: LocalDate, end: LocalDate): List<ServiceDto> {
         return getByClientAndStartAndEnd(clientId, start, end)
-                .map { modelMapper.map(it, ServiceDto::class.java) }
+            .map { modelMapper.map(it, ServiceDto::class.java) }
     }
 
     fun getByClientAndStartAndEnd(clientId: Long, start: LocalDate, end: LocalDate): List<Service> {
@@ -237,7 +272,7 @@ class ServiceService(
 
     fun getDtosByEmployeeAndFilter(employeeId: Long, filter: ServiceFilterDto): List<ServiceDto> {
         return getByEmployeeAndFilter(employeeId, filter)
-                .map { modelMapper.map(it, ServiceDto::class.java) }
+            .map { modelMapper.map(it, ServiceDto::class.java) }
     }
 
     fun getByEmployeeAndFilter(employeeId: Long, filter: ServiceFilterDto): List<Service> {
@@ -250,27 +285,55 @@ class ServiceService(
         return serviceRepository.findByEmployeeAndDate(employeeId, filter.date!!)
     }
 
-    fun getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(year: Int,
-                                                             month: Int,
-                                                             assistancePlanId: Long,
-                                                             hourTypeId: Long): List<ServiceSoloProjection> {
+    fun getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
+        year: Int,
+        month: Int,
+        assistancePlanId: Long,
+        hourTypeId: Long
+    ): List<ServiceSoloProjection> {
         val start = LocalDate.of(year, month, 1)
         val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
 
         return serviceRepository.findByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
-                assistancePlanId, hourTypeId, start, end)
+            assistancePlanId, hourTypeId, start, end
+        )
+    }
+
+    fun getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
+        year: Int,
+        assistancePlanId: Long,
+        hourTypeId: Long
+    ): List<ServiceSoloProjection> {
+        val start = LocalDate.of(year, 1, 1)
+        val end = LocalDate.of(year, 12, 31)
+
+        return serviceRepository.findByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
+            assistancePlanId, hourTypeId, start, end
+        )
+    }
+
+    fun getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
+        start: LocalDate,
+        end: LocalDate,
+        assistancePlanId: Long,
+        hourTypeId: Long
+    ): List<ServiceSoloProjection> {
+        return serviceRepository.findByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
+            assistancePlanId, hourTypeId, start, end
+        )
     }
 
     fun getAllByAssistancePlanIdAndYearAndMonth(
-            year: Int,
-            month: Int,
-            assistancePlanId: Long,
+        year: Int,
+        month: Int,
+        assistancePlanId: Long,
     ): List<ServiceSoloProjection> {
         val start = LocalDate.of(year, month, 1)
         val end = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
 
         return serviceRepository.findByAssistancePlanIdAndStartAndEnd(
-                assistancePlanId, start, end)
+            assistancePlanId, start, end
+        )
     }
 
     fun countByEmployee(employeeId: Long): Long {

@@ -2,26 +2,24 @@ package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.hourTypes.HourTypeService
-import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.hourTypes.HourTypeDto
+import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.domains.sponsors.SponsorService
-import de.vinz.openfls.services.*
-import org.springframework.transaction.annotation.Transactional
+import de.vinz.openfls.services.GenericService
 import org.modelmapper.ModelMapper
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -36,8 +34,6 @@ class AssistancePlanService(
         private val hourTypeService: HourTypeService,
         private val modelMapper: ModelMapper
 ) : GenericService<AssistancePlan> {
-
-    private val logger: Logger = LoggerFactory.getLogger(AssistancePlanService::class.java)
 
     @Transactional
     fun create(valueDto: AssistancePlanDto): AssistancePlanDto {
@@ -119,11 +115,7 @@ class AssistancePlanService(
                 } }
                 .toMutableSet()
 
-        entity.hours.forEach { logger.info(it.id.toString())}
-
         val savedEntity = update(entity)
-
-        savedEntity.hours.forEach { logger.info(it.id.toString())}
 
         valueDto.apply {
             this.id = savedEntity.id
@@ -143,7 +135,6 @@ class AssistancePlanService(
             throw IllegalArgumentException("id not found")
 
         // backup hours
-        value.hours.forEach { logger.info(it.id.toString())}
         value.goals = mutableSetOf()
 
         return assistancePlanRepository.save(value)

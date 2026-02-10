@@ -7,6 +7,8 @@ import {HttpClient} from "@angular/common/http";
 import {Converter} from "./converter.helper";
 import {ServiceTimeDto} from "../dtos/service-time-dto.model";
 import {Service} from "../dtos/service.projection";
+import {ClientAndDateRequestDto} from "../dtos/client-and-date-request-dto.model";
+import {ClientAndDateResponseDto} from "../dtos/client-and-date-response-dto.model";
 
 @Injectable({
   providedIn: 'root'
@@ -107,5 +109,17 @@ export class ServiceService extends Base<ServiceDto> {
     return this.http
       .get<number>(`${environment.api_url}${this.url}/count/goal/${goalId}`)
 
+  }
+
+  getClientAndDateServices(clientId: number, date: Date): Observable<ClientAndDateResponseDto> {
+    const payload: ClientAndDateRequestDto = {
+      clientId,
+      date: this.converter.formatDate(date)
+    };
+
+    return this.http.post<ClientAndDateResponseDto>(
+      `${environment.api_url}${this.url}/client-and-date`,
+      payload
+    );
   }
 }

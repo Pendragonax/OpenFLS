@@ -20,7 +20,8 @@ import {ClientDetailComponent} from "./pages/client/components/client-detail/cli
 import {AssistancePlanNewComponent} from "./shared/components/assistance-plans/components/assistance-plan-new/assistance-plan-new.component";
 import {AssistancePlanDetailComponent} from "./shared/components/assistance-plans/components/assistance-plan-detail/assistance-plan-detail.component";
 import {HourTypeComponent} from "./pages/hour-type/hour-type.component";
-import {ServiceDetailComponent} from "./pages/service-detail/service-detail.component";
+import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
+import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
   ServiceEvaluationOverviewComponent
 } from "./pages/service-evaluation-overview/service-evaluation-overview.component";
@@ -55,9 +56,9 @@ const routes: Routes = [
   { path: 'services/my/:start/:end', component: MyServicesComponent, canActivate: [AuthGuard] },
   { path: 'services/all', component: AllServicesComponent, canActivate: [AuthGuard] },
   { path: 'services/all/:start/:end/:institutionId/:employeeId/:clientId', component: AllServicesComponent, canActivate: [AuthGuard] },
-  { path: 'services/new', component: ServiceDetailComponent, canActivate: [AuthGuard] },
-  { path: 'services/new/:date', component: ServiceDetailComponent, canActivate: [AuthGuard] },
-  { path: 'services/edit/:id', component: ServiceDetailComponent, canActivate: [AuthGuard] },
+  { path: 'services/new', component: ServiceNewComponent, canActivate: [AuthGuard] },
+  { path: 'services/new/:date', component: ServiceNewComponent, canActivate: [AuthGuard] },
+  { path: 'services/edit/:id', component: ServiceEditComponent, canActivate: [AuthGuard] },
   { path: 'overview', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] },
   { path: 'overview/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] }
 ];
