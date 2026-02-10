@@ -16,8 +16,9 @@
             <mat-label>Datum</mat-label>
             <input matInput
                    formControlName="serviceDate"
+                   [disabled]="true"
                    [matDatepicker]="serviceDatePicker">
-            <mat-datepicker-toggle matSuffix [for]="serviceDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker-toggle matSuffix [for]="serviceDatePicker" [disabled]="true"></mat-datepicker-toggle>
             <mat-datepicker #serviceDatePicker></mat-datepicker>
           </mat-form-field>
 
@@ -122,23 +123,14 @@
     <div class="beta-section">
       <div class="beta-section-title">Klient, Bereich & Stundentyp</div>
       <div class="beta-grid beta-grid-3">
-        <form [formGroup]="secondForm">
-          <mat-form-field appearance="outline" class="beta-field">
-            <mat-icon matPrefix>person</mat-icon>
-            <mat-label>Klient</mat-label>
-            <input matInput
-                   type="text"
-                   formControlName="client"
-                   [matAutocomplete]="clientAuto">
-            <mat-autocomplete #clientAuto="matAutocomplete"
-                              [displayWith]="displayClient"
-                              (optionSelected)="onClientSelected($event.option.value)">
-              @for (client of filteredClients; track client.id) {
-                <mat-option [value]="client">{{ client.lastName }} {{ client.firstName }}</mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
-        </form>
+        <mat-form-field appearance="outline" class="beta-field">
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-label>Klient</mat-label>
+          <input matInput
+                 type="text"
+                 [value]="clientDisplayName"
+                 disabled>
+        </mat-form-field>
 
         <form [formGroup]="firstForm">
           <mat-form-field appearance="outline" class="beta-field">

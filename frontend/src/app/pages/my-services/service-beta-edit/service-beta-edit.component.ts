@@ -23,4 +23,19 @@ export class ServiceBetaEditComponent extends ServiceBetaNewComponent {
   get isLoading(): boolean {
     return this.editMode && !this.clientSelected;
   }
+
+  get clientDisplayName(): string {
+    if (!this.selectedClient || !this.selectedClient.id) {
+      return '';
+    }
+    return `${this.selectedClient.lastName} ${this.selectedClient.firstName}`;
+  }
+
+  override ngOnInit() {
+    super.ngOnInit();
+
+    if (this.editMode) {
+      this.serviceDateControl.disable({ emitEvent: false });
+    }
+  }
 }
