@@ -55,6 +55,7 @@ class ServiceControllerWebMvcTest {
         // Given
         val date = LocalDate.of(2026, 2, 8)
         val projection = object : FromTillEmployeeServiceProjection {
+            override val id: Long = 1
             override val start: LocalDateTime = LocalDateTime.of(2026, 2, 8, 8, 0)
             override val end: LocalDateTime = LocalDateTime.of(2026, 2, 8, 9, 0)
             override val employeeFirstname: String = "Max"

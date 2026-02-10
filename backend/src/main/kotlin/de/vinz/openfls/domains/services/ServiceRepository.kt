@@ -107,7 +107,7 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     ): List<ServiceProjection>
 
     @Query(
-        "SELECT u.start AS start, u.end AS end, e.firstname AS employeeFirstname, e.lastname AS employeeLastname " +
+        "SELECT u.id AS id, u.start AS start, u.end AS end, e.firstname AS employeeFirstname, e.lastname AS employeeLastname " +
                 "FROM Service u JOIN u.employee e " +
                 "WHERE u.client.id = :clientId " +
                 "AND cast(u.start as LocalDate) = :date " +

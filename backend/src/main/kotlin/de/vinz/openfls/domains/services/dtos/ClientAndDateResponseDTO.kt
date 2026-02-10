@@ -7,6 +7,7 @@ data class ClientAndDateResponseDTO(
     val services: List<ClientAndDateServiceDTO>
 ) {
     data class ClientAndDateServiceDTO(
+        val id: Long,
         val timepoint: String,
         val employeeName: String
     )
@@ -17,6 +18,7 @@ data class ClientAndDateResponseDTO(
                 clientId = clientId,
                 services = services.map { service ->
                     ClientAndDateServiceDTO(
+                        id = service.id,
                         timepoint = "${service.start.toLocalTime()} - ${service.end.toLocalTime()}",
                         employeeName = "${service.employeeFirstname.first()}. ${service.employeeLastname}"
                     )

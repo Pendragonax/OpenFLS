@@ -4,6 +4,7 @@ export class ClientAndDateResponseDto {
 }
 
 export class ClientAndDateServiceDto {
+  id:number = 0;
   timepoint: string = '';
   employeeName: string = '';
 }
