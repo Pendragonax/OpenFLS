@@ -1,6 +1,5 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Converter} from "../../shared/services/converter.helper";
-import {InstitutionService} from "../../shared/services/institution.service";
 import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {ServiceService} from "../../shared/services/service.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -36,7 +35,6 @@ export class MyServicesComponent implements OnInit {
   userId$: ReplaySubject<number> = new ReplaySubject<number>();
 
   constructor(
-    private institutionService: InstitutionService,
     private serviceService: ServiceService,
     private converter: Converter,
     private dateService: DateService,
@@ -109,10 +107,12 @@ export class MyServicesComponent implements OnInit {
   }
 
   private navigate(start: Date, end: Date) {
-    this.router.navigate([
+    void this.router.navigate([
       this.baseUrl,
       this.dateService.formatDateToYearMonthDay(start),
       this.dateService.formatDateToYearMonthDay(end)
-    ]);
+    ]).catch(error => {
+      console.error('Failed to navigate to my services', error);
+    });
   }
 }
