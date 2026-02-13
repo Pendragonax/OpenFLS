@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {Converter} from "../../shared/services/converter.helper";
 import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {ServiceService} from "../../shared/services/service.service";
@@ -6,7 +6,8 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {DateService} from "../../shared/services/date.service";
 import {Service} from "../../shared/dtos/service.projection";
 import {UserService} from "../../shared/services/user.service";
-import {ReplaySubject, switchMap} from "rxjs";
+import {finalize, ReplaySubject, switchMap, take} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
     selector: 'app-my-my-services',
@@ -17,6 +18,7 @@ import {ReplaySubject, switchMap} from "rxjs";
 export class MyServicesComponent implements OnInit {
 
   baseUrl: string = "/services/my";
+  private readonly destroyRef = inject(DestroyRef);
 
   filterDateStart: Date = new Date(Date.now());
   title: String = "Meine";
@@ -45,8 +47,12 @@ export class MyServicesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.userService.user$.subscribe(value => this.userId$.next(value.id));
-    this.route.paramMap.subscribe(params => {
+    this.userService.user$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.userId$.next(value.id));
+    this.route.paramMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
       const start = params.get('start');
       const end = params.get('end');
 
@@ -77,30 +83,47 @@ export class MyServicesComponent implements OnInit {
   loadServices() {
     this.isBusy = true;
     this.illegalMode = false;
-    this.userId$.pipe(
-      switchMap((employeeId: number) => {
-        return this.serviceService.getByEmployeeAndStartAndEnd(employeeId, this.start, this.end);
-      })
-    ).subscribe((services: Service[]) => {
-      this.services = services;
-      this.isBusy = false;
-    });
+    this.userId$
+      .pipe(
+        take(1),
+        switchMap((employeeId: number) =>
+          this.serviceService.getByEmployeeAndStartAndEnd(employeeId, this.start, this.end)
+        ),
+        finalize(() => {
+          this.isBusy = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (services: Service[]) => {
+          this.services = services;
+        },
+        error: () => {
+          this.isBusy = false;
+        }
+      });
   }
 
   loadIllegalServices() {
     this.isBusy = true;
     this.illegalMode = true;
-    this.userId$.pipe(
-      switchMap((employeeId: number) => {
-        return this.serviceService.getIllegalByEmployeeId(employeeId);
-      })
-    ).subscribe({
-      next: illegalServices => {
-        this.services = illegalServices;
-        this.isBusy = false;
-      },
-      error: () => this.isBusy = false
-    });
+    this.userId$
+      .pipe(
+        take(1),
+        switchMap((employeeId: number) => this.serviceService.getIllegalByEmployeeId(employeeId)),
+        finalize(() => {
+          this.isBusy = false;
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: illegalServices => {
+          this.services = illegalServices;
+        },
+        error: () => {
+          this.isBusy = false;
+        }
+      });
   }
 
   private navigate(start: Date, end: Date) {

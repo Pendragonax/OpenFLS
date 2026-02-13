@@ -28,7 +28,7 @@ import {AssistancePlanHourTypeEvaluationLeftDto} from "../../../shared/dtos/assi
 @Component({
   selector: 'app-service-new',
   templateUrl: './service-new.component.html',
-  styleUrls: ['./service-new.component.css'],
+  styleUrls: ['../service-form.shared.css', './service-new.component.css'],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
     {
