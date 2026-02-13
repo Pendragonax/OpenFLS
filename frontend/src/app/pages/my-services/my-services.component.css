@@ -3,6 +3,10 @@
   margin-top: 8px;
 }
 
+.filters-mobile-top {
+  margin-bottom: 8px;
+}
+
 .filters-mobile-body {
   display: flex;
   flex-direction: column;
