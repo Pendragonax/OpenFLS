@@ -48,6 +48,12 @@
   margin-bottom: 10px;
 }
 
+.service-card-date-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .service-card-date {
   font-size: 12px;
   color: #6a7386;
@@ -57,7 +63,6 @@
   font-size: 13px;
   color: #2f3a4b;
   font-weight: 600;
-  margin-top: 4px;
 }
 
 .service-card-minutes--pill {
@@ -65,8 +70,8 @@
   align-items: center;
   padding: 2px 10px;
   border-radius: 999px;
-  background: #13a3e6;
-  color: #ffffff;
+  background: #13a3e6 !important;
+  color: #ffffff !important;
   font-weight: 600;
   font-size: 12px;
 }
@@ -119,23 +124,9 @@
 }
 
 .service-card-actions {
-  display: flex;
-  justify-content: flex-end;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding-top: 10px;
-  margin-top: 10px;
-  border-top: 1px solid #e9edf4;
-}
-
-.service-card-title {
-  font-weight: 600;
-  color: #2f3a4b;
-  font-size: 0.95rem;
-  margin-right: auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  gap: 6px;
 }
 
 @media (max-width: 800px) {

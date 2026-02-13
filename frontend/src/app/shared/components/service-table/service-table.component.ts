@@ -215,6 +215,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
     };
   }
 
+
   private transformLineBreaksToHtml(text: string): string {
     return text.replace(/(?:\r\n|\r|\n)/g, '<br>');
   }
