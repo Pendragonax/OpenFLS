@@ -54,12 +54,14 @@
       </mat-accordion>
     </div>
   </div>
-  <div class="row">
+  <div class="row services-content">
   @if (!isBusy) {
       <app-service-table [redRows]="illegalMode" [services]="services" [editMode]="true"></app-service-table>
     }
     @if (isBusy) {
-      <app-loading-spinner [description]="'Lade Einträge'"></app-loading-spinner>
+      <div class="services-loading">
+        <app-loading-spinner [description]="'Lade Einträge'"></app-loading-spinner>
+      </div>
     }
   </div>
 </div>

@@ -1,20 +1,17 @@
-.fixed-button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  z-index: 100;
-  opacity: 0.3;
+.floating-export-button {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1100;
+  opacity: 0.9;
   background: limegreen;
   color: white;
+  transform: scale(1.1);
 }
 
-.fixed-button:hover {
+.floating-export-button:hover {
   transition: opacity 200ms ease-in-out;
   opacity: 1;
-}
-
-.table-container {
-  position: relative;
 }
 
 .background-red {
