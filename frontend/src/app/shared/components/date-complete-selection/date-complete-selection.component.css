@@ -1,0 +1,74 @@
+.date-complete-field {
+  width: 100%;
+  max-width: 520px;
+}
+
+.date-prefix-desktop,
+.date-suffix-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.date-prefix-mobile {
+  display: none;
+}
+
+.date-prefix-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.date-prefix-row:first-child {
+  margin-top: 2px;
+}
+
+@media (max-width: 800px) {
+  .date-complete-field {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  :host ::ng-deep .date-complete-field .mat-mdc-form-field-flex {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  :host ::ng-deep .date-complete-field .mat-mdc-form-field-infix {
+    min-width: 0;
+  }
+
+  .date-prefix-desktop,
+  .date-suffix-desktop {
+    display: none;
+  }
+
+  .date-prefix-mobile {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    white-space: nowrap;
+  }
+
+  :host ::ng-deep .date-complete-field .mat-mdc-form-field-hint {
+    display: none;
+  }
+
+  :host ::ng-deep .date-complete-field .mat-mdc-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+  }
+
+  :host ::ng-deep .date-complete-field .mat-mdc-icon-button .mat-icon {
+    font-size: 20px;
+  }
+
+  .width-scale-70 {
+    width: 100%;
+    min-width: 0;
+  }
+}

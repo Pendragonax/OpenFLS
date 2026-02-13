@@ -11,7 +11,7 @@
 
 <div class="table-container">
   @if (services.length > 0) {
-    <button mat-mini-fab class="fixed-button"
+    <button mat-mini-fab class="floating-export-button"
             (click)="exportAsCSV()"
             [matTooltip]="'.csv speichern'">
       <mat-icon>save</mat-icon>
@@ -80,6 +80,91 @@
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="overview-row-height"></tr>
     </table>
+  }
+
+  @if (services.length > 0) {
+    <div class="service-cards">
+      @for (row of tableDataSource.data; track row.id) {
+        <div class="service-card mat-elevation-z2" [ngClass]="{'service-card--illegal': redRows}">
+          <div class="service-card-header">
+            <div>
+              <div class="service-card-date-row">
+                <div class="service-card-date">{{ row.startDate }}</div>
+                <div class="service-card-time">{{ row.startTime }}</div>
+                @if (row.minutes != null) {
+                  <div class="service-card-minutes service-card-minutes--pill">{{ row.minutes }} Min</div>
+                }
+              </div>
+            </div>
+            @if (editMode || adminMode) {
+              <div class="service-card-actions">
+                @if (editMode) {
+                  <button mat-icon-button
+                          color="primary"
+                          [routerLink]="['/services/edit', row.id]">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
+
+                @if (adminMode) {
+                  <button mat-icon-button
+                          color="warn"
+                          [disabled]="!(isAdmin$ | async)"
+                          [matTooltip]="'Dokumentation löschen'"
+                          (click)="openDeleteConfirmation(deleteContent, row.id)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+
+                  <ng-template #deleteContent let-modal>
+                    <div class="modal-header">
+                      <h2 class="modal-title"
+                          id="modal-basic-delete-title-card">Bestätigung</h2>
+                      <button type="button"
+                              class="btn-close"
+                              aria-label="Close"
+                              (click)="modal.dismiss('Cross click')"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Wollen sie den Dokumentationseintrag wirklich löschen?</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button"
+                              class="btn btn-danger"
+                              (click)="modal.close(true)">Löschen</button>
+                      <button type="button"
+                              class="btn btn-outline-dark"
+                              (click)="modal.close(false)">Abbrechen</button>
+                    </div>
+                  </ng-template>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="service-card-body">
+            <div class="service-card-row">
+              <span class="service-card-label">Klient</span>
+              <span class="service-card-value-light">{{ row.clientFullName }}</span>
+            </div>
+            @if (!editMode && row.institutionName) {
+              <div class="service-card-row">
+                <span class="service-card-label">Bereich</span>
+                <span class="service-card-value-light">{{ row.institutionName }}</span>
+              </div>
+            }
+            @if (!editMode && row.employeeFullName) {
+              <div class="service-card-row">
+                <span class="service-card-label">Mitarbeiter</span>
+                <span class="service-card-value-light">{{ row.employeeFullName }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="service-card-content" [innerHTML]="row.content"></div>
+
+        </div>
+      }
+    </div>
   }
 </div>
 
