@@ -1,0 +1,40 @@
+.filters-mobile {
+  display: none;
+  margin-top: 8px;
+}
+
+.filters-mobile-top {
+  margin-bottom: 8px;
+}
+
+.filters-mobile-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.filters-mobile-body app-search-field,
+.filters-mobile-body app-institution-select,
+.filters-mobile-body app-client-autocomplete,
+.filters-mobile-body app-employee-autocomplete {
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 800px) {
+  :host ::ng-deep .filters-mobile-body app-institution-select mat-form-field,
+  :host ::ng-deep .filters-mobile-body app-client-autocomplete mat-form-field,
+  :host ::ng-deep .filters-mobile-body app-employee-autocomplete mat-form-field,
+  :host ::ng-deep .filters-mobile-body app-search-field mat-form-field {
+    width: 100%;
+  }
+}
+
+@media (max-width: 800px) {
+  .filters-desktop {
+    display: none;
+  }
+
+  .filters-mobile {
+    display: block;
+  }
+}

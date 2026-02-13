@@ -4,7 +4,7 @@
                  [addRouterLink]="['/services/new/' + getDate(filterDateStart)]"></app-info-header>
 
 <div class="container-fluid mt-1">
-  <div class="row justify-content-center">
+  <div class="row justify-content-center filters-desktop">
     <div class="col-auto">
       <app-date-complete-selection [start]="start"
                                    [end]="end"
@@ -33,6 +33,49 @@
                                  [employeeId]="paramEmployeeId"
                                  (employeeChanged)="onEmployeeChanged($event)"
                                  [disabled]="isBusy"></app-employee-autocomplete>
+    </div>
+  </div>
+  <div class="row filters-mobile">
+    <div class="col-12">
+      <div class="filters-mobile-top">
+        <app-date-complete-selection [start]="start"
+                                     [end]="end"
+                                     (dateChanged)="onDateChanged($event)"
+                                     [disabled]="isBusy"></app-date-complete-selection>
+      </div>
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Filter</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="filters-mobile-body">
+            <div class="mb-2">
+              <app-search-field class="w-100"
+                                [isSubmitting]="isBusy"
+                                (onSearchStringChanges)="onSearchStringChanged($event)"></app-search-field>
+            </div>
+            <div class="mb-2">
+              <app-institution-select [institutions]="readableInstitutions"
+                                      [institutionId]="paramInstitutionId"
+                                      (institutionChanged)="onInstitutionChanged($event)"
+                                      [disabled]="isBusy"></app-institution-select>
+            </div>
+            <div class="mb-2">
+              <app-client-autocomplete [clients]="clients"
+                                       [clientId]="paramClientId"
+                                       (clientChanged)="onClientChanged($event)"
+                                       [disabled]="isBusy"></app-client-autocomplete>
+            </div>
+            <div class="mb-2">
+              <app-employee-autocomplete *showOnRole="'leader'"
+                                         [employees]="employees"
+                                         [employeeId]="paramEmployeeId"
+                                         (employeeChanged)="onEmployeeChanged($event)"
+                                         [disabled]="isBusy"></app-employee-autocomplete>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
     </div>
   </div>
   <div class="row">

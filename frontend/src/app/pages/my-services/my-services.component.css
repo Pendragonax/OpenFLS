@@ -28,6 +28,17 @@
   flex-direction: column;
 }
 
+.filters-mobile-body app-search-field,
+.filters-mobile-body app-date-complete-selection {
+  display: block;
+  width: 100%;
+}
+
+.filters-mobile-body mat-raised-button,
+.filters-mobile-body button {
+  width: 100%;
+}
+
 @media (max-width: 800px) {
   .filters-desktop {
     display: none;
