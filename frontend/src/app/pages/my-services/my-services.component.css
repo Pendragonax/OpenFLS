@@ -1,0 +1,19 @@
+.filters-mobile {
+  display: none;
+  margin-top: 8px;
+}
+
+.filters-mobile-body {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 800px) {
+  .filters-desktop {
+    display: none;
+  }
+
+  .filters-mobile {
+    display: block;
+  }
+}

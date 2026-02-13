@@ -4,8 +4,7 @@
                  [addRouterLink]="['/services/new/' + getDate(filterDateStart)]"></app-info-header>
 
 <div class="container-fluid mt-1">
-  <div class="row justify-content-center">
-
+  <div class="row justify-content-center filters-desktop">
     <div class="col-auto">
       <app-date-complete-selection [start]="start"
                                    [end]="end"
@@ -13,7 +12,8 @@
                                    [disabled]="isBusy"></app-date-complete-selection>
     </div>
     <div class="col-auto">
-      <app-search-field [isSubmitting]="isBusy" (onSearchStringChanges)="onSearchStringChanged($event)"></app-search-field>
+      <app-search-field [isSubmitting]="isBusy"
+                        (onSearchStringChanges)="onSearchStringChanged($event)"></app-search-field>
     </div>
 
     <div class="col-auto mt-1">
@@ -21,6 +21,37 @@
         <mat-icon color="warn">new_releases</mat-icon>
         fehlerhafte Dokumentationen
       </button>
+    </div>
+  </div>
+
+  <div class="row filters-mobile">
+    <div class="col-12">
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Filter</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="filters-mobile-body">
+            <div class="mb-2">
+              <app-date-complete-selection [start]="start"
+                                           [end]="end"
+                                           (dateChanged)="onDateChanged($event)"
+                                           [disabled]="isBusy"></app-date-complete-selection>
+            </div>
+            <div class="mb-2">
+              <app-search-field class="w-100"
+                                [isSubmitting]="isBusy"
+                                (onSearchStringChanges)="onSearchStringChanged($event)"></app-search-field>
+            </div>
+            <div class="d-flex">
+              <button mat-raised-button color="primary" (click)="loadIllegalServices()">
+                <mat-icon color="warn">new_releases</mat-icon>
+                fehlerhafte Dokumentationen
+              </button>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
     </div>
   </div>
   <div class="row">

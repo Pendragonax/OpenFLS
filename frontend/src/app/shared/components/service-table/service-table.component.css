@@ -20,3 +20,134 @@
 .background-red {
   background: rgba(255, 33, 33, 0.24) !important;
 }
+
+.service-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.service-card {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.service-card--illegal {
+  border-left: 4px solid #e95c54;
+  background: rgba(233, 92, 84, 0.08);
+}
+
+.service-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.service-card-date {
+  font-size: 12px;
+  color: #6a7386;
+}
+
+.service-card-time {
+  font-size: 13px;
+  color: #2f3a4b;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.service-card-minutes--pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #13a3e6;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.service-card-minutes {
+  font-size: 12px;
+  color: #6a7386;
+  background: #f2f4f8;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.service-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e7ebf3;
+  background: #f8f9fc;
+}
+
+.service-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.service-card-label {
+  color: #6a7386;
+  min-width: 90px;
+}
+
+.service-card-value {
+  text-align: right;
+  font-weight: 600;
+  color: #2f3a4b;
+}
+
+.service-card-value-light {
+  text-align: right;
+  color: #2f3a4b;
+}
+
+.service-card-content {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #2f3a4b;
+}
+
+.service-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid #e9edf4;
+}
+
+.service-card-title {
+  font-weight: 600;
+  color: #2f3a4b;
+  font-size: 0.95rem;
+  margin-right: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+  table {
+    display: none;
+  }
+
+  .service-cards {
+    display: flex;
+  }
+
+  .paginator {
+    display: none;
+  }
+}

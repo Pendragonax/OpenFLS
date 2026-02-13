@@ -101,10 +101,13 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   }
 
   private mapServiceToDataSource(service: Service): any {
+    const dateParts = this.transformDateParts(service.start);
     return {
       id: service.id,
+      title: service.title,
       start: service.start,
-      startFormatted: this.transformDateString(service.start),
+      startDate: dateParts.date,
+      startTime: dateParts.time,
       minutes: service.minutes,
       content: (service.title.length > 0 ? `<strong>${service.title}</strong><br>` : '') + this.transformLineBreaksToHtml(service.content),
       institutionName: service.institution.name,
@@ -197,6 +200,19 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${day}.${month}.${year}<br> ${hours}:${minutes}`;
+  }
+
+  private transformDateParts(value: string): { date: string; time: string } {
+    const date = new Date(value);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return {
+      date: `${day}.${month}.${year}`,
+      time: `${hours}:${minutes}`
+    };
   }
 
   private transformLineBreaksToHtml(text: string): string {
