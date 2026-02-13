@@ -1,10 +1,9 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Converter} from "../../shared/services/converter.helper";
 import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {ServiceService} from "../../shared/services/service.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {DateService} from "../../shared/services/date.service";
-import {AllServicesComponent} from "../all-services/all-services.component";
 import {Service} from "../../shared/dtos/service.projection";
 import {UserService} from "../../shared/services/user.service";
 import {ReplaySubject, switchMap} from "rxjs";
@@ -16,8 +15,6 @@ import {ReplaySubject, switchMap} from "rxjs";
     standalone: false
 })
 export class MyServicesComponent implements OnInit {
-
-  @ViewChild('allServicesComponent') allServicesComponent!: AllServicesComponent;
 
   baseUrl: string = "/services/my";
 
