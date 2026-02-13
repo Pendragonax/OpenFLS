@@ -1,11 +1,12 @@
 import {Component} from '@angular/core';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from '@angular/material/core';
 import {ServiceNewComponent} from "../service-new/service-new.component";
 
 @Component({
   selector: 'app-service-edit',
   templateUrl: './service-edit.component.html',
-  styleUrls: ['./service-edit.component.css'],
+  styleUrls: ['../service-form.shared.css', './service-edit.component.css'],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
     {
@@ -126,7 +127,9 @@ export class ServiceEditComponent extends ServiceNewComponent {
       return;
     }
 
-    this.serviceService.getByAssistancePlan(planId).subscribe({
+    this.serviceService.getByAssistancePlan(planId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
       next: (services) => {
         const match = services.find(service => service.id === this.value?.id);
         const matchGoalIds = (match?.goals ?? []).map(goal => goal.id);

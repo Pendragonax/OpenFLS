@@ -186,7 +186,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
           try {
             const startDate = new Date(dateStr);
             this.value.start = startDate.valueOf().toString();
-            this.serviceDateControl.setValue(this.converter.formatDate(startDate));
+            this.serviceDateControl.setValue(startDate);
             this.selectedServiceDate = this.converter.formatDate(startDate);
             this.minDate = startDate;
           } catch {
@@ -258,7 +258,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
   }
 
   private fillFormGroups() {
-    this.serviceDateControl.setValue(this.converter.formatDate(new Date(this.value.start)));
+    this.serviceDateControl.setValue(new Date(this.value.start));
     this.startHourControl.setValue(new Date(this.value.start).getHours());
     this.startMinuteControl.setValue(new Date(this.value.start).getMinutes());
 
