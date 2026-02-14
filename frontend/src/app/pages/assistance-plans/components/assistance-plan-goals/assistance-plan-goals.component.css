@@ -1,9 +1,89 @@
-tab::ng-deep .cdk-overlay-container {
+:host ::ng-deep .cdk-overlay-container {
   z-index: 9999;
 }
 
-td , th {
-  white-space: break-spaces;
+.ag-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ag-toolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.ag-add-button {
+  min-width: 160px;
+}
+
+.ag-table-wrap {
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  background: #f9fafd;
+  padding: 6px;
+  overflow-x: auto;
+}
+
+.ag-table {
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ag-table th,
+.ag-table td,
+.ag-hour-table th,
+.ag-hour-table td {
+  white-space: normal;
   word-wrap: break-word;
   max-width: 200px;
+}
+
+.ag-table th,
+.ag-hour-table th {
+  color: #5f6880;
+  font-weight: 600;
+}
+
+.ag-modal-body {
+  padding-top: 4px;
+}
+
+.ag-modal-tab {
+  padding: 8px 2px 4px;
+}
+
+.ag-field {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.ag-hour-action {
+  margin: 4px 0 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.ag-hour-add-btn {
+  min-width: 160px;
+}
+
+.ag-hour-table-wrap {
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  background: #f9fafd;
+  padding: 6px;
+}
+
+.ag-hour-table {
+  width: 100%;
+}
+
+.ag-empty {
+  background: #f7f8fb;
+  border: 1px dashed #d7dbe5;
+  color: #7a8396;
+  padding: 10px 12px;
+  border-radius: 6px;
 }
