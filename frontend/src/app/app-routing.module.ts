@@ -30,6 +30,7 @@ import {AllServicesComponent} from "./pages/all-services/all-services.component"
 import {
   AssistancePlanNewSinglePageComponent
 } from "./pages/assistance-plans/assistance-plan-new/assistance-plan-new.component";
+import {AssistancePlanEditComponent} from "./pages/assistance-plans/assistance-plan-edit/assistance-plan-edit.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -49,6 +50,7 @@ const routes: Routes = [
   { path: 'clients/new', component: ClientNewComponent, canActivate: [AuthGuard] },
   { path: 'clients/detail/:id', component: ClientDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/new/:id', component: AssistancePlanNewSinglePageComponent, canActivate: [AuthGuard] },
+  { path: 'assistance_plans/edit/:id', component: AssistancePlanEditComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id/:tab', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/analysis/:id', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },

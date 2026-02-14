@@ -10,11 +10,15 @@ export class AssistancePlanCreateDto {
 }
 
 export class AssistancePlanCreateHourDto {
+  id?: number;
   weeklyMinutes: number = 0;
   hourTypeId: number = 0;
+  assistancePlanId?: number;
+  goalHourId?: number;
 }
 
 export class AssistancePlanCreateGoalDto {
+  id?: number;
   title: string = "";
   description: string = "";
   assistancePlanId: number = 0;

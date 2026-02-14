@@ -1,0 +1,140 @@
+<div class="beta-service-page">
+  <div class="ap-layout">
+    <div class="beta-card ap-card">
+      <div class="beta-title">
+        Hilfeplan bearbeiten für
+        <span class="ap-title-client">{{ client.lastName }} {{ client.firstName }}</span>
+      </div>
+
+      @if (isLoading) {
+        <div class="beta-loading">
+          <mat-spinner [diameter]="36" [strokeWidth]="4"></mat-spinner>
+          <span>Hilfeplan wird geladen…</span>
+        </div>
+      } @else {
+        <div class="beta-section">
+          <div class="beta-section-title">Basisdaten</div>
+
+          <form [formGroup]="generalForm" class="ap-form-grid">
+            <mat-form-field appearance="outline" class="beta-field">
+              <mat-label>Beginn</mat-label>
+              <input matInput
+                     formControlName="start"
+                     [matDatepicker]="startPicker"
+                     required>
+              <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="beta-field">
+              <mat-label>Ende</mat-label>
+              <input matInput
+                     formControlName="end"
+                     [matDatepicker]="endPicker"
+                     [min]="minEndDate"
+                     [matDatepickerFilter]="endDateFilter"
+                     [readonly]="true"
+                     (blur)="onEndDateBlur()"
+                     required>
+              <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+              @if (generalForm.end.hasError('endBeforeOrEqualStart')) {
+                <mat-error>Ende muss nach Beginn liegen.</mat-error>
+              }
+              @if (generalForm.end.hasError('matDatepickerParse')) {
+                <mat-error>Ungültiges Datum.</mat-error>
+              }
+              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="beta-field">
+              <mat-label>Kostenträger</mat-label>
+              <mat-select formControlName="sponsor" required>
+                @for (value of sponsors; track value.id) {
+                  <mat-option [value]="value.id">{{ value.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="beta-field">
+              <mat-label>Bereich</mat-label>
+              <mat-select formControlName="institution" required>
+                @for (institution of affiliatedInstitutions; track institution.id) {
+                  <mat-option [value]="institution.id">{{ institution.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </form>
+
+          <div class="ap-existing-plans">
+            <div class="beta-section-title">Weitere Hilfepläne des Klienten</div>
+            @if (existingPlansLoading) {
+              <div class="ap-existing-loading">
+                <mat-spinner [diameter]="28" [strokeWidth]="3"></mat-spinner>
+                <span>Hilfepläne werden geladen…</span>
+              </div>
+            } @else if (hasExistingPlans) {
+              <div class="ap-existing-list">
+                @for (plan of existingPlans; track plan.id) {
+                  <div class="ap-existing-row"
+                       [class.ap-existing-row--overlap]="isExistingPlanInNewRange(plan)">
+                    <div class="ap-existing-time">{{ getExistingPlanTimeRange(plan) }}</div>
+                    <div class="ap-existing-sponsor">{{ getExistingPlanSponsor(plan) }}</div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="ap-existing-empty">Keine weiteren Hilfepläne für den Klienten.</div>
+            }
+          </div>
+        </div>
+
+        <div class="beta-section">
+          <div class="beta-section-title">Stundenanteile</div>
+          @if (canAddPlanHours) {
+            <app-assistance-plan-hours-page
+              [hours]="updateValue.hours"
+              [editable]="true"
+              (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
+          } @else {
+            <div class="ap-section-hint">Stundenanteile können nicht hinzugefügt werden, solange in Zielen Stunden hinterlegt sind.</div>
+          }
+        </div>
+
+        <div class="beta-section">
+          <div class="beta-section-title">Ziele</div>
+          @if (!canAddGoalHours) {
+            <div class="ap-section-hint">In Zielen können keine Stunden hinzugefügt werden, solange Stundenanteile gesetzt sind.</div>
+          }
+          <app-assistance-plan-goals
+            [goals]="updateValue.goals"
+            [editable]="true"
+            [canAddGoalHours]="canAddGoalHours"
+            (goalsChange)="onGoalsChange($event)"></app-assistance-plan-goals>
+        </div>
+
+        <div class="beta-section">
+          <div class="beta-footer">
+            <div class="beta-status">
+              <div class="beta-status-title">Status</div>
+              <div>
+                Daten vollständig:
+                <mat-icon [class.beta-status-ok]="generalForm.valid" [class.beta-status-bad]="!generalForm.valid">
+                  {{ generalForm.valid ? 'check_circle' : 'cancel' }}
+                </mat-icon>
+              </div>
+              <div>Stunden: {{ updateValue.hours.length }}</div>
+              <div>Ziele: {{ updateValue.goals.length }}</div>
+            </div>
+
+            <div class="beta-actions">
+              <button mat-raised-button color="primary" [disabled]="!canSave" (click)="update()">Speichern</button>
+              <button mat-stroked-button (click)="location.back()">Abbrechen</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

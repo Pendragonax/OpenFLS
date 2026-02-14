@@ -37,10 +37,10 @@ export class AssistancePlanHoursPageComponent
   @Input() editable = false;
   @Input() set hours(value: AssistancePlanCreateHourDto[]) {
     this.values = (value ?? []).map((hour, index) => ({
-      id: index + 1,
+      id: hour.id ?? (index + 1),
       weeklyMinutes: hour.weeklyMinutes,
       hourTypeId: hour.hourTypeId,
-      assistancePlanId: 0
+      assistancePlanId: hour.assistancePlanId ?? 0
     }));
     this.filteredTableData = this.convertToTableSource(this.values);
     this.refreshTablePage();
@@ -200,6 +200,8 @@ export class AssistancePlanHoursPageComponent
     this.filteredTableData = this.convertToTableSource(this.values);
     this.refreshTablePage();
     this.hoursChange.emit(this.values.map(value => ({
+      id: value.id,
+      assistancePlanId: value.assistancePlanId,
       weeklyMinutes: value.weeklyMinutes,
       hourTypeId: value.hourTypeId
     })));

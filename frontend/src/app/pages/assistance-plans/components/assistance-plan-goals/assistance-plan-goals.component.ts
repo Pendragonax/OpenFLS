@@ -269,11 +269,14 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
     this.filteredTableData = this.convertToTableSource(this.values);
     this.refreshTablePage();
     this.goalsChange.emit(this.values.map(goal => ({
+      id: goal.id,
       title: goal.title,
       description: goal.description,
       assistancePlanId: goal.assistancePlanId,
       institutionId: goal.institutionId,
       hours: goal.hours.map((hour): AssistancePlanCreateHourDto => ({
+        id: hour.id,
+        goalHourId: hour.goalHourId,
         weeklyMinutes: hour.weeklyMinutes,
         hourTypeId: hour.hourTypeId
       }))
@@ -282,15 +285,15 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
 
   private toGoalDto(goal: AssistancePlanCreateGoalDto, id: number): GoalDto {
     return {
-      id,
+      id: goal.id ?? id,
       title: goal.title,
       description: goal.description,
       assistancePlanId: goal.assistancePlanId,
       institutionId: goal.institutionId,
       hours: (goal.hours ?? []).map((hour, index) => ({
-        id: index + 1,
+        id: hour.id ?? (index + 1),
         weeklyMinutes: hour.weeklyMinutes,
-        goalHourId: 0,
+        goalHourId: hour.goalHourId ?? 0,
         hourTypeId: hour.hourTypeId
       }))
     };

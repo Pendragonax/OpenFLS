@@ -149,6 +149,7 @@ import {
 import {
   AssistancePlanHoursPageComponent
 } from "./pages/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component";
+import {AssistancePlanEditComponent} from "./pages/assistance-plans/assistance-plan-edit/assistance-plan-edit.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -218,6 +219,7 @@ const routes: Routes = [
         ClientAutocompleteComponent,
         ServiceTableComponent,
         AssistancePlanNewSinglePageComponent,
+        AssistancePlanEditComponent,
         AssistancePlanGoalsComponent,
         AssistancePlanHoursPageComponent
     ],

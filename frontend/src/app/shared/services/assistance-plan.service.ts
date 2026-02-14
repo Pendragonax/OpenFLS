@@ -15,6 +15,7 @@ import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model
 import {AssistancePlanEvaluationLeftDto} from "../dtos/assistance-plan-evaluation-left.dto";
 import {AssistancePlan} from "../projections/assistance-plan.projection";
 import {AssistancePlanCreateDto} from "../dtos/assistance-plan-create-dto.model";
+import {AssistancePlanUpdateDto} from "../dtos/assistance-plan-update-dto.model";
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +43,12 @@ export class AssistancePlanService {
   }
 
   update(id: number, value: AssistancePlanDto): Observable<AssistancePlanDto> {
+    return this.http
+      .put<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}`, value)
+      .pipe(tap(() => this.initialLoad()));
+  }
+
+  updateWithCreateLikeDto(id: number, value: AssistancePlanUpdateDto): Observable<AssistancePlanDto> {
     return this.http
       .put<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}`, value)
       .pipe(tap(() => this.initialLoad()));
