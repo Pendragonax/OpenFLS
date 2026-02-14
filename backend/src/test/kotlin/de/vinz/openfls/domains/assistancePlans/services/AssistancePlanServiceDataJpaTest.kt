@@ -263,4 +263,52 @@ class AssistancePlanServiceDataJpaTest {
         val hours = assistancePlanHourRepository.findByAssistancePlanId(result.id)
         assertThat(hours).isNotNull
     }
+
+    @Test
+    fun getAssistancePlanDtosByClientId_sortsByStartDesc() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2024, 1, 1),
+                end = LocalDate.of(2024, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution
+            )
+        )
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution
+            )
+        )
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2025, 1, 1),
+                end = LocalDate.of(2025, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution
+            )
+        )
+
+        // When
+        val result = assistancePlanService.getAssistancePlanDtosByClientId(client.id)
+
+        // Then
+        assertThat(result).hasSize(3)
+        assertThat(result.map { it.start }).containsExactly(
+            LocalDate.of(2026, 1, 1),
+            LocalDate.of(2025, 1, 1),
+            LocalDate.of(2024, 1, 1)
+        )
+    }
 }

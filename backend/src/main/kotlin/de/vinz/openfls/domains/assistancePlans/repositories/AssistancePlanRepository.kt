@@ -51,7 +51,8 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     fun findAllByYear(@Param("year") year: Int): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
-            "WHERE u.client.id = :clientId")
+            "WHERE u.client.id = :clientId " +
+            "ORDER BY u.start DESC")
     fun findByClientId(@Param("clientId") id: Long): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
