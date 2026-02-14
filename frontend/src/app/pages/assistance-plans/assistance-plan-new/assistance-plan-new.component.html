@@ -1,9 +1,7 @@
-<app-info-header [title]="'Neuer Hilfeplan für &quot;' + client.lastName + ' ' + client.firstName + '&quot;'"></app-info-header>
-
 <div class="beta-service-page">
   <div class="ap-layout">
     <div class="beta-card ap-card">
-      <div class="beta-title">Daten</div>
+      <div class="beta-title">Neuer Hilfeplan</div>
       <div class="beta-section">
         <div class="beta-section-title">Basisdaten</div>
         <p class="ap-client-name"><b>{{ client.lastName }} {{ client.firstName }}</b></p>
@@ -51,28 +49,6 @@
         </form>
       </div>
 
-      <div class="beta-footer">
-        <div class="beta-status">
-        <div class="beta-status-title">Status</div>
-          <div>
-            Daten vollständig:
-            <mat-icon [class.beta-status-ok]="generalForm.valid" [class.beta-status-bad]="!generalForm.valid">
-              {{ generalForm.valid ? 'check_circle' : 'cancel' }}
-            </mat-icon>
-          </div>
-          <div>Stunden: {{ createValue.hours.length }}</div>
-          <div>Ziele: {{ createValue.goals.length }}</div>
-        </div>
-
-        <div class="beta-actions">
-          <button mat-raised-button color="primary" [disabled]="!canSave" (click)="create()">Speichern</button>
-          <button mat-stroked-button (click)="location.back()">Abbrechen</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="beta-card ap-card">
-      <div class="beta-title">Stunden</div>
       <div class="beta-section" [class.ap-section-inactive]="!isHoursSectionActive">
         <div class="beta-section-title">Stundenanteile</div>
         @if (!isHoursSectionActive) {
@@ -93,6 +69,27 @@
           [goals]="createValue.goals"
           [editable]="isGoalsSectionActive"
           (goalsChange)="onGoalsChange($event)"></app-assistance-plan-goals>
+      </div>
+
+      <div class="beta-section">
+        <div class="beta-footer">
+          <div class="beta-status">
+          <div class="beta-status-title">Status</div>
+            <div>
+              Daten vollständig:
+              <mat-icon [class.beta-status-ok]="generalForm.valid" [class.beta-status-bad]="!generalForm.valid">
+                {{ generalForm.valid ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+            </div>
+            <div>Stunden: {{ createValue.hours.length }}</div>
+            <div>Ziele: {{ createValue.goals.length }}</div>
+          </div>
+
+          <div class="beta-actions">
+            <button mat-raised-button color="primary" [disabled]="!canSave" (click)="create()">Speichern</button>
+            <button mat-stroked-button (click)="location.back()">Abbrechen</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
