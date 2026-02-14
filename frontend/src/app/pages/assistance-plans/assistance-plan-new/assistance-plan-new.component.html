@@ -1,0 +1,97 @@
+<app-info-header [title]="'Neuer Hilfeplan für &quot;' + client.lastName + ' ' + client.firstName + '&quot;'"></app-info-header>
+
+<div class="beta-service-page">
+  <div class="ap-layout">
+    <div class="beta-card ap-card">
+      <div class="beta-title">Daten</div>
+      <div class="beta-section">
+        <div class="beta-section-title">Basisdaten</div>
+        <p class="ap-client-name"><b>{{ client.lastName }} {{ client.firstName }}</b></p>
+
+        <form [formGroup]="generalForm" class="ap-form-grid">
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Beginn</mat-label>
+            <input matInput
+                   formControlName="start"
+                   [matDatepicker]="startPicker"
+                   required>
+            <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Ende</mat-label>
+            <input matInput
+                   formControlName="end"
+                   [matDatepicker]="endPicker"
+                   required>
+            <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Kostenträger</mat-label>
+            <mat-select formControlName="sponsor" required>
+              @for (value of sponsors; track value.id) {
+                <mat-option [value]="value.id">{{ value.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Bereich</mat-label>
+            <mat-select formControlName="institution" required>
+              @for (institution of affiliatedInstitutions; track institution.id) {
+                <mat-option [value]="institution.id">{{ institution.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </form>
+      </div>
+
+      <div class="beta-footer">
+        <div class="beta-status">
+        <div class="beta-status-title">Status</div>
+          <div>
+            Daten vollständig:
+            <mat-icon [class.beta-status-ok]="generalForm.valid" [class.beta-status-bad]="!generalForm.valid">
+              {{ generalForm.valid ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+          </div>
+          <div>Stunden: {{ value.hours.length }}</div>
+          <div>Ziele: {{ value.goals.length }}</div>
+        </div>
+
+        <div class="beta-actions">
+          <button mat-raised-button color="primary" [disabled]="!canSave" (click)="create()">Speichern</button>
+          <button mat-stroked-button (click)="location.back()">Abbrechen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="beta-card ap-card">
+      <div class="beta-title">Stunden</div>
+      <div class="beta-section">
+        <div class="beta-section-title">Stundenanteile</div>
+        <app-assistance-plan-hours
+          [assistancePlanView$]="valueView$"
+          [editable]="true"
+          (updatedValueEvent)="updateAssistancePlanHour($event)"
+          (addedValueEvent)="addAssistancePlanHour($event)"
+          (deletedValueEvent)="deleteAssistancePlanHour($event)"></app-assistance-plan-hours>
+      </div>
+
+      <div class="beta-section">
+        <div class="beta-section-title">Ziele</div>
+        <app-assistance-plan-goals
+          [assistancePlanView$]="valueView$"
+          [editable]="true"
+          (updatedGoalEvent)="updateGoal($event)"
+          (addedGoalEvent)="addGoal($event)"
+          (deletedGoalEvent)="deleteGoal($event)"></app-assistance-plan-goals>
+      </div>
+    </div>
+  </div>
+</div>

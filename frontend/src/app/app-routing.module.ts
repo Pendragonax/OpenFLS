@@ -17,7 +17,6 @@ import {SponsorDetailComponent} from "./pages/sponsor/components/sponsor-detail/
 import {ClientComponent} from "./pages/client/client.component";
 import {ClientNewComponent} from "./pages/client/components/client-new/client-new.component";
 import {ClientDetailComponent} from "./pages/client/components/client-detail/client-detail.component";
-import {AssistancePlanNewComponent} from "./shared/components/assistance-plans/components/assistance-plan-new/assistance-plan-new.component";
 import {AssistancePlanDetailComponent} from "./shared/components/assistance-plans/components/assistance-plan-detail/assistance-plan-detail.component";
 import {HourTypeComponent} from "./pages/hour-type/hour-type.component";
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
@@ -28,6 +27,9 @@ import {
 import {AssistancePlanAnalysisComponent} from "./pages/assistance-plan-analysis/assistance-plan-analysis.component";
 import {MyServicesComponent} from "./pages/my-services/my-services.component";
 import {AllServicesComponent} from "./pages/all-services/all-services.component";
+import {
+  AssistancePlanNewSinglePageComponent
+} from "./pages/assistance-plans/assistance-plan-new/assistance-plan-new.component";
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -46,7 +48,7 @@ const routes: Routes = [
   { path: 'clients', component: ClientComponent, canActivate: [AuthGuard] },
   { path: 'clients/new', component: ClientNewComponent, canActivate: [AuthGuard] },
   { path: 'clients/detail/:id', component: ClientDetailComponent, canActivate: [AuthGuard] },
-  { path: 'assistance_plans/new/:id', component: AssistancePlanNewComponent, canActivate: [AuthGuard] },
+  { path: 'assistance_plans/new/:id', component: AssistancePlanNewSinglePageComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/detail/:id/:tab', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/analysis/:id', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },

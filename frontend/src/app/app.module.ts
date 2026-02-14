@@ -140,6 +140,12 @@ import {ServiceTableComponent} from "./shared/components/service-table/service-t
 import {EmployeeAutocompleteComponent} from "./shared/components/employee-autocomplete/employee-autocomplete.component";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {
+  AssistancePlanNewSinglePageComponent
+} from "./pages/assistance-plans/assistance-plan-new/assistance-plan-new.component";
+import {
+  AssistancePlanGoalsComponent
+} from "./pages/assistance-plans/components/assistance-plan-goals/assistance-plan-goals.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -207,7 +213,9 @@ const routes: Routes = [
         MyServicesComponent,
         AllServicesComponent,
         ClientAutocompleteComponent,
-        ServiceTableComponent
+        ServiceTableComponent,
+        AssistancePlanNewSinglePageComponent,
+        AssistancePlanGoalsComponent
     ],
     exports: [
         ShowOnRoleDirective
