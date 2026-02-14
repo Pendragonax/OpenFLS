@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.permissions.AccessService
@@ -27,7 +28,7 @@ class AssistancePlanController(
     private val logPerformance: Boolean = false
 
     @PostMapping("")
-    fun create(@Valid @RequestBody valueDto: AssistancePlanDto): Any {
+    fun create(@Valid @RequestBody valueDto: AssistancePlanCreateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()

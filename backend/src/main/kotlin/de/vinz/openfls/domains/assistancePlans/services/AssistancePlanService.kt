@@ -2,10 +2,13 @@ package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
+import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
@@ -37,7 +40,44 @@ class AssistancePlanService(
 
     @Transactional
     fun create(valueDto: AssistancePlanDto): AssistancePlanDto {
-        val entity = modelMapper.map(valueDto, AssistancePlan::class.java)
+        val createDto = AssistancePlanCreateDto().apply {
+            start = valueDto.start
+            end = valueDto.end
+            clientId = valueDto.clientId
+            institutionId = valueDto.institutionId
+            sponsorId = valueDto.sponsorId
+            hours = valueDto.hours.map { hour ->
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateHourDto().apply {
+                    weeklyMinutes = hour.weeklyMinutes
+                    hourTypeId = hour.hourTypeId
+                }
+            }
+            goals = valueDto.goals.map { goal ->
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateGoalDto().apply {
+                    title = goal.title
+                    description = goal.description
+                    assistancePlanId = goal.assistancePlanId
+                    institutionId = goal.institutionId
+                    hours = goal.hours.map { hour ->
+                        de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateHourDto().apply {
+                            weeklyMinutes = hour.weeklyMinutes
+                            hourTypeId = hour.hourTypeId
+                        }
+                    }
+                }
+            }
+        }
+        return create(createDto)
+    }
+
+    @Transactional
+    fun create(valueDto: AssistancePlanCreateDto): AssistancePlanDto {
+        validateHoursPlacement(valueDto)
+
+        val entity = AssistancePlan().apply {
+            start = valueDto.start
+            end = valueDto.end
+        }
 
         entity.client = clientService.getById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
@@ -46,23 +86,51 @@ class AssistancePlanService(
         entity.sponsor = sponsorService.getById(valueDto.sponsorId)
                 ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
         entity.hours = valueDto.hours
-                .map { modelMapper.map(it, AssistancePlanHour::class.java) }
-                .map { it.apply {
-                    hourType = hourTypeService.getById(it.hourType!!.id)
-                            ?: throw IllegalArgumentException("hour type with id ${hourType?.id} not found")
-                } }
+                .map { hourDto ->
+                    AssistancePlanHour().apply {
+                        weeklyMinutes = hourDto.weeklyMinutes
+                        hourType = hourTypeService.getById(hourDto.hourTypeId)
+                            ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
+                        assistancePlan = entity
+                    }
+                }
                 .toMutableSet()
 
-        val savedEntity = this.create(entity)
+        entity.goals = valueDto.goals.map { goalDto ->
+            val goalEntity = Goal().apply {
+                title = goalDto.title
+                description = goalDto.description
+                assistancePlan = entity
+                institution = goalDto.institutionId?.let { institutionId ->
+                    institutionService.getEntityById(institutionId)
+                        ?: throw IllegalArgumentException("institution [id = $institutionId] not found")
+                }
+            }
+            goalEntity.hours = goalDto.hours.map { hourDto ->
+                GoalHour().apply {
+                    weeklyMinutes = hourDto.weeklyMinutes
+                    hourType = hourTypeService.getById(hourDto.hourTypeId)
+                        ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
+                    goal = goalEntity
+                }
+            }.toMutableSet()
+            goalEntity
+        }.toMutableSet()
 
-        valueDto.apply {
-            id = savedEntity.id
-            hours = savedEntity.hours
-                    .map { modelMapper.map(it, AssistancePlanHourDto::class.java) }
-                    .toMutableSet()
+        val savedEntity = assistancePlanRepository.save(entity)
+
+        return modelMapper.map(savedEntity, AssistancePlanDto::class.java)
+    }
+
+    private fun validateHoursPlacement(valueDto: AssistancePlanCreateDto) {
+        val hasPlanHours = valueDto.hours.isNotEmpty()
+        val hasGoalHours = valueDto.goals.any { it.hours.isNotEmpty() }
+
+        if (hasPlanHours && hasGoalHours) {
+            throw IllegalArgumentException(
+                "Stunden dürfen entweder direkt im Hilfeplan oder in den Zielen hinterlegt sein, nicht in beiden Bereichen gleichzeitig."
+            )
         }
-
-        return valueDto
     }
 
     @Transactional
