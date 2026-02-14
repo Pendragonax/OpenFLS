@@ -146,6 +146,9 @@ import {
 import {
   AssistancePlanGoalsComponent
 } from "./pages/assistance-plans/components/assistance-plan-goals/assistance-plan-goals.component";
+import {
+  AssistancePlanHoursPageComponent
+} from "./pages/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -215,7 +218,8 @@ const routes: Routes = [
         ClientAutocompleteComponent,
         ServiceTableComponent,
         AssistancePlanNewSinglePageComponent,
-        AssistancePlanGoalsComponent
+        AssistancePlanGoalsComponent,
+        AssistancePlanHoursPageComponent
     ],
     exports: [
         ShowOnRoleDirective

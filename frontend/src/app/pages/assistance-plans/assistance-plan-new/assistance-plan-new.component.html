@@ -75,12 +75,12 @@
       <div class="beta-title">Stunden</div>
       <div class="beta-section">
         <div class="beta-section-title">Stundenanteile</div>
-        <app-assistance-plan-hours
+        <app-assistance-plan-hours-page
           [assistancePlanView$]="valueView$"
           [editable]="true"
           (updatedValueEvent)="updateAssistancePlanHour($event)"
           (addedValueEvent)="addAssistancePlanHour($event)"
-          (deletedValueEvent)="deleteAssistancePlanHour($event)"></app-assistance-plan-hours>
+          (deletedValueEvent)="deleteAssistancePlanHour($event)"></app-assistance-plan-hours-page>
       </div>
 
       <div class="beta-section">
