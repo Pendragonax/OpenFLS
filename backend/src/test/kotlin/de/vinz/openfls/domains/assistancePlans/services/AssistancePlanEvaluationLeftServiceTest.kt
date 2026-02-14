@@ -67,7 +67,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         // Given
         val date = LocalDate.of(2024, 2, 1)
         val hourType = HourType(id = 10, title = "Einzel")
-        val goal = goalWithHourType(hourType, weeklyHours = 0.0)
+        val goal = goalWithHourType(hourType, weeklyMinutes = 0)
         val plan = AssistancePlan(
             id = 2,
             start = LocalDate.of(2024, 1, 1),
@@ -99,7 +99,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         // Given
         val date = LocalDate.of(2024, 2, 1)
         val hourType = HourType(id = 11, title = "Gruppe")
-        val goal = goalWithHourType(hourType, weeklyHours = 7.0)
+        val goal = goalWithHourType(hourType, weeklyMinutes = 420)
         val plan = AssistancePlan(
             id = 3,
             start = LocalDate.of(2023, 1, 1),
@@ -129,7 +129,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         // Given
         val date = LocalDate.of(2024, 3, 10)
         val hourType = HourType(id = 12, title = "Einzel")
-        val goal = goalWithHourType(hourType, weeklyHours = 7.0)
+        val goal = goalWithHourType(hourType, weeklyMinutes = 420)
         val plan = AssistancePlan(
             id = 4,
             start = LocalDate.of(2024, 1, 1),
@@ -166,7 +166,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             id = 4,
             start = LocalDate.of(2024, 1, 1),
             end = LocalDate.of(2025, 12, 31),
-            hours = mutableSetOf(AssistancePlanHour(weeklyHours = 7.0, hourType = hourType))
+            hours = mutableSetOf(AssistancePlanHour(weeklyMinutes = 420, hourType = hourType))
         )
         whenever(assistancePlanService.getById(4)).thenReturn(plan)
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
@@ -199,9 +199,9 @@ class AssistancePlanEvaluationLeftServiceTest {
         }
     }
 
-    private fun goalWithHourType(hourType: HourType, weeklyHours: Double): Goal {
+    private fun goalWithHourType(hourType: HourType, weeklyMinutes: Int): Goal {
         val goal = Goal(title = "Goal")
-        val goalHour = GoalHour(weeklyHours = weeklyHours, hourType = hourType, goal = goal)
+        val goalHour = GoalHour(weeklyMinutes = weeklyMinutes, hourType = hourType, goal = goal)
         goal.hours.add(goalHour)
         return goal
     }

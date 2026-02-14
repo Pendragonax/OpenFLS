@@ -284,28 +284,28 @@ class AssistancePlanService(
 
         eval.total = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = days * (it.weeklyHours / 7)
+                target = days * (it.weeklyMinutes / 7.0) / 60.0
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
 
         eval.tillToday = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = daysTillToday * (it.weeklyHours / 7)
+                target = daysTillToday * (it.weeklyMinutes / 7.0) / 60.0
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
 
         eval.actualYear = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = actualYear.first * (it.weeklyHours / 7)
+                target = actualYear.first * (it.weeklyMinutes / 7.0) / 60.0
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
 
         eval.actualMonth = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = actualMonth.first * (it.weeklyHours / 7)
+                target = actualMonth.first * (it.weeklyMinutes / 7.0) / 60.0
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }

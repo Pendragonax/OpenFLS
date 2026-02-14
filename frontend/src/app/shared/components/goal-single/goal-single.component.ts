@@ -19,4 +19,11 @@ export class GoalSingleComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  formatWeeklyMinutes(weeklyMinutes: number): number {
+    const totalMinutes = Math.max(0, Math.round(Number(weeklyMinutes ?? 0)));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return Number((hours + minutes / 100).toFixed(2));
+  }
+
 }

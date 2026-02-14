@@ -323,10 +323,10 @@ class AssistancePlanAnalysisService(
     fun getApprovedAssistancePlanHoursInMonth(year: Int,
                                               month: Int,
                                               assistancePlan: AssistancePlanProjection): Double {
-        val dailyHours = assistancePlan.hours.sumOf { it.weeklyHours } / 7
+        val dailyMinutes = assistancePlan.hours.sumOf { it.weeklyMinutes } / 7.0
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
         return TimeDoubleService.convertDoubleToTimeDouble(
-                dailyHours * days)
+                (dailyMinutes * days) / 60.0)
     }
 
     fun getApprovedAssistancePlanHoursByHourTypeIdInMonth(year: Int,
@@ -334,9 +334,9 @@ class AssistancePlanAnalysisService(
                                                           assistancePlan: AssistancePlanProjection,
                                                           hourTypeId: Long): Double {
         val hours = assistancePlan.hours.filter { it.hourType.id == hourTypeId }
-        val dailyHours = hours.sumOf { it.weeklyHours } / 7
+        val dailyMinutes = hours.sumOf { it.weeklyMinutes } / 7.0
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
-        return TimeDoubleService.convertDoubleToTimeDouble(dailyHours * days)
+        return TimeDoubleService.convertDoubleToTimeDouble((dailyMinutes * days) / 60.0)
     }
 
     fun getApprovedGoalHoursByHourTypeIdInMonth(year: Int,
@@ -415,7 +415,7 @@ class AssistancePlanAnalysisService(
             return 0.0
         }
 
-        return goal.hours.sumOf { hour -> (hour.weeklyHours / 7) * days }
+        return goal.hours.sumOf { hour -> (hour.weeklyMinutes / 7.0) * days / 60.0 }
     }
 
     private fun sumGoalHoursByHourTypeId(goal: GoalProjection, days: Int, hourTypeId: Long): Double {
@@ -424,7 +424,7 @@ class AssistancePlanAnalysisService(
         }
 
         val hours = goal.hours.filter { it.hourType.id == hourTypeId }
-        return hours.sumOf { hour -> (hour.weeklyHours / 7) * days }
+        return hours.sumOf { hour -> (hour.weeklyMinutes / 7.0) * days / 60.0 }
     }
 
     private fun isInYearMonth(year: Int, month: Int, assistancePlan: AssistancePlanProjection): Boolean {

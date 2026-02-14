@@ -44,7 +44,7 @@ export class AssistancePlanHoursComponent
   @Output() deletedValueEvent = new EventEmitter<AssistancePlanHourDto>();
 
   // CONFIG
-  tableColumns = ['type', 'weeklyHours', 'action'];
+  tableColumns = ['type', 'weeklyMinutes', 'action'];
 
   // VARs
   hourTypes: HourTypeDto[] = [];
@@ -65,7 +65,6 @@ export class AssistancePlanHoursComponent
     weeklyMinutesPart: new UntypedFormControl(
       0,
       Validators.compose([
-        Validators.min(0),
         Validators.max(59),
         Validators.required
       ])
@@ -126,7 +125,7 @@ export class AssistancePlanHoursComponent
   }
 
   fillEditForm(value: AssistancePlanHourDto) {
-    const totalMinutes = Math.max(0, Math.round(Number(value.weeklyHours ?? 0) * 60));
+    const totalMinutes = Math.max(0, Math.round(Number(value.weeklyMinutes ?? 0)));
     const hoursPart = Math.floor(totalMinutes / 60);
     const minutesPart = totalMinutes % 60;
     this.weeklyHoursPartControl.setValue(hoursPart);
@@ -170,6 +169,13 @@ export class AssistancePlanHoursComponent
     return value.title;
   }
 
+  formatWeeklyMinutes(value: number): number {
+    const totalMinutes = Math.max(0, Math.round(Number(value ?? 0)));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return Number((hours + minutes / 100).toFixed(2));
+  }
+
   sortData(sort: Sort) {
   }
 
@@ -193,7 +199,7 @@ export class AssistancePlanHoursComponent
     const hoursPart = this.toBoundedInt(this.weeklyHoursPartControl.value, 0, 9999);
     const minutesPart = this.toBoundedInt(this.weeklyMinutesPartControl.value, 0, 59);
     const totalMinutes = hoursPart * 60 + minutesPart;
-    this.editValue.weeklyHours = Number((totalMinutes / 60).toFixed(4));
+    this.editValue.weeklyMinutes = totalMinutes;
   }
 
   private toBoundedInt(value: unknown, min: number, max: number) {

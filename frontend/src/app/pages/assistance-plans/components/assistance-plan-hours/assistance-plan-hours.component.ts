@@ -38,7 +38,7 @@ export class AssistancePlanHoursPageComponent
   @Input() set hours(value: AssistancePlanCreateHourDto[]) {
     this.values = (value ?? []).map((hour, index) => ({
       id: index + 1,
-      weeklyHours: hour.weeklyHours,
+      weeklyMinutes: hour.weeklyMinutes,
       hourTypeId: hour.hourTypeId,
       assistancePlanId: 0
     }));
@@ -48,7 +48,7 @@ export class AssistancePlanHoursPageComponent
 
   @Output() hoursChange = new EventEmitter<AssistancePlanCreateHourDto[]>();
 
-  tableColumns = ['type', 'weeklyHours', 'action'];
+  tableColumns = ['type', 'weeklyMinutes', 'action'];
 
   hourTypes: HourTypeDto[] = [];
   filteredHourTypes: HourTypeDto[] = [];
@@ -109,7 +109,7 @@ export class AssistancePlanHoursPageComponent
   }
 
   fillEditForm(value: AssistancePlanHourDto) {
-    const totalMinutes = Math.max(0, Math.round(Number(value.weeklyHours ?? 0) * 60));
+    const totalMinutes = Math.max(0, Math.round(Number(value.weeklyMinutes ?? 0)));
     const hoursPart = Math.floor(totalMinutes / 60);
     const minutesPart = totalMinutes % 60;
     this.weeklyHoursPartControl.setValue(hoursPart);
@@ -170,6 +170,13 @@ export class AssistancePlanHoursPageComponent
     return value.title;
   }
 
+  formatWeeklyMinutes(value: number): number {
+    const totalMinutes = Math.max(0, Math.round(Number(value ?? 0)));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return Number((hours + minutes / 100).toFixed(2));
+  }
+
   sortData(sort: Sort) {
   }
 
@@ -193,7 +200,7 @@ export class AssistancePlanHoursPageComponent
     this.filteredTableData = this.convertToTableSource(this.values);
     this.refreshTablePage();
     this.hoursChange.emit(this.values.map(value => ({
-      weeklyHours: value.weeklyHours,
+      weeklyMinutes: value.weeklyMinutes,
       hourTypeId: value.hourTypeId
     })));
   }
@@ -202,7 +209,7 @@ export class AssistancePlanHoursPageComponent
     const hoursPart = this.toBoundedInt(this.weeklyHoursPartControl.value, 0, 9999);
     const minutesPart = this.toBoundedInt(this.weeklyMinutesPartControl.value, 0, 59);
     const totalMinutes = hoursPart * 60 + minutesPart;
-    this.editValue.weeklyHours = Number((totalMinutes / 60).toFixed(4));
+    this.editValue.weeklyMinutes = totalMinutes;
   }
 
   private toBoundedInt(value: unknown, min: number, max: number) {
@@ -219,7 +226,7 @@ export class AssistancePlanHoursPageComponent
       return false;
     }
 
-    if ((value.weeklyHours ?? 0) <= 0) {
+    if ((value.weeklyMinutes ?? 0) <= 0) {
       this.helperService.openSnackBar('Bitte eine Dauer größer als 0 angeben.');
       return false;
     }

@@ -4,6 +4,6 @@ import de.vinz.openfls.domains.hourTypes.projections.HourTypeSoloProjection
 
 interface GoalHourProjection {
     val id: Long
-    val weeklyHours: Double
+    val weeklyMinutes: Int
     val hourType: HourTypeSoloProjection
 }

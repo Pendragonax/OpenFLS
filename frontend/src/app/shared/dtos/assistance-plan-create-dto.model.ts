@@ -10,7 +10,7 @@ export class AssistancePlanCreateDto {
 }
 
 export class AssistancePlanCreateHourDto {
-  weeklyHours: number = 0.0;
+  weeklyMinutes: number = 0;
   hourTypeId: number = 0;
 }
 

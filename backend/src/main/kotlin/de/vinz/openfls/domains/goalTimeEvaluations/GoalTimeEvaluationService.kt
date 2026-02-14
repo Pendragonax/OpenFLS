@@ -335,7 +335,7 @@ class GoalTimeEvaluationService(
         val hourTypeExists = assistancePlan.hours.any { it.hourType!!.id == hourTypeId }
 
         val dailyHours = if (hourTypeExists) {
-            ((assistancePlan.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
+            ((assistancePlan.hours.first { it.hourType!!.id == hourTypeId }.weeklyMinutes) / 7.0) / 60.0
         } else {
             0.0
         }
@@ -348,7 +348,7 @@ class GoalTimeEvaluationService(
                                         start: LocalDate,
                                         end: LocalDate,
                                         sum: Boolean): List<YearMonthDoubleValue> {
-        val dailyHours = ((goal.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
+        val dailyHours = ((goal.hours.first { it.hourType!!.id == hourTypeId }.weeklyMinutes) / 7.0) / 60.0
         return getApprovedHoursMonthly(dailyHours, start, end, sum)
     }
 

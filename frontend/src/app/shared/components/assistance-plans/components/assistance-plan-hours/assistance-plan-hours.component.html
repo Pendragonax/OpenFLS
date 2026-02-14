@@ -21,11 +21,11 @@
             *matCellDef="let element"> {{getHourTypeName(element[1])}} </td>
       </ng-container>
 
-      <ng-container matColumnDef="weeklyHours">
+      <ng-container matColumnDef="weeklyMinutes">
         <th mat-header-cell
             *matHeaderCellDef> h/Woche </th>
         <td mat-cell
-            *matCellDef="let element"> {{element[0].weeklyHours}} </td>
+            *matCellDef="let element"> {{formatWeeklyMinutes(element[0].weeklyMinutes)}} </td>
       </ng-container>
 
       <ng-container matColumnDef="action">

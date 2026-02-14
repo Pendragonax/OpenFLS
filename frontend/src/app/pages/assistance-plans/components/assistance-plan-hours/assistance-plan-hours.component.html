@@ -24,9 +24,9 @@
           <td mat-cell *matCellDef="let element"> {{getHourTypeName(element[1])}} </td>
         </ng-container>
 
-        <ng-container matColumnDef="weeklyHours">
+        <ng-container matColumnDef="weeklyMinutes">
           <th mat-header-cell *matHeaderCellDef> h/Woche </th>
-          <td mat-cell *matCellDef="let element"> {{element[0].weeklyHours}} </td>
+          <td mat-cell *matCellDef="let element"> {{formatWeeklyMinutes(element[0].weeklyMinutes)}} </td>
         </ng-container>
 
         <ng-container matColumnDef="action">
@@ -62,7 +62,7 @@
               </div>
               <div class="ah-card-row">
                 <span class="ah-card-label">h/Woche</span>
-                <span class="ah-card-value">{{ element[0].weeklyHours }}</span>
+                <span class="ah-card-value">{{ formatWeeklyMinutes(element[0].weeklyMinutes) }}</span>
               </div>
               <div class="ah-card-actions">
                 <button mat-icon-button

@@ -22,7 +22,7 @@ class GoalHourServiceDataJpaTest {
     @Test
     fun create_validEntity_persistsEntry() {
         // Given
-        val entity = GoalHour(weeklyHours = 5.0)
+        val entity = GoalHour(weeklyMinutes = 300)
 
         // When
         val result = goalHourService.create(entity)
@@ -30,13 +30,13 @@ class GoalHourServiceDataJpaTest {
         // Then
         val saved = goalHourRepository.findById(result.id)
         assertThat(saved).isPresent
-        assertThat(saved.get().weeklyHours).isEqualTo(5.0)
+        assertThat(saved.get().weeklyMinutes).isEqualTo(300)
     }
 
     @Test
     fun update_missingEntity_throwsException() {
         // Given
-        val entity = GoalHour(id = 9999, weeklyHours = 5.0)
+        val entity = GoalHour(id = 9999, weeklyMinutes = 300)
 
         // When / Then
         assertThatThrownBy { goalHourService.update(entity) }
@@ -46,8 +46,8 @@ class GoalHourServiceDataJpaTest {
     @Test
     fun update_existingEntity_updatesValue() {
         // Given
-        val existing = goalHourRepository.save(GoalHour(weeklyHours = 2.0))
-        val updated = GoalHour(id = existing.id, weeklyHours = 7.0)
+        val existing = goalHourRepository.save(GoalHour(weeklyMinutes = 120))
+        val updated = GoalHour(id = existing.id, weeklyMinutes = 420)
 
         // When
         val result = goalHourService.update(updated)
@@ -55,6 +55,6 @@ class GoalHourServiceDataJpaTest {
         // Then
         val saved = goalHourRepository.findById(result.id)
         assertThat(saved).isPresent
-        assertThat(saved.get().weeklyHours).isEqualTo(7.0)
+        assertThat(saved.get().weeklyMinutes).isEqualTo(420)
     }
 }

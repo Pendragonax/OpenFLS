@@ -109,13 +109,13 @@ class RandomEntityGenerator {
                 // Generate random IDs
                 val id = random.nextLong()
 
-                // Generate random weekly hours
-                val weeklyHours = random.nextDouble(1.0, 20.0) // Modify the range as needed
+                // Generate random weekly minutes
+                val weeklyMinutes = random.nextInt(60, 1200)
 
                 // Create the GoalHour instance
                 val goalHour = GoalHour(
                         id = id,
-                        weeklyHours = weeklyHours,
+                        weeklyMinutes = weeklyMinutes,
                         hourType = hourType,
                         goal = goal
                 )

@@ -47,7 +47,7 @@ class AssistancePlanHourServiceDataJpaTest {
         whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
 
         val dto = AssistancePlanHourDto().apply {
-            weeklyHours = 8.0
+            weeklyMinutes = 480
             assistancePlanId = assistancePlan.id
             hourTypeId = hourType.id
         }
@@ -58,6 +58,6 @@ class AssistancePlanHourServiceDataJpaTest {
         // Then
         val saved = assistancePlanHourRepository.findById(result.id)
         assertThat(saved).isPresent
-        assertThat(saved.get().weeklyHours).isEqualTo(8.0)
+        assertThat(saved.get().weeklyMinutes).isEqualTo(480)
     }
 }

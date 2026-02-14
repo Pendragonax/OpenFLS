@@ -4,13 +4,13 @@ import {AssistancePlanHourDto} from "../dtos/assistance-plan-hour-dto.model";
 
 export class AssistancePlanHour {
   id: number = 0;
-  weeklyHours: number = 0.0;
+  weeklyMinutes: number = 0;
   hourType: HourTypeSolo = new HourTypeSolo();
   assistancePlan: AssistancePlanSolo = new AssistancePlanSolo();
 
   static from(dto: AssistancePlanHourDto): AssistancePlanHour {
     const result = new AssistancePlanHour();
-    result.weeklyHours = dto.weeklyHours;
+    result.weeklyMinutes = dto.weeklyMinutes;
     result.id = dto.id;
 
     result.assistancePlan = new AssistancePlanSolo();

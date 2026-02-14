@@ -403,22 +403,30 @@ export class AssistancePlansComponent
 
     const goalHours = plan.goals
       .filter(goal => goal.hours != null && goal.hours.length > 0)
-      .map(goal => goal.hours.map(x => x.weeklyHours).reduce((sum, current) => sum + current));
+      .map(goal => goal.hours.map(x => x.weeklyMinutes).reduce((sum, current) => sum + current));
 
-    return (goalHours.length > 0) ? goalHours.reduce((sum, current) => sum + current) : 0;
+    const totalMinutes = (goalHours.length > 0) ? goalHours.reduce((sum, current) => sum + current) : 0;
+    return this.toTimeDouble(totalMinutes);
   }
 
   sumWeeklyHoursByPlan(plan: AssistancePlanDto): number {
     if (plan.hours == null || plan.hours.length <= 0)
       return 0;
 
-    return plan.hours
-      .map(value => value.weeklyHours)
+    const totalMinutes = plan.hours
+      .map(value => value.weeklyMinutes)
       .reduce((sum, current) => sum + current);
+    return this.toTimeDouble(totalMinutes);
   }
 
   onSearchStringChanges(searchString: string) {
     this.searchString = searchString
     this.filterTableData()
+  }
+
+  private toTimeDouble(totalMinutes: number): number {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return Number((hours + minutes / 100).toFixed(2));
   }
 }

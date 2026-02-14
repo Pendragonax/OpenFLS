@@ -158,7 +158,7 @@ export class AssistancePlanNewComponent extends NewPageComponent<AssistancePlanD
       institutionId: this.value.institutionId,
       sponsorId: this.value.sponsorId,
       hours: this.value.hours.map((hour): AssistancePlanCreateHourDto => ({
-        weeklyHours: hour.weeklyHours,
+        weeklyMinutes: hour.weeklyMinutes,
         hourTypeId: hour.hourTypeId
       })),
       goals: this.value.goals.map((goal): AssistancePlanCreateGoalDto => ({
@@ -167,7 +167,7 @@ export class AssistancePlanNewComponent extends NewPageComponent<AssistancePlanD
         assistancePlanId: goal.assistancePlanId,
         institutionId: goal.institutionId,
         hours: goal.hours.map((hour): AssistancePlanCreateHourDto => ({
-          weeklyHours: hour.weeklyHours,
+          weeklyMinutes: hour.weeklyMinutes,
           hourTypeId: hour.hourTypeId
         }))
       }))

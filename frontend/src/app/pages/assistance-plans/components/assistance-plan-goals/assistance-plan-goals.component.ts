@@ -64,8 +64,8 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
 
   @Output() goalsChange = new EventEmitter<AssistancePlanCreateGoalDto[]>();
 
-  tableColumns = ['title', 'description', 'institution', 'weeklyHours', 'action'];
-  hourTableColumns = ['type', 'weeklyHours', 'actions'];
+  tableColumns = ['title', 'description', 'institution', 'weeklyMinutes', 'action'];
+  hourTableColumns = ['type', 'weeklyMinutes', 'actions'];
 
   deleteServiceCount = 0;
 
@@ -204,7 +204,7 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
   }
 
   createGoalHour() {
-    if (this.editGoalHour.hourTypeId <= 0 || this.editGoalHour.weeklyHours <= 0) {
+    if (this.editGoalHour.hourTypeId <= 0 || this.editGoalHour.weeklyMinutes <= 0) {
       return;
     }
 
@@ -240,9 +240,10 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
       return 0;
     }
 
-    return goal.hours
-      .map(value => value.weeklyHours)
+    const totalMinutes = goal.hours
+      .map(value => value.weeklyMinutes)
       .reduce((sum, current) => sum + current);
+    return this.toTimeDouble(totalMinutes);
   }
 
   sortData(sort: Sort) {
@@ -273,7 +274,7 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
       assistancePlanId: goal.assistancePlanId,
       institutionId: goal.institutionId,
       hours: goal.hours.map((hour): AssistancePlanCreateHourDto => ({
-        weeklyHours: hour.weeklyHours,
+        weeklyMinutes: hour.weeklyMinutes,
         hourTypeId: hour.hourTypeId
       }))
     })));
@@ -288,7 +289,7 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
       institutionId: goal.institutionId,
       hours: (goal.hours ?? []).map((hour, index) => ({
         id: index + 1,
-        weeklyHours: hour.weeklyHours,
+        weeklyMinutes: hour.weeklyMinutes,
         goalHourId: 0,
         hourTypeId: hour.hourTypeId
       }))
@@ -299,7 +300,13 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
     const hoursPart = this.toBoundedInt(this.weeklyHoursPartControl.value, 0, 999);
     const minutesPart = this.toBoundedInt(this.weeklyMinutesPartControl.value, 0, 59);
     const totalMinutes = hoursPart * 60 + minutesPart;
-    this.editGoalHour.weeklyHours = Number((totalMinutes / 60).toFixed(4));
+    this.editGoalHour.weeklyMinutes = totalMinutes;
+  }
+
+  private toTimeDouble(totalMinutes: number): number {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return Number((hours + minutes / 100).toFixed(2));
   }
 
   private toBoundedInt(value: unknown, min: number, max: number) {

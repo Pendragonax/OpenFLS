@@ -95,7 +95,7 @@ class AssistancePlanServiceDataJpaTest {
             institutionId = institution.id!!
             sponsorId = sponsor.id
             hours = mutableSetOf(AssistancePlanHourDto().apply {
-                weeklyHours = 10.0
+                weeklyMinutes = 600
                 hourTypeId = hourType.id
             })
         }
@@ -154,7 +154,7 @@ class AssistancePlanServiceDataJpaTest {
             institutionId = institution.id!!
             sponsorId = sponsor.id
             hours = mutableSetOf(AssistancePlanHourDto().apply {
-                weeklyHours = 12.0
+                weeklyMinutes = 720
                 hourTypeId = hourType.id
             })
         }
