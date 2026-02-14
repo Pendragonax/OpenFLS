@@ -5,7 +5,8 @@
               color="primary"
               class="ag-add-button"
               (click)="openEditModal(editContent, null)">
-        Ziel hinzufügen
+        <mat-icon>add</mat-icon>
+        Ziel
       </button>
     }
   </div>
@@ -185,6 +186,7 @@
                       color="primary"
                       [disabled]="hourForm.invalid"
                       (click)="createGoalHour()">
+                <mat-icon>add</mat-icon>
                 hinzufügen
               </button>
             </div>
