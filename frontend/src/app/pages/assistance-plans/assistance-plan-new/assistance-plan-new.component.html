@@ -49,25 +49,27 @@
         </form>
       </div>
 
-      <div class="beta-section" [class.ap-section-inactive]="!isHoursSectionActive">
+      <div class="beta-section">
         <div class="beta-section-title">Stundenanteile</div>
-        @if (!isHoursSectionActive) {
-          <div class="ap-section-hint">Stundenanteile sind deaktiviert, solange Ziele gesetzt sind.</div>
+        @if (canAddPlanHours) {
+          <app-assistance-plan-hours-page
+            [hours]="createValue.hours"
+            [editable]="isHoursSectionActive"
+            (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
+        } @else {
+          <div class="ap-section-hint">Stundenanteile können nicht hinzugefügt werden, solange in Zielen Stunden hinterlegt sind.</div>
         }
-        <app-assistance-plan-hours-page
-          [hours]="createValue.hours"
-          [editable]="isHoursSectionActive"
-          (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
       </div>
 
-      <div class="beta-section" [class.ap-section-inactive]="!isGoalsSectionActive">
+      <div class="beta-section">
         <div class="beta-section-title">Ziele</div>
-        @if (!isGoalsSectionActive) {
-          <div class="ap-section-hint">Ziele sind deaktiviert, solange Stundenanteile gesetzt sind.</div>
+        @if (!canAddGoalHours) {
+          <div class="ap-section-hint">In Zielen können keine Stunden hinzugefügt werden, solange Stundenanteile gesetzt sind.</div>
         }
         <app-assistance-plan-goals
           [goals]="createValue.goals"
           [editable]="isGoalsSectionActive"
+          [canAddGoalHours]="canAddGoalHours"
           (goalsChange)="onGoalsChange($event)"></app-assistance-plan-goals>
       </div>
 

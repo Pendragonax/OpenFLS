@@ -115,6 +115,16 @@
   justify-content: center;
 }
 
+.ag-lock-hint {
+  background: #f7f8fb;
+  border: 1px dashed #d7dbe5;
+  color: #7a8396;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
 .ag-hour-add-btn {
   min-width: 160px;
 }

@@ -154,93 +154,97 @@
 
         <mat-tab label="Stunden">
           <div class="ag-modal-tab">
-            <div>
-              <form [formGroup]="hourForm">
-                <mat-form-field appearance="outline" class="ag-field">
-                  <mat-label>Stundentyp</mat-label>
-                  <mat-select formControlName="hourType">
-                    @for (type of filteredHourTypes; track type.id) {
-                      <mat-option [value]="type.id">
-                        {{type.title}}
-                      </mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+            @if (!canAddGoalHours) {
+              <div class="ag-lock-hint">In Zielen können keine Stunden hinzugefügt werden, solange Stundenanteile gesetzt sind.</div>
+            } @else {
+              <div>
+                <form [formGroup]="hourForm">
+                  <mat-form-field appearance="outline" class="ag-field">
+                    <mat-label>Stundentyp</mat-label>
+                    <mat-select formControlName="hourType">
+                      @for (type of filteredHourTypes; track type.id) {
+                        <mat-option [value]="type.id">
+                          {{type.title}}
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
 
-                <div class="ag-time-group">
-                  <div class="ag-time-label">h/Woche</div>
-                  <div class="ag-time-control ag-time-pill" [class.ag-time-pill--invalid]="hourForm.invalid">
-                    <input type="number"
-                           class="ag-time-input"
-                           formControlName="weeklyHoursPart"
-                           inputmode="numeric"
-                           min="0"
-                           max="999"
-                           (focus)="selectAll($event)"
-                           (blur)="clampGoalWeeklyDuration()">
-                    <span class="ag-time-unit">Stunden</span>
-                    <input type="number"
-                           class="ag-time-input"
-                           formControlName="weeklyMinutesPart"
-                           inputmode="numeric"
-                           min="0"
-                           max="59"
-                           (focus)="selectAll($event)"
-                           (blur)="clampGoalWeeklyDuration()">
-                    <span class="ag-time-unit">Minuten</span>
+                  <div class="ag-time-group">
+                    <div class="ag-time-label">h/Woche</div>
+                    <div class="ag-time-control ag-time-pill" [class.ag-time-pill--invalid]="hourForm.invalid">
+                      <input type="number"
+                             class="ag-time-input"
+                             formControlName="weeklyHoursPart"
+                             inputmode="numeric"
+                             min="0"
+                             max="999"
+                             (focus)="selectAll($event)"
+                             (blur)="clampGoalWeeklyDuration()">
+                      <span class="ag-time-unit">Stunden</span>
+                      <input type="number"
+                             class="ag-time-input"
+                             formControlName="weeklyMinutesPart"
+                             inputmode="numeric"
+                             min="0"
+                             max="59"
+                             (focus)="selectAll($event)"
+                             (blur)="clampGoalWeeklyDuration()">
+                      <span class="ag-time-unit">Minuten</span>
+                    </div>
                   </div>
-                </div>
-              </form>
-            </div>
+                </form>
+              </div>
 
-            <div class="ag-hour-action">
-              <button mat-raised-button
-                      class="ag-hour-add-btn"
-                      color="primary"
-                      [disabled]="hourForm.invalid"
-                      (click)="createGoalHour()">
-                <mat-icon>add</mat-icon>
-                hinzufügen
-              </button>
-            </div>
+              <div class="ag-hour-action">
+                <button mat-raised-button
+                        class="ag-hour-add-btn"
+                        color="primary"
+                        [disabled]="hourForm.invalid"
+                        (click)="createGoalHour()">
+                  <mat-icon>add</mat-icon>
+                  hinzufügen
+                </button>
+              </div>
 
-            <div class="ag-hour-table-wrap">
-              @if (emptyHourTableSource) {
-                <div class="ag-empty">Keine Stunden für dieses Ziel vorhanden.</div>
-              }
+              <div class="ag-hour-table-wrap">
+                @if (emptyHourTableSource) {
+                  <div class="ag-empty">Keine Stunden für dieses Ziel vorhanden.</div>
+                }
 
-              @if (!emptyHourTableSource) {
-                <table mat-table
-                       [dataSource]="hourTableSource"
-                       class="ag-hour-table">
-                  <ng-container matColumnDef="type">
-                    <th mat-header-cell *matHeaderCellDef> Stundentyp </th>
-                    <td mat-cell *matCellDef="let element"> {{element[1].title}} </td>
-                  </ng-container>
+                @if (!emptyHourTableSource) {
+                  <table mat-table
+                         [dataSource]="hourTableSource"
+                         class="ag-hour-table">
+                    <ng-container matColumnDef="type">
+                      <th mat-header-cell *matHeaderCellDef> Stundentyp </th>
+                      <td mat-cell *matCellDef="let element"> {{element[1].title}} </td>
+                    </ng-container>
 
-                  <ng-container matColumnDef="weeklyHours">
-                    <th mat-header-cell *matHeaderCellDef> h/Woche </th>
-                    <td mat-cell *matCellDef="let element"> {{element[0].weeklyHours}} </td>
-                  </ng-container>
+                    <ng-container matColumnDef="weeklyHours">
+                      <th mat-header-cell *matHeaderCellDef> h/Woche </th>
+                      <td mat-cell *matCellDef="let element"> {{element[0].weeklyHours}} </td>
+                    </ng-container>
 
-                  <ng-container matColumnDef="actions">
-                    <th mat-header-cell class="text-center" *matHeaderCellDef> Aktionen </th>
-                    <td mat-cell
-                        class="pt-3"
-                        *matCellDef="let element">
-                      <button mat-icon-button
-                              color="warn"
-                              (click)="deleteGoalHour(element[0])">
-                        <mat-icon>delete</mat-icon>
-                      </button><br><br>
-                    </td>
-                  </ng-container>
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell class="text-center" *matHeaderCellDef> Aktionen </th>
+                      <td mat-cell
+                          class="pt-3"
+                          *matCellDef="let element">
+                        <button mat-icon-button
+                                color="warn"
+                                (click)="deleteGoalHour(element[0])">
+                          <mat-icon>delete</mat-icon>
+                        </button><br><br>
+                      </td>
+                    </ng-container>
 
-                  <tr mat-header-row *matHeaderRowDef="hourTableColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: hourTableColumns;"></tr>
-                </table>
-              }
-            </div>
+                    <tr mat-header-row *matHeaderRowDef="hourTableColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: hourTableColumns;"></tr>
+                  </table>
+                }
+              </div>
+            }
           </div>
         </mat-tab>
       </mat-tab-group>

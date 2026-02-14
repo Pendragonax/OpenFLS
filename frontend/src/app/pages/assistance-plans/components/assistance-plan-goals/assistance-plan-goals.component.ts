@@ -55,6 +55,7 @@ const weeklyDurationValidator = (control: AbstractControl): ValidationErrors | n
 })
 export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [GoalDto, InstitutionDto | null]> implements OnInit {
   @Input() editable = false;
+  @Input() canAddGoalHours = true;
   @Input() set goals(value: AssistancePlanCreateGoalDto[]) {
     this.values = (value ?? []).map((goal, index) => this.toGoalDto(goal, index + 1));
     this.filteredTableData = this.convertToTableSource(this.values);
