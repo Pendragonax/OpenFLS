@@ -1,14 +1,13 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Sort} from '@angular/material/sort';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {combineLatest, ReplaySubject} from 'rxjs';
 import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {TablePageComponent} from '../../../../shared/components/table-page.component';
 import {AssistancePlanHourDto} from '../../../../shared/dtos/assistance-plan-hour-dto.model';
 import {HourTypeDto} from '../../../../shared/dtos/hour-type-dto.model';
-import {AssistancePlanView} from '../../../../shared/models/assistance-plan-view.model';
 import {HelperService} from '../../../../shared/services/helper.service';
 import {HourTypeService} from '../../../../shared/services/hour-type.service';
+import {AssistancePlanCreateHourDto} from '../../../../shared/dtos/assistance-plan-create-dto.model';
 
 @Component({
   selector: 'app-assistance-plan-hours-page',
@@ -20,12 +19,19 @@ export class AssistancePlanHoursPageComponent
   extends TablePageComponent<AssistancePlanHourDto, [AssistancePlanHourDto, HourTypeDto | null]>
   implements OnInit {
 
-  @Input() assistancePlanView: AssistancePlanView = new AssistancePlanView();
-  @Input() assistancePlanView$: ReplaySubject<AssistancePlanView> = new ReplaySubject<AssistancePlanView>();
   @Input() editable = false;
-  @Output() addedValueEvent = new EventEmitter<AssistancePlanHourDto>();
-  @Output() updatedValueEvent = new EventEmitter<AssistancePlanHourDto>();
-  @Output() deletedValueEvent = new EventEmitter<AssistancePlanHourDto>();
+  @Input() set hours(value: AssistancePlanCreateHourDto[]) {
+    this.values = (value ?? []).map((hour, index) => ({
+      id: index + 1,
+      weeklyHours: hour.weeklyHours,
+      hourTypeId: hour.hourTypeId,
+      assistancePlanId: 0
+    }));
+    this.filteredTableData = this.convertToTableSource(this.values);
+    this.refreshTablePage();
+  }
+
+  @Output() hoursChange = new EventEmitter<AssistancePlanCreateHourDto[]>();
 
   tableColumns = ['type', 'weeklyHours', 'action'];
 
@@ -54,22 +60,11 @@ export class AssistancePlanHoursPageComponent
   }
 
   loadValues() {
-    combineLatest([
-      this.hourTypeService.allValues$,
-      this.assistancePlanView$
-    ]).subscribe(([types, plan]) => {
-      this.values = plan.dto.hours;
-      this.values$.next(this.values);
+    this.hourTypeService.allValues$.subscribe(types => {
       this.hourTypes = types;
-
-      this.assistancePlanView = plan;
-      this.editable = plan.editable;
-
       this.filteredTableData = this.convertToTableSource(this.values);
       this.refreshTablePage();
     });
-
-    this.initFormSubscriptions();
   }
 
   getNewValue(): AssistancePlanHourDto {
@@ -85,9 +80,9 @@ export class AssistancePlanHoursPageComponent
 
   initFormSubscriptions() {
     this.weeklyHoursControl.valueChanges.subscribe(value => this.editValue.weeklyHours = value);
-    this.typeControl.valueChanges.subscribe(value =>
-      this.editValue.hourTypeId = this.hourTypes.find(type => type.id === value)?.id ?? 0
-    );
+    this.typeControl.valueChanges.subscribe(value => {
+      this.editValue.hourTypeId = this.hourTypes.find(type => type.id === value)?.id ?? 0;
+    });
   }
 
   fillEditForm(value: AssistancePlanHourDto) {
@@ -100,22 +95,26 @@ export class AssistancePlanHoursPageComponent
   }
 
   override filterReferenceValues() {
-    this.filteredHourTypes = this.hourTypes.filter(x => !this.assistancePlanView.dto.hours.some(y => y.hourTypeId === x.id));
+    this.filteredHourTypes = this.hourTypes.filter(x => !this.values.some(y => y.hourTypeId === x.id));
   }
 
   create(value: AssistancePlanHourDto) {
-    this.addedValueEvent.emit(value);
-    this.loadValues();
+    const withId = {
+      ...value,
+      id: this.values.length > 0 ? Math.max(...this.values.map(v => v.id)) + 1 : 1
+    };
+    this.values = [...this.values, withId];
+    this.emitHours();
   }
 
   update(value: AssistancePlanHourDto) {
-    this.updatedValueEvent.emit(value);
-    this.loadValues();
+    this.values = this.values.map(current => current.id === value.id ? {...value} : current);
+    this.emitHours();
   }
 
   delete(value: AssistancePlanHourDto) {
-    this.deletedValueEvent.emit(value);
-    this.loadValues();
+    this.values = this.values.filter(current => current.id !== value.id);
+    this.emitHours();
   }
 
   resetHourType() {
@@ -131,5 +130,14 @@ export class AssistancePlanHoursPageComponent
   }
 
   sortData(sort: Sort) {
+  }
+
+  private emitHours() {
+    this.filteredTableData = this.convertToTableSource(this.values);
+    this.refreshTablePage();
+    this.hoursChange.emit(this.values.map(value => ({
+      weeklyHours: value.weeklyHours,
+      hourTypeId: value.hourTypeId
+    })));
   }
 }

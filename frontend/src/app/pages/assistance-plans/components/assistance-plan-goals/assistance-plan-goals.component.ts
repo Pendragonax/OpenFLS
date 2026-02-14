@@ -9,18 +9,19 @@ import {
 import {Sort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {combineLatest, ReplaySubject} from 'rxjs';
 import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {TablePageComponent} from '../../../../shared/components/table-page.component';
 import {GoalDto} from '../../../../shared/dtos/goal-dto.model';
 import {GoalHourDto} from '../../../../shared/dtos/goal-hour-dto.model';
 import {HourTypeDto} from '../../../../shared/dtos/hour-type-dto.model';
 import {InstitutionDto} from '../../../../shared/dtos/institution-dto.model';
-import {AssistancePlanView} from '../../../../shared/models/assistance-plan-view.model';
 import {HelperService} from '../../../../shared/services/helper.service';
 import {HourTypeService} from '../../../../shared/services/hour-type.service';
 import {InstitutionService} from '../../../../shared/services/institution.service';
-import {ServiceService} from '../../../../shared/services/service.service';
+import {
+  AssistancePlanCreateGoalDto,
+  AssistancePlanCreateHourDto
+} from '../../../../shared/dtos/assistance-plan-create-dto.model';
 
 @Component({
   selector: 'app-assistance-plan-goals',
@@ -38,12 +39,14 @@ import {ServiceService} from '../../../../shared/services/service.service';
   standalone: false
 })
 export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [GoalDto, InstitutionDto | null]> implements OnInit {
-  @Input() assistancePlanView: AssistancePlanView = new AssistancePlanView();
-  @Input() assistancePlanView$: ReplaySubject<AssistancePlanView> = new ReplaySubject<AssistancePlanView>();
-  @Input() editable: boolean = false;
-  @Output() addedGoalEvent = new EventEmitter<GoalDto>();
-  @Output() updatedGoalEvent = new EventEmitter<GoalDto>();
-  @Output() deletedGoalEvent = new EventEmitter<GoalDto>();
+  @Input() editable = false;
+  @Input() set goals(value: AssistancePlanCreateGoalDto[]) {
+    this.values = (value ?? []).map((goal, index) => this.toGoalDto(goal, index + 1));
+    this.filteredTableData = this.convertToTableSource(this.values);
+    this.refreshTablePage();
+  }
+
+  @Output() goalsChange = new EventEmitter<AssistancePlanCreateGoalDto[]>();
 
   tableColumns = ['title', 'description', 'institution', 'weeklyHours', 'action'];
   hourTableColumns = ['type', 'weeklyHours', 'actions'];
@@ -83,30 +86,23 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
     override modalService: NgbModal,
     override helperService: HelperService,
     private institutionService: InstitutionService,
-    private serviceService: ServiceService,
     private hourTypeService: HourTypeService
   ) {
     super(modalService, helperService);
   }
 
   loadValues() {
-    combineLatest([
-      this.institutionService.allValues$,
-      this.assistancePlanView$,
-      this.hourTypeService.allValues$
-    ]).subscribe(([institutions, plan, types]) => {
-      this.values = plan.dto.goals;
-      this.values$.next(this.values);
-
-      this.assistancePlanView = plan;
-      this.editable = plan.editable;
-
+    this.institutionService.allValues$.subscribe(institutions => {
       this.institutions = institutions;
-      this.hourTypes = types;
-
-      this.filteredHourTypes = this.hourTypes;
       this.filteredTableData = this.convertToTableSource(this.values);
+      this.refreshTablePage();
+    });
 
+    this.hourTypeService.allValues$.subscribe(types => {
+      this.hourTypes = types;
+      this.filteredHourTypes = this.hourTypes;
+      this.refreshGoalHoursTableSource();
+      this.filteredTableData = this.convertToTableSource(this.values);
       this.refreshTablePage();
     });
   }
@@ -167,19 +163,22 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
   }
 
   create(goal: GoalDto) {
-    goal.assistancePlanId = this.assistancePlanView.dto.id;
-    this.addedGoalEvent.emit(goal);
-    this.refreshTablePage();
+    const withId = {
+      ...goal,
+      id: this.values.length > 0 ? Math.max(...this.values.map(v => v.id)) + 1 : 1
+    };
+    this.values = [...this.values, withId];
+    this.emitGoals();
   }
 
   update(goal: GoalDto) {
-    this.updatedGoalEvent.emit(goal);
-    this.refreshTablePage();
+    this.values = this.values.map(current => current.id === goal.id ? {...goal} : current);
+    this.emitGoals();
   }
 
   delete(goal: GoalDto) {
-    this.deletedGoalEvent.emit(goal);
-    this.refreshTablePage();
+    this.values = this.values.filter(current => current.id !== goal.id);
+    this.emitGoals();
   }
 
   createGoalHour() {
@@ -187,7 +186,7 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
       return;
     }
 
-    this.editValue.hours.push(this.editGoalHour);
+    this.editValue.hours.push({...this.editGoalHour});
     this.editGoalHour = new GoalHourDto();
 
     this.filterReferenceValues();
@@ -214,12 +213,6 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
     return institution.name;
   }
 
-  override handleDeleteModalOpen(value: GoalDto) {
-    this.serviceService.getCountByGoalId(value.id).subscribe({
-      next: count => this.deleteServiceCount = count
-    });
-  }
-
   sumWeeklyHours(goal: GoalDto): number {
     if (goal.hours == null || goal.hours.length <= 0) {
       return 0;
@@ -231,5 +224,36 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
   }
 
   sortData(sort: Sort) {
+  }
+
+  private emitGoals() {
+    this.filteredTableData = this.convertToTableSource(this.values);
+    this.refreshTablePage();
+    this.goalsChange.emit(this.values.map(goal => ({
+      title: goal.title,
+      description: goal.description,
+      assistancePlanId: goal.assistancePlanId,
+      institutionId: goal.institutionId,
+      hours: goal.hours.map((hour): AssistancePlanCreateHourDto => ({
+        weeklyHours: hour.weeklyHours,
+        hourTypeId: hour.hourTypeId
+      }))
+    })));
+  }
+
+  private toGoalDto(goal: AssistancePlanCreateGoalDto, id: number): GoalDto {
+    return {
+      id,
+      title: goal.title,
+      description: goal.description,
+      assistancePlanId: goal.assistancePlanId,
+      institutionId: goal.institutionId,
+      hours: (goal.hours ?? []).map((hour, index) => ({
+        id: index + 1,
+        weeklyHours: hour.weeklyHours,
+        goalHourId: 0,
+        hourTypeId: hour.hourTypeId
+      }))
+    };
   }
 }

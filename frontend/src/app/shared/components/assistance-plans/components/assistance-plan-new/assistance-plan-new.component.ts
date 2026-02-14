@@ -19,6 +19,11 @@ import {HelperService} from "../../../../services/helper.service";
 import {AssistancePlanInfoForm} from "../assistance-plan-info-form";
 import {AssistancePlanView} from "../../../../models/assistance-plan-view.model";
 import {AssistancePlanHourDto} from "../../../../dtos/assistance-plan-hour-dto.model";
+import {
+  AssistancePlanCreateDto,
+  AssistancePlanCreateGoalDto,
+  AssistancePlanCreateHourDto
+} from "../../../../dtos/assistance-plan-create-dto.model";
 
 @Component({
     selector: 'app-assistance-plan-new',
@@ -117,10 +122,11 @@ export class AssistancePlanNewComponent extends NewPageComponent<AssistancePlanD
   }
 
   create() {
-    this.value.clientId = this.client.id;
+    const createValue = this.mapToCreateDto();
+    createValue.clientId = this.client.id;
 
     this.assistancePlanService
-      .create(this.value)
+      .create(createValue)
       .subscribe({
         next: () => this.handleSuccess("Hilfeplan gespeichert", true),
         error: () => this.handleSuccess("Fehler beim speichern")
@@ -142,5 +148,29 @@ export class AssistancePlanNewComponent extends NewPageComponent<AssistancePlanD
 
   deleteAssistancePlanHour(value: AssistancePlanHourDto) {
     this.value.hours = this.value.hours.filter(x => x.id != value.id);
+  }
+
+  private mapToCreateDto(): AssistancePlanCreateDto {
+    return {
+      start: this.value.start,
+      end: this.value.end,
+      clientId: this.value.clientId,
+      institutionId: this.value.institutionId,
+      sponsorId: this.value.sponsorId,
+      hours: this.value.hours.map((hour): AssistancePlanCreateHourDto => ({
+        weeklyHours: hour.weeklyHours,
+        hourTypeId: hour.hourTypeId
+      })),
+      goals: this.value.goals.map((goal): AssistancePlanCreateGoalDto => ({
+        title: goal.title,
+        description: goal.description,
+        assistancePlanId: goal.assistancePlanId,
+        institutionId: goal.institutionId,
+        hours: goal.hours.map((hour): AssistancePlanCreateHourDto => ({
+          weeklyHours: hour.weeklyHours,
+          hourTypeId: hour.hourTypeId
+        }))
+      }))
+    };
   }
 }

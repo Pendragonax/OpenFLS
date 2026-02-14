@@ -14,12 +14,12 @@ import {SponsorDto} from "../dtos/sponsor-dto.model";
 import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
 import {AssistancePlanEvaluationLeftDto} from "../dtos/assistance-plan-evaluation-left.dto";
 import {AssistancePlan} from "../projections/assistance-plan.projection";
-import {Service} from "./service";
+import {AssistancePlanCreateDto} from "../dtos/assistance-plan-create-dto.model";
 
 @Injectable({
   providedIn: 'root'
 })
-export class AssistancePlanService implements Service<AssistancePlanDto> {
+export class AssistancePlanService {
   allValues$: ReplaySubject<AssistancePlanDto[]> = new ReplaySubject<AssistancePlanDto[]>();
   allValues: AssistancePlanDto[] = [];
   url = "assistance_plans";
@@ -35,7 +35,7 @@ export class AssistancePlanService implements Service<AssistancePlanDto> {
   initialLoad() {
   }
 
-  create(value: AssistancePlanDto): Observable<AssistancePlanDto> {
+  create(value: AssistancePlanCreateDto): Observable<AssistancePlanDto> {
     return this.http
       .post<AssistancePlanDto>(`${environment.api_url}${this.url}`, value)
       .pipe(tap(() => this.initialLoad()));

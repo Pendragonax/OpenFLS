@@ -60,8 +60,8 @@
               {{ generalForm.valid ? 'check_circle' : 'cancel' }}
             </mat-icon>
           </div>
-          <div>Stunden: {{ value.hours.length }}</div>
-          <div>Ziele: {{ value.goals.length }}</div>
+          <div>Stunden: {{ createValue.hours.length }}</div>
+          <div>Ziele: {{ createValue.goals.length }}</div>
         </div>
 
         <div class="beta-actions">
@@ -76,21 +76,17 @@
       <div class="beta-section">
         <div class="beta-section-title">Stundenanteile</div>
         <app-assistance-plan-hours-page
-          [assistancePlanView$]="valueView$"
+          [hours]="createValue.hours"
           [editable]="true"
-          (updatedValueEvent)="updateAssistancePlanHour($event)"
-          (addedValueEvent)="addAssistancePlanHour($event)"
-          (deletedValueEvent)="deleteAssistancePlanHour($event)"></app-assistance-plan-hours-page>
+          (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
       </div>
 
       <div class="beta-section">
         <div class="beta-section-title">Ziele</div>
         <app-assistance-plan-goals
-          [assistancePlanView$]="valueView$"
+          [goals]="createValue.goals"
           [editable]="true"
-          (updatedGoalEvent)="updateGoal($event)"
-          (addedGoalEvent)="addGoal($event)"
-          (deletedGoalEvent)="deleteGoal($event)"></app-assistance-plan-goals>
+          (goalsChange)="onGoalsChange($event)"></app-assistance-plan-goals>
       </div>
     </div>
   </div>

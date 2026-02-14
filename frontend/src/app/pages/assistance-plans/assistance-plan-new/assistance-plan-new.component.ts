@@ -8,15 +8,16 @@ import {
   NativeDateAdapter
 } from '@angular/material/core';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, ReplaySubject} from 'rxjs';
+import {combineLatest} from 'rxjs';
 import {NewPageComponent} from '../../../shared/components/new-page.component';
 import {AssistancePlanDto} from '../../../shared/dtos/assistance-plan-dto.model';
-import {AssistancePlanHourDto} from '../../../shared/dtos/assistance-plan-hour-dto.model';
-import {GoalDto} from '../../../shared/dtos/goal-dto.model';
+import {
+  AssistancePlanCreateDto,
+  AssistancePlanCreateHourDto
+} from '../../../shared/dtos/assistance-plan-create-dto.model';
 import {ClientDto} from '../../../shared/dtos/client-dto.model';
 import {InstitutionDto} from '../../../shared/dtos/institution-dto.model';
 import {SponsorDto} from '../../../shared/dtos/sponsor-dto.model';
-import {AssistancePlanView} from '../../../shared/models/assistance-plan-view.model';
 import {AssistancePlanService} from '../../../shared/services/assistance-plan.service';
 import {ClientsService} from '../../../shared/services/clients.service';
 import {Converter} from '../../../shared/services/converter.helper';
@@ -42,12 +43,11 @@ import {AssistancePlanInfoForm} from '../../../shared/components/assistance-plan
   standalone: false
 })
 export class AssistancePlanNewSinglePageComponent extends NewPageComponent<AssistancePlanDto> implements OnInit {
-  valueView$: ReplaySubject<AssistancePlanView> = new ReplaySubject<AssistancePlanView>();
   client: ClientDto = new ClientDto();
   institutions: InstitutionDto[] = [];
   sponsors: SponsorDto[] = [];
   affiliatedInstitutions: InstitutionDto[] = [];
-  private localGoalId = -1;
+  createValue: AssistancePlanCreateDto = new AssistancePlanCreateDto();
 
   generalForm = new AssistancePlanInfoForm();
 
@@ -85,11 +85,6 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
       this.userService.affiliatedInstitutions$,
       this.userService.isAdmin$
     ]).subscribe(([institutions, sponsors, affiliatedIds, isAdmin]) => {
-      this.valueView$.next({
-        dto: this.value,
-        editable: true
-      } as AssistancePlanView);
-
       this.institutions = institutions;
       this.sponsors = sponsors;
       this.affiliatedInstitutions = this.institutions.filter(value =>
@@ -116,57 +111,51 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
   }
 
   initFormSubscriptions() {
-    this.generalForm.start.valueChanges.subscribe(value => this.value.start = this.converter.formatDate(new Date(value)));
-    this.generalForm.end.valueChanges.subscribe(value => this.value.end = this.converter.formatDate(new Date(value)));
-    this.generalForm.sponsor.valueChanges.subscribe(value =>
-      this.value.sponsorId = this.sponsors.find(sponsor => sponsor.id === value)?.id ?? 0
-    );
-    this.generalForm.institution.valueChanges.subscribe(value =>
-      this.value.institutionId = this.institutions.find(inst => inst.id === value)?.id ?? 0
-    );
+    this.generalForm.start.valueChanges.subscribe(value => {
+      const formatted = this.converter.formatDate(new Date(value));
+      this.value.start = formatted;
+      this.createValue.start = formatted;
+    });
+    this.generalForm.end.valueChanges.subscribe(value => {
+      const formatted = this.converter.formatDate(new Date(value));
+      this.value.end = formatted;
+      this.createValue.end = formatted;
+    });
+    this.generalForm.sponsor.valueChanges.subscribe(value => {
+      const sponsorId = this.sponsors.find(sponsor => sponsor.id === value)?.id ?? 0;
+      this.value.sponsorId = sponsorId;
+      this.createValue.sponsorId = sponsorId;
+    });
+    this.generalForm.institution.valueChanges.subscribe(value => {
+      const institutionId = this.institutions.find(inst => inst.id === value)?.id ?? 0;
+      this.value.institutionId = institutionId;
+      this.createValue.institutionId = institutionId;
+    });
   }
 
   create() {
-    this.value.clientId = this.client.id;
+    this.syncCreateDtoFromForm();
+    this.createValue.clientId = this.client.id;
 
-    this.assistancePlanService.create(this.value).subscribe({
+    this.assistancePlanService.create(this.createValue).subscribe({
       next: () => this.handleSuccess('Hilfeplan gespeichert', true),
       error: () => this.handleSuccess('Fehler beim speichern')
     });
   }
 
-  addAssistancePlanHour(value: AssistancePlanHourDto) {
-    this.value.hours.push(value);
+  onHoursChange(hours: AssistancePlanCreateHourDto[]) {
+    this.createValue.hours = [...hours];
   }
 
-  updateAssistancePlanHour(value: AssistancePlanHourDto) {
-    const index = this.value.hours.findIndex(x => x.id === value.id);
-
-    if (index >= 0) {
-      this.value.hours[index] = value;
-    }
+  onGoalsChange(goals: AssistancePlanCreateDto['goals']) {
+    this.createValue.goals = [...goals];
   }
 
-  deleteAssistancePlanHour(value: AssistancePlanHourDto) {
-    this.value.hours = this.value.hours.filter(x => x.id !== value.id);
-  }
-
-  addGoal(value: GoalDto) {
-    const goal = {...value};
-    if (goal.id <= 0) {
-      goal.id = this.localGoalId--;
-    }
-    this.value.goals.push(goal);
-  }
-
-  updateGoal(value: GoalDto) {
-    const index = this.value.goals.findIndex(goal => goal.id === value.id);
-    if (index >= 0) {
-      this.value.goals[index] = {...value};
-    }
-  }
-
-  deleteGoal(value: GoalDto) {
-    this.value.goals = this.value.goals.filter(goal => goal.id !== value.id);
+  private syncCreateDtoFromForm() {
+    this.createValue.start = this.value.start;
+    this.createValue.end = this.value.end;
+    this.createValue.clientId = this.client.id;
+    this.createValue.institutionId = this.value.institutionId;
+    this.createValue.sponsorId = this.value.sponsorId;
   }
 }
