@@ -31,6 +31,50 @@
   overflow: hidden;
 }
 
+.ah-cards {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ah-card {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.ah-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.ah-card-row + .ah-card-row {
+  margin-top: 6px;
+}
+
+.ah-card-label {
+  color: #6a7386;
+  font-size: 0.9rem;
+}
+
+.ah-card-value {
+  color: #2f3a4b;
+  font-weight: 600;
+  text-align: right;
+}
+
+.ah-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 8px;
+  border-top: 1px solid #edf1f7;
+  padding-top: 6px;
+}
+
 .ah-empty {
   background: #f7f8fb;
   border: 1px dashed #d7dbe5;
@@ -104,4 +148,14 @@
 .ah-time-unit {
   font-size: 0.85rem;
   color: #5c6780;
+}
+
+@media (max-width: 800px) {
+  .ah-table {
+    display: none;
+  }
+
+  .ah-cards {
+    display: flex;
+  }
 }

@@ -31,7 +31,7 @@
 
         <ng-container matColumnDef="action">
           <th mat-header-cell class="text-center" *matHeaderCellDef> Aktionen </th>
-          <div class="text-center" *matCellDef="let element">
+          <td mat-cell class="text-center" *matCellDef="let element">
             <button mat-icon-button
                     color="primary"
                     class="m-1"
@@ -46,32 +46,61 @@
                     (click)="openDeleteConfirmation(deleteModal, element[0])">
               <mat-icon>delete</mat-icon>
             </button>
-          </div>
-
-          <ng-template #deleteModal let-modal>
-            <div class="modal-header">
-              <h2 class="modal-title" id="modal-basic-title-delete">Löschbestätigung</h2>
-              <button type="button"
-                      class="btn-close"
-                      aria-label="Close"
-                      (click)="modal.dismiss('Cross click')"></button>
-            </div>
-            <div class="modal-body">
-              <p>Wollen sie den Stundenanteil wirklich löschen?</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-danger" (click)="modal.close(true)">Löschen</button>
-              <button type="button" class="btn btn-outline-dark" (click)="modal.close(false)">Abbrechen</button>
-            </div>
-          </ng-template>
+          </td>
         </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
         </table>
+
+        <div class="ah-cards">
+          @for (element of tableSource.data; track element[0].id) {
+            <div class="ah-card mat-elevation-z2">
+              <div class="ah-card-row">
+                <span class="ah-card-label">Typ</span>
+                <span class="ah-card-value">{{ getHourTypeName(element[1]) }}</span>
+              </div>
+              <div class="ah-card-row">
+                <span class="ah-card-label">h/Woche</span>
+                <span class="ah-card-value">{{ element[0].weeklyHours }}</span>
+              </div>
+              <div class="ah-card-actions">
+                <button mat-icon-button
+                        color="primary"
+                        [disabled]="!editable"
+                        (click)="openEditModal(editContent, element[0])">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="warn"
+                        [disabled]="!editable"
+                        (click)="openDeleteConfirmation(deleteModal, element[0])">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       }
     </div>
   }
+
+  <ng-template #deleteModal let-modal>
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-basic-title-delete">Löschbestätigung</h2>
+      <button type="button"
+              class="btn-close"
+              aria-label="Close"
+              (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+      <p>Wollen sie den Stundenanteil wirklich löschen?</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-danger" (click)="modal.close(true)">Löschen</button>
+      <button type="button" class="btn btn-outline-dark" (click)="modal.close(false)">Abbrechen</button>
+    </div>
+  </ng-template>
 
   <ng-template #editContent let-modal>
     <div class="modal-header">
