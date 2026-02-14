@@ -25,8 +25,18 @@
             <input matInput
                    formControlName="end"
                    [matDatepicker]="endPicker"
+                   [min]="minEndDate"
+                   [matDatepickerFilter]="endDateFilter"
+                   [readonly]="true"
+                   (blur)="onEndDateBlur()"
                    required>
             <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+            @if (generalForm.end.hasError('endBeforeOrEqualStart')) {
+              <mat-error>Ende muss nach Beginn liegen.</mat-error>
+            }
+            @if (generalForm.end.hasError('matDatepickerParse')) {
+              <mat-error>Ungültiges Datum.</mat-error>
+            }
             <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
             <mat-datepicker #endPicker></mat-datepicker>
           </mat-form-field>

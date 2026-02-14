@@ -70,10 +70,12 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
   override ngOnInit() {
     super.ngOnInit();
     this.initFormSubscriptions();
+    this.generalForm.start.setValue(null);
+    this.generalForm.end.setValue(null);
   }
 
   get canSave(): boolean {
-    return this.generalForm.valid && !this.isSubmitting;
+    return this.generalForm.valid && !this.hasEndDateError && !this.isSubmitting;
   }
 
   get isHoursSectionActive(): boolean {
@@ -102,6 +104,27 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
 
   get hasExistingPlans(): boolean {
     return this.existingPlans.length > 0;
+  }
+
+  get hasStartDate(): boolean {
+    return this.parseControlDate(this.generalForm.start.value) != null;
+  }
+
+  get minEndDate(): Date | null {
+    const startDate = this.parseControlDate(this.generalForm.start.value);
+    if (!startDate) {
+      return null;
+    }
+
+    const minDate = new Date(startDate);
+    minDate.setDate(minDate.getDate() + 1);
+    return minDate;
+  }
+
+  get hasEndDateError(): boolean {
+    return this.generalForm.end.hasError('required') ||
+      this.generalForm.end.hasError('matDatepickerParse') ||
+      this.generalForm.end.hasError('endBeforeOrEqualStart');
   }
 
   getNewValue(): AssistancePlanDto {
@@ -143,14 +166,34 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
 
   initFormSubscriptions() {
     this.generalForm.start.valueChanges.subscribe(value => {
-      const formatted = this.converter.formatDate(new Date(value));
-      this.value.start = formatted;
-      this.createValue.start = formatted;
+      const startDate = this.parseControlDate(value);
+
+      if (startDate) {
+        const formatted = this.converter.formatDate(startDate);
+        this.value.start = formatted;
+        this.createValue.start = formatted;
+        this.generalForm.end.enable({emitEvent: false});
+      } else {
+        this.value.start = '';
+        this.createValue.start = '';
+        this.generalForm.end.setValue(null, {emitEvent: false});
+        this.generalForm.end.disable({emitEvent: false});
+      }
+
+      this.validateEndAfterStart();
     });
     this.generalForm.end.valueChanges.subscribe(value => {
-      const formatted = this.converter.formatDate(new Date(value));
-      this.value.end = formatted;
-      this.createValue.end = formatted;
+      const endDate = this.parseControlDate(value);
+      if (endDate) {
+        const formatted = this.converter.formatDate(endDate);
+        this.value.end = formatted;
+        this.createValue.end = formatted;
+      } else {
+        this.value.end = '';
+        this.createValue.end = '';
+      }
+
+      this.validateEndAfterStart();
     });
     this.generalForm.sponsor.valueChanges.subscribe(value => {
       const sponsorId = this.sponsors.find(sponsor => sponsor.id === value)?.id ?? 0;
@@ -162,6 +205,14 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
       this.value.institutionId = institutionId;
       this.createValue.institutionId = institutionId;
     });
+
+    if (this.hasStartDate) {
+      this.generalForm.end.enable({emitEvent: false});
+    } else {
+      this.generalForm.end.disable({emitEvent: false});
+    }
+
+    this.validateEndAfterStart();
   }
 
   create() {
@@ -229,6 +280,59 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
 
   private parseDate(dateValue: string): Date | null {
     const date = new Date(dateValue);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  endDateFilter = (candidate: Date | null): boolean => {
+    if (!candidate) {
+      return false;
+    }
+
+    const minDate = this.minEndDate;
+    if (!minDate) {
+      return false;
+    }
+
+    return candidate >= minDate;
+  };
+
+  onEndDateBlur() {
+    if (this.generalForm.end.hasError('matDatepickerParse')) {
+      this.helperService.openSnackBar('Bitte ein gültiges Enddatum über den Kalender auswählen.');
+      return;
+    }
+
+    if (this.generalForm.end.hasError('endBeforeOrEqualStart')) {
+      this.helperService.openSnackBar('Das Enddatum muss nach dem Beginndatum liegen.');
+    }
+  }
+
+  private validateEndAfterStart() {
+    const startDate = this.parseControlDate(this.generalForm.start.value);
+    const endDate = this.parseControlDate(this.generalForm.end.value);
+    const currentErrors = {...(this.generalForm.end.errors ?? {})};
+
+    delete currentErrors['endBeforeOrEqualStart'];
+
+    if (startDate && endDate && endDate <= startDate) {
+      this.generalForm.end.setErrors({...currentErrors, endBeforeOrEqualStart: true});
+      return;
+    }
+
+    if (Object.keys(currentErrors).length > 0) {
+      this.generalForm.end.setErrors(currentErrors);
+      return;
+    }
+
+    this.generalForm.end.setErrors(null);
+  }
+
+  private parseControlDate(value: unknown): Date | null {
+    if (value == null || value === '') {
+      return null;
+    }
+
+    const date = value instanceof Date ? value : new Date(value as string | number);
     return Number.isNaN(date.getTime()) ? null : date;
   }
 
