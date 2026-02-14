@@ -1,9 +1,8 @@
 import {Injectable} from '@angular/core';
-import {Base} from "./base.service";
 import {AssistancePlanDto} from "../dtos/assistance-plan-dto.model";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../../environments/environment";
-import {combineLatest, map, Observable} from "rxjs";
+import {combineLatest, map, Observable, ReplaySubject, tap} from "rxjs";
 import {InstitutionDto} from "../dtos/institution-dto.model";
 import {ClientDto} from "../dtos/client-dto.model";
 import {InstitutionService} from "./institution.service";
@@ -15,24 +14,53 @@ import {SponsorDto} from "../dtos/sponsor-dto.model";
 import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
 import {AssistancePlanEvaluationLeftDto} from "../dtos/assistance-plan-evaluation-left.dto";
 import {AssistancePlan} from "../projections/assistance-plan.projection";
+import {Service} from "./service";
 
 @Injectable({
   providedIn: 'root'
 })
-export class AssistancePlanService extends Base<AssistancePlanDto>{
+export class AssistancePlanService implements Service<AssistancePlanDto> {
+  allValues$: ReplaySubject<AssistancePlanDto[]> = new ReplaySubject<AssistancePlanDto[]>();
+  allValues: AssistancePlanDto[] = [];
   url = "assistance_plans";
 
   constructor(
-    protected override http: HttpClient,
+    protected http: HttpClient,
     private institutionService: InstitutionService,
     private clientService: ClientsService,
     private userService: UserService,
     private sponsorService: SponsorService
-  ) {
-    super(http);
+  ) { }
+
+  initialLoad() {
   }
 
-  override initialLoad() {
+  create(value: AssistancePlanDto): Observable<AssistancePlanDto> {
+    return this.http
+      .post<AssistancePlanDto>(`${environment.api_url}${this.url}`, value)
+      .pipe(tap(() => this.initialLoad()));
+  }
+
+  update(id: number, value: AssistancePlanDto): Observable<AssistancePlanDto> {
+    return this.http
+      .put<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}`, value)
+      .pipe(tap(() => this.initialLoad()));
+  }
+
+  delete(id: number): Observable<AssistancePlanDto> {
+    return this.http
+      .delete<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}`)
+      .pipe(tap(() => this.initialLoad()));
+  }
+
+  getAll(): Observable<AssistancePlanDto[]> {
+    return this.http
+      .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}`);
+  }
+
+  getById(id: number): Observable<AssistancePlanDto> {
+    return this.http
+      .get<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}`);
   }
 
   getProjectionById(id: number): Observable<AssistancePlan> {
