@@ -17,9 +17,14 @@
   gap: 12px;
 }
 
-.ap-client-name {
-  margin: 0 0 12px;
-  color: #2f3a4b;
+.ap-title-client {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bs-primary);
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .ap-section-inactive {

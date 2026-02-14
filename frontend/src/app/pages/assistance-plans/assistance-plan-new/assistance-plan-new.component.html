@@ -1,10 +1,12 @@
 <div class="beta-service-page">
   <div class="ap-layout">
     <div class="beta-card ap-card">
-      <div class="beta-title">Neuer Hilfeplan</div>
+      <div class="beta-title">
+        Neuer Hilfeplan für
+        <span class="ap-title-client">{{ client.lastName }} {{ client.firstName }}</span>
+      </div>
       <div class="beta-section">
         <div class="beta-section-title">Basisdaten</div>
-        <p class="ap-client-name"><b>{{ client.lastName }} {{ client.firstName }}</b></p>
 
         <form [formGroup]="generalForm" class="ap-form-grid">
           <mat-form-field appearance="outline" class="beta-field">
