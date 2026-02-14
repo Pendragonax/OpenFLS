@@ -84,18 +84,29 @@
 
     <div class="modal-body text-center">
       <form [formGroup]="editForm">
-        <mat-form-field appearance="fill">
-          <mat-label>Stunden</mat-label>
-          <input matInput
-                 type="number"
-                 min="0"
-                 max="9999"
-                 step="0.1"
-                 pattern="^\d*(\.\d{0,2})?$"
-                 formControlName="weeklyHours"
-                 required>
-          <mat-hint>Punkttrennung (5.3)</mat-hint>
-        </mat-form-field><br><br>
+        <div class="ah-time-group">
+          <div class="ah-time-label">Stundenumfang</div>
+          <div class="ah-time-control ah-time-pill" [class.ah-time-pill--invalid]="editForm.invalid">
+            <input type="number"
+                   class="ah-time-input"
+                   formControlName="weeklyHoursPart"
+                   inputmode="numeric"
+                   min="0"
+                   max="9999"
+                   (focus)="selectAll($event)"
+                   (blur)="clampWeeklyDuration()">
+            <span class="ah-time-unit">Stunden</span>
+            <input type="number"
+                   class="ah-time-input"
+                   formControlName="weeklyMinutesPart"
+                   inputmode="numeric"
+                   min="0"
+                   max="59"
+                   (focus)="selectAll($event)"
+                   (blur)="clampWeeklyDuration()">
+            <span class="ah-time-unit">Minuten</span>
+          </div>
+        </div><br>
 
         <mat-form-field appearance="fill">
           <mat-label>Stundentyp</mat-label>
