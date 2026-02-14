@@ -11,13 +11,14 @@
     }
   </div>
 
-  <div class="ag-table-wrap">
-    @if (values.length <= 0) {
-      <div class="ag-empty">Ziele werden hier angezeigt, sobald ein Ziel hinzugefügt wurde.</div>
-    } @else {
-      <table mat-table
-             [dataSource]="tableSource"
-             class="ag-table">
+  @if (editable || values.length > 0) {
+    <div class="ag-table-wrap">
+      @if (values.length <= 0 && editable) {
+        <div class="ag-empty">Ziele werden hier angezeigt, sobald ein Ziel hinzugefügt wurde.</div>
+      } @else if (values.length > 0) {
+        <table mat-table
+               [dataSource]="tableSource"
+               class="ag-table">
       <ng-container matColumnDef="title">
         <th mat-header-cell
             class="pe-2"
@@ -97,11 +98,12 @@
         </div>
       </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
-      </table>
-    }
-  </div>
+          <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+        </table>
+      }
+    </div>
+  }
 
   <ng-template #editContent let-modal>
     <div class="modal-header">

@@ -74,6 +74,14 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
     return this.generalForm.valid && !this.isSubmitting;
   }
 
+  get isHoursSectionActive(): boolean {
+    return this.createValue.goals.length <= 0;
+  }
+
+  get isGoalsSectionActive(): boolean {
+    return this.createValue.hours.length <= 0;
+  }
+
   getNewValue(): AssistancePlanDto {
     return new AssistancePlanDto();
   }
@@ -145,10 +153,16 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
 
   onHoursChange(hours: AssistancePlanCreateHourDto[]) {
     this.createValue.hours = [...hours];
+    if (this.createValue.hours.length > 0) {
+      this.createValue.goals = [];
+    }
   }
 
   onGoalsChange(goals: AssistancePlanCreateDto['goals']) {
     this.createValue.goals = [...goals];
+    if (this.createValue.goals.length > 0) {
+      this.createValue.hours = [];
+    }
   }
 
   private syncCreateDtoFromForm() {

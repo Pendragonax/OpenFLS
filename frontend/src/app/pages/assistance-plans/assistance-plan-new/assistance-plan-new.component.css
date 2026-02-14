@@ -28,6 +28,20 @@
   color: #2f3a4b;
 }
 
+.ap-section-inactive {
+  opacity: 0.72;
+}
+
+.ap-section-hint {
+  background: #f7f8fb;
+  border: 1px dashed #d7dbe5;
+  color: #7a8396;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
 @media (max-width: 1024px) {
   .ap-layout {
     grid-template-columns: 1fr;

@@ -11,13 +11,14 @@
     }
   </div>
 
-  <div class="ah-table-wrap">
-    @if (values.length <= 0) {
-      <div class="ah-empty">Stunden werden hier angezeigt, sobald ein Stundenanteil hinzugefügt wurde.</div>
-    } @else {
-      <table mat-table
-             [dataSource]="tableSource"
-             class="ah-table">
+  @if (editable || values.length > 0) {
+    <div class="ah-table-wrap">
+      @if (values.length <= 0 && editable) {
+        <div class="ah-empty">Stunden werden hier angezeigt, sobald ein Stundenanteil hinzugefügt wurde.</div>
+      } @else if (values.length > 0) {
+        <table mat-table
+               [dataSource]="tableSource"
+               class="ah-table">
         <ng-container matColumnDef="type">
           <th mat-header-cell *matHeaderCellDef> Typ </th>
           <td mat-cell *matCellDef="let element"> {{getHourTypeName(element[1])}} </td>
@@ -65,11 +66,12 @@
           </ng-template>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
-      </table>
-    }
-  </div>
+          <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+        </table>
+      }
+    </div>
+  }
 
   <ng-template #editContent let-modal>
     <div class="modal-header">
