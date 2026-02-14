@@ -54,7 +54,7 @@ export class AssistancePlanHoursPageComponent
   filteredHourTypes: HourTypeDto[] = [];
 
   editForm = new UntypedFormGroup({
-    type: new UntypedFormControl(null, Validators.compose([Validators.required])),
+    type: new UntypedFormControl(null, Validators.compose([Validators.required, Validators.min(1)])),
     weeklyHoursPart: new UntypedFormControl(0, Validators.compose([
       Validators.min(0),
       Validators.max(9999),
@@ -114,7 +114,7 @@ export class AssistancePlanHoursPageComponent
     const minutesPart = totalMinutes % 60;
     this.weeklyHoursPartControl.setValue(hoursPart);
     this.weeklyMinutesPartControl.setValue(minutesPart);
-    this.typeControl.setValue(value.hourTypeId);
+    this.typeControl.setValue(value.hourTypeId > 0 ? value.hourTypeId : null);
     this.syncWeeklyHoursFromParts();
   }
 
@@ -132,6 +132,10 @@ export class AssistancePlanHoursPageComponent
   }
 
   create(value: AssistancePlanHourDto) {
+    if (!this.canPersistHour(value)) {
+      return;
+    }
+
     const withId = {
       ...value,
       id: this.values.length > 0 ? Math.max(...this.values.map(v => v.id)) + 1 : 1
@@ -141,6 +145,10 @@ export class AssistancePlanHoursPageComponent
   }
 
   update(value: AssistancePlanHourDto) {
+    if (!this.canPersistHour(value)) {
+      return;
+    }
+
     this.values = this.values.map(current => current.id === value.id ? {...value} : current);
     this.emitHours();
   }
@@ -203,5 +211,19 @@ export class AssistancePlanHoursPageComponent
       return min;
     }
     return Math.max(min, Math.min(max, Math.floor(parsed)));
+  }
+
+  private canPersistHour(value: AssistancePlanHourDto): boolean {
+    if ((value.hourTypeId ?? 0) <= 0) {
+      this.helperService.openSnackBar('Bitte zuerst einen Stundentyp auswählen.');
+      return false;
+    }
+
+    if ((value.weeklyHours ?? 0) <= 0) {
+      this.helperService.openSnackBar('Bitte eine Dauer größer als 0 angeben.');
+      return false;
+    }
+
+    return true;
   }
 }
