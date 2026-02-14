@@ -59,6 +59,56 @@
   margin-bottom: 8px;
 }
 
+.ag-time-group {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.ag-time-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 6px;
+}
+
+.ag-time-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+}
+
+.ag-time-pill {
+  border: 1px solid #c8d0df;
+  border-radius: 12px;
+  background: #f5f8fd;
+  padding: 8px 10px;
+}
+
+.ag-time-pill--invalid {
+  border-color: #d32f2f;
+}
+
+.ag-time-input {
+  width: 56px;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #25304a;
+  outline: none;
+  text-align: right;
+}
+
+.ag-time-input[type="number"] {
+  text-align: right;
+}
+
+.ag-time-unit {
+  font-size: 0.85rem;
+  color: #5c6780;
+}
+
 .ag-hour-action {
   margin: 4px 0 10px;
   display: flex;

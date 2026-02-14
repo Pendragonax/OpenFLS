@@ -9,7 +9,7 @@ import {
 import {Sort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
+import {AbstractControl, UntypedFormControl, UntypedFormGroup, ValidationErrors, Validators} from '@angular/forms';
 import {TablePageComponent} from '../../../../shared/components/table-page.component';
 import {GoalDto} from '../../../../shared/dtos/goal-dto.model';
 import {GoalHourDto} from '../../../../shared/dtos/goal-hour-dto.model';
@@ -22,6 +22,21 @@ import {
   AssistancePlanCreateGoalDto,
   AssistancePlanCreateHourDto
 } from '../../../../shared/dtos/assistance-plan-create-dto.model';
+
+const weeklyDurationValidator = (control: AbstractControl): ValidationErrors | null => {
+  const hours = Number(control.get('weeklyHoursPart')?.value ?? 0);
+  const minutes = Number(control.get('weeklyMinutesPart')?.value ?? 0);
+
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return {weeklyDurationInvalid: true};
+  }
+
+  if (hours < 0 || hours > 999 || minutes < 0 || minutes > 59) {
+    return {weeklyDurationInvalid: true};
+  }
+
+  return (hours * 60 + minutes) > 0 ? null : {weeklyDurationRequired: true};
+};
 
 @Component({
   selector: 'app-assistance-plan-goals',
@@ -68,9 +83,10 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
 
   hourForm = new UntypedFormGroup({
     hourType: new UntypedFormControl(null, Validators.compose([Validators.required])),
-    weeklyHours: new UntypedFormControl(0, Validators.compose([Validators.required, Validators.min(0.1)])),
+    weeklyHoursPart: new UntypedFormControl(0, Validators.compose([Validators.required, Validators.min(0), Validators.max(999)])),
+    weeklyMinutesPart: new UntypedFormControl(0, Validators.compose([Validators.required, Validators.min(0), Validators.max(59)])),
     hourTable: new UntypedFormControl()
-  });
+  }, {validators: weeklyDurationValidator});
 
   get titleControl() { return this.infoForm.controls['title']; }
 
@@ -80,7 +96,9 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
 
   get hourTypeControl() { return this.hourForm.controls['hourType']; }
 
-  get weeklyHoursControl() { return this.hourForm.controls['weeklyHours']; }
+  get weeklyHoursPartControl() { return this.hourForm.controls['weeklyHoursPart']; }
+
+  get weeklyMinutesPartControl() { return this.hourForm.controls['weeklyMinutesPart']; }
 
   constructor(
     override modalService: NgbModal,
@@ -126,7 +144,8 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
     );
 
     this.hourTypeControl.valueChanges.subscribe(value => this.editGoalHour.hourTypeId = value != null ? value : 0);
-    this.weeklyHoursControl.valueChanges.subscribe(value => this.editGoalHour.weeklyHours = value);
+    this.weeklyHoursPartControl.valueChanges.subscribe(() => this.syncGoalWeeklyHoursFromParts());
+    this.weeklyMinutesPartControl.valueChanges.subscribe(() => this.syncGoalWeeklyHoursFromParts());
   }
 
   fillEditForm(value: GoalDto) {
@@ -140,7 +159,9 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
 
   resetGoalHoursForm() {
     this.hourTypeControl.setValue(null);
-    this.weeklyHoursControl.setValue(0);
+    this.weeklyHoursPartControl.setValue(0);
+    this.weeklyMinutesPartControl.setValue(0);
+    this.syncGoalWeeklyHoursFromParts();
   }
 
   filterTableData() {
@@ -226,6 +247,22 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
   sortData(sort: Sort) {
   }
 
+  clampGoalWeeklyDuration() {
+    const safeHours = this.toBoundedInt(this.weeklyHoursPartControl.value, 0, 999);
+    const safeMinutes = this.toBoundedInt(this.weeklyMinutesPartControl.value, 0, 59);
+    this.weeklyHoursPartControl.setValue(safeHours);
+    this.weeklyMinutesPartControl.setValue(safeMinutes);
+    this.syncGoalWeeklyHoursFromParts();
+  }
+
+  selectAll(event: FocusEvent) {
+    const target = event.target as HTMLInputElement | null;
+    if (!target) {
+      return;
+    }
+    target.select();
+  }
+
   private emitGoals() {
     this.filteredTableData = this.convertToTableSource(this.values);
     this.refreshTablePage();
@@ -255,5 +292,20 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
         hourTypeId: hour.hourTypeId
       }))
     };
+  }
+
+  private syncGoalWeeklyHoursFromParts() {
+    const hoursPart = this.toBoundedInt(this.weeklyHoursPartControl.value, 0, 999);
+    const minutesPart = this.toBoundedInt(this.weeklyMinutesPartControl.value, 0, 59);
+    const totalMinutes = hoursPart * 60 + minutesPart;
+    this.editGoalHour.weeklyHours = Number((totalMinutes / 60).toFixed(4));
+  }
+
+  private toBoundedInt(value: unknown, min: number, max: number) {
+    const parsed = Number(value ?? 0);
+    if (!Number.isFinite(parsed)) {
+      return min;
+    }
+    return Math.max(min, Math.min(max, Math.floor(parsed)));
   }
 }

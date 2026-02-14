@@ -167,18 +167,29 @@
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline" class="ag-field">
-                  <mat-label>h/Woche</mat-label>
-                  <input matInput
-                         type="number"
-                         min="0"
-                         max="999"
-                         step="0.1"
-                         pattern="^\d*(\.\d{0,2})?$"
-                         formControlName="weeklyHours"
-                         required>
-                  <mat-hint>Punkttrennung (5.30)</mat-hint>
-                </mat-form-field>
+                <div class="ag-time-group">
+                  <div class="ag-time-label">h/Woche</div>
+                  <div class="ag-time-control ag-time-pill" [class.ag-time-pill--invalid]="hourForm.invalid">
+                    <input type="number"
+                           class="ag-time-input"
+                           formControlName="weeklyHoursPart"
+                           inputmode="numeric"
+                           min="0"
+                           max="999"
+                           (focus)="selectAll($event)"
+                           (blur)="clampGoalWeeklyDuration()">
+                    <span class="ag-time-unit">Stunden</span>
+                    <input type="number"
+                           class="ag-time-input"
+                           formControlName="weeklyMinutesPart"
+                           inputmode="numeric"
+                           min="0"
+                           max="59"
+                           (focus)="selectAll($event)"
+                           (blur)="clampGoalWeeklyDuration()">
+                    <span class="ag-time-unit">Minuten</span>
+                  </div>
+                </div>
               </form>
             </div>
 

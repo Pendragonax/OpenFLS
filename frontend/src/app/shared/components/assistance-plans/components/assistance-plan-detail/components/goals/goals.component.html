@@ -160,18 +160,29 @@
                   </mat-select>
                 </mat-form-field><br>
 
-                <mat-form-field appearance="fill" class="w-100">
-                  <mat-label>h/Woche</mat-label>
-                  <input matInput
-                         type="number"
-                         min="0"
-                         max="999"
-                         step="0.1"
-                         pattern="^\d*(\.\d{0,2})?$"
-                         formControlName="weeklyHours"
-                         required>
-                  <mat-hint>Punkttrennung (5.30)</mat-hint>
-                </mat-form-field>
+                <div class="goals-time-group">
+                  <div class="goals-time-label">h/Woche</div>
+                  <div class="goals-time-control goals-time-pill" [class.goals-time-pill--invalid]="hourForm.invalid">
+                    <input type="number"
+                           class="goals-time-input"
+                           formControlName="weeklyHoursPart"
+                           inputmode="numeric"
+                           min="0"
+                           max="999"
+                           (focus)="selectAll($event)"
+                           (blur)="clampGoalWeeklyDuration()">
+                    <span class="goals-time-unit">Stunden</span>
+                    <input type="number"
+                           class="goals-time-input"
+                           formControlName="weeklyMinutesPart"
+                           inputmode="numeric"
+                           min="0"
+                           max="59"
+                           (focus)="selectAll($event)"
+                           (blur)="clampGoalWeeklyDuration()">
+                    <span class="goals-time-unit">Minuten</span>
+                  </div>
+                </div>
               </form>
             </div>
 
