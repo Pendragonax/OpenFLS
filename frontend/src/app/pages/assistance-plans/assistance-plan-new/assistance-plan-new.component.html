@@ -49,6 +49,28 @@
             </mat-select>
           </mat-form-field>
         </form>
+
+        <div class="ap-existing-plans">
+          <div class="beta-section-title">Bestehende Hilfepläne</div>
+          @if (existingPlansLoading) {
+            <div class="ap-existing-loading">
+              <mat-spinner [diameter]="28" [strokeWidth]="3"></mat-spinner>
+              <span>Hilfepläne werden geladen…</span>
+            </div>
+          } @else if (hasExistingPlans) {
+            <div class="ap-existing-list">
+              @for (plan of existingPlans; track plan.id) {
+                <div class="ap-existing-row"
+                     [class.ap-existing-row--overlap]="isExistingPlanInNewRange(plan)">
+                  <div class="ap-existing-time">{{ getExistingPlanTimeRange(plan) }}</div>
+                  <div class="ap-existing-sponsor">{{ getExistingPlanSponsor(plan) }}</div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="ap-existing-empty">Keine bestehenden Hilfepläne für den Klienten.</div>
+          }
+        </div>
       </div>
 
       <div class="beta-section">

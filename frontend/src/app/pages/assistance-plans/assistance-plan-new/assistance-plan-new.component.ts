@@ -47,6 +47,8 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
   institutions: InstitutionDto[] = [];
   sponsors: SponsorDto[] = [];
   affiliatedInstitutions: InstitutionDto[] = [];
+  existingPlans: AssistancePlanDto[] = [];
+  existingPlansLoading = false;
   createValue: AssistancePlanCreateDto = new AssistancePlanCreateDto();
 
   generalForm = new AssistancePlanInfoForm();
@@ -98,6 +100,10 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
     return !this.hasPlanHours;
   }
 
+  get hasExistingPlans(): boolean {
+    return this.existingPlans.length > 0;
+  }
+
   getNewValue(): AssistancePlanDto {
     return new AssistancePlanDto();
   }
@@ -128,6 +134,7 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
           this.handleFailure('Fehler beim laden des Klienten', true);
         } else {
           this.client = value;
+          this.loadExistingPlans(value.id);
         }
       },
       error: () => this.handleFailure('Fehler beim laden des Klienten', true)
@@ -173,6 +180,56 @@ export class AssistancePlanNewSinglePageComponent extends NewPageComponent<Assis
 
   onGoalsChange(goals: AssistancePlanCreateDto['goals']) {
     this.createValue.goals = [...goals];
+  }
+
+  getExistingPlanTimeRange(plan: AssistancePlanDto): string {
+    return `${this.toGermanDate(plan.start)} - ${this.toGermanDate(plan.end)}`;
+  }
+
+  getExistingPlanSponsor(plan: AssistancePlanDto): string {
+    return this.sponsors.find(sponsor => sponsor.id === plan.sponsorId)?.name ?? 'n/a';
+  }
+
+  isExistingPlanInNewRange(plan: AssistancePlanDto): boolean {
+    const newStart = this.parseDate(this.createValue.start);
+    const newEnd = this.parseDate(this.createValue.end);
+    const planStart = this.parseDate(plan.start);
+    const planEnd = this.parseDate(plan.end);
+
+    if (!newStart || !newEnd || !planStart || !planEnd) {
+      return false;
+    }
+
+    return newStart <= planEnd && newEnd >= planStart;
+  }
+
+  private loadExistingPlans(clientId: number) {
+    this.existingPlansLoading = true;
+
+    this.assistancePlanService.getByClientId(clientId).subscribe({
+      next: (plans) => {
+        this.existingPlans = [...(plans ?? [])]
+          .sort((a, b) => a.start.localeCompare(b.start));
+        this.existingPlansLoading = false;
+      },
+      error: () => {
+        this.existingPlans = [];
+        this.existingPlansLoading = false;
+      }
+    });
+  }
+
+  private toGermanDate(dateValue: string): string {
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) {
+      return dateValue;
+    }
+    return this.converter.formatDateToGerman(date);
+  }
+
+  private parseDate(dateValue: string): Date | null {
+    const date = new Date(dateValue);
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 
   private syncCreateDtoFromForm() {
