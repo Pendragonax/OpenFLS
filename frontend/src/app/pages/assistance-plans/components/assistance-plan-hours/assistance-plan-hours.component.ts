@@ -95,7 +95,12 @@ export class AssistancePlanHoursPageComponent
   }
 
   override filterReferenceValues() {
-    this.filteredHourTypes = this.hourTypes.filter(x => !this.values.some(y => y.hourTypeId === x.id));
+    this.filteredHourTypes = this.hourTypes.filter(type => {
+      if (this.modalEditMode && this.editValue.hourTypeId === type.id) {
+        return true;
+      }
+      return !this.values.some(value => value.hourTypeId === type.id);
+    });
   }
 
   create(value: AssistancePlanHourDto) {
