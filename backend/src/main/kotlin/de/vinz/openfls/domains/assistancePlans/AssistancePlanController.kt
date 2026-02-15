@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.assistancePlans
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.permissions.AccessService
@@ -54,7 +55,7 @@ class AssistancePlanController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: AssistancePlanDto): Any {
+               @Valid @RequestBody valueDto: AssistancePlanUpdateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()

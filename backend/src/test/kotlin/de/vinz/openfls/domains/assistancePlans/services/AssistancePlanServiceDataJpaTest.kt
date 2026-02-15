@@ -4,6 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
@@ -310,5 +311,86 @@ class AssistancePlanServiceDataJpaTest {
             LocalDate.of(2025, 1, 1),
             LocalDate.of(2024, 1, 1)
         )
+    }
+
+    @Test
+    fun update_updateDtoWithGoalHours_updatesGoalAndGoalHour() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+
+        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
+        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+
+        val created = assistancePlanService.create(AssistancePlanCreateDto().apply {
+            start = LocalDate.of(2026, 1, 1)
+            end = LocalDate.of(2026, 12, 31)
+            clientId = client.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            goals = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateGoalDto().apply {
+                    title = "Goal Old"
+                    description = "Desc Old"
+                    institutionId = institution.id
+                    hours = listOf(
+                        de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateHourDto().apply {
+                            weeklyMinutes = 60
+                            hourTypeId = hourType.id
+                        }
+                    )
+                }
+            )
+        })
+
+        val createdEntity = assistancePlanRepository.findById(created.id).orElseThrow()
+        val existingGoal = createdEntity.goals.first()
+        val existingGoalHour = existingGoal.hours.first()
+
+        val updateDto = AssistancePlanUpdateDto().apply {
+            id = created.id
+            start = LocalDate.of(2026, 2, 1)
+            end = LocalDate.of(2026, 11, 30)
+            clientId = client.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            hours = emptyList()
+            goals = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateGoalDto().apply {
+                    id = existingGoal.id
+                    title = "Goal New"
+                    description = "Desc New"
+                    assistancePlanId = created.id
+                    institutionId = institution.id
+                    hours = listOf(
+                        de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateGoalHourDto().apply {
+                            id = existingGoalHour.id
+                            weeklyMinutes = 90
+                            hourTypeId = hourType.id
+                            goalHourId = existingGoal.id
+                        }
+                    )
+                }
+            )
+        }
+
+        // When
+        val result = assistancePlanService.update(created.id, updateDto)
+
+        // Then
+        val saved = assistancePlanRepository.findById(result.id).orElseThrow()
+        assertThat(saved.start).isEqualTo(LocalDate.of(2026, 2, 1))
+        assertThat(saved.end).isEqualTo(LocalDate.of(2026, 11, 30))
+        assertThat(saved.goals).hasSize(1)
+        assertThat(saved.goals.first().id).isEqualTo(existingGoal.id)
+        assertThat(saved.goals.first().title).isEqualTo("Goal New")
+        assertThat(saved.goals.first().hours).hasSize(1)
+        assertThat(saved.goals.first().hours.first().id).isEqualTo(existingGoalHour.id)
+        assertThat(saved.goals.first().hours.first().weeklyMinutes).isEqualTo(90)
     }
 }
