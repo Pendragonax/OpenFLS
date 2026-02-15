@@ -462,7 +462,7 @@ export class AssistancePlansComponent
   }
 
   getHoursTooltip(preview: AssistancePlanPreviewDto): string {
-    return `Diese Anzeige ist nicht nach Stundentypen getrennt, sondern fasst alle zusammen.\nGeleistet: ${preview.executedHoursThisYear}h\nBewilligt: ${preview.approvedHoursThisYear}h`;
+    return `Dieses Jahr bis heute\nBewilligt: ${preview.approvedHoursThisYear}\nGeleistet: ${preview.executedHoursThisYear}`;
   }
 
   getExecutedHoursProgressClass(preview: AssistancePlanPreviewDto): string {
