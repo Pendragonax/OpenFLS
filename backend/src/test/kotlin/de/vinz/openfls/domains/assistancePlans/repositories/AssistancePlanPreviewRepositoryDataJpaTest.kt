@@ -97,6 +97,7 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
         val goalHourMinutesResult = assistancePlanRepository
             .findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(planWithPlanHours.id, planWithGoalHours.id))
         val favoriteIdsResult = assistancePlanRepository.findFavoriteAssistancePlanIdsByEmployeeId(base.employee.id!!)
+        val existingResult = assistancePlanRepository.findExistingProjectionsByClientId(base.client.id)
 
         assertThat(previewResult).hasSize(2)
         assertThat(previewResult[0].id).isEqualTo(planWithPlanHours.id)
@@ -108,6 +109,8 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
         assertThat(goalHourMinutesResult.first().assistancePlanId).isEqualTo(planWithGoalHours.id)
         assertThat(goalHourMinutesResult.first().weeklyMinutes).isEqualTo(210)
         assertThat(favoriteIdsResult).containsExactly(planWithGoalHours.id)
+        assertThat(existingResult).hasSize(2)
+        assertThat(existingResult.first().sponsorName).isEqualTo("Sponsor")
     }
 
     @Test

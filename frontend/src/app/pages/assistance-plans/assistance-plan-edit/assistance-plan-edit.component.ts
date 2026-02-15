@@ -25,6 +25,7 @@ import {
 import {ClientDto} from '../../../shared/dtos/client-dto.model';
 import {InstitutionDto} from '../../../shared/dtos/institution-dto.model';
 import {SponsorDto} from '../../../shared/dtos/sponsor-dto.model';
+import {AssistancePlanExistingDto} from '../../../shared/dtos/assistance-plan-existing-dto.model';
 import {AssistancePlanService} from '../../../shared/services/assistance-plan.service';
 import {ClientsService} from '../../../shared/services/clients.service';
 import {Converter} from '../../../shared/services/converter.helper';
@@ -83,7 +84,7 @@ export class AssistancePlanEditComponent extends NewPageComponent<AssistancePlan
   institutions: InstitutionDto[] = [];
   sponsors: SponsorDto[] = [];
   affiliatedInstitutions: InstitutionDto[] = [];
-  existingPlans: AssistancePlanDto[] = [];
+  existingPlans: AssistancePlanExistingDto[] = [];
   existingPlansLoading = false;
   isLoading = true;
   planId = 0;
@@ -276,15 +277,15 @@ export class AssistancePlanEditComponent extends NewPageComponent<AssistancePlan
     });
   }
 
-  getExistingPlanTimeRange(plan: AssistancePlanDto): string {
+  getExistingPlanTimeRange(plan: AssistancePlanExistingDto): string {
     return `${this.toGermanDate(plan.start)} - ${this.toGermanDate(plan.end)}`;
   }
 
-  getExistingPlanSponsor(plan: AssistancePlanDto): string {
-    return this.sponsors.find(sponsor => sponsor.id === plan.sponsorId)?.name ?? 'n/a';
+  getExistingPlanSponsor(plan: AssistancePlanExistingDto): string {
+    return plan.sponsorName;
   }
 
-  isExistingPlanInNewRange(plan: AssistancePlanDto): boolean {
+  isExistingPlanInNewRange(plan: AssistancePlanExistingDto): boolean {
     const newStart = this.parseDate(this.updateValue.start);
     const newEnd = this.parseDate(this.updateValue.end);
     const planStart = this.parseDate(plan.start);
@@ -295,6 +296,10 @@ export class AssistancePlanEditComponent extends NewPageComponent<AssistancePlan
     }
 
     return newStart <= planEnd && newEnd >= planStart;
+  }
+
+  isEditedPlan(plan: AssistancePlanExistingDto): boolean {
+    return plan.id === this.planId;
   }
 
   endDateFilter = (candidate: Date | null): boolean => {
@@ -385,9 +390,10 @@ export class AssistancePlanEditComponent extends NewPageComponent<AssistancePlan
   private loadExistingPlans(clientId: number) {
     this.existingPlansLoading = true;
 
-    this.assistancePlanService.getByClientId(clientId).subscribe({
+    this.assistancePlanService.getExistingByClientId(clientId).subscribe({
       next: (plans) => {
-        this.existingPlans = (plans ?? []).filter(plan => plan.id !== this.planId);
+        this.existingPlans = [...(plans ?? [])]
+          .sort((a, b) => a.start.localeCompare(b.start));
         this.existingPlansLoading = false;
       },
       error: () => {

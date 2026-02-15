@@ -9,6 +9,7 @@ import {AssistancePlan} from '../projections/assistance-plan.projection';
 import {AssistancePlanCreateDto} from '../dtos/assistance-plan-create-dto.model';
 import {AssistancePlanUpdateDto} from '../dtos/assistance-plan-update-dto.model';
 import {AssistancePlanPreviewDto} from '../dtos/assistance-plan-preview-dto.model';
+import {AssistancePlanExistingDto} from '../dtos/assistance-plan-existing-dto.model';
 
 @Injectable({
   providedIn: 'root'
@@ -96,6 +97,10 @@ export class AssistancePlanService {
 
   getPreviewByFavorites(): Observable<AssistancePlanPreviewDto[]> {
     return this.http.get<AssistancePlanPreviewDto[]>(`${environment.api_url}${this.url}/favorites/preview`);
+  }
+
+  getExistingByClientId(id: number): Observable<AssistancePlanExistingDto[]> {
+    return this.http.get<AssistancePlanExistingDto[]>(`${environment.api_url}${this.url}/client/${id}/existing`);
   }
 
   getEvaluationById(id: number): Observable<AssistancePlanEvaluation> {

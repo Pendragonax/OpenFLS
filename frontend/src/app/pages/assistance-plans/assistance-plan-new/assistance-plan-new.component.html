@@ -73,7 +73,7 @@
                 <div class="ap-existing-row"
                      [class.ap-existing-row--overlap]="isExistingPlanInNewRange(plan)">
                   <div class="ap-existing-time">{{ getExistingPlanTimeRange(plan) }}</div>
-                  <div class="ap-existing-sponsor">{{ getExistingPlanSponsor(plan) }}</div>
+                  <div class="ap-existing-sponsor">{{ plan.sponsorName }}</div>
                 </div>
               }
             </div>

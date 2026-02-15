@@ -73,6 +73,12 @@
   box-shadow: 0 0 0 1px rgba(224, 180, 34, 0.2);
 }
 
+.ap-existing-row--highlight {
+  border-color: #13a3e6;
+  background: #e6f6ff;
+  box-shadow: 0 0 0 1px rgba(19, 163, 230, 0.2);
+}
+
 .ap-existing-time {
   font-weight: 600;
   color: #2f3a4b;

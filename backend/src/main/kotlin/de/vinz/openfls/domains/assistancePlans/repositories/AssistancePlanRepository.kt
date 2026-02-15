@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.repositories
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistingProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
@@ -56,6 +57,22 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
             "WHERE u.client.id = :clientId " +
             "ORDER BY u.start DESC")
     fun findByClientId(@Param("clientId") id: Long): List<AssistancePlan>
+
+    @Query(
+        """
+        SELECT ap.id as id,
+               ap.start as start,
+               ap.end as end,
+               s.name as sponsorName
+        FROM AssistancePlan ap
+        JOIN ap.sponsor s
+        WHERE ap.client.id = :clientId
+        ORDER BY ap.start DESC
+        """
+    )
+    fun findExistingProjectionsByClientId(
+        @Param("clientId") clientId: Long
+    ): List<AssistancePlanExistingProjection>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.client.id = :clientId")

@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
@@ -76,6 +77,27 @@ class AssistancePlanControllerWebMvcTest {
         val result = mockMvc.get("/assistance_plans/favorites/preview").andReturn()
 
         assertThat(result.response.status).isEqualTo(400)
+    }
+
+    @Test
+    fun getExistingByClientId_returnsExistingDtos() {
+        given(assistancePlanPreviewService.getExistingDtosByClientId(3L))
+            .willReturn(
+                listOf(
+                    AssistancePlanExistingDto(
+                        id = 99L,
+                        start = LocalDate.of(2026, 1, 1),
+                        end = LocalDate.of(2026, 3, 31),
+                        sponsorName = "LWV"
+                    )
+                )
+            )
+
+        val result = mockMvc.get("/assistance_plans/client/3/existing").andReturn()
+
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":99")
+        assertThat(result.response.contentAsString).contains("\"sponsorName\":\"LWV\"")
     }
 
     private fun previewDto(id: Long, isFavorite: Boolean): AssistancePlanPreviewDto {

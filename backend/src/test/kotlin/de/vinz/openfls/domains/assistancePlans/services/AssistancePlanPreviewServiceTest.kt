@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistingProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.services.ServiceRepository
@@ -115,6 +116,29 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().executedHoursThisYear).isEqualTo(0.0)
     }
 
+    @Test
+    fun getExistingDtosByClientId_returnsStartEndAndSponsorName() {
+        whenever(assistancePlanRepository.findExistingProjectionsByClientId(10L))
+            .thenReturn(
+                listOf(
+                    existingProjection(
+                        id = 9L,
+                        start = LocalDate.of(2026, 1, 1),
+                        end = LocalDate.of(2026, 3, 31),
+                        sponsorName = "LWV"
+                    )
+                )
+            )
+
+        val result = previewService.getExistingDtosByClientId(10L)
+
+        assertThat(result).hasSize(1)
+        assertThat(result.first().id).isEqualTo(9L)
+        assertThat(result.first().start).isEqualTo(LocalDate.of(2026, 1, 1))
+        assertThat(result.first().end).isEqualTo(LocalDate.of(2026, 3, 31))
+        assertThat(result.first().sponsorName).isEqualTo("LWV")
+    }
+
     @ParameterizedTest
     @MethodSource("approvedAndExecutedMinuteCases")
     fun getPreviewDtosByClientId_withMinuteParts_formatsAsTimeDouble(
@@ -214,6 +238,20 @@ class AssistancePlanPreviewServiceTest {
         return object : AssistancePlanServiceMinutesProjection {
             override val assistancePlanId: Long = assistancePlanId
             override val minutes: Int = minutes
+        }
+    }
+
+    private fun existingProjection(
+        id: Long,
+        start: LocalDate,
+        end: LocalDate,
+        sponsorName: String
+    ): AssistancePlanExistingProjection {
+        return object : AssistancePlanExistingProjection {
+            override val id: Long = id
+            override val start: LocalDate = start
+            override val end: LocalDate = end
+            override val sponsorName: String = sponsorName
         }
     }
 

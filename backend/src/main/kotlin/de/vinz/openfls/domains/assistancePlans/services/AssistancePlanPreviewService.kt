@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
@@ -51,6 +52,18 @@ class AssistancePlanPreviewService(
     fun getFavoritePreviewDtosByEmployeeId(employeeId: Long): List<AssistancePlanPreviewDto> {
         val previews = assistancePlanRepository.findFavoritePreviewProjectionsByEmployeeId(employeeId)
         return createPreviewDtos(previews, previews.map { it.id }.toSet())
+    }
+
+    @Transactional(readOnly = true)
+    fun getExistingDtosByClientId(clientId: Long): List<AssistancePlanExistingDto> {
+        return assistancePlanRepository.findExistingProjectionsByClientId(clientId).map { projection ->
+            AssistancePlanExistingDto(
+                id = projection.id,
+                start = projection.start,
+                end = projection.end,
+                sponsorName = projection.sponsorName
+            )
+        }
     }
 
     private fun createPreviewDtos(

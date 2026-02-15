@@ -18,6 +18,7 @@ import {
 import {ClientDto} from '../../../shared/dtos/client-dto.model';
 import {InstitutionDto} from '../../../shared/dtos/institution-dto.model';
 import {SponsorDto} from '../../../shared/dtos/sponsor-dto.model';
+import {AssistancePlanExistingDto} from '../../../shared/dtos/assistance-plan-existing-dto.model';
 import {AssistancePlanService} from '../../../shared/services/assistance-plan.service';
 import {ClientsService} from '../../../shared/services/clients.service';
 import {Converter} from '../../../shared/services/converter.helper';
@@ -47,7 +48,7 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
   institutions: InstitutionDto[] = [];
   sponsors: SponsorDto[] = [];
   affiliatedInstitutions: InstitutionDto[] = [];
-  existingPlans: AssistancePlanDto[] = [];
+  existingPlans: AssistancePlanExistingDto[] = [];
   existingPlansLoading = false;
   createValue: AssistancePlanCreateDto = new AssistancePlanCreateDto();
 
@@ -233,15 +234,11 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
     this.createValue.goals = [...goals];
   }
 
-  getExistingPlanTimeRange(plan: AssistancePlanDto): string {
+  getExistingPlanTimeRange(plan: AssistancePlanExistingDto): string {
     return `${this.toGermanDate(plan.start)} - ${this.toGermanDate(plan.end)}`;
   }
 
-  getExistingPlanSponsor(plan: AssistancePlanDto): string {
-    return this.sponsors.find(sponsor => sponsor.id === plan.sponsorId)?.name ?? 'n/a';
-  }
-
-  isExistingPlanInNewRange(plan: AssistancePlanDto): boolean {
+  isExistingPlanInNewRange(plan: AssistancePlanExistingDto): boolean {
     const newStart = this.parseDate(this.createValue.start);
     const newEnd = this.parseDate(this.createValue.end);
     const planStart = this.parseDate(plan.start);
@@ -257,7 +254,7 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
   private loadExistingPlans(clientId: number) {
     this.existingPlansLoading = true;
 
-    this.assistancePlanService.getByClientId(clientId).subscribe({
+    this.assistancePlanService.getExistingByClientId(clientId).subscribe({
       next: (plans) => {
         this.existingPlans = [...(plans ?? [])]
           .sort((a, b) => a.start.localeCompare(b.start));

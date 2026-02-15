@@ -423,6 +423,32 @@ class AssistancePlanController(
         }
     }
 
+    @GetMapping("client/{id}/existing")
+    fun getExistingByClientId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val dtos = assistancePlanPreviewService.getExistingDtosByClientId(id)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getExistingByClientId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
     @GetMapping("institution/{id}/preview")
     fun getPreviewByInstitutionId(@PathVariable id: Long): Any {
         return try {

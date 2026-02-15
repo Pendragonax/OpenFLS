@@ -55,4 +55,13 @@ describe('AssistancePlanService', () => {
 
     expect(get).toHaveBeenCalledWith(`${environment.api_url}assistance_plans/favorites/preview`);
   });
+
+  it('getExistingByClientId calls existing endpoint', () => {
+    const get = vi.fn().mockReturnValue(of([]));
+    const service = new AssistancePlanService({get} as any);
+
+    service.getExistingByClientId(5).subscribe();
+
+    expect(get).toHaveBeenCalledWith(`${environment.api_url}assistance_plans/client/5/existing`);
+  });
 });
