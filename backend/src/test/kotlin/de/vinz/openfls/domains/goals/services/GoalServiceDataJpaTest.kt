@@ -70,7 +70,7 @@ class GoalServiceDataJpaTest {
             assistancePlanId = assistancePlan.id
             institutionId = institution.id
             hours = mutableSetOf(GoalHourDto().apply {
-                weeklyHours = 5.0
+                weeklyMinutes = 300
                 hourTypeId = hourType.id
             })
         }
@@ -130,7 +130,7 @@ class GoalServiceDataJpaTest {
             description = "Old",
             assistancePlan = assistancePlan
         ))
-        goalHourRepository.save(de.vinz.openfls.domains.goals.entities.GoalHour(weeklyHours = 1.0, goal = existing, hourType = hourType))
+        goalHourRepository.save(de.vinz.openfls.domains.goals.entities.GoalHour(weeklyMinutes = 60, goal = existing, hourType = hourType))
 
         val dto = GoalDto().apply {
             id = existing.id
@@ -138,7 +138,7 @@ class GoalServiceDataJpaTest {
             description = "New"
             assistancePlanId = assistancePlan.id
             hours = mutableSetOf(GoalHourDto().apply {
-                weeklyHours = 3.0
+                weeklyMinutes = 180
                 hourTypeId = hourType.id
             })
         }
@@ -151,6 +151,6 @@ class GoalServiceDataJpaTest {
         assertThat(saved).isPresent
         val hours = goalHourRepository.findByGoalId(result.id)
         assertThat(hours).hasSize(1)
-        assertThat(hours.first().weeklyHours).isEqualTo(3.0)
+        assertThat(hours.first().weeklyMinutes).isEqualTo(180)
     }
 }

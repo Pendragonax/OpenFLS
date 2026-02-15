@@ -12,9 +12,9 @@ class AssistancePlanHour(
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
-        @field:NotNull(message = "weekly hours are null")
-        @Column(precision = 7)
-        var weeklyHours: Double = 0.0,
+        @field:NotNull(message = "weekly minutes are null")
+        @Column(name = "weekly_minutes")
+        var weeklyMinutes: Int = 0,
 
         @JsonIgnoreProperties(value = ["assistancePlanHours", "hibernateLazyInitializer"])
         @ManyToOne(

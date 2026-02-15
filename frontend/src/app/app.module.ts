@@ -54,20 +54,8 @@ import {SponsorDetailComponent} from './pages/sponsor/components/sponsor-detail/
 import {ClientComponent} from './pages/client/client.component';
 import {ClientNewComponent} from './pages/client/components/client-new/client-new.component';
 import {ClientDetailComponent} from './pages/client/components/client-detail/client-detail.component';
-import {AssistancePlansComponent} from './shared/components/assistance-plans/assistance-plans.component';
-import {
-  AssistancePlanNewComponent
-} from './shared/components/assistance-plans/components/assistance-plan-new/assistance-plan-new.component';
-import {
-  AssistancePlanDetailComponent
-} from './shared/components/assistance-plans/components/assistance-plan-detail/assistance-plan-detail.component';
-import {
-  GoalsComponent
-} from './shared/components/assistance-plans/components/assistance-plan-detail/components/goals/goals.component';
+import {AssistancePlansComponent} from './pages/assistance-plans/assistance-plans/assistance-plans.component';
 import {HourTypeComponent} from './pages/hour-type/hour-type.component';
-import {
-  AssistancePlanHoursComponent
-} from './shared/components/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component';
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
@@ -140,6 +128,16 @@ import {ServiceTableComponent} from "./shared/components/service-table/service-t
 import {EmployeeAutocompleteComponent} from "./shared/components/employee-autocomplete/employee-autocomplete.component";
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {
+  AssistancePlanNewPageComponent
+} from "./pages/assistance-plans/assistance-plan-new/assistance-plan-new.component";
+import {
+  AssistancePlanGoalsComponent
+} from "./pages/assistance-plans/components/assistance-plan-goals/assistance-plan-goals.component";
+import {
+  AssistancePlanHoursPageComponent
+} from "./pages/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component";
+import {AssistancePlanEditComponent} from "./pages/assistance-plans/assistance-plan-edit/assistance-plan-edit.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -172,11 +170,7 @@ const routes: Routes = [
         ClientNewComponent,
         ClientDetailComponent,
         AssistancePlansComponent,
-        AssistancePlanNewComponent,
-        AssistancePlanDetailComponent,
-        GoalsComponent,
         HourTypeComponent,
-        AssistancePlanHoursComponent,
         ServiceNewComponent,
         ServiceEditComponent,
         ServiceClientEntriesComponent,
@@ -207,7 +201,11 @@ const routes: Routes = [
         MyServicesComponent,
         AllServicesComponent,
         ClientAutocompleteComponent,
-        ServiceTableComponent
+        ServiceTableComponent,
+        AssistancePlanNewPageComponent,
+        AssistancePlanEditComponent,
+        AssistancePlanGoalsComponent,
+        AssistancePlanHoursPageComponent
     ],
     exports: [
         ShowOnRoleDirective

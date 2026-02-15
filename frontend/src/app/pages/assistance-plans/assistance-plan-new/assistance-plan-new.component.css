@@ -1,0 +1,108 @@
+::ng-deep .cdk-overlay-container {
+  z-index: 9999;
+}
+
+.ap-layout {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.ap-card {
+  height: auto;
+}
+
+.ap-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ap-title-client {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bs-primary);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.ap-section-inactive {
+  opacity: 0.72;
+}
+
+.ap-section-hint {
+  background: #f7f8fb;
+  border: 1px dashed #d7dbe5;
+  color: #7a8396;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.ap-existing-plans {
+  margin-top: 10px;
+}
+
+.ap-existing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ap-existing-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6a7386;
+  font-size: 12px;
+}
+
+.ap-existing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f7f8fb;
+  border: 1px solid #e1e6ef;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #4a5366;
+}
+
+.ap-existing-row--overlap {
+  border-color: #e0b422;
+  background: #fff9de;
+  box-shadow: 0 0 0 1px rgba(224, 180, 34, 0.2);
+}
+
+.ap-existing-time {
+  font-weight: 600;
+  color: #2f3a4b;
+}
+
+.ap-existing-sponsor {
+  color: #6a7386;
+}
+
+.ap-existing-empty {
+  background: #f7f8fb;
+  border: 1px dashed #d7dbe5;
+  color: #7a8396;
+  padding: 10px 12px;
+  border-radius: 6px;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .ap-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-existing-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

@@ -537,12 +537,12 @@ class OverviewService(
         } else if (assistancePlanDto.hours.size > 0) {
             assistancePlanDto.hours
                 .filter { it.hourTypeId == hourTypeId }
-                .sumOf { it.weeklyHours / 7 }
+                .sumOf { it.weeklyMinutes / 7.0 / 60.0 }
         } else {
             assistancePlanDto.goals
                 .flatMap { it.hours }
                 .filter { it.hourTypeId == hourTypeId }
-                .sumOf { it.weeklyHours / 7 }
+                .sumOf { it.weeklyMinutes / 7.0 / 60.0 }
         }
 
     @Throws(IllegalTimeException::class)

@@ -1,0 +1,261 @@
+<div class="ag-wrapper">
+  <div class="ag-toolbar">
+    @if (editable) {
+      <button mat-raised-button
+              color="primary"
+              class="ag-add-button"
+              (click)="openEditModal(editContent, null)">
+        <mat-icon>add</mat-icon>
+        Ziel
+      </button>
+    }
+  </div>
+
+  @if (editable || values.length > 0) {
+    <div class="ag-table-wrap">
+      @if (values.length <= 0 && editable) {
+        <div class="ag-empty">Ziele werden hier angezeigt, sobald ein Ziel hinzugefügt wurde.</div>
+      } @else if (values.length > 0) {
+        <table mat-table
+               [dataSource]="tableSource"
+               class="ag-table">
+      <ng-container matColumnDef="title">
+        <th mat-header-cell
+            class="pe-2"
+            *matHeaderCellDef> Titel </th>
+        <td mat-cell
+            class="pe-2"
+            *matCellDef="let element"> {{element[0].title}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <th mat-header-cell
+            class="px-2"
+            *matHeaderCellDef> Beschreibung </th>
+        <td mat-cell
+            class="px-2"
+            *matCellDef="let element"> {{element[0].description}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="institution">
+        <th mat-header-cell
+            class="hide-on-small"
+            *matHeaderCellDef> Bereich </th>
+        <td mat-cell
+            class="hide-on-small"
+            *matCellDef="let element"> {{getInstitutionName(element[1])}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="weeklyMinutes">
+        <th mat-header-cell
+            class="px-2"
+            *matHeaderCellDef> h/Woche </th>
+        <td mat-cell
+            class="px-2"
+            *matCellDef="let element"> {{sumWeeklyHours(element[0])}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <th mat-header-cell class="text-center" *matHeaderCellDef> Aktionen </th>
+        <td mat-cell class="text-center" *matCellDef="let element">
+          <button mat-icon-button
+                  color="primary"
+                  class="m-1"
+                  (click)="openEditModal(editContent, element[0])">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button
+                  color="warn"
+                  class="m-1"
+                  *showOnRole="'admin'"
+                  (click)="openDeleteConfirmation(deleteContent, element[0])">
+            <mat-icon>delete</mat-icon>
+          </button>
+
+          <ng-template #deleteContent let-modal>
+            <div class="modal-header">
+              <h2 class="modal-title"
+                  id="modal-basic-title-delete">Löschbestätigung</h2>
+              <button type="button"
+                      class="btn-close"
+                      aria-label="Close"
+                      (click)="modal.dismiss('Cross click')"></button>
+            </div>
+            <div class="modal-body">
+              <p>Wollen sie das Ziel "<b>{{ element[0].title }}</b>" wirklich löschen?<br>
+                Es würden <b>{{ deleteServiceCount }}</b> Dokumentationen ebenfalls gelöscht.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button"
+                      class="btn btn-danger"
+                      (click)="modal.close(true)">Löschen</button>
+              <button type="button"
+                      class="btn btn-outline-dark"
+                      (click)="modal.close(false)">Abbrechen</button>
+            </div>
+          </ng-template>
+        </td>
+      </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+        </table>
+      }
+    </div>
+  }
+
+  <ng-template #editContent let-modal>
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-information-title">Ziel - Hilfeplan</h2>
+      <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body ag-modal-body">
+      <mat-tab-group class="ag-tabs">
+        <mat-tab label="Allgemein">
+          <div class="ag-modal-tab">
+            <form [formGroup]="infoForm">
+              <mat-form-field appearance="outline" class="ag-field">
+                <mat-label>Titel</mat-label>
+                <input matInput
+                       type="text"
+                       formControlName="title"
+                       required>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="ag-field">
+                <mat-label>Beschreibung</mat-label>
+                <textarea matInput
+                          placeholder="Beschreibung"
+                          formControlName="description"
+                          rows="6"
+                          required></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="ag-field">
+                <mat-label>Bereich</mat-label>
+                <mat-select formControlName="institution">
+                  @for (institution of institutions; track institution.id) {
+                    <mat-option [value]="institution.id">
+                      {{institution.name}}
+                    </mat-option>
+                  }
+                </mat-select>
+
+                <button mat-icon-button
+                        matPrefix
+                        (click)="resetInstitutionControl()">
+                  <mat-icon>clear</mat-icon>
+                </button>
+              </mat-form-field>
+            </form>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Stunden">
+          <div class="ag-modal-tab">
+            @if (!canAddGoalHours) {
+              <div class="ag-lock-hint">In Zielen können keine Stunden hinzugefügt werden, solange Stundenanteile gesetzt sind.</div>
+            } @else {
+              <div>
+                <form [formGroup]="hourForm">
+                  <mat-form-field appearance="outline" class="ag-field">
+                    <mat-label>Stundentyp</mat-label>
+                    <mat-select formControlName="hourType">
+                      @for (type of filteredHourTypes; track type.id) {
+                        <mat-option [value]="type.id">
+                          {{type.title}}
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+
+                  <div class="ag-time-group">
+                    <div class="ag-time-label">h/Woche</div>
+                    <div class="ag-time-control ag-time-pill" [class.ag-time-pill--invalid]="hourForm.invalid">
+                      <input type="number"
+                             class="ag-time-input"
+                             formControlName="weeklyHoursPart"
+                   inputmode="numeric"
+                   min="0"
+                   max="999"
+                             (focus)="selectAll($event)"
+                             (blur)="clampGoalWeeklyDuration()">
+                      <span class="ag-time-unit">Stunden</span>
+                      <input type="number"
+                             class="ag-time-input"
+                             formControlName="weeklyMinutesPart"
+                             inputmode="numeric"
+                             min="0"
+                             max="59"
+                             (focus)="selectAll($event)"
+                             (blur)="clampGoalWeeklyDuration()">
+                      <span class="ag-time-unit">Minuten</span>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              <div class="ag-hour-action">
+                <button mat-raised-button
+                        class="ag-hour-add-btn"
+                        color="primary"
+                        [disabled]="hourForm.invalid"
+                        (click)="createGoalHour()">
+                  <mat-icon>add</mat-icon>
+                  hinzufügen
+                </button>
+              </div>
+
+              <div class="ag-hour-table-wrap">
+                @if (emptyHourTableSource) {
+                  <div class="ag-empty">Keine Stunden für dieses Ziel vorhanden.</div>
+                }
+
+                @if (!emptyHourTableSource) {
+                  <table mat-table
+                         [dataSource]="hourTableSource"
+                         class="ag-hour-table">
+                    <ng-container matColumnDef="type">
+                      <th mat-header-cell *matHeaderCellDef> Stundentyp </th>
+                      <td mat-cell *matCellDef="let element"> {{element[1].title}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="weeklyMinutes">
+                      <th mat-header-cell *matHeaderCellDef> h/Woche </th>
+                      <td mat-cell *matCellDef="let element"> {{element[0].weeklyMinutes}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="actions">
+                      <th mat-header-cell class="text-center" *matHeaderCellDef> Aktionen </th>
+                      <td mat-cell
+                          class="pt-3"
+                          *matCellDef="let element">
+                        <button mat-icon-button
+                                color="warn"
+                                (click)="deleteGoalHour(element[0])">
+                          <mat-icon>delete</mat-icon>
+                        </button><br><br>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="hourTableColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: hourTableColumns;"></tr>
+                  </table>
+                }
+              </div>
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+    <div class="modal-footer">
+      <button mat-raised-button
+              class="mx-1"
+              [disabled]="infoForm.invalid"
+              (click)="modal.close(true)">Speichern</button>
+      <button mat-raised-button
+              class="mx-1"
+              (click)="modal.close(false)">Schließen</button>
+    </div>
+  </ng-template>
+</div>

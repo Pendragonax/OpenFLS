@@ -1,9 +1,0 @@
-tab::ng-deep .cdk-overlay-container {
-  z-index: 9999;
-}
-
-td , th {
-  white-space: break-spaces;
-  word-wrap: break-word;
-  max-width: 200px;
-}

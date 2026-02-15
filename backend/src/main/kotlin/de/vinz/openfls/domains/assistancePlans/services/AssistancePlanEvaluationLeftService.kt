@@ -103,12 +103,12 @@ class AssistancePlanEvaluationLeftService(
     ): Double {
         val days = countMatchingDaysIn(year, assistancePlan)
 
-        val approvedHours = if (assistancePlan.hours.isEmpty()) {
+        val approvedMinutes = if (assistancePlan.hours.isEmpty()) {
             sumGoalsMinutesByHourTypeId(assistancePlan.goals, days, hourTypeId)
         } else {
             sumMinutesByHourTypeId(assistancePlan, days, hourTypeId)
         }
-        return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
+        return approvedMinutes
     }
 
     private fun getApprovedMinutesByHourTypeIdIn(
@@ -119,12 +119,12 @@ class AssistancePlanEvaluationLeftService(
     ): Double {
         val days = countMatchingDaysIn(year, month, assistancePlan)
 
-        val approvedHours = if (assistancePlan.hours.isEmpty()) {
+        val approvedMinutes = if (assistancePlan.hours.isEmpty()) {
             sumGoalsMinutesByHourTypeId(assistancePlan.goals, days, hourTypeId)
         } else {
             sumMinutesByHourTypeId(assistancePlan, days, hourTypeId)
         }
-        return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
+        return approvedMinutes
     }
 
     private fun countMatchingDaysIn(year: Int, assistancePlan: AssistancePlan): Int {
@@ -184,7 +184,7 @@ class AssistancePlanEvaluationLeftService(
 
     private fun sumMinutesByHourTypeId(assistancePlan: AssistancePlan, numberOfDays: Int, hourTypeId: Long): Double {
         return assistancePlan.hours.filter { it.hourType?.id == hourTypeId }
-            .sumOf { hour -> (hour.weeklyHours / 7) * numberOfDays * 60.0 }
+            .sumOf { hour -> (hour.weeklyMinutes / 7.0) * numberOfDays }
     }
 
     private fun sumGoalsMinutesByHourTypeId(goals: Set<Goal>, numberOfDays: Int, hourTypeId: Long): Double {
@@ -197,7 +197,7 @@ class AssistancePlanEvaluationLeftService(
         }
 
         val hours = goal.hours.filter { it.hourType?.id == hourTypeId }
-        return hours.sumOf { hour -> (hour.weeklyHours / 7) * numberOfDays * 60.0 }
+        return hours.sumOf { hour -> (hour.weeklyMinutes / 7.0) * numberOfDays }
     }
 
     private fun getExecutedMinutesByHourTypeIdIn(

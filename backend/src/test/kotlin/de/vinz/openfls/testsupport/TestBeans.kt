@@ -19,7 +19,7 @@ class TestBeans {
             override fun convert(source: AssistancePlanHourDto): AssistancePlanHour {
                 return AssistancePlanHour().apply {
                     id = source.id
-                    weeklyHours = source.weeklyHours
+                    weeklyMinutes = source.weeklyMinutes
                     hourType = HourType(id = source.hourTypeId)
                     assistancePlan = AssistancePlan(id = source.assistancePlanId)
                 }

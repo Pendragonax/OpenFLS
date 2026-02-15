@@ -17,7 +17,7 @@
         <mat-chip-set>
           @for (hour of goal.hours; track $index) {
             <mat-chip class="mat-hour-chip">
-              <span>{{hour.weeklyHours}}h | {{hour.hourType.title}}</span>
+              <span>{{formatWeeklyMinutes(hour.weeklyMinutes)}}h | {{hour.hourType.title}}</span>
             </mat-chip>
           }
         </mat-chip-set>
