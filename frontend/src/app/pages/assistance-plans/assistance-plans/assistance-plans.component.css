@@ -101,9 +101,24 @@ td , th {
 .timeline-actions {
   display: flex;
   justify-content: space-between;
+  flex-wrap: nowrap;
   padding-top: 12px;
   margin-top: 10px;
   border-top: 1px solid #e9edf4;
+}
+
+.actions-column-header,
+.actions-column-cell {
+  min-width: 180px;
+  white-space: nowrap;
+}
+
+.actions-bar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 2px;
 }
 
 .plan-status-pill {
@@ -156,13 +171,20 @@ td , th {
 }
 
 .year-status-cell {
-  min-width: 150px;
+  min-width: 0;
+  width: 100%;
 }
 
 .year-status-bar {
   display: block;
   position: relative;
   height: 30px;
+  border-radius: 8px;
+}
+
+.year-status-track {
+  position: absolute;
+  inset: 0;
   border-radius: 8px;
   background: linear-gradient(90deg, #f2f3f7 0%, #eceef4 100%);
   overflow: hidden;
@@ -214,6 +236,10 @@ td , th {
   z-index: 1;
   font-size: 13px;
   line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 46%;
 }
 
 .hours-progress-text-left {
@@ -230,8 +256,9 @@ td , th {
 
 .year-status-column-header,
 .year-status-column-cell {
-  min-width: 270px;
-  max-width: 290px !important;
+  width: clamp(110px, 14vw, 190px);
+  min-width: 110px;
+  max-width: 190px !important;
 }
 
 @media (max-width: 1100px) {
@@ -246,13 +273,29 @@ td , th {
 
   .year-status-column-header,
   .year-status-column-cell {
-    min-width: 230px;
-    max-width: 240px !important;
+    width: clamp(95px, 12vw, 150px);
+    min-width: 95px;
+    max-width: 150px !important;
   }
 
   .hours-progress-text-left,
   .hours-progress-text-right {
     font-size: 12px;
+  }
+}
+
+@media (max-width: 1300px) and (min-width: 801px) {
+  .hours-progress-text-left,
+  .hours-progress-text-right {
+    font-size: 11px;
+  }
+
+  .hours-progress-text-left {
+    left: 6px;
+  }
+
+  .hours-progress-text-right {
+    right: 6px;
   }
 }
 
@@ -272,7 +315,7 @@ td , th {
   text-align: center;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1100px) {
   .filters-desktop {
     display: none;
   }
