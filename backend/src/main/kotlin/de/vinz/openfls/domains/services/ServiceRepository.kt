@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.services
 
 import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
 import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
+import de.vinz.openfls.domains.services.projections.AssistancePlanServiceMinutesProjection
 import de.vinz.openfls.domains.services.projections.ServiceCalendarProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
@@ -129,6 +130,22 @@ interface ServiceRepository : CrudRepository<Service, Long> {
         start: LocalDate,
         end: LocalDate
     ): List<ServiceSoloProjection>
+
+    @Query(
+        """
+        SELECT u.assistancePlan.id as assistancePlanId,
+               u.minutes as minutes
+        FROM Service u
+        WHERE u.assistancePlan.id in :assistancePlanIds
+          AND cast(u.start as LocalDate) >= :start
+          AND cast(u.start as LocalDate) <= :end
+        """
+    )
+    fun findMinutesByAssistancePlanIdsAndStartAndEnd(
+        assistancePlanIds: List<Long>,
+        start: LocalDate,
+        end: LocalDate
+    ): List<AssistancePlanServiceMinutesProjection>
 
     @Query("SELECT u FROM Service u WHERE u.institution.id = :institutionId AND cast(u.start as LocalDate) = :date")
     fun findByInstitutionIdAndDate(

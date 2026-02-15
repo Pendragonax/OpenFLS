@@ -4,9 +4,11 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.services.UserService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,7 +23,9 @@ import java.time.LocalDate
 class AssistancePlanController(
         private val assistancePlanService: AssistancePlanService,
         private val assistancePlanEvaluationLeftService: AssistancePlanEvaluationLeftService,
-        private val accessService: AccessService
+        private val assistancePlanPreviewService: AssistancePlanPreviewService,
+        private val accessService: AccessService,
+        private val userService: UserService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanController::class.java)
 
@@ -385,6 +389,87 @@ class AssistancePlanController(
         } catch (ex: Exception) {
             logger.error(ex.message, ex)
 
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("client/{id}/preview")
+    fun getPreviewByClientId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val userId = userService.getUserId()
+            val dtos = assistancePlanPreviewService.getPreviewDtosByClientId(id, userId)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getPreviewByClientId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("institution/{id}/preview")
+    fun getPreviewByInstitutionId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val userId = userService.getUserId()
+            val dtos = assistancePlanPreviewService.getPreviewDtosByInstitutionId(id, userId)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getPreviewByInstitutionId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("favorites/preview")
+    fun getFavoritePreviewsByLoggedInUser(): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val userId = userService.getUserId()
+            val dtos = assistancePlanPreviewService.getFavoritePreviewDtosByEmployeeId(userId)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getFavoritePreviewsByLoggedInUser took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
