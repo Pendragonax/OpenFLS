@@ -57,8 +57,7 @@
 
       <ng-container matColumnDef="action">
         <th mat-header-cell class="text-center" *matHeaderCellDef> Aktionen </th>
-        <div class="text-center"
-             *matCellDef="let element">
+        <td mat-cell class="text-center" *matCellDef="let element">
           <button mat-icon-button
                   color="primary"
                   class="m-1"
@@ -95,7 +94,7 @@
                       (click)="modal.close(false)">Abbrechen</button>
             </div>
           </ng-template>
-        </div>
+        </td>
       </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
