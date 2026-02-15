@@ -227,7 +227,11 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
 
         // ASSISTANCE PLAN
         this.selectedAssistancePlan = client.assistancePlans.find(value => value.id == service.assistancePlanId);
-        this.filteredAssistancePlans = client.assistancePlans;
+        this.filteredAssistancePlans = this.getSelectableAssistancePlansForEdit(
+          client.assistancePlans,
+          this.selectedServiceDate,
+          service.assistancePlanId
+        );
         this.assistancePlanSelected = true;
         this.setGoals(service.goals.map(value => value.id));
         if (this.selectedAssistancePlan != null) {
@@ -503,6 +507,28 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       const date = this.converter.formatDate(new Date(searchDateString))
       return startDate <= date && endDate >= date
     });
+  }
+
+  protected getSelectableAssistancePlansForEdit(
+    assistancePlans: AssistancePlanDto[],
+    serviceDateString: string,
+    currentAssistancePlanId: number | null
+  ): AssistancePlanDto[] {
+    const selectablePlans = this.getAssistancePlansByDateString(assistancePlans, serviceDateString);
+    if (!currentAssistancePlanId) {
+      return selectablePlans;
+    }
+
+    const currentPlan = assistancePlans.find(plan => plan.id === currentAssistancePlanId);
+    if (!currentPlan) {
+      return selectablePlans;
+    }
+
+    if (selectablePlans.some(plan => plan.id === currentPlan.id)) {
+      return selectablePlans;
+    }
+
+    return [currentPlan, ...selectablePlans];
   }
 
   getDateString(plan: AssistancePlanDto | undefined): string {
