@@ -23,7 +23,7 @@ class ClientService(
         val clientEntity = modelMapper.map(value, Client::class.java)
         val resultClientEntity = create(clientEntity)
         val clientDto = modelMapper.map(resultClientEntity, ClientDto::class.java)
-        return sortClientDto(clientDto)
+        return sortClientDto(clientDto, resultClientEntity)
     }
 
     @Transactional
@@ -41,7 +41,7 @@ class ClientService(
         val clientEntity = modelMapper.map(value, Client::class.java)
         val resultClientEntity = update(clientEntity)
         val clientDto = modelMapper.map(resultClientEntity, ClientDto::class.java)
-        return sortClientDto(clientDto)
+        return sortClientDto(clientDto, resultClientEntity)
     }
 
     @Transactional
@@ -89,7 +89,7 @@ class ClientService(
 
         if (entity != null) {
             val clientDto = modelMapper.map(entity, ClientDto::class.java)
-            return sortClientDto(clientDto)
+            return sortClientDto(clientDto, entity)
         }
 
         return null
@@ -110,7 +110,11 @@ class ClientService(
         return clientRepository.existsById(id)
     }
 
-    private fun sortClientDto(clientDto: ClientDto): ClientDto {
+    private fun sortClientDto(clientDto: ClientDto, entity: Client): ClientDto {
+        val institutionNamesByAssistancePlanId = entity.assistancePlans.associate { it.id to (it.institution?.name ?: "") }
+        clientDto.assistancePlans.forEach { plan ->
+            plan.institutionName = institutionNamesByAssistancePlanId[plan.id] ?: ""
+        }
         clientDto.assistancePlans =
                 clientDto.assistancePlans.sortedBy { it.start }.toTypedArray()
         clientDto.categoryTemplate.categories =

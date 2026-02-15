@@ -547,6 +547,14 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
     return "n/a";
   }
 
+  getInstitutionName(plan: AssistancePlanDto | undefined): string {
+    if (plan != null) {
+      return plan.institutionName || "n/a";
+    }
+
+    return "n/a";
+  }
+
   protected _getClients(searchString: string): ClientDto[] {
     let filterValue = searchString.toLowerCase();
 

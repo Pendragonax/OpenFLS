@@ -177,4 +177,20 @@ describe('ServiceFormBase', () => {
 
     expect(result.map(plan => plan.id)).toEqual([2, 1]);
   });
+
+  it('should return institution name for assistance plan label', () => {
+    const institutionName = component.getInstitutionName({
+      id: 1,
+      start: '2026-01-01',
+      end: '2026-01-31',
+      clientId: 1,
+      institutionId: 2,
+      institutionName: 'Bereich Nord',
+      sponsorId: 3,
+      hours: [],
+      goals: []
+    } as any);
+
+    expect(institutionName).toBe('Bereich Nord');
+  });
 });

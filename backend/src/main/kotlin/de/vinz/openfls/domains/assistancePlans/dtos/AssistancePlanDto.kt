@@ -20,6 +20,8 @@ class AssistancePlanDto {
     @field:NotNull(message = "institutionId is null")
     var institutionId: Long = 0
 
+    var institutionName: String = ""
+
     @field:NotNull(message = "sponsorId is null")
     var sponsorId: Long = 0
 

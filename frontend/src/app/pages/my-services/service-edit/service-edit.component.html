@@ -176,7 +176,7 @@
                 @for (plan of filteredAssistancePlans; track plan.id) {
                   <mat-option [value]="plan.id">
                     <div class="beta-plan-option">
-                      <div class="beta-plan-date">{{ getDateString(plan) }} | {{ getSponsorName(plan) }}</div>
+                      <div class="beta-plan-date">{{ getDateString(plan) }} | {{ getSponsorName(plan) }} | {{ getInstitutionName(plan) }}</div>
                     </div>
                   </mat-option>
                 }
