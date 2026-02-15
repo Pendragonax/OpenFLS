@@ -44,7 +44,7 @@
                 <button mat-icon-button
                         color="warn"
                         class="m-1"
-                        [disabled]="!(isAdmin$ | async)"
+                        [disabled]="!canDelete(element, (isAdmin$ | async))"
                         [matTooltip]="'Dokumentation löschen'"
                         (click)="openDeleteConfirmation(deleteContent, element['id'])">
                   <mat-icon>delete</mat-icon></button>
@@ -109,7 +109,7 @@
                 @if (adminMode) {
                   <button mat-icon-button
                           color="warn"
-                          [disabled]="!(isAdmin$ | async)"
+                          [disabled]="!canDelete(row, (isAdmin$ | async))"
                           [matTooltip]="'Dokumentation löschen'"
                           (click)="openDeleteConfirmation(deleteContent, row.id)">
                     <mat-icon>delete</mat-icon>

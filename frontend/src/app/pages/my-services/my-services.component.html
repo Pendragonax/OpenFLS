@@ -56,7 +56,10 @@
   </div>
   <div class="row services-content">
   @if (!isBusy) {
-      <app-service-table [redRows]="illegalMode" [services]="services" [editMode]="true"></app-service-table>
+      <app-service-table [redRows]="illegalMode"
+                         [services]="services"
+                         [editMode]="true"
+                         [allowOwnDelete]="true"></app-service-table>
     }
     @if (isBusy) {
       <div class="services-loading">

@@ -3,9 +3,11 @@ package de.vinz.openfls.domains.services
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
+import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.PermissionService
+import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
 import de.vinz.openfls.domains.services.services.ServiceService
 import org.assertj.core.api.Assertions.assertThat
@@ -17,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 import java.time.LocalDate
@@ -98,5 +101,54 @@ class ServiceControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(400)
+    }
+
+    @Test
+    fun delete_ownService_nonAdmin_returnsOk() {
+        // Given
+        val serviceId = 11L
+        val employeeId = 5L
+        val service = Service(
+            id = serviceId,
+            start = LocalDateTime.of(2026, 2, 8, 8, 0),
+            end = LocalDateTime.of(2026, 2, 8, 9, 0),
+            employee = Employee(id = employeeId)
+        )
+
+        given(serviceService.existsById(serviceId)).willReturn(true)
+        given(serviceService.getById(serviceId)).willReturn(service)
+        given(serviceService.getDtoById(serviceId)).willReturn(ServiceDto().apply { id = serviceId })
+        given(accessService.isAdmin()).willReturn(false)
+        given(accessService.getId()).willReturn(employeeId)
+
+        // When
+        val result = mockMvc.delete("/services/$serviceId").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+    }
+
+    @Test
+    fun delete_foreignService_nonAdmin_returnsBadRequest() {
+        // Given
+        val serviceId = 12L
+        val service = Service(
+            id = serviceId,
+            start = LocalDateTime.of(2026, 2, 8, 8, 0),
+            end = LocalDateTime.of(2026, 2, 8, 9, 0),
+            employee = Employee(id = 9L)
+        )
+
+        given(serviceService.existsById(serviceId)).willReturn(true)
+        given(serviceService.getById(serviceId)).willReturn(service)
+        given(accessService.isAdmin()).willReturn(false)
+        given(accessService.getId()).willReturn(5L)
+
+        // When
+        val result = mockMvc.delete("/services/$serviceId").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(400)
+        assertThat(result.response.contentAsString).contains("No permission to delete this service")
     }
 }

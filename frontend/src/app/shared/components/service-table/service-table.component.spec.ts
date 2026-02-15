@@ -17,7 +17,7 @@ describe('ServiceViewTableComponent', () => {
       declarations: [ServiceTableComponent],
       providers: [
         { provide: NgbModal, useValue: { open: () => ({ result: Promise.resolve(false) }) } },
-        { provide: UserService, useValue: { isAdmin$: of(true) } },
+        { provide: UserService, useValue: { isAdmin$: of(true), user$: of({ id: 7 }) } },
         { provide: ServiceService, useValue: { delete: () => of({}) } },
         { provide: CsvService, useValue: { exportToCsvWithHeader: () => null } }
       ]
@@ -70,5 +70,13 @@ describe('ServiceViewTableComponent', () => {
     expect(html).toContain('08:00 - 09:30');
     expect(html).toContain('90 Min');
     expect(html).toContain('service-time-pill');
+  });
+
+  it('should allow delete for own services when own-delete is enabled', () => {
+    component.allowOwnDelete = true;
+    component.currentUserId = 7;
+
+    expect(component.canDelete({ employeeId: 7 }, false)).toBe(true);
+    expect(component.canDelete({ employeeId: 8 }, false)).toBe(false);
   });
 });

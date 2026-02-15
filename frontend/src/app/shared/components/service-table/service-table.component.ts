@@ -14,7 +14,7 @@ import {Service} from "../../dtos/service.projection";
 import {PageEvent} from "@angular/material/paginator";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {UserService} from "../../services/user.service";
-import {ReplaySubject} from "rxjs";
+import {ReplaySubject, take} from "rxjs";
 import {CsvService} from "../../services/csv.service";
 import {ServiceExport} from "./model/service-export.model";
 import {ServiceService} from "../../services/service.service";
@@ -30,6 +30,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   @Input() editMode: boolean = false;
   @Input() adminMode: boolean = true;
   @Input() redRows: boolean = false;
+  @Input() allowOwnDelete: boolean = false;
   @Output() tableUpdated = new EventEmitter();
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -40,6 +41,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   pageSize: number = 100;
   pageIndex: number = 0;
   isAdmin$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
+  currentUserId: number = 0;
 
   private static readonly COLUMN_VIEW_MAPPING = {
     start: 'Zeitpunkt',
@@ -60,6 +62,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
               private serviceService: ServiceService,
               private csvService: CsvService) {
     this.userService.isAdmin$.subscribe(value => this.isAdmin$.next(value))
+    this.userService.user$.pipe(take(1)).subscribe(value => this.currentUserId = value.id)
   }
 
   ngAfterViewInit(): void {
@@ -163,6 +166,14 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
             error: () => console.log("Fehler beim speichern")
           });
       })
+  }
+
+  canDelete(element: any, isAdmin: boolean | null): boolean {
+    if (isAdmin) {
+      return true;
+    }
+
+    return this.allowOwnDelete && element?.employeeId === this.currentUserId;
   }
 
   applySort() {
