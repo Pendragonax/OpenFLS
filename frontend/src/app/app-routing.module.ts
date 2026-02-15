@@ -17,7 +17,6 @@ import {SponsorDetailComponent} from "./pages/sponsor/components/sponsor-detail/
 import {ClientComponent} from "./pages/client/client.component";
 import {ClientNewComponent} from "./pages/client/components/client-new/client-new.component";
 import {ClientDetailComponent} from "./pages/client/components/client-detail/client-detail.component";
-import {AssistancePlanDetailComponent} from "./shared/components/assistance-plans/components/assistance-plan-detail/assistance-plan-detail.component";
 import {HourTypeComponent} from "./pages/hour-type/hour-type.component";
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
@@ -28,7 +27,7 @@ import {AssistancePlanAnalysisComponent} from "./pages/assistance-plan-analysis/
 import {MyServicesComponent} from "./pages/my-services/my-services.component";
 import {AllServicesComponent} from "./pages/all-services/all-services.component";
 import {
-  AssistancePlanNewSinglePageComponent
+  AssistancePlanNewPageComponent
 } from "./pages/assistance-plans/assistance-plan-new/assistance-plan-new.component";
 import {AssistancePlanEditComponent} from "./pages/assistance-plans/assistance-plan-edit/assistance-plan-edit.component";
 
@@ -49,10 +48,8 @@ const routes: Routes = [
   { path: 'clients', component: ClientComponent, canActivate: [AuthGuard] },
   { path: 'clients/new', component: ClientNewComponent, canActivate: [AuthGuard] },
   { path: 'clients/detail/:id', component: ClientDetailComponent, canActivate: [AuthGuard] },
-  { path: 'assistance_plans/new/:id', component: AssistancePlanNewSinglePageComponent, canActivate: [AuthGuard] },
+  { path: 'assistance_plans/new/:id', component: AssistancePlanNewPageComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/edit/:id', component: AssistancePlanEditComponent, canActivate: [AuthGuard] },
-  { path: 'assistance_plans/detail/:id', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
-  { path: 'assistance_plans/detail/:id/:tab', component: AssistancePlanDetailComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/analysis/:id', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/analysis/:id/:tab', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },
   { path: 'hour_types', component: HourTypeComponent, canActivate: [AuthGuard] },

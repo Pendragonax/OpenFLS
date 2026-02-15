@@ -55,19 +55,7 @@ import {ClientComponent} from './pages/client/client.component';
 import {ClientNewComponent} from './pages/client/components/client-new/client-new.component';
 import {ClientDetailComponent} from './pages/client/components/client-detail/client-detail.component';
 import {AssistancePlansComponent} from './shared/components/assistance-plans/assistance-plans.component';
-import {
-  AssistancePlanNewComponent
-} from './shared/components/assistance-plans/components/assistance-plan-new/assistance-plan-new.component';
-import {
-  AssistancePlanDetailComponent
-} from './shared/components/assistance-plans/components/assistance-plan-detail/assistance-plan-detail.component';
-import {
-  GoalsComponent
-} from './shared/components/assistance-plans/components/assistance-plan-detail/components/goals/goals.component';
 import {HourTypeComponent} from './pages/hour-type/hour-type.component';
-import {
-  AssistancePlanHoursComponent
-} from './shared/components/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component';
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
@@ -141,7 +129,7 @@ import {EmployeeAutocompleteComponent} from "./shared/components/employee-autoco
 import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
 import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {
-  AssistancePlanNewSinglePageComponent
+  AssistancePlanNewPageComponent
 } from "./pages/assistance-plans/assistance-plan-new/assistance-plan-new.component";
 import {
   AssistancePlanGoalsComponent
@@ -182,11 +170,7 @@ const routes: Routes = [
         ClientNewComponent,
         ClientDetailComponent,
         AssistancePlansComponent,
-        AssistancePlanNewComponent,
-        AssistancePlanDetailComponent,
-        GoalsComponent,
         HourTypeComponent,
-        AssistancePlanHoursComponent,
         ServiceNewComponent,
         ServiceEditComponent,
         ServiceClientEntriesComponent,
@@ -218,7 +202,7 @@ const routes: Routes = [
         AllServicesComponent,
         ClientAutocompleteComponent,
         ServiceTableComponent,
-        AssistancePlanNewSinglePageComponent,
+        AssistancePlanNewPageComponent,
         AssistancePlanEditComponent,
         AssistancePlanGoalsComponent,
         AssistancePlanHoursPageComponent

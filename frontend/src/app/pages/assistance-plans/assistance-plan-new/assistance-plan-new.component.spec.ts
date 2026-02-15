@@ -1,20 +1,20 @@
 import '@testbed';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {AssistancePlanNewSinglePageComponent} from './assistance-plan-new.component';
+import {AssistancePlanNewPageComponent} from './assistance-plan-new.component';
 
-describe('AssistancePlanNewSinglePageComponent', () => {
-  let component: AssistancePlanNewSinglePageComponent;
-  let fixture: ComponentFixture<AssistancePlanNewSinglePageComponent>;
+describe('AssistancePlanNewPageComponent', () => {
+  let component: AssistancePlanNewPageComponent;
+  let fixture: ComponentFixture<AssistancePlanNewPageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AssistancePlanNewSinglePageComponent]
+      declarations: [AssistancePlanNewPageComponent]
     }).compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AssistancePlanNewSinglePageComponent);
+    fixture = TestBed.createComponent(AssistancePlanNewPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

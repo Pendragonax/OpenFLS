@@ -9,7 +9,7 @@ import {
 } from '@angular/material/core';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest} from 'rxjs';
-import {AssistancePlanInfoForm} from '../../../shared/components/assistance-plans/components/assistance-plan-info-form';
+import {AssistancePlanInfoForm} from '../components/assistance-plan-info-form/assistance-plan-info-form';
 import {NewPageComponent} from '../../../shared/components/new-page.component';
 import {
   AssistancePlanCreateGoalDto,

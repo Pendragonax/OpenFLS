@@ -25,10 +25,10 @@ import {HelperService} from '../../../shared/services/helper.service';
 import {InstitutionService} from '../../../shared/services/institution.service';
 import {SponsorService} from '../../../shared/services/sponsor.service';
 import {UserService} from '../../../shared/services/user.service';
-import {AssistancePlanInfoForm} from '../../../shared/components/assistance-plans/components/assistance-plan-info-form';
+import {AssistancePlanInfoForm} from '../components/assistance-plan-info-form/assistance-plan-info-form';
 
 @Component({
-  selector: 'app-assistance-plan-new-single-page',
+  selector: 'app-assistance-plan-new-page',
   templateUrl: './assistance-plan-new.component.html',
   styleUrls: ['../../my-services/service-form.shared.css', './assistance-plan-new.component.css'],
   providers: [
@@ -42,7 +42,7 @@ import {AssistancePlanInfoForm} from '../../../shared/components/assistance-plan
   ],
   standalone: false
 })
-export class AssistancePlanNewSinglePageComponent extends NewPageComponent<AssistancePlanDto> implements OnInit {
+export class AssistancePlanNewPageComponent extends NewPageComponent<AssistancePlanDto> implements OnInit {
   client: ClientDto = new ClientDto();
   institutions: InstitutionDto[] = [];
   sponsors: SponsorDto[] = [];
