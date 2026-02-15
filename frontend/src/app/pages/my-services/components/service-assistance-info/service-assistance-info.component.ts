@@ -11,4 +11,9 @@ export class ServiceAssistanceInfoComponent {
   @Input() assistancePlanSelected = false;
   @Input() loading = false;
   @Input() info: AssistancePlanHourTypeEvaluationLeftDto[] = [];
+
+  // Tooltip texts can be adjusted freely.
+  tooltipLeftThisWeek = 'Es wird nur die aktuelle komplette Woche betrachtet von Montag - Sonntag.';
+  tooltipLeftThisMonth = 'Es wird nur der aktuelle komplette Monat betrachtet.';
+  tooltipLeftThisYear = 'Es wird nur das aktuelle komplette Jahr betrachtet.';
 }
