@@ -43,9 +43,9 @@ class AssistancePlanPreviewServiceTest {
     fun getPreviewDtosByClientId_calculatesApprovedAndExecutedHoursInKotlin() {
         val now = LocalDate.now()
         val yearStart = LocalDate.of(now.year, 1, 1)
-        val yearEnd = LocalDate.of(now.year, 12, 31)
+        val periodEnd = now
 
-        val projection = previewProjection(5L, yearStart, yearEnd)
+        val projection = previewProjection(5L, yearStart, now.plusDays(30))
 
         whenever(assistancePlanRepository.findPreviewProjectionsByClientId(10L))
             .thenReturn(listOf(projection))
@@ -55,7 +55,7 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(5L, 120)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(5L)))
             .thenReturn(listOf(weeklyMinutesProjection(5L, 300)))
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, yearEnd))
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, periodEnd))
             .thenReturn(
                 listOf(
                     serviceMinutesProjection(5L, 120),
@@ -71,7 +71,8 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().approvedHoursPerWeek).isEqualTo(7.0)
         assertThat(result.first().executedHoursThisYear).isEqualTo(3.0)
         assertThat(result.first().approvedHoursThisYear)
-            .isEqualTo(expectedApprovedHoursThisYear(420.0, yearStart, yearEnd, yearStart, yearEnd))
+            .isEqualTo(expectedApprovedHoursThisYear(420.0, yearStart, now.plusDays(30), yearStart, now))
+        verify(serviceRepository).findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, now)
     }
 
     @Test
@@ -92,7 +93,7 @@ class AssistancePlanPreviewServiceTest {
     fun getFavoritePreviewDtosByEmployeeId_marksAllReturnedPlansAsFavorite() {
         val now = LocalDate.now()
         val yearStart = LocalDate.of(now.year, 1, 1)
-        val yearEnd = LocalDate.of(now.year, 12, 31)
+        val periodEnd = now
 
         val projection = previewProjection(7L, now.minusDays(10), now.plusDays(10))
 
@@ -102,7 +103,7 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(7L, 210)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(7L)))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(7L), yearStart, yearEnd))
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(7L), yearStart, periodEnd))
             .thenReturn(emptyList())
 
         val result = previewService.getFavoritePreviewDtosByEmployeeId(33L)
@@ -121,14 +122,14 @@ class AssistancePlanPreviewServiceTest {
         weeklyGoalMinutes: Int,
         executedMinutesA: Int,
         executedMinutesB: Int,
-        expectedApprovedTimeDouble: Double,
+        expectedWeeklyTimeDouble: Double,
         expectedExecutedTimeDouble: Double
     ) {
         val now = LocalDate.now()
         val yearStart = LocalDate.of(now.year, 1, 1)
-        val yearEnd = LocalDate.of(now.year, 12, 31)
-        val planStart = yearStart
-        val planEnd = yearStart.plusDays(6)
+        val periodEnd = now
+        val planStart = now.minusDays(3)
+        val planEnd = now.plusDays(3)
         val projection = previewProjection(55L, planStart, planEnd)
 
         whenever(assistancePlanRepository.findPreviewProjectionsByClientId(10L))
@@ -145,7 +146,7 @@ class AssistancePlanPreviewServiceTest {
                 if (weeklyGoalMinutes == 0) emptyList()
                 else listOf(weeklyMinutesProjection(55L, weeklyGoalMinutes))
             )
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(55L), yearStart, yearEnd))
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(55L), yearStart, periodEnd))
             .thenReturn(
                 listOf(
                     serviceMinutesProjection(55L, executedMinutesA),
@@ -156,8 +157,16 @@ class AssistancePlanPreviewServiceTest {
         val result = previewService.getPreviewDtosByClientId(10L, 20L)
 
         assertThat(result).hasSize(1)
-        assertThat(result.first().approvedHoursPerWeek).isEqualTo(expectedApprovedTimeDouble)
-        assertThat(result.first().approvedHoursThisYear).isEqualTo(expectedApprovedTimeDouble)
+        assertThat(result.first().approvedHoursPerWeek).isEqualTo(expectedWeeklyTimeDouble)
+        assertThat(result.first().approvedHoursThisYear).isEqualTo(
+            expectedApprovedHoursThisYear(
+                (weeklyPlanMinutes + weeklyGoalMinutes).toDouble(),
+                planStart,
+                planEnd,
+                yearStart,
+                now
+            )
+        )
         assertThat(result.first().executedHoursThisYear).isEqualTo(expectedExecutedTimeDouble)
     }
 

@@ -106,6 +106,162 @@ td , th {
   border-top: 1px solid #e9edf4;
 }
 
+.plan-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.2;
+  border: 1px solid transparent;
+}
+
+.plan-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.plan-status-pill--active {
+  color: #2f8d67;
+  background: #dcf5ea;
+  border-color: #9fd9c0;
+  font-weight: 600;
+}
+
+.plan-status-pill--active .plan-status-dot {
+  animation: status-blink 1.2s ease-in-out infinite;
+}
+
+.plan-status-pill--ended {
+  color: #6a7386;
+  background: #edf0f6;
+  border-color: #cfd6e3;
+  font-weight: 400;
+}
+
+@keyframes status-blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.year-status-cell {
+  min-width: 150px;
+}
+
+.year-status-bar {
+  display: block;
+  position: relative;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f2f3f7 0%, #eceef4 100%);
+  overflow: hidden;
+  border: 1px solid #dde2ec;
+}
+
+.hours-progress-fill {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  border-radius: 8px 0 0 8px;
+  background: linear-gradient(90deg, #f06b63 0%, #e95c54 100%);
+}
+
+.hours-progress-fill--bad {
+  background: linear-gradient(90deg, #f06b63 0%, #e95c54 100%);
+}
+
+.hours-progress-fill--warn {
+  background: linear-gradient(90deg, #e0b24a 0%, #c69225 100%);
+}
+
+.hours-progress-fill--ok {
+  background: linear-gradient(90deg, #65b98f 0%, #4a8c6f 100%);
+}
+
+.timeline-hours-value {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 250px;
+}
+
+.timeline-row-hours-bar .timeline-hours-value {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+.timeline-row-hours-bar .year-status-bar {
+  width: 100%;
+}
+
+.hours-progress-text-left,
+.hours-progress-text-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.hours-progress-text-left {
+  left: 10px;
+  color: #2f3a4b;
+  font-weight: 500;
+}
+
+.hours-progress-text-right {
+  right: 10px;
+  color: #2f3a4b;
+  font-weight: 500;
+}
+
+.year-status-column-header,
+.year-status-column-cell {
+  min-width: 270px;
+  max-width: 290px !important;
+}
+
+@media (max-width: 1100px) {
+  .year-status-cell,
+  .timeline-hours-value {
+    min-width: 220px;
+  }
+
+  .timeline-row-hours-bar .timeline-hours-value {
+    min-width: 0;
+  }
+
+  .year-status-column-header,
+  .year-status-column-cell {
+    min-width: 230px;
+    max-width: 240px !important;
+  }
+
+  .hours-progress-text-left,
+  .hours-progress-text-right {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1150px) and (min-width: 801px) {
+  .assistance-table .desktop-hide-1150 {
+    display: none !important;
+  }
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;

@@ -68,15 +68,14 @@ class AssistancePlanPreviewService(
     private fun buildPreviewContext(previews: List<AssistancePlanPreviewProjection>): PreviewContext {
         val now = LocalDate.now()
         val yearStart = LocalDate.of(now.year, 1, 1)
-        val yearEnd = LocalDate.of(now.year, 12, 31)
         val assistancePlanIds = previews.map { it.id }
 
         return PreviewContext(
             now = now,
             yearStart = yearStart,
-            yearEnd = yearEnd,
+            periodEnd = now,
             weeklyApprovedMinutesByAssistancePlanId = getWeeklyApprovedMinutesByAssistancePlanId(assistancePlanIds),
-            executedMinutesByAssistancePlanId = getExecutedMinutesByAssistancePlanId(assistancePlanIds, yearStart, yearEnd)
+            executedMinutesByAssistancePlanId = getExecutedMinutesByAssistancePlanId(assistancePlanIds, yearStart, now)
         )
     }
 
@@ -93,7 +92,7 @@ class AssistancePlanPreviewService(
                 projection.end,
                 approvedWeeklyMinutes,
                 context.yearStart,
-                context.yearEnd
+                context.periodEnd
             )
         )
         val executedHoursThisYear = TimeDoubleService.convertDoubleToTimeDouble(
@@ -173,7 +172,7 @@ class AssistancePlanPreviewService(
     private data class PreviewContext(
         val now: LocalDate,
         val yearStart: LocalDate,
-        val yearEnd: LocalDate,
+        val periodEnd: LocalDate,
         val weeklyApprovedMinutesByAssistancePlanId: Map<Long, Double>,
         val executedMinutesByAssistancePlanId: Map<Long, Long>
     )

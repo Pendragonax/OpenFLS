@@ -102,4 +102,50 @@ describe('AssistancePlansComponent', () => {
 
     expect(assistancePlanService.getPreviewByClientId).toHaveBeenCalledWith(5);
   });
+
+  it.each([
+    {isActive: true, expected: 'Aktiv'},
+    {isActive: false, expected: 'Inaktiv'}
+  ])('returns status label for isActive=$isActive', ({isActive, expected}) => {
+    const {component} = createComponent();
+    expect(component.getStatusLabel(isActive)).toBe(expected);
+  });
+
+  it.each([
+    {approved: 2.0, executed: 1.3, expected: 75},
+    {approved: 1.15, executed: 0.45, expected: 60},
+    {approved: 0, executed: 1.0, expected: 0},
+    {approved: 1.0, executed: 2.0, expected: 100}
+  ])('calculates executed-hours percentage for progress bar', ({approved, executed, expected}) => {
+    const {component} = createComponent();
+    const value = component.getExecutedHoursPercent(
+      preview({approvedHoursThisYear: approved, executedHoursThisYear: executed})
+    );
+
+    expect(value).toBe(expected);
+  });
+
+  it('builds hours tooltip with headline and lines for approved and executed', () => {
+    const {component} = createComponent();
+    const text = component.getHoursTooltip(
+      preview({approvedHoursThisYear: 12.3, executedHoursThisYear: 4.5})
+    );
+
+    expect(text).toBe(`Dieses Jahr bis heute
+Bewilligt: 12.3
+Geleistet: 4.5`);
+  });
+
+  it.each([
+    {approved: 10.0, executed: 8.59, expected: 'hours-progress-fill--bad'},
+    {approved: 10.0, executed: 9.0, expected: 'hours-progress-fill--warn'},
+    {approved: 10.0, executed: 9.5, expected: 'hours-progress-fill--ok'}
+  ])('returns correct progress class by percentage threshold', ({approved, executed, expected}) => {
+    const {component} = createComponent();
+    const cssClass = component.getExecutedHoursProgressClass(
+      preview({approvedHoursThisYear: approved, executedHoursThisYear: executed})
+    );
+
+    expect(cssClass).toBe(expected);
+  });
 });

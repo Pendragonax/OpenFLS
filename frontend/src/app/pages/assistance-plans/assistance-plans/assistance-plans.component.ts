@@ -61,7 +61,7 @@ export class AssistancePlansComponent
   @Output() updatedValueEvent = new EventEmitter<AssistancePlanPreviewDto>();
   @Output() deletedValueEvent = new EventEmitter<AssistancePlanPreviewDto>();
 
-  tableColumns = ['client', 'institution', 'sponsor', 'start', 'end', 'hours', 'actions'];
+  tableColumns = ['client', 'institution', 'sponsor', 'start', 'end', 'status', 'hours', 'yearStatus', 'actions'];
 
   deleteServiceCount: number = 0;
   client: ClientViewModel = new ClientViewModel();
@@ -377,7 +377,11 @@ export class AssistancePlansComponent
         case this.tableColumns[4]:
           return this.comparer.compare(a.preview.end, b.preview.end, isAsc);
         case this.tableColumns[5]:
+          return this.comparer.compare(a.preview.isActive ? 1 : 0, b.preview.isActive ? 1 : 0, isAsc);
+        case this.tableColumns[6]:
           return this.comparer.compare(a.preview.approvedHoursPerWeek, b.preview.approvedHoursPerWeek, isAsc);
+        case this.tableColumns[7]:
+          return this.comparer.compare(this.getExecutedHoursPercent(a.preview), this.getExecutedHoursPercent(b.preview), isAsc);
         default:
           return 0;
       }
@@ -432,6 +436,44 @@ export class AssistancePlansComponent
 
   getDateString(date: string | null): string {
     return this.converter.getLocalDateString(date);
+  }
+
+  getStatusLabel(isActive: boolean): string {
+    return isActive ? 'Aktiv' : 'Inaktiv';
+  }
+
+  getExecutedHoursPercent(preview: AssistancePlanPreviewDto): number {
+    const approvedMinutes = this.convertTimeDoubleToMinutes(preview.approvedHoursThisYear);
+    if (approvedMinutes <= 0) {
+      return 0;
+    }
+
+    const executedMinutes = this.convertTimeDoubleToMinutes(preview.executedHoursThisYear);
+    const percent = (executedMinutes * 100) / approvedMinutes;
+    return Math.max(0, Math.min(100, Number(percent.toFixed(1))));
+  }
+
+  private convertTimeDoubleToMinutes(value: number): number {
+    const sign = value < 0 ? -1 : 1;
+    const absoluteValue = Math.abs(value);
+    const hours = Math.trunc(absoluteValue);
+    const minutes = Math.round((absoluteValue - hours) * 100);
+    return sign * (hours * 60 + minutes);
+  }
+
+  getHoursTooltip(preview: AssistancePlanPreviewDto): string {
+    return `Diese Anzeige ist nicht nach Stundentypen getrennt, sondern fasst alle zusammen.\nGeleistet: ${preview.executedHoursThisYear}h\nBewilligt: ${preview.approvedHoursThisYear}h`;
+  }
+
+  getExecutedHoursProgressClass(preview: AssistancePlanPreviewDto): string {
+    const percent = this.getExecutedHoursPercent(preview);
+    if (percent >= 95) {
+      return 'hours-progress-fill--ok';
+    }
+    if (percent >= 90) {
+      return 'hours-progress-fill--warn';
+    }
+    return 'hours-progress-fill--bad';
   }
 
   onSearchStringChanges(searchString: string) {

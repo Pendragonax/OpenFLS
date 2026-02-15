@@ -183,12 +183,12 @@
             <th mat-header-cell
                 [style.display]="(!hideInstitutionColumn) ? '' : 'none'"
                 mat-sort-header="{{tableColumns[1]}}"
-                class="hide-on-small px-2"
+                class="hide-on-small px-2 desktop-hide-1150"
                 *matHeaderCellDef>Bereich
             </th>
             <td mat-cell
                 [style.display]="(!hideInstitutionColumn) ? '' : 'none'"
-                class="hide-on-small px-2"
+                class="hide-on-small px-2 desktop-hide-1150"
                 *matCellDef="let row">{{row.preview.institutionName}}
             </td>
           </ng-container>
@@ -197,13 +197,13 @@
             <th mat-header-cell
                 [style.display]="(!hideSponsorColumn) ? '' : 'none'"
                 mat-sort-header="{{tableColumns[2]}}"
-                class="hide-on-small px-2"
+                class="hide-on-small px-2 desktop-hide-1150"
                 *matHeaderCellDef>Kostenträger
             </th>
             <td mat-cell
                 [style.display]="(!hideSponsorColumn) ? '' : 'none'"
                 *matCellDef="let row"
-                class="hide-on-small px-2">{{row.preview.sponsorName}}
+                class="hide-on-small px-2 desktop-hide-1150">{{row.preview.sponsorName}}
             </td>
           </ng-container>
 
@@ -231,17 +231,57 @@
             </td>
           </ng-container>
 
-          <ng-container matColumnDef="hours">
+          <ng-container matColumnDef="status">
             <th mat-header-cell
                 mat-sort-header="{{tableColumns[5]}}"
+                class="px-2"
+                *matHeaderCellDef>Status
+            </th>
+            <td mat-cell
+                class="px-2"
+                *matCellDef="let row">
+              @if (row.preview.isActive) {
+                <span class="plan-status-pill plan-status-pill--active">
+                  <span class="plan-status-dot"></span>
+                  {{ getStatusLabel(row.preview.isActive) }}
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="hours">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[6]}}"
                 class="px-2"
                 *matHeaderCellDef>h/Woche
             </th>
             <td mat-cell
                 class="px-2"
-                [matTooltip]="'h/Jahr bewilligt: ' + row.preview.approvedHoursThisYear + ' | h/Jahr ausgeführt: ' + row.preview.executedHoursThisYear"
                 *matCellDef="let row">
               {{ row.preview.approvedHoursPerWeek }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="yearStatus">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[7]}}"
+                class="px-2 year-status-column-header"
+                *matHeaderCellDef>Erfüllt "dieses Jahr" bis "jetzt"
+            </th>
+            <td mat-cell
+                class="px-2 year-status-column-cell"
+                [matTooltip]="getHoursTooltip(row.preview)"
+                matTooltipClass="hours-week-tooltip"
+                *matCellDef="let row">
+              <div class="year-status-cell">
+                <div class="year-status-bar">
+                  <div class="hours-progress-fill"
+                       [ngClass]="getExecutedHoursProgressClass(row.preview)"
+                       [style.width.%]="getExecutedHoursPercent(row.preview)"></div>
+                  <span class="hours-progress-text-left">{{ row.preview.executedHoursThisYear }} h</span>
+                  <span class="hours-progress-text-right">{{ row.preview.approvedHoursThisYear }} h</span>
+                </div>
+              </div>
             </td>
           </ng-container>
 
@@ -303,6 +343,12 @@
                   <mat-icon class="timeline-date-icon">watch_later</mat-icon>
                   {{ getDateString(row.preview.start) }} – {{ getDateString(row.preview.end) }}
                 </div>
+                @if (row.preview.isActive) {
+                  <span class="plan-status-pill plan-status-pill--active">
+                    <span class="plan-status-dot"></span>
+                    {{ getStatusLabel(row.preview.isActive) }}
+                  </span>
+                }
               </div>
 
               <div class="timeline-body">
@@ -328,9 +374,18 @@
                   <span class="timeline-label">h/Woche</span>
                   <span class="timeline-value-light">{{row.preview.approvedHoursPerWeek}}</span>
                 </div>
-                <div class="timeline-row">
-                  <span class="timeline-label">h/Jahr</span>
-                  <span class="timeline-value-light">{{row.preview.approvedHoursThisYear}} / {{row.preview.executedHoursThisYear}}</span>
+                <div class="timeline-row timeline-row-hours-bar"
+                     [matTooltip]="getHoursTooltip(row.preview)"
+                     matTooltipClass="hours-week-tooltip">
+                  <span class="timeline-hours-value">
+                    <span class="year-status-bar">
+                      <span class="hours-progress-fill"
+                            [ngClass]="getExecutedHoursProgressClass(row.preview)"
+                            [style.width.%]="getExecutedHoursPercent(row.preview)"></span>
+                      <span class="hours-progress-text-left">{{ row.preview.executedHoursThisYear }} h</span>
+                      <span class="hours-progress-text-right">{{ row.preview.approvedHoursThisYear }} h</span>
+                    </span>
+                  </span>
                 </div>
               </div>
 
