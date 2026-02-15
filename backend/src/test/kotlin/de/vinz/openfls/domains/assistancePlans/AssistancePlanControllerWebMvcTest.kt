@@ -81,6 +81,9 @@ class AssistancePlanControllerWebMvcTest {
     private fun previewDto(id: Long, isFavorite: Boolean): AssistancePlanPreviewDto {
         return AssistancePlanPreviewDto(
             id = id,
+            clientId = 11,
+            institutionId = 12,
+            sponsorId = 13,
             clientFirstname = "Max",
             clientLastname = "Mustermann",
             institutionName = "Schule",

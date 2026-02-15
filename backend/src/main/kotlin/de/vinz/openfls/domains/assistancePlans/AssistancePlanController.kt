@@ -450,6 +450,33 @@ class AssistancePlanController(
         }
     }
 
+    @GetMapping("sponsor/{id}/preview")
+    fun getPreviewBySponsorId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val userId = userService.getUserId()
+            val dtos = assistancePlanPreviewService.getPreviewDtosBySponsorId(id, userId)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getPreviewBySponsorId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
     @GetMapping("favorites/preview")
     fun getFavoritePreviewsByLoggedInUser(): Any {
         return try {

@@ -127,6 +127,9 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     @Query(
         """
         SELECT ap.id as id,
+               c.id as clientId,
+               i.id as institutionId,
+               s.id as sponsorId,
                c.firstName as clientFirstname,
                c.lastName as clientLastname,
                i.name as institutionName,
@@ -148,6 +151,9 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     @Query(
         """
         SELECT ap.id as id,
+               c.id as clientId,
+               i.id as institutionId,
+               s.id as sponsorId,
                c.firstName as clientFirstname,
                c.lastName as clientLastname,
                i.name as institutionName,
@@ -169,6 +175,33 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     @Query(
         """
         SELECT ap.id as id,
+               c.id as clientId,
+               i.id as institutionId,
+               s.id as sponsorId,
+               c.firstName as clientFirstname,
+               c.lastName as clientLastname,
+               i.name as institutionName,
+               s.name as sponsorName,
+               ap.start as start,
+               ap.end as end
+        FROM AssistancePlan ap
+        JOIN ap.client c
+        JOIN ap.institution i
+        JOIN ap.sponsor s
+        WHERE ap.sponsor.id = :sponsorId
+        ORDER BY ap.start DESC
+        """
+    )
+    fun findPreviewProjectionsBySponsorId(
+        @Param("sponsorId") sponsorId: Long
+    ): List<AssistancePlanPreviewProjection>
+
+    @Query(
+        """
+        SELECT ap.id as id,
+               c.id as clientId,
+               i.id as institutionId,
+               s.id as sponsorId,
                c.firstName as clientFirstname,
                c.lastName as clientLastname,
                i.name as institutionName,

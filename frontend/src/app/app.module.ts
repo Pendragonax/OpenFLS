@@ -54,7 +54,7 @@ import {SponsorDetailComponent} from './pages/sponsor/components/sponsor-detail/
 import {ClientComponent} from './pages/client/client.component';
 import {ClientNewComponent} from './pages/client/components/client-new/client-new.component';
 import {ClientDetailComponent} from './pages/client/components/client-detail/client-detail.component';
-import {AssistancePlansComponent} from './shared/components/assistance-plans/assistance-plans.component';
+import {AssistancePlansComponent} from './pages/assistance-plans/assistance-plans/assistance-plans.component';
 import {HourTypeComponent} from './pages/hour-type/hour-type.component';
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";

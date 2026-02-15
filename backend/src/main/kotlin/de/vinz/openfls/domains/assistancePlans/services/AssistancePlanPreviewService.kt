@@ -38,6 +38,16 @@ class AssistancePlanPreviewService(
     }
 
     @Transactional(readOnly = true)
+    fun getPreviewDtosBySponsorId(sponsorId: Long, employeeId: Long): List<AssistancePlanPreviewDto> {
+        val previews = assistancePlanRepository.findPreviewProjectionsBySponsorId(sponsorId)
+        if (previews.isEmpty()) {
+            return emptyList()
+        }
+        val favoriteAssistancePlanIds = assistancePlanRepository.findFavoriteAssistancePlanIdsByEmployeeId(employeeId).toSet()
+        return createPreviewDtos(previews, favoriteAssistancePlanIds)
+    }
+
+    @Transactional(readOnly = true)
     fun getFavoritePreviewDtosByEmployeeId(employeeId: Long): List<AssistancePlanPreviewDto> {
         val previews = assistancePlanRepository.findFavoritePreviewProjectionsByEmployeeId(employeeId)
         return createPreviewDtos(previews, previews.map { it.id }.toSet())
@@ -92,6 +102,9 @@ class AssistancePlanPreviewService(
 
         return AssistancePlanPreviewDto(
             id = projection.id,
+            clientId = projection.clientId,
+            institutionId = projection.institutionId,
+            sponsorId = projection.sponsorId,
             clientFirstname = projection.clientFirstname,
             clientLastname = projection.clientLastname,
             institutionName = projection.institutionName,

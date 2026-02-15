@@ -182,6 +182,9 @@ class AssistancePlanPreviewServiceTest {
     private fun previewProjection(planId: Long, planStart: LocalDate, planEnd: LocalDate): AssistancePlanPreviewProjection {
         return object : AssistancePlanPreviewProjection {
             override val id: Long = planId
+            override val clientId: Long = 101
+            override val institutionId: Long = 102
+            override val sponsorId: Long = 103
             override val clientFirstname: String = "Max"
             override val clientLastname: String = "Mustermann"
             override val institutionName: String = "Schule"

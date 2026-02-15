@@ -1,21 +1,14 @@
 import {Injectable} from '@angular/core';
-import {AssistancePlanDto} from "../dtos/assistance-plan-dto.model";
-import {HttpClient} from "@angular/common/http";
-import {environment} from "../../../environments/environment";
-import {combineLatest, map, Observable, ReplaySubject, tap} from "rxjs";
-import {InstitutionDto} from "../dtos/institution-dto.model";
-import {ClientDto} from "../dtos/client-dto.model";
-import {InstitutionService} from "./institution.service";
-import {ClientsService} from "./clients.service";
-import {UserService} from "./user.service";
-import {AssistancePlanView} from "../models/assistance-plan-view.model";
-import {SponsorService} from "./sponsor.service";
-import {SponsorDto} from "../dtos/sponsor-dto.model";
-import {AssistancePlanEvaluation} from "../dtos/assistance-plan-evaluation.model";
-import {AssistancePlanEvaluationLeftDto} from "../dtos/assistance-plan-evaluation-left.dto";
-import {AssistancePlan} from "../projections/assistance-plan.projection";
-import {AssistancePlanCreateDto} from "../dtos/assistance-plan-create-dto.model";
-import {AssistancePlanUpdateDto} from "../dtos/assistance-plan-update-dto.model";
+import {AssistancePlanDto} from '../dtos/assistance-plan-dto.model';
+import {HttpClient} from '@angular/common/http';
+import {environment} from '../../../environments/environment';
+import {Observable, ReplaySubject, tap} from 'rxjs';
+import {AssistancePlanEvaluation} from '../dtos/assistance-plan-evaluation.model';
+import {AssistancePlanEvaluationLeftDto} from '../dtos/assistance-plan-evaluation-left.dto';
+import {AssistancePlan} from '../projections/assistance-plan.projection';
+import {AssistancePlanCreateDto} from '../dtos/assistance-plan-create-dto.model';
+import {AssistancePlanUpdateDto} from '../dtos/assistance-plan-update-dto.model';
+import {AssistancePlanPreviewDto} from '../dtos/assistance-plan-preview-dto.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,18 +16,11 @@ import {AssistancePlanUpdateDto} from "../dtos/assistance-plan-update-dto.model"
 export class AssistancePlanService {
   allValues$: ReplaySubject<AssistancePlanDto[]> = new ReplaySubject<AssistancePlanDto[]>();
   allValues: AssistancePlanDto[] = [];
-  url = "assistance_plans";
+  url = 'assistance_plans';
 
-  constructor(
-    protected http: HttpClient,
-    private institutionService: InstitutionService,
-    private clientService: ClientsService,
-    private userService: UserService,
-    private sponsorService: SponsorService
-  ) { }
+  constructor(protected http: HttpClient) {}
 
-  initialLoad() {
-  }
+  initialLoad() {}
 
   create(value: AssistancePlanCreateDto): Observable<AssistancePlanDto> {
     return this.http
@@ -61,175 +47,62 @@ export class AssistancePlanService {
   }
 
   getAll(): Observable<AssistancePlanDto[]> {
-    return this.http
-      .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}`);
+    return this.http.get<AssistancePlanDto[]>(`${environment.api_url}${this.url}`);
   }
 
   getById(id: number): Observable<AssistancePlanDto> {
-    return this.http
-      .get<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}`);
+    return this.http.get<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}`);
   }
 
   getProjectionById(id: number): Observable<AssistancePlan> {
-    return this.http
-      .get<AssistancePlan>(`${environment.api_url}${this.url}/projection/${id}`);
+    return this.http.get<AssistancePlan>(`${environment.api_url}${this.url}/projection/${id}`);
   }
 
   getByClientId(id: number): Observable<AssistancePlanDto[]> {
-    return this.http
-      .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/client/${id}`)
+    return this.http.get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/client/${id}`);
   }
 
   getIllegalByClientId(id: number): Observable<AssistancePlan[]> {
-    return this.http
-      .get<AssistancePlan[]>(`${environment.api_url}${this.url}/client/${id}/illegal`)
-  }
-
-  getCombinationByClientId(id: number): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
-    return combineLatest([
-      this.clientService.getById(id),
-      this.institutionService.allValues$,
-      this.sponsorService.allValues$,
-      this.getByClientId(id),
-      this.userService.affiliatedInstitutions$,
-      this.userService.isAdmin$,
-      this.userService.getFavorites()]
-    ).pipe(map(([client,
-                             institutions,
-                             sponsors,
-                             assistancePlans,
-                             affiliatedInstitutions,
-                             isAdmin,
-                             favoriteAssistancePlans]) => {
-      return assistancePlans.map<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>(plan => {
-        return [
-          client,
-          institutions.find(x => x.id === plan.institutionId) ?? new InstitutionDto(),
-          sponsors.find(x => x.id === plan.sponsorId) ?? new SponsorDto(),
-          <AssistancePlanView> {
-            dto: plan,
-            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId),
-            favorite: favoriteAssistancePlans.some(value => value.id === plan.id)
-        }]
-      })
-    }))
+    return this.http.get<AssistancePlan[]>(`${environment.api_url}${this.url}/client/${id}/illegal`);
   }
 
   getByInstitutionId(id: number): Observable<AssistancePlanDto[]> {
-    return this.http
-      .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/institution/${id}`)
+    return this.http.get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/institution/${id}`);
   }
 
   getIllegalByInstitutionId(id: number): Observable<AssistancePlan[]> {
-    return this.http
-      .get<AssistancePlan[]>(`${environment.api_url}${this.url}/institution/${id}/illegal`)
-  }
-
-  getCombinationByInstitutionId(id: number): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
-    return combineLatest([
-      this.clientService.allValues$,
-      this.institutionService.getById(id),
-      this.sponsorService.allValues$,
-      this.getByInstitutionId(id),
-      this.userService.affiliatedInstitutions$,
-      this.userService.isAdmin$,
-      this.userService.getFavorites()]
-    ).pipe(map(([clients,
-                             institution,
-                             sponsors,
-                             assistancePlans,
-                             affiliatedInstitutions,
-                             isAdmin,
-                             favoriteAssistancePlans]) => {
-      return assistancePlans.map<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>(plan => {
-        return [
-          clients.find(x => x.id === plan.clientId) ?? new ClientDto(),
-          institution,
-          sponsors.find(x => x.id === plan.sponsorId) ?? new SponsorDto(),
-          <AssistancePlanView> {
-            dto: plan,
-            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId),
-            favorite: favoriteAssistancePlans.some(value => value.id === plan.id)
-        }]
-      })
-    }))
-  }
-
-  getCombinationByFavorites(): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
-    return combineLatest([
-      this.clientService.allValues$,
-      this.institutionService.allValues$,
-      this.sponsorService.allValues$,
-      this.userService.getFavorites(),
-      this.userService.affiliatedInstitutions$,
-      this.userService.isAdmin$]
-    ).pipe(map(([clients,
-                             institutions,
-                             sponsors,
-                             favoriteAssistancePlans,
-                             affiliatedInstitutions,
-                             isAdmin,]) => {
-      return favoriteAssistancePlans.map<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>(plan => {
-        return [
-          clients.find(x => x.id === plan.clientId) ?? new ClientDto(),
-          institutions.find(x => x.id === plan.institutionId) ?? new InstitutionDto(),
-          sponsors.find(x => x.id === plan.sponsorId) ?? new SponsorDto(),
-          <AssistancePlanView> {
-            dto: plan,
-            editable: isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId),
-            favorite: true
-          }]
-      })
-    }))
+    return this.http.get<AssistancePlan[]>(`${environment.api_url}${this.url}/institution/${id}/illegal`);
   }
 
   getBySponsorId(id: number): Observable<AssistancePlanDto[]> {
-    return this.http
-      .get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/sponsor/${id}`)
+    return this.http.get<AssistancePlanDto[]>(`${environment.api_url}${this.url}/sponsor/${id}`);
   }
 
   getIllegalBySponsorId(id: number): Observable<AssistancePlan[]> {
-    return this.http
-      .get<AssistancePlan[]>(`${environment.api_url}${this.url}/sponsor/${id}/illegal`)
+    return this.http.get<AssistancePlan[]>(`${environment.api_url}${this.url}/sponsor/${id}/illegal`);
   }
 
-  getCombinationBySponsorId(id: number): Observable<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView][]> {
-    return combineLatest([
-      this.clientService.allValues$,
-      this.institutionService.allValues$,
-      this.sponsorService.getById(id),
-      this.getBySponsorId(id),
-      this.userService.affiliatedInstitutions$,
-      this.userService.isAdmin$,
-      this.userService.getFavorites()]
-    ).pipe(map(([clients,
-                             institutions,
-                             sponsor,
-                             assistancePlans,
-                             affiliatedInstitutions,
-                             isAdmin,
-                             favoriteAssistancePlans]) => {
-      return assistancePlans.map<[ClientDto, InstitutionDto, SponsorDto, AssistancePlanView]>(plan => {
-        return [
-          clients.find(x => x.id === plan.clientId) ?? new ClientDto(),
-          institutions.find(x => x.id === plan.institutionId) ?? new InstitutionDto(),
-          sponsor,
-          <AssistancePlanView> {
-            dto: plan,
-            editable : isAdmin || affiliatedInstitutions.some(value => value === plan.institutionId),
-            favorite: favoriteAssistancePlans.some(value => value.id === plan.id)
-        }]
-      })
-    }))
+  getPreviewByClientId(id: number): Observable<AssistancePlanPreviewDto[]> {
+    return this.http.get<AssistancePlanPreviewDto[]>(`${environment.api_url}${this.url}/client/${id}/preview`);
+  }
+
+  getPreviewByInstitutionId(id: number): Observable<AssistancePlanPreviewDto[]> {
+    return this.http.get<AssistancePlanPreviewDto[]>(`${environment.api_url}${this.url}/institution/${id}/preview`);
+  }
+
+  getPreviewBySponsorId(id: number): Observable<AssistancePlanPreviewDto[]> {
+    return this.http.get<AssistancePlanPreviewDto[]>(`${environment.api_url}${this.url}/sponsor/${id}/preview`);
+  }
+
+  getPreviewByFavorites(): Observable<AssistancePlanPreviewDto[]> {
+    return this.http.get<AssistancePlanPreviewDto[]>(`${environment.api_url}${this.url}/favorites/preview`);
   }
 
   getEvaluationById(id: number): Observable<AssistancePlanEvaluation> {
-    return this.http
-      .get<AssistancePlanEvaluation>(`${environment.api_url}${this.url}/eval/${id}`)
+    return this.http.get<AssistancePlanEvaluation>(`${environment.api_url}${this.url}/eval/${id}`);
   }
 
   getEvaluationLeftById(id: number): Observable<AssistancePlanEvaluationLeftDto> {
-    return this.http
-      .get<AssistancePlanEvaluationLeftDto>(`${environment.api_url}${this.url}/eval/left/${id}`)
+    return this.http.get<AssistancePlanEvaluationLeftDto>(`${environment.api_url}${this.url}/eval/left/${id}`);
   }
 }

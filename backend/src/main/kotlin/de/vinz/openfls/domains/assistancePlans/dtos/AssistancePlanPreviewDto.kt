@@ -4,6 +4,9 @@ import java.time.LocalDate
 
 data class AssistancePlanPreviewDto(
     val id: Long,
+    val clientId: Long,
+    val institutionId: Long,
+    val sponsorId: Long,
     val clientFirstname: String,
     val clientLastname: String,
     val institutionName: String,
