@@ -23,7 +23,6 @@ import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.domains.sponsors.SponsorService
-import de.vinz.openfls.services.GenericService
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -43,39 +42,7 @@ class AssistancePlanService(
         private val sponsorService: SponsorService,
         private val hourTypeService: HourTypeService,
         private val modelMapper: ModelMapper
-) : GenericService<AssistancePlan> {
-
-    @Transactional
-    fun create(valueDto: AssistancePlanDto): AssistancePlanDto {
-        val createDto = AssistancePlanCreateDto().apply {
-            start = valueDto.start
-            end = valueDto.end
-            clientId = valueDto.clientId
-            institutionId = valueDto.institutionId
-            sponsorId = valueDto.sponsorId
-            hours = valueDto.hours.map { hour ->
-                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateHourDto().apply {
-                    weeklyMinutes = hour.weeklyMinutes
-                    hourTypeId = hour.hourTypeId
-                }
-            }
-            goals = valueDto.goals.map { goal ->
-                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateGoalDto().apply {
-                    title = goal.title
-                    description = goal.description
-                    assistancePlanId = goal.assistancePlanId
-                    institutionId = goal.institutionId
-                    hours = goal.hours.map { hour ->
-                        de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateHourDto().apply {
-                            weeklyMinutes = hour.weeklyMinutes
-                            hourTypeId = hour.hourTypeId
-                        }
-                    }
-                }
-            }
-        }
-        return create(createDto)
-    }
+) {
 
     @Transactional
     fun create(valueDto: AssistancePlanCreateDto): AssistancePlanDto {
@@ -138,71 +105,6 @@ class AssistancePlanService(
                 "Stunden dürfen entweder direkt im Hilfeplan oder in den Zielen hinterlegt sein, nicht in beiden Bereichen gleichzeitig."
             )
         }
-    }
-
-    @Transactional
-    override fun create(value: AssistancePlan): AssistancePlan {
-        if (value.id > 0)
-            throw IllegalArgumentException("id is set")
-
-        // backup hours
-        val hours = value.hours
-        value.goals = mutableSetOf()
-        value.hours = mutableSetOf()
-
-        // save
-        val entity = assistancePlanRepository.save(value)
-
-        // add hours
-        entity.hours = hours
-                .map {
-                    assistancePlanHourRepository
-                            .save(it.apply {
-                                id = 0
-                                assistancePlan = entity
-                            })
-                }
-                .toMutableSet()
-
-        return entity
-    }
-
-    @Transactional
-    fun update(id: Long, valueDto: AssistancePlanDto): AssistancePlanDto {
-        val updateDto = AssistancePlanUpdateDto().apply {
-            this.id = valueDto.id
-            start = valueDto.start
-            end = valueDto.end
-            clientId = valueDto.clientId
-            institutionId = valueDto.institutionId
-            sponsorId = valueDto.sponsorId
-            hours = valueDto.hours.map { hour ->
-                AssistancePlanUpdateHourDto().apply {
-                    this.id = hour.id
-                    weeklyMinutes = hour.weeklyMinutes
-                    hourTypeId = hour.hourTypeId
-                    assistancePlanId = hour.assistancePlanId
-                }
-            }
-            goals = valueDto.goals.map { goal ->
-                AssistancePlanUpdateGoalDto().apply {
-                    this.id = goal.id
-                    title = goal.title
-                    description = goal.description
-                    assistancePlanId = goal.assistancePlanId
-                    institutionId = goal.institutionId
-                    hours = goal.hours.map { hour ->
-                        de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateGoalHourDto().apply {
-                            this.id = hour.id
-                            weeklyMinutes = hour.weeklyMinutes
-                            hourTypeId = hour.hourTypeId
-                            goalHourId = hour.goalId
-                        }
-                    }
-                }
-            }
-        }
-        return update(id, updateDto)
     }
 
     @Transactional
@@ -311,20 +213,7 @@ class AssistancePlanService(
     }
 
     @Transactional
-    override fun update(value: AssistancePlan): AssistancePlan {
-        if (value.id <= 0)
-            throw IllegalArgumentException("id is set")
-        if (!assistancePlanRepository.existsById(value.id))
-            throw IllegalArgumentException("id not found")
-
-        // backup hours
-        value.goals = mutableSetOf()
-
-        return assistancePlanRepository.save(value)
-    }
-
-    @Transactional
-    override fun delete(id: Long) {
+    fun delete(id: Long) {
         return assistancePlanRepository.deleteById(id)
     }
 
@@ -332,11 +221,6 @@ class AssistancePlanService(
     fun getAllAssistancePlanDtos(): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findAll().toList()
         return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
-    }
-
-    @Transactional(readOnly = true)
-    override fun getAll(): List<AssistancePlan> {
-        return assistancePlanRepository.findAll().toList()
     }
 
     @Transactional(readOnly = true)
@@ -351,12 +235,12 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    override fun getById(id: Long): AssistancePlan? {
+    fun getById(id: Long): AssistancePlan? {
         return assistancePlanRepository.findByIdOrNull(id)
     }
 
     @Transactional(readOnly = true)
-    override fun existsById(id: Long): Boolean {
+    fun existsById(id: Long): Boolean {
         return assistancePlanRepository.existsById(id)
     }
 
@@ -364,11 +248,6 @@ class AssistancePlanService(
     fun getAssistancePlanDtosByClientId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByClientId(id)
         return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
-    }
-
-    @Transactional(readOnly = true)
-    fun getByClientId(id: Long): List<AssistancePlan> {
-        return assistancePlanRepository.findByClientId(id)
     }
 
     @Transactional(readOnly = true)
@@ -384,11 +263,6 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getBySponsorId(id: Long): List<AssistancePlan> {
-        return assistancePlanRepository.findBySponsorId(id)
-    }
-
-    @Transactional(readOnly = true)
     fun getIllegalBySponsorId(id: Long): List<AssistancePlanProjection> {
         val assistancePlans = assistancePlanRepository.findProjectionsBySponsorId(id)
         return assistancePlans.filter { isIllegalAssistancePlan(it) }
@@ -398,11 +272,6 @@ class AssistancePlanService(
     fun getAssistancePlanDtosByInstitutionId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByInstitutionId(id)
         return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
-    }
-
-    @Transactional(readOnly = true)
-    fun getByInstitutionId(id: Long): List<AssistancePlan> {
-        return assistancePlanRepository.findByInstitutionId(id)
     }
 
     @Transactional(readOnly = true)
