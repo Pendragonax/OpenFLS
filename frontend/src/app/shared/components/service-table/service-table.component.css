@@ -18,6 +18,57 @@
   background: rgba(255, 33, 33, 0.24) !important;
 }
 
+:host ::ng-deep .mat-column-start {
+  min-width: 200px;
+  max-width: 200px;
+  width: 200px;
+}
+
+:host ::ng-deep .mat-column-actions {
+  min-width: 150px;
+  max-width: 150px;
+  width: 150px;
+  text-align: center;
+}
+
+:host ::ng-deep td.mat-column-actions > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:host ::ng-deep .mat-column-clientFullName {
+  white-space: nowrap;
+  width: 1%;
+}
+
+:host ::ng-deep .mat-column-institutionName,
+:host ::ng-deep .mat-column-employeeFullName {
+  white-space: nowrap;
+  width: 1%;
+}
+
+:host ::ng-deep .service-time-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:host ::ng-deep .service-time-left {
+  display: inline-block;
+}
+
+:host ::ng-deep .service-time-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #13a3e6;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12px;
+}
+
 .service-cards {
   display: none;
   flex-direction: column;

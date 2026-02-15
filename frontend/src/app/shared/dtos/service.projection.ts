@@ -5,6 +5,7 @@ import {ClientSolo} from "./client-solo.projection";
 export class Service {
   id: number = 0;
   start: string = Date.now().toString();
+  end: string = Date.now().toString();
   minutes: number = 0;
   title: string = "";
   content: string = "";
