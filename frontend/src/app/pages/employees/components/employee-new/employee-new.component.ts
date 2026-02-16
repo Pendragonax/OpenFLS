@@ -27,6 +27,7 @@ export class EmployeeNewComponent extends NewPageComponent<EmployeeDto> implemen
 
   // VARs
   permissions: [InstitutionDto, PermissionDto][] = [];
+  private readonly usernamePattern = '^[A-Za-z0-9ÄÖÜäöüß]+$';
 
   // configs
   permissionTableColumns: string[] = ['name', 'lead', 'write', 'read', 'affiliated'];
@@ -35,7 +36,8 @@ export class EmployeeNewComponent extends NewPageComponent<EmployeeDto> implemen
   accessForm: UntypedFormGroup = new UntypedFormGroup({
     username: new UntypedFormControl({value:'', disabled: false}, Validators.compose([
       Validators.required,
-      Validators.minLength(6)])),
+      Validators.minLength(6),
+      Validators.pattern(this.usernamePattern)])),
     role: new UntypedFormControl({value:'3', disabled: false})
   });
   personalInfoForm = new UntypedFormGroup({
@@ -157,7 +159,7 @@ export class EmployeeNewComponent extends NewPageComponent<EmployeeDto> implemen
   getControlErrorMessage(control: AbstractControl | null) {
     if (control?.hasError('required')) { return 'Eingabe ist notwendig'; }
     if (control?.hasError('minlength')) { return 'zu wenig Zeichen'; }
-    if (control?.hasError('pattern')) { return 'Großbuchtabe, Zahl und Sonderzeichen notwendig'; }
+    if (control?.hasError('pattern')) { return 'Nur Buchstaben (inkl. Umlaute) und Zahlen; keine Leer- oder Sonderzeichen'; }
 
     return 'unbekannter Fehler';
   }

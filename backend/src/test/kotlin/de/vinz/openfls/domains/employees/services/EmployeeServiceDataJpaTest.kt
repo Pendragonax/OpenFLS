@@ -86,6 +86,64 @@ class EmployeeServiceDataJpaTest(@Autowired private val unprofessionalRepository
     }
 
     @Test
+    fun create_dto_withUmlautsAndDigitsUsername_persistsEmployeeAndAccess() {
+        // Given
+        val dto = EmployeeDto().apply {
+            firstName = "Max"
+            lastName = "Mustermann"
+            email = "m@m.de"
+            access = EmployeeAccessDto().apply {
+                username = "Mäx123"
+                role = 2
+            }
+        }
+
+        // When
+        val result = employeeService.create(dto)
+
+        // Then
+        val savedAccess = employeeAccessRepository.findById(result.id)
+        assertThat(savedAccess).isPresent
+        assertThat(savedAccess.get().username).isEqualTo("Mäx123")
+    }
+
+    @Test
+    fun create_dto_withWhitespaceInUsername_throwsException() {
+        // Given
+        val dto = EmployeeDto().apply {
+            firstName = "Max"
+            lastName = "Mustermann"
+            access = EmployeeAccessDto().apply {
+                username = "max user"
+                role = 2
+            }
+        }
+
+        // When / Then
+        assertThatThrownBy { employeeService.create(dto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("username contains invalid characters")
+    }
+
+    @Test
+    fun create_dto_withSpecialCharacterInUsername_throwsException() {
+        // Given
+        val dto = EmployeeDto().apply {
+            firstName = "Max"
+            lastName = "Mustermann"
+            access = EmployeeAccessDto().apply {
+                username = "max\$user"
+                role = 2
+            }
+        }
+
+        // When / Then
+        assertThatThrownBy { employeeService.create(dto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("username contains invalid characters")
+    }
+
+    @Test
     fun create_entityWithoutAccess_throwsException() {
         // Given
         val employee = Employee(firstname = "Max", lastname = "Mustermann")

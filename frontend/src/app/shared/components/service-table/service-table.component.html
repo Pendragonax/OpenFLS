@@ -27,7 +27,7 @@
         <ng-container [matColumnDef]="displayedColumn">
           @if (displayedColumn !== 'actions') {
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="overview-font-size">{{getColumnDisplayName(displayedColumn)}}</th>
-            <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}" [innerHTML]="getFormattedCellContent(displayedColumn, element[displayedColumn])"></td>
+            <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}" [innerHTML]="getFormattedCellContent(displayedColumn, element)"></td>
           } @else {
             <th mat-header-cell *matHeaderCellDef class="overview-font-size">Aktionen</th>
             <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}">
@@ -44,7 +44,7 @@
                 <button mat-icon-button
                         color="warn"
                         class="m-1"
-                        [disabled]="!(isAdmin$ | async)"
+                        [disabled]="!canDelete(element, (isAdmin$ | async))"
                         [matTooltip]="'Dokumentation löschen'"
                         (click)="openDeleteConfirmation(deleteContent, element['id'])">
                   <mat-icon>delete</mat-icon></button>
@@ -90,7 +90,7 @@
             <div>
               <div class="service-card-date-row">
                 <div class="service-card-date">{{ row.startDate }}</div>
-                <div class="service-card-time">{{ row.startTime }}</div>
+                <div class="service-card-time">{{ row.startTime }} - {{ row.endTime }}</div>
                 @if (row.minutes != null) {
                   <div class="service-card-minutes service-card-minutes--pill">{{ row.minutes }} Min</div>
                 }
@@ -109,7 +109,7 @@
                 @if (adminMode) {
                   <button mat-icon-button
                           color="warn"
-                          [disabled]="!(isAdmin$ | async)"
+                          [disabled]="!canDelete(row, (isAdmin$ | async))"
                           [matTooltip]="'Dokumentation löschen'"
                           (click)="openDeleteConfirmation(deleteContent, row.id)">
                     <mat-icon>delete</mat-icon>

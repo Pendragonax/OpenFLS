@@ -93,7 +93,7 @@ class AssistancePlanService(
 
         val savedEntity = assistancePlanRepository.save(entity)
 
-        return modelMapper.map(savedEntity, AssistancePlanDto::class.java)
+        return mapToDto(savedEntity)
     }
 
     private fun validateHoursPlacement(valueDto: AssistancePlanCreateDto) {
@@ -198,7 +198,7 @@ class AssistancePlanService(
 
         val savedEntity = assistancePlanRepository.save(entity)
 
-        return modelMapper.map(savedEntity, AssistancePlanDto::class.java)
+        return mapToDto(savedEntity)
     }
 
     private fun validateHoursPlacement(valueDto: AssistancePlanUpdateDto) {
@@ -220,13 +220,13 @@ class AssistancePlanService(
     @Transactional(readOnly = true)
     fun getAllAssistancePlanDtos(): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findAll().toList()
-        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return entities.map(::mapToDto)
     }
 
     @Transactional(readOnly = true)
     fun getAssistancePlanDtoById(id: Long): AssistancePlanDto? {
         val entity = assistancePlanRepository.findByIdOrNull(id)
-        return modelMapper.map(entity, AssistancePlanDto::class.java)
+        return entity?.let(::mapToDto)
     }
 
     @Transactional(readOnly = true)
@@ -247,7 +247,7 @@ class AssistancePlanService(
     @Transactional(readOnly = true)
     fun getAssistancePlanDtosByClientId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByClientId(id)
-        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return entities.map(::mapToDto)
     }
 
     @Transactional(readOnly = true)
@@ -259,7 +259,7 @@ class AssistancePlanService(
     @Transactional(readOnly = true)
     fun getAssistancePlanDtosBySponsorId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findBySponsorId(id)
-        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return entities.map(::mapToDto)
     }
 
     @Transactional(readOnly = true)
@@ -271,7 +271,7 @@ class AssistancePlanService(
     @Transactional(readOnly = true)
     fun getAssistancePlanDtosByInstitutionId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByInstitutionId(id)
-        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return entities.map(::mapToDto)
     }
 
     @Transactional(readOnly = true)
@@ -494,5 +494,11 @@ class AssistancePlanService(
                 (assistancePlan.goals.isNotEmpty() && assistancePlan.goals.all { goal -> goal.hours.isEmpty() }) ||
                         assistancePlan.goals.isEmpty())
         return containsHoursAndGoalHours || containsNoHoursAndNoGoalHours
+    }
+
+    private fun mapToDto(entity: AssistancePlan): AssistancePlanDto {
+        val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
+        dto.institutionName = entity.institution?.name ?: ""
+        return dto
     }
 }

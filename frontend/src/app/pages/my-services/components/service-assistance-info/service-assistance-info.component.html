@@ -15,15 +15,21 @@
             </div>
             <div class="beta-plan-metric">
               übrig diese Woche:
-              <span class="beta-plan-pill">{{ item.leftThisWeek }}h</span>
+              <span class="beta-plan-pill"
+                    [matTooltipDisabled]="!tooltipLeftThisWeek"
+                    [matTooltip]="tooltipLeftThisWeek">{{ item.leftThisWeek }}h</span>
             </div>
             <div class="beta-plan-metric">
               übrig diesen Monat:
-              <span class="beta-plan-pill">{{ item.leftThisMonth }}h</span>
+              <span class="beta-plan-pill"
+                    [matTooltipDisabled]="!tooltipLeftThisMonth"
+                    [matTooltip]="tooltipLeftThisMonth">{{ item.leftThisMonth }}h</span>
             </div>
             <div class="beta-plan-metric">
               übrig dieses Jahr:
-              <span class="beta-plan-pill">{{ item.leftThisYear }}h</span>
+              <span class="beta-plan-pill"
+                    [matTooltipDisabled]="!tooltipLeftThisYear"
+                    [matTooltip]="tooltipLeftThisYear">{{ item.leftThisYear }}h</span>
             </div>
           </div>
         }

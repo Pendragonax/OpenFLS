@@ -114,6 +114,10 @@ class TestServiceFormComponent extends ServiceFormBase {
   callSetupValueSync() {
     this.setupValueSyncSubscriptions();
   }
+
+  callGetSelectableAssistancePlansForEdit(plans: any[], serviceDate: string, currentPlanId: number | null) {
+    return this.getSelectableAssistancePlansForEdit(plans as any, serviceDate, currentPlanId);
+  }
 }
 
 describe('ServiceFormBase', () => {
@@ -150,5 +154,43 @@ describe('ServiceFormBase', () => {
     component.institutionControl.setValue(2);
     expect(component.value.hourTypeId).toBe(5);
     expect(component.value.institutionId).toBe(2);
+  });
+
+  it('should only return date-selectable assistance plans in edit if current plan is selectable', () => {
+    const plans = [
+      {id: 1, start: '2026-01-01', end: '2026-01-31'},
+      {id: 2, start: '2026-02-01', end: '2026-02-28'}
+    ];
+
+    const result = component.callGetSelectableAssistancePlansForEdit(plans, '2026-01-15', 1);
+
+    expect(result.map(plan => plan.id)).toEqual([1]);
+  });
+
+  it('should keep current assistance plan in edit even if outside service date', () => {
+    const plans = [
+      {id: 1, start: '2026-01-01', end: '2026-01-31'},
+      {id: 2, start: '2026-02-01', end: '2026-02-28'}
+    ];
+
+    const result = component.callGetSelectableAssistancePlansForEdit(plans, '2026-01-15', 2);
+
+    expect(result.map(plan => plan.id)).toEqual([2, 1]);
+  });
+
+  it('should return institution name for assistance plan label', () => {
+    const institutionName = component.getInstitutionName({
+      id: 1,
+      start: '2026-01-01',
+      end: '2026-01-31',
+      clientId: 1,
+      institutionId: 2,
+      institutionName: 'Bereich Nord',
+      sponsorId: 3,
+      hours: [],
+      goals: []
+    } as any);
+
+    expect(institutionName).toBe('Bereich Nord');
   });
 });

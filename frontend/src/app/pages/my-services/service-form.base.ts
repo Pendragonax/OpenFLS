@@ -227,7 +227,11 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
 
         // ASSISTANCE PLAN
         this.selectedAssistancePlan = client.assistancePlans.find(value => value.id == service.assistancePlanId);
-        this.filteredAssistancePlans = client.assistancePlans;
+        this.filteredAssistancePlans = this.getSelectableAssistancePlansForEdit(
+          client.assistancePlans,
+          this.selectedServiceDate,
+          service.assistancePlanId
+        );
         this.assistancePlanSelected = true;
         this.setGoals(service.goals.map(value => value.id));
         if (this.selectedAssistancePlan != null) {
@@ -505,6 +509,28 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
     });
   }
 
+  protected getSelectableAssistancePlansForEdit(
+    assistancePlans: AssistancePlanDto[],
+    serviceDateString: string,
+    currentAssistancePlanId: number | null
+  ): AssistancePlanDto[] {
+    const selectablePlans = this.getAssistancePlansByDateString(assistancePlans, serviceDateString);
+    if (!currentAssistancePlanId) {
+      return selectablePlans;
+    }
+
+    const currentPlan = assistancePlans.find(plan => plan.id === currentAssistancePlanId);
+    if (!currentPlan) {
+      return selectablePlans;
+    }
+
+    if (selectablePlans.some(plan => plan.id === currentPlan.id)) {
+      return selectablePlans;
+    }
+
+    return [currentPlan, ...selectablePlans];
+  }
+
   getDateString(plan: AssistancePlanDto | undefined): string {
     if (plan != null) {
       return `${this.formatDateStringToGermanDateString(plan.start)} - ${this.formatDateStringToGermanDateString(plan.end)}`;
@@ -516,6 +542,14 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
   getSponsorName(plan: AssistancePlanDto | undefined): string {
     if (plan != null) {
       return `${this.sponsors.find(value => value.id == plan.sponsorId)?.name ?? "n/a"}`;
+    }
+
+    return "n/a";
+  }
+
+  getInstitutionName(plan: AssistancePlanDto | undefined): string {
+    if (plan != null) {
+      return plan.institutionName || "n/a";
     }
 
     return "n/a";

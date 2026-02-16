@@ -105,14 +105,13 @@ class ServiceController(
     fun delete(@PathVariable id: Long): Any {
         return try {
             val startMs = System.currentTimeMillis()
-            val service = serviceService.getById(id)
-
-            if (!accessService.isAdmin() &&
-                    (service?.employee?.id != accessService.getId() ||
-                            service.start.toLocalDate().isBefore(LocalDate.now().minusDays(14))))
-                throw IllegalArgumentException("No permission to delete this service")
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
+            val service = serviceService.getById(id) ?: throw IllegalArgumentException("service not found")
+
+            val isOwner = service.employee?.id == accessService.getId()
+            if (!accessService.isAdmin() && !isOwner)
+                throw IllegalArgumentException("No permission to delete this service")
 
             val dto = serviceService.getDtoById(id)
             serviceService.delete(id)

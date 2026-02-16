@@ -7,6 +7,7 @@ export class AssistancePlanDto {
   end: string = Date.now().toLocaleString();
   clientId: number = 0;
   institutionId: number = 0;
+  institutionName: string = '';
   sponsorId: number = 0;
   hours: AssistancePlanHourDto[] = [];
   goals: GoalDto[] = [];

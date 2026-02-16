@@ -172,11 +172,20 @@
             <mat-form-field appearance="outline" class="beta-field beta-field-wide">
               <mat-icon matPrefix>event</mat-icon>
               <mat-label>Hilfeplan</mat-label>
-              <mat-select formControlName="assistancePlanList">
+              <mat-select formControlName="assistancePlanList" class="beta-plan-select">
+                <mat-select-trigger>
+                  <div class="beta-plan-trigger-text">
+                    <span class="beta-plan-meta">{{ getDateString(selectedAssistancePlan ?? undefined) }} | {{ getSponsorName(selectedAssistancePlan ?? undefined) }}</span>
+                    <span class="beta-plan-institution-pill">{{ getInstitutionName(selectedAssistancePlan ?? undefined) }}</span>
+                  </div>
+                </mat-select-trigger>
                 @for (plan of filteredAssistancePlans; track plan.id) {
                   <mat-option [value]="plan.id">
                     <div class="beta-plan-option">
-                      <div class="beta-plan-date">{{ getDateString(plan) }} | {{ getSponsorName(plan) }}</div>
+                      <div class="beta-plan-date">
+                      <span class="beta-plan-meta">{{ getDateString(plan) }} | {{ getSponsorName(plan) }}</span>
+                      <span class="beta-plan-institution-pill">{{ getInstitutionName(plan) }}</span>
+                      </div>
                     </div>
                   </mat-option>
                 }

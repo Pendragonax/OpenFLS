@@ -1,7 +1,28 @@
 .mat-form-field{
-  width:350px !important;
+  width: 350px !important;
+  min-width: 350px !important;
+  max-width: 350px !important;
+  margin-bottom: 0.75rem;
 }
 
 table {
   width: 100%;
+}
+
+:host ::ng-deep .mat-mdc-form-field-error,
+:host ::ng-deep .mat-error {
+  white-space: normal;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:host ::ng-deep .mat-mdc-form-field-subscript-wrapper,
+:host ::ng-deep .mat-form-field-subscript-wrapper {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.role-field {
+  margin-top: 1.25rem;
 }

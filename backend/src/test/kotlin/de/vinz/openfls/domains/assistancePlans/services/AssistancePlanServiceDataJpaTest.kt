@@ -216,6 +216,7 @@ class AssistancePlanServiceDataJpaTest {
             LocalDate.of(2025, 1, 1),
             LocalDate.of(2024, 1, 1)
         )
+        assertThat(result.map { it.institutionName }).containsOnly("Inst")
     }
 
     @Test
