@@ -31,9 +31,17 @@ class EmployeeService(
         private val passwordEncoder: PasswordEncoder,
         private val modelMapper: ModelMapper
 ) {
+    companion object {
+        private val USERNAME_PATTERN = Regex("^[A-Za-z0-9ÄÖÜäöüß]+$")
+    }
 
     @Transactional
     fun create(valueDto: EmployeeDto): EmployeeDto {
+        val username = valueDto.access?.username ?: throw IllegalArgumentException("employee access is null")
+        validateUsername(username)
+        if (employeeAccessRepository.getEmployeeByUsername(username) != null)
+            throw IllegalArgumentException("username already exists")
+
         val employee = modelMapper.map(valueDto, Employee::class.java).apply {
             id = null
             permissions = null
@@ -41,8 +49,8 @@ class EmployeeService(
             contingents = null
             access = EmployeeAccess(
                 id = null,
-                username = valueDto.access?.username.orEmpty(),
-                password = passwordEncoder.encode(valueDto.access?.username.orEmpty()),
+                username = username,
+                password = passwordEncoder.encode(username),
                 role = valueDto.access?.role ?: 3,
                 employee = this
             )
@@ -72,6 +80,7 @@ class EmployeeService(
     fun create(value: Employee): Employee {
         if (value.access == null)
             throw IllegalArgumentException("employee access is null")
+        validateUsername(value.access!!.username)
         if (value.access!!.password.isEmpty())
             throw IllegalArgumentException("password is empty")
         if (employeeAccessRepository.getEmployeeByUsername(value.access!!.username) != null)
@@ -286,5 +295,14 @@ class EmployeeService(
             } }
             .map { unprofessionalService.create(it) }
             .toMutableSet()
+    }
+
+    private fun validateUsername(username: String) {
+        if (username.isEmpty())
+            throw IllegalArgumentException("username is empty")
+        if (username.length < 6)
+            throw IllegalArgumentException("username is too short")
+        if (!USERNAME_PATTERN.matches(username))
+            throw IllegalArgumentException("username contains invalid characters")
     }
 }
