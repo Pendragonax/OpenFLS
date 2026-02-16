@@ -98,6 +98,8 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/institutions/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/institutions/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/institutions/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/contingents/evaluations/employee/**").authenticated()
+                        .requestMatchers("/absences/**").authenticated()
                         .requestMatchers("/contingents/**").hasAnyAuthority("ADMIN", "LEAD")
                         .requestMatchers(HttpMethod.POST, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
                         .requestMatchers(HttpMethod.PUT, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")

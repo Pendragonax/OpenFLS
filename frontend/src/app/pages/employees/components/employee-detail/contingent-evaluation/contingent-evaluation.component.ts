@@ -7,7 +7,6 @@ import {Router} from "@angular/router";
 import {DateService} from "../../../../../shared/services/date.service";
 import {CalendarInformationDTO} from "../../../../../shared/dtos/calendar-information-dto.model";
 import {AbsenceService} from "../../../../../shared/services/absence.service";
-import {UserService} from "../../../../../shared/services/user.service";
 import {ContingentsService} from "../../../../../shared/services/contingents.service";
 
 @Component({
@@ -35,14 +34,12 @@ export class ContingentEvaluationComponent implements OnInit {
   serviceMyBaseUrl = "services/my"
   menuPosition = { x: 0, y: 0 };
   lastSelectedDate: Date | null = null;
-  userId: number = 0;
 
   constructor(
     private contingentService: ContingentsService,
     private router: Router,
     private dateService: DateService,
     private absenceService: AbsenceService,
-    private userService: UserService,
   ) { }
 
   ngOnInit(): void {
@@ -52,7 +49,6 @@ export class ContingentEvaluationComponent implements OnInit {
   loadValues() {
     this.isSubmitting = true;
 
-    this.userService.user$.subscribe(value => this.userId = value.id);
     this.employee$
       .pipe(switchMap((value: EmployeeDto) => {
         this.employee = value;
@@ -135,7 +131,7 @@ export class ContingentEvaluationComponent implements OnInit {
       return;
     }
 
-    this.absenceService.create(this.userId, this.lastSelectedDate).subscribe(() => {
+    this.absenceService.create(this.lastSelectedDate).subscribe(() => {
       this.loadValues();
     });
   }
