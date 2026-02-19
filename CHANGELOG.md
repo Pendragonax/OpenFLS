@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## 3.0.1
+
+#### Bug
+- fix wrong docker images
+
+
 ## 3.0.0
 
 #### Features
