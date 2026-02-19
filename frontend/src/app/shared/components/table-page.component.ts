@@ -8,9 +8,10 @@ import {HelperService} from "../services/helper.service";
 import {PageEvent} from "@angular/material/paginator";
 
 @Component({
-  selector: 'app-table-page',
-  template: ``,
-  styleUrls: []
+    selector: 'app-table-page',
+    template: ``,
+    styleUrls: [],
+    standalone: false
 })
 export abstract class TablePageComponent<T, R> implements OnInit {
 

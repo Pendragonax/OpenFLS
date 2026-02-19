@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -23,7 +23,9 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet
 import org.springframework.security.oauth2.jwt.JwtEncoder
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters
 import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Value
 import java.time.Instant
+import java.time.Duration
 import java.util.*
 import java.util.stream.Collectors
 
@@ -34,20 +36,22 @@ class AuthenticationService(
         private val authenticationManager: AuthenticationManager,
         private val jwtEncoder: JwtEncoder,
         private val passwordEncoder: PasswordEncoder,
-        private val modelMapper: ModelMapper
+        private val modelMapper: ModelMapper,
+        @param:Value("\${server.servlet.session.timeout}") private val sessionTimeout: Duration
 ) {
+    @Transactional(readOnly = true)
     fun login(username: String, password: String): AuthenticationResponseDto {
         val authentication = authenticationManager
                 .authenticate(UsernamePasswordAuthenticationToken(username, password))
 
-        val user = authentication?.principal as CustomUserDetails
+        val user = authentication.principal as CustomUserDetails
 
         val now = Instant.now()
-        val expireAfterSeconds = System.getenv("SESSION_TIMEOUT").toLong()
+        val expireAfterSeconds = sessionTimeout.seconds
 
-        val scope = authentication.authorities?.stream()
-                ?.map(GrantedAuthority::getAuthority)
-                ?.collect(Collectors.joining(" "))
+        val scope = authentication.authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(" "))
 
         val claims = JwtClaimsSet.builder()
                 .issuer("openfls")
@@ -71,7 +75,7 @@ class AuthenticationService(
     fun changePassword(passwordDto: PasswordDto) {
         val userId = getCurrentUserId()
 
-        val newEncryptedPassword = passwordEncoder.encode(passwordDto.newPassword) ?: passwordDto.newPassword
+        val newEncryptedPassword = passwordEncoder.encode(passwordDto.newPassword).orEmpty()
 
         if (passwordDto.oldPassword.isEmpty())
             throw IllegalArgumentException("old password is empty")
@@ -95,10 +99,12 @@ class AuthenticationService(
 
     fun getCurrentUserId(): Long {
         val authentication = SecurityContextHolder.getContext().authentication
+                ?: throw IllegalStateException("No authentication present")
         val jwt: Jwt = authentication.principal as Jwt
         return jwt.getClaimAsString("id").toLong()
     }
 
+    @Transactional(readOnly = true)
     fun getCurrentEmployeeDto(): Optional<EmployeeDto> {
         val employeeOptional = getCurrentEmployee()
 
@@ -112,13 +118,14 @@ class AuthenticationService(
                 }
                 permissions = employee.permissions
                         ?.map { modelMapper.map(it, PermissionDto::class.java) }
-                        ?.toTypedArray()
+                        ?.toList()
             })
         }
 
         return Optional.empty()
     }
 
+    @Transactional(readOnly = true)
     fun getCurrentEmployee(): Optional<Employee> {
         val userId = getCurrentUserId()
 
@@ -142,7 +149,7 @@ class AuthenticationService(
                 access = EmployeeAccess(
                         id = 0,
                         username = "admin",
-                        password = passwordEncoder.encode("admin"),
+                        password = passwordEncoder.encode("admin").orEmpty(),
                         role = EUserRoles.ADMIN.id,
                         employee = null
                 ),

@@ -1,0 +1,22 @@
+.home-panel {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(20, 35, 70, 0.08);
+}
+
+.home-panel-header {
+  padding: 0 20px;
+  min-height: 56px;
+}
+
+.home-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.home-panel-title mat-icon {
+  color: #6a7386;
+}

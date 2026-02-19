@@ -1,4 +1,4 @@
-[![GitHub release](https://img.shields.io/badge/version-2.0.1-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
+[![GitHub release](https://img.shields.io/badge/version-3.0.0-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
 # OpenFLS
@@ -23,14 +23,14 @@ This will create the default credentials and the keys needed to encrypt the toke
 ```
 
 Make sure you change the credentials in the *secrets* folder (be sure not to leave an empty line at the end).
-In the *.env* file you can make further configurations like the path to the certificate, the forwarded port, etc.
+In the *docker/.env* file you can make further configurations like the path to the certificate, the forwarded port, etc.
 To start the application use the following command:
 
 ``` console
 # DEVELOPMENT-MODE
-docker-compose up
+docker-compose --env-file docker/.env -f docker/docker-compose.yml up
 # PRODUCTION-MODE
-docker-compose -f docker-compose.prod.yml up
+docker-compose --env-file docker/.env -f docker/docker-compose.prod.yml up
 ```
 
 ## Operation
@@ -45,4 +45,4 @@ In the further course this can be changed at any time by the user.
 WiP
 
 ## Backups
-WiP
+See `BACKUP.md` for automatic backup configuration and manual restore steps.

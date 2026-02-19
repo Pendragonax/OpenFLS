@@ -14,9 +14,10 @@ import {ClientInformationForm} from "../../forms/client-information-form";
 import {ClientDto} from "../../../../shared/dtos/client-dto.model";
 
 @Component({
-  selector: 'app-client-detail',
-  templateUrl: './client-detail.component.html',
-  styleUrls: ['./client-detail.component.css']
+    selector: 'app-client-detail',
+    templateUrl: './client-detail.component.html',
+    styleUrls: ['./client-detail.component.css'],
+    standalone: false
 })
 export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> implements OnInit {
 

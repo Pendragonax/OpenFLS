@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnInit, Output, SimpleChanges} from '@angular/core';
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatButtonModule} from "@angular/material/button";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -12,8 +12,7 @@ import {map, startWith} from "rxjs/operators";
 import {EmployeeSolo} from "../../dtos/employee-solo.projection";
 
 @Component({
-  selector: 'app-employee-autocomplete',
-  standalone: true,
+    selector: 'app-employee-autocomplete',
     imports: [
         AsyncPipe,
         MatAutocompleteModule,
@@ -22,12 +21,10 @@ import {EmployeeSolo} from "../../dtos/employee-solo.projection";
         MatIconModule,
         MatInputModule,
         MatOptionModule,
-        NgForOf,
-        NgIf,
         ReactiveFormsModule
     ],
-  templateUrl: './employee-autocomplete.component.html',
-  styleUrl: './employee-autocomplete.component.css'
+    templateUrl: './employee-autocomplete.component.html',
+    styleUrl: './employee-autocomplete.component.css'
 })
 export class EmployeeAutocompleteComponent implements OnInit {
 

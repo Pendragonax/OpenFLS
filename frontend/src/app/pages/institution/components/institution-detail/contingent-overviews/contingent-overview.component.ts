@@ -1,16 +1,16 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ReplaySubject} from "rxjs";
-import {Period} from "../../../../../shared/components/year-month-selection/Period";
 import {ContingentEvaluationDto} from "./dtos/contingent-evaluation-dto.model";
-import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
 import {ContingentEvaluationService} from "./services/contingent-evaluation.service";
 import {MatDialog} from "@angular/material/dialog";
 import {InformationModal} from "../../../../../shared/modals/information/information.modal";
+import {CsvService} from "../../../../../shared/services/csv.service";
 
 @Component({
-  selector: 'app-contingent-overview',
-  templateUrl: './contingent-overview.component.html',
-  styleUrls: ['./contingent-overview.component.css']
+    selector: 'app-contingent-overview',
+    templateUrl: './contingent-overview.component.html',
+    styleUrls: ['./contingent-overview.component.css'],
+    standalone: false
 })
 export class ContingentOverviewComponent implements OnInit {
 
@@ -33,44 +33,39 @@ export class ContingentOverviewComponent implements OnInit {
 
   header$: ReplaySubject<string[]> = new ReplaySubject()
   data$: ReplaySubject<any[][]> = new ReplaySubject()
+  tableHeader: string[] = []
+  tableData: any[][] = []
 
   isGenerating: boolean = false
   isLoadedInitially: boolean = false
   errorOccurred: boolean = false
   contingentOverView: ContingentEvaluationDto | null = null
   year: number = new Date(Date.now()).getFullYear()
-  type: number = 0
-  hourTypes: { name: String, value: number }[] =
-    [{name: "Kontingent [h]", value: 1}, {name: "Geleistet [h]", value: 2}, {name: "Geleistet [%]", value: 3}, {name: "Geleistet summiert [%]", value: 4}, {name: "Nicht geleistet [h]", value: 5}]
+  years: number[] = []
+  hourTypes: { name: string, value: number }[] =
+    [{name: "Kontingent [h]", value: 1}, {name: "Geleistet [h]", value: 2}, {name: "Geleistet [%]", value: 3}, {name: "Geleistet summiert [%]", value: 4}, {name: "Nicht geleistet [h]", value: 5}, {name: "Abwesenheitstage", value: 6}]
   selectedHourType: number = 0
 
-  filterForm = new UntypedFormGroup({
-    hourType: new UntypedFormControl({value: '1'})
-    })
-
-  public get hourTypeControl() { return this.filterForm.get('hourType'); }
-
   constructor(private contingentEvaluationService: ContingentEvaluationService,
-              private dialog: MatDialog) { }
+              private dialog: MatDialog,
+              private csvService: CsvService) { }
 
   ngOnInit(): void {
+    this.years = this.buildYearOptions()
     this.getHeader()
-    this.initFormControls()
+    this.selectedHourType = this.hourTypes[0]?.value ?? 0
+    this.loadValues()
   }
 
-  initFormControls() {
-    this.hourTypeControl?.valueChanges.subscribe({
-      next: value => {
-        this.selectedHourType = value
-        this.isLoadedInitially = this.contingentOverView != null
-        this.getData()
-      }
-    })
+  onYearChanged(year: number) {
+    this.year = year
+    this.loadValues()
   }
 
-  onDateSelectionChanged(event: Period) {
-    this.year = event.year
-    this.loadValues();
+  onHourTypeChanged(value: number) {
+    this.selectedHourType = value
+    this.isLoadedInitially = this.contingentOverView != null
+    this.getData()
   }
 
   public loadValues() {
@@ -102,7 +97,8 @@ export class ContingentOverviewComponent implements OnInit {
   }
 
   public getHeader() {
-    this.header$.next(this.getYearHeader())
+    this.tableHeader = this.getYearHeader()
+    this.header$.next(this.tableHeader)
   }
 
   public getData() {
@@ -134,6 +130,10 @@ export class ContingentOverviewComponent implements OnInit {
             values = employee.missingHours
             break
           }
+          case 6: {
+            values = employee.absenceDays
+            break
+          }
           default: {
             values = employee.contingentHours
             break
@@ -148,7 +148,15 @@ export class ContingentOverviewComponent implements OnInit {
       }
     }
 
+    this.tableData = result
     this.data$.next(result)
+  }
+
+  exportTable() {
+    if (this.tableData.length === 0) {
+      return
+    }
+    this.csvService.exportToCsvWithHeader("ContingentOverview", this.tableData, this.tableHeader)
   }
 
   private getYearHeader(): string[] {
@@ -159,6 +167,11 @@ export class ContingentOverviewComponent implements OnInit {
       result.push(col.toString())
     }
     return result
+  }
+
+  private buildYearOptions(): number[] {
+    const currentYear = new Date(Date.now()).getFullYear()
+    return Array.from({length: 11}, (_, index) => currentYear - index)
   }
 
 }

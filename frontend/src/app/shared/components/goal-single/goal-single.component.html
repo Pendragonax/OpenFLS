@@ -13,11 +13,15 @@
   </mat-card-content>
   <mat-card-footer>
     <div class="m-1">
-      <mat-chip-set *ngIf="goal.hours.length > 0">
-        <mat-chip class="mat-hour-chip" *ngFor="let hour of goal.hours">
-          <span>{{hour.weeklyHours}}h | {{hour.hourType.title}}</span>
-        </mat-chip>
-      </mat-chip-set>
+    @if (goal.hours.length > 0) {
+        <mat-chip-set>
+          @for (hour of goal.hours; track $index) {
+            <mat-chip class="mat-hour-chip">
+              <span>{{formatWeeklyMinutes(hour.weeklyMinutes)}}h | {{hour.hourType.title}}</span>
+            </mat-chip>
+          }
+        </mat-chip-set>
+      }
     </div>
   </mat-card-footer>
 </mat-card>

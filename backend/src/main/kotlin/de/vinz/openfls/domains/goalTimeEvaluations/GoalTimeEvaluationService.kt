@@ -12,6 +12,7 @@ import de.vinz.openfls.domains.goalTimeEvaluations.models.YearMonthDoubleValue
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
+import org.springframework.transaction.annotation.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -22,6 +23,7 @@ import java.time.YearMonth
 import kotlin.math.roundToInt
 
 @Service
+@Transactional(readOnly = true)
 class GoalTimeEvaluationService(
         private val serviceRepository: ServiceRepository,
         private val assistancePlanRepository: AssistancePlanRepository
@@ -333,7 +335,7 @@ class GoalTimeEvaluationService(
         val hourTypeExists = assistancePlan.hours.any { it.hourType!!.id == hourTypeId }
 
         val dailyHours = if (hourTypeExists) {
-            ((assistancePlan.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
+            ((assistancePlan.hours.first { it.hourType!!.id == hourTypeId }.weeklyMinutes) / 7.0) / 60.0
         } else {
             0.0
         }
@@ -346,7 +348,7 @@ class GoalTimeEvaluationService(
                                         start: LocalDate,
                                         end: LocalDate,
                                         sum: Boolean): List<YearMonthDoubleValue> {
-        val dailyHours = ((goal.hours.first { it.hourType!!.id == hourTypeId }.weeklyHours) / 7)
+        val dailyHours = ((goal.hours.first { it.hourType!!.id == hourTypeId }.weeklyMinutes) / 7.0) / 60.0
         return getApprovedHoursMonthly(dailyHours, start, end, sum)
     }
 

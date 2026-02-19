@@ -8,6 +8,10 @@ import {LoginComponent} from './pages/login/login.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AuthInterceptor} from "./interceptors/auth.interceptor";
 import {HomeComponent} from './pages/home/home.component';
+import {HomeHeaderComponent} from "./pages/home/components/home-header/home-header.component";
+import {HomeInfoPanelComponent} from "./pages/home/components/home-info-panel/home-info-panel.component";
+import {HomePermissionsTableComponent} from "./pages/home/components/home-permissions-table/home-permissions-table.component";
+import {HomePasswordPanelComponent} from "./pages/home/components/home-password-panel/home-password-panel.component";
 import {UserService} from "./shared/services/user.service";
 import {TokenStorageService} from "./shared/services/token.storage.service";
 import {EmployeesComponent} from './pages/employees/employees.component';
@@ -50,21 +54,16 @@ import {SponsorDetailComponent} from './pages/sponsor/components/sponsor-detail/
 import {ClientComponent} from './pages/client/client.component';
 import {ClientNewComponent} from './pages/client/components/client-new/client-new.component';
 import {ClientDetailComponent} from './pages/client/components/client-detail/client-detail.component';
-import {AssistancePlansComponent} from './shared/components/assistance-plans/assistance-plans.component';
-import {
-  AssistancePlanNewComponent
-} from './shared/components/assistance-plans/components/assistance-plan-new/assistance-plan-new.component';
-import {
-  AssistancePlanDetailComponent
-} from './shared/components/assistance-plans/components/assistance-plan-detail/assistance-plan-detail.component';
-import {
-  GoalsComponent
-} from './shared/components/assistance-plans/components/assistance-plan-detail/components/goals/goals.component';
+import {AssistancePlansComponent} from './pages/assistance-plans/assistance-plans/assistance-plans.component';
 import {HourTypeComponent} from './pages/hour-type/hour-type.component';
+import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
+import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
-  AssistancePlanHoursComponent
-} from './shared/components/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component';
-import {ServiceDetailComponent} from './pages/service-detail/service-detail.component';
+  ServiceClientEntriesComponent
+} from "./pages/my-services/components/service-client-entries/service-client-entries.component";
+import {
+  ServiceAssistanceInfoComponent
+} from "./pages/my-services/components/service-assistance-info/service-assistance-info.component";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {MatPaginatorIntl, MatPaginatorModule} from "@angular/material/paginator";
@@ -92,6 +91,7 @@ import {
 import {AssistancePlanAnalysisComponent} from './pages/assistance-plan-analysis/assistance-plan-analysis.component';
 import {GoalSingleComponent} from './shared/components/goal-single/goal-single.component';
 import {MatChipsModule} from "@angular/material/chips";
+import {MatDividerModule} from "@angular/material/divider";
 import {YearMonthSelectionComponent} from './shared/components/year-month-selection/year-month-selection.component';
 import {
   AssistancePlanTimeEvaluationFilterComponent
@@ -113,6 +113,9 @@ import {
 import {
   ContingentOverviewComponent
 } from "./pages/institution/components/institution-detail/contingent-overviews/contingent-overview.component";
+import {
+  ContingentOverviewToolbarComponent
+} from "./pages/institution/components/institution-detail/contingent-overviews/contingent-overview-toolbar/contingent-overview-toolbar.component";
 import {SearchFieldComponent} from "./shared/components/search-field/search-field.component";
 import {MyServicesComponent} from "./pages/my-services/my-services.component";
 import {InstitutionSelectComponent} from "./shared/components/institution-select/institution-select.component";
@@ -123,6 +126,18 @@ import {AllServicesComponent} from "./pages/all-services/all-services.component"
 import {ClientAutocompleteComponent} from "./shared/components/client-autocomplete/client-autocomplete.component";
 import {ServiceTableComponent} from "./shared/components/service-table/service-table.component";
 import {EmployeeAutocompleteComponent} from "./shared/components/employee-autocomplete/employee-autocomplete.component";
+import {MatMenu, MatMenuItem, MatMenuTrigger} from "@angular/material/menu";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
+import {
+  AssistancePlanNewPageComponent
+} from "./pages/assistance-plans/assistance-plan-new/assistance-plan-new.component";
+import {
+  AssistancePlanGoalsComponent
+} from "./pages/assistance-plans/components/assistance-plan-goals/assistance-plan-goals.component";
+import {
+  AssistancePlanHoursPageComponent
+} from "./pages/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component";
+import {AssistancePlanEditComponent} from "./pages/assistance-plans/assistance-plan-edit/assistance-plan-edit.component";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -133,6 +148,10 @@ const routes: Routes = [
         AppComponent,
         LoginComponent,
         HomeComponent,
+        HomeHeaderComponent,
+        HomeInfoPanelComponent,
+        HomePermissionsTableComponent,
+        HomePasswordPanelComponent,
         EmployeesComponent,
         EmployeeNewComponent,
         InstitutionComponent,
@@ -151,12 +170,11 @@ const routes: Routes = [
         ClientNewComponent,
         ClientDetailComponent,
         AssistancePlansComponent,
-        AssistancePlanNewComponent,
-        AssistancePlanDetailComponent,
-        GoalsComponent,
         HourTypeComponent,
-        AssistancePlanHoursComponent,
-        ServiceDetailComponent,
+        ServiceNewComponent,
+        ServiceEditComponent,
+        ServiceClientEntriesComponent,
+        ServiceAssistanceInfoComponent,
         UnprofesssionalComponent,
         InformationRowComponent,
         ContingentEvaluationComponent,
@@ -179,50 +197,57 @@ const routes: Routes = [
         ObjectTableComponent,
         ContingentEvaluationComponent,
         ContingentOverviewComponent,
+        ContingentOverviewToolbarComponent,
         MyServicesComponent,
         AllServicesComponent,
         ClientAutocompleteComponent,
-        ServiceTableComponent
+        ServiceTableComponent,
+        AssistancePlanNewPageComponent,
+        AssistancePlanEditComponent,
+        AssistancePlanGoalsComponent,
+        AssistancePlanHoursPageComponent
     ],
     exports: [
         ShowOnRoleDirective
     ],
     bootstrap: [AppComponent], imports: [RouterModule.forRoot(routes),
-        BrowserModule,
-        AppRoutingModule,
-        ReactiveFormsModule,
-        NgbModule,
-        FormsModule,
-        BrowserAnimationsModule,
-        MatIconModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatStepperModule,
-        MatInputModule,
-        MatTabsModule,
-        MatCheckboxModule,
-        MatSelectModule,
-        MatTableModule,
-        MatCardModule,
-        MatProgressSpinnerModule,
-        MatTooltipModule,
-        MatListModule,
-        MatSidenavModule,
-        MatSnackBarModule,
-        MatExpansionModule,
-        MatSortModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatAutocompleteModule,
-        MatToolbarModule,
-        MatPaginatorModule,
-        MatRadioModule,
-        MatDialogModule,
-        MatChipsModule,
-        SearchFieldComponent,
-        InstitutionSelectComponent,
-        DateCompleteSelectionComponent,
-        EmployeeAutocompleteComponent], providers: [
+    BrowserModule,
+    AppRoutingModule,
+    ReactiveFormsModule,
+    NgbModule,
+    FormsModule,
+    BrowserAnimationsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatStepperModule,
+    MatInputModule,
+    MatTabsModule,
+    MatCheckboxModule,
+    MatSelectModule,
+    MatTableModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatListModule,
+    MatSidenavModule,
+    MatSnackBarModule,
+    MatExpansionModule,
+    MatSortModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatAutocompleteModule,
+    MatToolbarModule,
+    MatPaginatorModule,
+    MatRadioModule,
+    MatDialogModule,
+    MatChipsModule,
+    MatDividerModule,
+    MatSlideToggleModule,
+    SearchFieldComponent,
+    InstitutionSelectComponent,
+    DateCompleteSelectionComponent,
+    EmployeeAutocompleteComponent, MatMenu, MatMenuTrigger, MatMenuItem], providers: [
         { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
         { provide: MatPaginatorIntl, useValue: getGermanPaginatorIntl() },
         TokenStorageService,

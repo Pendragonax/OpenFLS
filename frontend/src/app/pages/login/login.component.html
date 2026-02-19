@@ -11,10 +11,12 @@
                 <mat-form-field appearance="fill">
                   <mat-label>Benutzername</mat-label>
                   <input matInput formControlName="username" required>
-                  <mat-icon [hidden]="!loginFailed"
+                  @if (loginFailed) {
+                    <mat-icon
                             [color]="'warn'"
                             matSuffix
                             title="Fehler beim Login">report_problem</mat-icon>
+                  }
                 </mat-form-field>
               </div>
 
@@ -22,19 +24,22 @@
                 <mat-form-field appearance="fill">
                   <mat-label>Password</mat-label>
                   <input matInput type="password" formControlName="password" required>
-                  <mat-icon [hidden]="!loginFailed"
+                  @if (loginFailed) {
+                    <mat-icon
                             [color]="'warn'"
                             matSuffix
                             title="Fehler beim Login">report_problem</mat-icon>
+                  }
                 </mat-form-field>
               </div>
 
               <div class="row">
                 <button class="btn btn-lg btn-primary pull-xs-right" type="submit">Login</button>
-                <mat-spinner [diameter]="25"
+                @if (isSubmitting) {
+                  <mat-spinner [diameter]="25"
                              class="loading"
-                             [color]="'accent'"
-                             [hidden]="!isSubmitting"></mat-spinner>
+                             [color]="'accent'"></mat-spinner>
+                }
               </div>
             </div>
           </fieldset>

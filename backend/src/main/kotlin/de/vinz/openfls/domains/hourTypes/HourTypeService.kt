@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.hourTypes
 
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,7 +23,7 @@ class HourTypeService(private val hourTypeRepository: HourTypeRepository) {
         hourTypeRepository.deleteById(id)
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     fun getAll(): List<HourTypeDto> {
         val entities = hourTypeRepository.findAll()
                 .toList()
@@ -31,15 +31,18 @@ class HourTypeService(private val hourTypeRepository: HourTypeRepository) {
         return entities.map { HourTypeDto.from(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getDtoById(id: Long): HourTypeDto? {
         val entity = hourTypeRepository.findById(id).orElse(null)
         return entity?.let { HourTypeDto.from(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getById(id: Long): HourType? {
         return hourTypeRepository.findById(id).orElse(null)
     }
 
+    @Transactional(readOnly = true)
     fun existsById(id: Long): Boolean {
         return hourTypeRepository.existsById(id)
     }

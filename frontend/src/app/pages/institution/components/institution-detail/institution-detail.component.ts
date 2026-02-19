@@ -17,9 +17,10 @@ import {ServiceService} from "../../../../shared/services/service.service";
 import {Service} from "../../../../shared/dtos/service.projection";
 
 @Component({
-  selector: 'app-institution-detail',
-  templateUrl: './institution-detail.component.html',
-  styleUrls: ['./institution-detail.component.css']
+    selector: 'app-institution-detail',
+    templateUrl: './institution-detail.component.html',
+    styleUrls: ['./institution-detail.component.css'],
+    standalone: false
 })
 export class InstitutionDetailComponent extends DetailPageComponent<InstitutionViewModel> implements OnInit {
   // VARs

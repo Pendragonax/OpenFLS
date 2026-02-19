@@ -11,12 +11,14 @@ import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
+@Transactional(readOnly = true)
 class OverviewService(
     private val accessService: AccessService,
     private val serviceRepository: ServiceRepository,
@@ -535,12 +537,12 @@ class OverviewService(
         } else if (assistancePlanDto.hours.size > 0) {
             assistancePlanDto.hours
                 .filter { it.hourTypeId == hourTypeId }
-                .sumOf { it.weeklyHours / 7 }
+                .sumOf { it.weeklyMinutes / 7.0 / 60.0 }
         } else {
             assistancePlanDto.goals
                 .flatMap { it.hours }
                 .filter { it.hourTypeId == hourTypeId }
-                .sumOf { it.weeklyHours / 7 }
+                .sumOf { it.weeklyMinutes / 7.0 / 60.0 }
         }
 
     @Throws(IllegalTimeException::class)

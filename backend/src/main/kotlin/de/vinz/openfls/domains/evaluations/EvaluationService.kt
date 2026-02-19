@@ -9,6 +9,7 @@ import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.services.DateService
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -23,6 +24,7 @@ class EvaluationService(
         private val modelMapper: ModelMapper
 ) {
 
+    @Transactional
     fun create(value: EvaluationRequestDto, createdBy: Employee): EvaluationResponseDto {
         val entity = modelMapper.map(value, Evaluation::class.java)
 
@@ -36,6 +38,7 @@ class EvaluationService(
         return saveEvaluation(entity, createdBy)
     }
 
+    @Transactional
     fun update(value: EvaluationRequestDto, updatedBy: Employee): EvaluationResponseDto {
         val existingEntity =
                 evaluationRepository
@@ -52,26 +55,31 @@ class EvaluationService(
         return saveEvaluation(existingEntity, updatedBy)
     }
 
+    @Transactional
     fun delete(id: Long) {
         return evaluationRepository.deleteById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getAll(): List<EvaluationResponseDto> {
         val entities = evaluationRepository.findAll().toList()
 
         return entities.map { convertEntityToDto(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getById(id: Long): EvaluationResponseDto? {
         return evaluationRepository.findByIdOrNull(id)?.let { convertEntityToDto(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getByGoalId(goalId: Long): List<EvaluationResponseDto> {
         val evaluations = evaluationRepository.findAllByGoalId(goalId)
 
         return evaluations.map { convertEntityToDto(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getByAssistancePlanId(assistancePlanId: Long): List<EvaluationResponseDto>? {
         val assistancePlan = assistancePlanRepository.findById(assistancePlanId)
 
@@ -84,6 +92,7 @@ class EvaluationService(
         return null
     }
 
+    @Transactional(readOnly = true)
     fun getByAssistancePlanIdAndYear(assistancePlanId: Long, year: Int): GenericYearlyResponseDto<GoalEvaluationsYearDto>? {
         val assistancePlan = assistancePlanRepository
                 .findById(assistancePlanId)
@@ -97,6 +106,7 @@ class EvaluationService(
         }
     }
 
+    @Transactional(readOnly = true)
     fun existsById(id: Long): Boolean {
         return evaluationRepository.existsById(id)
     }

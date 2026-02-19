@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {combineLatest, Observable, ReplaySubject} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
@@ -11,12 +11,7 @@ import {InstitutionService} from "../../shared/services/institution.service";
 import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {SponsorService} from "../../shared/services/sponsor.service";
 import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from "@angular/material/core";
-import {
-  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
-  MAT_MOMENT_DATE_FORMATS,
-  MomentDateAdapter
-} from "@angular/material-moment-adapter";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
 import {EOverviewType} from "./enums/EOverviewType";
 import {Converter} from "../../shared/services/converter.helper";
 import {
@@ -34,22 +29,25 @@ import {
 import {
   AssistancePlansAnalysisMonthDto
 } from "./dtos/assistance-plans-analysis-month-dto";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: 'app-service-evaluation-overview',
-  templateUrl: './service-evaluation-overview.component.html',
-  styleUrls: ['./service-evaluation-overview.component.css'],
-  providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
-    {
-      provide: DateAdapter,
-      useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
-    },
-    {provide: MAT_DATE_FORMATS, useValue: MAT_MOMENT_DATE_FORMATS},
-  ]
+    selector: 'app-service-evaluation-overview',
+    templateUrl: './service-evaluation-overview.component.html',
+    styleUrls: ['./service-evaluation-overview.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: NativeDateAdapter,
+            deps: [MAT_DATE_LOCALE],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
+    ],
+    standalone: false
 })
 export class ServiceEvaluationOverviewComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   readonly FIXED_COLUMN_FROM_INDEX: number = 2
   readonly COMBINATION_COLUMN_NAME: string = "Gesamt"
   readonly CLIENT_COLUMN_HEADER: string = "Klient"
@@ -129,7 +127,9 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.hourTypeService.allValues$,
       this.institutionService.allValues$,
       this.sponsorService.allValues$
-    ]).subscribe(([hourTypes, institutions, sponsors]) => {
+    ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(([hourTypes, institutions, sponsors]) => {
       this.hourTypes = []
       this.hourTypes.push(...hourTypes);
       this.areas = [this.areaAll]
@@ -143,7 +143,9 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   }
 
   initFormControlSubscriptions() {
-    this.periodModeControl.valueChanges.subscribe(value => {
+    this.periodModeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
       if (this.month == 0) {
         this.month = new Date().getMonth() + 1
       }
@@ -152,25 +154,33 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.validateGenerationStatus();
     });
 
-    this.hourTypeControl.valueChanges.subscribe(value => {
+    this.hourTypeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
       this.selectedHourType = this.hourTypes.find(it => it.id == value) ?? null;
       this.updateUrl();
       this.validateGenerationStatus();
     });
 
-    this.areaControl.valueChanges.subscribe(value => {
+    this.areaControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
       this.selectedArea = this.areas.find(it => it.id == value) ?? null;
       this.updateUrl();
       this.validateGenerationStatus();
     });
 
-    this.sponsorControl.valueChanges.subscribe(value => {
+    this.sponsorControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
       this.selectedSponsor = this.sponsors.find(it => it.id == value) ?? null;
       this.updateUrl();
       this.validateGenerationStatus();
     });
 
-    this.valueTypeControl.valueChanges.subscribe(value => {
+    this.valueTypeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
       this.selectedValueType = this.getEnumByValue(EOverviewType, value) ?? null;
       this.updateUrl();
       this.validateGenerationStatus();
@@ -178,7 +188,9 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   }
 
   loadURLParams() {
-    this.route.params.subscribe(params => {
+    this.route.params
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
       this.periodModeControl.setValue(params['month'] != null && params['month'] != '0' ? '2' : '1');
       this.year = params['year'] != null ? +params['year'] : new Date(Date.now()).getFullYear();
 
@@ -241,11 +253,13 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     // Year
     if (this.selectedPeriodMode == this.PERIOD_MODE_YEARLY) {
       this.loadYearlyData()
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(this.getDataObserver(this.getTableHeaderStrings()))
     }
     // Month
     else {
       this.loadMonthlyData()
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(this.getDataObserverWithoutSeparateHeader())
     }
   }

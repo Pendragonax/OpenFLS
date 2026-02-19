@@ -1,9 +1,0 @@
-td , th {
-  white-space: normal;
-  word-wrap: break-word;
-  max-width: 150px;
-}
-
-::ng-deep .cdk-overlay-container {
-  z-index: 1200 !important;
-}

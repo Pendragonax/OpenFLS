@@ -2,26 +2,31 @@ package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
+import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateGoalDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateHourDto
+import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.goals.entities.GoalHour
+import de.vinz.openfls.domains.goals.repositories.GoalHourRepository
+import de.vinz.openfls.domains.goals.repositories.GoalRepository
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.hourTypes.HourTypeService
-import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.hourTypes.HourTypeDto
+import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.institutions.InstitutionService
-import de.vinz.openfls.domains.services.ServiceService
+import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.domains.sponsors.SponsorService
-import de.vinz.openfls.services.*
-import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -29,199 +34,253 @@ import java.time.temporal.ChronoUnit
 class AssistancePlanService(
         private val assistancePlanRepository: AssistancePlanRepository,
         private val assistancePlanHourRepository: AssistancePlanHourRepository,
+        private val goalRepository: GoalRepository,
+        private val goalHourRepository: GoalHourRepository,
         private val serviceService: ServiceService,
         private val clientService: ClientService,
         private val institutionService: InstitutionService,
         private val sponsorService: SponsorService,
         private val hourTypeService: HourTypeService,
         private val modelMapper: ModelMapper
-) : GenericService<AssistancePlan> {
-
-    private val logger: Logger = LoggerFactory.getLogger(AssistancePlanService::class.java)
+) {
 
     @Transactional
-    fun create(valueDto: AssistancePlanDto): AssistancePlanDto {
-        val entity = modelMapper.map(valueDto, AssistancePlan::class.java)
+    fun create(valueDto: AssistancePlanCreateDto): AssistancePlanDto {
+        validateHoursPlacement(valueDto)
+
+        val entity = AssistancePlan().apply {
+            start = valueDto.start
+            end = valueDto.end
+        }
 
         entity.client = clientService.getById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
-        entity.institution = institutionService.getById(valueDto.institutionId)
+        entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
         entity.sponsor = sponsorService.getById(valueDto.sponsorId)
                 ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
         entity.hours = valueDto.hours
-                .map { modelMapper.map(it, AssistancePlanHour::class.java) }
-                .map { it.apply {
-                    hourType = hourTypeService.getById(it.hourType!!.id)
-                            ?: throw IllegalArgumentException("hour type with id ${hourType?.id} not found")
-                } }
-                .toMutableSet()
-
-        val savedEntity = this.create(entity)
-
-        valueDto.apply {
-            id = savedEntity.id
-            hours = savedEntity.hours
-                    .map { modelMapper.map(it, AssistancePlanHourDto::class.java) }
-                    .toMutableSet()
-        }
-
-        return valueDto
-    }
-
-    @Transactional
-    override fun create(value: AssistancePlan): AssistancePlan {
-        if (value.id > 0)
-            throw IllegalArgumentException("id is set")
-
-        // backup hours
-        val hours = value.hours
-        value.goals = mutableSetOf()
-        value.hours = mutableSetOf()
-
-        // save
-        val entity = assistancePlanRepository.save(value)
-
-        // add hours
-        entity.hours = hours
-                .map {
-                    assistancePlanHourRepository
-                            .save(it.apply {
-                                id = 0
-                                assistancePlan = entity
-                            })
+                .map { hourDto ->
+                    AssistancePlanHour().apply {
+                        weeklyMinutes = hourDto.weeklyMinutes
+                        hourType = hourTypeService.getById(hourDto.hourTypeId)
+                            ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
+                        assistancePlan = entity
+                    }
                 }
                 .toMutableSet()
 
-        return entity
+        entity.goals = valueDto.goals.map { goalDto ->
+            val goalEntity = Goal().apply {
+                title = goalDto.title
+                description = goalDto.description
+                assistancePlan = entity
+                institution = goalDto.institutionId?.let { institutionId ->
+                    institutionService.getEntityById(institutionId)
+                        ?: throw IllegalArgumentException("institution [id = $institutionId] not found")
+                }
+            }
+            goalEntity.hours = goalDto.hours.map { hourDto ->
+                GoalHour().apply {
+                    weeklyMinutes = hourDto.weeklyMinutes
+                    hourType = hourTypeService.getById(hourDto.hourTypeId)
+                        ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
+                    goal = goalEntity
+                }
+            }.toMutableSet()
+            goalEntity
+        }.toMutableSet()
+
+        val savedEntity = assistancePlanRepository.save(entity)
+
+        return mapToDto(savedEntity)
+    }
+
+    private fun validateHoursPlacement(valueDto: AssistancePlanCreateDto) {
+        val hasPlanHours = valueDto.hours.isNotEmpty()
+        val hasGoalHours = valueDto.goals.any { it.hours.isNotEmpty() }
+
+        if (hasPlanHours && hasGoalHours) {
+            throw IllegalArgumentException(
+                "Stunden dürfen entweder direkt im Hilfeplan oder in den Zielen hinterlegt sein, nicht in beiden Bereichen gleichzeitig."
+            )
+        }
     }
 
     @Transactional
-    fun update(id: Long, valueDto: AssistancePlanDto): AssistancePlanDto {
+    fun update(id: Long, valueDto: AssistancePlanUpdateDto): AssistancePlanDto {
         if (id != valueDto.id)
             throw IllegalArgumentException("path id and dto id are not the same")
         if (!existsById(id))
             throw IllegalArgumentException("assistance plan not found")
+        validateHoursPlacement(valueDto)
 
-        val entity = modelMapper.map(valueDto, AssistancePlan::class.java)
+        val entity = assistancePlanRepository.findByIdOrNull(id)
+            ?: throw IllegalArgumentException("assistance plan not found")
+
+        entity.start = valueDto.start
+        entity.end = valueDto.end
 
         entity.client = clientService.getById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
-        entity.institution = institutionService.getById(valueDto.institutionId)
+        entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
         entity.sponsor = sponsorService.getById(valueDto.sponsorId)
                 ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
-        entity.hours = valueDto.hours
-                .map { modelMapper.map(it, AssistancePlanHour::class.java) }
-                .map { it.apply {
-                    hourType = hourTypeService.getById(it.hourType!!.id)
-                            ?: throw IllegalArgumentException("hour type with id ${hourType!!.id} not found")
-                } }
-                .toMutableSet()
 
-        entity.hours.forEach { logger.info(it.id.toString())}
+        val planHours = valueDto.hours
+            .map { hourDto ->
+                AssistancePlanHour().apply {
+                    this.id = hourDto.id
+                    weeklyMinutes = hourDto.weeklyMinutes
+                    hourType = hourTypeService.getById(hourDto.hourTypeId)
+                        ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
+                    assistancePlan = entity
+                }
+            }
 
-        val savedEntity = update(entity)
+        assistancePlanHourRepository
+            .findByAssistancePlanId(id)
+            .filter { existingHour -> !planHours.any { hour -> hour.id > 0 && hour.id == existingHour.id } }
+            .forEach { assistancePlanHourRepository.deleteById(it.id) }
 
-        savedEntity.hours.forEach { logger.info(it.id.toString())}
+        entity.hours = planHours
+            .map { hour ->
+                assistancePlanHourRepository.save(hour.apply {
+                    assistancePlan = entity
+                })
+            }
+            .toMutableSet()
 
-        valueDto.apply {
-            this.id = savedEntity.id
-            hours = savedEntity.hours
-                    .map { modelMapper.map(it, AssistancePlanHourDto::class.java) }
-                    .toMutableSet()
+        val goals = valueDto.goals.map { goalDto ->
+            val goalEntity = Goal().apply {
+                this.id = goalDto.id
+                title = goalDto.title
+                description = goalDto.description
+                assistancePlan = entity
+                institution = goalDto.institutionId?.let { institutionId ->
+                    institutionService.getEntityById(institutionId)
+                        ?: throw IllegalArgumentException("institution [id = $institutionId] not found")
+                }
+            }
+
+            val savedGoal = goalRepository.save(goalEntity)
+            val goalHours = goalDto.hours.map { hourDto ->
+                GoalHour().apply {
+                    this.id = hourDto.id
+                    weeklyMinutes = hourDto.weeklyMinutes
+                    hourType = hourTypeService.getById(hourDto.hourTypeId)
+                        ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
+                    goal = savedGoal
+                }
+            }
+
+            goalHourRepository
+                .findByGoalId(savedGoal.id)
+                .filter { existingHour -> !goalHours.any { hour -> hour.id > 0 && hour.id == existingHour.id } }
+                .forEach { goalHourRepository.deleteById(it.id) }
+
+            savedGoal.hours = goalHours.map { hour ->
+                goalHourRepository.save(hour.apply {
+                    goal = savedGoal
+                })
+            }.toMutableSet()
+
+            savedGoal
         }
 
-        return valueDto
+        goalRepository
+            .findByAssistancePlanId(id)
+            .filter { existingGoal -> !goals.any { goal -> goal.id > 0 && goal.id == existingGoal.id } }
+            .forEach { goalRepository.deleteById(it.id) }
+
+        entity.goals = goals.toMutableSet()
+
+        val savedEntity = assistancePlanRepository.save(entity)
+
+        return mapToDto(savedEntity)
+    }
+
+    private fun validateHoursPlacement(valueDto: AssistancePlanUpdateDto) {
+        val hasPlanHours = valueDto.hours.isNotEmpty()
+        val hasGoalHours = valueDto.goals.any { it.hours.isNotEmpty() }
+
+        if (hasPlanHours && hasGoalHours) {
+            throw IllegalArgumentException(
+                "Stunden dürfen entweder direkt im Hilfeplan oder in den Zielen hinterlegt sein, nicht in beiden Bereichen gleichzeitig."
+            )
+        }
     }
 
     @Transactional
-    override fun update(value: AssistancePlan): AssistancePlan {
-        if (value.id <= 0)
-            throw IllegalArgumentException("id is set")
-        if (!assistancePlanRepository.existsById(value.id))
-            throw IllegalArgumentException("id not found")
-
-        // backup hours
-        value.hours.forEach { logger.info(it.id.toString())}
-        value.goals = mutableSetOf()
-
-        return assistancePlanRepository.save(value)
-    }
-
-    @Transactional
-    override fun delete(id: Long) {
+    fun delete(id: Long) {
         return assistancePlanRepository.deleteById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getAllAssistancePlanDtos(): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findAll().toList()
-        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return entities.map(::mapToDto)
     }
 
-    override fun getAll(): List<AssistancePlan> {
-        return assistancePlanRepository.findAll().toList()
-    }
-
+    @Transactional(readOnly = true)
     fun getAssistancePlanDtoById(id: Long): AssistancePlanDto? {
         val entity = assistancePlanRepository.findByIdOrNull(id)
-        return modelMapper.map(entity, AssistancePlanDto::class.java)
+        return entity?.let(::mapToDto)
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionById(id: Long): AssistancePlanProjection? {
         return assistancePlanRepository.findProjectionById(id)
     }
 
-    override fun getById(id: Long): AssistancePlan? {
+    @Transactional(readOnly = true)
+    fun getById(id: Long): AssistancePlan? {
         return assistancePlanRepository.findByIdOrNull(id)
     }
 
-    override fun existsById(id: Long): Boolean {
+    @Transactional(readOnly = true)
+    fun existsById(id: Long): Boolean {
         return assistancePlanRepository.existsById(id)
     }
 
+    @Transactional(readOnly = true)
     fun getAssistancePlanDtosByClientId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByClientId(id)
-        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return entities.map(::mapToDto)
     }
 
-    fun getByClientId(id: Long): List<AssistancePlan> {
-        return assistancePlanRepository.findByClientId(id)
-    }
-
+    @Transactional(readOnly = true)
     fun getIllegalByClientId(id: Long): List<AssistancePlanProjection> {
         val assistancePlans = assistancePlanRepository.findProjectionsByClientId(id)
         return assistancePlans.filter { isIllegalAssistancePlan(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getAssistancePlanDtosBySponsorId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findBySponsorId(id)
-        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return entities.map(::mapToDto)
     }
 
-    fun getBySponsorId(id: Long): List<AssistancePlan> {
-        return assistancePlanRepository.findBySponsorId(id)
-    }
-
+    @Transactional(readOnly = true)
     fun getIllegalBySponsorId(id: Long): List<AssistancePlanProjection> {
         val assistancePlans = assistancePlanRepository.findProjectionsBySponsorId(id)
         return assistancePlans.filter { isIllegalAssistancePlan(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getAssistancePlanDtosByInstitutionId(id: Long): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByInstitutionId(id)
-        return entities.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        return entities.map(::mapToDto)
     }
 
-    fun getByInstitutionId(id: Long): List<AssistancePlan> {
-        return assistancePlanRepository.findByInstitutionId(id)
-    }
-
+    @Transactional(readOnly = true)
     fun getIllegalByInstitutionId(id: Long): List<AssistancePlanProjection> {
         val assistancePlans = assistancePlanRepository.findProjectionsByInstitutionId(id)
         return assistancePlans.filter { isIllegalAssistancePlan(it) }
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionByYearMonth(year: Int,
                                  month: Int): List<AssistancePlanProjection> {
         val start = LocalDate.of(year, month, 1)
@@ -230,6 +289,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByStartAndEnd(start, end)
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionByYearMonthSponsorId(year: Int,
                                           month: Int,
                                           sponsorId: Long): List<AssistancePlanProjection> {
@@ -239,6 +299,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionBySponsorIdAndStartAndEnd(sponsorId, start, end)
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionByYearMonthInstitutionId(year: Int,
                                               month: Int,
                                               institutionId: Long): List<AssistancePlanProjection> {
@@ -248,6 +309,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
+    @Transactional(readOnly = true)
     fun getProjectionByYearMonthInstitutionIdSponsorId(year: Int,
                                                        month: Int,
                                                        institutionId: Long,
@@ -258,6 +320,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByInstitutionIdAndSponsorIdAndStartAndEnd(institutionId, sponsorId, start, end)
     }
 
+    @Transactional(readOnly = true)
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
         val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ") }
         val services = serviceService.getByAssistancePlan(id)
@@ -273,28 +336,28 @@ class AssistancePlanService(
 
         eval.total = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = days * (it.weeklyHours / 7)
+                target = days * (it.weeklyMinutes / 7.0) / 60.0
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
 
         eval.tillToday = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = daysTillToday * (it.weeklyHours / 7)
+                target = daysTillToday * (it.weeklyMinutes / 7.0) / 60.0
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
 
         eval.actualYear = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = actualYear.first * (it.weeklyHours / 7)
+                target = actualYear.first * (it.weeklyMinutes / 7.0) / 60.0
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
 
         eval.actualMonth = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
-                target = actualMonth.first * (it.weeklyHours / 7)
+                target = actualMonth.first * (it.weeklyMinutes / 7.0) / 60.0
                 hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
             }
         }
@@ -431,5 +494,11 @@ class AssistancePlanService(
                 (assistancePlan.goals.isNotEmpty() && assistancePlan.goals.all { goal -> goal.hours.isEmpty() }) ||
                         assistancePlan.goals.isEmpty())
         return containsHoursAndGoalHours || containsNoHoursAndNoGoalHours
+    }
+
+    private fun mapToDto(entity: AssistancePlan): AssistancePlanDto {
+        val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
+        dto.institutionName = entity.institution?.name ?: ""
+        return dto
     }
 }

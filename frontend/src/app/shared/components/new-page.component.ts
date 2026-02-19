@@ -1,14 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Directive, OnInit } from '@angular/core';
 import {Location} from "@angular/common";
 import {ReplaySubject} from "rxjs";
 import {HelperService} from "../services/helper.service";
 
-@Component({
-  selector: 'app-new-page',
-  template: ``,
-  styles: [
-  ]
-})
+@Directive()
 export abstract class NewPageComponent<T> implements OnInit {
 
   // STATES

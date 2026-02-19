@@ -13,8 +13,9 @@ class GoalHour(
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0,
 
-        @field:NotNull(message = "Weekly hours are required")
-        var weeklyHours: Double = 0.0,
+        @field:NotNull(message = "Weekly minutes are required")
+        @Column(name = "weekly_minutes")
+        var weeklyMinutes: Int = 0,
 
         @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
@@ -33,6 +34,6 @@ class GoalHour(
         }
 
         override fun hashCode(): Int {
-                return id.hashCode() ?: 0
+                return id.hashCode()
         }
 }

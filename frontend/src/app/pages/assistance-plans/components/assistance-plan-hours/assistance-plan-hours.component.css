@@ -1,0 +1,161 @@
+::ng-deep .cdk-overlay-container {
+  z-index: 1200 !important;
+}
+
+.ah-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ah-toolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.ah-add-button {
+  width: 190px;
+}
+
+.ah-table-wrap {
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  background: #f9fafd;
+  padding: 6px;
+  overflow-x: auto;
+}
+
+.ah-table {
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.ah-cards {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ah-card {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.ah-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.ah-card-row + .ah-card-row {
+  margin-top: 6px;
+}
+
+.ah-card-label {
+  color: #6a7386;
+  font-size: 0.9rem;
+}
+
+.ah-card-value {
+  color: #2f3a4b;
+  font-weight: 600;
+  text-align: right;
+}
+
+.ah-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 8px;
+  border-top: 1px solid #edf1f7;
+  padding-top: 6px;
+}
+
+.ah-empty {
+  background: #f7f8fb;
+  border: 1px dashed #d7dbe5;
+  color: #7a8396;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.ah-table th,
+.ah-table td {
+  white-space: normal;
+  word-wrap: break-word;
+  max-width: 180px;
+}
+
+.ah-table th {
+  color: #5f6880;
+  font-weight: 600;
+}
+
+.ah-field {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.ah-time-group {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.ah-time-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 6px;
+}
+
+.ah-time-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+}
+
+.ah-time-pill {
+  border: 1px solid #c8d0df;
+  border-radius: 12px;
+  background: #f5f8fd;
+  padding: 8px 10px;
+}
+
+.ah-time-pill--invalid {
+  border-color: #d32f2f;
+}
+
+.ah-time-input {
+  width: 56px;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #25304a;
+  outline: none;
+  text-align: right;
+}
+
+.ah-time-input[type="number"] {
+  text-align: right;
+}
+
+.ah-time-unit {
+  font-size: 0.85rem;
+  color: #5c6780;
+}
+
+@media (max-width: 800px) {
+  .ah-table {
+    display: none;
+  }
+
+  .ah-cards {
+    display: flex;
+  }
+}

@@ -6,4 +6,5 @@ export class ContingentEmployeeEvaluationDto {
   executedPercent: number[] = []
   summedExecutedPercent: number[] = []
   missingHours: number[] = []
+  absenceDays: number[] = []
 }

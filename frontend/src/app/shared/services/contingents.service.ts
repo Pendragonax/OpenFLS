@@ -11,6 +11,8 @@ import {EmployeeService} from "./employee.service";
 import {InstitutionService} from "./institution.service";
 import {UserService} from "./user.service";
 import {ContingentEvaluationDto} from "../../pages/institution/components/institution-detail/contingent-overviews/dtos/contingent-evaluation-dto.model";
+import {CalendarInformationDTO} from "../dtos/calendar-information-dto.model";
+import {Converter} from "./converter.helper";
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +24,8 @@ export class ContingentsService extends Base<ContingentDto> {
     protected override http: HttpClient,
     protected employeeService: EmployeeService,
     protected institutionService: InstitutionService,
-    protected userService: UserService
+    protected userService: UserService,
+    protected converter: Converter
   ) {
     super(http);
     this.initialLoad();
@@ -80,5 +83,11 @@ export class ContingentsService extends Base<ContingentDto> {
         ]
       })
     }))
+  }
+
+  getCalendarInformation(employeeId: number, end: Date): Observable<CalendarInformationDTO> {
+    return this.http
+      .get<CalendarInformationDTO>(`${environment.api_url}${this.url}/evaluations/employee/${employeeId}/${this.converter.formatDate(end)}`)
+
   }
 }

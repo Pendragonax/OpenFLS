@@ -1,0 +1,459 @@
+<div class="container-fluid">
+  @if (!(hideAddButton || !addAvailable)) {
+    <div class="row">
+      <div class="container-fluid text-center">
+        <button mat-raised-button
+                color="primary"
+                [routerLink]="['/assistance_plans/new/', client.dto.id]"> Hilfeplan hinzufügen
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="row mt-3 filters-desktop">
+    <form [formGroup]="filterForm">
+      <div class="container-fluid">
+        <div class="row justify-content-center">
+          @if (!hideSearchStringFilter) {
+            <div class="col-auto">
+              <app-search-field [isSubmitting]="isSubmitting"
+                                [placeholder]="'...'"
+                                (onSearchStringChanges)="onSearchStringChanges($event)"></app-search-field>
+            </div>
+          }
+
+          <div class="col-auto">
+            <div class="input-field">
+              <mat-form-field appearance="fill">
+                <mat-label>Stichtag</mat-label>
+                <input matInput
+                       formControlName="date"
+                       [matDatepicker]="filterPicker">
+                <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+                <mat-datepicker-toggle matSuffix [for]="filterPicker"></mat-datepicker-toggle>
+                <mat-datepicker #filterPicker></mat-datepicker>
+                <button mat-icon-button
+                        matPrefix
+                        class="my-1 mx-2"
+                        (click)="resetFilterDate()">
+                  <mat-icon>clear</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+          </div>
+
+          @if (!hideInstitutionFilter) {
+            <div class="col-auto">
+              <mat-form-field appearance="fill" class="width-350">
+                <mat-label>Bereich</mat-label>
+                <mat-select formControlName="institution">
+                  @for (value of institutions; track value.id) {
+                    <mat-option [value]="value.id">
+                      {{ value.name }}
+                    </mat-option>
+                  }
+                </mat-select>
+                <button mat-icon-button
+                        matPrefix
+                        class="my-1 mx-2"
+                        (click)="resetFilterInstitution()">
+                  <mat-icon>clear</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="row mt-3 filters-mobile">
+    <div class="container-fluid">
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Filter</mat-panel-title>
+          </mat-expansion-panel-header>
+          <form [formGroup]="filterForm">
+            <div class="row justify-content-center">
+              @if (!hideSearchStringFilter) {
+                <div class="col-12 mb-2">
+                  <app-search-field class="w-100"
+                                    [isSubmitting]="isSubmitting"
+                                    [placeholder]="'...'"
+                                    (onSearchStringChanges)="onSearchStringChanges($event)"></app-search-field>
+                </div>
+              }
+
+              <div class="col-12 mb-2">
+                <div class="input-field">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>Stichtag</mat-label>
+                    <input matInput
+                           formControlName="date"
+                           [matDatepicker]="filterPickerMobile">
+                    <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+                    <mat-datepicker-toggle matSuffix [for]="filterPickerMobile"></mat-datepicker-toggle>
+                    <mat-datepicker #filterPickerMobile></mat-datepicker>
+                    <button mat-icon-button
+                            matPrefix
+                            class="my-1 mx-2"
+                            (click)="resetFilterDate()">
+                      <mat-icon>clear</mat-icon>
+                    </button>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              @if (!hideInstitutionFilter) {
+                <div class="col-12 mb-2">
+                  <mat-form-field appearance="fill" class="w-100">
+                    <mat-label>Bereich</mat-label>
+                    <mat-select formControlName="institution">
+                      @for (value of institutions; track value.id) {
+                        <mat-option [value]="value.id">
+                          {{ value.name }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    <button mat-icon-button
+                            matPrefix
+                            class="my-1 mx-2"
+                            (click)="resetFilterInstitution()">
+                      <mat-icon>clear</mat-icon>
+                    </button>
+                  </mat-form-field>
+                </div>
+              }
+            </div>
+          </form>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    @if (!isSubmitting) {
+      <div class="row">
+        <div class="col">
+          <mat-paginator class="paginator"
+                         showFirstLastButtons
+                         (page)="handlePageEvent($event)"
+                         [length]="pageLength"
+                         [pageIndex]="pageIndex"
+                         [pageSize]="pageSize"></mat-paginator>
+        </div>
+      </div>
+    }
+
+    @if (isSubmitting) {
+      <div class="row">
+        <div class="loading-container">
+          <mat-spinner [strokeWidth]="2"
+                       [diameter]="100"
+                       class="center-spinner"></mat-spinner>
+          <p><b>Lade Hilfepläne</b></p>
+        </div>
+      </div>
+    }
+
+    <div class="assistance-table">
+      @if (!isSubmitting) {
+        <table mat-table
+               matSort
+               (matSortChange)="sortData($event)"
+               [dataSource]="tableSource"
+               class="mat-elevation-z4">
+
+          <ng-container matColumnDef="client">
+            <th mat-header-cell
+                [style.display]="(!hideClientColumn) ? '' : 'none'"
+                mat-sort-header="{{tableColumns[0]}}"
+                class="hide-on-small px-4"
+                *matHeaderCellDef>Klient
+            </th>
+            <td mat-cell
+                [style.display]="(!hideClientColumn) ? '' : 'none'"
+                class="hide-on-small px-4"
+                *matCellDef="let row">{{row.preview.clientLastname}} {{row.preview.clientFirstname}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="institution">
+            <th mat-header-cell
+                [style.display]="(!hideInstitutionColumn) ? '' : 'none'"
+                mat-sort-header="{{tableColumns[1]}}"
+                class="hide-on-small px-2 desktop-hide-1150"
+                *matHeaderCellDef>Bereich
+            </th>
+            <td mat-cell
+                [style.display]="(!hideInstitutionColumn) ? '' : 'none'"
+                class="hide-on-small px-2 desktop-hide-1150"
+                *matCellDef="let row">{{row.preview.institutionName}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="sponsor">
+            <th mat-header-cell
+                [style.display]="(!hideSponsorColumn) ? '' : 'none'"
+                mat-sort-header="{{tableColumns[2]}}"
+                class="hide-on-small px-2 desktop-hide-1150"
+                *matHeaderCellDef>Kostenträger
+            </th>
+            <td mat-cell
+                [style.display]="(!hideSponsorColumn) ? '' : 'none'"
+                *matCellDef="let row"
+                class="hide-on-small px-2 desktop-hide-1150">{{row.preview.sponsorName}}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="start">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[3]}}"
+                class="px-2"
+                *matHeaderCellDef>Beginn
+            </th>
+            <td mat-cell
+                class="px-2"
+                *matCellDef="let row">{{ getDateString(row.preview.start) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="end">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[4]}}"
+                class="px-2"
+                *matHeaderCellDef>Ende
+            </th>
+            <td mat-cell
+                class="px-2"
+                *matCellDef="let row">{{ getDateString(row.preview.end) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[5]}}"
+                class="px-2"
+                *matHeaderCellDef>Status
+            </th>
+            <td mat-cell
+                class="px-2"
+                *matCellDef="let row">
+              @if (row.preview.isActive) {
+                <span class="plan-status-pill plan-status-pill--active">
+                  <span class="plan-status-dot"></span>
+                  {{ getStatusLabel(row.preview.isActive) }}
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="hours">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[6]}}"
+                class="px-2"
+                *matHeaderCellDef>h/Woche
+            </th>
+            <td mat-cell
+                class="px-2"
+                *matCellDef="let row">
+              {{ row.preview.approvedHoursPerWeek }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="yearStatus">
+            <th mat-header-cell
+                mat-sort-header="{{tableColumns[7]}}"
+                class="px-2 year-status-column-header"
+                *matHeaderCellDef>Erfüllt "dieses Jahr" bis "jetzt"
+            </th>
+            <td mat-cell
+                class="px-2 year-status-column-cell"
+                [matTooltip]="getHoursTooltip(row.preview)"
+                matTooltipClass="hours-week-tooltip"
+                *matCellDef="let row">
+              <div class="year-status-cell">
+                <div class="year-status-bar">
+                  <div class="year-status-track">
+                    <div class="hours-progress-fill"
+                         [ngClass]="getExecutedHoursProgressClass(row.preview)"
+                         [style.width.%]="getExecutedHoursPercent(row.preview)"></div>
+                  </div>
+                  <span class="hours-progress-text-left">{{ row.preview.executedHoursThisYear }} h</span>
+                  <span class="hours-progress-text-right">{{ row.preview.approvedHoursThisYear }} h</span>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell
+                *matHeaderCellDef
+                class="text-center px-2 actions-column-header">Aktionen
+            </th>
+            <td mat-cell
+                *matCellDef="let row"
+                class="text-center px-2 actions-column-cell">
+              <div class="text-center actions-bar">
+                <button mat-icon-button
+                        color="primary"
+                        [matTooltip]="'Favorit'"
+                        [matTooltipPosition]="'above'"
+                        (click)="row.preview.isFavorite ? deleteAssistancePlanAsFavorite(row.preview.id) : addAssistancePlanAsFavorite(row.preview.id)">
+                  <mat-icon>{{row.preview.isFavorite ? 'bookmark' : 'bookmark_border'}}</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="primary"
+                        [matTooltip]="'Bearbeiten'"
+                        [matTooltipPosition]="'above'"
+                        [disabled]="!row.editable"
+                        [routerLink]="['/assistance_plans/edit', row.preview.id]">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="primary"
+                        [matTooltip]="'Auswertung'"
+                        [matTooltipPosition]="'above'"
+                        [routerLink]="['/assistance_plans/analysis', row.preview.id, '0']">
+                  <mat-icon>view_module</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="warn"
+                        *showOnRole="'admin'"
+                        [matTooltip]="'Löschen'"
+                        [matTooltipPosition]="'above'"
+                        (click)="openDeleteConfirmation(deleteContent, row.preview)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+        </table>
+      }
+    </div>
+
+    @if (!isSubmitting) {
+      <div class="assistance-timeline">
+        @for (row of tableSource.data; track $index) {
+          <div class="timeline-item">
+            <div class="timeline-card mat-elevation-z2">
+              <div class="timeline-header">
+                <div class="timeline-date">
+                  <mat-icon class="timeline-date-icon">watch_later</mat-icon>
+                  {{ getDateString(row.preview.start) }} – {{ getDateString(row.preview.end) }}
+                </div>
+                @if (row.preview.isActive) {
+                  <span class="plan-status-pill plan-status-pill--active">
+                    <span class="plan-status-dot"></span>
+                    {{ getStatusLabel(row.preview.isActive) }}
+                  </span>
+                }
+              </div>
+
+              <div class="timeline-body">
+                @if (!hideClientColumn) {
+                  <div class="timeline-row">
+                    <span class="timeline-label">Klient</span>
+                    <span class="timeline-value">{{row.preview.clientLastname}} {{row.preview.clientFirstname}}</span>
+                  </div>
+                }
+                @if (!hideInstitutionColumn) {
+                  <div class="timeline-row">
+                    <span class="timeline-label">Bereich</span>
+                    <span class="timeline-value-light">{{row.preview.institutionName}}</span>
+                  </div>
+                }
+                @if (!hideSponsorColumn) {
+                  <div class="timeline-row">
+                    <span class="timeline-label">Kostenträger</span>
+                    <span class="timeline-value-light">{{row.preview.sponsorName}}</span>
+                  </div>
+                }
+                <div class="timeline-row">
+                  <span class="timeline-label">h/Woche</span>
+                  <span class="timeline-value-light">{{row.preview.approvedHoursPerWeek}}</span>
+                </div>
+                <div class="timeline-row timeline-row-hours-bar"
+                     [matTooltip]="getHoursTooltip(row.preview)"
+                     matTooltipClass="hours-week-tooltip">
+                  <span class="timeline-hours-value">
+                    <span class="year-status-bar">
+                      <span class="year-status-track">
+                        <span class="hours-progress-fill"
+                              [ngClass]="getExecutedHoursProgressClass(row.preview)"
+                              [style.width.%]="getExecutedHoursPercent(row.preview)"></span>
+                      </span>
+                      <span class="hours-progress-text-left">{{ row.preview.executedHoursThisYear }} h</span>
+                      <span class="hours-progress-text-right">{{ row.preview.approvedHoursThisYear }} h</span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+
+              <div class="timeline-actions">
+                <button mat-icon-button
+                        color="primary"
+                        [matTooltip]="'Favorit'"
+                        [matTooltipPosition]="'above'"
+                        (click)="row.preview.isFavorite ? deleteAssistancePlanAsFavorite(row.preview.id) : addAssistancePlanAsFavorite(row.preview.id)">
+                  <mat-icon>{{row.preview.isFavorite ? 'bookmark' : 'bookmark_border'}}</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="primary"
+                        [matTooltip]="'Bearbeiten'"
+                        [matTooltipPosition]="'above'"
+                        [disabled]="!row.editable"
+                        [routerLink]="['/assistance_plans/edit', row.preview.id]">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="primary"
+                        [matTooltip]="'Auswertung'"
+                        [matTooltipPosition]="'above'"
+                        [routerLink]="['/assistance_plans/analysis', row.preview.id, '0']">
+                  <mat-icon>view_module</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="warn"
+                        *showOnRole="'admin'"
+                        [matTooltip]="'Löschen'"
+                        [matTooltipPosition]="'above'"
+                        (click)="openDeleteConfirmation(deleteContent, row.preview)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <ng-template #deleteContent let-modal>
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-basic-title-delete">Löschbestätigung</h2>
+      <button type="button"
+              class="btn-close"
+              aria-label="Close"
+              (click)="modal.dismiss('Cross click')"></button>
+    </div>
+    <div class="modal-body">
+      <p>Wollen sie den Hilfeplan vom <b>{{ getDateString(editValue.start) }} -
+        {{ getDateString(editValue.end) }}</b> wirklich löschen?<br>
+        Es würden <b>{{ deleteServiceCount }}</b> Dokumentationen ebenfalls gelöscht.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button"
+              class="btn btn-danger"
+              (click)="modal.close(true)">Löschen
+      </button>
+      <button type="button"
+              class="btn btn-outline-dark"
+              (click)="modal.close(false)">Abbrechen
+      </button>
+    </div>
+  </ng-template>
+</div>

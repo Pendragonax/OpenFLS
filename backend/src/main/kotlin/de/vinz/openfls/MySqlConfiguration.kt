@@ -1,24 +1,26 @@
 package de.vinz.openfls
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.orm.jpa.JpaVendorAdapter
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
 import java.io.File
 import javax.sql.DataSource
 
 @Configuration
-class MySqlConfiguration {
+class MySqlConfiguration(
+    @param:Value($$"${openfls.mysql.host}") private val dbHost: String,
+    @param:Value($$"${openfls.mysql.database}") private val dbName: String,
+    @param:Value($$"${openfls.mysql.user-file}") private val userFile: String,
+    @param:Value($$"${openfls.mysql.password-file}") private val passwordFile: String
+) {
     @Bean
     fun getDataSource(): DataSource {
-        val dbHost = System.getenv("MYSQL_HOST")
-
         return DataSourceBuilder
             .create()
-            .username(File(System.getenv("MYSQL_USER_FILE")).readText())
-            .password(File(System.getenv("MYSQL_PASSWORD_FILE")).readText())
-            .url("jdbc:mysql://$dbHost:3306/openfls")
+            .username(File(userFile).readText())
+            .password(File(passwordFile).readText())
+            .url("jdbc:mysql://$dbHost:3306/$dbName")
             .driverClassName("com.mysql.cj.jdbc.Driver")
             .build()
     }

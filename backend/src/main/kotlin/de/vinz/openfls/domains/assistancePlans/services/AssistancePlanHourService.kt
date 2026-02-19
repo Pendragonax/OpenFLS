@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourPro
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourSoloProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.hourTypes.HourTypeService
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 
@@ -32,7 +32,7 @@ class AssistancePlanHourService(
         return assistancePlanHourRepository.deleteById(id)
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     fun getById(id: Long): AssistancePlanHourSoloProjection {
         return assistancePlanHourRepository.findProjectionById(id)
     }

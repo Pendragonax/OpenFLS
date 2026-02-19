@@ -17,10 +17,15 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "es2022",
     "module": "es2022",
+    "paths": {
+      "@testbed": [
+        "src/init-testbed.ts"
+      ]
+    },
     "lib": [
       "es2022",
       "dom"

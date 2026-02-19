@@ -14,21 +14,23 @@ import {Service} from "../../dtos/service.projection";
 import {PageEvent} from "@angular/material/paginator";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {UserService} from "../../services/user.service";
-import {ReplaySubject} from "rxjs";
+import {ReplaySubject, take} from "rxjs";
 import {CsvService} from "../../services/csv.service";
 import {ServiceExport} from "./model/service-export.model";
 import {ServiceService} from "../../services/service.service";
 
 @Component({
-  selector: 'app-service-table',
-  templateUrl: './service-table.component.html',
-  styleUrl: './service-table.component.css'
+    selector: 'app-service-table',
+    templateUrl: './service-table.component.html',
+    styleUrl: './service-table.component.css',
+    standalone: false
 })
 export class ServiceTableComponent implements AfterViewInit, OnChanges {
   @Input() services: Service[] = [];
   @Input() editMode: boolean = false;
   @Input() adminMode: boolean = true;
   @Input() redRows: boolean = false;
+  @Input() allowOwnDelete: boolean = false;
   @Output() tableUpdated = new EventEmitter();
 
   @ViewChild(MatSort) sort!: MatSort;
@@ -39,6 +41,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   pageSize: number = 100;
   pageIndex: number = 0;
   isAdmin$: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
+  currentUserId: number = 0;
 
   private static readonly COLUMN_VIEW_MAPPING = {
     start: 'Zeitpunkt',
@@ -50,7 +53,6 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
 
   private static readonly COLUMN_EDIT_MAPPING = {
     start: 'Zeitpunkt',
-    minutes: 'Minuten',
     content: 'Inhalt',
     clientFullName: 'Klient'
   };
@@ -60,6 +62,7 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
               private serviceService: ServiceService,
               private csvService: CsvService) {
     this.userService.isAdmin$.subscribe(value => this.isAdmin$.next(value))
+    this.userService.user$.pipe(take(1)).subscribe(value => this.currentUserId = value.id)
   }
 
   ngAfterViewInit(): void {
@@ -100,10 +103,15 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   }
 
   private mapServiceToDataSource(service: Service): any {
+    const dateParts = this.transformDateParts(service.start);
     return {
       id: service.id,
+      title: service.title,
       start: service.start,
-      startFormatted: this.transformDateString(service.start),
+      end: service.end,
+      startDate: dateParts.date,
+      startTime: dateParts.time,
+      endTime: this.transformDateParts(service.end).time,
       minutes: service.minutes,
       content: (service.title.length > 0 ? `<strong>${service.title}</strong><br>` : '') + this.transformLineBreaksToHtml(service.content),
       institutionName: service.institution.name,
@@ -121,11 +129,11 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
     return ServiceTableComponent.COLUMN_VIEW_MAPPING[column] || column;
   }
 
-  getFormattedCellContent(column: string, value: any): string {
+  getFormattedCellContent(column: string, row: any): string {
     if (column === 'start') {
-      return this.transformDateString(value);
+      return this.transformDateRangeString(row.start, row.end, row.minutes);
     }
-    return value;
+    return row[column];
   }
 
   handlePageEvent(e: PageEvent) {
@@ -160,6 +168,14 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
       })
   }
 
+  canDelete(element: any, isAdmin: boolean | null): boolean {
+    if (isAdmin) {
+      return true;
+    }
+
+    return this.allowOwnDelete && element?.employeeId === this.currentUserId;
+  }
+
   applySort() {
     if (this.sort && this.sort.active && this.sort.direction) {
       this.services.sort((a, b) => {
@@ -167,8 +183,6 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
         switch (this.sort.active) {
           case 'start':
             return this.compare(a.start, b.start, isAsc);
-          case 'minutes':
-            return this.compare(a.minutes, b.minutes, isAsc);
           case 'content':
             return this.compare(a.content, b.content, isAsc);
           case 'institutionName':
@@ -188,15 +202,25 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
     return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
   }
 
-  transformDateString(value: string): string {
+  transformDateRangeString(startValue: string, endValue: string, minutes: number): string {
+    const start = this.transformDateParts(startValue)
+    const end = this.transformDateParts(endValue);
+    return `<span class=\"service-time-block\"><span class=\"service-time-left\">${start.date}<br><span class=\"service-time-range\">${start.time} - ${end.time}</span></span><span class=\"service-time-pill\">${minutes} Min</span></span>`;
+  }
+
+  private transformDateParts(value: string): { date: string; time: string } {
     const date = new Date(value);
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${day}.${month}.${year}<br> ${hours}:${minutes}`;
+    return {
+      date: `${day}.${month}.${year}`,
+      time: `${hours}:${minutes}`
+    };
   }
+
 
   private transformLineBreaksToHtml(text: string): string {
     return text.replace(/(?:\r\n|\r|\n)/g, '<br>');

@@ -1,4 +1,4 @@
-[![GitHub release](https://img.shields.io/badge/version-2.0.1-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
+[![GitHub release](https://img.shields.io/badge/version-3.0.0-blue)](https://GitHub.com/Pendragonax/OpenFLS/releases/)
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
 
 # OpenFLS
@@ -23,14 +23,14 @@ In diesem werden die Standard Zugangsdaten erstellt und die für die Verschlüss
 ```
 
 Stellen sie sicher, dass Sie die Zugangsdaten im Ordner *secrets* ändern (achten sie darauf keine leere Zeile am Ende zu belassen).
-In der Datei *.env* können sie noch weitere Konfigurationen tätigen wie dem Pfad zum Zertifikat, dem weitergeleiteten Port etc.
+In der Datei *docker/.env* können sie noch weitere Konfigurationen tätigen wie dem Pfad zum Zertifikat, dem weitergeleiteten Port etc.
 Um die Anwendung zu starten, nutzen sie folgenden Befehl:
 
 ``` console
 # DEVELOPMENT-MODE
-docker-compose up
+docker-compose --env-file docker/.env -f docker/docker-compose.yml up
 # PRODUCTION-MODE
-docker-compose -f docker-compose.prod.yml up
+docker-compose --env-file docker/.env -f docker/docker-compose.prod.yml up
 ```
 
 ## Betrieb
@@ -45,4 +45,4 @@ Im weiteren Verlauf kann dieses jederzeit durch den Nutzer geändert werden.
 WiP
 
 ## Backups
-WiP
+Siehe `BACKUP.md` für die automatische Backup-Konfiguration und den manuellen Restore-Prozess.

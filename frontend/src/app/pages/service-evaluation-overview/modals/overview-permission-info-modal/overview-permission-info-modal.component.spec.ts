@@ -1,3 +1,4 @@
+import '@testbed';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OverviewPermissionInfoModalComponent } from './overview-permission-info-modal.component';

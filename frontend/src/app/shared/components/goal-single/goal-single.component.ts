@@ -4,9 +4,10 @@ import {GoalResponseDto} from "../../dtos/goal-response-dto.model";
 import {Goal} from "../../projections/goal.projection";
 
 @Component({
-  selector: 'app-goal-single',
-  templateUrl: './goal-single.component.html',
-  styleUrls: ['./goal-single.component.css']
+    selector: 'app-goal-single',
+    templateUrl: './goal-single.component.html',
+    styleUrls: ['./goal-single.component.css'],
+    standalone: false
 })
 export class GoalSingleComponent implements OnInit {
 
@@ -16,6 +17,13 @@ export class GoalSingleComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  formatWeeklyMinutes(weeklyMinutes: number): number {
+    const totalMinutes = Math.max(0, Math.round(Number(weeklyMinutes ?? 0)));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return Number((hours + minutes / 100).toFixed(2));
   }
 
 }

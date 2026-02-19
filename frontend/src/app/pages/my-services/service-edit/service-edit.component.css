@@ -1,0 +1,11 @@
+.beta-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #edf0f6;
+  border-radius: 8px;
+  color: #6a7386;
+  font-size: 12px;
+}

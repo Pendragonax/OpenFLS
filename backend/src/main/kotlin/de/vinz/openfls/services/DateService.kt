@@ -84,12 +84,20 @@ class DateService {
             return if (Year.of(year).isLeap) 366L else 365L
         }
 
-        fun countDaysOfYearBetweenStartAndEnd(year: Int, start: LocalDate, end: LocalDate?): Long {
+        fun countDaysOfYearBetweenStartAndEnd(year: Int, start: LocalDate, end: LocalDate?): Int {
             val startYear = LocalDate.of(year, 1, 1)
             val startReal = if (start < startYear) startYear else start
-            val endReal = end ?: LocalDate.of(year, 12, 31)
+            val endYear = LocalDate.of(year, 12, 31)
 
-            return ChronoUnit.DAYS.between(startReal, endReal) + 1
+            val endReal = if (end == null) {
+                LocalDate.of(year, 12, 31)
+            } else if (end < endYear) {
+                end
+            } else {
+                endYear
+            }
+
+            return (ChronoUnit.DAYS.between(startReal, endReal) + 1).toInt()
         }
 
         fun countDaysOfMonthAndYearBetweenStartAndEnd(year: Int, month: Int, start: LocalDate, end: LocalDate): Int {
@@ -118,6 +126,37 @@ class DateService {
 
             if (end <= calcEnd) {
                 return (ChronoUnit.DAYS.between(calcStart, end) + 1).toInt()
+            }
+
+            return 0
+        }
+
+        fun countWorkDaysOfMonthAndYearBetweenStartAndEnd(year: Int, month: Int, start: LocalDate, end: LocalDate): Int {
+            val calcStart = LocalDate.of(year, month, 1)
+            val calcEnd = LocalDate.of(year, month, 1).plusMonths(1).minusDays(1)
+
+            if (start > calcEnd || end < calcStart) {
+                return 0
+            }
+
+            if (start == calcEnd || end == calcStart) {
+                return if (isWorkday(start)) 1 else 0
+            }
+
+            if (start < calcStart && end > calcEnd) {
+                return calculateWorkdaysInHesseBetween(calcStart, calcEnd)
+            }
+
+            if (start >= calcStart && end <= calcEnd) {
+                return calculateWorkdaysInHesseBetween(start, end)
+            }
+
+            if (start >= calcStart) {
+                return calculateWorkdaysInHesseBetween(start, calcEnd)
+            }
+
+            if (end <= calcEnd) {
+                return calculateWorkdaysInHesseBetween(calcStart, end)
             }
 
             return 0
@@ -153,6 +192,25 @@ class DateService {
             return calculateWorkdaysInHesseBetween(LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31), year)
         }
 
+        fun calculateWorkdaysInHesseBetween(startDate: LocalDate, endDate: LocalDate): Int {
+            var workdays = 0
+
+            var currentDate = startDate
+            var holidays = getHesseHolidays(startDate.year)
+            while (!currentDate.isAfter(endDate)) {
+                if (currentDate.year != holidays.first().year) {
+                    holidays = getHesseHolidays(currentDate.year)
+                }
+
+                if (!isWeekend(currentDate) && !isHoliday(currentDate, holidays)) {
+                    workdays++
+                }
+
+                currentDate = currentDate.plusDays(1)
+            }
+            return workdays
+        }
+
         fun calculateWorkdaysInHesseBetween(startDate: LocalDate, endDate: LocalDate?, year: Int): Int {
             var workdays = 0
             val holidays = getHesseHolidays(startDate.year)
@@ -172,6 +230,11 @@ class DateService {
                 currentDate = currentDate.plusDays(1)
             }
             return workdays
+        }
+
+        fun isWorkday(date: LocalDate): Boolean {
+            val holidays = getHesseHolidays(date.year)
+            return !holidays.contains(date) && !isWeekend(date)
         }
 
         private fun isWeekend(date: LocalDate): Boolean {

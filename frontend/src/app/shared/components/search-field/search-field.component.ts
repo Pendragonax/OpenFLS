@@ -8,24 +8,22 @@ import {debounceTime, ReplaySubject} from "rxjs";
 import {MatSelectModule} from "@angular/material/select";
 
 @Component({
-  selector: 'app-search-field',
-  standalone: true,
-  imports: [
-    FormsModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    MatSelectModule
-  ],
-  templateUrl: './search-field.component.html',
-  styleUrl: './search-field.component.css'
+    selector: 'app-search-field',
+    imports: [
+        FormsModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatInputModule,
+        ReactiveFormsModule,
+        MatSelectModule
+    ],
+    templateUrl: './search-field.component.html',
+    styleUrl: './search-field.component.css'
 })
 export class SearchFieldComponent {
 
   @Input() label: string = "Suchtext"
-  @Input() onResetClick!: () => void
   @Input() placeholder: string = "..."
   @Input() isSubmitting: boolean = false
 

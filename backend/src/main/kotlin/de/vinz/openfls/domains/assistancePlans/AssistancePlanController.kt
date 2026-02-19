@@ -1,9 +1,14 @@
 package de.vinz.openfls.domains.assistancePlans
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.services.UserService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -11,12 +16,16 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/assistance_plans")
 class AssistancePlanController(
         private val assistancePlanService: AssistancePlanService,
-        private val accessService: AccessService
+        private val assistancePlanEvaluationLeftService: AssistancePlanEvaluationLeftService,
+        private val assistancePlanPreviewService: AssistancePlanPreviewService,
+        private val accessService: AccessService,
+        private val userService: UserService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanController::class.java)
 
@@ -24,7 +33,7 @@ class AssistancePlanController(
     private val logPerformance: Boolean = false
 
     @PostMapping("")
-    fun create(@Valid @RequestBody valueDto: AssistancePlanDto): Any {
+    fun create(@Valid @RequestBody valueDto: AssistancePlanCreateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -50,7 +59,7 @@ class AssistancePlanController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: AssistancePlanDto): Any {
+               @Valid @RequestBody valueDto: AssistancePlanUpdateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -351,6 +360,169 @@ class AssistancePlanController(
         } catch(ex: Exception) {
             logger.error(ex.message, ex)
 
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("eval/left/{id}")
+    fun getEvaluationLeftById(@PathVariable id: Long): ResponseEntity<Any> {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val response = assistancePlanEvaluationLeftService.createAssistancePlanHourTypeAnalysis(LocalDate.now(), id)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getEvaluationLeftById took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(response)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("client/{id}/preview")
+    fun getPreviewByClientId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val userId = userService.getUserId()
+            val dtos = assistancePlanPreviewService.getPreviewDtosByClientId(id, userId)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getPreviewByClientId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("client/{id}/existing")
+    fun getExistingByClientId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val dtos = assistancePlanPreviewService.getExistingDtosByClientId(id)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getExistingByClientId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("institution/{id}/preview")
+    fun getPreviewByInstitutionId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val userId = userService.getUserId()
+            val dtos = assistancePlanPreviewService.getPreviewDtosByInstitutionId(id, userId)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getPreviewByInstitutionId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("sponsor/{id}/preview")
+    fun getPreviewBySponsorId(@PathVariable id: Long): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val userId = userService.getUserId()
+            val dtos = assistancePlanPreviewService.getPreviewDtosBySponsorId(id, userId)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getPreviewBySponsorId took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @GetMapping("favorites/preview")
+    fun getFavoritePreviewsByLoggedInUser(): Any {
+        return try {
+            val startMs = System.currentTimeMillis()
+            val userId = userService.getUserId()
+            val dtos = assistancePlanPreviewService.getFavoritePreviewDtosByEmployeeId(userId)
+
+            if (logPerformance) {
+                logger.info(
+                    String.format(
+                        "%s getFavoritePreviewsByLoggedInUser took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs
+                    )
+                )
+            }
+
+            ResponseEntity.ok(dtos)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST

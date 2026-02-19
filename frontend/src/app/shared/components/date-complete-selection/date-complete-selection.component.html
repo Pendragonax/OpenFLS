@@ -1,4 +1,4 @@
-<mat-form-field appearance="fill">
+<mat-form-field appearance="fill" class="date-complete-field">
   <mat-label>Zeitraum</mat-label>
   <mat-date-range-input class="width-scale-70"
                         [rangePicker]="picker"
@@ -10,25 +10,50 @@
   <mat-datepicker-toggle matSuffix [for]="picker" class="m-2"></mat-datepicker-toggle>
   <mat-hint class="fw-light">Tag.Monat.Jahr – Tag.Monat.Jahr</mat-hint>
   <mat-date-range-picker #picker (closed)="setStartAndEnd(rangeStart, rangeEnd)"></mat-date-range-picker>
-  <button class="my-auto ms-1"
-          mat-icon-button
-          matPrefix
-          [disabled]="disabled"
-          (click)="decreaseDate(1)">
-    <mat-icon>keyboard_arrow_left</mat-icon>
-  </button>
-  <button mat-icon-button
-          matPrefix
-          [matTooltip]="'heute'"
-          [disabled]="disabled"
-          (click)="setDateToToday($event)">
-    <mat-icon>settings_backup_restore</mat-icon>
-  </button>
-  <button class="my-auto me-1"
-          mat-icon-button
-          matSuffix
-          [disabled]="disabled"
-          (click)="increaseDate(1)">
-    <mat-icon>keyboard_arrow_right</mat-icon>
-  </button>
+  <span matPrefix class="date-prefix-desktop">
+    <button class="my-auto ms-1"
+            mat-icon-button
+            [disabled]="disabled"
+            (click)="decreaseDate(1)">
+      <mat-icon>keyboard_arrow_left</mat-icon>
+    </button>
+    <button mat-icon-button
+            [matTooltip]="'heute'"
+            [disabled]="disabled"
+            (click)="setDateToToday($event)">
+      <mat-icon>settings_backup_restore</mat-icon>
+    </button>
+  </span>
+  <span matSuffix class="date-suffix-desktop">
+    <button class="my-auto me-1"
+            mat-icon-button
+            [disabled]="disabled"
+            (click)="increaseDate(1)">
+      <mat-icon>keyboard_arrow_right</mat-icon>
+    </button>
+  </span>
+  <span matPrefix class="date-prefix-mobile">
+    <span class="date-prefix-row">
+      <button class="my-auto ms-1"
+              mat-icon-button
+              [disabled]="disabled"
+              (click)="decreaseDate(1)">
+        <mat-icon>keyboard_arrow_left</mat-icon>
+      </button>
+      <button class="my-auto me-1"
+              mat-icon-button
+              [disabled]="disabled"
+              (click)="increaseDate(1)">
+        <mat-icon>keyboard_arrow_right</mat-icon>
+      </button>
+    </span>
+    <span class="date-prefix-row">
+      <button mat-icon-button
+              [matTooltip]="'heute'"
+              [disabled]="disabled"
+              (click)="setDateToToday($event)">
+        <mat-icon>settings_backup_restore</mat-icon>
+      </button>
+    </span>
+  </span>
 </mat-form-field>

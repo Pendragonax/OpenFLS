@@ -9,9 +9,10 @@ import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {ConfirmationModalComponent} from "../../../../shared/modals/confirmation-modal/confirmation-modal.component";
 
 @Component({
-  selector: 'app-assistance-plan-analysis-modal',
-  templateUrl: './assistance-plan-evaluation-modal.component.html',
-  styleUrls: ['./assistance-plan-evaluation-modal.component.css']
+    selector: 'app-assistance-plan-analysis-modal',
+    templateUrl: './assistance-plan-evaluation-modal.component.html',
+    styleUrls: ['./assistance-plan-evaluation-modal.component.css'],
+    standalone: false
 })
 export class AssistancePlanEvaluationModalComponent implements OnInit {
   evaluation$: ReplaySubject<EvaluationDto> = new ReplaySubject();

@@ -1,5 +1,9 @@
 package de.vinz.openfls.services
 
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlin.math.abs
+
 class TimeDoubleService {
     companion object {
         fun roundDoubleToTwoDigits(value: Double): Double {
@@ -7,12 +11,16 @@ class TimeDoubleService {
         }
 
         fun convertDoubleToTimeDouble(value: Double): Double {
-            val fullHours = value.toInt()
-            val restMinutes =  ((value - fullHours) * 60).roundHalfToEven()
-            val addedHours = restMinutes / 60
-            val minutes = (restMinutes % 60).toDouble() / 100
+            val sign = if (value < 0) -1 else 1
 
-            return roundDoubleToTwoDigits(fullHours.toDouble() + addedHours + minutes)
+            // Gesamtminuten runden (HALF_EVEN) – am besten als Long/Int
+            val totalMinutes = (abs(value) * 60).roundHalfToEven()
+
+            val hours = totalMinutes / 60
+            val minutes = totalMinutes % 60
+
+            val result = sign * (hours + minutes / 100.0)
+            return roundDoubleToTwoDigits(result)
         }
 
         fun convertTimeDoubleToDouble(value: Double): Double {
@@ -33,10 +41,15 @@ class TimeDoubleService {
 
         fun sumTimeDoubles(sum1: Double, sum2: Double): Double {
             val totalMinutes = timeToMinutes(sum1) + timeToMinutes(sum2)
-            val hours = totalMinutes / 60
-            val minutes = totalMinutes % 60
 
-            return (hours + minutes / 100.0).toTwoDecimalPlaces()
+            val sign = if (totalMinutes < 0) -1 else 1
+            val absMinutes = abs(totalMinutes)
+
+            val hours = absMinutes / 60
+            val minutes = absMinutes % 60
+
+            val result = sign * (hours + minutes / 100.0)
+            return result.toTwoDecimalPlaces()
         }
 
         fun diffTimeDoubles(sum1: Double, sum2: Double): Double {
@@ -70,9 +83,20 @@ class TimeDoubleService {
         }
 
         private fun timeToMinutes(time: Double): Int {
-            val hours = time.toInt()
-            val minutes = ((time - hours) * 100).roundHalfToEven()
-            return hours * 60 + minutes
+            val sign = if (time < 0) -1 else 1
+
+            // exakt auf 2 Nachkommastellen bringen (damit aus 39.5399999 -> 39.54 wird)
+            val bd = BigDecimal.valueOf(abs(time)).setScale(2, RoundingMode.HALF_EVEN)
+
+            val hours = bd.setScale(0, RoundingMode.DOWN).toInt()
+            val minutes = bd.remainder(BigDecimal.ONE)
+                .movePointRight(2)              // .54 -> 54
+                .setScale(0, RoundingMode.HALF_EVEN)
+                .toInt()
+
+            require(minutes in 0..59) { "Ungültige Minutenanteil: $minutes (aus $time)" }
+
+            return sign * (hours * 60 + minutes)
         }
 
         private fun Double.toTwoDecimalPlaces(): Double = String.format("%.2f", this).toDouble()

@@ -9,11 +9,13 @@ import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
-import de.vinz.openfls.domains.services.ServiceService
+import de.vinz.openfls.domains.services.services.ServiceService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
+@Transactional(readOnly = true)
 class AssistancePlanAnalysisService(
         private val assistancePlanService: AssistancePlanService,
         private val serviceService: ServiceService,
@@ -321,10 +323,10 @@ class AssistancePlanAnalysisService(
     fun getApprovedAssistancePlanHoursInMonth(year: Int,
                                               month: Int,
                                               assistancePlan: AssistancePlanProjection): Double {
-        val dailyHours = assistancePlan.hours.sumOf { it.weeklyHours } / 7
+        val dailyMinutes = assistancePlan.hours.sumOf { it.weeklyMinutes } / 7.0
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
         return TimeDoubleService.convertDoubleToTimeDouble(
-                dailyHours * days)
+                (dailyMinutes * days) / 60.0)
     }
 
     fun getApprovedAssistancePlanHoursByHourTypeIdInMonth(year: Int,
@@ -332,9 +334,9 @@ class AssistancePlanAnalysisService(
                                                           assistancePlan: AssistancePlanProjection,
                                                           hourTypeId: Long): Double {
         val hours = assistancePlan.hours.filter { it.hourType.id == hourTypeId }
-        val dailyHours = hours.sumOf { it.weeklyHours } / 7
+        val dailyMinutes = hours.sumOf { it.weeklyMinutes } / 7.0
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
-        return TimeDoubleService.convertDoubleToTimeDouble(dailyHours * days)
+        return TimeDoubleService.convertDoubleToTimeDouble((dailyMinutes * days) / 60.0)
     }
 
     fun getApprovedGoalHoursByHourTypeIdInMonth(year: Int,
@@ -413,7 +415,7 @@ class AssistancePlanAnalysisService(
             return 0.0
         }
 
-        return goal.hours.sumOf { hour -> (hour.weeklyHours / 7) * days }
+        return goal.hours.sumOf { hour -> (hour.weeklyMinutes / 7.0) * days / 60.0 }
     }
 
     private fun sumGoalHoursByHourTypeId(goal: GoalProjection, days: Int, hourTypeId: Long): Double {
@@ -422,7 +424,7 @@ class AssistancePlanAnalysisService(
         }
 
         val hours = goal.hours.filter { it.hourType.id == hourTypeId }
-        return hours.sumOf { hour -> (hour.weeklyHours / 7) * days }
+        return hours.sumOf { hour -> (hour.weeklyMinutes / 7.0) * days / 60.0 }
     }
 
     private fun isInYearMonth(year: Int, month: Int, assistancePlan: AssistancePlanProjection): Boolean {

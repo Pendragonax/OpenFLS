@@ -3,9 +3,10 @@ import {Period} from "../../../../shared/components/year-month-selection/Period"
 import {UntypedFormGroup} from "@angular/forms";
 
 @Component({
-  selector: 'app-assistance-plan-analysis-filter',
-  templateUrl: './assistance-plan-evaluation-filter.component.html',
-  styleUrls: ['./assistance-plan-evaluation-filter.component.css']
+    selector: 'app-assistance-plan-analysis-filter',
+    templateUrl: './assistance-plan-evaluation-filter.component.html',
+    styleUrls: ['./assistance-plan-evaluation-filter.component.css'],
+    standalone: false
 })
 export class AssistancePlanEvaluationFilterComponent implements OnInit {
 

@@ -7,14 +7,14 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import org.modelmapper.ModelMapper
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -31,8 +31,8 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
-import org.springframework.web.filter.CorsFilter
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
@@ -40,35 +40,38 @@ import java.security.interfaces.RSAPublicKey
 @EnableWebSecurity
 class SecurityConfiguration {
 
+    private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
+
     @Value("\${jwt.private-key}")
     private val rsaPrivateKey: RSAPrivateKey? = null
 
     @Value("\${jwt.public-key}")
     private val rsaPublicKey: RSAPublicKey? = null
 
-    @Bean
-    fun authenticationProvider(userDetailsService: UserDetailsService,
-                               passwordEncoder: PasswordEncoder?): DaoAuthenticationProvider {
-        return DaoAuthenticationProvider().apply {
-            setUserDetailsService(userDetailsService)
-            setPasswordEncoder(passwordEncoder)
-        }
-    }
+    @Value("\${openfls.cors.allowed-origin-patterns:}")
+    private val corsAllowedOriginPatterns: List<String> = listOf()
 
     @Bean
     fun modelMapper(): ModelMapper? = ModelMapper()
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder? = BCryptPasswordEncoder()
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
     @Throws(Exception::class)
-    fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
-        return authenticationConfiguration.authenticationManager
+    fun authenticationManager(
+        http: HttpSecurity,
+        userDetailsService: UserDetailsService,
+        passwordEncoder: PasswordEncoder
+    ): AuthenticationManager {
+        val builder = http.getSharedObject(AuthenticationManagerBuilder::class.java)
+        builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder)
+        return builder.build()
     }
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        http.cors { }
         http.csrf { csrf -> csrf.disable() }
 
         http.sessionManagement { mgm -> mgm.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
@@ -95,6 +98,8 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/institutions/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/institutions/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/institutions/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/contingents/evaluations/employee/**").authenticated()
+                        .requestMatchers("/absences/**").authenticated()
                         .requestMatchers("/contingents/**").hasAnyAuthority("ADMIN", "LEAD")
                         .requestMatchers(HttpMethod.POST, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
                         .requestMatchers(HttpMethod.PUT, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
@@ -135,10 +140,11 @@ class SecurityConfiguration {
     }
 
     @Bean
-    fun corsFilter(): CorsFilter {
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        logger.info("Allowed cors origin patterns: $corsAllowedOriginPatterns");
         val config = CorsConfiguration().apply {
             allowCredentials = true
-            addAllowedOriginPattern("*")
+            allowedOriginPatterns = corsAllowedOriginPatterns
             addAllowedHeader("*")
             addAllowedMethod("OPTIONS")
             addAllowedMethod("HEAD")
@@ -153,6 +159,6 @@ class SecurityConfiguration {
             registerCorsConfiguration("/**", config)
         }
 
-        return CorsFilter(source)
+        return source
     }
 }

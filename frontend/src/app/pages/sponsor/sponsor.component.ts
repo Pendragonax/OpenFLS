@@ -9,9 +9,10 @@ import {TablePageComponent} from "../../shared/components/table-page.component";
 import {HelperService} from "../../shared/services/helper.service";
 
 @Component({
-  selector: 'app-sponsor',
-  templateUrl: './sponsor.component.html',
-  styleUrls: ['./sponsor.component.css']
+    selector: 'app-sponsor',
+    templateUrl: './sponsor.component.html',
+    styleUrls: ['./sponsor.component.css'],
+    standalone: false
 })
 export class SponsorComponent extends TablePageComponent<SponsorDto, SponsorDto> implements OnInit {
 

@@ -1,22 +1,192 @@
-.fixed-button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  z-index: 100;
-  opacity: 0.3;
+.floating-export-button {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1100;
+  opacity: 0.9;
   background: limegreen;
   color: white;
+  transform: scale(1.1);
 }
 
-.fixed-button:hover {
+.floating-export-button:hover {
   transition: opacity 200ms ease-in-out;
   opacity: 1;
 }
 
-.table-container {
-  position: relative;
-}
-
 .background-red {
   background: rgba(255, 33, 33, 0.24) !important;
+}
+
+:host ::ng-deep .mat-column-start {
+  min-width: 200px;
+  max-width: 200px;
+  width: 200px;
+}
+
+:host ::ng-deep .mat-column-actions {
+  min-width: 150px;
+  max-width: 150px;
+  width: 150px;
+  text-align: center;
+}
+
+:host ::ng-deep td.mat-column-actions > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+:host ::ng-deep .mat-column-clientFullName {
+  white-space: nowrap;
+  width: 1%;
+}
+
+:host ::ng-deep .mat-column-institutionName,
+:host ::ng-deep .mat-column-employeeFullName {
+  white-space: nowrap;
+  width: 1%;
+}
+
+:host ::ng-deep .service-time-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:host ::ng-deep .service-time-left {
+  display: inline-block;
+}
+
+:host ::ng-deep .service-time-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #13a3e6;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.service-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.service-card {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.service-card--illegal {
+  border-left: 4px solid #e95c54;
+  background: rgba(233, 92, 84, 0.08);
+}
+
+.service-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.service-card-date-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.service-card-date {
+  font-size: 12px;
+  color: #6a7386;
+}
+
+.service-card-time {
+  font-size: 13px;
+  color: #2f3a4b;
+  font-weight: 600;
+}
+
+.service-card-minutes--pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #13a3e6 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.service-card-minutes {
+  font-size: 12px;
+  color: #6a7386;
+  background: #f2f4f8;
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.service-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e7ebf3;
+  background: #f8f9fc;
+}
+
+.service-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.service-card-label {
+  color: #6a7386;
+  min-width: 90px;
+}
+
+.service-card-value {
+  text-align: right;
+  font-weight: 600;
+  color: #2f3a4b;
+}
+
+.service-card-value-light {
+  text-align: right;
+  color: #2f3a4b;
+}
+
+.service-card-content {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #2f3a4b;
+}
+
+.service-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 800px) {
+  table {
+    display: none;
+  }
+
+  .service-cards {
+    display: flex;
+  }
+
+  .paginator {
+    display: none;
+  }
 }

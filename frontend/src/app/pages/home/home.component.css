@@ -1,15 +1,10 @@
-table {
+.home-general-wrapper {
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
-.mat-form-field {
-  width: 300px;
-}
-
-.mat-cell {
-  padding: 4px 4px 4px 4px;
-}
-
-.mat-header-cell {
-  padding: 4px 4px 4px 4px;
+.home-general-accordion {
+  width: 100%;
+  max-width: 1000px;
 }

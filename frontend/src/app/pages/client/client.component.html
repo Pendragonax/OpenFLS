@@ -5,63 +5,66 @@
 
 <div class="container mt-3">
   <!--FILTER-->
-  <div class="row"
-       *ngIf="!isSubmitting">
-    <!--FILTER FORM-->
-    <form [formGroup]="filterForm">
-      <div class="container-fluid text-center">
-        <div class="row justify-content-center">
-          <div class="col-auto">
-            <app-search-field [isSubmitting]="isSubmitting"
-                              [placeholder]="'...'"
-                              (onSearchStringChanges)="onSearchStringChanges($event)"
-                              [onResetClick]="resetFilterSearchString"></app-search-field>
-          </div>
-          <div class="col-auto">
-            <app-institution-select [institutions]="readableInstitutions"
-                                    [institutionId]="institutionId"
-                                    (institutionChanged)="onInstitutionChanged($event)"></app-institution-select>
+  @if (!isSubmitting) {
+    <div class="row">
+      <!--FILTER FORM-->
+      <form [formGroup]="filterForm">
+        <div class="container-fluid text-center">
+          <div class="row justify-content-center">
+            <div class="col-auto">
+              <app-search-field [isSubmitting]="isSubmitting"
+                                [placeholder]="'...'"
+                                (onSearchStringChanges)="onSearchStringChanges($event)"
+                                ></app-search-field>
+            </div>
+            <div class="col-auto">
+              <app-institution-select [institutions]="readableInstitutions"
+                                      [institutionId]="institutionId"
+                                      (institutionChanged)="onInstitutionChanged($event)"></app-institution-select>
+            </div>
           </div>
         </div>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
+  }
 
   <!--TABLE-->
   <div class="row">
     <!--ACTIONS-->
-    <div class="row"
-         *ngIf="!isSubmitting">
-      <div class="col">
-        <mat-paginator class="paginator"
-                       showFirstLastButtons
-                       (page)="handlePageEvent($event)"
-                       [length]="pageLength"
-                       [pageIndex]="pageIndex"
-                       [pageSize]="pageSize"></mat-paginator>
+    @if (!isSubmitting) {
+      <div class="row">
+        <div class="col">
+          <mat-paginator class="paginator"
+                         showFirstLastButtons
+                         (page)="handlePageEvent($event)"
+                         [length]="pageLength"
+                         [pageIndex]="pageIndex"
+                         [pageSize]="pageSize"></mat-paginator>
+        </div>
       </div>
-    </div>
+    }
 
     <!--LOADING-->
-    <div class="row m-2"
-         *ngIf="isSubmitting">
-      <div class="d-flex justify-content-center">
-        <mat-spinner [strokeWidth]="2"
-                     [diameter]="70"
-                     class="center-spinner"></mat-spinner>
+    @if (isSubmitting) {
+      <div class="row m-2">
+        <div class="d-flex justify-content-center">
+          <mat-spinner [strokeWidth]="2"
+                       [diameter]="70"
+                       class="center-spinner"></mat-spinner>
+        </div>
+        <div class="d-flex justify-content-center">
+          <p><b>Lade Klienten</b></p>
+        </div>
       </div>
-      <div class="d-flex justify-content-center">
-        <p><b>Lade Klienten</b></p>
-      </div>
-    </div>
+    }
 
-    <div class="row"
-         *ngIf="!isSubmitting">
-      <table mat-table
-             matSort
-             (matSortChange)="sortData($event)"
-             [dataSource]="tableSource"
-             class="mat-elevation-z4">
+    @if (!isSubmitting) {
+      <div class="row">
+        <table mat-table
+               matSort
+               (matSortChange)="sortData($event)"
+               [dataSource]="tableSource"
+               class="mat-elevation-z4">
         <ng-container matColumnDef="name">
           <th mat-header-cell
               mat-sort-header="{{tableColumns[0]}}"
@@ -167,7 +170,8 @@
 
         <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
-      </table>
-    </div>
+        </table>
+      </div>
+    }
   </div>
 </div>

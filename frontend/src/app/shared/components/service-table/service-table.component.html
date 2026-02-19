@@ -10,77 +10,167 @@
 </div>
 
 <div class="table-container">
-  <button mat-mini-fab class="fixed-button"
-          *ngIf="services.length > 0"
-          (click)="exportAsCSV()"
-          [matTooltip]="'.csv speichern'">
-    <mat-icon>save</mat-icon>
-  </button>
+  @if (services.length > 0) {
+    <button mat-mini-fab class="floating-export-button"
+            (click)="exportAsCSV()"
+            [matTooltip]="'.csv speichern'">
+      <mat-icon>save</mat-icon>
+    </button>
+  }
 
-  <table mat-table
-         matSort
-         *ngIf="services.length > 0"
-         [dataSource]="tableDataSource"
-         class="mat-elevation-z4">
-    <ng-container [matColumnDef]="displayedColumn" *ngFor="let displayedColumn of displayedColumns">
-      <ng-container *ngIf="displayedColumn !== 'actions'">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header class="overview-font-size">{{getColumnDisplayName(displayedColumn)}}</th>
-        <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}" [innerHTML]="getFormattedCellContent(displayedColumn, element[displayedColumn])"></td>
-      </ng-container>
-      <ng-container *ngIf="displayedColumn == 'actions'" >
-        <th mat-header-cell *matHeaderCellDef class="overview-font-size">Aktionen</th>
-        <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}">
-          <div>
-            <button mat-icon-button
-                    color="primary"
-                    class="m-1"
-                    *ngIf="editMode"
-                    [routerLink]="['/services/edit', element['id']]">
-              <mat-icon>edit</mat-icon>
-            </button>
+  @if (services.length > 0) {
+    <table mat-table
+           matSort
+           [dataSource]="tableDataSource"
+           class="mat-elevation-z4">
+      @for (displayedColumn of displayedColumns; track displayedColumn) {
+        <ng-container [matColumnDef]="displayedColumn">
+          @if (displayedColumn !== 'actions') {
+            <th mat-header-cell *matHeaderCellDef mat-sort-header class="overview-font-size">{{getColumnDisplayName(displayedColumn)}}</th>
+            <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}" [innerHTML]="getFormattedCellContent(displayedColumn, element)"></td>
+          } @else {
+            <th mat-header-cell *matHeaderCellDef class="overview-font-size">Aktionen</th>
+            <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}">
+              <div>
+                @if (editMode) {
+                  <button mat-icon-button
+                          color="primary"
+                          class="m-1"
+                          [routerLink]="['/services/edit', element['id']]">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
 
-            <button mat-icon-button
-                    color="warn"
-                    class="m-1"
-                    [disabled]="!(isAdmin$ | async)"
-                    [matTooltip]="'Dokumentation löschen'"
-                    (click)="openDeleteConfirmation(deleteContent, element['id'])">
-              <mat-icon>delete</mat-icon></button>
+                <button mat-icon-button
+                        color="warn"
+                        class="m-1"
+                        [disabled]="!canDelete(element, (isAdmin$ | async))"
+                        [matTooltip]="'Dokumentation löschen'"
+                        (click)="openDeleteConfirmation(deleteContent, element['id'])">
+                  <mat-icon>delete</mat-icon></button>
 
-            <!--DELETE MODAL CONFIRMATION-->
-            <ng-template #deleteContent let-modal>
-              <div class="modal-header">
-                <h2 class="modal-title"
-                    id="modal-basic-delete-title">Bestätigung</h2>
-                <button type="button"
-                        class="btn-close"
-                        aria-label="Close"
-                        (click)="modal.dismiss('Cross click')"></button>
+                <!--DELETE MODAL CONFIRMATION-->
+                <ng-template #deleteContent let-modal>
+                  <div class="modal-header">
+                    <h2 class="modal-title"
+                        id="modal-basic-delete-title">Bestätigung</h2>
+                    <button type="button"
+                            class="btn-close"
+                            aria-label="Close"
+                            (click)="modal.dismiss('Cross click')"></button>
+                  </div>
+                  <div class="modal-body">
+                    <p>Wollen sie den Dokumentationseintrag wirklich löschen?</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-danger"
+                            (click)="modal.close(true)">Löschen</button>
+                    <button type="button"
+                            class="btn btn-outline-dark"
+                            (click)="modal.close(false)">Abbrechen</button>
+                  </div>
+                </ng-template>
               </div>
-              <div class="modal-body">
-                <p>Wollen sie den Dokumentationseintrag wirklich löschen?</p>
+            </td>
+          }
+        </ng-container>
+      }
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="overview-row-height"></tr>
+    </table>
+  }
+
+  @if (services.length > 0) {
+    <div class="service-cards">
+      @for (row of tableDataSource.data; track row.id) {
+        <div class="service-card mat-elevation-z2" [ngClass]="{'service-card--illegal': redRows}">
+          <div class="service-card-header">
+            <div>
+              <div class="service-card-date-row">
+                <div class="service-card-date">{{ row.startDate }}</div>
+                <div class="service-card-time">{{ row.startTime }} - {{ row.endTime }}</div>
+                @if (row.minutes != null) {
+                  <div class="service-card-minutes service-card-minutes--pill">{{ row.minutes }} Min</div>
+                }
               </div>
-              <div class="modal-footer">
-                <button type="button"
-                        class="btn btn-danger"
-                        (click)="modal.close(true)">Löschen</button>
-                <button type="button"
-                        class="btn btn-outline-dark"
-                        (click)="modal.close(false)">Abbrechen</button>
+            </div>
+            @if (editMode || adminMode) {
+              <div class="service-card-actions">
+                @if (editMode) {
+                  <button mat-icon-button
+                          color="primary"
+                          [routerLink]="['/services/edit', row.id]">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
+
+                @if (adminMode) {
+                  <button mat-icon-button
+                          color="warn"
+                          [disabled]="!canDelete(row, (isAdmin$ | async))"
+                          [matTooltip]="'Dokumentation löschen'"
+                          (click)="openDeleteConfirmation(deleteContent, row.id)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+
+                  <ng-template #deleteContent let-modal>
+                    <div class="modal-header">
+                      <h2 class="modal-title"
+                          id="modal-basic-delete-title-card">Bestätigung</h2>
+                      <button type="button"
+                              class="btn-close"
+                              aria-label="Close"
+                              (click)="modal.dismiss('Cross click')"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Wollen sie den Dokumentationseintrag wirklich löschen?</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button"
+                              class="btn btn-danger"
+                              (click)="modal.close(true)">Löschen</button>
+                      <button type="button"
+                              class="btn btn-outline-dark"
+                              (click)="modal.close(false)">Abbrechen</button>
+                    </div>
+                  </ng-template>
+                }
               </div>
-            </ng-template>
+            }
           </div>
-        </td>
-      </ng-container>
-    </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="overview-row-height"></tr>
-  </table>
+          <div class="service-card-body">
+            <div class="service-card-row">
+              <span class="service-card-label">Klient</span>
+              <span class="service-card-value-light">{{ row.clientFullName }}</span>
+            </div>
+            @if (!editMode && row.institutionName) {
+              <div class="service-card-row">
+                <span class="service-card-label">Bereich</span>
+                <span class="service-card-value-light">{{ row.institutionName }}</span>
+              </div>
+            }
+            @if (!editMode && row.employeeFullName) {
+              <div class="service-card-row">
+                <span class="service-card-label">Mitarbeiter</span>
+                <span class="service-card-value-light">{{ row.employeeFullName }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="service-card-content" [innerHTML]="row.content"></div>
+
+        </div>
+      }
+    </div>
+  }
 </div>
 
-<div class="text-center"
-     *ngIf="services.length <= 0">
-  <mat-icon [color]="'warn'" class="m-auto mt-2">remove_circle_outline</mat-icon>
-  <p class="mt-1"><b>Es wurden keine Einträge gefunden.</b></p>
-</div>
+@if (services.length <= 0) {
+  <div class="text-center">
+    <mat-icon [color]="'warn'" class="m-auto mt-2">remove_circle_outline</mat-icon>
+    <p class="mt-1"><b>Es wurden keine Einträge gefunden.</b></p>
+  </div>
+}

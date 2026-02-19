@@ -1,40 +1,36 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, Output, SimpleChanges} from '@angular/core';
-import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatButtonModule} from "@angular/material/button";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatIconModule} from "@angular/material/icon";
 import {MatOptionModule} from "@angular/material/core";
 import {MatSelectModule} from "@angular/material/select";
-import {InstitutionSoloDto} from "../../dtos/institution-solo-dto.model";
+import {ReadableInstitutionDto} from "../../dtos/institution-readable-dto.model";
 
 @Component({
-  selector: 'app-institution-select',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    FormsModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatOptionModule,
-    MatSelectModule,
-    NgForOf,
-    NgIf,
-    ReactiveFormsModule
-  ],
-  templateUrl: './institution-select.component.html',
-  styleUrl: './institution-select.component.css'
+    selector: 'app-institution-select',
+    imports: [
+        FormsModule,
+        MatButtonModule,
+        MatFormFieldModule,
+        MatIconModule,
+        MatOptionModule,
+        MatSelectModule,
+        ReactiveFormsModule
+    ],
+    templateUrl: './institution-select.component.html',
+    styleUrl: './institution-select.component.css'
 })
 export class InstitutionSelectComponent {
 
-  @Input() institutions: InstitutionSoloDto[] = [];
+  @Input() institutions: ReadableInstitutionDto[] = [];
   @Input() disabled: boolean = false;
   @Input() institutionId: number | null = null;
 
-  @Output() institutionChanged: EventEmitter<InstitutionSoloDto | null> = new EventEmitter<InstitutionSoloDto | null>()
+  @Output() institutionChanged: EventEmitter<ReadableInstitutionDto | null> = new EventEmitter<ReadableInstitutionDto | null>()
 
-  institution: InstitutionSoloDto | null = null;
+  institution: ReadableInstitutionDto | null = null;
   selectionGroup: FormGroup;
 
   get institutionControl() {

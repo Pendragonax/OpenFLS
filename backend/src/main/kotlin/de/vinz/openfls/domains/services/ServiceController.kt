@@ -7,8 +7,13 @@ import de.vinz.openfls.domains.permissions.PermissionService
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
+import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
+import de.vinz.openfls.domains.services.dtos.ClientAndDateRequestDTO
+import de.vinz.openfls.domains.services.dtos.ClientAndDateResponseDTO
+import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
+import org.apache.coyote.Response
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -21,11 +26,12 @@ import java.time.LocalDate
 @RestController
 @RequestMapping("/services")
 class ServiceController(
-        private val serviceService: ServiceService,
-        private val employeeService: EmployeeService,
-        private val accessService: AccessService,
-        private val permissionService: PermissionService,
-        private val assistancePlanService: AssistancePlanService
+    private val serviceService: ServiceService,
+    private val contingentCalendarService: ContingentCalendarService,
+    private val employeeService: EmployeeService,
+    private val accessService: AccessService,
+    private val permissionService: PermissionService,
+    private val assistancePlanService: AssistancePlanService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(ServiceController::class.java)
@@ -54,7 +60,9 @@ class ServiceController(
             logger.error(ex.message)
 
             ResponseEntity(
-                    employeeService.getById(valueDto.employeeId),
+                    employeeService.getById(valueDto.employeeId).apply {
+                        this?.access?.password = ""
+                    },
                     HttpStatus.BAD_REQUEST
             )
         }
@@ -97,14 +105,13 @@ class ServiceController(
     fun delete(@PathVariable id: Long): Any {
         return try {
             val startMs = System.currentTimeMillis()
-            val service = serviceService.getById(id)
-
-            if (!accessService.isAdmin() &&
-                    (service?.employee?.id != accessService.getId() ||
-                            service.start.toLocalDate().isBefore(LocalDate.now().minusDays(14))))
-                throw IllegalArgumentException("No permission to delete this service")
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
+            val service = serviceService.getById(id) ?: throw IllegalArgumentException("service not found")
+
+            val isOwner = service.employee?.id == accessService.getId()
+            if (!accessService.isAdmin() && !isOwner)
+                throw IllegalArgumentException("No permission to delete this service")
 
             val dto = serviceService.getDtoById(id)
             serviceService.delete(id)
@@ -715,6 +722,32 @@ class ServiceController(
     fun countByGoal(@PathVariable id: Long): Any {
         return try {
             ResponseEntity.ok(serviceService.countByGoal(id))
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+            ResponseEntity(
+                    ex.message,
+                    HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
+    @PostMapping("client-and-date")
+    fun getByClientAndDate(@RequestBody request: ClientAndDateRequestDTO): ResponseEntity<Any> {
+        return try {
+            val startMs = System.currentTimeMillis()
+
+            val result = serviceService.getFromTillEmployeeNameProjectionByClientAndDate(request.clientId, request.date)
+            val response = ClientAndDateResponseDTO.of(request.clientId, result)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getByClientAndDate took %s ms and found %d entities",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs,
+                    result.size))
+            }
+
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             logger.error(ex.message)
 
