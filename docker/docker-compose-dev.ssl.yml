@@ -13,6 +13,31 @@ services:
     networks:
       - open-fls-network
 
+  backup:
+    container_name: open_fls_backup
+    image: databack/mysql-backup:latest
+    user: "${UID:-1000}:${GID:-1000}"
+    restart: always
+    env_file: docker-compose.env
+    environment:
+      DB_SERVER: ${MYSQL_HOST:-open_fls_db}
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASS_FILE: /run/secrets/db_root_password
+      DB_DUMP_INCLUDE: ${MYSQL_DATABASE:-openfls}
+      DB_DUMP_TARGET: /backup
+      DB_DUMP_FREQUENCY: ${BACKUP_INTERVAL_MINUTES:-1440}
+      DB_DUMP_RETENTION: ${BACKUP_RETENTION_DAYS:-30}d
+    volumes:
+      - ./backup:/backup
+    depends_on:
+      - db
+    secrets:
+      - db_root_password
+    networks:
+      - open-fls-network
+    command: ["dump"]
+
   adminer:
     container_name: open_fls_adminer
     image: adminer
