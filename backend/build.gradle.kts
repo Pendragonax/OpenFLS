@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "de.vinz"
-version = "2.0.1"
+version = "3.0.0"
 description = "Application for documenting Fls"
 
 java {
