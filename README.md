@@ -45,4 +45,4 @@ In the further course this can be changed at any time by the user.
 WiP
 
 ## Backups
-WiP
+See `BACKUP.md` for automatic backup configuration and manual restore steps.

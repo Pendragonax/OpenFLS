@@ -45,4 +45,4 @@ Im weiteren Verlauf kann dieses jederzeit durch den Nutzer geändert werden.
 WiP
 
 ## Backups
-WiP
+Siehe `BACKUP.md` für die automatische Backup-Konfiguration und den manuellen Restore-Prozess.
