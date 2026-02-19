@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 
 
+## 3.0.0
+
+#### Features
+- add absence days and add to calculations
+- add multiple mobile views
+- add single page service creation and editing
+- add single page assistance plan creation and editing
+- add backup service with retention policy
+- add docker images instead of building local images
+- refactor restore database script
+- refactor contingent view
+- refactor service view
+- refactor home view
+- refactor hour view
+- refactor assistance plan view with multiple new statistics
+- switch assistance plans hours to HH,MM format
+- switch from maven to gradle
+- update backend versions
+- update frontend versions
+
+#### Bug
+- fix several bugs
+- refactor multiple backend services
+
+
 ## 2.0.1
 
 #### Bug
