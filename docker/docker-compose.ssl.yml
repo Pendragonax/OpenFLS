@@ -16,7 +16,7 @@ services:
 
   backup:
     container_name: open_fls_backup
-    image: databack/mysql-backup:latest
+    image: databack/mysql-backup@sha256:6acb182b8cfb1e05f3c486fd8f6c1d72897ef636eb413a5e7f1c6a3f5def3033
     user: "${UID:-1000}:${GID:-1000}"
     restart: always
     env_file: docker-compose.env
