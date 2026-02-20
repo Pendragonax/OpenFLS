@@ -51,6 +51,9 @@ class SecurityConfiguration {
     @Value("\${openfls.cors.allowed-origin-patterns:}")
     private val corsAllowedOriginPatterns: List<String> = listOf()
 
+    @Value("\${openfls.cors.enabled:true}")
+    private val corsEnabled: Boolean = true
+
     @Bean
     fun modelMapper(): ModelMapper? = ModelMapper()
 
@@ -71,7 +74,11 @@ class SecurityConfiguration {
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-        http.cors { }
+        if (corsEnabled) {
+            http.cors { }
+        } else {
+            http.cors { cors -> cors.disable() }
+        }
         http.csrf { csrf -> csrf.disable() }
 
         http.sessionManagement { mgm -> mgm.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
