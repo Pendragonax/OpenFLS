@@ -51,6 +51,9 @@ services:
     image: ghcr.io/pendragonax/openfls-backend:latest
     restart: always
     env_file: docker-compose.env
+    environment:
+      JWT_PRIVATE_KEY: file:/run/secrets/jwt_private_key
+      JWT_PUBLIC_KEY: file:/run/secrets/jwt_public_key
     volumes:
       - ./logs:/app/logs/
     depends_on:
@@ -59,6 +62,8 @@ services:
       - db_root_password
       - db_password
       - db_user
+      - jwt_private_key
+      - jwt_public_key
     networks:
       - open-fls-network
 
@@ -101,6 +106,10 @@ secrets:
     file: ../secrets/db_root_password.secret
   db_user:
     file: ../secrets/db_user.secret
+  jwt_private_key:
+    file: ../secrets/jwt_private_key.secret
+  jwt_public_key:
+    file: ../secrets/jwt_public_key.secret
 
 volumes:
   open-fls-db:
