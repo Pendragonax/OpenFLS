@@ -33,8 +33,7 @@ WORKDIR /app
 RUN mkdir -p /app && chown ${UID}:${GID} /app
 COPY --chown=${UID}:${GID} . /app/
 USER ${UID}:${GID}
-# Schlüssel erzeugen und Jar bauen
-RUN bash scripts/backend_generate_rsa_keys.sh
+# Jar bauen (JWT-Keys werden zur Laufzeit via Compose-Secrets injiziert)
 RUN ./gradlew --no-daemon clean build
 
 # Stage 3: Prod
