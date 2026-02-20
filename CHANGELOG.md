@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## 3.0.2
+
+#### Bug
+- fix rsa key problem and add to docker compose as volume
+
+
 ## 3.0.1
 
 #### Bug
