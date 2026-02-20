@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## 3.0.3
+
+#### Bug
+- add CORS switch
+
+
 ## 3.0.2
 
 #### Bug
