@@ -54,6 +54,7 @@ services:
     environment:
       JWT_PRIVATE_KEY: file:/run/secrets/jwt_private_key
       JWT_PUBLIC_KEY: file:/run/secrets/jwt_public_key
+      OPENFLS_CORS_ENABLED: "false"
     volumes:
       - ./logs:/app/logs/
     depends_on:
