@@ -102,6 +102,13 @@
   grid-column: 1 / -1;
 }
 
+.beta-flags {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
 .beta-plan-option {
   display: flex;
   flex-direction: column;
