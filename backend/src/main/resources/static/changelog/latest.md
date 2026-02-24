@@ -1,6 +1,6 @@
 # Version 3.0.3
 
-**Release-Datum:** 2026-02-23
+**Release-Datum:** 20.02.2026
 
 # Highlights
 
