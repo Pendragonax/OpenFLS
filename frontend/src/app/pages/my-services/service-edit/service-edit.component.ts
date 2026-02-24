@@ -44,8 +44,6 @@ export class ServiceEditComponent extends ServiceNewComponent {
     super.initFormSubscriptions();
 
     if (this.editMode) {
-      this.serviceDateControl.disable({ emitEvent: false });
-
       const planId = this.ensureAssistancePlanSelection();
       this.emitAssistancePlanSelection(planId, effectiveGoalIds);
       this.restoreGoals(effectiveGoalIds, planId);

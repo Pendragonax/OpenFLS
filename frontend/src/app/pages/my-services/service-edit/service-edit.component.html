@@ -277,6 +277,10 @@
           <textarea matInput rows="5" formControlName="content" placeholder="Text hier eingeben..." maxlength="1024"></textarea>
           <mat-hint>{{ 1024 - (contentControl.value?.length ?? 0) }} Zeichen übrig</mat-hint>
         </mat-form-field>
+        <div class="beta-flags">
+          <mat-checkbox formControlName="groupService">Gruppenangebot</mat-checkbox>
+          <mat-checkbox formControlName="unfinished">Unvollständig</mat-checkbox>
+        </div>
       </form>
     </div>
 

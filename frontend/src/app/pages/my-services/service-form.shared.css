@@ -102,6 +102,13 @@
   grid-column: 1 / -1;
 }
 
+.beta-flags {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
 .beta-plan-option {
   display: flex;
   flex-direction: column;
@@ -414,6 +421,18 @@
   .beta-actions {
     flex-wrap: wrap;
     width: 100%;
+    gap: 2px;
+  }
+
+  :host ::ng-deep .beta-actions .mat-mdc-button-base {
+    min-height: 32px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  :host ::ng-deep .beta-actions .mat-mdc-button-base .mdc-button__label {
+    font-size: 12px;
   }
 
   .beta-actions button:first-child {
@@ -421,6 +440,6 @@
   }
 
   .beta-actions button:not(:first-child) {
-    width: calc(50% - 5px);
+    width: calc(50% - 1px);
   }
 }
