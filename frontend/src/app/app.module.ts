@@ -138,6 +138,7 @@ import {
   AssistancePlanHoursPageComponent
 } from "./pages/assistance-plans/components/assistance-plan-hours/assistance-plan-hours.component";
 import {AssistancePlanEditComponent} from "./pages/assistance-plans/assistance-plan-edit/assistance-plan-edit.component";
+import {MarkdownModule} from "ngx-markdown";
 
 const routes: Routes = [
   {path: '', pathMatch: 'full', redirectTo: ''},
@@ -243,6 +244,7 @@ const routes: Routes = [
     MatDialogModule,
     MatChipsModule,
     MatDividerModule,
+    MarkdownModule.forRoot(),
     MatSlideToggleModule,
     SearchFieldComponent,
     InstitutionSelectComponent,

@@ -76,10 +76,16 @@
     </div>
 
     <button mat-icon-button
+            [matTooltip]="'Was ist neu?'"
+            class="m-1 my-3 my-lg-0 text-white d-none d-lg-inline-flex"
+            (click)="openChangelog()">
+      <mat-icon class="text-white">new_releases</mat-icon>
+    </button>
+
+    <button mat-icon-button
             [matTooltip]="'Logout'"
-            color="accent"
-            class="m-1 my-3 my-lg-0" (click)="logout()">
-      <mat-icon>exit_to_app</mat-icon>
+            class="m-1 my-3 my-lg-0 text-white" (click)="logout()">
+      <mat-icon class="text-white">exit_to_app</mat-icon>
     </button>
 
     <button class="navbar-toggler"

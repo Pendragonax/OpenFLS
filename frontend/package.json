@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "2.0.1",
+  "version": "3.0.3",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -24,6 +24,8 @@
     "@angular/platform-browser-dynamic": "^20.2.0",
     "@angular/router": "^20.2.0",
     "@ng-bootstrap/ng-bootstrap": "^19.0.0",
+    "marked": "^16.4.2",
+    "ngx-markdown": "^20.1.0",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.8",
     "file-saver-es": "^2.0.5",

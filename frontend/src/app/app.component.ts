@@ -5,6 +5,8 @@ import {EmployeeDto} from "./shared/dtos/employee-dto.model";
 import {interval, ReplaySubject} from "rxjs";
 import {TokenStorageService} from "./shared/services/token.storage.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {MatDialog} from "@angular/material/dialog";
+import {ChangelogModalComponent} from "./shared/modals/changelog-modal/changelog-modal.component";
 
 @Component({
     selector: 'app-root',
@@ -28,7 +30,8 @@ export class AppComponent {
   constructor(
     private userService: UserService,
     private tokenService: TokenStorageService,
-    private router: Router) { }
+    private router: Router,
+    private dialog: MatDialog) { }
 
   ngOnInit() {
     this.userService.isAuthenticated$
@@ -66,5 +69,13 @@ export class AppComponent {
 
   logout() {
     this.userService.logout();
+  }
+
+  openChangelog(): void {
+    this.dialog.open(ChangelogModalComponent, {
+      width: '95vw',
+      maxWidth: '980px',
+      maxHeight: '80vh'
+    });
   }
 }

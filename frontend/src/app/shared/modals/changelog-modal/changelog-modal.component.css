@@ -1,0 +1,55 @@
+.changelog-modal__content {
+  min-height: 220px;
+  max-height: 70vh;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.changelog-modal__loading {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.changelog-modal__error {
+  color: #b00020;
+  margin: 0;
+}
+
+.changelog-markdown :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.changelog-markdown p,
+.changelog-markdown li {
+  line-height: 1.5;
+}
+
+.changelog-markdown {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:host ::ng-deep .changelog-markdown img {
+  width: min(100%) !important;
+  max-width: 520px !important;
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #d0d7de;
+}
+
+.changelog-markdown code {
+  background: #f4f6f8;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  white-space: pre-wrap;
+}
