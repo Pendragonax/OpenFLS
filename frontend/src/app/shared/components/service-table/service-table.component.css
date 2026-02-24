@@ -182,6 +182,10 @@
     display: none;
   }
 
+  .service-card-header {
+    gap: 0;
+  }
+
   .service-cards {
     display: flex;
   }
