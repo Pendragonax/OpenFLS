@@ -86,6 +86,7 @@ class SecurityConfiguration {
         http.authorizeHttpRequests { auth ->
             run {
                 auth.requestMatchers(HttpMethod.POST, "/login/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/changelog/**").permitAll()
                         .requestMatchers("/change_role/**").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/employees/assistance_plan/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/employees/assistance_plan/**").authenticated()

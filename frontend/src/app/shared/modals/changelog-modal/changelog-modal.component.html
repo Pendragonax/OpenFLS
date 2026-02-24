@@ -1,0 +1,21 @@
+<h1 mat-dialog-title>{{ title }}</h1>
+
+<div mat-dialog-content class="changelog-modal__content">
+  @if (isLoading) {
+    <div class="changelog-modal__loading">
+      <mat-spinner diameter="34"></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading && hasError) {
+    <p class="changelog-modal__error">Die Changelog konnte nicht geladen werden.</p>
+  }
+
+  @if (!isLoading && !hasError) {
+    <markdown class="changelog-markdown" [data]="changelogMarkdown"></markdown>
+  }
+</div>
+
+<div mat-dialog-actions>
+  <button mat-raised-button color="primary" (click)="closeDialog()">{{ closeButtonLabel }}</button>
+</div>
