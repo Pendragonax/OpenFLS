@@ -93,14 +93,14 @@
 
         <div class="beta-section">
           <div class="beta-section-title">Stundenanteile</div>
-          @if (canAddPlanHours) {
-            <app-assistance-plan-hours-page
-              [hours]="updateValue.hours"
-              [editable]="true"
-              (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
-          } @else {
+          @if (!canAddPlanHours) {
             <div class="ap-section-hint">Stundenanteile können nicht hinzugefügt werden, solange in Zielen Stunden hinterlegt sind.</div>
           }
+          <app-assistance-plan-hours-page
+            [hours]="updateValue.hours"
+            [editable]="true"
+            [canAddHours]="canAddPlanHours"
+            (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
         </div>
 
         <div class="beta-section">

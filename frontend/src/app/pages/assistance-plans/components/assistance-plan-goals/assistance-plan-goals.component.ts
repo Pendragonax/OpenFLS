@@ -204,6 +204,11 @@ export class AssistancePlanGoalsComponent extends TablePageComponent<GoalDto, [G
   }
 
   createGoalHour() {
+    if (!this.canAddGoalHours) {
+      this.helperService.openSnackBar('Neue Ziel-Stunden können erst hinzugefügt werden, wenn nur ein Bereich Stunden enthält.');
+      return;
+    }
+
     if (this.editGoalHour.hourTypeId <= 0 || this.editGoalHour.weeklyMinutes <= 0) {
       return;
     }
