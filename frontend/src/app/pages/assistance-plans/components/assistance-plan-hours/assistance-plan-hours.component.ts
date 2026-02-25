@@ -35,6 +35,7 @@ export class AssistancePlanHoursPageComponent
   implements OnInit {
 
   @Input() editable = false;
+  @Input() canAddHours = true;
   @Input() set hours(value: AssistancePlanCreateHourDto[]) {
     this.values = (value ?? []).map((hour, index) => ({
       id: hour.id ?? (index + 1),
@@ -132,6 +133,11 @@ export class AssistancePlanHoursPageComponent
   }
 
   create(value: AssistancePlanHourDto) {
+    if (!this.canAddHours) {
+      this.helperService.openSnackBar('Neue Stunden können erst hinzugefügt werden, wenn nur ein Bereich Stunden enthält.');
+      return;
+    }
+
     if (!this.canPersistHour(value)) {
       return;
     }
