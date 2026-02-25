@@ -258,7 +258,17 @@
             <td mat-cell
                 class="px-2"
                 *matCellDef="let row">
-              {{ row.preview.approvedHoursPerWeek }}
+              <span class="hours-cell-content">
+                <span [ngClass]="{'hours-value-illegal': row.preview.hasIllegalHours}">
+                  {{ row.preview.approvedHoursPerWeek }}
+                </span>
+                @if (row.preview.hasIllegalHours) {
+                  <mat-icon class="illegal-hours-icon"
+                            [matTooltip]="illegalHoursTooltip"
+                            [matTooltipPosition]="'above'"
+                            aria-label="Warnung zu Stundenberechnung">warning</mat-icon>
+                }
+              </span>
             </td>
           </ng-container>
 
@@ -374,7 +384,17 @@
                 }
                 <div class="timeline-row">
                   <span class="timeline-label">h/Woche</span>
-                  <span class="timeline-value-light">{{row.preview.approvedHoursPerWeek}}</span>
+                  <span class="timeline-value-light hours-cell-content">
+                    <span [ngClass]="{'hours-value-illegal': row.preview.hasIllegalHours}">
+                      {{row.preview.approvedHoursPerWeek}}
+                    </span>
+                    @if (row.preview.hasIllegalHours) {
+                      <mat-icon class="illegal-hours-icon"
+                                [matTooltip]="illegalHoursTooltip"
+                                [matTooltipPosition]="'above'"
+                                aria-label="Warnung zu Stundenberechnung">warning</mat-icon>
+                    }
+                  </span>
                 </div>
                 <div class="timeline-row timeline-row-hours-bar"
                      [matTooltip]="getHoursTooltip(row.preview)"

@@ -11,6 +11,7 @@ export class AssistancePlanPreviewDto {
   end: string = '';
   isActive: boolean = false;
   isFavorite: boolean = false;
+  hasIllegalHours: boolean = false;
   approvedHoursPerWeek: number = 0;
   approvedHoursThisYear: number = 0;
   executedHoursThisYear: number = 0;

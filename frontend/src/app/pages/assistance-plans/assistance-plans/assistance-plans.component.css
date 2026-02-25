@@ -254,6 +254,25 @@ td , th {
   font-weight: 500;
 }
 
+.hours-cell-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.illegal-hours-icon {
+  color: #d32f2f;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+.hours-value-illegal {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
 .year-status-column-header,
 .year-status-column-cell {
   width: clamp(110px, 14vw, 190px);

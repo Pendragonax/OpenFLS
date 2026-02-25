@@ -70,10 +70,10 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().id).isEqualTo(5L)
         assertThat(result.first().isFavorite).isTrue()
         assertThat(result.first().hasIllegalHours).isTrue()
-        assertThat(result.first().approvedHoursPerWeek).isEqualTo(7.0)
+        assertThat(result.first().approvedHoursPerWeek).isEqualTo(2.0)
         assertThat(result.first().executedHoursThisYear).isEqualTo(3.0)
         assertThat(result.first().approvedHoursThisYear)
-            .isEqualTo(expectedApprovedHoursThisYear(420.0, yearStart, now.plusDays(30), yearStart, now))
+            .isEqualTo(expectedApprovedHoursThisYear(120.0, yearStart, now.plusDays(30), yearStart, now))
         verify(serviceRepository).findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, now)
     }
 
@@ -148,7 +148,6 @@ class AssistancePlanPreviewServiceTest {
         weeklyGoalMinutes: Int,
         executedMinutesA: Int,
         executedMinutesB: Int,
-        expectedWeeklyTimeDouble: Double,
         expectedExecutedTimeDouble: Double
     ) {
         val now = LocalDate.now()
@@ -183,11 +182,14 @@ class AssistancePlanPreviewServiceTest {
         val result = previewService.getPreviewDtosByClientId(10L, 20L)
 
         assertThat(result).hasSize(1)
-        assertThat(result.first().approvedHoursPerWeek).isEqualTo(expectedWeeklyTimeDouble)
+        val expectedApprovedWeeklyMinutes = if (weeklyPlanMinutes > 0) weeklyPlanMinutes else weeklyGoalMinutes
+        assertThat(result.first().approvedHoursPerWeek).isEqualTo(
+            TimeDoubleService.convertDoubleToTimeDouble(expectedApprovedWeeklyMinutes / 60.0)
+        )
         assertThat(result.first().hasIllegalHours).isEqualTo(weeklyPlanMinutes > 0 && weeklyGoalMinutes > 0)
         assertThat(result.first().approvedHoursThisYear).isEqualTo(
             expectedApprovedHoursThisYear(
-                (weeklyPlanMinutes + weeklyGoalMinutes).toDouble(),
+                expectedApprovedWeeklyMinutes.toDouble(),
                 planStart,
                 planEnd,
                 yearStart,
@@ -262,9 +264,9 @@ class AssistancePlanPreviewServiceTest {
         @JvmStatic
         fun approvedAndExecutedMinuteCases(): Stream<Arguments> {
             return Stream.of(
-                Arguments.of(95, 40, 65, 60, 2.15, 2.05),
-                Arguments.of(61, 0, 29, 30, 1.01, 0.59),
-                Arguments.of(120, 35, 31, 31, 2.35, 1.02)
+                Arguments.of(95, 40, 65, 60, 2.05),
+                Arguments.of(61, 0, 29, 30, 0.59),
+                Arguments.of(120, 35, 31, 31, 1.02)
             )
         }
     }

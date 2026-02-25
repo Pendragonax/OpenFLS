@@ -156,9 +156,16 @@ class AssistancePlanPreviewService(
     ): Map<Long, Double> {
         val assistancePlanHourMinutes = assistancePlanHourWeeklyMinutes.sumWeeklyMinutesByAssistancePlanId()
         val goalHourMinutes = goalHourWeeklyMinutes.sumWeeklyMinutesByAssistancePlanId()
+        val assistancePlanIdsWithPlanHours = assistancePlanHourWeeklyMinutes
+            .map { it.assistancePlanId }
+            .toSet()
 
         return assistancePlanIds.associateWith { assistancePlanId ->
-            (assistancePlanHourMinutes[assistancePlanId] ?: 0.0) + (goalHourMinutes[assistancePlanId] ?: 0.0)
+            if (assistancePlanIdsWithPlanHours.contains(assistancePlanId)) {
+                assistancePlanHourMinutes[assistancePlanId] ?: 0.0
+            } else {
+                goalHourMinutes[assistancePlanId] ?: 0.0
+            }
         }
     }
 
