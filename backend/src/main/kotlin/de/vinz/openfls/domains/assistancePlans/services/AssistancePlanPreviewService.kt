@@ -82,12 +82,25 @@ class AssistancePlanPreviewService(
         val now = LocalDate.now()
         val yearStart = LocalDate.of(now.year, 1, 1)
         val assistancePlanIds = previews.map { it.id }
+        val assistancePlanHourWeeklyMinutes = assistancePlanRepository
+            .findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(assistancePlanIds)
+        val goalHourWeeklyMinutes = assistancePlanRepository
+            .findWeeklyMinutesFromGoalHoursByAssistancePlanIds(assistancePlanIds)
 
         return PreviewContext(
             now = now,
             yearStart = yearStart,
             periodEnd = now,
-            weeklyApprovedMinutesByAssistancePlanId = getWeeklyApprovedMinutesByAssistancePlanId(assistancePlanIds),
+            weeklyApprovedMinutesByAssistancePlanId = getWeeklyApprovedMinutesByAssistancePlanId(
+                assistancePlanIds,
+                assistancePlanHourWeeklyMinutes,
+                goalHourWeeklyMinutes
+            ),
+            hasIllegalHoursByAssistancePlanId = getHasIllegalHoursByAssistancePlanId(
+                assistancePlanIds,
+                assistancePlanHourWeeklyMinutes,
+                goalHourWeeklyMinutes
+            ),
             executedMinutesByAssistancePlanId = getExecutedMinutesByAssistancePlanId(assistancePlanIds, yearStart, now)
         )
     }
@@ -125,6 +138,7 @@ class AssistancePlanPreviewService(
             end = projection.end,
             isActive = isActiveOn(projection, context.now),
             isFavorite = favoriteAssistancePlanIds.contains(projection.id),
+            hasIllegalHours = context.hasIllegalHoursByAssistancePlanId[projection.id] ?: false,
             approvedHoursPerWeek = approvedHoursPerWeek,
             approvedHoursThisYear = approvedHoursThisYear,
             executedHoursThisYear = executedHoursThisYear
@@ -135,17 +149,34 @@ class AssistancePlanPreviewService(
         return projection.start <= date && projection.end >= date
     }
 
-    private fun getWeeklyApprovedMinutesByAssistancePlanId(assistancePlanIds: List<Long>): Map<Long, Double> {
-        val assistancePlanHourMinutes = assistancePlanRepository
-            .findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(assistancePlanIds)
-            .sumWeeklyMinutesByAssistancePlanId()
-
-        val goalHourMinutes = assistancePlanRepository
-            .findWeeklyMinutesFromGoalHoursByAssistancePlanIds(assistancePlanIds)
-            .sumWeeklyMinutesByAssistancePlanId()
+    private fun getWeeklyApprovedMinutesByAssistancePlanId(
+        assistancePlanIds: List<Long>,
+        assistancePlanHourWeeklyMinutes: List<AssistancePlanWeeklyMinutesProjection>,
+        goalHourWeeklyMinutes: List<AssistancePlanWeeklyMinutesProjection>
+    ): Map<Long, Double> {
+        val assistancePlanHourMinutes = assistancePlanHourWeeklyMinutes.sumWeeklyMinutesByAssistancePlanId()
+        val goalHourMinutes = goalHourWeeklyMinutes.sumWeeklyMinutesByAssistancePlanId()
 
         return assistancePlanIds.associateWith { assistancePlanId ->
             (assistancePlanHourMinutes[assistancePlanId] ?: 0.0) + (goalHourMinutes[assistancePlanId] ?: 0.0)
+        }
+    }
+
+    private fun getHasIllegalHoursByAssistancePlanId(
+        assistancePlanIds: List<Long>,
+        assistancePlanHourWeeklyMinutes: List<AssistancePlanWeeklyMinutesProjection>,
+        goalHourWeeklyMinutes: List<AssistancePlanWeeklyMinutesProjection>
+    ): Map<Long, Boolean> {
+        val assistancePlanIdsWithPlanHours = assistancePlanHourWeeklyMinutes
+            .map { it.assistancePlanId }
+            .toSet()
+
+        val assistancePlanIdsWithGoalHours = goalHourWeeklyMinutes
+            .map { it.assistancePlanId }
+            .toSet()
+
+        return assistancePlanIds.associateWith { assistancePlanId ->
+            assistancePlanIdsWithPlanHours.contains(assistancePlanId) && assistancePlanIdsWithGoalHours.contains(assistancePlanId)
         }
     }
 
@@ -187,6 +218,7 @@ class AssistancePlanPreviewService(
         val yearStart: LocalDate,
         val periodEnd: LocalDate,
         val weeklyApprovedMinutesByAssistancePlanId: Map<Long, Double>,
+        val hasIllegalHoursByAssistancePlanId: Map<Long, Boolean>,
         val executedMinutesByAssistancePlanId: Map<Long, Long>
     )
 }

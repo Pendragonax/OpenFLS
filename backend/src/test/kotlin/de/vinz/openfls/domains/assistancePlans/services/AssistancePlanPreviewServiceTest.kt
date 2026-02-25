@@ -69,6 +69,7 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result).hasSize(1)
         assertThat(result.first().id).isEqualTo(5L)
         assertThat(result.first().isFavorite).isTrue()
+        assertThat(result.first().hasIllegalHours).isTrue()
         assertThat(result.first().approvedHoursPerWeek).isEqualTo(7.0)
         assertThat(result.first().executedHoursThisYear).isEqualTo(3.0)
         assertThat(result.first().approvedHoursThisYear)
@@ -112,6 +113,7 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result).hasSize(1)
         assertThat(result.first().isFavorite).isTrue()
         assertThat(result.first().isActive).isTrue()
+        assertThat(result.first().hasIllegalHours).isFalse()
         assertThat(result.first().approvedHoursPerWeek).isEqualTo(3.3)
         assertThat(result.first().executedHoursThisYear).isEqualTo(0.0)
     }
@@ -182,6 +184,7 @@ class AssistancePlanPreviewServiceTest {
 
         assertThat(result).hasSize(1)
         assertThat(result.first().approvedHoursPerWeek).isEqualTo(expectedWeeklyTimeDouble)
+        assertThat(result.first().hasIllegalHours).isEqualTo(weeklyPlanMinutes > 0 && weeklyGoalMinutes > 0)
         assertThat(result.first().approvedHoursThisYear).isEqualTo(
             expectedApprovedHoursThisYear(
                 (weeklyPlanMinutes + weeklyGoalMinutes).toDouble(),
