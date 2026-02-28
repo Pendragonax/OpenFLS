@@ -1,3 +1,37 @@
+# Version 3.1.0
+
+**Release-Datum:** 28.02.2026
+
+# Highlights
+
+- „Was ist neu?“-Seite mit Informationen zu den Neuerungen der aktuellen Version
+- Stundentypen beim Dokumentieren passen zum Hilfeplan
+- Behebung vieler kleiner Fehler und Verbesserung der Stabilität
+
+# „Was ist neu?“-Seite
+
+![Was ist neu?](/api/changelog/assets/whats-new.png)
+
+Nach dem Update auf die neue Version wird eine Seite angezeigt, die die wichtigsten Neuerungen der aktuellen Version zusammenfasst.  
+Diese Seite kann jederzeit über den Link „Was ist neu?“ in der Kopfzeile neben „Abmelden“ aufgerufen werden, um sich über die Neuerungen zu informieren.
+
+# Stundentypen beim Dokumentieren
+
+Die Auswahl der Stundentypen beim Dokumentieren eines Eintrags orientiert sich nun an den Stundentypen, die im zugehörigen Hilfeplan hinterlegt sind.  
+Dafür ist die Auswahl in den Bereich „Hilfeplan“ gewandert, damit die Stundentypen direkt in diesem Kontext ausgewählt werden können.  
+Somit wird sichergestellt, dass nur die Stundentypen ausgewählt werden können, die auch im Hilfeplan definiert sind, um eine konsistente Dokumentation zu gewährleisten.
+
+# Fehlerbehebungen und Stabilitätsverbesserungen
+
+In dieser Version wurden viele kleinere Fehler behoben, die die Benutzererfahrung beeinträchtigen konnten.
+
+- Leitungskräften wird bei der Ansicht der „Stunden“ eines Mitarbeiters keine Interaktionsmöglichkeit mehr angezeigt.
+- Das Datum kann beim Ändern eines Eintrags wieder angepasst werden.
+- Die Auswahl „Gruppenangebot“ und „unvollständig“ bei der Dokumentation eines Eintrags ist wieder eingebunden.
+- Beim Ändern von Kontingenten verschwinden diese nicht mehr aus der Liste.
+- Beim Dokumentieren werden nur noch die Hilfepläne angezeigt, für die der Mitarbeiter auch ein Schreibrecht hat (abhängig vom Bereich).
+- Hilfepläne, die sowohl bei den Stunden als auch bei den Zielen Einträge aufweisen, können jetzt bearbeitet werden (eine Seite davon muss zuerst gelöscht werden).
+
 # Version 3.0.3
 
 **Release-Datum:** 20.02.2026
