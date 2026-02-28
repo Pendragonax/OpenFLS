@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.0
+
+#### Features
+- add "whats new?" page with information about the new features of the current version
+
+#### Bug
+- Supervisors no longer see interaction options when viewing an employee’s "Hours".
+- The date can now be modified again when editing an entry.
+- The options "Group Offer" and "Incomplete" have been restored in the entry documentation.
+- Contingents no longer disappear from the list when being edited.
+- When documenting, only support plans for which the employee has write permission (depending on the assigned area) are displayed.
+- Support plans that contain entries in both "Hours" and "Goals" can now be edited again (one of the sections must be cleared first).
 
 ## 3.0.3
 
