@@ -27,7 +27,7 @@ class MockInstitutionService {
 
 class MockClientsService {
   allValues$ = of([{ id: 1, firstName: 'Max', lastName: 'M' }]);
-  getById() {
+  getByIdForServiceEditing() {
     return of({
       id: 1,
       assistancePlans: [],

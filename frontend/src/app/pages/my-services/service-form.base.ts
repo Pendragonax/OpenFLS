@@ -9,6 +9,7 @@ import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {combineLatest, startWith} from "rxjs";
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ClientDto} from "../../shared/dtos/client-dto.model";
+import {ClientForServiceEditingDto} from "../../shared/dtos/client-for-service-editing-dto.model";
 import {AssistancePlanDto} from "../../shared/dtos/assistance-plan-dto.model";
 import {Converter} from "../../shared/services/converter.helper";
 import {GoalDto} from "../../shared/dtos/goal-dto.model";
@@ -40,7 +41,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
   filteredClients: ClientDto[] = [];
   filteredAssistancePlans: AssistancePlanDto[] = [];
   selectedServiceDate: string = "";
-  selectedClient: ClientDto = new ClientDto();
+  selectedClient: ClientForServiceEditingDto = new ClientForServiceEditingDto();
   selectedAssistancePlan: AssistancePlanDto | null | undefined = null;
   selectedGoals: GoalDto[] = [];
   selectedCategories: CategoryDto[] = [];
@@ -205,7 +206,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       this.clientService.allValues$,
       this.hourTypeService.allValues$,
       this.sponsorService.allValues$,
-      this.clientService.getById(service.clientId),
+      this.clientService.getByIdForServiceEditing(service.clientId),
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([writeableInstitutions, institutions, clients, hourTypes, sponsors, client]) => {
@@ -251,7 +252,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
   }
 
   protected loadClient(id: number) {
-    this.clientService.getById(id)
+    this.clientService.getByIdForServiceEditing(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => {
       this.selectedClient = value;

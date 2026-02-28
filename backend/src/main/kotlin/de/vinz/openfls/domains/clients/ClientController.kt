@@ -187,4 +187,32 @@ class ClientController(
             )
         }
     }
+
+    @GetMapping("/for-service-editing/{id}")
+    fun getForServiceEditingById(@PathVariable id: Long): Any {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val userId = accessService.getId()
+            val writePermittedInstitutions = accessService.getWriteRightsInstitutionIds(userId)
+
+            val dto = clientService.getForServiceEditingById(id, writePermittedInstitutions)
+
+            if (logPerformance) {
+                logger.info(String.format("%s getById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(dto)
+        } catch (ex: Exception) {
+            logger.error(ex.message, ex)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
 }

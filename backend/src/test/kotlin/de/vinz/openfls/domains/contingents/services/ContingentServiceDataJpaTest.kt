@@ -120,18 +120,26 @@ class ContingentServiceDataJpaTest {
     @Test
     fun update_validDto_updatesEntity() {
         // Given
+        val employee = employeeRepository.save(Employee(firstname = "Erika", lastname = "Musterfrau"))
+        val institution = institutionRepository.save(Institution(name = "UpdateInst", email = "u@b.c", phonenumber = "2"))
         val existing = contingentRepository.save(de.vinz.openfls.domains.contingents.Contingent(
             id = 0,
             start = LocalDate.of(2026, 1, 1),
             end = LocalDate.of(2026, 1, 10),
-            weeklyServiceHours = 10.0
+            weeklyServiceHours = 10.0,
+            employee = employee,
+            institution = institution
         ))
         val dto = ContingentDto().apply {
             id = existing.id
             start = LocalDate.of(2026, 1, 1)
             end = LocalDate.of(2026, 1, 31)
             weeklyServiceHours = 12.0
+            employeeId = employee.id!!
+            institutionId = institution.id!!
         }
+        whenever(employeeService.getById(dto.employeeId, true)).thenReturn(employee)
+        whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
 
         // When
         val result = contingentService.update(dto)
@@ -140,5 +148,7 @@ class ContingentServiceDataJpaTest {
         val saved = contingentRepository.findById(result.id)
         assertThat(saved).isPresent
         assertThat(saved.get().weeklyServiceHours).isEqualTo(12.0)
+        assertThat(saved.get().employee?.id).isEqualTo(employee.id)
+        assertThat(saved.get().institution?.id).isEqualTo(institution.id)
     }
 }

@@ -194,7 +194,7 @@ class AccessService(
             .map { it.institution?.id ?: 0 }
     }
 
-    private fun getWriteRightsInstitutionIds(id: Long): List<Long> {
+    fun getWriteRightsInstitutionIds(id: Long): List<Long> {
         return permissionService
             .getPermissionByEmployee(id)
             .filter { it.writeEntries }
