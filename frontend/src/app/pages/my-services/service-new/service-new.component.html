@@ -114,8 +114,8 @@
     </div>
 
     <div class="beta-section">
-      <div class="beta-section-title">Klient, Bereich & Stundentyp</div>
-      <div class="beta-grid beta-grid-3">
+      <div class="beta-section-title">Klient & Bereich</div>
+      <div class="beta-grid beta-grid-2">
         <form [formGroup]="secondForm">
           <mat-form-field appearance="outline" class="beta-field">
             <mat-icon matPrefix>person</mat-icon>
@@ -137,7 +137,7 @@
         <form [formGroup]="firstForm">
           <mat-form-field appearance="outline" class="beta-field">
             <mat-icon matPrefix>apartment</mat-icon>
-            <mat-label>Bereich</mat-label>
+            <mat-label>ausführender Bereich</mat-label>
             <mat-select formControlName="institution">
               @for (institution of institutions; track institution.id) {
                 <mat-option [value]="institution.id">{{ institution.name }}</mat-option>
@@ -146,17 +146,6 @@
           </mat-form-field>
         </form>
 
-        <form [formGroup]="secondForm">
-          <mat-form-field appearance="outline" class="beta-field">
-            <mat-icon matPrefix>watch_later</mat-icon>
-            <mat-label>Stundentyp</mat-label>
-            <mat-select formControlName="hourType">
-              @for (hourType of assistancePlanHourTypes.length > 0 ? assistancePlanHourTypes : hourTypes; track hourType.id) {
-                <mat-option [value]="hourType.id">{{ hourType.title }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </form>
       </div>
     </div>
 
@@ -167,7 +156,7 @@
       [entries]="clientEntries"></app-service-client-entries>
 
     <div class="beta-section">
-      <div class="beta-section-title">Hilfeplan & Ziele</div>
+      <div class="beta-section-title">Hilfeplan, Stundentyp & Ziele</div>
       <form [formGroup]="secondForm">
         <div class="beta-grid beta-grid-2">
           @if (clientSelected && filteredAssistancePlans.length > 0) {
@@ -195,6 +184,20 @@
             </mat-form-field>
           } @else {
             <div class="beta-empty">Hilfeplan ist auswählbar, wenn ein Klient und Datum gewählt wurden.</div>
+          }
+
+          @if (assistancePlanSelected) {
+            <mat-form-field appearance="outline" class="beta-field beta-field-wide">
+              <mat-icon matPrefix>watch_later</mat-icon>
+              <mat-label>Stundentyp</mat-label>
+              <mat-select formControlName="hourType">
+                @for (hourType of assistancePlanHourTypes.length > 0 ? assistancePlanHourTypes : hourTypes; track hourType.id) {
+                  <mat-option [value]="hourType.id">{{ hourType.title }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          } @else {
+            <div class="beta-empty">Stundentyp wird angezeigt, sobald ein Hilfeplan gewählt wurde.</div>
           }
 
           @if (assistancePlanSelected && (selectedAssistancePlan?.goals?.length ?? 0) > 0) {

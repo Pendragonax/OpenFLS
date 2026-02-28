@@ -197,7 +197,7 @@ class ClientController(
             val userId = accessService.getId()
             val writePermittedInstitutions = accessService.getWriteRightsInstitutionIds(userId)
 
-            val dto = clientService.getDtoBy(id, writePermittedInstitutions)
+            val dto = clientService.getForServiceEditingById(id, writePermittedInstitutions)
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",

@@ -6,6 +6,7 @@ import {Observable} from "rxjs";
 import {environment} from "../../../environments/environment";
 import {ClientSoloDto} from "../dtos/client-solo-dto.model";
 import {map} from "rxjs/operators";
+import {ClientForServiceEditingDto} from "../dtos/client-for-service-editing-dto.model";
 
 @Injectable({
   providedIn: 'root'
@@ -33,9 +34,9 @@ export class ClientsService extends Base<ClientDto>{
       );
   }
 
-  getByIdForServiceEditing(id: number): Observable<ClientDto> {
+  getByIdForServiceEditing(id: number): Observable<ClientForServiceEditingDto> {
     return this.http
-      .get<ClientDto>(`${environment.api_url}${this.url}/for-service-editing/${id}`);
+      .get<ClientForServiceEditingDto>(`${environment.api_url}${this.url}/for-service-editing/${id}`);
   }
 
   transformToClientSoloDto(data: any): ClientSoloDto {

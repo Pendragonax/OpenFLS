@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.clients
 
-import de.vinz.openfls.domains.clients.dtos.ClientDto
+import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
 import de.vinz.openfls.domains.permissions.AccessService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -32,14 +32,14 @@ class ClientControllerWebMvcTest {
         val userId = 8L
         val clientId = 3L
         val allowedInstitutions = listOf(11L, 12L)
-        val dto = ClientDto().apply {
+        val dto = ClientForServiceEditingDto().apply {
             id = clientId
             firstName = "Max"
             lastName = "Mustermann"
         }
         given(accessService.getId()).willReturn(userId)
         given(accessService.getWriteRightsInstitutionIds(userId)).willReturn(allowedInstitutions)
-        given(clientService.getDtoBy(clientId, allowedInstitutions)).willReturn(dto)
+        given(clientService.getForServiceEditingById(clientId, allowedInstitutions)).willReturn(dto)
 
         // When
         val result = mockMvc.get("/clients/for-service-editing/$clientId").andReturn()
@@ -65,4 +65,3 @@ class ClientControllerWebMvcTest {
         assertThat(result.response.status).isEqualTo(400)
     }
 }
-
