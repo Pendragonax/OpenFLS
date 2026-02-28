@@ -205,7 +205,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       this.clientService.allValues$,
       this.hourTypeService.allValues$,
       this.sponsorService.allValues$,
-      this.clientService.getById(service.clientId),
+      this.clientService.getByIdForServiceEditing(service.clientId),
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([writeableInstitutions, institutions, clients, hourTypes, sponsors, client]) => {
@@ -251,7 +251,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
   }
 
   protected loadClient(id: number) {
-    this.clientService.getById(id)
+    this.clientService.getByIdForServiceEditing(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => {
       this.selectedClient = value;

@@ -33,6 +33,11 @@ export class ClientsService extends Base<ClientDto>{
       );
   }
 
+  getByIdForServiceEditing(id: number): Observable<ClientDto> {
+    return this.http
+      .get<ClientDto>(`${environment.api_url}${this.url}/for-service-editing/${id}`);
+  }
+
   transformToClientSoloDto(data: any): ClientSoloDto {
     return {
       id: data.id,

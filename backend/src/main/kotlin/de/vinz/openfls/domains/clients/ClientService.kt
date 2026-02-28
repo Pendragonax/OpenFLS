@@ -96,6 +96,19 @@ class ClientService(
     }
 
     @Transactional(readOnly = true)
+    fun getDtoBy(clientId: Long, allowedInstitutions: List<Long>): ClientDto? {
+        val entity = getById(clientId)
+
+        if (entity != null) {
+            entity.assistancePlans.removeIf { assistancePlan -> allowedInstitutions.none { it == assistancePlan.institution?.id } }
+            val clientDto = modelMapper.map(entity, ClientDto::class.java)
+            return sortClientDto(clientDto, entity)
+        }
+
+        return null
+    }
+
+    @Transactional(readOnly = true)
     override fun getById(id: Long): Client? {
         return clientRepository.findById(id).orElse(null)
     }

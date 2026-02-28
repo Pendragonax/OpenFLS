@@ -156,4 +156,57 @@ class ClientServiceDataJpaTest {
         assertThat(result!!.assistancePlans).hasSize(1)
         assertThat(result.assistancePlans.first().institutionName).isEqualTo("Inst A")
     }
+
+    @Test
+    fun getDtoBy_existingClient_filtersAssistancePlansByAllowedInstitutions() {
+        // Given
+        val institutionA = institutionRepository.save(Institution(name = "Inst A", email = "a@b.c", phonenumber = "1"))
+        val institutionB = institutionRepository.save(Institution(name = "Inst B", email = "b@b.c", phonenumber = "2"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val client = clientRepository.save(
+            Client(firstName = "Max", lastName = "Mustermann", institution = institutionA, categoryTemplate = categoryTemplate)
+        )
+
+        client.assistancePlans.add(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 6, 30),
+                client = client,
+                sponsor = sponsor,
+                institution = institutionA
+            )
+        )
+        client.assistancePlans.add(
+            AssistancePlan(
+                start = LocalDate.of(2026, 7, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institutionB
+            )
+        )
+        clientRepository.save(client)
+
+        // When
+        val result = clientService.getDtoBy(client.id, listOf(institutionA.id!!))
+
+        // Then
+        assertThat(result).isNotNull
+        assertThat(result!!.assistancePlans).hasSize(1)
+        assertThat(result.assistancePlans.first().institutionId).isEqualTo(institutionA.id)
+        assertThat(result.assistancePlans.first().institutionName).isEqualTo("Inst A")
+    }
+
+    @Test
+    fun getDtoBy_missingClient_returnsNull() {
+        // Given
+        val missingId = 99999L
+
+        // When
+        val result = clientService.getDtoBy(missingId, listOf(1L, 2L))
+
+        // Then
+        assertThat(result).isNull()
+    }
 }
