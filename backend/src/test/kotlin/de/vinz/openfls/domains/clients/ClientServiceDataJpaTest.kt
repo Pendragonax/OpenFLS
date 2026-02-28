@@ -1,10 +1,15 @@
 package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.categories.CategoryTemplateService
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
 import de.vinz.openfls.domains.clients.dtos.ClientDto
+import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.goals.entities.GoalHour
+import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.hourTypes.HourTypeRepository
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.institutions.InstitutionService
@@ -40,6 +45,9 @@ class ClientServiceDataJpaTest {
 
     @Autowired
     lateinit var sponsorRepository: SponsorRepository
+
+    @Autowired
+    lateinit var hourTypeRepository: HourTypeRepository
 
     @MockitoBean
     lateinit var institutionService: InstitutionService
@@ -155,5 +163,98 @@ class ClientServiceDataJpaTest {
         assertThat(result).isNotNull
         assertThat(result!!.assistancePlans).hasSize(1)
         assertThat(result.assistancePlans.first().institutionName).isEqualTo("Inst A")
+    }
+
+    @Test
+    fun getForServiceEditingById_existingClient_filtersAssistancePlansByAllowedInstitutions() {
+        // Given
+        val institutionA = institutionRepository.save(Institution(name = "Inst A", email = "a@b.c", phonenumber = "1"))
+        val institutionB = institutionRepository.save(Institution(name = "Inst B", email = "b@b.c", phonenumber = "2"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val client = clientRepository.save(
+            Client(firstName = "Max", lastName = "Mustermann", institution = institutionA, categoryTemplate = categoryTemplate)
+        )
+
+        val includedPlan = AssistancePlan(
+            start = LocalDate.of(2026, 1, 1),
+            end = LocalDate.of(2026, 6, 30),
+            client = client,
+            sponsor = sponsor,
+            institution = institutionA
+        )
+        val hourTypeA = hourTypeRepository.save(HourType(title = "Direkt", price = 10.0))
+        val hourTypeB = hourTypeRepository.save(HourType(title = "Indirekt", price = 20.0))
+        val hourTypeC = hourTypeRepository.save(HourType(title = "Beratung", price = 30.0))
+
+        includedPlan.hours.add(
+            AssistancePlanHour(
+                weeklyMinutes = 60,
+                hourType = hourTypeA,
+                assistancePlan = includedPlan
+            )
+        )
+        includedPlan.hours.add(
+            AssistancePlanHour(
+                weeklyMinutes = 30,
+                hourType = hourTypeB,
+                assistancePlan = includedPlan
+            )
+        )
+        includedPlan.hours.add(
+            AssistancePlanHour(
+                weeklyMinutes = 20,
+                hourType = hourTypeC,
+                assistancePlan = includedPlan
+            )
+        )
+        val goal = Goal(
+            title = "Ziel",
+            description = "Beschreibung",
+            institution = institutionA,
+            assistancePlan = includedPlan
+        )
+        goal.hours.add(
+            GoalHour(
+                weeklyMinutes = 15,
+                hourType = hourTypeB,
+                goal = goal
+            )
+        )
+        includedPlan.goals.add(goal)
+        client.assistancePlans.add(includedPlan)
+        client.assistancePlans.add(
+            AssistancePlan(
+                start = LocalDate.of(2026, 7, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institutionB
+            )
+        )
+        clientRepository.save(client)
+
+        // When
+        val result = clientService.getForServiceEditingById(client.id, listOf(institutionA.id!!))
+
+        // Then
+        assertThat(result).isNotNull
+        assertThat(result!!.assistancePlans).hasSize(1)
+        assertThat(result.assistancePlans.first().institutionId).isEqualTo(institutionA.id)
+        assertThat(result.assistancePlans.first().institutionName).isEqualTo("Inst A")
+        assertThat(result.assistancePlans.first().possibleDocumentationHourTypes.map { it.title })
+            .containsExactlyInAnyOrder("Beratung", "Direkt", "Indirekt")
+    }
+
+    @Test
+    fun getForServiceEditingById_missingClient_returnsNull() {
+        // Given
+        val missingId = 99999L
+
+        // When
+        val result = clientService.getForServiceEditingById(missingId, listOf(1L, 2L))
+
+        // Then
+        assertThat(result).isNull()
     }
 }

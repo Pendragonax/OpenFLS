@@ -1,9 +1,13 @@
 package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.clients.dtos.ClientDto
+import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
+import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanForServiceEditingDto
 import de.vinz.openfls.domains.categories.CategoryTemplateService
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
+import de.vinz.openfls.domains.hourTypes.HourTypeDto
 import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.domains.institutions.InstitutionService
 import org.springframework.transaction.annotation.Transactional
@@ -96,6 +100,24 @@ class ClientService(
     }
 
     @Transactional(readOnly = true)
+    fun getForServiceEditingById(clientId: Long, allowedInstitutions: List<Long>): ClientForServiceEditingDto? {
+        val entity = getById(clientId)
+
+        if (entity != null) {
+            val clientDto = modelMapper.map(entity, ClientForServiceEditingDto::class.java)
+            clientDto.assistancePlans = entity.assistancePlans
+                .filter { assistancePlan -> allowedInstitutions.any { it == assistancePlan.institution?.id } }
+                .map { mapToServiceEditingAssistancePlanDto(it, entity.id) }
+                .sortedBy { it.start }
+                .toTypedArray()
+            clientDto.categoryTemplate.categories = clientDto.categoryTemplate.categories.sortedBy { it.shortcut }
+            return clientDto
+        }
+
+        return null
+    }
+
+    @Transactional(readOnly = true)
     override fun getById(id: Long): Client? {
         return clientRepository.findById(id).orElse(null)
     }
@@ -120,5 +142,26 @@ class ClientService(
         clientDto.categoryTemplate.categories =
                 clientDto.categoryTemplate.categories.sortedBy { it.shortcut }
         return clientDto
+    }
+
+    private fun mapToServiceEditingAssistancePlanDto(
+        plan: AssistancePlan,
+        clientId: Long
+    ): AssistancePlanForServiceEditingDto {
+        val planDto = modelMapper.map(plan, AssistancePlanForServiceEditingDto::class.java)
+        planDto.clientId = clientId
+        planDto.institutionId = plan.institution?.id ?: 0
+        planDto.institutionName = plan.institution?.name ?: ""
+        planDto.sponsorId = plan.sponsor?.id ?: 0
+        planDto.possibleDocumentationHourTypes = extractPossibleDocumentationHourTypes(plan)
+        return planDto
+    }
+
+    private fun extractPossibleDocumentationHourTypes(plan: AssistancePlan): Array<HourTypeDto> {
+        return (plan.hours.mapNotNull { it.hourType } + plan.goals.flatMap { it.hours.mapNotNull { hour -> hour.hourType } })
+            .distinctBy { it.id }
+            .sortedBy { it.title.lowercase() }
+            .map { HourTypeDto.from(it) }
+            .toTypedArray()
     }
 }

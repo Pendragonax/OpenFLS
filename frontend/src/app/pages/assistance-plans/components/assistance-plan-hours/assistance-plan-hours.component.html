@@ -4,6 +4,7 @@
       <button mat-raised-button
               color="primary"
               class="ah-add-button"
+              [disabled]="!canAddHours"
               (click)="openEditModal(editContent, null)">
         <mat-icon>add</mat-icon>
         Stunden

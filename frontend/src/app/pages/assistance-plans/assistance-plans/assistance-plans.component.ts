@@ -46,6 +46,7 @@ type AssistancePlanContext = 'none' | 'client' | 'sponsor' | 'institution' | 'fa
 export class AssistancePlansComponent
   extends TablePageComponent<AssistancePlanPreviewDto, AssistancePlanPreviewRow>
   implements OnInit {
+  readonly illegalHoursTooltip = 'Sowohl der Hilfeplan als auch die Ziele haben Stunden zugewiesen. Dies stellt ein Problem bei der Berechnung dar.';
 
   @Input() client$: ReplaySubject<ClientViewModel> = new ReplaySubject<ClientViewModel>();
   @Input() sponsor$: ReplaySubject<SponsorDto> = new ReplaySubject<SponsorDto>();

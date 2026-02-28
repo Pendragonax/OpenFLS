@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
@@ -18,6 +19,8 @@ import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.institutions.InstitutionService
+import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.domains.sponsors.Sponsor
 import de.vinz.openfls.domains.sponsors.SponsorRepository
@@ -298,5 +301,163 @@ class AssistancePlanServiceDataJpaTest {
         assertThat(saved.goals.first().hours).hasSize(1)
         assertThat(saved.goals.first().hours.first().id).isEqualTo(existingGoalHour.id)
         assertThat(saved.goals.first().hours.first().weeklyMinutes).isEqualTo(90)
+    }
+
+    @Test
+    fun update_existingMixedHours_allowsDeletingExistingHours() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+
+        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
+        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+
+        val mixedPlan = AssistancePlan(
+            start = LocalDate.of(2026, 1, 1),
+            end = LocalDate.of(2026, 12, 31),
+            client = client,
+            sponsor = sponsor,
+            institution = institution
+        )
+        val planHour = AssistancePlanHour(weeklyMinutes = 120, hourType = hourType, assistancePlan = mixedPlan)
+        mixedPlan.hours = mutableSetOf(planHour)
+        val goal = Goal(
+            title = "Goal 1",
+            description = "Description",
+            institution = institution,
+            assistancePlan = mixedPlan
+        )
+        val goalHour = GoalHour(weeklyMinutes = 60, hourType = hourType, goal = goal)
+        goal.hours = mutableSetOf(goalHour)
+        mixedPlan.goals = mutableSetOf(goal)
+
+        val savedMixedPlan = assistancePlanRepository.save(mixedPlan)
+        val existingGoal = savedMixedPlan.goals.first()
+        val existingPlanHour = savedMixedPlan.hours.first()
+
+        val updateDto = AssistancePlanUpdateDto().apply {
+            id = savedMixedPlan.id
+            start = savedMixedPlan.start
+            end = savedMixedPlan.end
+            clientId = client.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            hours = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateHourDto().apply {
+                    id = existingPlanHour.id
+                    weeklyMinutes = 120
+                    hourTypeId = hourType.id
+                    assistancePlanId = savedMixedPlan.id
+                }
+            )
+            goals = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateGoalDto().apply {
+                    id = existingGoal.id
+                    title = existingGoal.title
+                    description = existingGoal.description
+                    assistancePlanId = savedMixedPlan.id
+                    institutionId = institution.id
+                    hours = emptyList()
+                }
+            )
+        }
+
+        // When
+        val result = assistancePlanService.update(savedMixedPlan.id, updateDto)
+
+        // Then
+        val saved = assistancePlanRepository.findById(result.id).orElseThrow()
+        assertThat(saved.hours).hasSize(1)
+        assertThat(saved.goals).hasSize(1)
+        assertThat(saved.goals.first().hours).isEmpty()
+    }
+
+    @Test
+    fun update_existingMixedHours_rejectsAddingNewHours() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+
+        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
+        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+
+        val mixedPlan = AssistancePlan(
+            start = LocalDate.of(2026, 1, 1),
+            end = LocalDate.of(2026, 12, 31),
+            client = client,
+            sponsor = sponsor,
+            institution = institution
+        )
+        val planHour = AssistancePlanHour(weeklyMinutes = 120, hourType = hourType, assistancePlan = mixedPlan)
+        mixedPlan.hours = mutableSetOf(planHour)
+        val goal = Goal(
+            title = "Goal 1",
+            description = "Description",
+            institution = institution,
+            assistancePlan = mixedPlan
+        )
+        val goalHour = GoalHour(weeklyMinutes = 60, hourType = hourType, goal = goal)
+        goal.hours = mutableSetOf(goalHour)
+        mixedPlan.goals = mutableSetOf(goal)
+
+        val savedMixedPlan = assistancePlanRepository.save(mixedPlan)
+        val existingGoal = savedMixedPlan.goals.first()
+        val existingPlanHour = savedMixedPlan.hours.first()
+        val existingGoalHour = existingGoal.hours.first()
+
+        val updateDto = AssistancePlanUpdateDto().apply {
+            id = savedMixedPlan.id
+            start = savedMixedPlan.start
+            end = savedMixedPlan.end
+            clientId = client.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            hours = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateHourDto().apply {
+                    id = existingPlanHour.id
+                    weeklyMinutes = 120
+                    hourTypeId = hourType.id
+                    assistancePlanId = savedMixedPlan.id
+                },
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateHourDto().apply {
+                    id = 0
+                    weeklyMinutes = 30
+                    hourTypeId = hourType.id
+                    assistancePlanId = savedMixedPlan.id
+                }
+            )
+            goals = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateGoalDto().apply {
+                    id = existingGoal.id
+                    title = existingGoal.title
+                    description = existingGoal.description
+                    assistancePlanId = savedMixedPlan.id
+                    institutionId = institution.id
+                    hours = listOf(
+                        de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateGoalHourDto().apply {
+                            id = existingGoalHour.id
+                            weeklyMinutes = existingGoalHour.weeklyMinutes
+                            hourTypeId = hourType.id
+                            goalHourId = existingGoal.id
+                        }
+                    )
+                }
+            )
+        }
+
+        // When / Then
+        assertThatThrownBy { assistancePlanService.update(savedMixedPlan.id, updateDto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("Bei Hilfeplänen mit Stunden in beiden Bereichen dürfen keine neuen Stunden hinzugefügt werden. Bitte erst bestehende Stunden löschen, bis nur noch ein Bereich Stunden enthält.")
     }
 }

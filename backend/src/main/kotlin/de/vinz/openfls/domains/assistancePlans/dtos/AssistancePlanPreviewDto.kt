@@ -15,6 +15,7 @@ data class AssistancePlanPreviewDto(
     val end: LocalDate,
     val isActive: Boolean,
     val isFavorite: Boolean,
+    val hasIllegalHours: Boolean,
     val approvedHoursPerWeek: Double,
     val approvedHoursThisYear: Double,
     val executedHoursThisYear: Double

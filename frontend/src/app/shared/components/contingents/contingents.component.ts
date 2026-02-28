@@ -43,7 +43,17 @@ export class ContingentsComponent
   @Input() institutionView$: ReplaySubject<InstitutionViewModel> = new ReplaySubject<InstitutionViewModel>();
   @Input() hideEmployeeColumn: boolean = false;
   @Input() hideInstitutionColumn: boolean = false;
-  @Input() hideAddButton: boolean = false;
+  @Input() set hideAddButton(value: boolean) {
+    this.hideAddButtonByInput = value;
+    this.updateResolvedHideAddButton();
+  }
+  get hideAddButton(): boolean {
+    return this.hideAddButtonByInput;
+  }
+  // Backward-compatible alias in case templates still use the old typo.
+  @Input() set hideAddutton(value: boolean) {
+    this.hideAddButton = value;
+  }
   @Output() addedValueEvent = new EventEmitter<ContingentDto>();
   @Output() updatedValueEvent = new EventEmitter<ContingentDto>();
   @Output() deletedValueEvent = new EventEmitter<ContingentDto>();
@@ -52,6 +62,8 @@ export class ContingentsComponent
   tableColumns = ['employee', 'institution', 'start', 'end', 'hours', 'actions'];
   employeeView: EmployeeViewModel | null = null;
   institutionView: InstitutionViewModel | null = null;
+  private hideAddButtonByInput = false;
+  resolvedHideAddButton = false;
   leadingInstitutions : InstitutionDto[] = [];
   employees : EmployeeDto[] = [];
   institutions: InstitutionDto[] = [];
@@ -135,7 +147,7 @@ export class ContingentsComponent
       next: (value) => {
         this.institutionView = null;
         this.employeeView = value;
-        this.hideAddButton = !this.employeeView?.editable;
+        this.updateResolvedHideAddButton();
 
         this.loadContingents();
       }
@@ -146,11 +158,21 @@ export class ContingentsComponent
       next: (value) => {
         this.institutionView = value;
         this.employeeView = null;
-        this.hideAddButton = !this.institutionView?.editable;
+        this.updateResolvedHideAddButton();
 
         this.loadContingents();
       }
     })
+  }
+
+  private updateResolvedHideAddButton() {
+    const hiddenByContext = this.employeeView != null
+      ? !this.employeeView.editable
+      : this.institutionView != null
+        ? !this.institutionView.editable
+        : false;
+
+    this.resolvedHideAddButton = this.hideAddButtonByInput || hiddenByContext;
   }
 
   loadContingents() {

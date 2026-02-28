@@ -114,6 +114,7 @@ class AssistancePlanControllerWebMvcTest {
             end = LocalDate.of(2026, 12, 31),
             isActive = true,
             isFavorite = isFavorite,
+            hasIllegalHours = false,
             approvedHoursPerWeek = 7.0,
             approvedHoursThisYear = 366.0,
             executedHoursThisYear = 100.0

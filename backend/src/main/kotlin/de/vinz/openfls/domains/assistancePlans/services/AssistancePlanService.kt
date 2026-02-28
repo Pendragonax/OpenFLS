@@ -113,10 +113,10 @@ class AssistancePlanService(
             throw IllegalArgumentException("path id and dto id are not the same")
         if (!existsById(id))
             throw IllegalArgumentException("assistance plan not found")
-        validateHoursPlacement(valueDto)
 
         val entity = assistancePlanRepository.findByIdOrNull(id)
             ?: throw IllegalArgumentException("assistance plan not found")
+        validateHoursPlacement(entity, valueDto)
 
         entity.start = valueDto.start
         entity.end = valueDto.end
@@ -201,13 +201,36 @@ class AssistancePlanService(
         return mapToDto(savedEntity)
     }
 
-    private fun validateHoursPlacement(valueDto: AssistancePlanUpdateDto) {
+    private fun validateHoursPlacement(entity: AssistancePlan, valueDto: AssistancePlanUpdateDto) {
         val hasPlanHours = valueDto.hours.isNotEmpty()
         val hasGoalHours = valueDto.goals.any { it.hours.isNotEmpty() }
 
-        if (hasPlanHours && hasGoalHours) {
+        if (!hasPlanHours || !hasGoalHours) {
+            return
+        }
+
+        val existingHasPlanHours = entity.hours.isNotEmpty()
+        val existingHasGoalHours = entity.goals.any { it.hours.isNotEmpty() }
+
+        if (!existingHasPlanHours || !existingHasGoalHours) {
             throw IllegalArgumentException(
                 "Stunden dürfen entweder direkt im Hilfeplan oder in den Zielen hinterlegt sein, nicht in beiden Bereichen gleichzeitig."
+            )
+        }
+
+        val existingPlanHourIds = entity.hours.map { it.id }.toSet()
+        val existingGoalHourIds = entity.goals
+            .flatMap { goal -> goal.hours.map { hour -> hour.id } }
+            .toSet()
+
+        val hasNewPlanHours = valueDto.hours.any { hour -> hour.id <= 0 || !existingPlanHourIds.contains(hour.id) }
+        val hasNewGoalHours = valueDto.goals
+            .flatMap { goal -> goal.hours }
+            .any { hour -> hour.id <= 0 || !existingGoalHourIds.contains(hour.id) }
+
+        if (hasNewPlanHours || hasNewGoalHours) {
+            throw IllegalArgumentException(
+                "Bei Hilfeplänen mit Stunden in beiden Bereichen dürfen keine neuen Stunden hinzugefügt werden. Bitte erst bestehende Stunden löschen, bis nur noch ein Bereich Stunden enthält."
             )
         }
     }

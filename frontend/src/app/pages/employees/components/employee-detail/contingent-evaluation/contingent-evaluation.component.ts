@@ -19,6 +19,7 @@ export class ContingentEvaluationComponent implements OnInit {
   @Input() employee$: ReplaySubject<EmployeeDto> = new ReplaySubject<EmployeeDto>();
   @Input() hideRefresh = false;
   @Input() navigateToMyServices = true;
+  @Input() disableCalendarMenu = false;
   @Output() onRefreshClick = new EventEmitter<any>();
 
   @ViewChild('serviceCalendar') serviceCalendar;
@@ -87,6 +88,9 @@ export class ContingentEvaluationComponent implements OnInit {
   }
 
   onDateClicked(date) {
+    if (this.disableCalendarMenu) {
+      return;
+    }
     this.lastSelectedDate = new Date(date);
     this.openMenu();
   }
@@ -147,6 +151,9 @@ export class ContingentEvaluationComponent implements OnInit {
   }
 
   private openMenu() {
+    if (this.disableCalendarMenu) {
+      return;
+    }
     setTimeout(() => this.menuTrigger?.openMenu());
   }
 }

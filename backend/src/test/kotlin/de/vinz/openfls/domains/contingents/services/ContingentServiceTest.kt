@@ -156,6 +156,8 @@ class ContingentServiceTest {
             institution = Institution(id = 3)
         )
         whenever(contingentRepository.existsById(dto.id)).thenReturn(true)
+        whenever(employeeService.getById(dto.employeeId, true)).thenReturn(Employee(id = dto.employeeId))
+        whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(Institution(id = dto.institutionId))
         whenever(contingentRepository.save(any())).thenReturn(saved)
 
         // When
@@ -165,6 +167,8 @@ class ContingentServiceTest {
         assertThat(result.id).isEqualTo(9)
         assertThat(result.employeeId).isEqualTo(2)
         assertThat(result.institutionId).isEqualTo(3)
+        verify(employeeService).getById(dto.employeeId, true)
+        verify(institutionService).getEntityById(dto.institutionId)
     }
 
     @Test

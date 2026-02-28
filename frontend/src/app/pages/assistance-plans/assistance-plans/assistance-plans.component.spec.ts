@@ -17,6 +17,7 @@ function preview(overrides: Partial<AssistancePlanPreviewDto>): AssistancePlanPr
     end: '2026-12-31',
     isActive: true,
     isFavorite: false,
+    hasIllegalHours: false,
     approvedHoursPerWeek: 0,
     approvedHoursThisYear: 0,
     executedHoursThisYear: 0,
