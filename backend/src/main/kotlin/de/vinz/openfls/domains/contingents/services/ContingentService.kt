@@ -44,8 +44,12 @@ class ContingentService(
         if (contingentDto.end != null && contingentDto.start >= contingentDto.end)
             throw IllegalArgumentException("end before start")
 
-        val entity = contingentRepository.save(Contingent.of(contingentDto))
-        return ContingentDto.from(entity)
+        val entity = Contingent.of(contingentDto)
+        entity.employee = employeeService.getById(contingentDto.employeeId, true)
+        entity.institution = institutionService.getEntityById(contingentDto.institutionId)
+
+        val savedEntity = contingentRepository.save(entity)
+        return ContingentDto.from(savedEntity)
     }
 
     @Transactional
