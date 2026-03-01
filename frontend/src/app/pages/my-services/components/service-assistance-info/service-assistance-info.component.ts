@@ -16,4 +16,5 @@ export class ServiceAssistanceInfoComponent {
   tooltipLeftThisWeek = 'Es wird nur die aktuelle komplette Woche betrachtet von Montag - Sonntag.';
   tooltipLeftThisMonth = 'Es wird nur der aktuelle komplette Monat betrachtet.';
   tooltipLeftThisYear = 'Es wird nur das aktuelle komplette Jahr betrachtet.';
+  tooltipLeftComplete = 'Es wird die komplette Laufzeit des Hilfeplans betrachtet.';
 }
