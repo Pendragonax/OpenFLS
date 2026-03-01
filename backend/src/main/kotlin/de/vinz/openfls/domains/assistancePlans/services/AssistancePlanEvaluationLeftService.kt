@@ -30,12 +30,14 @@ class AssistancePlanEvaluationLeftService(
             val approvedMinutesLeftInMonth =
                 getApprovedMinutesLeftIn(date.year, date.monthValue, assistancePlan, hourType.id)
             val approvedMinutesLeftInYear = getApprovedMinutesLeftIn(date.year, assistancePlan, hourType.id)
+            val approvedMinutesLeftComplete = getApprovedMinutesLeftIn(assistancePlan, hourType.id)
 
             HourTypeEvaluationDTO(
                 hourTypeName = hourType.title,
                 leftThisWeek = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInWeek / 60.0),
                 leftThisMonth = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInMonth / 60.0),
-                leftThisYear = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInYear / 60.0)
+                leftThisYear = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInYear / 60.0),
+                leftComplete = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftComplete / 60.0)
             )
         }
 
@@ -51,6 +53,12 @@ class AssistancePlanEvaluationLeftService(
             .mapNotNull { it.hourType }.toSet()
 
         return hourTypeIdsFromHours + hourTypeIdsFromGoals
+    }
+
+    private fun getApprovedMinutesLeftIn(assistancePlan: AssistancePlan, hourTypeId: Long): Double {
+        val approvedMinutes = getApprovedMinutesByHourTypeIdIn(assistancePlan, hourTypeId)
+        val executedMinutes = getExecutedMinutesByHourTypeIdIn(assistancePlan, hourTypeId)
+        return approvedMinutes - executedMinutes
     }
 
     private fun getApprovedMinutesLeftIn(date: LocalDate, assistancePlan: AssistancePlan, hourTypeId: Long): Double {
@@ -93,6 +101,23 @@ class AssistancePlanEvaluationLeftService(
             sumMinutesByHourTypeId(assistancePlan, days, hourTypeId)
         }
 
+        return approvedMinutes
+    }
+
+    private fun getApprovedMinutesByHourTypeIdIn(
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Double {
+        val days = DateService.countDaysOfYearBetweenStartAndEnd(
+            assistancePlan.start,
+            assistancePlan.end
+        )
+
+        val approvedMinutes = if (assistancePlan.hours.isEmpty()) {
+            sumGoalsMinutesByHourTypeId(assistancePlan.goals, days, hourTypeId)
+        } else {
+            sumMinutesByHourTypeId(assistancePlan, days, hourTypeId)
+        }
         return approvedMinutes
     }
 
@@ -198,6 +223,19 @@ class AssistancePlanEvaluationLeftService(
 
         val hours = goal.hours.filter { it.hourType?.id == hourTypeId }
         return hours.sumOf { hour -> (hour.weeklyMinutes / 7.0) * numberOfDays }
+    }
+
+    private fun getExecutedMinutesByHourTypeIdIn(
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Int {
+        val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
+            start = assistancePlan.start,
+            end = assistancePlan.end,
+            assistancePlanId = assistancePlan.id,
+            hourTypeId = hourTypeId
+        )
+        return services.sumOf { it.minutes }
     }
 
     private fun getExecutedMinutesByHourTypeIdIn(

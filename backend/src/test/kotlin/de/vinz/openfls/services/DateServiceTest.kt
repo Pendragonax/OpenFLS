@@ -217,6 +217,32 @@ class DateServiceTest {
     }
 
     @Test
+    fun countDaysOfYearBetweenStartAndEnd_sameDay_returnsOne() {
+        // Given
+        val start = LocalDate.of(2024, 6, 15)
+        val end = LocalDate.of(2024, 6, 15)
+
+        // When
+        val numberOfDays = DateService.countDaysOfYearBetweenStartAndEnd(start, end)
+
+        // Then
+        assertThat(numberOfDays).isEqualTo(1)
+    }
+
+    @Test
+    fun countDaysOfYearBetweenStartAndEnd_leapDayRange_returnsCorrectAmount() {
+        // Given
+        val start = LocalDate.of(2024, 2, 28)
+        val end = LocalDate.of(2024, 3, 1)
+
+        // When
+        val numberOfDays = DateService.countDaysOfYearBetweenStartAndEnd(start, end)
+
+        // Then
+        assertThat(numberOfDays).isEqualTo(3)
+    }
+
+    @Test
     fun getStartAndEndInYear_inBetween_correctAmount() {
         // Given
         val start = LocalDate.of(2023, 1, 1)

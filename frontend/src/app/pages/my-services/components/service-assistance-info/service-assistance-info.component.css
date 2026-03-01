@@ -14,7 +14,7 @@
 
 .beta-plan-row {
   display: grid;
-  grid-template-columns: minmax(120px, 0.8fr) repeat(3, minmax(160px, 1fr));
+  grid-template-columns: minmax(120px, 0.8fr) minmax(320px, 1fr);
   gap: 8px;
   background: #f7f8fb;
   border: 1px solid #e1e6ef;
@@ -31,6 +31,18 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.beta-plan-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.beta-plan-metric-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 8px;
 }
 
 .beta-plan-metric {
@@ -52,6 +64,10 @@
   margin-left: 6px;
 }
 
+.beta-plan-pill--negative {
+  background: #d9534f;
+}
+
 .beta-empty {
   background: #f7f8fb;
   border: 1px dashed #d7dbe5;
@@ -64,6 +80,10 @@
 
 @media (max-width: 700px) {
   .beta-plan-row {
+    grid-template-columns: 1fr;
+  }
+
+  .beta-plan-metric-row {
     grid-template-columns: 1fr;
   }
 

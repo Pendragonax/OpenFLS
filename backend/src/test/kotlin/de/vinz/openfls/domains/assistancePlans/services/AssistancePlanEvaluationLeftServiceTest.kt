@@ -92,6 +92,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
         assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
         assertThat(evaluation.leftThisYear).isEqualTo(0.0)
+        assertThat(evaluation.leftComplete).isEqualTo(0.0)
     }
 
     @Test
@@ -122,6 +123,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
         assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
         assertThat(evaluation.leftThisYear).isEqualTo(0.0)
+        assertThat(evaluation.leftComplete).isEqualTo(365.0)
     }
 
     @Test
@@ -155,6 +157,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
         assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
         assertThat(evaluation.leftThisYear).isEqualTo(expectedLeftYear)
+        assertThat(evaluation.leftComplete).isEqualTo(expectedLeftYear)
     }
 
     @Test
@@ -184,6 +187,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         assertThat(evaluation.leftThisWeek).isEqualTo(6.0)
         assertThat(evaluation.leftThisMonth).isEqualTo(30.0)
         assertThat(evaluation.leftThisYear).isEqualTo(365.0)
+        assertThat(evaluation.leftComplete).isEqualTo(730.0)
     }
 
     private fun generateService(start: LocalDate, minutes: Int): ServiceSoloProjection {

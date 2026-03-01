@@ -13,23 +13,39 @@
             <div class="beta-plan-type">
               {{ item.hourTypeName.length > 20 ? (item.hourTypeName | slice:0:20) + '…' : item.hourTypeName }}
             </div>
-            <div class="beta-plan-metric">
-              übrig diese Woche:
-              <span class="beta-plan-pill"
-                    [matTooltipDisabled]="!tooltipLeftThisWeek"
-                    [matTooltip]="tooltipLeftThisWeek">{{ item.leftThisWeek }}h</span>
-            </div>
-            <div class="beta-plan-metric">
-              übrig diesen Monat:
-              <span class="beta-plan-pill"
-                    [matTooltipDisabled]="!tooltipLeftThisMonth"
-                    [matTooltip]="tooltipLeftThisMonth">{{ item.leftThisMonth }}h</span>
-            </div>
-            <div class="beta-plan-metric">
-              übrig dieses Jahr:
-              <span class="beta-plan-pill"
-                    [matTooltipDisabled]="!tooltipLeftThisYear"
-                    [matTooltip]="tooltipLeftThisYear">{{ item.leftThisYear }}h</span>
+            <div class="beta-plan-metrics">
+              <div class="beta-plan-metric-row">
+                <div class="beta-plan-metric">
+                  übrig diese Woche:
+                  <span class="beta-plan-pill"
+                        [class.beta-plan-pill--negative]="item.leftThisWeek <= 0"
+                        [matTooltipDisabled]="!tooltipLeftThisWeek"
+                        [matTooltip]="tooltipLeftThisWeek">{{ item.leftThisWeek }}h</span>
+                </div>
+                <div class="beta-plan-metric">
+                  übrig diesen Monat:
+                  <span class="beta-plan-pill"
+                        [class.beta-plan-pill--negative]="item.leftThisMonth <= 0"
+                        [matTooltipDisabled]="!tooltipLeftThisMonth"
+                        [matTooltip]="tooltipLeftThisMonth">{{ item.leftThisMonth }}h</span>
+                </div>
+              </div>
+              <div class="beta-plan-metric-row">
+                <div class="beta-plan-metric">
+                  übrig dieses Jahr:
+                  <span class="beta-plan-pill"
+                        [class.beta-plan-pill--negative]="item.leftThisYear <= 0"
+                        [matTooltipDisabled]="!tooltipLeftThisYear"
+                        [matTooltip]="tooltipLeftThisYear">{{ item.leftThisYear }}h</span>
+                </div>
+                <div class="beta-plan-metric">
+                  übrig komp. Hilfeplan:
+                  <span class="beta-plan-pill"
+                        [class.beta-plan-pill--negative]="item.leftComplete <= 0"
+                        [matTooltipDisabled]="!tooltipLeftComplete"
+                        [matTooltip]="tooltipLeftComplete">{{ item.leftComplete }}h</span>
+                </div>
+              </div>
             </div>
           </div>
         }

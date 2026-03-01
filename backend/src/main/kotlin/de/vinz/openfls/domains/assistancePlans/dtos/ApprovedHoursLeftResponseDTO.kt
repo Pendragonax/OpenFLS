@@ -8,6 +8,7 @@ data class ApprovedHoursLeftResponseDTO(
         val hourTypeName: String,
         val leftThisWeek: Double,
         val leftThisMonth: Double,
-        val leftThisYear: Double
+        val leftThisYear: Double,
+        val leftComplete: Double
     )
 }

@@ -8,4 +8,5 @@ export class AssistancePlanHourTypeEvaluationLeftDto {
   leftThisWeek: number = 0;
   leftThisMonth: number = 0;
   leftThisYear: number = 0;
+  leftComplete: number = 0;
 }
