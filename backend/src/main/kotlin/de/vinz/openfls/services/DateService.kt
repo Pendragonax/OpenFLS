@@ -97,7 +97,11 @@ class DateService {
                 endYear
             }
 
-            return (ChronoUnit.DAYS.between(startReal, endReal) + 1).toInt()
+            return countDaysOfYearBetweenStartAndEnd(startReal, endReal)
+        }
+
+        fun countDaysOfYearBetweenStartAndEnd(start: LocalDate, end: LocalDate?): Int {
+            return (ChronoUnit.DAYS.between(start, end) + 1).toInt()
         }
 
         fun countDaysOfMonthAndYearBetweenStartAndEnd(year: Int, month: Int, start: LocalDate, end: LocalDate): Int {
