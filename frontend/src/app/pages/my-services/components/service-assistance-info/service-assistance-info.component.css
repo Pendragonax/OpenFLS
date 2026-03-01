@@ -64,6 +64,10 @@
   margin-left: 6px;
 }
 
+.beta-plan-pill--negative {
+  background: #d9534f;
+}
+
 .beta-empty {
   background: #f7f8fb;
   border: 1px dashed #d7dbe5;
