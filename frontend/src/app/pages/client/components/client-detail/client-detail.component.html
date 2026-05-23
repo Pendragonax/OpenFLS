@@ -107,7 +107,8 @@
     <app-assistance-plans class="m-2"
                           [client$]="value$"
                           [hideSearchStringFilter]="true"
-                          [hideClientColumn]="false"></app-assistance-plans>
+                          [hideClientColumn]="false"
+                          [readOnly]="value.dto.archived"></app-assistance-plans>
   </mat-tab>
 
   @if (showArchiveTab) {

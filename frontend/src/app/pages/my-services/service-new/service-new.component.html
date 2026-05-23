@@ -326,6 +326,10 @@
         <div>Kategorien: {{ selectedCategories.length > 0 ? selectedCategories.length : 'Keine' }}</div>
       </div>
 
+      @if (clientSelectionBlockMessage != null) {
+        <div class="beta-blocked-message">{{ clientSelectionBlockMessage }}</div>
+      }
+
       <div class="beta-actions">
         <button mat-raised-button color="primary" (click)="create()" [disabled]="!canSave">Speichern</button>
         <button mat-stroked-button (click)="location.back()">Abbrechen</button>

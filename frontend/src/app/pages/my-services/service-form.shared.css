@@ -355,6 +355,16 @@
   width: 17px;
 }
 
+.beta-blocked-message {
+  flex: 1 1 100%;
+  background: #fff0ef;
+  border: 1px solid #f0b5b2;
+  border-radius: 6px;
+  color: #a62821;
+  font-size: 12px;
+  padding: 10px 12px;
+}
+
 .beta-actions {
   display: flex;
   align-items: center;

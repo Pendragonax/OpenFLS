@@ -151,4 +151,14 @@ describe('ServiceEditComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should block save when the selected client is archived', () => {
+    component.clientSelected = true;
+    component.selectedClient = {archived: true} as any;
+    component.assistancePlanSelected = true;
+    component.institutionControl.setValue(1);
+    component.hourTypeControl.setValue(1);
+
+    expect(component.canSave).toBe(false);
+  });
 });

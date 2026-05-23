@@ -18,6 +18,7 @@ function preview(overrides: Partial<AssistancePlanPreviewDto>): AssistancePlanPr
     isActive: true,
     isFavorite: false,
     hasIllegalHours: false,
+    clientArchived: false,
     approvedHoursPerWeek: 0,
     approvedHoursThisYear: 0,
     executedHoursThisYear: 0,
@@ -102,6 +103,23 @@ describe('AssistancePlansComponent', () => {
     client$.next({dto: {id: 5}});
 
     expect(assistancePlanService.getPreviewByClientId).toHaveBeenCalledWith(5);
+  });
+
+  it('exposes read only mode for archived client contexts', () => {
+    const {component} = createComponent();
+    component.readOnly = true;
+
+    expect(component.readOnly).toBe(true);
+  });
+
+  it('marks archived client rows as read only', () => {
+    const {component} = createComponent();
+    expect(component.isRowReadOnly({preview: preview({clientArchived: true}), editable: true})).toBe(true);
+  });
+
+  it('keeps active client rows editable when the component is not globally read only', () => {
+    const {component} = createComponent();
+    expect(component.isRowReadOnly({preview: preview({clientArchived: false}), editable: true})).toBe(false);
   });
 
   it.each([

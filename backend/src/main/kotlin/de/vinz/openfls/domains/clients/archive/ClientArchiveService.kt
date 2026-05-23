@@ -3,6 +3,7 @@ package de.vinz.openfls.domains.clients.archive
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
+import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -11,7 +12,8 @@ import java.time.LocalDateTime
 
 @Service
 class ClientArchiveService(
-    private val clientService: ClientService
+    private val clientService: ClientService,
+    private val employeeService: EmployeeService
 ) {
 
     @Transactional
@@ -85,7 +87,9 @@ class ClientArchiveService(
                 executingEmployeeLastname = actor.lastname,
                 reason = reason,
                 remark = remark
-            )
+            ).also {
+                employeeService.deleteAssistancePlanFavoritesByClientId(clientId)
+            }
             ClientArchiveActionType.REACTIVATE -> clientService.reactivate(
                 clientId = clientId,
                 actionDate = actionDate,

@@ -25,7 +25,10 @@ class MockInstitutionService {
 }
 
 class MockClientsService {
-  allValues$ = of([{ id: 1, firstName: 'Max', lastName: 'M' }]);
+  allValues$ = of([
+    { id: 1, firstName: 'Max', lastName: 'M', archived: false },
+    { id: 2, firstName: 'Archiv', lastName: 'K', archived: true }
+  ]);
   getByIdForServiceEditing() {
     return of({
       id: 1,
@@ -118,6 +121,18 @@ class TestServiceFormComponent extends ServiceFormBase {
   callGetSelectableAssistancePlansForEdit(plans: any[], serviceDate: string, currentPlanId: number | null) {
     return this.getSelectableAssistancePlansForEdit(plans as any, serviceDate, currentPlanId);
   }
+
+  callGetSelectableClients(clients: any[]) {
+    return this.getSelectableClients(clients as any);
+  }
+
+  callIsSelectedClientArchived() {
+    return this.isSelectedClientArchived;
+  }
+
+  callClientSelectionBlockMessage() {
+    return this.clientSelectionBlockMessage;
+  }
 }
 
 describe('ServiceFormBase', () => {
@@ -176,6 +191,23 @@ describe('ServiceFormBase', () => {
     const result = component.callGetSelectableAssistancePlansForEdit(plans, '2026-01-15', 2);
 
     expect(result.map(plan => plan.id)).toEqual([2, 1]);
+  });
+
+  it('should hide archived clients from selectable client lists', () => {
+    const selectableClients = component.callGetSelectableClients([
+      {id: 1, firstName: 'Max', lastName: 'M', archived: false},
+      {id: 2, firstName: 'Archiv', lastName: 'K', archived: true}
+    ]);
+
+    expect(selectableClients.map(client => client.id)).toEqual([1]);
+  });
+
+  it('should expose a blocking message for archived client selections', () => {
+    component.clientSelected = true;
+    component.selectedClient = {archived: true} as any;
+
+    expect(component.callIsSelectedClientArchived()).toBe(true);
+    expect(component.callClientSelectionBlockMessage()).toContain('archiviert');
   });
 
   it('should return institution name for assistance plan label', () => {

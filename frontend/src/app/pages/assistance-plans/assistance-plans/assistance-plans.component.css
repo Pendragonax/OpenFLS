@@ -1,3 +1,22 @@
+.plan-readonly-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e6eef7;
+  color: #355070;
+  border: 1px solid #bfd0e6;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.plan-readonly-pill--archived {
+  background: #fff0ef;
+  color: #a62821;
+  border-color: #f0b5b2;
+}
+
 .mat-row:hover {
   background-color: whitesmoke;
 }
@@ -6,6 +25,29 @@ td , th {
   white-space: normal;
   word-wrap: break-word;
   max-width: 130px;
+}
+
+.assistance-row--readonly {
+  background: #fff3f1;
+}
+
+.assistance-row--readonly td {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.assistance-row--readonly td:first-child {
+  box-shadow: inset 4px 0 0 #c94a43;
+}
+
+.assistance-row--readonly .plan-status-pill,
+.assistance-row--readonly .hours-progress-text-left,
+.assistance-row--readonly .hours-progress-text-right,
+.assistance-row--readonly .timeline-label,
+.assistance-row--readonly .timeline-value,
+.assistance-row--readonly .timeline-value-light {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
 }
 
 .sidenav-height {
@@ -37,6 +79,36 @@ td , th {
   box-shadow: 0 2px 5px rgba(20, 35, 70, 0.12);
 }
 
+.timeline-card--readonly {
+  border-left: 4px solid #c94a43 !important;
+  background: #fff8f7;
+}
+
+.timeline-card--readonly .timeline-body {
+  border-color: #f0b5b2;
+  background: #fffaf9;
+}
+
+.timeline-card--readonly .timeline-date,
+.timeline-card--readonly .timeline-value,
+.timeline-card--readonly .timeline-value-light,
+.timeline-card--readonly .timeline-label {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.timeline-card--readonly .hours-progress-text-left,
+.timeline-card--readonly .hours-progress-text-right {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.timeline-card--readonly .plan-status-pill--active {
+  color: #2f8d67;
+  background: #dcf5ea;
+  border-color: #9fd9c0;
+}
+
 .timeline-illegal {
   border-left-color: #e95c54;
   background: rgba(233, 92, 84, 0.08);
@@ -48,6 +120,14 @@ td , th {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+.status-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .timeline-date {

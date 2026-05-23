@@ -12,6 +12,7 @@ import {EmployeeViewModel} from "../../shared/models/employee-view.model";
 import {ServiceService} from "../../shared/services/service.service";
 import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
+import {EmployeeDto} from "../../shared/dtos/employee-dto.model";
 
 @Component({
     selector: 'app-client',
@@ -50,13 +51,7 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
       if (this.readableInstitutions != null) {
         this.readableInstitutions = readableInstitutions
       }
-      this.values = clients
-        .map(client => <ClientViewModel> {
-          dto: client,
-          editable: user.permissions
-            .filter(perm => perm.affiliated)
-            .some(perm => perm.institutionId === client.institution.id)});
-      this.values.filter(value => this.readableInstitutions != null && this.readableInstitutions.some(it => it.id == value.dto.institution.id))
+      this.values = this.buildVisibleClients(clients, user);
       this.values$.next(this.values);
       this.filteredTableData = this.values;
       this.isSubmitting = false;
@@ -72,12 +67,7 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
       this.clientService.getAll(),
       this.userService.user$,
     ]).subscribe(([clients, user]) => {
-      this.values = clients
-        .map(client => <ClientViewModel> {
-          dto: client,
-          editable: user.permissions
-            .filter(perm => perm.affiliated)
-            .some(perm => perm.institutionId === client.institution.id)});
+      this.values = this.buildVisibleClients(clients, user);
       this.values = this.values.filter(value => (this.selectedInstitution != null && this.selectedInstitution.id == value.dto.institution.id) || this.selectedInstitution == null)
       this.values$.next(this.values);
       this.filteredTableData = this.values;
@@ -144,6 +134,15 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
       .subscribe({
         next: (value) => this.deleteServiceCount = value
       });
+  }
+
+  private buildVisibleClients(clients: any[], user: EmployeeDto): ClientViewModel[] {
+    return clients.map(client => <ClientViewModel> {
+      dto: client,
+      editable: user.permissions
+        .filter(perm => perm.affiliated)
+        .some(perm => perm.institutionId === client.institution.id)
+    });
   }
 
   sortData(sort: Sort) {

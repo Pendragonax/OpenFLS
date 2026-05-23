@@ -56,6 +56,7 @@ export class AssistancePlansComponent
   @Input() hideClientColumn: boolean = false;
   @Input() hideSponsorColumn: boolean = false;
   @Input() hideAddButton: boolean = false;
+  @Input() readOnly: boolean = false;
   @Input() hideInstitutionFilter: boolean = false;
   @Input() hideSearchStringFilter: boolean = false;
   @Output() addedValueEvent = new EventEmitter<AssistancePlanPreviewDto>();
@@ -90,6 +91,10 @@ export class AssistancePlansComponent
 
   get institutionControl() {
     return this.filterForm.controls['institution'];
+  }
+
+  isRowReadOnly(row: AssistancePlanPreviewRow): boolean {
+    return this.readOnly || row.preview.clientArchived;
   }
 
   constructor(
