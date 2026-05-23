@@ -16,6 +16,7 @@ Use this skill to execute exactly one approved plan step.
 - Keep the diff minimal and aligned with repository rules.
 - Update or add tests that cover the changed behavior.
 - Report what changed and how it was validated.
+- Recommend a Conventional Commits-style commit message when the work is ready to commit, using `type(scope): summary`.
 - Record meaningful decisions and any scope/behavior clarifications in `agent-private/decisions/decision-log.md`.
 
 ## Do Not

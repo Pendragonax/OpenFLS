@@ -5,6 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.categories.CategoryTemplateService
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
+import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
@@ -26,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @DataJpaTest
 @Import(ClientService::class, TestBeans::class)
@@ -256,5 +258,148 @@ class ClientServiceDataJpaTest {
 
         // Then
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun archive_createsHistoryEntry_andMarksClientArchived() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(
+            Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate)
+        )
+        val actionDate = LocalDate.of(2026, 5, 23)
+        val actionTimestamp = LocalDateTime.of(2026, 5, 23, 10, 15)
+
+        // When
+        clientService.archive(
+            clientId = client.id,
+            actionDate = actionDate,
+            actionTimestamp = actionTimestamp,
+            executingEmployeeId = 11,
+            executingEmployeeFirstname = "Anna",
+            executingEmployeeLastname = "Lead",
+            reason = "Archived by request",
+            remark = "Initial archive"
+        )
+
+        // Then
+        val saved = clientRepository.findById(client.id)
+        assertThat(saved).isPresent
+        assertThat(saved.get().archived).isTrue
+        assertThat(saved.get().archiveHistoryEntries).hasSize(1)
+        assertThat(saved.get().archiveHistoryEntries.first().actionType).isEqualTo(ClientArchiveActionType.ARCHIVE)
+        assertThat(saved.get().archiveHistoryEntries.first().actionDate).isEqualTo(actionDate)
+        assertThat(saved.get().archiveHistoryEntries.first().actionTimestamp).isEqualTo(actionTimestamp)
+        assertThat(saved.get().archiveHistoryEntries.first().executingEmployeeId).isEqualTo(11)
+        assertThat(saved.get().archiveHistoryEntries.first().executingEmployeeFirstname).isEqualTo("Anna")
+        assertThat(saved.get().archiveHistoryEntries.first().executingEmployeeLastname).isEqualTo("Lead")
+        assertThat(saved.get().archiveHistoryEntries.first().reason).isEqualTo("Archived by request")
+        assertThat(saved.get().archiveHistoryEntries.first().remark).isEqualTo("Initial archive")
+    }
+
+    @Test
+    fun reactivate_appendsHistoryEntry_andReturnsNewestHistoryFirst() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(
+            Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate)
+        )
+        val archiveTimestamp = LocalDateTime.of(2026, 5, 23, 9, 0)
+        val reactivateTimestamp = LocalDateTime.of(2026, 5, 23, 11, 0)
+        clientService.archive(
+            clientId = client.id,
+            actionDate = LocalDate.of(2026, 5, 23),
+            actionTimestamp = archiveTimestamp,
+            executingEmployeeId = 11,
+            executingEmployeeFirstname = "Anna",
+            executingEmployeeLastname = "Lead",
+            reason = "Archived by request",
+            remark = "Initial archive"
+        )
+
+        // When
+        clientService.reactivate(
+            clientId = client.id,
+            actionDate = LocalDate.of(2026, 5, 23),
+            actionTimestamp = reactivateTimestamp,
+            executingEmployeeId = 12,
+            executingEmployeeFirstname = "Ben",
+            executingEmployeeLastname = "Lead",
+            reason = "Client active again",
+            remark = "Reactivated"
+        )
+
+        // Then
+        val saved = clientRepository.findById(client.id)
+        assertThat(saved).isPresent
+        assertThat(saved.get().archived).isFalse
+        assertThat(saved.get().archiveHistoryEntries).hasSize(2)
+
+        val history = clientService.getArchiveHistoryById(client.id)
+        assertThat(history).hasSize(2)
+        assertThat(history.first().actionType).isEqualTo(ClientArchiveActionType.REACTIVATE)
+        assertThat(history.first().actionTimestamp).isEqualTo(reactivateTimestamp)
+        assertThat(history[1].actionType).isEqualTo(ClientArchiveActionType.ARCHIVE)
+        assertThat(history[1].actionTimestamp).isEqualTo(archiveTimestamp)
+    }
+
+    @Test
+    fun archive_duplicateStateChange_throwsException() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(
+            Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate)
+        )
+        clientService.archive(
+            clientId = client.id,
+            actionDate = LocalDate.of(2026, 5, 23),
+            actionTimestamp = LocalDateTime.of(2026, 5, 23, 9, 0),
+            executingEmployeeId = 11,
+            executingEmployeeFirstname = "Anna",
+            executingEmployeeLastname = "Lead",
+            reason = "Archived by request",
+            remark = "Initial archive"
+        )
+
+        // When / Then
+        assertThatThrownBy {
+            clientService.archive(
+                clientId = client.id,
+                actionDate = LocalDate.of(2026, 5, 23),
+                actionTimestamp = LocalDateTime.of(2026, 5, 23, 10, 0),
+                executingEmployeeId = 11,
+                executingEmployeeFirstname = "Anna",
+                executingEmployeeLastname = "Lead",
+                reason = "Archived again",
+                remark = "Should fail"
+            )
+        }.isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun reactivate_activeClient_throwsException() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(
+            Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate)
+        )
+
+        // When / Then
+        assertThatThrownBy {
+            clientService.reactivate(
+                clientId = client.id,
+                actionDate = LocalDate.of(2026, 5, 23),
+                actionTimestamp = LocalDateTime.of(2026, 5, 23, 10, 0),
+                executingEmployeeId = 12,
+                executingEmployeeFirstname = "Ben",
+                executingEmployeeLastname = "Lead",
+                reason = "Reactivated",
+                remark = "Should fail"
+            )
+        }.isInstanceOf(IllegalStateException::class.java)
     }
 }

@@ -1,18 +1,22 @@
 package de.vinz.openfls.domains.clients
 
-import de.vinz.openfls.domains.clients.dtos.ClientDto
-import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
-import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanForServiceEditingDto
 import de.vinz.openfls.domains.categories.CategoryTemplateService
+import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
+import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
+import de.vinz.openfls.domains.clients.dtos.ClientDto
+import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
+import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
 import de.vinz.openfls.domains.hourTypes.HourTypeDto
-import de.vinz.openfls.services.GenericService
 import de.vinz.openfls.domains.institutions.InstitutionService
-import org.springframework.transaction.annotation.Transactional
+import de.vinz.openfls.services.GenericService
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Service
 class ClientService(
@@ -36,6 +40,7 @@ class ClientService(
                 ?: throw IllegalArgumentException("institution not found")
         value.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate?.id ?: 0)
                 ?: throw IllegalArgumentException("category template not found")
+        value.archived = false
 
         return clientRepository.save(value)
     }
@@ -50,15 +55,73 @@ class ClientService(
 
     @Transactional
     override fun update(value: Client): Client {
-        if (!clientRepository.existsById(value.id))
-            throw IllegalArgumentException("client not found")
+        val existingClient = clientRepository.findById(value.id)
+                .orElseThrow { IllegalArgumentException("client not found") }
 
-        value.institution = institutionService.getEntityById(value.institution?.id ?: 0)
+        existingClient.firstName = value.firstName
+        existingClient.lastName = value.lastName
+        existingClient.phoneNumber = value.phoneNumber
+        existingClient.email = value.email
+        existingClient.institution = institutionService.getEntityById(value.institution?.id ?: 0)
                 ?: throw IllegalArgumentException("institution not found")
-        value.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate?.id ?: 0)
+        existingClient.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate?.id ?: 0)
                 ?: throw IllegalArgumentException("category template not found")
 
-        return clientRepository.save(value)
+        return clientRepository.save(existingClient)
+    }
+
+    @Transactional
+    fun archive(
+        clientId: Long,
+        actionDate: LocalDate,
+        actionTimestamp: LocalDateTime,
+        executingEmployeeId: Long,
+        executingEmployeeFirstname: String,
+        executingEmployeeLastname: String,
+        reason: String,
+        remark: String
+    ): ClientArchiveHistoryEntry {
+        return changeArchiveState(
+                clientId = clientId,
+                actionType = ClientArchiveActionType.ARCHIVE,
+                actionDate = actionDate,
+                actionTimestamp = actionTimestamp,
+                executingEmployeeId = executingEmployeeId,
+                executingEmployeeFirstname = executingEmployeeFirstname,
+                executingEmployeeLastname = executingEmployeeLastname,
+                reason = reason,
+                remark = remark
+        )
+    }
+
+    @Transactional
+    fun reactivate(
+        clientId: Long,
+        actionDate: LocalDate,
+        actionTimestamp: LocalDateTime,
+        executingEmployeeId: Long,
+        executingEmployeeFirstname: String,
+        executingEmployeeLastname: String,
+        reason: String,
+        remark: String
+    ): ClientArchiveHistoryEntry {
+        return changeArchiveState(
+                clientId = clientId,
+                actionType = ClientArchiveActionType.REACTIVATE,
+                actionDate = actionDate,
+                actionTimestamp = actionTimestamp,
+                executingEmployeeId = executingEmployeeId,
+                executingEmployeeFirstname = executingEmployeeFirstname,
+                executingEmployeeLastname = executingEmployeeLastname,
+                reason = reason,
+                remark = remark
+        )
+    }
+
+    @Transactional(readOnly = true)
+    fun getArchiveHistoryById(clientId: Long): List<ClientArchiveHistoryEntry> {
+        val client = getById(clientId) ?: return emptyList()
+        return client.archiveHistoryEntries.sortedByDescending { it.actionTimestamp }
     }
 
     @Transactional
@@ -130,6 +193,50 @@ class ClientService(
     @Transactional(readOnly = true)
     fun existById(id: Long): Boolean {
         return clientRepository.existsById(id)
+    }
+
+    private fun changeArchiveState(
+        clientId: Long,
+        actionType: ClientArchiveActionType,
+        actionDate: LocalDate,
+        actionTimestamp: LocalDateTime,
+        executingEmployeeId: Long,
+        executingEmployeeFirstname: String,
+        executingEmployeeLastname: String,
+        reason: String,
+        remark: String
+    ): ClientArchiveHistoryEntry {
+        val client = getById(clientId) ?: throw IllegalArgumentException("client not found")
+
+        when (actionType) {
+            ClientArchiveActionType.ARCHIVE -> {
+                if (client.archived) {
+                    throw IllegalStateException("client already archived")
+                }
+            }
+            ClientArchiveActionType.REACTIVATE -> {
+                if (!client.archived) {
+                    throw IllegalStateException("client is not archived")
+                }
+            }
+        }
+
+        val historyEntry = ClientArchiveHistoryEntry(
+                actionType = actionType,
+                actionDate = actionDate,
+                actionTimestamp = actionTimestamp,
+                reason = reason,
+                remark = remark,
+                executingEmployeeId = executingEmployeeId,
+                executingEmployeeFirstname = executingEmployeeFirstname,
+                executingEmployeeLastname = executingEmployeeLastname,
+                client = client
+        )
+
+        client.archived = actionType == ClientArchiveActionType.ARCHIVE
+        client.archiveHistoryEntries.add(historyEntry)
+        clientRepository.save(client)
+        return historyEntry
     }
 
     private fun sortClientDto(clientDto: ClientDto, entity: Client): ClientDto {

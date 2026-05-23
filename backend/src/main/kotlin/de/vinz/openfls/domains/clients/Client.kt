@@ -7,6 +7,7 @@ import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
 
@@ -29,6 +30,9 @@ class Client(
 
         @Column(length = 64)
         var email: String = "",
+
+        @Column(nullable = false)
+        var archived: Boolean = false,
 
         @JsonIgnoreProperties(value = ["hibernateLazyInitializer"])
         @ManyToOne(
@@ -59,7 +63,16 @@ class Client(
                 mappedBy = "client",
                 cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
-        var services: MutableSet<Service> = mutableSetOf()
+        var services: MutableSet<Service> = mutableSetOf(),
+
+        @JsonIgnoreProperties(value = ["client", "hibernateLazyInitializer"])
+        @OneToMany(
+                mappedBy = "client",
+                cascade = [CascadeType.ALL],
+                fetch = FetchType.LAZY,
+                orphanRemoval = true)
+        @OrderBy("actionTimestamp DESC")
+        var archiveHistoryEntries: MutableList<ClientArchiveHistoryEntry> = mutableListOf()
 ) {
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true
