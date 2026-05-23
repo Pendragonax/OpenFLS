@@ -25,6 +25,8 @@ class AssistancePlanDto {
     @field:NotNull(message = "sponsorId is null")
     var sponsorId: Long = 0
 
+    var clientArchived: Boolean = false
+
     var goals: MutableSet<GoalDto> = mutableSetOf()
 
     @Valid

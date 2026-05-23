@@ -6,5 +6,6 @@ data class AssistancePlanExistingDto(
     val id: Long,
     val start: LocalDate,
     val end: LocalDate,
-    val sponsorName: String
+    val sponsorName: String,
+    val clientArchived: Boolean
 )

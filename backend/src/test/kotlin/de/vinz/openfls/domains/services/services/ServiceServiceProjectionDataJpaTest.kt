@@ -2,18 +2,21 @@ package de.vinz.openfls.domains.services.services
 
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
+import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -35,6 +38,12 @@ class ServiceServiceProjectionDataJpaTest {
 
     @Autowired
     lateinit var institutionRepository: InstitutionRepository
+
+    @MockitoBean
+    lateinit var clientService: ClientService
+
+    @MockitoBean
+    lateinit var assistancePlanService: AssistancePlanService
 
     @Test
     fun getFromTillEmployeeNameProjectionByClientAndDate_matchingDate_returnsProjection() {

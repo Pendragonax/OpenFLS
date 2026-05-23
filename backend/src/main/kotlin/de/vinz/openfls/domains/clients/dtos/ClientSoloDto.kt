@@ -5,4 +5,5 @@ data class ClientSoloDto(
         var firstName: String = "",
         var lastName: String = "",
         var phoneNumber: String = "",
-        var email: String = "")
+        var email: String = "",
+        var archived: Boolean = false)

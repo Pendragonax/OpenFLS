@@ -7,7 +7,6 @@ import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -93,7 +92,11 @@ class ClientController(
             if (!clientService.existById(id))
                 throw IllegalArgumentException("client not found")
 
-            val dto = clientService.getDtoById(id)
+            val dto = clientService.getDtoById(
+                id,
+                includeArchived = accessService.isAdmin(),
+                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
+            )
             clientService.delete(id)
 
             if (logPerformance) {
@@ -119,7 +122,10 @@ class ClientController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = clientService.getAllClientSimpleDto()
+            val dtos = clientService.getAllClientSimpleDto(
+                includeArchived = accessService.isAdmin(),
+                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
+            )
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms",
@@ -144,7 +150,10 @@ class ClientController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = clientService.getAllClientSoloDto()
+            val dtos = clientService.getAllClientSoloDto(
+                includeArchived = accessService.isAdmin(),
+                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
+            )
 
             if (logPerformance) {
                 logger.info(String.format("%s getAllClientSoloDTOs took %s ms",
@@ -169,7 +178,11 @@ class ClientController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dto = clientService.getDtoById(id)
+            val dto = clientService.getDtoById(
+                id,
+                includeArchived = accessService.isAdmin(),
+                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
+            ) ?: throw IllegalArgumentException("client not found")
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",
@@ -197,7 +210,12 @@ class ClientController(
             val userId = accessService.getId()
             val writePermittedInstitutions = accessService.getWriteRightsInstitutionIds(userId)
 
-            val dto = clientService.getForServiceEditingById(id, writePermittedInstitutions)
+            val dto = clientService.getForServiceEditingById(
+                id,
+                writePermittedInstitutions,
+                includeArchived = accessService.isAdmin(),
+                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
+            )
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",

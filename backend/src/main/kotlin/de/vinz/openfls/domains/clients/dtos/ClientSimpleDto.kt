@@ -14,6 +14,8 @@ class ClientSimpleDto {
 
     var email: String = ""
 
+    var archived: Boolean = false
+
     @JsonIgnoreProperties(value = ["contingents", "permissions", "assistancePlans", "goals", "hibernateLazyInitializer"])
     var institution: InstitutionDto = InstitutionDto()
 }

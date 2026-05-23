@@ -7,4 +7,5 @@ interface AssistancePlanExistingProjection {
     val start: LocalDate
     val end: LocalDate
     val sponsorName: String
+    val clientArchived: Boolean
 }

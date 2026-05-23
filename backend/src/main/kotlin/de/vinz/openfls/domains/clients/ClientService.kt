@@ -58,6 +58,10 @@ class ClientService(
         val existingClient = clientRepository.findById(value.id)
                 .orElseThrow { IllegalArgumentException("client not found") }
 
+        if (existingClient.archived) {
+            throw IllegalStateException("client is archived")
+        }
+
         existingClient.firstName = value.firstName
         existingClient.lastName = value.lastName
         existingClient.phoneNumber = value.phoneNumber
@@ -135,26 +139,38 @@ class ClientService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllClientSimpleDto(): List<ClientSimpleDto> {
-        val clientInstitutionDtos = clientRepository.findAllClientSimpleDto()
-        return clientInstitutionDtos
+    fun getAllClientSimpleDto(
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): List<ClientSimpleDto> {
+        return clientRepository.findAll()
+                .toList()
+                .filter { includeArchived || !it.archived || leadingInstitutionIds.contains(it.institution?.id ?: 0) }
                 .map { modelMapper.map(it, ClientSimpleDto::class.java) }
                 .sortedBy { it.lastName.lowercase() }
     }
 
     @Transactional(readOnly = true)
-    fun getAllClientSoloDto(): List<ClientSoloDto> {
-        val clientSoloProjections = clientRepository.findAllClientSoloProjectionBy()
-        return clientSoloProjections
+    fun getAllClientSoloDto(
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): List<ClientSoloDto> {
+        return clientRepository.findAll()
+                .toList()
+                .filter { includeArchived || !it.archived || leadingInstitutionIds.contains(it.institution?.id ?: 0) }
                 .map { modelMapper.map(it, ClientSoloDto::class.java) }
                 .sortedBy { it.lastName.lowercase() }
     }
 
     @Transactional(readOnly = true)
-    fun getDtoById(id: Long): ClientDto? {
+    fun getDtoById(
+        id: Long,
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): ClientDto? {
         val entity = getById(id)
 
-        if (entity != null) {
+        if (entity != null && isVisible(entity.archived, entity.institution?.id, includeArchived, leadingInstitutionIds)) {
             val clientDto = modelMapper.map(entity, ClientDto::class.java)
             return sortClientDto(clientDto, entity)
         }
@@ -163,10 +179,15 @@ class ClientService(
     }
 
     @Transactional(readOnly = true)
-    fun getForServiceEditingById(clientId: Long, allowedInstitutions: List<Long>): ClientForServiceEditingDto? {
+    fun getForServiceEditingById(
+        clientId: Long,
+        allowedInstitutions: List<Long>,
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): ClientForServiceEditingDto? {
         val entity = getById(clientId)
 
-        if (entity != null) {
+        if (entity != null && isVisible(entity.archived, entity.institution?.id, includeArchived, leadingInstitutionIds)) {
             val clientDto = modelMapper.map(entity, ClientForServiceEditingDto::class.java)
             clientDto.assistancePlans = entity.assistancePlans
                 .filter { assistancePlan -> allowedInstitutions.any { it == assistancePlan.institution?.id } }
@@ -270,5 +291,14 @@ class ClientService(
             .sortedBy { it.title.lowercase() }
             .map { HourTypeDto.from(it) }
             .toTypedArray()
+    }
+
+    private fun isVisible(
+        archived: Boolean,
+        institutionId: Long?,
+        includeArchived: Boolean,
+        leadingInstitutionIds: List<Long>
+    ): Boolean {
+        return !archived || includeArchived || leadingInstitutionIds.contains(institutionId ?: 0)
     }
 }

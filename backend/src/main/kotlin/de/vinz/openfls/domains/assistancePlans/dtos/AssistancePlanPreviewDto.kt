@@ -9,6 +9,7 @@ data class AssistancePlanPreviewDto(
     val sponsorId: Long,
     val clientFirstname: String,
     val clientLastname: String,
+    val clientArchived: Boolean,
     val institutionName: String,
     val sponsorName: String,
     val start: LocalDate,

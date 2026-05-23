@@ -21,7 +21,6 @@ import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
-import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.domains.sponsors.Sponsor
 import de.vinz.openfls.domains.sponsors.SponsorRepository
 import de.vinz.openfls.domains.sponsors.SponsorService
@@ -75,9 +74,6 @@ class AssistancePlanServiceDataJpaTest {
 
     @MockitoBean
     lateinit var hourTypeService: HourTypeService
-
-    @MockitoBean
-    lateinit var serviceService: ServiceService
 
     @Test
     fun create_validCreateDto_withGoalHoursOnly_persistsGoalsAndGoalHours() {
@@ -220,6 +216,66 @@ class AssistancePlanServiceDataJpaTest {
             LocalDate.of(2024, 1, 1)
         )
         assertThat(result.map { it.institutionName }).containsOnly("Inst")
+    }
+
+    @Test
+    fun getAssistancePlanDtosByClientId_filtersArchivedClientUnlessIncluded() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution, archived = true))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution
+            )
+        )
+
+        // When
+        val hiddenResult = assistancePlanService.getAssistancePlanDtosByClientId(client.id)
+        val visibleResult = assistancePlanService.getAssistancePlanDtosByClientId(
+            client.id,
+            includeArchived = true
+        )
+
+        // Then
+        assertThat(hiddenResult).isEmpty()
+        assertThat(visibleResult).hasSize(1)
+        assertThat(visibleResult.first().clientArchived).isTrue()
+    }
+
+    @Test
+    fun getAssistancePlanDtoById_filtersArchivedClientUnlessIncluded() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution, archived = true))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val plan = assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution
+            )
+        )
+
+        // When
+        val hiddenResult = assistancePlanService.getAssistancePlanDtoById(plan.id)
+        val visibleResult = assistancePlanService.getAssistancePlanDtoById(
+            plan.id,
+            includeArchived = true
+        )
+
+        // Then
+        assertThat(hiddenResult).isNull()
+        assertThat(visibleResult).isNotNull
+        assertThat(visibleResult!!.clientArchived).isTrue()
     }
 
     @Test
@@ -459,5 +515,45 @@ class AssistancePlanServiceDataJpaTest {
         assertThatThrownBy { assistancePlanService.update(savedMixedPlan.id, updateDto) }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessage("Bei Hilfeplänen mit Stunden in beiden Bereichen dürfen keine neuen Stunden hinzugefügt werden. Bitte erst bestehende Stunden löschen, bis nur noch ein Bereich Stunden enthält.")
+    }
+
+    @Test
+    fun update_archivedClient_throwsException() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val archivedClient = clientRepository.save(
+            Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution, archived = true)
+        )
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val plan = assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = archivedClient,
+                sponsor = sponsor,
+                institution = institution
+            )
+        )
+
+        whenever(clientService.getById(archivedClient.id)).thenReturn(archivedClient)
+        whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
+        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+
+        val updateDto = AssistancePlanUpdateDto().apply {
+            id = plan.id
+            start = plan.start
+            end = plan.end
+            clientId = archivedClient.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            hours = emptyList()
+            goals = emptyList()
+        }
+
+        // When / Then
+        assertThatThrownBy { assistancePlanService.update(plan.id, updateDto) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("client is archived")
     }
 }

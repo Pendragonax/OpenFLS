@@ -138,6 +138,31 @@ class ClientServiceDataJpaTest {
     }
 
     @Test
+    fun update_archivedClient_throwsException() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val existing = clientRepository.save(
+            Client(firstName = "Old", lastName = "Name", institution = institution, categoryTemplate = categoryTemplate, archived = true)
+        )
+        whenever(institutionService.getEntityById(any())).thenReturn(institution)
+        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+
+        val dto = ClientDto().apply {
+            id = existing.id
+            firstName = "New"
+            lastName = "Name"
+            institution.id = institution.id!!
+            categoryTemplate.id = categoryTemplate.id
+        }
+
+        // When / Then
+        assertThatThrownBy { clientService.update(dto) }
+            .isInstanceOf(IllegalStateException::class.java)
+            .hasMessage("client is archived")
+    }
+
+    @Test
     fun getDtoById_setsInstitutionNameForAssistancePlans() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst A", email = "a@b.c", phonenumber = "1"))
@@ -168,6 +193,61 @@ class ClientServiceDataJpaTest {
     }
 
     @Test
+    fun getDtoById_filtersArchivedClientsUnlessIncluded() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val archivedClient = clientRepository.save(
+            Client(firstName = "Archived", lastName = "Client", institution = institution, categoryTemplate = categoryTemplate, archived = true)
+        )
+
+        // When
+        val hiddenResult = clientService.getDtoById(archivedClient.id)
+        val visibleResult = clientService.getDtoById(archivedClient.id, includeArchived = true)
+
+        // Then
+        assertThat(hiddenResult).isNull()
+        assertThat(visibleResult).isNotNull
+        assertThat(visibleResult!!.archived).isTrue()
+    }
+
+    @Test
+    fun getAllClientSimpleDto_filtersArchivedClientsUnlessIncluded() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        clientRepository.save(Client(firstName = "Active", lastName = "Client", institution = institution, categoryTemplate = categoryTemplate))
+        clientRepository.save(Client(firstName = "Archived", lastName = "Client", institution = institution, categoryTemplate = categoryTemplate, archived = true))
+
+        // When
+        val hiddenResult = clientService.getAllClientSimpleDto()
+        val visibleResult = clientService.getAllClientSimpleDto(includeArchived = true)
+
+        // Then
+        assertThat(hiddenResult).hasSize(1)
+        assertThat(hiddenResult.first().firstName).isEqualTo("Active")
+        assertThat(visibleResult).hasSize(2)
+    }
+
+    @Test
+    fun getAllClientSoloDto_filtersArchivedClientsUnlessIncluded() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        clientRepository.save(Client(firstName = "Active", lastName = "Client", institution = institution, categoryTemplate = categoryTemplate))
+        clientRepository.save(Client(firstName = "Archived", lastName = "Client", institution = institution, categoryTemplate = categoryTemplate, archived = true))
+
+        // When
+        val hiddenResult = clientService.getAllClientSoloDto()
+        val visibleResult = clientService.getAllClientSoloDto(includeArchived = true)
+
+        // Then
+        assertThat(hiddenResult).hasSize(1)
+        assertThat(hiddenResult.first().firstName).isEqualTo("Active")
+        assertThat(visibleResult).hasSize(2)
+    }
+
+    @Test
     fun getForServiceEditingById_existingClient_filtersAssistancePlansByAllowedInstitutions() {
         // Given
         val institutionA = institutionRepository.save(Institution(name = "Inst A", email = "a@b.c", phonenumber = "1"))
@@ -189,40 +269,11 @@ class ClientServiceDataJpaTest {
         val hourTypeB = hourTypeRepository.save(HourType(title = "Indirekt", price = 20.0))
         val hourTypeC = hourTypeRepository.save(HourType(title = "Beratung", price = 30.0))
 
-        includedPlan.hours.add(
-            AssistancePlanHour(
-                weeklyMinutes = 60,
-                hourType = hourTypeA,
-                assistancePlan = includedPlan
-            )
-        )
-        includedPlan.hours.add(
-            AssistancePlanHour(
-                weeklyMinutes = 30,
-                hourType = hourTypeB,
-                assistancePlan = includedPlan
-            )
-        )
-        includedPlan.hours.add(
-            AssistancePlanHour(
-                weeklyMinutes = 20,
-                hourType = hourTypeC,
-                assistancePlan = includedPlan
-            )
-        )
-        val goal = Goal(
-            title = "Ziel",
-            description = "Beschreibung",
-            institution = institutionA,
-            assistancePlan = includedPlan
-        )
-        goal.hours.add(
-            GoalHour(
-                weeklyMinutes = 15,
-                hourType = hourTypeB,
-                goal = goal
-            )
-        )
+        includedPlan.hours.add(AssistancePlanHour(weeklyMinutes = 60, hourType = hourTypeA, assistancePlan = includedPlan))
+        includedPlan.hours.add(AssistancePlanHour(weeklyMinutes = 30, hourType = hourTypeB, assistancePlan = includedPlan))
+        includedPlan.hours.add(AssistancePlanHour(weeklyMinutes = 20, hourType = hourTypeC, assistancePlan = includedPlan))
+        val goal = Goal(title = "Ziel", description = "Beschreibung", institution = institutionA, assistancePlan = includedPlan)
+        goal.hours.add(GoalHour(weeklyMinutes = 15, hourType = hourTypeB, goal = goal))
         includedPlan.goals.add(goal)
         client.assistancePlans.add(includedPlan)
         client.assistancePlans.add(
@@ -246,6 +297,40 @@ class ClientServiceDataJpaTest {
         assertThat(result.assistancePlans.first().institutionName).isEqualTo("Inst A")
         assertThat(result.assistancePlans.first().possibleDocumentationHourTypes.map { it.title })
             .containsExactlyInAnyOrder("Beratung", "Direkt", "Indirekt")
+    }
+
+    @Test
+    fun getForServiceEditingById_filtersArchivedClientsUnlessIncluded() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val archivedClient = clientRepository.save(
+            Client(firstName = "Archived", lastName = "Client", institution = institution, categoryTemplate = categoryTemplate, archived = true)
+        )
+        archivedClient.assistancePlans.add(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = archivedClient,
+                sponsor = sponsor,
+                institution = institution
+            )
+        )
+        clientRepository.save(archivedClient)
+
+        // When
+        val hiddenResult = clientService.getForServiceEditingById(archivedClient.id, listOf(institution.id!!))
+        val visibleResult = clientService.getForServiceEditingById(
+            archivedClient.id,
+            listOf(institution.id!!),
+            includeArchived = true
+        )
+
+        // Then
+        assertThat(hiddenResult).isNull()
+        assertThat(visibleResult).isNotNull
+        assertThat(visibleResult!!.assistancePlans).hasSize(1)
     }
 
     @Test

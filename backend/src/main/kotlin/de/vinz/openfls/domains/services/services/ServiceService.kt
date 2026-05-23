@@ -1,5 +1,7 @@
 package de.vinz.openfls.domains.services.services
 
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.dtos.ServiceDto
@@ -18,15 +20,19 @@ import java.time.LocalDate
 @Transactional
 class ServiceService(
     private val serviceRepository: ServiceRepository,
+    private val clientService: ClientService,
+    private val assistancePlanService: AssistancePlanService,
     private val modelMapper: org.modelmapper.ModelMapper
 ) : de.vinz.openfls.services.GenericService<Service> {
 
     @Transactional
     fun create(serviceDto: ServiceDto): ServiceDto {
+        ensureClientIsMutable(serviceDto.clientId)
+        ensureAssistancePlanClientIsMutable(serviceDto.assistancePlanId)
+
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
         entity.employee?.unprofessionals = null
-        println(entity.toString())
         return modelMapper.map(create(entity), ServiceDto::class.java)
     }
 
@@ -37,6 +43,9 @@ class ServiceService(
         if (value.start >= value.end)
             throw IllegalArgumentException("start is equal or greater than end")
 
+        ensureClientIsMutable(value.client?.id)
+        ensureAssistancePlanClientIsMutable(value.assistancePlan?.id)
+
         value.minutes = Duration.between(value.start, value.end).toMinutes().toInt()
 
         return serviceRepository.save(value)
@@ -44,6 +53,9 @@ class ServiceService(
 
     @Transactional
     fun update(serviceDto: ServiceDto): ServiceDto {
+        ensureClientIsMutable(serviceDto.clientId)
+        ensureAssistancePlanClientIsMutable(serviceDto.assistancePlanId)
+
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
         val savedEntity = update(entity)
@@ -60,6 +72,13 @@ class ServiceService(
         if (value.start >= value.end)
             throw IllegalArgumentException("start is equal or greater than end")
 
+        val existingService = serviceRepository.findByIdOrNull(value.id)
+            ?: throw IllegalArgumentException("id not found")
+        ensureClientIsMutable(existingService.client?.id)
+        ensureAssistancePlanClientIsMutable(existingService.assistancePlan?.id)
+        ensureClientIsMutable(value.client?.id)
+        ensureAssistancePlanClientIsMutable(value.assistancePlan?.id)
+
         value.minutes = Duration.between(value.start, value.end).toMinutes().toInt()
 
         return serviceRepository.save(value)
@@ -67,6 +86,10 @@ class ServiceService(
 
     @Transactional
     override fun delete(id: Long) {
+        val existingService = serviceRepository.findByIdOrNull(id)
+            ?: throw IllegalArgumentException("id not found")
+        ensureClientIsMutable(existingService.client?.id)
+        ensureAssistancePlanClientIsMutable(existingService.assistancePlan?.id)
         serviceRepository.deleteById(id)
     }
 
@@ -350,5 +373,25 @@ class ServiceService(
 
     fun countByGoal(goalId: Long): Long {
         return serviceRepository.countByGoalId(goalId)
+    }
+
+    private fun ensureClientIsMutable(clientId: Long?) {
+        if (clientId == null || clientId <= 0) {
+            return
+        }
+
+        if (clientService.getById(clientId)?.archived == true) {
+            throw IllegalStateException("client is archived")
+        }
+    }
+
+    private fun ensureAssistancePlanClientIsMutable(assistancePlanId: Long?) {
+        if (assistancePlanId == null || assistancePlanId <= 0) {
+            return
+        }
+
+        if (assistancePlanService.getById(assistancePlanId)?.client?.archived == true) {
+            throw IllegalStateException("client is archived")
+        }
     }
 }

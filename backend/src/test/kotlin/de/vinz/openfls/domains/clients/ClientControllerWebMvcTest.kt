@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.clients
 
+import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
 import de.vinz.openfls.domains.permissions.AccessService
 import org.assertj.core.api.Assertions.assertThat
@@ -39,7 +40,9 @@ class ClientControllerWebMvcTest {
         }
         given(accessService.getId()).willReturn(userId)
         given(accessService.getWriteRightsInstitutionIds(userId)).willReturn(allowedInstitutions)
-        given(clientService.getForServiceEditingById(clientId, allowedInstitutions)).willReturn(dto)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
+        given(accessService.isAdmin()).willReturn(false)
+        given(clientService.getForServiceEditingById(clientId, allowedInstitutions, false, emptyList())).willReturn(dto)
 
         // When
         val result = mockMvc.get("/clients/for-service-editing/$clientId").andReturn()
@@ -49,6 +52,29 @@ class ClientControllerWebMvcTest {
         assertThat(result.response.contentAsString).contains("\"id\":3")
         assertThat(result.response.contentAsString).contains("\"firstName\":\"Max\"")
         assertThat(result.response.contentAsString).contains("\"lastName\":\"Mustermann\"")
+    }
+
+    @Test
+    fun getById_admin_returnsClientDto() {
+        // Given
+        val clientId = 7L
+        val dto = ClientDto().apply {
+            id = clientId
+            firstName = "Max"
+            lastName = "Mustermann"
+            archived = true
+        }
+        given(accessService.isAdmin()).willReturn(true)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
+        given(clientService.getDtoById(clientId, true, emptyList())).willReturn(dto)
+
+        // When
+        val result = mockMvc.get("/clients/$clientId").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":7")
+        assertThat(result.response.contentAsString).contains("\"archived\":true")
     }
 
     @Test

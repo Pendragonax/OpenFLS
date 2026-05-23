@@ -10,6 +10,7 @@ class ClientForServiceEditingDto {
     var lastName: String = ""
     var phoneNumber: String = ""
     var email: String = ""
+    var archived: Boolean = false
     var categoryTemplate: CategoryTemplateDto = CategoryTemplateDto()
     var institution: InstitutionDto = InstitutionDto()
     var assistancePlans: Array<AssistancePlanForServiceEditingDto> = emptyArray()
