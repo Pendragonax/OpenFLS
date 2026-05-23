@@ -10,6 +10,7 @@ export class InformationRowComponent implements OnInit {
 
   @Input() title: string = "";
   @Input() content: string = "";
+  @Input() titleWidthClass: string = "col-sm-2";
 
   constructor() { }
 
