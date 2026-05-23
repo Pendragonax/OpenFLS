@@ -5,6 +5,8 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanForServiceEdit
 import de.vinz.openfls.domains.categories.CategoryTemplateService
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
+import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
+import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
@@ -54,12 +56,13 @@ class ClientService(
     }
 
     @Transactional
+    @Throws(ClientArchiveStateException::class)
     override fun update(value: Client): Client {
         val existingClient = clientRepository.findById(value.id)
                 .orElseThrow { IllegalArgumentException("client not found") }
 
         if (existingClient.archived) {
-            throw IllegalStateException("client is archived")
+            throw ClientArchiveStateException("client is archived")
         }
 
         existingClient.firstName = value.firstName
@@ -75,6 +78,7 @@ class ClientService(
     }
 
     @Transactional
+    @Throws(ClientArchiveStateException::class)
     fun archive(
         clientId: Long,
         actionDate: LocalDate,
@@ -84,8 +88,9 @@ class ClientService(
         executingEmployeeLastname: String,
         reason: String,
         remark: String
-    ): ClientArchiveHistoryEntry {
-        return changeArchiveState(
+    ): ClientArchiveHistoryEntryDto {
+        return ClientArchiveHistoryEntryDto.from(
+            changeArchiveState(
                 clientId = clientId,
                 actionType = ClientArchiveActionType.ARCHIVE,
                 actionDate = actionDate,
@@ -95,10 +100,12 @@ class ClientService(
                 executingEmployeeLastname = executingEmployeeLastname,
                 reason = reason,
                 remark = remark
+            )
         )
     }
 
     @Transactional
+    @Throws(ClientArchiveStateException::class)
     fun reactivate(
         clientId: Long,
         actionDate: LocalDate,
@@ -108,8 +115,9 @@ class ClientService(
         executingEmployeeLastname: String,
         reason: String,
         remark: String
-    ): ClientArchiveHistoryEntry {
-        return changeArchiveState(
+    ): ClientArchiveHistoryEntryDto {
+        return ClientArchiveHistoryEntryDto.from(
+            changeArchiveState(
                 clientId = clientId,
                 actionType = ClientArchiveActionType.REACTIVATE,
                 actionDate = actionDate,
@@ -119,17 +127,27 @@ class ClientService(
                 executingEmployeeLastname = executingEmployeeLastname,
                 reason = reason,
                 remark = remark
+            )
         )
     }
 
     @Transactional(readOnly = true)
-    fun getArchiveHistoryById(clientId: Long): List<ClientArchiveHistoryEntry> {
+    fun getArchiveHistoryById(clientId: Long): List<ClientArchiveHistoryEntryDto> {
         val client = getById(clientId) ?: return emptyList()
-        return client.archiveHistoryEntries.sortedByDescending { it.actionTimestamp }
+        return client.archiveHistoryEntries
+            .sortedByDescending { it.actionTimestamp }
+            .map { ClientArchiveHistoryEntryDto.from(it) }
     }
 
     @Transactional
+    @Throws(ClientArchiveStateException::class)
     override fun delete(id: Long) {
+        val client = getById(id) ?: throw IllegalArgumentException("client not found")
+
+        if (client.archived) {
+            throw ClientArchiveStateException("client is archived")
+        }
+
         clientRepository.deleteById(id)
     }
 
@@ -232,12 +250,12 @@ class ClientService(
         when (actionType) {
             ClientArchiveActionType.ARCHIVE -> {
                 if (client.archived) {
-                    throw IllegalStateException("client already archived")
+                    throw ClientArchiveStateException("client already archived")
                 }
             }
             ClientArchiveActionType.REACTIVATE -> {
                 if (!client.archived) {
-                    throw IllegalStateException("client is not archived")
+                    throw ClientArchiveStateException("client is not archived")
                 }
             }
         }

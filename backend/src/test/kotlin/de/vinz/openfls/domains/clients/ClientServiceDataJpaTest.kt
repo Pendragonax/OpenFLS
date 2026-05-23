@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.categories.CategoryTemplateService
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
+import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
@@ -158,7 +159,7 @@ class ClientServiceDataJpaTest {
 
         // When / Then
         assertThatThrownBy { clientService.update(dto) }
-            .isInstanceOf(IllegalStateException::class.java)
+            .isInstanceOf(ClientArchiveStateException::class.java)
             .hasMessage("client is archived")
     }
 
@@ -357,7 +358,7 @@ class ClientServiceDataJpaTest {
         val actionTimestamp = LocalDateTime.of(2026, 5, 23, 10, 15)
 
         // When
-        clientService.archive(
+        val result = clientService.archive(
             clientId = client.id,
             actionDate = actionDate,
             actionTimestamp = actionTimestamp,
@@ -373,6 +374,8 @@ class ClientServiceDataJpaTest {
         assertThat(saved).isPresent
         assertThat(saved.get().archived).isTrue
         assertThat(saved.get().archiveHistoryEntries).hasSize(1)
+        assertThat(result.actionType).isEqualTo(ClientArchiveActionType.ARCHIVE)
+        assertThat(result.executingEmployeeFirstname).isEqualTo("Anna")
         assertThat(saved.get().archiveHistoryEntries.first().actionType).isEqualTo(ClientArchiveActionType.ARCHIVE)
         assertThat(saved.get().archiveHistoryEntries.first().actionDate).isEqualTo(actionDate)
         assertThat(saved.get().archiveHistoryEntries.first().actionTimestamp).isEqualTo(actionTimestamp)
@@ -461,7 +464,7 @@ class ClientServiceDataJpaTest {
                 reason = "Archived again",
                 remark = "Should fail"
             )
-        }.isInstanceOf(IllegalStateException::class.java)
+        }.isInstanceOf(ClientArchiveStateException::class.java)
     }
 
     @Test
@@ -485,6 +488,21 @@ class ClientServiceDataJpaTest {
                 reason = "Reactivated",
                 remark = "Should fail"
             )
-        }.isInstanceOf(IllegalStateException::class.java)
+        }.isInstanceOf(ClientArchiveStateException::class.java)
+    }
+
+    @Test
+    fun delete_archivedClient_throwsException() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val archivedClient = clientRepository.save(
+            Client(firstName = "Archived", lastName = "Client", institution = institution, categoryTemplate = categoryTemplate, archived = true)
+        )
+
+        // When / Then
+        assertThatThrownBy { clientService.delete(archivedClient.id) }
+            .isInstanceOf(ClientArchiveStateException::class.java)
+            .hasMessage("client is archived")
     }
 }
