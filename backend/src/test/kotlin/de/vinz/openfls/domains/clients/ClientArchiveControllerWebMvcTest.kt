@@ -4,6 +4,7 @@ import de.vinz.openfls.domains.clients.archive.ClientArchiveActionRequest
 import de.vinz.openfls.domains.clients.archive.ClientArchiveService
 import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
+import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
@@ -18,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -37,6 +39,46 @@ class ClientArchiveControllerWebMvcTest {
 
     @MockitoBean
     lateinit var accessService: AccessService
+
+    @Test
+    fun getArchiveHistory_returnsReadDtosInNewestFirstOrder() {
+        // Given
+        val clientId = 17L
+        val newest = ClientArchiveHistoryEntryReadDto().apply {
+            id = 2L
+            actionType = de.vinz.openfls.domains.clients.archive.ClientArchiveActionType.REACTIVATE
+            actionDate = LocalDate.of(2026, 5, 24)
+            actionTimestamp = LocalDateTime.of(2026, 5, 24, 10, 45)
+            reason = "Reactivated"
+            remark = "Back to active"
+            executingEmployeeId = 8L
+            executingEmployeeFirstname = "Anna"
+            executingEmployeeLastname = "Lead"
+        }
+        val older = ClientArchiveHistoryEntryReadDto().apply {
+            id = 1L
+            actionType = de.vinz.openfls.domains.clients.archive.ClientArchiveActionType.ARCHIVE
+            actionDate = LocalDate.of(2026, 5, 23)
+            actionTimestamp = LocalDateTime.of(2026, 5, 23, 10, 30)
+            reason = "Archived by request"
+            remark = "Initial archive"
+            executingEmployeeId = 8L
+            executingEmployeeFirstname = "Anna"
+            executingEmployeeLastname = "Lead"
+        }
+        given(clientArchiveService.getArchiveHistory(clientId)).willReturn(listOf(newest, older))
+
+        // When
+        val result = mockMvc.get("/clients/$clientId/archive/history").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":2")
+        assertThat(result.response.contentAsString).contains("\"id\":1")
+        assertThat(result.response.contentAsString.indexOf("\"id\":2")).isLessThan(
+            result.response.contentAsString.indexOf("\"id\":1")
+        )
+    }
 
     @Test
     fun archive_withPermission_returnsHistoryEntry() {

@@ -4,6 +4,7 @@ import de.vinz.openfls.domains.clients.archive.ClientArchiveActionRequest
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActor
 import de.vinz.openfls.domains.clients.archive.ClientArchiveService
 import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
+import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.exceptions.UserNotAllowedException
@@ -12,6 +13,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -27,6 +29,11 @@ class ClientArchiveController(
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(ClientArchiveController::class.java)
+
+    @GetMapping("{id}/archive/history")
+    fun getArchiveHistory(@PathVariable id: Long): ResponseEntity<List<ClientArchiveHistoryEntryReadDto>> {
+        return ResponseEntity.ok(clientArchiveService.getArchiveHistory(id))
+    }
 
     @PostMapping("{id}/archive")
     fun archive(

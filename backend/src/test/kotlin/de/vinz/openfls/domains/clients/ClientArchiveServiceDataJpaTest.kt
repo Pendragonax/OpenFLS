@@ -146,6 +146,25 @@ class ClientArchiveServiceDataJpaTest {
         assertThat(saved.get().archived).isFalse
         assertThat(saved.get().archiveHistoryEntries).hasSize(2)
         assertThat(entry.actionType).isEqualTo(ClientArchiveActionType.REACTIVATE)
-        assertThat(clientArchiveService.getArchiveHistory(client.id)).hasSize(2)
+        val history = clientArchiveService.getArchiveHistory(client.id)
+        assertThat(history).hasSize(2)
+        assertThat(history[0].actionType).isEqualTo(ClientArchiveActionType.REACTIVATE)
+        assertThat(history[1].actionType).isEqualTo(ClientArchiveActionType.ARCHIVE)
+    }
+
+    @Test
+    fun getArchiveHistory_withoutHistory_returnsEmptyList() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        whenever(institutionService.getEntityById(any())).thenReturn(institution)
+        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate))
+
+        // When
+        val history = clientArchiveService.getArchiveHistory(client.id)
+
+        // Then
+        assertThat(history).isEmpty()
     }
 }

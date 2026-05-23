@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.clients.archive
 
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
+import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -52,8 +53,9 @@ class ClientArchiveService(
     }
 
     @Transactional(readOnly = true)
-    fun getArchiveHistory(clientId: Long): List<ClientArchiveHistoryEntryDto> {
+    fun getArchiveHistory(clientId: Long): List<ClientArchiveHistoryEntryReadDto> {
         return clientService.getArchiveHistoryById(clientId)
+            .map { ClientArchiveHistoryEntryReadDto.from(it) }
     }
 
     private fun changeArchiveState(
