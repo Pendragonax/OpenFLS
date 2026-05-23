@@ -2,3 +2,13 @@
 command = "npx"
 args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/vinz/projects/OpenFLS"]
 enabled = true
+
+[mcp_servers.spring_docs]
+command = "npx"
+args = ["-y", "@enokdev/springdocs-mcp@latest"]
+enabled = true
+
+[mcp_servers.angular_docs]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp@latest"]
+enabled = true

@@ -1,55 +1,33 @@
 ---
 name: mockup
-description: Erstellt zwei eigenständige UI/UX-Bild-Prompts (Baseline+ und Blue-Sky).
+description: Use when the user wants two independent UI/UX image prompts for a product or feature, typically a conservative baseline and a more ambitious blue-sky variant.
 ---
 
-# Instructions
+# Mockup
 
-## Trigger
-- "Mockup:"
-- "M:"
-- "Bitte erstelle mir ein Mockup"
-- "Wireframe:"
+Use this skill to produce two independent image prompts for UI/UX exploration.
 
-## Process
-1. Falls Code vorhanden: Frameworks, Patterns, Labels, Daten ableiten.
-2. Falls kein Code vorhanden: Enterprise-SaaS-Annahmen explizit machen.
-3. Zwei **vollständig unabhängige** Bild-Prompts erzeugen.
+## Do
 
-## Output format
-[MOCKUP]
+- Infer product context, framework patterns, labels, data shapes, and navigation from code or prompt context when available.
+- If no code is available, state the assumptions explicitly.
+- Create two fully self-contained prompts:
+  - `Baseline+`
+  - `Blue-Sky`
+- Keep each prompt independent and usable without the other.
+- Include a short negative prompt for each variant.
 
-Extrahierter Kontext (aus Code/Prompt):
-- Produkt/Domäne: …
-- UI-Framework/Design System: …
-- Navigationsstruktur: …
-- Wiederkehrende Komponenten: …
-- Wichtige Begriffe/Labels: …
-- Datenobjekte: …
-- Tonalität/Brand: …
+## Do Not
 
-Globale Annahmen (falls nötig):
-- …
+- Do not create files.
+- Do not reference one option from the other.
+- Do not produce an illustration-style prompt when a realistic SaaS UI is needed.
+- Do not invent product details that are not supported by the context unless you label them as assumptions.
 
-------------------------------------------------------------
-Option A — Baseline+
+## Output
 
-Bild-Prompt (vollständig eigenständig):
-- …
-
-Negativ-Prompt:
-- …
-
-------------------------------------------------------------
-Option B — Blue-Sky
-
-Bild-Prompt (vollständig eigenständig):
-- …
-
-Negativ-Prompt:
-- …
-
-## Rules
-- Keine Referenzen zwischen Option A und B.
-- Keine lokalen Dateien erzeugen.
-- Realistische SaaS-UI, kein Illustrationsstil.
+- `[MOCKUP]`
+- Extracted context.
+- Global assumptions, if needed.
+- `Option A - Baseline+`
+- `Option B - Blue-Sky`
