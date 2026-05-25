@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {combineLatest, ReplaySubject} from 'rxjs';
 import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {Sort} from '@angular/material/sort';
@@ -45,7 +45,7 @@ type AssistancePlanContext = 'none' | 'client' | 'sponsor' | 'institution' | 'fa
 })
 export class AssistancePlansComponent
   extends TablePageComponent<AssistancePlanPreviewDto, AssistancePlanPreviewRow>
-  implements OnInit {
+  implements OnInit, OnChanges {
   readonly illegalHoursTooltip = 'Sowohl der Hilfeplan als auch die Ziele haben Stunden zugewiesen. Dies stellt ein Problem bei der Berechnung dar.';
 
   @Input() client$: ReplaySubject<ClientViewModel> = new ReplaySubject<ClientViewModel>();
@@ -59,6 +59,8 @@ export class AssistancePlansComponent
   @Input() readOnly: boolean = false;
   @Input() hideInstitutionFilter: boolean = false;
   @Input() hideSearchStringFilter: boolean = false;
+  @Input() showArchivedEntries: boolean = false;
+  @Input() showArchivedEntriesToggleVisible: boolean = false;
   @Output() addedValueEvent = new EventEmitter<AssistancePlanPreviewDto>();
   @Output() updatedValueEvent = new EventEmitter<AssistancePlanPreviewDto>();
   @Output() deletedValueEvent = new EventEmitter<AssistancePlanPreviewDto>();
@@ -75,6 +77,7 @@ export class AssistancePlansComponent
 
   filterDate: Date | null = null;
   filterInstitutionId: number | null = null;
+  showArchivedEntriesVisible = false;
 
   override filterForm = new UntypedFormGroup({
     searchString: new UntypedFormControl(''),
@@ -95,6 +98,15 @@ export class AssistancePlansComponent
 
   isRowReadOnly(row: AssistancePlanPreviewRow): boolean {
     return this.readOnly || row.preview.clientArchived;
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['showArchivedEntries']) {
+      this.showArchivedEntriesVisible = changes['showArchivedEntries'].currentValue ?? false;
+      if (!changes['showArchivedEntries'].firstChange) {
+        this.filterTableData();
+      }
+    }
   }
 
   constructor(
@@ -284,11 +296,8 @@ export class AssistancePlansComponent
   }
 
   setTableSource(rows: AssistancePlanPreviewRow[]) {
-    this.filteredTableData = rows;
-    this.tableData = this.filteredTableData;
-    this.tableSource.data = this.filteredTableData;
-
-    this.refreshTablePage();
+    this.tableData = rows;
+    this.filterTableData();
   }
 
   setFilterInstitution(value: number | null) {
@@ -299,6 +308,11 @@ export class AssistancePlansComponent
     }
 
     this.filterInstitutionId = null;
+  }
+
+  onArchivedVisibilityChanged(showArchivedEntries: boolean) {
+    this.showArchivedEntriesVisible = showArchivedEntries;
+    this.filterTableData();
   }
 
   resetFilterInstitution() {
@@ -324,6 +338,10 @@ export class AssistancePlansComponent
 
   override filterTableData() {
     let filteredData = this.tableData.slice();
+
+    if (!this.showArchivedEntriesVisible) {
+      filteredData = filteredData.filter((row) => !row.preview.clientArchived);
+    }
 
     filteredData = filteredData.filter((row) => {
       const preview = row.preview;

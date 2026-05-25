@@ -11,7 +11,8 @@
 
 <div class="table-container">
   @if (services.length > 0) {
-    <button mat-mini-fab class="floating-export-button"
+    <button mat-mini-fab
+            class="floating-export-button"
             (click)="exportAsCSV()"
             [matTooltip]="'.csv speichern'">
       <mat-icon>save</mat-icon>
@@ -26,13 +27,23 @@
       @for (displayedColumn of displayedColumns; track displayedColumn) {
         <ng-container [matColumnDef]="displayedColumn">
           @if (displayedColumn !== 'actions') {
-            <th mat-header-cell *matHeaderCellDef mat-sort-header class="overview-font-size">{{getColumnDisplayName(displayedColumn)}}</th>
-            <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}" [innerHTML]="getFormattedCellContent(displayedColumn, element)"></td>
+            <th mat-header-cell
+                *matHeaderCellDef
+                mat-sort-header
+                class="overview-font-size">{{ getColumnDisplayName(displayedColumn) }}</th>
+            <td mat-cell
+                *matCellDef="let element"
+                class="overview-font-size"
+                [ngClass]="{'background-red': redRows}"
+                [innerHTML]="getFormattedCellContent(displayedColumn, element)"></td>
           } @else {
             <th mat-header-cell *matHeaderCellDef class="overview-font-size">Aktionen</th>
             <td mat-cell *matCellDef="let element" class="overview-font-size" [ngClass]="{'background-red': redRows}">
-              <div>
-                @if (editMode) {
+              <div class="service-actions-cell">
+                @if (element.archivedService) {
+                  <span class="service-archived-pill">Archiviert</span>
+                }
+                @if (editMode && !element.archivedService) {
                   <button mat-icon-button
                           color="primary"
                           class="m-1"
@@ -47,13 +58,12 @@
                         [disabled]="!canDelete(element, (isAdmin$ | async))"
                         [matTooltip]="'Dokumentation löschen'"
                         (click)="openDeleteConfirmation(deleteContent, element['id'])">
-                  <mat-icon>delete</mat-icon></button>
+                  <mat-icon>delete</mat-icon>
+                </button>
 
-                <!--DELETE MODAL CONFIRMATION-->
                 <ng-template #deleteContent let-modal>
                   <div class="modal-header">
-                    <h2 class="modal-title"
-                        id="modal-basic-delete-title">Bestätigung</h2>
+                    <h2 class="modal-title" id="modal-basic-delete-title">Bestätigung</h2>
                     <button type="button"
                             class="btn-close"
                             aria-label="Close"
@@ -78,14 +88,15 @@
       }
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="overview-row-height"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="overview-row-height" [ngClass]="{'service-row--archived': row.archivedService}"></tr>
     </table>
   }
 
   @if (services.length > 0) {
     <div class="service-cards">
       @for (row of tableDataSource.data; track row.id) {
-        <div class="service-card mat-elevation-z2" [ngClass]="{'service-card--illegal': redRows}">
+        <div class="service-card mat-elevation-z2"
+             [ngClass]="{'service-card--illegal': redRows, 'service-card--archived': row.archivedService}">
           <div class="service-card-header">
             <div>
               <div class="service-card-date-row">
@@ -94,11 +105,15 @@
                 @if (row.minutes != null) {
                   <div class="service-card-minutes service-card-minutes--pill">{{ row.minutes }} Min</div>
                 }
+                @if (row.archivedService) {
+                  <span class="service-archived-pill service-archived-pill--inline">Archiviert</span>
+                }
               </div>
             </div>
+
             @if (editMode || adminMode) {
               <div class="service-card-actions">
-                @if (editMode) {
+                @if (editMode && !row.archivedService) {
                   <button mat-icon-button
                           color="primary"
                           [routerLink]="['/services/edit', row.id]">
@@ -117,8 +132,7 @@
 
                   <ng-template #deleteContent let-modal>
                     <div class="modal-header">
-                      <h2 class="modal-title"
-                          id="modal-basic-delete-title-card">Bestätigung</h2>
+                      <h2 class="modal-title" id="modal-basic-delete-title-card">Bestätigung</h2>
                       <button type="button"
                               class="btn-close"
                               aria-label="Close"
@@ -161,7 +175,6 @@
           </div>
 
           <div class="service-card-content" [innerHTML]="row.content"></div>
-
         </div>
       }
     </div>

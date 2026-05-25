@@ -72,11 +72,12 @@ describe('ServiceViewTableComponent', () => {
     expect(html).toContain('service-time-pill');
   });
 
-  it('should allow delete for own services when own-delete is enabled', () => {
+  it('should allow delete for own services when own-delete is enabled and block archived rows', () => {
     component.allowOwnDelete = true;
     component.currentUserId = 7;
 
     expect(component.canDelete({ employeeId: 7 }, false)).toBe(true);
     expect(component.canDelete({ employeeId: 8 }, false)).toBe(false);
+    expect(component.canDelete({ employeeId: 7, archivedService: true }, false)).toBe(false);
   });
 });

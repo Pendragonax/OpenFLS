@@ -21,7 +21,7 @@
   background-color: whitesmoke;
 }
 
-td , th {
+td, th {
   white-space: normal;
   word-wrap: break-word;
   max-width: 130px;
@@ -80,27 +80,27 @@ td , th {
 }
 
 .timeline-card--readonly {
-  border-left: 4px solid #c94a43 !important;
-  background: #fff8f7;
+border-left: 4px solid #c94a43 !important;
+background: #fff8f7;
 }
 
 .timeline-card--readonly .timeline-body {
-  border-color: #f0b5b2;
-  background: #fffaf9;
+border-color: #f0b5b2;
+background: #fffaf9;
 }
 
 .timeline-card--readonly .timeline-date,
 .timeline-card--readonly .timeline-value,
 .timeline-card--readonly .timeline-value-light,
 .timeline-card--readonly .timeline-label {
-  color: rgba(47, 58, 75, 0.72);
-  font-style: italic;
+color: rgba(47, 58, 75, 0.72);
+font-style: italic;
 }
 
 .timeline-card--readonly .hours-progress-text-left,
 .timeline-card--readonly .hours-progress-text-right {
-  color: rgba(47, 58, 75, 0.72);
-  font-style: italic;
+color: rgba(47, 58, 75, 0.72);
+font-style: italic;
 }
 
 .timeline-card--readonly .plan-status-pill--active {
@@ -167,9 +167,9 @@ td , th {
 }
 
 .timeline-value {
-  text-align: right;
-  font-weight: 600;
-  color: #2f3a4b;
+text-align: right;
+font-weight: 600;
+color: #2f3a4b;
 }
 
 .timeline-value-light {
@@ -179,12 +179,12 @@ td , th {
 }
 
 .timeline-actions {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: nowrap;
-  padding-top: 12px;
-  margin-top: 10px;
-  border-top: 1px solid #e9edf4;
+display: flex;
+justify-content: space-between;
+flex-wrap: nowrap;
+padding-top: 12px;
+margin-top: 10px;
+border-top: 1px solid #e9edf4;
 }
 
 .actions-column-header,

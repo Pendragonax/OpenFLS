@@ -117,7 +117,8 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
       institutionName: service.institution.name,
       employeeId: service.employee.id,
       employeeFullName: `${service.employee.firstname} ${service.employee.lastname}`,
-      clientFullName: `${service.client.firstName} ${service.client.lastName}`
+      clientFullName: `${service.client.firstName} ${service.client.lastName}`,
+      archivedService: service.archivedService
     };
   }
 
@@ -169,6 +170,10 @@ export class ServiceTableComponent implements AfterViewInit, OnChanges {
   }
 
   canDelete(element: any, isAdmin: boolean | null): boolean {
+    if (element?.archivedService) {
+      return false;
+    }
+
     if (isAdmin) {
       return true;
     }

@@ -24,6 +24,8 @@ class ServiceDto {
 
     var groupService: Boolean = false
 
+    var archivedService: Boolean = false
+
     var minutes: Int = 0
 
     @field:NotNull

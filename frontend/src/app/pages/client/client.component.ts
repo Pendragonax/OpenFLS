@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ClientsService} from "../../shared/services/clients.service";
 import {Sort} from "@angular/material/sort";
@@ -8,7 +8,7 @@ import {combineLatest} from "rxjs";
 import {UserService} from "../../shared/services/user.service";
 import {TablePageComponent} from "../../shared/components/table-page.component";
 import {HelperService} from "../../shared/services/helper.service";
-import {EmployeeViewModel} from "../../shared/models/employee-view.model";
+
 import {ServiceService} from "../../shared/services/service.service";
 import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
@@ -25,6 +25,8 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
   tableColumns = ['name', 'institution', 'actions'];
 
   deleteServiceCount: number = 0;
+  showArchivedEntries = false;
+  canToggleArchivedEntries = false;
   readableInstitutions: ReadableInstitutionDto[] = [];
   institutionId: number | null = null;
   selectedInstitution: ReadableInstitutionDto | null = null;
@@ -48,6 +50,9 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
       this.userService.user$,
       this.institutionService.getAllReadable()
     ]).subscribe(([clients, user, readableInstitutions]) => {
+      this.canToggleArchivedEntries = user.access?.role === 1 || user.permissions
+        .filter(perm => perm.changeInstitution)
+        .length > 0;
       if (this.readableInstitutions != null) {
         this.readableInstitutions = readableInstitutions
       }
@@ -129,6 +134,11 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
     this.loadClients();
   }
 
+  onArchivedVisibilityChanged(showArchivedEntries: boolean) {
+    this.showArchivedEntries = showArchivedEntries;
+    this.loadClients();
+  }
+
   override handleDeleteModalOpen(value: ClientViewModel) {
     this.serviceService.getCountByClientId(value.dto.id)
       .subscribe({
@@ -137,12 +147,14 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
   }
 
   private buildVisibleClients(clients: any[], user: EmployeeDto): ClientViewModel[] {
-    return clients.map(client => <ClientViewModel> {
-      dto: client,
-      editable: user.permissions
-        .filter(perm => perm.affiliated)
-        .some(perm => perm.institutionId === client.institution.id)
-    });
+    return clients
+      .filter(client => this.showArchivedEntries || !client.archived)
+      .map(client => <ClientViewModel> {
+        dto: client,
+        editable: user.permissions
+          .filter(perm => perm.affiliated)
+          .some(perm => perm.institutionId === client.institution.id)
+      });
   }
 
   sortData(sort: Sort) {

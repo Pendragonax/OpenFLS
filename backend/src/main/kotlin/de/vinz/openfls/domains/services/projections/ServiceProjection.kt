@@ -13,6 +13,7 @@ interface ServiceProjection {
     val title: String
     val content: String
     val groupService: Boolean
+    val archivedService: Boolean
     val institution: InstitutionSoloProjection
     val employee: EmployeeSoloProjection
     val client: ClientSoloProjection

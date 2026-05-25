@@ -206,14 +206,15 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       this.clientService.allValues$,
       this.hourTypeService.allValues$,
       this.sponsorService.allValues$,
-      this.clientService.getByIdForServiceEditing(service.clientId),
+      this.clientService.getByIdForServiceEditing(service.clientId)
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([writeableInstitutions, institutions, clients, hourTypes, sponsors, client]) => {
         // base
         this.institutions = institutions.filter(value => writeableInstitutions.some(inst => inst == value.id));
         this.clients = clients;
-        this.filteredClients = clients.filter(value => value.id == service.clientId);
+        this.filteredClients = this.getSelectableClients(clients)
+          .filter(value => value.id === service.clientId);
         this.hourTypes = hourTypes;
         this.sponsors = sponsors;
 
@@ -258,6 +259,8 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       this.selectedClient = value;
       this.filteredAssistancePlans = this.getAssistancePlansByDateString(value.assistancePlans, this.serviceDateControl.value);
       this.categories = value.categoryTemplate.categories;
+      this.filteredClients = this.getSelectableClients(this.clients)
+        .filter(client => client.id === value.id || this._getClients(this.clientControl.value || '').some(entry => entry.id === client.id));
       this.reloadTitle();
     })
   }

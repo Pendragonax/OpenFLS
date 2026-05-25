@@ -88,6 +88,53 @@
   background: rgba(233, 92, 84, 0.08);
 }
 
+:host ::ng-deep tr.service-row--archived {
+  background: #fff3f1 !important;
+}
+
+:host ::ng-deep tr.service-row--archived td {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+:host ::ng-deep tr.service-row--archived td:first-child {
+  box-shadow: inset 4px 0 0 #c94a43;
+}
+
+:host ::ng-deep tr.service-row--archived:hover {
+  background: #fff8f7 !important;
+}
+
+.service-card--archived {
+  border-left: 4px solid #c94a43;
+  background: #fff3f1;
+}
+
+.service-card--archived .service-card-date,
+.service-card--archived .service-card-time,
+.service-card--archived .service-card-label,
+.service-card--archived .service-card-value-light,
+.service-card--archived .service-card-content {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.service-archived-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #6a7386;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.service-archived-pill--inline {
+  margin-left: 4px;
+}
+
 .service-card-header {
   display: flex;
   align-items: center;

@@ -57,7 +57,7 @@ function createClient(id: number, archived: boolean) {
   return {
     id,
     firstName: archived ? 'Archiv' : 'Aktiv',
-    lastName: archived ? 'Kunde' : 'Kunde',
+    lastName: 'Kunde',
     phoneNumber: '0123',
     email: 'test@example.org',
     archived,
@@ -91,23 +91,25 @@ describe('ClientComponent', () => {
     }).compileComponents();
   });
 
-  it('should render the clients returned by the backend', () => {
+  it('hides archived clients by default', () => {
     currentUser = createUser(false, false);
     fixture = TestBed.createComponent(ClientComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    expect(component.values.map(value => value.dto.id)).toEqual([1, 2]);
-    expect(component.tableSource.data.map(value => value.dto.id)).toEqual([1, 2]);
+    expect(component.values.map(value => value.dto.id)).toEqual([1]);
+    expect(component.tableSource.data.map(value => value.dto.id)).toEqual([1]);
   });
 
-  it('should keep archived entries in the data set when the backend returns them', () => {
+  it('reveals archived clients when the toggle is enabled', () => {
     currentUser = createUser(true);
     fixture = TestBed.createComponent(ClientComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    expect(component.values[1].dto.archived).toBe(true);
-    expect(component.tableSource.data[1].dto.archived).toBe(true);
+    component.onArchivedVisibilityChanged(true);
+
+    expect(component.values.map(value => value.dto.id)).toEqual([1, 2]);
+    expect(component.tableSource.data.map(value => value.dto.id)).toEqual([1, 2]);
   });
 });

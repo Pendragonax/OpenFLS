@@ -132,4 +132,30 @@ class ServiceServiceProjectionDataJpaTest {
         assertThat(result.first().start).isEqualTo(start)
         assertThat(result.first().end).isEqualTo(end)
     }
+
+    @Test
+    fun getByEmployeeAndStartAndEnd_archivedClient_populatesArchivedServiceFlag() {
+        // Given
+        val client = clientRepository.save(Client(firstName = "Archiv", lastName = "iert", archived = true))
+        val employee = employeeRepository.save(Employee(firstname = "Max", lastname = "Mustermann"))
+        serviceRepository.save(
+            Service(
+                start = LocalDateTime.of(2026, 2, 8, 8, 0),
+                end = LocalDateTime.of(2026, 2, 8, 9, 30),
+                client = client,
+                employee = employee
+            )
+        )
+
+        // When
+        val result = serviceService.getByEmployeeAndStartAndEnd(
+            employee.id!!,
+            LocalDate.of(2026, 2, 1),
+            LocalDate.of(2026, 2, 28)
+        )
+
+        // Then
+        assertThat(result).hasSize(1)
+        assertThat(result.first().archivedService).isTrue
+    }
 }

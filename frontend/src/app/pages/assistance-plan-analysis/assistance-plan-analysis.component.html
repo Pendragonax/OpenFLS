@@ -49,7 +49,14 @@
       </div>
       <div class="row">
         <div class="my-3">
-        @if (isGenerating) {
+          @if (clientArchived) {
+            <div class="container-fluid mt-2">
+              <div class="archive-state-banner archive-state-banner--archived">
+                Der Klient ist <b>archiviert</b>.
+              </div>
+            </div>
+          }
+          @if (isGenerating) {
             <app-loading-spinner></app-loading-spinner>
           }
           @if (!errorOccurred && !isGenerating) {

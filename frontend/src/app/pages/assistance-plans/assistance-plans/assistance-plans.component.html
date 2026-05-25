@@ -134,6 +134,18 @@
 
   <div class="row mt-2">
     @if (!isSubmitting) {
+      @if (showArchivedEntriesToggleVisible) {
+        <div class="row mb-2 justify-content-center">
+          <div class="col-auto">
+            <mat-slide-toggle
+              [checked]="showArchivedEntriesVisible"
+              (change)="onArchivedVisibilityChanged($event.checked)">
+              Archivierte Klienten und Hilfepläne anzeigen
+            </mat-slide-toggle>
+          </div>
+        </div>
+      }
+
       <div class="row">
         <div class="col">
           <mat-paginator class="paginator"
@@ -175,7 +187,8 @@
             <td mat-cell
                 [style.display]="(!hideClientColumn) ? '' : 'none'"
                 class="hide-on-small px-4"
-                *matCellDef="let row">{{row.preview.clientLastname}} {{row.preview.clientFirstname}}
+                *matCellDef="let row">
+            <span>{{row.preview.clientLastname}} {{row.preview.clientFirstname}}</span>
             </td>
           </ng-container>
 
@@ -438,7 +451,6 @@
 
               <div class="timeline-actions">
                 @if (isRowReadOnly(row)) {
-                  <span class="plan-readonly-pill plan-readonly-pill--archived">Archiviert</span>
                   <button mat-icon-button
                           color="primary"
                           [matTooltip]="'Auswertung'"

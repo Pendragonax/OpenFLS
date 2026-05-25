@@ -1,9 +1,10 @@
 <div class="min-width-500">
-@if (newEvaluation) {
-    <h1 mat-dialog-title>{{TITLE_NEW}}</h1>
-  }
-  @if (!newEvaluation) {
-    <h1 mat-dialog-title>{{TITLE_EXISTING}}</h1>
+  @if (readOnly) {
+    <h1 mat-dialog-title>{{ TITLE_READ_ONLY }}</h1>
+  } @else if (newEvaluation) {
+    <h1 mat-dialog-title>{{ TITLE_NEW }}</h1>
+  } @else {
+    <h1 mat-dialog-title>{{ TITLE_EXISTING }}</h1>
   }
   <div mat-dialog-content>
     <div [formGroup]="inputGroup">
@@ -15,7 +16,7 @@
                   class="w-100"
                   maxlength="1024"
                   formControlName="description"></textarea>
-        <mat-hint>{{1024 - description.length}} Zeichen übrig</mat-hint>
+        <mat-hint>{{ 1024 - description.length }} Zeichen übrig</mat-hint>
       </mat-form-field>
 
       <div class="row text-center my-3">
@@ -25,26 +26,33 @@
         </mat-checkbox><br><br>
       </div>
     </div>
+    @if (operationErrorMessage) {
+      <div class="archive-state-banner archive-state-banner--archived mb-3">
+        {{ operationErrorMessage }}
+      </div>
+    }
     @if (!newEvaluation) {
       <div class="d-flex justify-content-between">
         <p class="fw-light">erstellt</p>
         <p class="fw-light">bearbeitet</p>
       </div>
       <div class="d-flex justify-content-between">
-        <p class="fw-light">{{convertDateStringToString(evaluation.createdAt)}}</p>
-        <p class="fw-light">{{convertDateStringToString(evaluation.updatedAt)}}</p>
+        <p class="fw-light">{{ convertDateStringToString(evaluation.createdAt) }}</p>
+        <p class="fw-light">{{ convertDateStringToString(evaluation.updatedAt) }}</p>
       </div>
       <div class="d-flex justify-content-between">
-        <p class="fw-light">{{evaluation.createdBy}}</p>
-        <p class="fw-light">{{evaluation.updatedBy}}</p>
+        <p class="fw-light">{{ evaluation.createdBy }}</p>
+        <p class="fw-light">{{ evaluation.updatedBy }}</p>
       </div>
     }
   </div>
   <div mat-dialog-actions class="justify-content-end">
-    <button mat-flat-button color="primary" (click)="onSaveClick()" [disabled]="isExecuting">{{SAVE_BUTTON_DESCRIPTION}}</button>
-    <button mat-flat-button (click)="closeDialog()" [disabled]="isExecuting">{{CLOSE_BUTTON_DESCRIPTION}}</button>
-    @if (evaluation.id > 0) {
-      <button mat-flat-button color="warn" (click)="onDeleteClick()" [disabled]="isExecuting">{{DELETE_BUTTON_DESCRIPTION}}</button>
+    @if (!readOnly) {
+      <button mat-flat-button color="primary" (click)="onSaveClick()" [disabled]="isExecuting">{{ SAVE_BUTTON_DESCRIPTION }}</button>
+    }
+    <button mat-flat-button (click)="closeDialog()" [disabled]="isExecuting">{{ CLOSE_BUTTON_DESCRIPTION }}</button>
+    @if (!readOnly && evaluation.id > 0) {
+      <button mat-flat-button color="warn" (click)="onDeleteClick()" [disabled]="isExecuting">{{ DELETE_BUTTON_DESCRIPTION }}</button>
     }
   </div>
 </div>

@@ -72,6 +72,23 @@ describe('AssistancePlansComponent', () => {
     expect(component.filteredTableData[0].preview.id).toBe(1);
   });
 
+  it('hides archived rows until the shared toggle is enabled', () => {
+    const {component} = createComponent();
+
+    component.tableData = [
+      {preview: preview({id: 1, clientArchived: false}), editable: true},
+      {preview: preview({id: 2, clientArchived: true}), editable: true}
+    ];
+
+    component.showArchivedEntriesVisible = false;
+    component.filterTableData();
+    expect(component.filteredTableData.map(row => row.preview.id)).toEqual([1]);
+
+    component.showArchivedEntriesVisible = true;
+    component.filterTableData();
+    expect(component.filteredTableData.map(row => row.preview.id)).toEqual([1, 2]);
+  });
+
   it('re-loads current client context after adding favorite', () => {
     const {component, assistancePlanService} = createComponent();
 

@@ -89,6 +89,26 @@ class ServiceServiceDataJpaTest {
     }
 
     @Test
+    fun getDtoById_archivedClient_populatesArchivedServiceFlag() {
+        // Given
+        val archivedClient = clientRepository.save(Client(firstName = "Archived", lastName = "Client", archived = true))
+        val savedService = serviceRepository.save(
+            Service(
+                start = LocalDateTime.of(2026, 2, 1, 8, 0),
+                end = LocalDateTime.of(2026, 2, 1, 9, 0),
+                client = archivedClient
+            )
+        )
+
+        // When
+        val result = serviceService.getDtoById(savedService.id)
+
+        // Then
+        assertThat(result).isNotNull
+        assertThat(result!!.archivedService).isTrue
+    }
+
+    @Test
     fun create_idSet_throwsException() {
         // Given
         val entity = Service(id = 1, start = LocalDateTime.now(), end = LocalDateTime.now().plusHours(1))
