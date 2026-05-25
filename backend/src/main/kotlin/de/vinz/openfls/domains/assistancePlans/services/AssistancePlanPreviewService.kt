@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistingProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
@@ -19,8 +20,13 @@ class AssistancePlanPreviewService(
 ) {
 
     @Transactional(readOnly = true)
-    fun getPreviewDtosByClientId(clientId: Long, employeeId: Long): List<AssistancePlanPreviewDto> {
+    fun getPreviewDtosByClientId(
+        clientId: Long,
+        employeeId: Long,
+        includeArchived: Boolean = false
+    ): List<AssistancePlanPreviewDto> {
         val previews = assistancePlanRepository.findPreviewProjectionsByClientId(clientId)
+            .filter { includeArchived || !it.clientArchived }
         if (previews.isEmpty()) {
             return emptyList()
         }
@@ -29,8 +35,13 @@ class AssistancePlanPreviewService(
     }
 
     @Transactional(readOnly = true)
-    fun getPreviewDtosByInstitutionId(institutionId: Long, employeeId: Long): List<AssistancePlanPreviewDto> {
+    fun getPreviewDtosByInstitutionId(
+        institutionId: Long,
+        employeeId: Long,
+        includeArchived: Boolean = false
+    ): List<AssistancePlanPreviewDto> {
         val previews = assistancePlanRepository.findPreviewProjectionsByInstitutionId(institutionId)
+            .filter { includeArchived || !it.clientArchived }
         if (previews.isEmpty()) {
             return emptyList()
         }
@@ -39,8 +50,13 @@ class AssistancePlanPreviewService(
     }
 
     @Transactional(readOnly = true)
-    fun getPreviewDtosBySponsorId(sponsorId: Long, employeeId: Long): List<AssistancePlanPreviewDto> {
+    fun getPreviewDtosBySponsorId(
+        sponsorId: Long,
+        employeeId: Long,
+        includeArchived: Boolean = false
+    ): List<AssistancePlanPreviewDto> {
         val previews = assistancePlanRepository.findPreviewProjectionsBySponsorId(sponsorId)
+            .filter { includeArchived || !it.clientArchived }
         if (previews.isEmpty()) {
             return emptyList()
         }
@@ -49,21 +65,32 @@ class AssistancePlanPreviewService(
     }
 
     @Transactional(readOnly = true)
-    fun getFavoritePreviewDtosByEmployeeId(employeeId: Long): List<AssistancePlanPreviewDto> {
+    fun getFavoritePreviewDtosByEmployeeId(
+        employeeId: Long,
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): List<AssistancePlanPreviewDto> {
         val previews = assistancePlanRepository.findFavoritePreviewProjectionsByEmployeeId(employeeId)
+            .filter { includeArchived || !it.clientArchived || leadingInstitutionIds.contains(it.institutionId) }
         return createPreviewDtos(previews, previews.map { it.id }.toSet())
     }
 
     @Transactional(readOnly = true)
-    fun getExistingDtosByClientId(clientId: Long): List<AssistancePlanExistingDto> {
-        return assistancePlanRepository.findExistingProjectionsByClientId(clientId).map { projection ->
-            AssistancePlanExistingDto(
-                id = projection.id,
-                start = projection.start,
-                end = projection.end,
-                sponsorName = projection.sponsorName
-            )
-        }
+    fun getExistingDtosByClientId(
+        clientId: Long,
+        includeArchived: Boolean = false
+    ): List<AssistancePlanExistingDto> {
+        return assistancePlanRepository.findExistingProjectionsByClientId(clientId)
+            .filter { includeArchived || !it.clientArchived }
+            .map { projection ->
+                AssistancePlanExistingDto(
+                    id = projection.id,
+                    start = projection.start,
+                    end = projection.end,
+                    sponsorName = projection.sponsorName,
+                    clientArchived = projection.clientArchived
+                )
+            }
     }
 
     private fun createPreviewDtos(
@@ -132,6 +159,7 @@ class AssistancePlanPreviewService(
             sponsorId = projection.sponsorId,
             clientFirstname = projection.clientFirstname,
             clientLastname = projection.clientLastname,
+            clientArchived = projection.clientArchived,
             institutionName = projection.institutionName,
             sponsorName = projection.sponsorName,
             start = projection.start,

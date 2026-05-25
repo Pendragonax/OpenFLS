@@ -8,6 +8,7 @@ export class ClientForServiceEditingDto {
   lastName: string = ""
   phoneNumber: string = ""
   email: string = ""
+  archived: boolean = false
   institution: InstitutionDto = new InstitutionDto()
   categoryTemplate: CategoryTemplateDto = new CategoryTemplateDto()
   assistancePlans: AssistancePlanForServiceEditingDto[] = []

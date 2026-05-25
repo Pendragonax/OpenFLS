@@ -1,36 +1,39 @@
 import '@testbed';
-import { Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { ServiceFormBase } from './service-form.base';
-import { UserService } from '../../shared/services/user.service';
-import { InstitutionService } from '../../shared/services/institution.service';
-import { ClientsService } from '../../shared/services/clients.service';
-import { HourTypeService } from '../../shared/services/hour-type.service';
-import { CategoriesService } from '../../shared/services/categories.service';
-import { SponsorService } from '../../shared/services/sponsor.service';
-import { ServiceService } from '../../shared/services/service.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Converter } from '../../shared/services/converter.helper';
-import { HelperService } from '../../shared/services/helper.service';
-import { Location } from '@angular/common';
+import {Component} from '@angular/core';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {of} from 'rxjs';
+import {ServiceFormBase} from './service-form.base';
+import {UserService} from '../../shared/services/user.service';
+import {InstitutionService} from '../../shared/services/institution.service';
+import {ClientsService} from '../../shared/services/clients.service';
+import {HourTypeService} from '../../shared/services/hour-type.service';
+import {CategoriesService} from '../../shared/services/categories.service';
+import {SponsorService} from '../../shared/services/sponsor.service';
+import {ServiceService} from '../../shared/services/service.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Converter} from '../../shared/services/converter.helper';
+import {HelperService} from '../../shared/services/helper.service';
+import {Location} from '@angular/common';
 
 class MockUserService {
   writeableInstitutions$ = of([1]);
-  user$ = of({ id: 1 });
+  user$ = of({id: 1});
 }
 
 class MockInstitutionService {
-  allValues$ = of([{ id: 1, name: 'Inst' }]);
+  allValues$ = of([{id: 1, name: 'Inst'}]);
 }
 
 class MockClientsService {
-  allValues$ = of([{ id: 1, firstName: 'Max', lastName: 'M' }]);
+  allValues$ = of([
+    {id: 1, firstName: 'Max', lastName: 'M', archived: false},
+    {id: 2, firstName: 'Archiv', lastName: 'K', archived: true}
+  ]);
   getByIdForServiceEditing() {
     return of({
       id: 1,
       assistancePlans: [],
-      categoryTemplate: { categories: [] }
+      categoryTemplate: {categories: []}
     });
   }
 }
@@ -118,6 +121,18 @@ class TestServiceFormComponent extends ServiceFormBase {
   callGetSelectableAssistancePlansForEdit(plans: any[], serviceDate: string, currentPlanId: number | null) {
     return this.getSelectableAssistancePlansForEdit(plans as any, serviceDate, currentPlanId);
   }
+
+  callGetSelectableClients(clients: any[]) {
+    return this.getSelectableClients(clients as any);
+  }
+
+  callIsSelectedClientArchived() {
+    return this.isSelectedClientArchived;
+  }
+
+  callClientSelectionBlockMessage() {
+    return this.clientSelectionBlockMessage;
+  }
 }
 
 describe('ServiceFormBase', () => {
@@ -128,18 +143,18 @@ describe('ServiceFormBase', () => {
     await TestBed.configureTestingModule({
       declarations: [TestServiceFormComponent],
       providers: [
-        { provide: UserService, useClass: MockUserService },
-        { provide: InstitutionService, useClass: MockInstitutionService },
-        { provide: ClientsService, useClass: MockClientsService },
-        { provide: HourTypeService, useClass: MockHourTypeService },
-        { provide: CategoriesService, useClass: MockCategoriesService },
-        { provide: SponsorService, useClass: MockSponsorService },
-        { provide: ServiceService, useClass: MockServiceService },
-        { provide: ActivatedRoute, useClass: MockActivatedRoute },
-        { provide: Router, useClass: MockRouter },
-        { provide: Converter, useClass: MockConverter },
-        { provide: HelperService, useClass: MockHelperService },
-        { provide: Location, useClass: MockLocation }
+        {provide: UserService, useClass: MockUserService},
+        {provide: InstitutionService, useClass: MockInstitutionService},
+        {provide: ClientsService, useClass: MockClientsService},
+        {provide: HourTypeService, useClass: MockHourTypeService},
+        {provide: CategoriesService, useClass: MockCategoriesService},
+        {provide: SponsorService, useClass: MockSponsorService},
+        {provide: ServiceService, useClass: MockServiceService},
+        {provide: ActivatedRoute, useClass: MockActivatedRoute},
+        {provide: Router, useClass: MockRouter},
+        {provide: Converter, useClass: MockConverter},
+        {provide: HelperService, useClass: MockHelperService},
+        {provide: Location, useClass: MockLocation}
       ]
     }).compileComponents();
 
@@ -176,6 +191,23 @@ describe('ServiceFormBase', () => {
     const result = component.callGetSelectableAssistancePlansForEdit(plans, '2026-01-15', 2);
 
     expect(result.map(plan => plan.id)).toEqual([2, 1]);
+  });
+
+  it('should hide archived clients from selectable client lists by default', () => {
+    const selectableClients = component.callGetSelectableClients([
+      {id: 1, firstName: 'Max', lastName: 'M', archived: false},
+      {id: 2, firstName: 'Archiv', lastName: 'K', archived: true}
+    ]);
+
+    expect(selectableClients.map(client => client.id)).toEqual([1]);
+  });
+
+  it('should expose a blocking message for archived client selections', () => {
+    component.clientSelected = true;
+    component.selectedClient = {archived: true} as any;
+
+    expect(component.callIsSelectedClientArchived()).toBe(true);
+    expect(component.callClientSelectionBlockMessage()).toContain('archiviert');
   });
 
   it('should return institution name for assistance plan label', () => {

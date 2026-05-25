@@ -9,6 +9,7 @@ export class AssistancePlanPreviewDto {
   sponsorName: string = '';
   start: string = '';
   end: string = '';
+  clientArchived: boolean = false;
   isActive: boolean = false;
   isFavorite: boolean = false;
   hasIllegalHours: boolean = false;

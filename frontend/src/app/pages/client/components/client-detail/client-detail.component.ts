@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {InstitutionService} from "../../../../shared/services/institution.service";
 import {CategoriesService} from "../../../../shared/services/categories.service";
 import {ClientsService} from "../../../../shared/services/clients.service";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {InstitutionDto} from "../../../../shared/dtos/institution-dto.model";
 import {CategoryTemplateDto} from "../../../../shared/dtos/category-template-dto.model";
 import {combineLatest} from "rxjs";
@@ -12,11 +12,34 @@ import {DetailPageComponent} from "../../../../shared/components/detail-page.com
 import {HelperService} from "../../../../shared/services/helper.service";
 import {ClientInformationForm} from "../../forms/client-information-form";
 import {ClientDto} from "../../../../shared/dtos/client-dto.model";
+import {ClientArchiveActionForm} from "../../forms/client-archive-action-form";
+import {ClientArchiveActionRequest} from "../../../../shared/dtos/client-archive-action-request.model";
+import {ClientArchiveHistoryEntryReadDto} from "../../../../shared/dtos/client-archive-history-entry-read-dto.model";
+import {MatDialog} from "@angular/material/dialog";
+import {ConfirmationModalComponent} from "../../../../shared/modals/confirmation-modal/confirmation-modal.component";
+import {Converter} from "../../../../shared/services/converter.helper";
+import {MatTabChangeEvent} from "@angular/material/tabs";
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MAT_NATIVE_DATE_FORMATS,
+  NativeDateAdapter
+} from "@angular/material/core";
 
 @Component({
     selector: 'app-client-detail',
     templateUrl: './client-detail.component.html',
     styleUrls: ['./client-detail.component.css'],
+    providers: [
+      {provide: MAT_DATE_LOCALE, useValue: 'de-DE'},
+      {
+        provide: DateAdapter,
+        useClass: NativeDateAdapter,
+        deps: [MAT_DATE_LOCALE]
+      },
+      {provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS}
+    ],
     standalone: false
 })
 export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> implements OnInit {
@@ -24,11 +47,15 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
   // VARs
   institutions: InstitutionDto[] = [];
   categoryTemplates: CategoryTemplateDto[] = [];
+  archiveHistory: ClientArchiveHistoryEntryReadDto[] = [];
 
   // STATEs
   editMode = false;
+  canManageArchive = false;
+  selectedTabIndex = 0;
 
   infoForm = new ClientInformationForm();
+  archiveActionForm = new ClientArchiveActionForm();
 
   constructor(
     override helperService: HelperService,
@@ -36,12 +63,14 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     private categoryTemplateService: CategoriesService,
     private clientService: ClientsService,
     private route: ActivatedRoute,
-    private userService: UserService,) {
+    private router: Router,
+    private userService: UserService,
+    private dialog: MatDialog,
+    private converter: Converter) {
     super(helperService);
   }
 
   loadValues() {
-    // get id
     const id = this.route.snapshot.paramMap.get('id');
 
     if (id != null) {
@@ -56,6 +85,9 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
           this.value.editable = user.access?.role === 1 || user.permissions
             .filter(perm => perm.affiliated)
             .some(perm => perm.institutionId === client.institution.id);
+          this.canManageArchive = user.access?.role === 1 || user.permissions
+            .filter(perm => perm.changeInstitution)
+            .some(perm => perm.institutionId === client.institution.id);
           this.value$.next(this.value);
           this.editValue = <ClientViewModel> {...this.value};
           this.institutions = institutions;
@@ -63,6 +95,7 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
           this.editMode = user.institutionId == this.value.dto.institution.id;
 
           this.refreshForm();
+          this.loadArchiveState(id);
         });
     }
   }
@@ -74,6 +107,12 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     this.infoForm.email.setValue(this.value.dto.email);
     this.infoForm.institution.setValue(this.value.dto.institution.id);
     this.infoForm.categoryTemplate.setValue(this.value.dto.categoryTemplate.id);
+
+    if (this.value.dto.archived) {
+      this.infoForm.disable({emitEvent: false});
+    } else {
+      this.infoForm.enable({emitEvent: false});
+    }
   }
 
   getNewValue(): ClientViewModel {
@@ -100,7 +139,7 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
   }
 
   update() {
-    if (this.isSubmitting)
+    if (this.isSubmitting || this.value.dto.archived)
       return;
 
     this.isSubmitting = true;
@@ -109,5 +148,199 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
       next: () => this.handleSuccess("Klient geändert"),
       error: () => this.handleFailure("Fehler beim speichern")
     })
+  }
+
+  onTabChanged(event: MatTabChangeEvent) {
+    this.selectedTabIndex = event.index;
+
+    if (!this.canManageArchive) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {tab: null},
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      }).then();
+      return;
+    }
+
+    const selectedTab = this.getTabNameByIndex(event.index);
+    if (selectedTab === 'archive') {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {tab: 'archive'},
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      }).then();
+      return;
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {tab: null},
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    }).then();
+  }
+
+  get showArchiveTab(): boolean {
+    return this.canManageArchive;
+  }
+
+  get showSaveButton(): boolean {
+    return this.value.editable && !this.value.dto.archived;
+  }
+
+  get canEditGeneralFields(): boolean {
+    return this.value.editable && !this.value.dto.archived;
+  }
+
+  get isArchived(): boolean {
+    return this.value.dto.archived;
+  }
+
+  get archiveActionDescription(): string {
+    return this.isArchived
+      ? 'Wollen Sie den Klienten wirklich reaktivieren?'
+      : 'Wollen Sie den Klienten wirklich archivieren?';
+  }
+
+  openArchiveConfirmation() {
+    const dialogRef = this.dialog.open(ConfirmationModalComponent, {
+      width: '520px'
+    });
+
+    dialogRef.componentInstance.title = this.isArchived ? 'Klient reaktivieren' : 'Klient archivieren';
+    dialogRef.componentInstance.description = `${this.archiveActionDescription}<br><br>` +
+      `Klient: <b>${this.value.dto.lastName} ${this.value.dto.firstName}</b><br>` +
+      `Datum: <b>${this.formatArchiveActionDate(this.archiveActionForm.actionDate.value)}</b>`;
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.submitArchiveAction();
+      }
+    });
+  }
+
+  private submitArchiveAction() {
+    if (this.isSubmitting || !this.archiveActionForm.valid) {
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    const request = new ClientArchiveActionRequest();
+    request.actionDate = this.archiveActionForm.actionDate.value;
+    request.reason = this.archiveActionForm.reason.value;
+    request.remark = this.archiveActionForm.remark.value;
+
+    const action$ = this.isArchived
+      ? this.clientService.reactivate(this.value.dto.id, request)
+      : this.clientService.archive(this.value.dto.id, request);
+
+    action$.subscribe({
+      next: () => this.handleSuccess(this.isArchived ? 'Klient reaktiviert' : 'Klient archiviert'),
+      error: () => this.handleFailure(this.isArchived ? 'Fehler beim reaktivieren' : 'Fehler beim archivieren')
+    });
+  }
+
+  private loadArchiveState(clientId: string) {
+    this.resetArchiveForm();
+
+    if (!this.canManageArchive) {
+      this.archiveHistory = [];
+      this.syncSelectedTab();
+      return;
+    }
+
+    const historyRequest = this.clientService.getArchiveHistoryById(+clientId);
+
+    if (historyRequest == null) {
+      this.archiveHistory = [];
+      this.syncSelectedTab();
+      return;
+    }
+
+    historyRequest.subscribe({
+      next: (history) => {
+        this.archiveHistory = history ?? [];
+        this.syncSelectedTab();
+      },
+      error: () => {
+        this.archiveHistory = [];
+        this.syncSelectedTab();
+      }
+    });
+  }
+
+  private resetArchiveForm() {
+    this.archiveActionForm.actionDate.setValue(new Date(), {emitEvent: false});
+    this.archiveActionForm.reason.setValue('', {emitEvent: false});
+    this.archiveActionForm.remark.setValue('', {emitEvent: false});
+    this.archiveActionForm.markAsPristine();
+    this.archiveActionForm.markAsUntouched();
+  }
+
+  private syncSelectedTab() {
+    const requestedTab = (this.route.snapshot.queryParamMap.get('tab') ?? '').toLowerCase();
+
+    if (requestedTab === 'archive') {
+      if (this.canManageArchive) {
+        this.selectedTabIndex = 2;
+        return;
+      }
+
+      this.selectedTabIndex = 0;
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {tab: null},
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      }).then();
+      return;
+    }
+
+    this.selectedTabIndex = requestedTab === 'plans' ? 1 : 0;
+  }
+
+  private getTabNameByIndex(index: number): string {
+    if (index === 0) {
+      return 'general';
+    }
+
+    if (index === 1) {
+      return 'plans';
+    }
+
+    return 'archive';
+  }
+
+  formatArchiveActionType(actionType: string): string {
+    if (actionType === 'REACTIVATE') {
+      return 'Reaktivierung';
+    }
+
+    return 'Archivierung';
+  }
+
+  formatArchiveActionDate(actionDate: string | Date | null): string {
+    if (!actionDate) {
+      return '';
+    }
+
+    const date = actionDate instanceof Date ? actionDate : new Date(actionDate);
+    return this.converter.formatDateToGerman(date);
+  }
+
+  formatArchiveActionTimestamp(actionTimestamp: string | Date | null): string {
+    if (!actionTimestamp) {
+      return '';
+    }
+
+    const timestamp = actionTimestamp instanceof Date ? actionTimestamp : new Date(actionTimestamp);
+    return this.converter.formatDateToGermanTime(timestamp);
+  }
+
+  formatArchiveEmployee(entry: ClientArchiveHistoryEntryReadDto): string {
+    return `${entry.executingEmployeeFirstname} ${entry.executingEmployeeLastname} (#${entry.executingEmployeeId})`;
   }
 }

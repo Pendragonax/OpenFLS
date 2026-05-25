@@ -18,6 +18,7 @@ function preview(overrides: Partial<AssistancePlanPreviewDto>): AssistancePlanPr
     isActive: true,
     isFavorite: false,
     hasIllegalHours: false,
+    clientArchived: false,
     approvedHoursPerWeek: 0,
     approvedHoursThisYear: 0,
     executedHoursThisYear: 0,
@@ -71,6 +72,23 @@ describe('AssistancePlansComponent', () => {
     expect(component.filteredTableData[0].preview.id).toBe(1);
   });
 
+  it('hides archived rows until the shared toggle is enabled', () => {
+    const {component} = createComponent();
+
+    component.tableData = [
+      {preview: preview({id: 1, clientArchived: false}), editable: true},
+      {preview: preview({id: 2, clientArchived: true}), editable: true}
+    ];
+
+    component.showArchivedEntriesVisible = false;
+    component.filterTableData();
+    expect(component.filteredTableData.map(row => row.preview.id)).toEqual([1]);
+
+    component.showArchivedEntriesVisible = true;
+    component.filterTableData();
+    expect(component.filteredTableData.map(row => row.preview.id)).toEqual([1, 2]);
+  });
+
   it('re-loads current client context after adding favorite', () => {
     const {component, assistancePlanService} = createComponent();
 
@@ -102,6 +120,23 @@ describe('AssistancePlansComponent', () => {
     client$.next({dto: {id: 5}});
 
     expect(assistancePlanService.getPreviewByClientId).toHaveBeenCalledWith(5);
+  });
+
+  it('exposes read only mode for archived client contexts', () => {
+    const {component} = createComponent();
+    component.readOnly = true;
+
+    expect(component.readOnly).toBe(true);
+  });
+
+  it('marks archived client rows as read only', () => {
+    const {component} = createComponent();
+    expect(component.isRowReadOnly({preview: preview({clientArchived: true}), editable: true})).toBe(true);
+  });
+
+  it('keeps active client rows editable when the component is not globally read only', () => {
+    const {component} = createComponent();
+    expect(component.isRowReadOnly({preview: preview({clientArchived: false}), editable: true})).toBe(false);
   });
 
   it.each([

@@ -1,10 +1,13 @@
 package de.vinz.openfls.domains.assistancePlans
 
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.UserService
 import org.assertj.core.api.Assertions.assertThat
@@ -30,6 +33,9 @@ class AssistancePlanControllerWebMvcTest {
     lateinit var assistancePlanService: AssistancePlanService
 
     @MockitoBean
+    lateinit var assistancePlanEvaluationService: AssistancePlanEvaluationService
+
+    @MockitoBean
     lateinit var assistancePlanEvaluationLeftService: AssistancePlanEvaluationLeftService
 
     @MockitoBean
@@ -41,10 +47,13 @@ class AssistancePlanControllerWebMvcTest {
     @MockitoBean
     lateinit var userService: UserService
 
+    @MockitoBean
+    lateinit var clientService: ClientService
+
     @Test
     fun getPreviewByClientId_returnsPreviewDtos() {
         given(userService.getUserId()).willReturn(44L)
-        given(assistancePlanPreviewService.getPreviewDtosByClientId(3L, 44L))
+        given(assistancePlanPreviewService.getPreviewDtosByClientId(3L, 44L, false))
             .willReturn(listOf(previewDto(id = 1L, isFavorite = true)))
 
         val result = mockMvc.get("/assistance_plans/client/3/preview").andReturn()
@@ -57,7 +66,7 @@ class AssistancePlanControllerWebMvcTest {
     @Test
     fun getPreviewByInstitutionId_returnsPreviewDtos() {
         given(userService.getUserId()).willReturn(44L)
-        given(assistancePlanPreviewService.getPreviewDtosByInstitutionId(9L, 44L))
+        given(assistancePlanPreviewService.getPreviewDtosByInstitutionId(9L, 44L, false))
             .willReturn(listOf(previewDto(id = 2L, isFavorite = false)))
 
         val result = mockMvc.get("/assistance_plans/institution/9/preview").andReturn()
@@ -68,11 +77,49 @@ class AssistancePlanControllerWebMvcTest {
     }
 
     @Test
+    fun getById_admin_returnsAssistancePlanDto() {
+        val planId = 12L
+        given(accessService.isAdmin()).willReturn(true)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
+        given(assistancePlanService.getAssistancePlanDtoById(planId, true, emptyList()))
+            .willReturn(
+                AssistancePlanDto().apply {
+                    id = planId
+                    clientId = 33
+                    institutionId = 44
+                    sponsorId = 55
+                    clientArchived = true
+                }
+            )
+
+        val result = mockMvc.get("/assistance_plans/$planId").andReturn()
+
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":12")
+        assertThat(result.response.contentAsString).contains("\"clientArchived\":true")
+    }
+
+    @Test
+    fun getFavoritePreviewsByLoggedInUser_returnsPreviewDtos() {
+        given(userService.getUserId()).willReturn(44L)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
+        given(assistancePlanPreviewService.getFavoritePreviewDtosByEmployeeId(44L, false, emptyList()))
+            .willReturn(listOf(previewDto(id = 4L, isFavorite = true)))
+
+        val result = mockMvc.get("/assistance_plans/favorites/preview").andReturn()
+
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":4")
+        assertThat(result.response.contentAsString).contains("\"isFavorite\":true")
+    }
+
+    @Test
     fun getFavoritePreviewsByLoggedInUser_serviceThrows_returnsBadRequest() {
         given(userService.getUserId()).willReturn(44L)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
         doThrow(IllegalArgumentException("boom"))
             .`when`(assistancePlanPreviewService)
-            .getFavoritePreviewDtosByEmployeeId(44L)
+            .getFavoritePreviewDtosByEmployeeId(44L, false, emptyList())
 
         val result = mockMvc.get("/assistance_plans/favorites/preview").andReturn()
 
@@ -81,14 +128,15 @@ class AssistancePlanControllerWebMvcTest {
 
     @Test
     fun getExistingByClientId_returnsExistingDtos() {
-        given(assistancePlanPreviewService.getExistingDtosByClientId(3L))
+        given(assistancePlanPreviewService.getExistingDtosByClientId(3L, false))
             .willReturn(
                 listOf(
                     AssistancePlanExistingDto(
                         id = 99L,
                         start = LocalDate.of(2026, 1, 1),
                         end = LocalDate.of(2026, 3, 31),
-                        sponsorName = "LWV"
+                        sponsorName = "LWV",
+                        clientArchived = false
                     )
                 )
             )
@@ -110,6 +158,7 @@ class AssistancePlanControllerWebMvcTest {
             clientLastname = "Mustermann",
             institutionName = "Schule",
             sponsorName = "Kostentraeger",
+            clientArchived = false,
             start = LocalDate.of(2026, 1, 1),
             end = LocalDate.of(2026, 12, 31),
             isActive = true,

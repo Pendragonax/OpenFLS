@@ -41,3 +41,26 @@ body {
 .hours-week-tooltip {
   white-space: pre-line;
 }
+
+.readonly-banner {
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--readonly-banner-border, #d9dfeb);
+  background: var(--readonly-banner-background, #f7f8fb);
+  color: var(--readonly-banner-color, #2f3a4b);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(20, 35, 70, 0.08);
+}
+
+.readonly-banner--danger {
+  --readonly-banner-border: #f0b5b2;
+  --readonly-banner-background: #fff0ef;
+  --readonly-banner-color: #a62821;
+}
+
+.readonly-banner--info {
+  --readonly-banner-border: #bfd0e6;
+  --readonly-banner-background: #eef5ff;
+  --readonly-banner-color: #355070;
+}

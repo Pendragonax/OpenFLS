@@ -10,6 +10,7 @@ export class Service {
   title: string = "";
   content: string = "";
   groupOffer: boolean = false;
+  archivedService: boolean = false;
   institution: ReadableInstitutionDto = new ReadableInstitutionDto();
   employee: EmployeeSolo = new EmployeeSolo();
   client: ClientSolo = new ClientSolo();

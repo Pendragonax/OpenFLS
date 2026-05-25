@@ -46,7 +46,7 @@ class AssistancePlanPreviewServiceTest {
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
 
-        val projection = previewProjection(5L, yearStart, now.plusDays(30))
+        val projection = previewProjection(5L, yearStart, now.plusDays(30), false)
 
         whenever(assistancePlanRepository.findPreviewProjectionsByClientId(10L))
             .thenReturn(listOf(projection))
@@ -92,12 +92,38 @@ class AssistancePlanPreviewServiceTest {
     }
 
     @Test
+    fun getPreviewDtosByClientId_filtersArchivedPlansUnlessIncluded() {
+        val now = LocalDate.now()
+        val yearStart = LocalDate.of(now.year, 1, 1)
+        val periodEnd = now
+        val projection = previewProjection(6L, now.minusDays(10), now.plusDays(10), true)
+
+        whenever(assistancePlanRepository.findPreviewProjectionsByClientId(10L))
+            .thenReturn(listOf(projection))
+        whenever(assistancePlanRepository.findFavoriteAssistancePlanIdsByEmployeeId(20L))
+            .thenReturn(listOf(6L))
+        whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(6L)))
+            .thenReturn(listOf(weeklyMinutesProjection(6L, 180)))
+        whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(6L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(6L), yearStart, periodEnd))
+            .thenReturn(emptyList())
+
+        val hiddenResult = previewService.getPreviewDtosByClientId(10L, 20L)
+        val visibleResult = previewService.getPreviewDtosByClientId(10L, 20L, includeArchived = true)
+
+        assertThat(hiddenResult).isEmpty()
+        assertThat(visibleResult).hasSize(1)
+        assertThat(visibleResult.first().clientArchived).isTrue()
+    }
+
+    @Test
     fun getFavoritePreviewDtosByEmployeeId_marksAllReturnedPlansAsFavorite() {
         val now = LocalDate.now()
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
 
-        val projection = previewProjection(7L, now.minusDays(10), now.plusDays(10))
+        val projection = previewProjection(7L, now.minusDays(10), now.plusDays(10), false)
 
         whenever(assistancePlanRepository.findFavoritePreviewProjectionsByEmployeeId(33L))
             .thenReturn(listOf(projection))
@@ -116,6 +142,60 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().hasIllegalHours).isFalse()
         assertThat(result.first().approvedHoursPerWeek).isEqualTo(3.3)
         assertThat(result.first().executedHoursThisYear).isEqualTo(0.0)
+    }
+
+    @Test
+    fun getFavoritePreviewDtosByEmployeeId_filtersArchivedPlansForLeads() {
+        val now = LocalDate.now()
+        val yearStart = LocalDate.of(now.year, 1, 1)
+        val periodEnd = now
+        val projection = previewProjection(8L, now.minusDays(10), now.plusDays(10), true)
+
+        whenever(assistancePlanRepository.findFavoritePreviewProjectionsByEmployeeId(44L))
+            .thenReturn(listOf(projection))
+        whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(8L)))
+            .thenReturn(listOf(weeklyMinutesProjection(8L, 180)))
+        whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(8L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(8L), yearStart, periodEnd))
+            .thenReturn(emptyList())
+
+        val hiddenResult = previewService.getFavoritePreviewDtosByEmployeeId(44L)
+        val visibleResult = previewService.getFavoritePreviewDtosByEmployeeId(
+            44L,
+            includeArchived = false,
+            leadingInstitutionIds = listOf(102L)
+        )
+
+        assertThat(hiddenResult).isEmpty()
+        assertThat(visibleResult).hasSize(1)
+        assertThat(visibleResult.first().clientArchived).isTrue()
+    }
+
+    @Test
+    fun getPreviewDtosBySponsorId_filtersArchivedPlansUnlessIncluded() {
+        val now = LocalDate.now()
+        val yearStart = LocalDate.of(now.year, 1, 1)
+        val periodEnd = now
+        val projection = previewProjection(9L, now.minusDays(10), now.plusDays(10), true)
+
+        whenever(assistancePlanRepository.findPreviewProjectionsBySponsorId(77L))
+            .thenReturn(listOf(projection))
+        whenever(assistancePlanRepository.findFavoriteAssistancePlanIdsByEmployeeId(55L))
+            .thenReturn(listOf(9L))
+        whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(9L)))
+            .thenReturn(listOf(weeklyMinutesProjection(9L, 240)))
+        whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(9L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(9L), yearStart, periodEnd))
+            .thenReturn(emptyList())
+
+        val hiddenResult = previewService.getPreviewDtosBySponsorId(77L, 55L)
+        val visibleResult = previewService.getPreviewDtosBySponsorId(77L, 55L, includeArchived = true)
+
+        assertThat(hiddenResult).isEmpty()
+        assertThat(visibleResult).hasSize(1)
+        assertThat(visibleResult.first().clientArchived).isTrue()
     }
 
     @Test
@@ -139,6 +219,7 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().start).isEqualTo(LocalDate.of(2026, 1, 1))
         assertThat(result.first().end).isEqualTo(LocalDate.of(2026, 3, 31))
         assertThat(result.first().sponsorName).isEqualTo("LWV")
+        assertThat(result.first().clientArchived).isFalse()
     }
 
     @ParameterizedTest
@@ -155,7 +236,7 @@ class AssistancePlanPreviewServiceTest {
         val periodEnd = now
         val planStart = now.minusDays(3)
         val planEnd = now.plusDays(3)
-        val projection = previewProjection(55L, planStart, planEnd)
+        val projection = previewProjection(55L, planStart, planEnd, false)
 
         whenever(assistancePlanRepository.findPreviewProjectionsByClientId(10L))
             .thenReturn(listOf(projection))
@@ -217,7 +298,7 @@ class AssistancePlanPreviewServiceTest {
         return TimeDoubleService.convertDoubleToTimeDouble(hours)
     }
 
-    private fun previewProjection(planId: Long, planStart: LocalDate, planEnd: LocalDate): AssistancePlanPreviewProjection {
+    private fun previewProjection(planId: Long, planStart: LocalDate, planEnd: LocalDate, clientArchived: Boolean): AssistancePlanPreviewProjection {
         return object : AssistancePlanPreviewProjection {
             override val id: Long = planId
             override val clientId: Long = 101
@@ -227,6 +308,7 @@ class AssistancePlanPreviewServiceTest {
             override val clientLastname: String = "Mustermann"
             override val institutionName: String = "Schule"
             override val sponsorName: String = "Kostentraeger"
+            override val clientArchived: Boolean = clientArchived
             override val start: LocalDate = planStart
             override val end: LocalDate = planEnd
         }
@@ -257,6 +339,7 @@ class AssistancePlanPreviewServiceTest {
             override val start: LocalDate = start
             override val end: LocalDate = end
             override val sponsorName: String = sponsorName
+            override val clientArchived: Boolean = false
         }
     }
 

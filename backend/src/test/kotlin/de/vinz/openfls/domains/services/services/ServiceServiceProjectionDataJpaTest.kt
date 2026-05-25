@@ -2,18 +2,21 @@ package de.vinz.openfls.domains.services.services
 
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
+import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -35,6 +38,12 @@ class ServiceServiceProjectionDataJpaTest {
 
     @Autowired
     lateinit var institutionRepository: InstitutionRepository
+
+    @MockitoBean
+    lateinit var clientService: ClientService
+
+    @MockitoBean
+    lateinit var assistancePlanService: AssistancePlanService
 
     @Test
     fun getFromTillEmployeeNameProjectionByClientAndDate_matchingDate_returnsProjection() {
@@ -122,5 +131,31 @@ class ServiceServiceProjectionDataJpaTest {
         assertThat(result).hasSize(1)
         assertThat(result.first().start).isEqualTo(start)
         assertThat(result.first().end).isEqualTo(end)
+    }
+
+    @Test
+    fun getByEmployeeAndStartAndEnd_archivedClient_populatesArchivedServiceFlag() {
+        // Given
+        val client = clientRepository.save(Client(firstName = "Archiv", lastName = "iert", archived = true))
+        val employee = employeeRepository.save(Employee(firstname = "Max", lastname = "Mustermann"))
+        serviceRepository.save(
+            Service(
+                start = LocalDateTime.of(2026, 2, 8, 8, 0),
+                end = LocalDateTime.of(2026, 2, 8, 9, 30),
+                client = client,
+                employee = employee
+            )
+        )
+
+        // When
+        val result = serviceService.getByEmployeeAndStartAndEnd(
+            employee.id!!,
+            LocalDate.of(2026, 2, 1),
+            LocalDate.of(2026, 2, 28)
+        )
+
+        // Then
+        assertThat(result).hasSize(1)
+        assertThat(result.first().archivedService).isTrue
     }
 }

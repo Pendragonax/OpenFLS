@@ -63,8 +63,10 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
         SELECT ap.id as id,
                ap.start as start,
                ap.end as end,
-               s.name as sponsorName
+               s.name as sponsorName,
+               c.archived as clientArchived
         FROM AssistancePlan ap
+        JOIN ap.client c
         JOIN ap.sponsor s
         WHERE ap.client.id = :clientId
         ORDER BY ap.start DESC
@@ -149,6 +151,7 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                s.id as sponsorId,
                c.firstName as clientFirstname,
                c.lastName as clientLastname,
+               c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
                ap.start as start,
@@ -173,6 +176,7 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                s.id as sponsorId,
                c.firstName as clientFirstname,
                c.lastName as clientLastname,
+               c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
                ap.start as start,
@@ -197,6 +201,7 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                s.id as sponsorId,
                c.firstName as clientFirstname,
                c.lastName as clientLastname,
+               c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
                ap.start as start,
@@ -221,6 +226,7 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                s.id as sponsorId,
                c.firstName as clientFirstname,
                c.lastName as clientLastname,
+               c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
                ap.start as start,

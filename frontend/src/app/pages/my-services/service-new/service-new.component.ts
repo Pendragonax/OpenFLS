@@ -113,6 +113,7 @@ export class ServiceNewComponent extends ServiceFormBase {
   get canSave(): boolean {
     return this.isTimeValid &&
       this.clientSelected &&
+      !this.isSelectedClientArchived &&
       !!this.institutionControl.value &&
       !!this.hourTypeControl.value &&
       this.assistancePlanSelected;

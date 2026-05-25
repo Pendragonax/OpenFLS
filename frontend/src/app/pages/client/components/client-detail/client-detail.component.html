@@ -1,8 +1,16 @@
 <app-info-header [title]="'Klient &quot;' + value.dto.lastName + ' ' + value.dto.firstName + '&quot;'"></app-info-header>
 
-<mat-tab-group>
+<mat-tab-group [selectedIndex]="selectedTabIndex"
+               (selectedTabChange)="onTabChanged($event)">
   <mat-tab label="Allgemein">
-    <!--EDIT-->
+    @if (value.dto.archived && value.editable) {
+      <div class="container-fluid mt-2">
+        <div class="archive-state-banner archive-state-banner--archived">
+          Der Klient ist archiviert. Änderungen an den Stammdaten sind gesperrt.
+        </div>
+      </div>
+    }
+
     @if (editValue.editable) {
       <div class="container-fluid text-center mt-1">
       <form [formGroup]="infoForm">
@@ -10,34 +18,41 @@
           <mat-form-field appearance="fill">
             <mat-label>Vorname</mat-label>
             <input matInput
-                   formControlName="firstName" required>
+                   formControlName="firstName"
+                   [disabled]="value.dto.archived"
+                   required>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="fill">
             <mat-label>Nachname</mat-label>
             <input matInput
-                   formControlName="lastName" required>
+                   formControlName="lastName"
+                   [disabled]="value.dto.archived"
+                   required>
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="fill">
             <mat-label>Telefonnummer</mat-label>
             <input matInput
-                   formControlName="phone">
+                   formControlName="phone"
+                   [disabled]="value.dto.archived">
           </mat-form-field>
         </div>
         <div>
           <mat-form-field appearance="fill">
             <mat-label>Email</mat-label>
             <input matInput
-                   formControlName="email">
+                   formControlName="email"
+                   [disabled]="value.dto.archived">
           </mat-form-field>
         </div>
         <div>
           <mat-form-field class="mt-2">
             <mat-label>Bereich</mat-label>
             <mat-select formControlName="institution"
+                        [disabled]="value.dto.archived"
                         required>
               @for (institution of institutions; track institution.id) {
                 <mat-option [value]="institution.id">{{institution.name}}</mat-option>
@@ -49,6 +64,7 @@
           <mat-form-field class="mt-2">
             <mat-label>Kategorievorlage</mat-label>
             <mat-select formControlName="categoryTemplate"
+                        [disabled]="value.dto.archived"
                         required>
               @for (categoryTemplate of categoryTemplates; track categoryTemplate.id) {
                 <mat-option [value]="categoryTemplate.id">{{categoryTemplate.title}}</mat-option>
@@ -57,17 +73,18 @@
           </mat-form-field>
         </div>
       </form>
-      <div>
-        <button mat-button
-                (click)="update()"
-                [disabled]="!infoForm.valid || isSubmitting"
-                color="primary"
-                mat-raised-button>Speichern</button>
-      </div>
+      @if (showSaveButton) {
+        <div>
+          <button mat-button
+                  (click)="update()"
+                  [disabled]="!infoForm.valid || isSubmitting"
+                  color="primary"
+                  mat-raised-button>Speichern</button>
+        </div>
+      }
       </div>
     }
 
-    <!--SHOW-->
     @if (!editValue.editable) {
       <div class="container-fluid mt-1">
       <app-information-row [title]="'Name'"
@@ -80,6 +97,8 @@
                            [content]="editValue.dto.categoryTemplate.title"></app-information-row>
       <app-information-row [title]="'Bereich'"
                            [content]="editValue.dto.institution.name"></app-information-row>
+      <app-information-row [title]="'Archiviert'"
+                           [content]="editValue.dto.archived ? 'Ja' : 'Nein'"></app-information-row>
       </div>
     }
   </mat-tab>
@@ -88,6 +107,107 @@
     <app-assistance-plans class="m-2"
                           [client$]="value$"
                           [hideSearchStringFilter]="true"
-                          [hideClientColumn]="false"></app-assistance-plans>
+                          [hideClientColumn]="false"
+                          [readOnly]="value.dto.archived"
+                          [showArchivedEntries]="true"
+                          [showArchivedEntriesToggleVisible]="true"></app-assistance-plans>
   </mat-tab>
+
+  @if (showArchiveTab) {
+    <mat-tab label="Archiv">
+      <div class="container-fluid mt-2 archive-tab">
+        <div class="archive-state-banner" [class.archive-state-banner--archived]="value.dto.archived">
+          <div class="archive-state-banner__eyebrow">Status</div>
+          <div class="archive-state-banner__status">
+            {{ value.dto.archived ? 'Archiviert' : 'Aktiv' }}
+          </div>
+        </div>
+
+        <div class="archive-columns">
+          <section class="archive-panel archive-panel--form">
+            <div class="archive-panel__title">Aktion</div>
+            <form [formGroup]="archiveActionForm" class="archive-form">
+              <div>
+                <mat-form-field appearance="fill">
+                  <mat-label>Datum</mat-label>
+                  <input matInput
+                         formControlName="actionDate"
+                         [matDatepicker]="archiveDatePicker"
+                         required>
+                  <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+                  <mat-datepicker-toggle matSuffix [for]="archiveDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #archiveDatePicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+              <div>
+                <mat-form-field appearance="fill">
+                  <mat-label>Grund</mat-label>
+                  <input matInput
+                         formControlName="reason"
+                         required>
+                </mat-form-field>
+              </div>
+              <div>
+                <mat-form-field appearance="fill">
+                  <mat-label>Bemerkung</mat-label>
+                  <textarea matInput
+                            rows="4"
+                            formControlName="remark"
+                            required></textarea>
+                </mat-form-field>
+              </div>
+            </form>
+
+            <div class="archive-actions">
+              @if (!value.dto.archived) {
+                <button mat-raised-button
+                        color="warn"
+                        [disabled]="!archiveActionForm.valid || isSubmitting"
+                        (click)="openArchiveConfirmation()">Archivieren</button>
+              } @else {
+                <button mat-raised-button
+                        color="primary"
+                        [disabled]="!archiveActionForm.valid || isSubmitting"
+                        (click)="openArchiveConfirmation()">Reaktivieren</button>
+              }
+            </div>
+          </section>
+
+          <section class="archive-panel archive-panel--history">
+            <div class="archive-panel__title">Historie</div>
+            <div class="archive-history">
+              @if (archiveHistory.length > 0) {
+                @for (entry of archiveHistory; track entry.id) {
+                  <div class="archive-history-entry"
+                       [class.archive-history-entry--archive]="entry.actionType === 'ARCHIVE'"
+                       [class.archive-history-entry--reactivate]="entry.actionType === 'REACTIVATE'">
+                    <div class="archive-history-entry__action">
+                      {{ formatArchiveActionType(entry.actionType) }}
+                    </div>
+                    <app-information-row [title]="'Datum'"
+                                         [content]="formatArchiveActionDate(entry.actionDate)"
+                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
+                    <app-information-row [title]="'Grund'"
+                                         [content]="entry.reason"
+                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
+                    <app-information-row [title]="'Bemerkung'"
+                                         [content]="entry.remark"
+                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
+                    <app-information-row [title]="'Ausgeführt von'"
+                                         [content]="formatArchiveEmployee(entry)"
+                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
+                    <app-information-row [title]="'Ausgeführt am'"
+                                         [content]="formatArchiveActionTimestamp(entry.actionTimestamp)"
+                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
+                  </div>
+                }
+              } @else {
+                <div class="archive-history__empty">Keine Historie vorhanden.</div>
+              }
+            </div>
+          </section>
+        </div>
+      </div>
+    </mat-tab>
+  }
 </mat-tab-group>

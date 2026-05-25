@@ -1,3 +1,24 @@
 .mat-form-field {
   width: 300px;
 }
+
+.client-name-cell {
+  display: inline-block;
+}
+
+.client-row--archived {
+  background: #fff3f1;
+}
+
+.client-row--archived td {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.client-row--archived td:first-child {
+  box-shadow: inset 4px 0 0 #c94a43;
+}
+
+.client-row--archived:hover {
+  background: #fff8f7;
+}

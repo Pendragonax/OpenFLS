@@ -4,12 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
-import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateGoalDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateHourDto
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.goals.repositories.GoalHourRepository
@@ -18,10 +13,8 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProject
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.hourTypes.HourTypeDto
 import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.institutions.InstitutionService
-import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.domains.sponsors.SponsorService
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
@@ -36,7 +29,6 @@ class AssistancePlanService(
         private val assistancePlanHourRepository: AssistancePlanHourRepository,
         private val goalRepository: GoalRepository,
         private val goalHourRepository: GoalHourRepository,
-        private val serviceService: ServiceService,
         private val clientService: ClientService,
         private val institutionService: InstitutionService,
         private val sponsorService: SponsorService,
@@ -55,6 +47,9 @@ class AssistancePlanService(
 
         entity.client = clientService.getById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
+        if (entity.client?.archived == true) {
+            throw IllegalStateException("client is archived")
+        }
         entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
         entity.sponsor = sponsorService.getById(valueDto.sponsorId)
@@ -123,6 +118,9 @@ class AssistancePlanService(
 
         entity.client = clientService.getById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
+        if (entity.client?.archived == true) {
+            throw IllegalStateException("client is archived")
+        }
         entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
         entity.sponsor = sponsorService.getById(valueDto.sponsorId)
@@ -241,15 +239,25 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllAssistancePlanDtos(): List<AssistancePlanDto> {
+    fun getAllAssistancePlanDtos(
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findAll().toList()
-        return entities.map(::mapToDto)
+        return entities
+            .filter { isVisible(it.client?.archived == true, it.client?.institution?.id, includeArchived, leadingInstitutionIds) }
+            .map(::mapToDto)
     }
 
     @Transactional(readOnly = true)
-    fun getAssistancePlanDtoById(id: Long): AssistancePlanDto? {
+    fun getAssistancePlanDtoById(
+        id: Long,
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): AssistancePlanDto? {
         val entity = assistancePlanRepository.findByIdOrNull(id)
-        return entity?.let(::mapToDto)
+        return entity?.takeIf { isVisible(it.client?.archived == true, it.client?.institution?.id, includeArchived, leadingInstitutionIds) }
+            ?.let(::mapToDto)
     }
 
     @Transactional(readOnly = true)
@@ -268,9 +276,15 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAssistancePlanDtosByClientId(id: Long): List<AssistancePlanDto> {
+    fun getAssistancePlanDtosByClientId(
+        id: Long,
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByClientId(id)
-        return entities.map(::mapToDto)
+        return entities
+            .filter { isVisible(it.client?.archived == true, it.client?.institution?.id, includeArchived, leadingInstitutionIds) }
+            .map(::mapToDto)
     }
 
     @Transactional(readOnly = true)
@@ -280,9 +294,15 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAssistancePlanDtosBySponsorId(id: Long): List<AssistancePlanDto> {
+    fun getAssistancePlanDtosBySponsorId(
+        id: Long,
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findBySponsorId(id)
-        return entities.map(::mapToDto)
+        return entities
+            .filter { isVisible(it.client?.archived == true, it.client?.institution?.id, includeArchived, leadingInstitutionIds) }
+            .map(::mapToDto)
     }
 
     @Transactional(readOnly = true)
@@ -292,9 +312,15 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAssistancePlanDtosByInstitutionId(id: Long): List<AssistancePlanDto> {
+    fun getAssistancePlanDtosByInstitutionId(
+        id: Long,
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): List<AssistancePlanDto> {
         val entities = assistancePlanRepository.findByInstitutionId(id)
-        return entities.map(::mapToDto)
+        return entities
+            .filter { isVisible(it.client?.archived == true, it.client?.institution?.id, includeArchived, leadingInstitutionIds) }
+            .map(::mapToDto)
     }
 
     @Transactional(readOnly = true)
@@ -343,174 +369,6 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByInstitutionIdAndSponsorIdAndStartAndEnd(institutionId, sponsorId, start, end)
     }
 
-    @Transactional(readOnly = true)
-    fun getEvaluationById(id: Long): AssistancePlanEvalDto {
-        val assistancePlan = assistancePlanRepository.findById(id).orElseThrow { IllegalArgumentException("id not found ") }
-        val services = serviceService.getByAssistancePlan(id)
-        val eval = AssistancePlanEvalDto()
-
-        val days = ChronoUnit.DAYS.between(assistancePlan.start, assistancePlan.end) + 1
-        val tillDate = if (assistancePlan.end < LocalDate.now()) assistancePlan.end else LocalDate.now()
-        val daysTillToday = ChronoUnit.DAYS.between(assistancePlan.start, tillDate) + 1
-
-        val actualMonth = getDaysOfActualMonth(assistancePlan)
-        val actualYear = getDaysOfActualYear(assistancePlan)
-
-
-        eval.total = assistancePlan.hours.map {
-            ActualTargetValueDto().apply {
-                target = days * (it.weeklyMinutes / 7.0) / 60.0
-                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
-            }
-        }
-
-        eval.tillToday = assistancePlan.hours.map {
-            ActualTargetValueDto().apply {
-                target = daysTillToday * (it.weeklyMinutes / 7.0) / 60.0
-                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
-            }
-        }
-
-        eval.actualYear = assistancePlan.hours.map {
-            ActualTargetValueDto().apply {
-                target = actualYear.first * (it.weeklyMinutes / 7.0) / 60.0
-                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
-            }
-        }
-
-        eval.actualMonth = assistancePlan.hours.map {
-            ActualTargetValueDto().apply {
-                target = actualMonth.first * (it.weeklyMinutes / 7.0) / 60.0
-                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
-            }
-        }
-
-        for (service in services) {
-            val startDate = service.start.toLocalDate()
-
-            // service is in between the start and end inclusive
-            if ((assistancePlan.start.isBefore(startDate) || assistancePlan.start.isEqual(startDate)) &&
-                    (assistancePlan.end.isAfter(startDate) || assistancePlan.end.isEqual(startDate))) {
-                // total values
-                eval.total
-                        .firstOrNull { it.hourType.id == service.hourType?.id }
-                        ?.apply {
-                            actual += service.minutes / 60.0
-                            size++
-                        }
-
-                // till today
-                eval.tillToday
-                        .firstOrNull {
-                            it.hourType.id == service.hourType?.id &&
-                                    service.start.year <= tillDate.year &&
-                                    (service.start.month < tillDate.month ||
-                                            (service.start.month == tillDate.month && service.start.dayOfMonth <= tillDate.dayOfMonth))
-                        }
-                        ?.apply {
-                            actual += service.minutes / 60.0
-                            size++
-                        }
-
-                if (actualYear.second != null && actualYear.third != null) {
-                    // actual year
-                    eval.actualYear
-                            .firstOrNull {
-                                it.hourType.id == service.hourType?.id &&
-                                        (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
-                                        (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
-                            }
-                            ?.apply {
-                                actual += service.minutes / 60.0
-                                size++
-                            }
-
-                    if (actualYear.second != null && actualYear.third != null) {
-                        // actual year
-                        eval.actualYear
-                                .firstOrNull {
-                                    it.hourType.id == service.hourType?.id &&
-                                            (startDate.isAfter(actualYear.second) || startDate.isEqual(actualYear.second)) &&
-                                            (startDate.isBefore(actualYear.third) || startDate.isEqual(actualYear.third))
-                                }
-                                ?.apply {
-                                    actual += service.minutes / 60.0
-                                    size++
-                                }
-                    }
-
-                    if (actualMonth.second != null && actualMonth.third != null) {
-                        // actual month
-                        eval.actualMonth
-                                .firstOrNull {
-                                    it.hourType.id == service.hourType?.id &&
-                                            (startDate.isAfter(actualMonth.second) || startDate.isEqual(actualMonth.second)) &&
-                                            (startDate.isBefore(actualMonth.third) || startDate.isEqual(actualMonth.third))
-                                }
-                                ?.apply {
-                                    actual += service.minutes / 60.0
-                                    size++
-                                }
-                    }
-                } else {
-                    eval.notMatchingServices++
-                    eval.notMatchingServicesIds.add(service.id)
-                }
-            }
-        }
-        return eval
-    }
-
-    private fun getDaysOfActualMonth(assistancePlan: AssistancePlan): Triple<Long, LocalDate?, LocalDate?> {
-        val today = LocalDate.now()
-        val firstOfMonth = LocalDate.of(today.year, today.monthValue, 1)
-        var from: LocalDate = firstOfMonth
-        var till: LocalDate = today
-
-        // month is in between start and end
-        if ((today.isAfter(assistancePlan.start) || today.isEqual(assistancePlan.start)) &&
-                (firstOfMonth.isBefore(assistancePlan.end) || firstOfMonth.isEqual(assistancePlan.end))) {
-            // start is in the actual month
-            if (assistancePlan.start.year == today.year && assistancePlan.start.month == today.month) {
-                from = assistancePlan.start
-            }
-
-            // end is in the actual month
-            if (assistancePlan.end < today && assistancePlan.end.year == today.year && assistancePlan.end.month == today.month) {
-                till = assistancePlan.end
-            }
-
-            return Triple(ChronoUnit.DAYS.between(from, till) + 1, from, till)
-        } else {
-            return Triple(0, null, null)
-        }
-    }
-
-    private fun getDaysOfActualYear(assistancePlan: AssistancePlan): Triple<Long, LocalDate?, LocalDate?> {
-        val today = LocalDate.now()
-        val firstOfYear = LocalDate.of(today.year, 1, 1)
-        var from: LocalDate = firstOfYear
-        var till: LocalDate = today
-
-        // month is in between start and end
-        if ((today.isAfter(assistancePlan.start) || today.isEqual(assistancePlan.start)) &&
-                (firstOfYear.isBefore(assistancePlan.end) || firstOfYear.isEqual(assistancePlan.end))) {
-            // start is in the actual month
-            if (assistancePlan.start.year == today.year) {
-                from = assistancePlan.start
-            }
-
-            // end is in the actual month
-            if (assistancePlan.end < today && assistancePlan.end.year == today.year) {
-                till = assistancePlan.end
-            }
-
-            return Triple(ChronoUnit.DAYS.between(from, till) + 1, from, till)
-        } else {
-            return Triple(0, null, null)
-        }
-    }
-
     private fun isIllegalAssistancePlan(assistancePlan: AssistancePlanProjection): Boolean {
         val containsHoursAndGoalHours = assistancePlan.hours.isNotEmpty() && assistancePlan.goals.isNotEmpty() && assistancePlan.goals.any { goal -> goal.hours.isNotEmpty() }
         val containsNoHoursAndNoGoalHours = assistancePlan.hours.isEmpty() && (
@@ -522,6 +380,17 @@ class AssistancePlanService(
     private fun mapToDto(entity: AssistancePlan): AssistancePlanDto {
         val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
         dto.institutionName = entity.institution?.name ?: ""
+        dto.clientArchived = entity.client?.archived ?: false
         return dto
     }
+
+    private fun isVisible(
+        archived: Boolean,
+        institutionId: Long?,
+        includeArchived: Boolean,
+        leadingInstitutionIds: List<Long>
+    ): Boolean {
+        return !archived || includeArchived || leadingInstitutionIds.contains(institutionId ?: 0)
+    }
 }
+

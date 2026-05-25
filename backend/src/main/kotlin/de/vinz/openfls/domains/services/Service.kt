@@ -80,6 +80,9 @@ data class Service(
         @JsonIgnoreProperties(value = ["services", "categoryTemplate", "hibernateLazyInitializer"])
         var categorys: MutableSet<Category> = mutableSetOf()
 ) {
+        val archivedService: Boolean
+                get() = client?.archived == true
+
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (other !is Service) return false

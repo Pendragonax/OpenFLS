@@ -23,6 +23,8 @@ class ClientDto {
     @field:NotNull
     var categoryTemplate: CategoryTemplateDto = CategoryTemplateDto()
 
+    var archived: Boolean = false
+
     @field:NotNull
     @JsonIgnoreProperties(value = ["contingents", "permissions", "assistancePlans", "goals", "hibernateLazyInitializer"])
     var institution: InstitutionDto = InstitutionDto()

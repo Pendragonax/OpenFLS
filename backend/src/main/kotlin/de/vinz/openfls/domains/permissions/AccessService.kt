@@ -49,6 +49,13 @@ class AccessService(
         }
     }
 
+    fun getLeadingInstitutionIds(): List<Long> {
+        return permissionService
+            .getPermissionByEmployee(getId())
+            .filter { it.changeInstitution }
+            .map { it.institution?.id ?: 0 }
+    }
+
     fun canWriteEntries(institutionId: Long): Boolean {
         return try {
             // ADMIN

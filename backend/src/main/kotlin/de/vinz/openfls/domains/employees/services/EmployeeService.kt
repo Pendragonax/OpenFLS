@@ -219,6 +219,30 @@ class EmployeeService(
         }
     }
 
+    @Transactional
+    fun deleteAssistancePlanFavoritesByClientId(clientId: Long): Int {
+        val assistancePlanIds = assistancePlanRepository.findByClientId(clientId)
+            .map { it.id }
+            .toSet()
+
+        if (assistancePlanIds.isEmpty()) {
+            return 0
+        }
+
+        var removedFavorites = 0
+        employeeRepository.findAll().forEach { employee ->
+            val before = employee.assistancePlanFavorites.size
+            employee.assistancePlanFavorites.removeIf { it.id in assistancePlanIds }
+            val removedForEmployee = before - employee.assistancePlanFavorites.size
+            if (removedForEmployee > 0) {
+                removedFavorites += removedForEmployee
+                employeeRepository.save(employee)
+            }
+        }
+
+        return removedFavorites
+    }
+
     @Transactional(readOnly = true)
     fun getAllEmployeeDtos(): List<EmployeeDto> {
         return getAll()

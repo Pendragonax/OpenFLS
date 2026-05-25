@@ -174,7 +174,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
         // base
         this.institutions = institutions.filter(value => writeableInstitutions.some(inst => inst == value.id));
         this.clients = clients;
-        this.filteredClients = clients.slice(0, 5);
+        this.filteredClients = this.getSelectableClients(clients).slice(0, 5);
         this.hourTypes = hourTypes;
         this.sponsors = sponsors;
 
@@ -206,14 +206,15 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       this.clientService.allValues$,
       this.hourTypeService.allValues$,
       this.sponsorService.allValues$,
-      this.clientService.getByIdForServiceEditing(service.clientId),
+      this.clientService.getByIdForServiceEditing(service.clientId)
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([writeableInstitutions, institutions, clients, hourTypes, sponsors, client]) => {
         // base
         this.institutions = institutions.filter(value => writeableInstitutions.some(inst => inst == value.id));
         this.clients = clients;
-        this.filteredClients = clients.filter(value => value.id == service.clientId);
+        this.filteredClients = this.getSelectableClients(clients)
+          .filter(value => value.id === service.clientId);
         this.hourTypes = hourTypes;
         this.sponsors = sponsors;
 
@@ -258,6 +259,8 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       this.selectedClient = value;
       this.filteredAssistancePlans = this.getAssistancePlansByDateString(value.assistancePlans, this.serviceDateControl.value);
       this.categories = value.categoryTemplate.categories;
+      this.filteredClients = this.getSelectableClients(this.clients)
+        .filter(client => client.id === value.id || this._getClients(this.clientControl.value || '').some(entry => entry.id === client.id));
       this.reloadTitle();
     })
   }
@@ -532,6 +535,18 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
     return [currentPlan, ...selectablePlans];
   }
 
+  get isSelectedClientArchived(): boolean {
+    return this.clientSelected && this.selectedClient?.archived === true;
+  }
+
+  get clientSelectionBlockMessage(): string | null {
+    if (!this.isSelectedClientArchived) {
+      return null;
+    }
+
+    return 'Der ausgewählte Klient ist archiviert. Dokumentationen können nicht gespeichert werden.';
+  }
+
   getDateString(plan: AssistancePlanDto | undefined): string {
     if (plan != null) {
       return `${this.formatDateStringToGermanDateString(plan.start)} - ${this.formatDateStringToGermanDateString(plan.end)}`;
@@ -559,10 +574,14 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
   protected _getClients(searchString: string): ClientDto[] {
     let filterValue = searchString.toLowerCase();
 
-    return this.clients
+    return this.getSelectableClients(this.clients)
       .filter(client => client.firstName.toLowerCase().includes(filterValue) ||
         client.lastName.toLowerCase().includes(filterValue))
       .slice(0, 5);
+  }
+
+  protected getSelectableClients(clients: ClientDto[]): ClientDto[] {
+    return clients.filter(client => !client.archived);
   }
 
   protected reloadTitle() {
