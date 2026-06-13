@@ -48,6 +48,8 @@ import {
 })
 export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> implements OnInit {
 
+  private static readonly archiveExportStepOrder = ['requested', 'generating', 'ready'] as const;
+
   // VARs
   institutions: InstitutionDto[] = [];
   categoryTemplates: CategoryTemplateDto[] = [];
@@ -56,6 +58,23 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
   archiveExportFormats = [
     {value: ClientArchiveExportFormat.JSON, label: 'JSON'}
   ];
+  archiveExportSteps = [
+    {
+      key: 'requested',
+      title: 'Angefordert',
+      description: 'Der Export wurde angefordert.'
+    },
+    {
+      key: 'generating',
+      title: 'Wird erstellt',
+      description: 'Die JSON-Datei wird serverseitig erzeugt.'
+    },
+    {
+      key: 'ready',
+      title: 'Bereit zum Download',
+      description: 'Der Downloadlink ist verfügbar.'
+    }
+  ] as const;
 
   // STATEs
   editMode = false;
@@ -415,8 +434,29 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     return this.archiveExportStatus?.downloadLink != null;
   }
 
+  get archiveExportStage(): 'requested' | 'generating' | 'ready' {
+    if (this.isArchiveExportRequesting) {
+      return 'generating';
+    }
+
+    if (this.hasArchiveExportDownloadLink) {
+      return 'ready';
+    }
+
+    return 'requested';
+  }
+
   get archiveExportDownloadExpiresAt(): string {
     return this.formatArchiveActionTimestamp(this.archiveExportStatus?.downloadLink?.downloadLinkExpiresAt ?? null);
+  }
+
+  isArchiveExportStepCompleted(step: 'requested' | 'generating' | 'ready'): boolean {
+    return ClientDetailComponent.archiveExportStepOrder.indexOf(step) <
+      ClientDetailComponent.archiveExportStepOrder.indexOf(this.archiveExportStage);
+  }
+
+  isArchiveExportStepCurrent(step: 'requested' | 'generating' | 'ready'): boolean {
+    return this.archiveExportStage === step;
   }
 
   private handleArchiveExportStatus(status: ClientArchiveExportStatusDto, successMessage: string) {

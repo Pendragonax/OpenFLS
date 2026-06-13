@@ -42,12 +42,14 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.TestPropertySource
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @DataJpaTest
+@TestPropertySource(properties = ["openfls.client-archive-export.download-link-ttl=5m"])
 @Import(
     TimeConfiguration::class,
     ClientArchiveExportService::class,
@@ -166,6 +168,31 @@ class ClientArchiveExportServiceDataJpaTest {
         val historyEntry = savedClient.get().archiveHistoryEntries.first()
         assertThat(historyEntry.actionType).isEqualTo(de.vinz.openfls.domains.clients.archive.ClientArchiveActionType.EXPORT)
         assertThat(historyEntry.exportFormat).isEqualTo(ClientArchiveExportFormat.JSON)
+    }
+
+    @Test
+    fun requestExport_usesConfiguredDownloadLinkTtl() {
+        // Given
+        val graph = createExportGraph()
+        val actor = ClientArchiveActor(
+            employeeId = graph.employee.id!!,
+            firstname = graph.employee.firstname,
+            lastname = graph.employee.lastname,
+            isAdmin = true,
+            leadingInstitutionIds = emptyList()
+        )
+
+        // When
+        clientArchiveExportService.requestExport(
+            clientId = graph.client.id,
+            format = ClientArchiveExportFormat.JSON,
+            actor = actor
+        )
+
+        // Then
+        val request = clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)
+        assertThat(request).isNotNull
+        assertThat(request!!.expiresAt).isEqualTo(request.requestedAt.plusMinutes(5))
     }
 
     @Test

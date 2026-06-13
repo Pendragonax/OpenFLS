@@ -14,9 +14,11 @@ import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.beans.factory.annotation.Value
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.time.Duration
 import java.time.Clock
 import java.time.LocalDateTime
 import java.util.UUID
@@ -29,7 +31,9 @@ class ClientArchiveExportService(
     private val assistancePlanRepository: AssistancePlanRepository,
     private val clientArchiveExportRequestRepository: ClientArchiveExportRequestRepository,
     private val objectMapper: ObjectMapper,
-    private val clock: Clock
+    private val clock: Clock,
+    @param:Value("\${openfls.client-archive-export.download-link-ttl:20m}")
+    private val exportDownloadLinkTtl: Duration
 ) {
 
     private val exportDirectory: String = Paths.get(System.getProperty("java.io.tmpdir"), "openfls-client-archive-exports").toString()
@@ -66,7 +70,7 @@ class ClientArchiveExportService(
                     downloadToken = downloadToken,
                     exportFormat = format,
                     requestedAt = now,
-                    expiresAt = now.plusMinutes(20),
+                    expiresAt = now.plus(exportDownloadLinkTtl),
                     fileName = fileName,
                     filePath = exportFile.toString(),
                     requestedByEmployeeId = actor.employeeId,
