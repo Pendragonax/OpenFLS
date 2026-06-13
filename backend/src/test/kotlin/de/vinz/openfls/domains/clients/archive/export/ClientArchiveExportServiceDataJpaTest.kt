@@ -53,6 +53,7 @@ import java.time.LocalDateTime
 @Import(
     TimeConfiguration::class,
     ClientArchiveExportService::class,
+    ClientArchiveExportStorage::class,
     ClientArchiveService::class,
     de.vinz.openfls.domains.clients.ClientService::class,
     EmployeeService::class,

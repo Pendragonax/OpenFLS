@@ -12,7 +12,7 @@ import {HelperService} from "../../shared/services/helper.service";
 import {ServiceService} from "../../shared/services/service.service";
 import {ReadableInstitutionDto} from "../../shared/dtos/institution-readable-dto.model";
 import {InstitutionService} from "../../shared/services/institution.service";
-import {EmployeeDto} from "../../shared/dtos/employee-dto.model";
+import {mapVisibleClients} from "./helpers/client-visibility.helper";
 
 @Component({
     selector: 'app-client',
@@ -56,7 +56,7 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
       if (this.readableInstitutions != null) {
         this.readableInstitutions = readableInstitutions
       }
-      this.values = this.buildVisibleClients(clients, user);
+      this.values = mapVisibleClients(clients, user, this.showArchivedEntries);
       this.values$.next(this.values);
       this.filteredTableData = this.values;
       this.isSubmitting = false;
@@ -72,7 +72,7 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
       this.clientService.getAll(),
       this.userService.user$,
     ]).subscribe(([clients, user]) => {
-      this.values = this.buildVisibleClients(clients, user);
+      this.values = mapVisibleClients(clients, user, this.showArchivedEntries);
       this.values = this.values.filter(value => (this.selectedInstitution != null && this.selectedInstitution.id == value.dto.institution.id) || this.selectedInstitution == null)
       this.values$.next(this.values);
       this.filteredTableData = this.values;
@@ -143,17 +143,6 @@ export class ClientComponent extends TablePageComponent<ClientViewModel, ClientV
     this.serviceService.getCountByClientId(value.dto.id)
       .subscribe({
         next: (value) => this.deleteServiceCount = value
-      });
-  }
-
-  private buildVisibleClients(clients: any[], user: EmployeeDto): ClientViewModel[] {
-    return clients
-      .filter(client => this.showArchivedEntries || !client.archived)
-      .map(client => <ClientViewModel> {
-        dto: client,
-        editable: user.permissions
-          .filter(perm => perm.affiliated)
-          .some(perm => perm.institutionId === client.institution.id)
       });
   }
 

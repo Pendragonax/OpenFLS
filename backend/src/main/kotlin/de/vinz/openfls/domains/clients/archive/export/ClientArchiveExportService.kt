@@ -1,7 +1,6 @@
 package de.vinz.openfls.domains.clients.archive.export
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActor
 import de.vinz.openfls.domains.clients.archive.ClientArchiveService
@@ -15,9 +14,6 @@ import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.beans.factory.annotation.Value
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.time.Duration
 import java.time.Clock
 import java.time.LocalDateTime
@@ -32,11 +28,10 @@ class ClientArchiveExportService(
     private val clientArchiveExportRequestRepository: ClientArchiveExportRequestRepository,
     private val objectMapper: ObjectMapper,
     private val clock: Clock,
+    private val clientArchiveExportStorage: ClientArchiveExportStorage,
     @param:Value("\${openfls.client-archive-export.download-link-ttl:20m}")
     private val exportDownloadLinkTtl: Duration
 ) {
-
-    private val exportDirectory: String = Paths.get(System.getProperty("java.io.tmpdir"), "openfls-client-archive-exports").toString()
 
     @Transactional
     @Throws(UserNotAllowedException::class, ClientArchiveExportStateException::class)
@@ -61,12 +56,19 @@ class ClientArchiveExportService(
         )
         val downloadToken = UUID.randomUUID().toString()
         val fileName = "client-$clientId-archive-export-$downloadToken.json"
-        val exportFile = resolveExportFilePath(clientId, fileName)
+
+        val exportFile = try {
+            clientArchiveExportStorage.writeExport(
+                clientId = clientId,
+                fileName = fileName,
+                content = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(exportData)
+            )
+        } catch (ex: Exception) {
+            clientArchiveExportStorage.delete(clientId, fileName)
+            throw ex
+        }
 
         try {
-            Files.createDirectories(exportFile.parent)
-            Files.write(exportFile, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(exportData))
-
             val request = clientArchiveExportRequestRepository.save(
                 ClientArchiveExportRequest(
                     downloadToken = downloadToken,
@@ -94,7 +96,7 @@ class ClientArchiveExportService(
 
             return toStatusDto(request, clientId)
         } catch (ex: Exception) {
-            Files.deleteIfExists(exportFile)
+            clientArchiveExportStorage.delete(exportFile.toString())
             throw ex
         }
     }
@@ -125,14 +127,13 @@ class ClientArchiveExportService(
             throw ClientArchiveExportStateException("export unavailable")
         }
 
-        val file = Path.of(request.filePath)
-        if (!Files.exists(file)) {
+        if (!clientArchiveExportStorage.exists(request.filePath)) {
             cleanupExport(request)
             throw ClientArchiveExportStateException("export file missing")
         }
 
-        val content = Files.readAllBytes(file)
-        Files.deleteIfExists(file)
+        val content = clientArchiveExportStorage.read(request.filePath)
+        clientArchiveExportStorage.delete(request.filePath)
         clientArchiveExportRequestRepository.delete(request)
 
         return ClientArchiveExportDownloadDto(
@@ -154,7 +155,7 @@ class ClientArchiveExportService(
         val now = LocalDateTime.now(clock)
         return clientArchiveExportRequestRepository.findAllByClientId(clientId)
             .sortedByDescending { it.requestedAt }
-            .firstOrNull { it.downloadedAt == null && it.expiresAt.isAfter(now) && Files.exists(Path.of(it.filePath)) }
+            .firstOrNull { it.downloadedAt == null && it.expiresAt.isAfter(now) && clientArchiveExportStorage.exists(it.filePath) }
             ?: run {
                 cleanupExpiredExports(clientId, now)
                 null
@@ -163,12 +164,12 @@ class ClientArchiveExportService(
 
     private fun cleanupExpiredExports(clientId: Long, now: LocalDateTime) {
         clientArchiveExportRequestRepository.findAllByClientId(clientId)
-            .filter { it.downloadedAt != null || !it.expiresAt.isAfter(now) || !Files.exists(Path.of(it.filePath)) }
+            .filter { it.downloadedAt != null || !it.expiresAt.isAfter(now) || !clientArchiveExportStorage.exists(it.filePath) }
             .forEach { cleanupExport(it) }
     }
 
     private fun cleanupExport(request: ClientArchiveExportRequest) {
-        Files.deleteIfExists(Path.of(request.filePath))
+        clientArchiveExportStorage.delete(request.filePath)
         clientArchiveExportRequestRepository.delete(request)
     }
 
@@ -181,9 +182,7 @@ class ClientArchiveExportService(
             format = request.exportFormat
             requestedAt = request.requestedAt
             requestedByEmployeeId = request.requestedByEmployeeId
-            downloadLink = request.downloadedAt?.let {
-                null
-            } ?: if (request.expiresAt.isAfter(LocalDateTime.now(clock)) && Files.exists(Path.of(request.filePath))) {
+            downloadLink = if (request.expiresAt.isAfter(LocalDateTime.now(clock)) && clientArchiveExportStorage.exists(request.filePath)) {
                 ClientArchiveExportDownloadLinkDto().apply {
                     downloadLink = buildDownloadLink(clientId, request.downloadToken)
                     downloadLinkExpiresAt = request.expiresAt
@@ -204,9 +203,5 @@ class ClientArchiveExportService(
 
     private fun buildDownloadLink(clientId: Long, downloadToken: String): String {
         return "/clients/$clientId/archive/export/$downloadToken"
-    }
-
-    private fun resolveExportFilePath(clientId: Long, fileName: String): Path {
-        return Paths.get(exportDirectory, clientId.toString(), fileName)
     }
 }
