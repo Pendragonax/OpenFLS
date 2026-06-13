@@ -133,19 +133,32 @@ class ClientArchiveExportServiceDataJpaTest {
 
         val json = objectMapper.readTree(Files.readString(Path.of(request.filePath)))
         val serviceNode = json["services"][0]
+        val assistancePlansNode = json["assistancePlans"]
+        val assistancePlans = assistancePlansNode.toList()
+        val serviceAssistancePlan = assistancePlans.first { it["id"].asLong() == serviceNode["assistancePlan"]["id"].asLong() }
         assertThat(json["client"]["firstName"].asText()).isEqualTo("Max")
+        assertThat(assistancePlansNode).hasSize(2)
         assertThat(serviceNode["employee"]["firstName"].asText()).isEqualTo("Anna")
         assertThat(serviceNode["institution"]["name"].asText()).isEqualTo("Institution")
         assertThat(serviceNode["hourType"]["title"].asText()).isEqualTo("Service Hour")
-        assertThat(serviceNode["assistancePlan"]["sponsor"]["name"].asText()).isEqualTo("Sponsor")
-        assertThat(serviceNode["assistancePlan"]["goals"][0]["title"].asText()).isEqualTo("Goal Title")
-        assertThat(serviceNode["assistancePlan"]["goals"][0]["evaluations"][0]["createdBy"]["firstName"].asText()).isEqualTo("Anna")
+        assertThat(serviceNode["assistancePlan"]["id"].asLong()).isEqualTo(serviceAssistancePlan["id"].asLong())
+        assertThat(serviceNode["assistancePlan"]["start"].toString()).isEqualTo("[2026,1,1]")
+        assertThat(serviceNode["assistancePlan"]["end"].toString()).isEqualTo("[2026,12,31]")
+        assertThat(serviceNode["assistancePlan"].has("sponsor")).isFalse
+        assertThat(serviceNode["assistancePlan"].has("goals")).isFalse
+        assertThat(serviceNode["goals"][0]["title"].asText()).isEqualTo("Goal Title")
+        assertThat(serviceNode["goals"][0]["description"].asText()).isEqualTo("Goal Description")
+        assertThat(serviceNode["goals"][0].has("hours")).isFalse
+        assertThat(serviceNode["goals"][0].has("evaluations")).isFalse
+        assertThat(serviceAssistancePlan["sponsor"]["name"].asText()).isEqualTo("Sponsor")
+        assertThat(serviceAssistancePlan["goals"][0]["title"].asText()).isEqualTo("Goal Title")
+        assertThat(serviceAssistancePlan["goals"][0]["evaluations"][0]["createdBy"]["firstName"].asText()).isEqualTo("Anna")
         assertThat(serviceNode["employee"].has("email")).isFalse
         assertThat(serviceNode["institution"].has("email")).isFalse
         assertThat(serviceNode["hourType"].has("price")).isFalse
         assertThat(serviceNode["categories"][0].has("description")).isFalse
-        assertThat(serviceNode["assistancePlan"]["sponsor"].has("payExact")).isFalse
-        assertThat(serviceNode["assistancePlan"]["goals"][0].has("institution")).isFalse
+        assertThat(serviceAssistancePlan["sponsor"].has("payExact")).isFalse
+        assertThat(serviceAssistancePlan["goals"][0].has("institution")).isFalse
 
         val savedClient = clientRepository.findById(graph.client.id)
         assertThat(savedClient).isPresent
@@ -288,6 +301,22 @@ class ClientArchiveExportServiceDataJpaTest {
         )
         assistancePlan.goals.add(goal)
         assistancePlanRepository.save(assistancePlan)
+
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 2, 1),
+                end = LocalDate.of(2026, 11, 30),
+                client = client,
+                sponsor = sponsor,
+                institution = institution,
+                hours = mutableSetOf(
+                    AssistancePlanHour(
+                        weeklyMinutes = 90,
+                        hourType = hourTypePlan
+                    )
+                )
+            )
+        )
 
         goal.evaluations.add(
             de.vinz.openfls.domains.evaluations.Evaluation(

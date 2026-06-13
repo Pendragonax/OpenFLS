@@ -15,6 +15,10 @@ import {ClientDto} from "../../../../shared/dtos/client-dto.model";
 import {ClientArchiveActionForm} from "../../forms/client-archive-action-form";
 import {ClientArchiveActionRequest} from "../../../../shared/dtos/client-archive-action-request.model";
 import {ClientArchiveHistoryEntryReadDto} from "../../../../shared/dtos/client-archive-history-entry-read-dto.model";
+import {ClientArchiveExportForm} from "../../forms/client-archive-export-form";
+import {ClientArchiveExportRequest} from "../../../../shared/dtos/client-archive-export-request.model";
+import {ClientArchiveExportStatusDto} from "../../../../shared/dtos/client-archive-export-status-dto.model";
+import {ClientArchiveExportFormat} from "../../../../shared/dtos/client-archive-export-format.model";
 import {MatDialog} from "@angular/material/dialog";
 import {ConfirmationModalComponent} from "../../../../shared/modals/confirmation-modal/confirmation-modal.component";
 import {Converter} from "../../../../shared/services/converter.helper";
@@ -48,14 +52,21 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
   institutions: InstitutionDto[] = [];
   categoryTemplates: CategoryTemplateDto[] = [];
   archiveHistory: ClientArchiveHistoryEntryReadDto[] = [];
+  archiveExportStatus: ClientArchiveExportStatusDto | null = null;
+  archiveExportFormats = [
+    {value: ClientArchiveExportFormat.JSON, label: 'JSON'}
+  ];
 
   // STATEs
   editMode = false;
   canManageArchive = false;
   selectedTabIndex = 0;
+  isArchiveExportRequesting = false;
+  isArchiveExportDownloading = false;
 
   infoForm = new ClientInformationForm();
   archiveActionForm = new ClientArchiveActionForm();
+  archiveExportForm = new ClientArchiveExportForm();
 
   constructor(
     override helperService: HelperService,
@@ -245,17 +256,21 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
 
   private loadArchiveState(clientId: string) {
     this.resetArchiveForm();
+    this.resetArchiveExportState();
 
     if (!this.canManageArchive) {
       this.archiveHistory = [];
+      this.archiveExportStatus = null;
       this.syncSelectedTab();
       return;
     }
 
     const historyRequest = this.clientService.getArchiveHistoryById(+clientId);
+    const exportStatusRequest = this.clientService.getArchiveExportStatusById(+clientId);
 
-    if (historyRequest == null) {
+    if (historyRequest == null || exportStatusRequest == null) {
       this.archiveHistory = [];
+      this.archiveExportStatus = null;
       this.syncSelectedTab();
       return;
     }
@@ -270,6 +285,15 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
         this.syncSelectedTab();
       }
     });
+
+    exportStatusRequest.subscribe({
+      next: (status) => {
+        this.archiveExportStatus = status ?? null;
+      },
+      error: () => {
+        this.archiveExportStatus = null;
+      }
+    });
   }
 
   private resetArchiveForm() {
@@ -278,6 +302,49 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     this.archiveActionForm.remark.setValue('', {emitEvent: false});
     this.archiveActionForm.markAsPristine();
     this.archiveActionForm.markAsUntouched();
+  }
+
+  private resetArchiveExportState() {
+    this.archiveExportForm.format.setValue(ClientArchiveExportFormat.JSON, {emitEvent: false});
+    this.archiveExportForm.markAsPristine();
+    this.archiveExportForm.markAsUntouched();
+    this.isArchiveExportRequesting = false;
+    this.isArchiveExportDownloading = false;
+  }
+
+  requestArchiveExport() {
+    if (this.isArchiveExportRequesting || this.isArchiveExportDownloading || !this.archiveExportForm.valid) {
+      return;
+    }
+
+    this.isArchiveExportRequesting = true;
+
+    const request = new ClientArchiveExportRequest();
+    request.format = this.archiveExportForm.format.value as ClientArchiveExportFormat;
+
+    this.clientService.requestArchiveExport(this.value.dto.id, request).subscribe({
+      next: status => this.handleArchiveExportStatus(status, 'Export angefordert'),
+      error: () => this.handleArchiveExportRequestFailure('Fehler beim Anfordern des Exports')
+    });
+  }
+
+  downloadArchiveExport() {
+    const downloadLink = this.archiveExportStatus?.downloadLink;
+
+    if (this.isArchiveExportRequesting || this.isArchiveExportDownloading || downloadLink == null) {
+      return;
+    }
+
+    this.isArchiveExportDownloading = true;
+
+    this.clientService.downloadArchiveExport(downloadLink).subscribe({
+      next: () => {
+        this.archiveExportStatus = null;
+        this.isArchiveExportDownloading = false;
+        this.helperService.openSnackBar('Export heruntergeladen');
+      },
+      error: () => this.handleArchiveExportDownloadFailure('Export nicht mehr verfügbar')
+    });
   }
 
   private syncSelectedTab() {
@@ -342,5 +409,33 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
 
   formatArchiveEmployee(entry: ClientArchiveHistoryEntryReadDto): string {
     return `${entry.executingEmployeeFirstname} ${entry.executingEmployeeLastname} (#${entry.executingEmployeeId})`;
+  }
+
+  get hasArchiveExportDownloadLink(): boolean {
+    return this.archiveExportStatus?.downloadLink != null;
+  }
+
+  get archiveExportDownloadExpiresAt(): string {
+    return this.formatArchiveActionTimestamp(this.archiveExportStatus?.downloadLink?.downloadLinkExpiresAt ?? null);
+  }
+
+  private handleArchiveExportStatus(status: ClientArchiveExportStatusDto, successMessage: string) {
+    this.archiveExportStatus = status;
+    this.isArchiveExportRequesting = false;
+    this.isArchiveExportDownloading = false;
+    this.helperService.openSnackBar(successMessage);
+  }
+
+  private handleArchiveExportRequestFailure(message: string) {
+    this.isArchiveExportRequesting = false;
+    this.isArchiveExportDownloading = false;
+    this.helperService.openSnackBar(message);
+  }
+
+  private handleArchiveExportDownloadFailure(message: string) {
+    this.archiveExportStatus = null;
+    this.isArchiveExportRequesting = false;
+    this.isArchiveExportDownloading = false;
+    this.helperService.openSnackBar(message);
   }
 }

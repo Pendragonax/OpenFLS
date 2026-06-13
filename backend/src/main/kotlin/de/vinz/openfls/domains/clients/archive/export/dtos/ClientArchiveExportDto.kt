@@ -16,13 +16,19 @@ import java.time.LocalDateTime
 
 data class ClientArchiveExportDto(
     var client: ClientArchiveExportClientDto = ClientArchiveExportClientDto(),
-    var services: List<ClientArchiveExportServiceDto> = emptyList()
+    var services: List<ClientArchiveExportServiceDto> = emptyList(),
+    var assistancePlans: List<ClientArchiveExportAssistancePlanDto> = emptyList()
 ) {
     companion object {
-        fun from(client: Client, services: List<Service>): ClientArchiveExportDto {
+        fun from(
+            client: Client,
+            services: List<Service>,
+            assistancePlans: List<AssistancePlan>
+        ): ClientArchiveExportDto {
             return ClientArchiveExportDto(
                 client = ClientArchiveExportClientDto.from(client),
-                services = services.map { ClientArchiveExportServiceDto.from(it) }
+                services = services.map { ClientArchiveExportServiceDto.from(it) },
+                assistancePlans = assistancePlans.map { ClientArchiveExportAssistancePlanDto.from(it) }
             )
         }
     }
@@ -59,8 +65,8 @@ data class ClientArchiveExportServiceDto(
     var employee: ClientArchiveExportEmployeeDto = ClientArchiveExportEmployeeDto(),
     var institution: ClientArchiveExportInstitutionDto = ClientArchiveExportInstitutionDto(),
     var hourType: ClientArchiveExportHourTypeDto = ClientArchiveExportHourTypeDto(),
-    var assistancePlan: ClientArchiveExportAssistancePlanDto = ClientArchiveExportAssistancePlanDto(),
-    var goals: List<ClientArchiveExportGoalDto> = emptyList(),
+    var assistancePlan: ClientArchiveExportAssistancePlanReferenceDto = ClientArchiveExportAssistancePlanReferenceDto(),
+    var goals: List<ClientArchiveExportServiceGoalDto> = emptyList(),
     var categories: List<ClientArchiveExportCategoryDto> = emptyList()
 ) {
     companion object {
@@ -78,8 +84,8 @@ data class ClientArchiveExportServiceDto(
                 employee = service.employee?.let { ClientArchiveExportEmployeeDto.from(it) } ?: ClientArchiveExportEmployeeDto(),
                 institution = service.institution?.let { ClientArchiveExportInstitutionDto.from(it) } ?: ClientArchiveExportInstitutionDto(),
                 hourType = service.hourType?.let { ClientArchiveExportHourTypeDto.from(it) } ?: ClientArchiveExportHourTypeDto(),
-                assistancePlan = service.assistancePlan?.let { ClientArchiveExportAssistancePlanDto.from(it) } ?: ClientArchiveExportAssistancePlanDto(),
-                goals = service.goals.map { ClientArchiveExportGoalDto.from(it) },
+                assistancePlan = service.assistancePlan?.let { ClientArchiveExportAssistancePlanReferenceDto.from(it) } ?: ClientArchiveExportAssistancePlanReferenceDto(),
+                goals = service.goals.map { ClientArchiveExportServiceGoalDto.from(it) },
                 categories = service.categorys.map { ClientArchiveExportCategoryDto.from(it) }
             )
         }
@@ -192,6 +198,20 @@ data class ClientArchiveExportGoalHourDto(
     }
 }
 
+data class ClientArchiveExportServiceGoalDto(
+    var title: String = "",
+    var description: String = ""
+) {
+    companion object {
+        fun from(goal: Goal): ClientArchiveExportServiceGoalDto {
+            return ClientArchiveExportServiceGoalDto(
+                title = goal.title,
+                description = goal.description
+            )
+        }
+    }
+}
+
 data class ClientArchiveExportEvaluationDto(
     var id: Long = 0,
     var date: LocalDate = LocalDate.now(),
@@ -262,3 +282,18 @@ data class ClientArchiveExportAssistancePlanDto(
     }
 }
 
+data class ClientArchiveExportAssistancePlanReferenceDto(
+    var id: Long = 0,
+    var start: LocalDate = LocalDate.now(),
+    var end: LocalDate = LocalDate.now()
+) {
+    companion object {
+        fun from(assistancePlan: AssistancePlan): ClientArchiveExportAssistancePlanReferenceDto {
+            return ClientArchiveExportAssistancePlanReferenceDto(
+                id = assistancePlan.id,
+                start = assistancePlan.start,
+                end = assistancePlan.end
+            )
+        }
+    }
+}

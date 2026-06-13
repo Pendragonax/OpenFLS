@@ -98,6 +98,55 @@
   margin-top: 12px;
 }
 
+.archive-export-copy {
+  color: #5f6b7a;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.archive-export-form {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.archive-export-form > div {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.archive-export-form .mat-form-field {
+  width: min(100%, 420px) !important;
+}
+
+.archive-export-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.archive-export-actions button {
+  min-width: 220px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.archive-export-meta {
+  color: #5f6b7a;
+  font-size: 0.88rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.archive-export-actions mat-spinner {
+  display: inline-block;
+}
+
 .archive-history {
   display: grid;
   gap: 12px;
