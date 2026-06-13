@@ -263,6 +263,33 @@ describe('ClientDetailComponent', () => {
     expect(text).toContain('Extern verwaltet');
   });
 
+  it('should render export history entries without reason and with export label', () => {
+    const historyEntry: ArchiveHistoryDto = {
+      id: 8,
+      actionType: 'EXPORT',
+      actionDate: '2026-06-13',
+      actionTimestamp: '2026-06-13T11:15:00',
+      reason: 'Export requested',
+      remark: 'JSON',
+      executingEmployeeId: 11,
+      executingEmployeeFirstname: 'Vinz',
+      executingEmployeeLastname: 'Branzk'
+    };
+
+    configureScenario({tab: 'archive', history: [historyEntry]});
+
+    const historyText = fixture.nativeElement.querySelector('.archive-history-entry')?.textContent as string;
+    const historyRows = fixture.nativeElement.querySelectorAll('.archive-history-entry app-information-row');
+
+    expect(historyText).toContain('EXPORT');
+    expect(historyText).not.toContain('Archivierung');
+    expect(historyText).not.toContain('Grund');
+    expect(historyText).not.toContain('Datum');
+    expect(historyRows.length).toBe(3);
+    expect(historyText).toContain('JSON');
+    expect(historyText).toContain('Vinz Branzk (#11)');
+  });
+
   it('should show a download button for an already prepared export', () => {
     const exportStatus: ClientArchiveExportStatusDto = {
       ready: true,

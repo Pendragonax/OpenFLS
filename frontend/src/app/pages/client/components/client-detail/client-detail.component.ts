@@ -401,6 +401,10 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
   }
 
   formatArchiveActionType(actionType: string): string {
+    if (actionType === 'EXPORT') {
+      return 'EXPORT';
+    }
+
     if (actionType === 'REACTIVATE') {
       return 'Reaktivierung';
     }
@@ -428,6 +432,14 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
 
   formatArchiveEmployee(entry: ClientArchiveHistoryEntryReadDto): string {
     return `${entry.executingEmployeeFirstname} ${entry.executingEmployeeLastname} (#${entry.executingEmployeeId})`;
+  }
+
+  shouldShowArchiveHistoryDate(actionType: string): boolean {
+    return actionType !== 'EXPORT';
+  }
+
+  shouldShowArchiveHistoryReason(actionType: string): boolean {
+    return actionType !== 'EXPORT';
   }
 
   get hasArchiveExportDownloadLink(): boolean {

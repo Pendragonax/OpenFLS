@@ -226,7 +226,7 @@
                         mat-raised-button
                         color="primary"
                         disabled>
-                  <mat-spinner [diameter]="18" [strokeWidth]="2"></mat-spinner>
+                  <mat-spinner [diameter]="14" [strokeWidth]="2" class="me-3"></mat-spinner>
                   <span>Export wird erstellt</span>
                 </button>
               } @else if (hasArchiveExportDownloadLink) {
@@ -272,12 +272,16 @@
                       </div>
                       <div class="archive-history-entry__details">
                         <div class="archive-history-entry__details-column">
-                          <app-information-row [title]="'Datum'"
-                                               [content]="formatArchiveActionDate(entry.actionDate)"
-                                               [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
-                          <app-information-row [title]="'Grund'"
-                                               [content]="entry.reason"
-                                               [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
+                          @if (shouldShowArchiveHistoryDate(entry.actionType)) {
+                            <app-information-row [title]="'Datum'"
+                                                 [content]="formatArchiveActionDate(entry.actionDate)"
+                                                 [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
+                          }
+                          @if (shouldShowArchiveHistoryReason(entry.actionType)) {
+                            <app-information-row [title]="'Grund'"
+                                                 [content]="entry.reason"
+                                                 [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
+                          }
                           <app-information-row [title]="'Bemerkung'"
                                                [content]="entry.remark"
                                                [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
