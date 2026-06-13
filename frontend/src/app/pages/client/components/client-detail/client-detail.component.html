@@ -189,23 +189,12 @@
                   </div>
                   <div class="archive-export-step__content">
                     <div class="archive-export-step__title">{{ step.title }}</div>
-                    <div class="archive-export-step__description">
-                      @if (step.key === 'requested' && archiveExportStatus?.requestedAt) {
-                        Angefordert am {{ formatArchiveActionTimestamp(archiveExportStatus?.requestedAt ?? null) }}
-                      } @else if (step.key === 'generating' && isArchiveExportRequesting) {
-                        Der Export wird gerade erstellt.
-                      } @else if (step.key === 'ready' && hasArchiveExportDownloadLink) {
-                        Link gültig bis {{ archiveExportDownloadExpiresAt }}
-                      } @else {
-                        {{ step.description }}
-                      }
-                    </div>
                   </div>
                 </div>
               }
             </div>
             <div class="archive-export-copy">
-              Exportiert alle Inhalte dieses Klienten inklusive Service-Einträge und verknüpfte Referenzen.
+              Exportiert alle Inhalte dieses Klienten inklusive Dokumentationen, Hilfepläne und verknüpfte Referenzen.
             </div>
             <form [formGroup]="archiveExportForm" class="archive-export-form">
               <div>
@@ -217,6 +206,11 @@
                     }
                   </mat-select>
                 </mat-form-field>
+              </div>
+              <div class="archive-export-form__anonymize">
+                <mat-checkbox formControlName="anonymize">
+                  Mitarbeiternamen anonymisieren
+                </mat-checkbox>
               </div>
             </form>
 

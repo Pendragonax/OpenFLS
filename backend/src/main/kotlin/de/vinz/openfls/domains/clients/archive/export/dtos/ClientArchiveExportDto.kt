@@ -23,12 +23,13 @@ data class ClientArchiveExportDto(
         fun from(
             client: Client,
             services: List<Service>,
-            assistancePlans: List<AssistancePlan>
+            assistancePlans: List<AssistancePlan>,
+            anonymize: Boolean = false
         ): ClientArchiveExportDto {
             return ClientArchiveExportDto(
                 client = ClientArchiveExportClientDto.from(client),
-                services = services.map { ClientArchiveExportServiceDto.from(it) },
-                assistancePlans = assistancePlans.map { ClientArchiveExportAssistancePlanDto.from(it) }
+                services = services.map { ClientArchiveExportServiceDto.from(it, anonymize) },
+                assistancePlans = assistancePlans.map { ClientArchiveExportAssistancePlanDto.from(it, anonymize) }
             )
         }
     }
@@ -70,7 +71,7 @@ data class ClientArchiveExportServiceDto(
     var categories: List<ClientArchiveExportCategoryDto> = emptyList()
 ) {
     companion object {
-        fun from(service: Service): ClientArchiveExportServiceDto {
+        fun from(service: Service, anonymize: Boolean = false): ClientArchiveExportServiceDto {
             return ClientArchiveExportServiceDto(
                 id = service.id,
                 start = service.start,
@@ -81,7 +82,7 @@ data class ClientArchiveExportServiceDto(
                 groupService = service.groupService,
                 unfinished = service.unfinished,
                 archivedService = service.archivedService,
-                employee = service.employee?.let { ClientArchiveExportEmployeeDto.from(it) } ?: ClientArchiveExportEmployeeDto(),
+                employee = service.employee?.let { ClientArchiveExportEmployeeDto.from(it, anonymize) } ?: ClientArchiveExportEmployeeDto(),
                 institution = service.institution?.let { ClientArchiveExportInstitutionDto.from(it) } ?: ClientArchiveExportInstitutionDto(),
                 hourType = service.hourType?.let { ClientArchiveExportHourTypeDto.from(it) } ?: ClientArchiveExportHourTypeDto(),
                 assistancePlan = service.assistancePlan?.let { ClientArchiveExportAssistancePlanReferenceDto.from(it) } ?: ClientArchiveExportAssistancePlanReferenceDto(),
@@ -98,11 +99,11 @@ data class ClientArchiveExportEmployeeDto(
     var lastName: String = ""
 ) {
     companion object {
-        fun from(employee: Employee): ClientArchiveExportEmployeeDto {
+        fun from(employee: Employee, anonymize: Boolean = false): ClientArchiveExportEmployeeDto {
             return ClientArchiveExportEmployeeDto(
                 id = employee.id ?: 0,
-                firstName = employee.firstname,
-                lastName = employee.lastname
+                firstName = if (anonymize) "Anonym" else employee.firstname,
+                lastName = if (anonymize) "Anonym" else employee.lastname
             )
         }
     }
@@ -223,7 +224,7 @@ data class ClientArchiveExportEvaluationDto(
     var updatedBy: ClientArchiveExportEmployeeDto = ClientArchiveExportEmployeeDto()
 ) {
     companion object {
-        fun from(evaluation: Evaluation): ClientArchiveExportEvaluationDto {
+        fun from(evaluation: Evaluation, anonymize: Boolean = false): ClientArchiveExportEvaluationDto {
             return ClientArchiveExportEvaluationDto(
                 id = evaluation.id,
                 date = evaluation.date,
@@ -231,8 +232,8 @@ data class ClientArchiveExportEvaluationDto(
                 approved = evaluation.approved,
                 createdAt = evaluation.createdAt,
                 updatedAt = evaluation.updatedAt,
-                createdBy = evaluation.createdBy?.let { ClientArchiveExportEmployeeDto.from(it) } ?: ClientArchiveExportEmployeeDto(),
-                updatedBy = evaluation.updatedBy?.let { ClientArchiveExportEmployeeDto.from(it) } ?: ClientArchiveExportEmployeeDto()
+                createdBy = evaluation.createdBy?.let { ClientArchiveExportEmployeeDto.from(it, anonymize) } ?: ClientArchiveExportEmployeeDto(),
+                updatedBy = evaluation.updatedBy?.let { ClientArchiveExportEmployeeDto.from(it, anonymize) } ?: ClientArchiveExportEmployeeDto()
             )
         }
     }
@@ -246,13 +247,13 @@ data class ClientArchiveExportGoalDto(
     var evaluations: List<ClientArchiveExportEvaluationDto> = emptyList()
 ) {
     companion object {
-        fun from(goal: Goal): ClientArchiveExportGoalDto {
+        fun from(goal: Goal, anonymize: Boolean = false): ClientArchiveExportGoalDto {
             return ClientArchiveExportGoalDto(
                 id = goal.id,
                 title = goal.title,
                 description = goal.description,
                 hours = goal.hours.map { ClientArchiveExportGoalHourDto.from(it) },
-                evaluations = goal.evaluations.map { ClientArchiveExportEvaluationDto.from(it) }
+                evaluations = goal.evaluations.map { ClientArchiveExportEvaluationDto.from(it, anonymize) }
             )
         }
     }
@@ -268,7 +269,7 @@ data class ClientArchiveExportAssistancePlanDto(
     var goals: List<ClientArchiveExportGoalDto> = emptyList()
 ) {
     companion object {
-        fun from(assistancePlan: AssistancePlan): ClientArchiveExportAssistancePlanDto {
+        fun from(assistancePlan: AssistancePlan, anonymize: Boolean = false): ClientArchiveExportAssistancePlanDto {
             return ClientArchiveExportAssistancePlanDto(
                 id = assistancePlan.id,
                 start = assistancePlan.start,
@@ -276,7 +277,7 @@ data class ClientArchiveExportAssistancePlanDto(
                 sponsor = assistancePlan.sponsor?.let { ClientArchiveExportSponsorDto.from(it) } ?: ClientArchiveExportSponsorDto(),
                 institution = assistancePlan.institution?.let { ClientArchiveExportInstitutionDto.from(it) } ?: ClientArchiveExportInstitutionDto(),
                 hours = assistancePlan.hours.map { ClientArchiveExportAssistancePlanHourDto.from(it) },
-                goals = assistancePlan.goals.map { ClientArchiveExportGoalDto.from(it) }
+                goals = assistancePlan.goals.map { ClientArchiveExportGoalDto.from(it, anonymize) }
             )
         }
     }

@@ -43,6 +43,7 @@ class ClientArchiveExportService(
     fun requestExport(
         clientId: Long,
         format: ClientArchiveExportFormat,
+        anonymize: Boolean = false,
         actor: ClientArchiveActor
     ): ClientArchiveExportStatusDto {
         if (format != ClientArchiveExportFormat.JSON) {
@@ -55,7 +56,8 @@ class ClientArchiveExportService(
         val exportData = ClientArchiveExportDto.from(
             client = client,
             services = serviceRepository.findByClientIdOrderByStartAsc(clientId),
-            assistancePlans = assistancePlanRepository.findByClientId(clientId)
+            assistancePlans = assistancePlanRepository.findByClientId(clientId),
+            anonymize = anonymize
         )
         val downloadToken = UUID.randomUUID().toString()
         val fileName = "client-$clientId-archive-export-$downloadToken.json"
@@ -85,7 +87,7 @@ class ClientArchiveExportService(
                 actionDate = now.toLocalDate(),
                 actionTimestamp = now,
                 reason = "Export requested",
-                remark = format.name,
+                remark = if (anonymize) "${format.name} [anonym]" else format.name,
                 actor = actor,
                 exportFormat = format
             )

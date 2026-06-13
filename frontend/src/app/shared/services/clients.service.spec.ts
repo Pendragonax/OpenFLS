@@ -84,6 +84,28 @@ describe('ClientsService', () => {
     expect(result.requestedByEmployeeId).toBe(4);
   });
 
+  it('requestArchiveExport_should_post_anonymize_flag', () => {
+    const requestBody = new ClientArchiveExportRequest();
+    requestBody.anonymize = true;
+
+    service.requestArchiveExport(12, requestBody).subscribe();
+
+    const request = httpMock.expectOne(`${environment.api_url}clients/12/archive/export`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body.anonymize).toBe(true);
+    request.flush({
+      ready: true,
+      format: 'JSON',
+      requestedAt: '2026-06-13T10:15:00',
+      requestedByEmployeeId: 4,
+      downloadLink: {
+        downloadLink: '/clients/12/archive/export/token-123',
+        downloadLinkExpiresAt: '2026-06-13T10:35:00',
+        downloadedAt: null
+      }
+    });
+  });
+
   it('downloadArchiveExport_should_save_blob_with_filename_from_header', () => {
     let completed = false;
     const downloadLink = {

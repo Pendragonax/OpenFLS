@@ -20,6 +20,7 @@ import {EmployeeDto} from '../../../../shared/dtos/employee-dto.model';
 import {ClientArchiveHistoryEntryReadDto as ArchiveHistoryDto} from '../../../../shared/dtos/client-archive-history-entry-read-dto.model';
 import {ClientArchiveExportStatusDto} from '../../../../shared/dtos/client-archive-export-status-dto.model';
 import {ClientArchiveExportFormat} from '../../../../shared/dtos/client-archive-export-format.model';
+import {ClientArchiveExportRequest} from '../../../../shared/dtos/client-archive-export-request.model';
 
 class MockClientsService {
   getById = vi.fn();
@@ -254,6 +255,9 @@ describe('ClientDetailComponent', () => {
     expect(text).toContain('Angefordert');
     expect(text).toContain('Wird erstellt');
     expect(text).toContain('Bereit zum Download');
+    expect(text).not.toContain('Der Export wurde angefordert.');
+    expect(text).not.toContain('Der Export wird erzeugt.');
+    expect(text).not.toContain('Der Downloadlink ist verfügbar.');
     expect(text).toContain('Export anfordern');
     expect(text).toContain('Archivierung');
     expect(text).toContain('23.05.2026');
@@ -340,6 +344,28 @@ describe('ClientDetailComponent', () => {
     expect(component.isArchiveExportRequesting).toBe(false);
     expect(component.hasArchiveExportDownloadLink).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('Download (JSON)');
+  });
+
+  it('should send anonymize flag with the export request', () => {
+    configureScenario({tab: 'archive'});
+
+    component.archiveExportForm.anonymize.setValue(true);
+    component.requestArchiveExport();
+
+    const request = clientsService.requestArchiveExport.mock.calls[0][1] as ClientArchiveExportRequest;
+
+    expect(request.anonymize).toBe(true);
+    expect(request.format).toBe(ClientArchiveExportFormat.JSON);
+  });
+
+  it('should reload archive history after a successful export request', () => {
+    configureScenario({tab: 'archive'});
+
+    const initialHistoryCalls = clientsService.getArchiveHistoryById.mock.calls.length;
+
+    component.requestArchiveExport();
+
+    expect(clientsService.getArchiveHistoryById.mock.calls.length).toBe(initialHistoryCalls + 1);
   });
 
   it('should remove the export link after a successful download', () => {

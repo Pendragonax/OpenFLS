@@ -252,6 +252,7 @@ class ClientArchiveControllerWebMvcTest {
             clientArchiveExportService.requestExport(
                 eq(clientId),
                 eq(ClientArchiveExportFormat.JSON),
+                eq(false),
                 any()
             )
         ).willReturn(status)
@@ -259,12 +260,51 @@ class ClientArchiveControllerWebMvcTest {
         // When
         val result = mockMvc.post("/clients/$clientId/archive/export") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"format":"JSON"}"""
+            content = """{"format":"JSON","anonymize":false}"""
         }.andReturn()
 
         // Then
         assertThat(result.response.status).isEqualTo(200)
         assertThat(result.response.contentAsString).contains("\"downloadLink\":\"/clients/$clientId/archive/export/token-1\"")
+    }
+
+    @Test
+    fun requestExport_withAnonymizeTrue_forwardsFlagToService() {
+        // Given
+        val clientId = 17L
+        val employeeId = 8L
+        val employeeDto = EmployeeDto().apply {
+            id = employeeId
+            firstName = "Anna"
+            lastName = "Lead"
+        }
+        val status = ClientArchiveExportStatusDto().apply {
+            ready = true
+            format = ClientArchiveExportFormat.JSON
+            requestedAt = LocalDateTime.of(2026, 6, 13, 11, 15)
+            requestedByEmployeeId = employeeId
+        }
+        given(accessService.getId()).willReturn(employeeId)
+        given(accessService.isAdmin()).willReturn(true)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
+        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
+        given(
+            clientArchiveExportService.requestExport(
+                eq(clientId),
+                eq(ClientArchiveExportFormat.JSON),
+                eq(true),
+                any()
+            )
+        ).willReturn(status)
+
+        // When
+        val result = mockMvc.post("/clients/$clientId/archive/export") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"format":"JSON","anonymize":true}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
     }
 
     @Test

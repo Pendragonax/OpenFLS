@@ -121,6 +121,7 @@ class ClientArchiveController(
                 clientArchiveExportService.requestExport(
                     clientId = id,
                     format = request.format ?: ClientArchiveExportFormat.JSON,
+                    anonymize = request.anonymize,
                     actor = loadActor()
                 )
             )

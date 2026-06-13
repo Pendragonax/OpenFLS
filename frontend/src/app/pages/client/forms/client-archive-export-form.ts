@@ -4,9 +4,11 @@ import {ClientArchiveExportFormat} from "../../../shared/dtos/client-archive-exp
 export class ClientArchiveExportForm extends UntypedFormGroup {
   constructor() {
     super({
-      format: new UntypedFormControl(ClientArchiveExportFormat.JSON, Validators.required)
+      format: new UntypedFormControl(ClientArchiveExportFormat.JSON, Validators.required),
+      anonymize: new UntypedFormControl(false, Validators.required)
     });
   }
 
   get format() { return this.controls['format']; }
+  get anonymize() { return this.controls['anonymize']; }
 }

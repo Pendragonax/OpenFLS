@@ -6,4 +6,5 @@ import jakarta.validation.constraints.NotNull
 class ClientArchiveExportRequestDto {
     @field:NotNull
     var format: ClientArchiveExportFormat? = ClientArchiveExportFormat.JSON
+    var anonymize: Boolean = false
 }

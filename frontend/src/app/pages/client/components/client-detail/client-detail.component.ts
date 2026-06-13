@@ -61,18 +61,15 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
   archiveExportSteps = [
     {
       key: 'requested',
-      title: 'Angefordert',
-      description: 'Der Export wurde angefordert.'
+      title: 'Angefordert'
     },
     {
       key: 'generating',
-      title: 'Wird erstellt',
-      description: 'Die JSON-Datei wird serverseitig erzeugt.'
+      title: 'Wird erstellt'
     },
     {
       key: 'ready',
-      title: 'Bereit zum Download',
-      description: 'Der Downloadlink ist verfügbar.'
+      title: 'Bereit zum Download'
     }
   ] as const;
 
@@ -325,6 +322,7 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
 
   private resetArchiveExportState() {
     this.archiveExportForm.format.setValue(ClientArchiveExportFormat.JSON, {emitEvent: false});
+    this.archiveExportForm.anonymize.setValue(false, {emitEvent: false});
     this.archiveExportForm.markAsPristine();
     this.archiveExportForm.markAsUntouched();
     this.isArchiveExportRequesting = false;
@@ -340,6 +338,7 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
 
     const request = new ClientArchiveExportRequest();
     request.format = this.archiveExportForm.format.value as ClientArchiveExportFormat;
+    request.anonymize = this.archiveExportForm.anonymize.value as boolean;
 
     this.clientService.requestArchiveExport(this.value.dto.id, request).subscribe({
       next: status => this.handleArchiveExportStatus(status, 'Export angefordert'),
@@ -475,7 +474,29 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     this.archiveExportStatus = status;
     this.isArchiveExportRequesting = false;
     this.isArchiveExportDownloading = false;
+    this.loadArchiveHistory(this.value.dto.id);
     this.helperService.openSnackBar(successMessage);
+  }
+
+  private loadArchiveHistory(clientId: number) {
+    const historyRequest = this.clientService.getArchiveHistoryById(clientId);
+
+    if (historyRequest == null) {
+      this.archiveHistory = [];
+      this.syncSelectedTab();
+      return;
+    }
+
+    historyRequest.subscribe({
+      next: (history) => {
+        this.archiveHistory = history ?? [];
+        this.syncSelectedTab();
+      },
+      error: () => {
+        this.archiveHistory = [];
+        this.syncSelectedTab();
+      }
+    });
   }
 
   private handleArchiveExportRequestFailure(message: string) {

@@ -122,6 +122,7 @@ class ClientArchiveExportServiceDataJpaTest {
         val status = clientArchiveExportService.requestExport(
             clientId = graph.client.id,
             format = ClientArchiveExportFormat.JSON,
+            anonymize = false,
             actor = actor
         )
 
@@ -171,6 +172,46 @@ class ClientArchiveExportServiceDataJpaTest {
     }
 
     @Test
+    fun requestExport_withAnonymization_replacesEmployeeNamesAndRemark() {
+        // Given
+        val graph = createExportGraph()
+        val actor = ClientArchiveActor(
+            employeeId = graph.employee.id!!,
+            firstname = graph.employee.firstname,
+            lastname = graph.employee.lastname,
+            isAdmin = true,
+            leadingInstitutionIds = emptyList()
+        )
+
+        // When
+        clientArchiveExportService.requestExport(
+            clientId = graph.client.id,
+            format = ClientArchiveExportFormat.JSON,
+            anonymize = true,
+            actor = actor
+        )
+
+        // Then
+        val request = clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)
+        assertThat(request).isNotNull
+        val json = objectMapper.readTree(Files.readString(Path.of(request!!.filePath)))
+        val serviceNode = json["services"][0]
+        val assistancePlanNode = json["assistancePlans"].toList()
+            .first { it["id"].asLong() == serviceNode["assistancePlan"]["id"].asLong() }
+        val goalNode = assistancePlanNode["goals"][0]
+        val evaluationNode = goalNode["evaluations"][0]
+        assertThat(serviceNode["employee"]["firstName"].asText()).isEqualTo("Anonym")
+        assertThat(serviceNode["employee"]["lastName"].asText()).isEqualTo("Anonym")
+        assertThat(evaluationNode["createdBy"]["firstName"].asText()).isEqualTo("Anonym")
+        assertThat(evaluationNode["updatedBy"]["lastName"].asText()).isEqualTo("Anonym")
+
+        val savedClient = clientRepository.findById(graph.client.id)
+        assertThat(savedClient).isPresent
+        val historyEntry = savedClient.get().archiveHistoryEntries.first()
+        assertThat(historyEntry.remark).isEqualTo("JSON [anonym]")
+    }
+
+    @Test
     fun requestExport_usesConfiguredDownloadLinkTtl() {
         // Given
         val graph = createExportGraph()
@@ -186,6 +227,7 @@ class ClientArchiveExportServiceDataJpaTest {
         clientArchiveExportService.requestExport(
             clientId = graph.client.id,
             format = ClientArchiveExportFormat.JSON,
+            anonymize = false,
             actor = actor
         )
 
@@ -209,6 +251,7 @@ class ClientArchiveExportServiceDataJpaTest {
         val status = clientArchiveExportService.requestExport(
             clientId = graph.client.id,
             format = ClientArchiveExportFormat.JSON,
+            anonymize = false,
             actor = actor
         )
         val token = status.downloadLink!!.downloadLink.substringAfterLast("/")
@@ -238,6 +281,7 @@ class ClientArchiveExportServiceDataJpaTest {
         clientArchiveExportService.requestExport(
             clientId = graph.client.id,
             format = ClientArchiveExportFormat.JSON,
+            anonymize = false,
             actor = actor
         )
         val request = clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)!!
