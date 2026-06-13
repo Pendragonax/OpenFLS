@@ -258,6 +258,9 @@ class ClientService(
                     throw ClientArchiveStateException("client is not archived")
                 }
             }
+            ClientArchiveActionType.EXPORT -> {
+                throw IllegalArgumentException("unsupported client archive action")
+            }
         }
 
         val historyEntry = ClientArchiveHistoryEntry(

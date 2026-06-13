@@ -100,6 +100,7 @@ class ClientArchiveService(
                 reason = reason,
                 remark = remark
             )
+            ClientArchiveActionType.EXPORT -> throw IllegalArgumentException("unsupported client archive action")
         }
     }
 }

@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.clients.archive
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.clients.Client
+import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportFormat
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
 import java.time.LocalDate
@@ -18,6 +19,10 @@ class ClientArchiveHistoryEntry(
         @Enumerated(EnumType.STRING)
         @Column(name = "action_type", length = 32, nullable = false)
         var actionType: ClientArchiveActionType = ClientArchiveActionType.ARCHIVE,
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "export_format", length = 32)
+        var exportFormat: ClientArchiveExportFormat? = null,
 
         @field:NotNull
         @Column(name = "action_date", nullable = false)
