@@ -21,6 +21,9 @@ import {ClientArchiveHistoryEntryReadDto as ArchiveHistoryDto} from '../../../..
 import {ClientArchiveExportStatusDto} from '../../../../shared/dtos/client-archive-export-status-dto.model';
 import {ClientArchiveExportFormat} from '../../../../shared/dtos/client-archive-export-format.model';
 import {ClientArchiveExportRequest} from '../../../../shared/dtos/client-archive-export-request.model';
+import {ClientArchiveActionPanelComponent} from './client-archive-action-panel.component';
+import {ClientArchiveExportPanelComponent} from './client-archive-export-panel.component';
+import {ClientArchiveHistoryPanelComponent} from './client-archive-history-panel.component';
 
 class MockClientsService {
   getById = vi.fn();
@@ -131,7 +134,13 @@ describe('ClientDetailComponent', () => {
     clientsService.update.mockReset();
 
     await TestBed.configureTestingModule({
-      declarations: [ClientDetailComponent, InformationRowComponent],
+      declarations: [
+        ClientDetailComponent,
+        InformationRowComponent,
+        ClientArchiveActionPanelComponent,
+        ClientArchiveExportPanelComponent,
+        ClientArchiveHistoryPanelComponent
+      ],
       providers: [
         {provide: ActivatedRoute, useValue: route},
         {provide: Router, useValue: router},
@@ -311,7 +320,7 @@ describe('ClientDetailComponent', () => {
 
     const text = fixture.nativeElement.textContent as string;
 
-    expect(component.hasArchiveExportDownloadLink).toBe(true);
+    expect(component.archiveExportStatus?.downloadLink != null).toBe(true);
     expect(text).toContain('Download (JSON)');
     expect(text).toContain('Link gültig bis');
   });
@@ -342,7 +351,7 @@ describe('ClientDetailComponent', () => {
     fixture.detectChanges();
 
     expect(component.isArchiveExportRequesting).toBe(false);
-    expect(component.hasArchiveExportDownloadLink).toBe(true);
+    expect(component.archiveExportStatus?.downloadLink != null).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('Download (JSON)');
   });
 
@@ -388,7 +397,7 @@ describe('ClientDetailComponent', () => {
     fixture.detectChanges();
 
     expect(clientsService.downloadArchiveExport).toHaveBeenCalled();
-    expect(component.hasArchiveExportDownloadLink).toBe(false);
+    expect(component.archiveExportStatus?.downloadLink != null).toBe(false);
     expect(fixture.nativeElement.textContent).toContain('Export anfordern');
   });
 

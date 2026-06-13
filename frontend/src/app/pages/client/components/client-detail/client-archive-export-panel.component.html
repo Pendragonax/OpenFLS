@@ -1,0 +1,76 @@
+<div class="archive-panel__title">Daten exportieren</div>
+<div class="archive-export-stepper">
+  @for (step of archiveExportSteps; track step.key) {
+    <div class="archive-export-step"
+         [class.archive-export-step--completed]="isArchiveExportStepCompleted(step.key)"
+         [class.archive-export-step--current]="isArchiveExportStepCurrent(step.key)">
+      <div class="archive-export-step__marker">
+        @if (isArchiveExportStepCompleted(step.key)) {
+          <mat-icon>check</mat-icon>
+        } @else {
+          {{ $index + 1 }}
+        }
+      </div>
+      <div class="archive-export-step__content">
+        <div class="archive-export-step__title">{{ step.title }}</div>
+      </div>
+    </div>
+  }
+</div>
+<div class="archive-export-copy">
+  Exportiert alle Inhalte dieses Klienten inklusive Dokumentationen, Hilfepläne und verknüpfte Referenzen.
+</div>
+<form [formGroup]="archiveExportForm" class="archive-export-form">
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Format</mat-label>
+      <mat-select formControlName="format">
+        @for (format of archiveExportFormats; track format.value) {
+          <mat-option [value]="format.value">{{ format.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="archive-export-form__anonymize">
+    <mat-checkbox formControlName="anonymize">
+      Mitarbeiternamen anonymisieren
+    </mat-checkbox>
+  </div>
+</form>
+
+<div class="archive-export-actions">
+  @if (isRequesting) {
+    <button type="button"
+            mat-raised-button
+            color="primary"
+            disabled>
+      <mat-spinner [diameter]="14" [strokeWidth]="2" class="me-3"></mat-spinner>
+      <span>Export wird erstellt</span>
+    </button>
+  } @else if (hasDownloadLink) {
+    <button type="button"
+            mat-raised-button
+            color="primary"
+            (click)="downloadExport.emit()"
+            [disabled]="isDownloading">
+      @if (isDownloading) {
+        <mat-spinner [diameter]="18" [strokeWidth]="2"></mat-spinner>
+      }
+      <span>Download ({{ archiveExportStatus?.format }})</span>
+    </button>
+  } @else {
+    <button type="button"
+            mat-raised-button
+            color="primary"
+            (click)="requestExport.emit()"
+            [disabled]="!archiveExportForm.valid || isDownloading">
+      Export anfordern
+    </button>
+  }
+</div>
+
+@if (hasDownloadLink) {
+  <div class="archive-export-meta">
+    Link gültig bis {{ archiveExportDownloadExpiresAt }}
+  </div>
+}

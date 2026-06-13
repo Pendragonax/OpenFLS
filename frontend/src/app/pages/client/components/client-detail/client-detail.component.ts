@@ -21,7 +21,6 @@ import {ClientArchiveExportStatusDto} from "../../../../shared/dtos/client-archi
 import {ClientArchiveExportFormat} from "../../../../shared/dtos/client-archive-export-format.model";
 import {MatDialog} from "@angular/material/dialog";
 import {ConfirmationModalComponent} from "../../../../shared/modals/confirmation-modal/confirmation-modal.component";
-import {Converter} from "../../../../shared/services/converter.helper";
 import {MatTabChangeEvent} from "@angular/material/tabs";
 import {
   DateAdapter,
@@ -47,31 +46,11 @@ import {
     standalone: false
 })
 export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> implements OnInit {
-
-  private static readonly archiveExportStepOrder = ['requested', 'generating', 'ready'] as const;
-
   // VARs
   institutions: InstitutionDto[] = [];
   categoryTemplates: CategoryTemplateDto[] = [];
   archiveHistory: ClientArchiveHistoryEntryReadDto[] = [];
   archiveExportStatus: ClientArchiveExportStatusDto | null = null;
-  archiveExportFormats = [
-    {value: ClientArchiveExportFormat.JSON, label: 'JSON'}
-  ];
-  archiveExportSteps = [
-    {
-      key: 'requested',
-      title: 'Angefordert'
-    },
-    {
-      key: 'generating',
-      title: 'Wird erstellt'
-    },
-    {
-      key: 'ready',
-      title: 'Bereit zum Download'
-    }
-  ] as const;
 
   // STATEs
   editMode = false;
@@ -92,8 +71,7 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     private route: ActivatedRoute,
     private router: Router,
     private userService: UserService,
-    private dialog: MatDialog,
-    private converter: Converter) {
+    private dialog: MatDialog) {
     super(helperService);
   }
 
@@ -229,6 +207,19 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     return this.isArchived
       ? 'Wollen Sie den Klienten wirklich reaktivieren?'
       : 'Wollen Sie den Klienten wirklich archivieren?';
+  }
+
+  private formatArchiveActionDate(actionDate: string | Date | null): string {
+    if (!actionDate) {
+      return '';
+    }
+
+    const date = actionDate instanceof Date ? actionDate : new Date(actionDate);
+    return date.toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 
   openArchiveConfirmation() {
@@ -397,77 +388,6 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     }
 
     return 'archive';
-  }
-
-  formatArchiveActionType(actionType: string): string {
-    if (actionType === 'EXPORT') {
-      return 'EXPORT';
-    }
-
-    if (actionType === 'REACTIVATE') {
-      return 'Reaktivierung';
-    }
-
-    return 'Archivierung';
-  }
-
-  formatArchiveActionDate(actionDate: string | Date | null): string {
-    if (!actionDate) {
-      return '';
-    }
-
-    const date = actionDate instanceof Date ? actionDate : new Date(actionDate);
-    return this.converter.formatDateToGerman(date);
-  }
-
-  formatArchiveActionTimestamp(actionTimestamp: string | Date | null): string {
-    if (!actionTimestamp) {
-      return '';
-    }
-
-    const timestamp = actionTimestamp instanceof Date ? actionTimestamp : new Date(actionTimestamp);
-    return this.converter.formatDateToGermanTime(timestamp);
-  }
-
-  formatArchiveEmployee(entry: ClientArchiveHistoryEntryReadDto): string {
-    return `${entry.executingEmployeeFirstname} ${entry.executingEmployeeLastname} (#${entry.executingEmployeeId})`;
-  }
-
-  shouldShowArchiveHistoryDate(actionType: string): boolean {
-    return actionType !== 'EXPORT';
-  }
-
-  shouldShowArchiveHistoryReason(actionType: string): boolean {
-    return actionType !== 'EXPORT';
-  }
-
-  get hasArchiveExportDownloadLink(): boolean {
-    return this.archiveExportStatus?.downloadLink != null;
-  }
-
-  get archiveExportStage(): 'requested' | 'generating' | 'ready' {
-    if (this.isArchiveExportRequesting) {
-      return 'generating';
-    }
-
-    if (this.hasArchiveExportDownloadLink) {
-      return 'ready';
-    }
-
-    return 'requested';
-  }
-
-  get archiveExportDownloadExpiresAt(): string {
-    return this.formatArchiveActionTimestamp(this.archiveExportStatus?.downloadLink?.downloadLinkExpiresAt ?? null);
-  }
-
-  isArchiveExportStepCompleted(step: 'requested' | 'generating' | 'ready'): boolean {
-    return ClientDetailComponent.archiveExportStepOrder.indexOf(step) <
-      ClientDetailComponent.archiveExportStepOrder.indexOf(this.archiveExportStage);
-  }
-
-  isArchiveExportStepCurrent(step: 'requested' | 'generating' | 'ready'): boolean {
-    return this.archiveExportStage === step;
   }
 
   private handleArchiveExportStatus(status: ClientArchiveExportStatusDto, successMessage: string) {

@@ -124,179 +124,22 @@
         </div>
 
         <div class="archive-columns">
-          <section class="archive-panel archive-panel--form">
-            <div class="archive-panel__title">Aktion</div>
-            <form [formGroup]="archiveActionForm" class="archive-form">
-              <div>
-                <mat-form-field appearance="fill">
-                  <mat-label>Datum</mat-label>
-                  <input matInput
-                         formControlName="actionDate"
-                         [matDatepicker]="archiveDatePicker"
-                         required>
-                  <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
-                  <mat-datepicker-toggle matSuffix [for]="archiveDatePicker"></mat-datepicker-toggle>
-                  <mat-datepicker #archiveDatePicker></mat-datepicker>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-form-field appearance="fill">
-                  <mat-label>Grund</mat-label>
-                  <input matInput
-                         formControlName="reason"
-                         required>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-form-field appearance="fill">
-                  <mat-label>Bemerkung</mat-label>
-                  <textarea matInput
-                            rows="4"
-                            formControlName="remark"
-                            required></textarea>
-                </mat-form-field>
-              </div>
-            </form>
+          <app-client-archive-action-panel
+            [archiveActionForm]="archiveActionForm"
+            [archived]="value.dto.archived"
+            [isSubmitting]="isSubmitting"
+            (confirm)="openArchiveConfirmation()"></app-client-archive-action-panel>
 
-            <div class="archive-actions">
-              @if (!value.dto.archived) {
-                <button mat-raised-button
-                        color="warn"
-                        [disabled]="!archiveActionForm.valid || isSubmitting"
-                        (click)="openArchiveConfirmation()">Archivieren</button>
-              } @else {
-                <button mat-raised-button
-                        color="primary"
-                        [disabled]="!archiveActionForm.valid || isSubmitting"
-                        (click)="openArchiveConfirmation()">Reaktivieren</button>
-              }
-            </div>
-          </section>
+          <app-client-archive-export-panel
+            [archiveExportForm]="archiveExportForm"
+            [archiveExportStatus]="archiveExportStatus"
+            [isRequesting]="isArchiveExportRequesting"
+            [isDownloading]="isArchiveExportDownloading"
+            (requestExport)="requestArchiveExport()"
+            (downloadExport)="downloadArchiveExport()"></app-client-archive-export-panel>
 
-          <section class="archive-panel archive-panel--export">
-            <div class="archive-panel__title">Daten exportieren</div>
-            <div class="archive-export-stepper">
-              @for (step of archiveExportSteps; track step.key) {
-                <div class="archive-export-step"
-                     [class.archive-export-step--completed]="isArchiveExportStepCompleted(step.key)"
-                     [class.archive-export-step--current]="isArchiveExportStepCurrent(step.key)">
-                  <div class="archive-export-step__marker">
-                    @if (isArchiveExportStepCompleted(step.key)) {
-                      <mat-icon>check</mat-icon>
-                    } @else {
-                      {{ $index + 1 }}
-                    }
-                  </div>
-                  <div class="archive-export-step__content">
-                    <div class="archive-export-step__title">{{ step.title }}</div>
-                  </div>
-                </div>
-              }
-            </div>
-            <div class="archive-export-copy">
-              Exportiert alle Inhalte dieses Klienten inklusive Dokumentationen, Hilfepläne und verknüpfte Referenzen.
-            </div>
-            <form [formGroup]="archiveExportForm" class="archive-export-form">
-              <div>
-                <mat-form-field appearance="fill">
-                  <mat-label>Format</mat-label>
-                  <mat-select formControlName="format">
-                    @for (format of archiveExportFormats; track format.value) {
-                      <mat-option [value]="format.value">{{ format.label }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="archive-export-form__anonymize">
-                <mat-checkbox formControlName="anonymize">
-                  Mitarbeiternamen anonymisieren
-                </mat-checkbox>
-              </div>
-            </form>
-
-            <div class="archive-export-actions">
-              @if (isArchiveExportRequesting) {
-                <button type="button"
-                        mat-raised-button
-                        color="primary"
-                        disabled>
-                  <mat-spinner [diameter]="14" [strokeWidth]="2" class="me-3"></mat-spinner>
-                  <span>Export wird erstellt</span>
-                </button>
-              } @else if (hasArchiveExportDownloadLink) {
-                <button type="button"
-                        mat-raised-button
-                        color="primary"
-                        (click)="downloadArchiveExport()"
-                        [disabled]="isArchiveExportDownloading">
-                  @if (isArchiveExportDownloading) {
-                    <mat-spinner [diameter]="18" [strokeWidth]="2"></mat-spinner>
-                  }
-                  <span>Download ({{ archiveExportStatus?.format }})</span>
-                </button>
-              } @else {
-                <button type="button"
-                        mat-raised-button
-                        color="primary"
-                        (click)="requestArchiveExport()"
-                        [disabled]="!archiveExportForm.valid || isArchiveExportDownloading">
-                  Export anfordern
-                </button>
-              }
-            </div>
-
-            @if (hasArchiveExportDownloadLink) {
-              <div class="archive-export-meta">
-                Link gültig bis {{ archiveExportDownloadExpiresAt }}
-              </div>
-            }
-          </section>
-
-          <section class="archive-panel archive-panel--history">
-            <div class="archive-panel__title">Historie</div>
-            <div class="archive-history-scroll">
-              <div class="archive-history">
-                @if (archiveHistory.length > 0) {
-                  @for (entry of archiveHistory; track entry.id) {
-                    <div class="archive-history-entry"
-                         [class.archive-history-entry--archive]="entry.actionType === 'ARCHIVE'"
-                         [class.archive-history-entry--reactivate]="entry.actionType === 'REACTIVATE'">
-                      <div class="archive-history-entry__action">
-                        {{ formatArchiveActionType(entry.actionType) }}
-                      </div>
-                      <div class="archive-history-entry__details">
-                        <div class="archive-history-entry__details-column">
-                          @if (shouldShowArchiveHistoryDate(entry.actionType)) {
-                            <app-information-row [title]="'Datum'"
-                                                 [content]="formatArchiveActionDate(entry.actionDate)"
-                                                 [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
-                          }
-                          @if (shouldShowArchiveHistoryReason(entry.actionType)) {
-                            <app-information-row [title]="'Grund'"
-                                                 [content]="entry.reason"
-                                                 [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
-                          }
-                          <app-information-row [title]="'Bemerkung'"
-                                               [content]="entry.remark"
-                                               [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
-                        </div>
-                        <div class="archive-history-entry__details-column archive-history-entry__details-column--secondary">
-                          <app-information-row [title]="'Ausgeführt von'"
-                                               [content]="formatArchiveEmployee(entry)"
-                                               [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
-                          <app-information-row [title]="'Ausgeführt am'"
-                                               [content]="formatArchiveActionTimestamp(entry.actionTimestamp)"
-                                               [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                } @else {
-                  <div class="archive-history__empty">Keine Historie vorhanden.</div>
-                }
-              </div>
-            </div>
-          </section>
+          <app-client-archive-history-panel
+            [archiveHistory]="archiveHistory"></app-client-archive-history-panel>
         </div>
       </div>
     </mat-tab>

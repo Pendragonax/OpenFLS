@@ -1,0 +1,43 @@
+<div class="archive-panel__title">Historie</div>
+<div class="archive-history-scroll">
+  <div class="archive-history">
+    @if (archiveHistory.length > 0) {
+      @for (entry of archiveHistory; track entry.id) {
+        <div class="archive-history-entry"
+             [class.archive-history-entry--archive]="entry.actionType === 'ARCHIVE'"
+             [class.archive-history-entry--reactivate]="entry.actionType === 'REACTIVATE'">
+          <div class="archive-history-entry__action">
+            {{ formatArchiveActionType(entry.actionType) }}
+          </div>
+          <div class="archive-history-entry__details">
+            <div class="archive-history-entry__details-column">
+              @if (shouldShowArchiveHistoryDate(entry.actionType)) {
+                <app-information-row [title]="'Datum'"
+                                     [content]="formatArchiveActionDate(entry.actionDate)"
+                                     [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
+              }
+              @if (shouldShowArchiveHistoryReason(entry.actionType)) {
+                <app-information-row [title]="'Grund'"
+                                     [content]="entry.reason"
+                                     [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
+              }
+              <app-information-row [title]="'Bemerkung'"
+                                   [content]="entry.remark"
+                                   [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
+            </div>
+            <div class="archive-history-entry__details-column archive-history-entry__details-column--secondary">
+              <app-information-row [title]="'Ausgeführt von'"
+                                   [content]="formatArchiveEmployee(entry)"
+                                   [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
+              <app-information-row [title]="'Ausgeführt am'"
+                                   [content]="formatArchiveActionTimestamp(entry.actionTimestamp)"
+                                   [titleWidthClass]="'col-sm-4 col-md-4 col-lg-4'"></app-information-row>
+            </div>
+          </div>
+        </div>
+      }
+    } @else {
+      <div class="archive-history__empty">Keine Historie vorhanden.</div>
+    }
+  </div>
+</div>
