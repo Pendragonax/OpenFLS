@@ -3,6 +3,12 @@ package de.vinz.openfls.domains.clients
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionRequest
 import de.vinz.openfls.domains.clients.archive.ClientArchiveService
 import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
+import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportFormat
+import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportService
+import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportStateException
+import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportDownloadLinkDto
+import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportRequestDto
+import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportStatusDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
@@ -33,6 +39,9 @@ class ClientArchiveControllerWebMvcTest {
 
     @MockitoBean
     lateinit var clientArchiveService: ClientArchiveService
+
+    @MockitoBean
+    lateinit var clientArchiveExportService: ClientArchiveExportService
 
     @MockitoBean
     lateinit var employeeService: EmployeeService
@@ -212,6 +221,104 @@ class ClientArchiveControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(409)
+    }
+
+    @Test
+    fun requestExport_withPermission_returnsDownloadStatus() {
+        // Given
+        val clientId = 17L
+        val employeeId = 8L
+        val employeeDto = EmployeeDto().apply {
+            id = employeeId
+            firstName = "Anna"
+            lastName = "Lead"
+        }
+        val downloadLink = ClientArchiveExportDownloadLinkDto().apply {
+            this.downloadLink = "/clients/$clientId/archive/export/token-1"
+            downloadLinkExpiresAt = LocalDateTime.of(2026, 6, 13, 12, 0)
+        }
+        val status = ClientArchiveExportStatusDto().apply {
+            ready = true
+            format = ClientArchiveExportFormat.JSON
+            requestedAt = LocalDateTime.of(2026, 6, 13, 11, 15)
+            requestedByEmployeeId = employeeId
+            this.downloadLink = downloadLink
+        }
+        given(accessService.getId()).willReturn(employeeId)
+        given(accessService.isAdmin()).willReturn(true)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
+        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
+        given(
+            clientArchiveExportService.requestExport(
+                eq(clientId),
+                eq(ClientArchiveExportFormat.JSON),
+                any()
+            )
+        ).willReturn(status)
+
+        // When
+        val result = mockMvc.post("/clients/$clientId/archive/export") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"format":"JSON"}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"downloadLink\":\"/clients/$clientId/archive/export/token-1\"")
+    }
+
+    @Test
+    fun getExportStatus_withPermission_returnsCurrentLink() {
+        // Given
+        val clientId = 17L
+        val employeeId = 8L
+        val employeeDto = EmployeeDto().apply {
+            id = employeeId
+            firstName = "Anna"
+            lastName = "Lead"
+        }
+        val downloadLink = ClientArchiveExportDownloadLinkDto().apply {
+            this.downloadLink = "/clients/$clientId/archive/export/token-1"
+            downloadLinkExpiresAt = LocalDateTime.of(2026, 6, 13, 12, 0)
+        }
+        val status = ClientArchiveExportStatusDto().apply {
+            ready = true
+            format = ClientArchiveExportFormat.JSON
+            requestedAt = LocalDateTime.of(2026, 6, 13, 11, 15)
+            requestedByEmployeeId = employeeId
+            this.downloadLink = downloadLink
+        }
+        given(accessService.getId()).willReturn(employeeId)
+        given(accessService.isAdmin()).willReturn(true)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
+        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
+        given(clientArchiveExportService.getExportStatus(eq(clientId), any())).willReturn(status)
+
+        // When
+        val result = mockMvc.get("/clients/$clientId/archive/export").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"ready\":true")
+    }
+
+    @Test
+    fun downloadExport_withExpiredToken_returnsGone() {
+        // Given
+        val clientId = 17L
+        val downloadToken = "token-1"
+        given(
+            clientArchiveExportService.downloadExport(
+                clientId,
+                downloadToken
+            )
+        ).willThrow(ClientArchiveExportStateException("export unavailable"))
+
+        // When
+        val result = mockMvc.get("/clients/$clientId/archive/export/$downloadToken").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(410)
     }
 
 }

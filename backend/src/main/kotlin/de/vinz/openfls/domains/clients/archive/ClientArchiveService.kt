@@ -3,6 +3,7 @@ package de.vinz.openfls.domains.clients.archive
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
+import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportFormat
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.stereotype.Service
@@ -58,6 +59,37 @@ class ClientArchiveService(
     fun getArchiveHistory(clientId: Long): List<ClientArchiveHistoryEntryReadDto> {
         return clientService.getArchiveHistoryById(clientId)
             .map { ClientArchiveHistoryEntryReadDto.from(it) }
+    }
+
+    @Transactional
+    fun recordExport(
+        clientId: Long,
+        actionDate: LocalDate,
+        actionTimestamp: LocalDateTime,
+        reason: String,
+        remark: String,
+        actor: ClientArchiveActor,
+        exportFormat: ClientArchiveExportFormat
+    ): ClientArchiveHistoryEntryDto {
+        val client = clientService.getById(clientId)
+            ?: throw IllegalArgumentException("client not found")
+
+        val historyEntry = ClientArchiveHistoryEntry(
+            actionType = ClientArchiveActionType.EXPORT,
+            exportFormat = exportFormat,
+            actionDate = actionDate,
+            actionTimestamp = actionTimestamp,
+            reason = reason,
+            remark = remark,
+            executingEmployeeId = actor.employeeId,
+            executingEmployeeFirstname = actor.firstname,
+            executingEmployeeLastname = actor.lastname,
+            client = client
+        )
+
+        client.archiveHistoryEntries.add(historyEntry)
+
+        return ClientArchiveHistoryEntryDto.from(historyEntry)
     }
 
     private fun changeArchiveState(
