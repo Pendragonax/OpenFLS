@@ -8,9 +8,12 @@
         [selectedHourType]="selectedHourType"
         [exportDisabled]="tableData.length === 0"
         [loading]="isGenerating"
+        [showArchivedEmployees]="showArchivedEmployees"
+        [showArchivedEmployeesToggleVisible]="showArchivedEmployeesToggleVisible"
         (yearChanged)="onYearChanged($event)"
         (hourTypeChanged)="onHourTypeChanged($event)"
         (infoClicked)="openValueTypeInfoModal($event)"
+        (showArchivedEmployeesChange)="onArchivedVisibilityChanged($event)"
         (exportClicked)="exportTable()">
       </app-contingent-overview-toolbar>
 
@@ -25,6 +28,7 @@
             [boldColumnIndices]="[0,1]"
             [exportFilename]="'ContingentOverview'"
             [columnFixedWidthFromIndex]="1"
+            [rowClasses]="rowClasses"
             [data$]="data$"
             [header$]="header$"></app-object-table>
         }
@@ -35,8 +39,9 @@
           <app-loading-spinner></app-loading-spinner>
         }
         @if (!isGenerating && isLoadedInitially) {
-          @for (row of tableData; track $index) {
-            <div class="contingent-card">
+          @for (row of tableData; track $index; let rowIndex = $index) {
+            <div class="contingent-card"
+                 [class.contingent-card--archived]="rowClasses[rowIndex] === 'contingent-row--archived'">
               <div class="contingent-card__header">
                 <div class="contingent-card__name">{{row[0]}}</div>
                 <div class="contingent-card__total">{{tableHeader[1]}}: {{row[1]}}</div>

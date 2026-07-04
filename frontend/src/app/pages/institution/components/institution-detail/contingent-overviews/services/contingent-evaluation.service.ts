@@ -13,8 +13,8 @@ export class ContingentEvaluationService {
   constructor(
     private http: HttpClient) { }
 
-  getOverviewByInstitutionIdAndYear(institutionId: number, year: number): Observable<ContingentEvaluationDto> {
+  getOverviewByInstitutionIdAndYear(institutionId: number, year: number, includeArchivedEmployees: boolean = false): Observable<ContingentEvaluationDto> {
     return this.http
-      .get<ContingentEvaluationDto>(`${environment.api_url}${this.url}/evaluations/institution/${institutionId}/${year}`)
+      .get<ContingentEvaluationDto>(`${environment.api_url}${this.url}/evaluations/institution/${institutionId}/${year}?includeArchivedEmployees=${includeArchivedEmployees}`)
   }
 }

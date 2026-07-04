@@ -30,6 +30,8 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
 
   editMode: boolean = false;
   adminMode: boolean = false;
+  canToggleArchivedContingentEmployees: boolean = false;
+  showArchivedContingentEmployees: boolean = false;
   institutionId: number = 0;
   illegalServices: Service[] = []
 
@@ -58,15 +60,16 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
       this.institutionId = parseInt(id)
       // sync loading employees and institution
       combineLatest([
-          this.institutionService.getById(+id),
-          this.employeeService.allValues$,
-          this.userService.leadingInstitutions$,
-          this.userService.user$,
-          this.serviceService.getIllegalByInstitutionId(+id)
+        this.institutionService.getById(+id),
+        this.employeeService.allValues$,
+        this.userService.leadingInstitutions$,
+        this.userService.user$,
+        this.serviceService.getIllegalByInstitutionId(+id)
         ]
       )
         .subscribe(([institution, employees, leadingIds, user, illegalServices]) => {
           this.adminMode = (user?.access?.role ?? 99) === 1;
+          this.canToggleArchivedContingentEmployees = this.adminMode;
           this.editMode = this.isEditable(leadingIds, institution) || this.adminMode;
           this.value = <InstitutionViewModel>{
             dto: institution,
@@ -126,6 +129,10 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
     });
 
     this.update();
+  }
+
+  onArchivedContingentVisibilityChanged(showArchivedEmployees: boolean) {
+    this.showArchivedContingentEmployees = showArchivedEmployees;
   }
 
   private isEditable(leadingIds: number[], institution: InstitutionDto | null): boolean {

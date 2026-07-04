@@ -77,6 +77,7 @@ class ContingentEvaluationServiceTest {
         assertThat(evaluation.employees).hasSize(1)
         val employeeEvaluation = evaluation.employees.first()
         assertThat(employeeEvaluation.employeeId).isEqualTo(employee.id)
+        assertThat(employeeEvaluation.archived).isFalse()
         assertThat(employeeEvaluation.executedHours[0]).isEqualTo(1.0)
         assertThat(employeeEvaluation.executedPercent[0]).isEqualTo(50.0)
         assertThat(employeeEvaluation.missingHours[0]).isEqualTo(1.0)
@@ -181,6 +182,38 @@ class ContingentEvaluationServiceTest {
         assertThat(evaluations).hasSize(2)
         assertThat(evaluations[0].employeeId).isEqualTo(employeeA.id)
         assertThat(evaluations[1].employeeId).isEqualTo(employeeB.id)
+    }
+
+    @Test
+    fun generateContingentEvaluationFor_archivedEmployee_marksArchivedEmployee() {
+        // Given
+        val year = 2024
+        val institutionId = 1L
+        val institution = mockInstitution()
+        val archivedEmployee = mockEmployee(11L, "Anna", "Archive", archived = true)
+        val archivedContingent = mockContingent(
+            id = 2L,
+            employee = archivedEmployee,
+            institution = institution,
+            start = LocalDate.of(year, 1, 1),
+            end = null,
+            weeklyHours = 7.0
+        )
+        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val contingentHours = listOf(2.0, 2.0) + List(11) { 0.0 }
+
+        whenever(serviceService.getContingentEvaluationServiceDTOsBy(institutionId, year)).thenReturn(emptyList())
+        whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(listOf(archivedContingent))
+        whenever(absenceService.getAllByYear(year)).thenReturn(yearlyAbsences)
+        whenever(contingentService.calculateContingentHoursBy(year, archivedContingent, yearlyAbsences))
+            .thenReturn(contingentHours)
+
+        // When
+        val evaluation = contingentEvaluationService.generateContingentEvaluationFor(year, institutionId, includeArchivedEmployees = true)
+
+        // Then
+        assertThat(evaluation.employees).hasSize(1)
+        assertThat(evaluation.employees.first().archived).isTrue()
     }
 
     @Test

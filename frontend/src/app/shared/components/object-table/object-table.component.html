@@ -27,6 +27,9 @@
     }
 
     <tr mat-header-row *matHeaderRowDef="header"></tr>
-    <tr mat-row *matRowDef="let row; columns: header;" class="overview-row-height"></tr>
+    <tr mat-row
+        *matRowDef="let row; let rowIndex = index; columns: header;"
+        class="overview-row-height"
+        [ngClass]="rowClasses[rowIndex] ?? ''"></tr>
   </table>
 </div>

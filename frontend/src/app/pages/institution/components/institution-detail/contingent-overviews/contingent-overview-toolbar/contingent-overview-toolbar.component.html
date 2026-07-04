@@ -35,6 +35,16 @@
         <mat-icon>info</mat-icon>
       </button>
     </mat-form-field>
+
+    @if (showArchivedEmployeesToggleVisible) {
+      <div class="archived-toggle">
+        <mat-slide-toggle
+          [checked]="showArchivedEmployees"
+          (change)="onArchivedVisibilityChanged($event.checked)">
+          Archivierte Mitarbeiter anzeigen
+        </mat-slide-toggle>
+      </div>
+    }
   </div>
 
   <button

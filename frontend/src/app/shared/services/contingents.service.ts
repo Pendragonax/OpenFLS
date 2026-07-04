@@ -42,9 +42,9 @@ export class ContingentsService extends Base<ContingentDto> {
       .get<ContingentDto[]>(`${environment.api_url}${this.url}/employee/${id}`)
   }
 
-  getByInstitutionId(id: Number): Observable<ContingentDto[]> {
+  getByInstitutionId(id: Number, includeArchivedEmployees: boolean = false): Observable<ContingentDto[]> {
     return this.http
-      .get<ContingentDto[]>(`${environment.api_url}${this.url}/institution/${id}`)
+      .get<ContingentDto[]>(`${environment.api_url}${this.url}/institution/${id}?includeArchivedEmployees=${includeArchivedEmployees}`)
   }
 
   getCombinationByEmployeeId(id: number): Observable<[EmployeeDto, InstitutionDto, ContingentDto, boolean][]> {
@@ -66,11 +66,11 @@ export class ContingentsService extends Base<ContingentDto> {
     }))
   }
 
-  getCombinationByInstitutionId(id: number): Observable<[EmployeeDto, InstitutionDto, ContingentDto, boolean][]> {
+  getCombinationByInstitutionId(id: number, includeArchivedEmployees: boolean = false): Observable<[EmployeeDto, InstitutionDto, ContingentDto, boolean][]> {
     return combineLatest([
       this.institutionService.getById(id),
-      this.employeeService.allValues$,
-      this.getByInstitutionId(id),
+      this.employeeService.getAll(includeArchivedEmployees),
+      this.getByInstitutionId(id, includeArchivedEmployees),
       this.userService.leadingInstitutions$,
       this.userService.isAdmin$]
     ).pipe(map(([institution, employees, contingents, leadingIds, isAdmin]) => {
