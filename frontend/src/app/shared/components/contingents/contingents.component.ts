@@ -122,7 +122,7 @@ export class ContingentsComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['showArchivedEmployees'] && !changes['showArchivedEmployees'].firstChange && this.institutionView != null) {
+    if (changes['showArchivedEmployees'] && !changes['showArchivedEmployees'].firstChange && (this.institutionView != null || this.employeeView != null)) {
       this.loadContingents();
     }
   }
@@ -187,7 +187,7 @@ export class ContingentsComponent
   loadContingents() {
     if (this.employeeView != null) {
       this.contingentService
-        .getCombinationByEmployeeId(this.employeeView.dto.id)
+        .getCombinationByEmployeeId(this.employeeView.dto.id, this.showArchivedEmployees)
         .subscribe((contingents) => {
           this.sourceTableData = contingents;
           this.setTableData(contingents);

@@ -30,8 +30,14 @@ class ContingentService(
             throw IllegalArgumentException("end before start")
         }
 
+        val employee = employeeService.getById(contingentDto.employeeId)
+            ?: throw IllegalArgumentException("employee not found")
+        if (employee.archived) {
+            throw IllegalArgumentException("employee is archived")
+        }
+
         val entity = Contingent.of(contingentDto)
-        entity.employee = employeeService.getById(contingentDto.employeeId, true)
+        entity.employee = employee
         entity.institution = institutionService.getEntityById(contingentDto.institutionId)
 
         return ContingentDto.from(contingentRepository.save(entity))
@@ -44,8 +50,14 @@ class ContingentService(
         if (contingentDto.end != null && contingentDto.start >= contingentDto.end)
             throw IllegalArgumentException("end before start")
 
+        val employee = employeeService.getById(contingentDto.employeeId)
+            ?: throw IllegalArgumentException("employee not found")
+        if (employee.archived) {
+            throw IllegalArgumentException("employee is archived")
+        }
+
         val entity = Contingent.of(contingentDto)
-        entity.employee = employeeService.getById(contingentDto.employeeId, true)
+        entity.employee = employee
         entity.institution = institutionService.getEntityById(contingentDto.institutionId)
 
         val savedEntity = contingentRepository.save(entity)
@@ -94,9 +106,9 @@ class ContingentService(
     }
 
     @Transactional(readOnly = true)
-    fun getByEmployeeId(id: Long): List<ContingentDto> {
+    fun getByEmployeeId(id: Long, includeArchivedEmployees: Boolean = false): List<ContingentDto> {
         val employee = employeeService.getById(id) ?: return emptyList()
-        if (employee.archived) {
+        if (employee.archived && !includeArchivedEmployees) {
             return emptyList()
         }
 

@@ -266,6 +266,10 @@
            *showOnRole="'leader'">
     <app-contingents class="mb-2"
                      [hideEmployeeColumn]="true"
+                     [hideAddButton]="hideContingentAddButton"
+                     [showArchivedEmployees]="showArchivedContingentEmployees"
+                     [showArchivedEmployeesToggleVisible]="true"
+                     (showArchivedEmployeesChange)="onArchivedContingentVisibilityChanged($event)"
                      [employeeView$]="employeeView$"></app-contingents>
   </mat-tab>
 

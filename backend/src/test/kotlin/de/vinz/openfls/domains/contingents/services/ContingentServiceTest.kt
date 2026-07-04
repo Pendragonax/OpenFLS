@@ -77,7 +77,7 @@ class ContingentServiceTest {
             employee = employee,
             institution = institution
         )
-        whenever(employeeService.getById(dto.employeeId, true)).thenReturn(employee)
+        whenever(employeeService.getById(dto.employeeId)).thenReturn(employee)
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
         whenever(contingentRepository.save(any())).thenReturn(saved)
 
@@ -88,6 +88,25 @@ class ContingentServiceTest {
         assertThat(result.id).isEqualTo(12)
         assertThat(result.employeeId).isEqualTo(5)
         assertThat(result.institutionId).isEqualTo(7)
+    }
+
+    @Test
+    fun create_archivedEmployee_throwsIllegalArgument() {
+        // Given
+        val dto = contingentDto(
+            id = 0,
+            start = LocalDate.of(2024, 1, 1),
+            weeklyHours = 10.0,
+            employeeId = 5,
+            institutionId = 7
+        )
+        val archivedEmployee = Employee(id = 5, archived = true)
+        whenever(employeeService.getById(dto.employeeId)).thenReturn(archivedEmployee)
+
+        // When / Then
+        assertThatThrownBy { contingentService.create(dto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("employee is archived")
     }
 
     @Test
@@ -156,7 +175,7 @@ class ContingentServiceTest {
             institution = Institution(id = 3)
         )
         whenever(contingentRepository.existsById(dto.id)).thenReturn(true)
-        whenever(employeeService.getById(dto.employeeId, true)).thenReturn(Employee(id = dto.employeeId))
+        whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId))
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(Institution(id = dto.institutionId))
         whenever(contingentRepository.save(any())).thenReturn(saved)
 
@@ -167,8 +186,28 @@ class ContingentServiceTest {
         assertThat(result.id).isEqualTo(9)
         assertThat(result.employeeId).isEqualTo(2)
         assertThat(result.institutionId).isEqualTo(3)
-        verify(employeeService).getById(dto.employeeId, true)
+        verify(employeeService).getById(dto.employeeId)
         verify(institutionService).getEntityById(dto.institutionId)
+    }
+
+    @Test
+    fun update_archivedEmployee_throwsIllegalArgument() {
+        // Given
+        val dto = contingentDto(
+            id = 9,
+            start = LocalDate.of(2024, 1, 1),
+            end = LocalDate.of(2024, 2, 1),
+            weeklyHours = 5.0,
+            employeeId = 2,
+            institutionId = 3
+        )
+        whenever(contingentRepository.existsById(dto.id)).thenReturn(true)
+        whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId, archived = true))
+
+        // When / Then
+        assertThatThrownBy { contingentService.update(dto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("employee is archived")
     }
 
     @Test
@@ -320,6 +359,21 @@ class ContingentServiceTest {
 
         // Then
         assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun getByEmployeeId_archivedEmployee_withOptInReturnsSortedContingents() {
+        // Given
+        val contingent1 = Contingent(id = 1, employee = Employee(id = 2, archived = true), institution = Institution(id = 2))
+        val contingent2 = Contingent(id = 2, employee = Employee(id = 1, archived = true), institution = Institution(id = 1))
+        whenever(employeeService.getById(7)).thenReturn(Employee(id = 7, archived = true))
+        whenever(contingentRepository.findAllByEmployeeId(7)).thenReturn(listOf(contingent1, contingent2))
+
+        // When
+        val result = contingentService.getByEmployeeId(7, includeArchivedEmployees = true)
+
+        // Then
+        assertThat(result.map { it.institutionId }).containsExactly(1, 2)
     }
 
     @Test

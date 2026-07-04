@@ -82,6 +82,16 @@ describe('ContingentsComponent', () => {
     expect(contingentsService.getCombinationByInstitutionId).toHaveBeenCalledWith(9, true);
   });
 
+  it('loadContingents_employeeView_showArchivedEmployeesTrue_requestsArchivedEmployees', () => {
+    const employeeView = {dto: Object.assign(new EmployeeDto(), {id: 7}), editable: true} as any;
+
+    component.employeeView = employeeView;
+    component.showArchivedEmployees = true;
+    component.loadContingents();
+
+    expect(contingentsService.getCombinationByEmployeeId).toHaveBeenCalledWith(7, true);
+  });
+
   it('onArchivedVisibilityChanged_emitsSelectionChange', () => {
     const emitted: boolean[] = [];
     component.showArchivedEmployeesChange.subscribe(value => emitted.push(value));
@@ -89,6 +99,23 @@ describe('ContingentsComponent', () => {
     component.onArchivedVisibilityChanged(true);
 
     expect(emitted).toEqual([true]);
+  });
+
+  it('ngOnChanges_showArchivedEmployeesChangesOnEmployeeView_reloadsContingents', () => {
+    const employeeView = {dto: Object.assign(new EmployeeDto(), {id: 7}), editable: true} as any;
+    component.employeeView = employeeView;
+    component.showArchivedEmployees = true;
+
+    component.ngOnChanges({
+      showArchivedEmployees: {
+        previousValue: false,
+        currentValue: true,
+        firstChange: false,
+        isFirstChange: () => false
+      } as any
+    });
+
+    expect(contingentsService.getCombinationByEmployeeId).toHaveBeenCalledWith(7, true);
   });
 
   it('isArchivedEmployeeContingent_returnsTrueForArchivedEmployees', () => {

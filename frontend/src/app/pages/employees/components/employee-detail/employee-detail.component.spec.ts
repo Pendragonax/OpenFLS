@@ -90,6 +90,14 @@ describe('EmployeeDetailComponent', () => {
     expect(component.archiveHistory).toHaveLength(1);
     expect(component.detailForm.disabled).toBe(true);
     expect(component.isArchived).toBe(true);
+    expect(component.hideContingentAddButton).toBe(true);
+    expect(component.showArchivedContingentEmployees).toBe(true);
+  });
+
+  it('onArchivedContingentVisibilityChanged_updatesContingentToggleState', () => {
+    component.onArchivedContingentVisibilityChanged(false);
+
+    expect(component.showArchivedContingentEmployees).toBe(false);
   });
 });
 

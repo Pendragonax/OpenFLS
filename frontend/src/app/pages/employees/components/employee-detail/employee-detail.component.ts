@@ -58,6 +58,7 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
   editMode: boolean = false;
   adminMode: boolean = false;
   selectedTabIndex = 0;
+  showArchivedContingentEmployees: boolean = true;
   archiveActionForm = new EmployeeArchiveActionForm();
 
   // FORMs
@@ -190,6 +191,10 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
     return this.editMode && !this.value.archived;
   }
 
+  get hideContingentAddButton(): boolean {
+    return this.value.archived;
+  }
+
   get showArchiveTab(): boolean {
     return this.adminMode;
   }
@@ -272,6 +277,10 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
 
   onTabChanged(event: MatTabChangeEvent) {
     this.selectedTabIndex = event.index;
+  }
+
+  onArchivedContingentVisibilityChanged(showArchivedEmployees: boolean) {
+    this.showArchivedContingentEmployees = showArchivedEmployees;
   }
 
   get isArchived(): boolean {

@@ -61,4 +61,19 @@ class ContingentControllerWebMvcTest {
         assertThat(result.response.status).isEqualTo(200)
         verify(contingentService).getByInstitutionId(9L, false)
     }
+
+    @Test
+    fun getByEmployeeId_withIncludeArchived_forwardsOptIn() {
+        // Given
+        given(contingentService.getByEmployeeId(7L, true)).willReturn(emptyList())
+
+        // When
+        val result = mockMvc.get("/contingents/employee/7") {
+            param("includeArchivedEmployees", "true")
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        verify(contingentService).getByEmployeeId(7L, true)
+    }
 }

@@ -44,4 +44,12 @@ describe('ContingentsService', () => {
     expect(request.request.method).toBe('GET');
     request.flush([]);
   });
+
+  it('getByEmployeeId_includeArchivedTrue_should_requestArchivedEmployees', () => {
+    service.getByEmployeeId(9, true).subscribe();
+
+    const request = httpMock.expectOne(`${environment.api_url}contingents/employee/9?includeArchivedEmployees=true`);
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
 });
