@@ -32,4 +32,17 @@ class CustomUserDetailsTest {
         // Then
         assertThat(result.isEnabled()).isTrue()
     }
+
+    @Test
+    fun isEnabled_archivedEmployee_returnsFalse() {
+        // Given
+        val employee = Employee(inactive = false, archived = true)
+        val access = EmployeeAccess(username = "archived", password = "secret", role = 3, employee = employee)
+
+        // When
+        val result = CustomUserDetails(access)
+
+        // Then
+        assertThat(result.isEnabled()).isFalse()
+    }
 }

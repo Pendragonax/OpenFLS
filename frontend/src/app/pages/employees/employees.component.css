@@ -7,3 +7,20 @@ td , th {
   word-wrap: break-word;
   max-width: 200px;
 }
+
+.employee-row--archived {
+  background: #fff3f1;
+}
+
+.employee-row--archived td {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.employee-row--archived td:first-child {
+  box-shadow: inset 4px 0 0 #c94a43;
+}
+
+.employee-row--archived:hover {
+  background: #fff8f7;
+}

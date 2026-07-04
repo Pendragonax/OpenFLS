@@ -1,0 +1,46 @@
+<div class="archive-panel__title">Aktion</div>
+<form [formGroup]="archiveActionForm" class="archive-form">
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Datum</mat-label>
+      <input matInput
+             formControlName="actionDate"
+             [matDatepicker]="archiveDatePicker"
+             required>
+      <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+      <mat-datepicker-toggle matSuffix [for]="archiveDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #archiveDatePicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Grund</mat-label>
+      <input matInput
+             formControlName="reason"
+             required>
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Bemerkung</mat-label>
+      <textarea matInput
+                rows="4"
+                formControlName="remark"
+                required></textarea>
+    </mat-form-field>
+  </div>
+</form>
+
+<div class="archive-actions">
+  @if (!archived) {
+    <button mat-raised-button
+            color="warn"
+            [disabled]="!archiveActionForm.valid || isSubmitting"
+            (click)="confirm.emit()">Archivieren</button>
+  } @else {
+    <button mat-raised-button
+            color="primary"
+            [disabled]="!archiveActionForm.valid || isSubmitting"
+            (click)="confirm.emit()">Reaktivieren</button>
+  }
+</div>

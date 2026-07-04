@@ -15,11 +15,34 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {HelperService} from "../../../../shared/services/helper.service";
 import {DetailPageComponent} from "../../../../shared/components/detail-page.component";
 import {EmployeeViewModel} from "../../../../shared/models/employee-view.model";
+import {EmployeeArchiveService} from "../../../../shared/services/employee-archive.service";
+import {EmployeeArchiveActionForm} from "../../forms/employee-archive-action-form";
+import {EmployeeArchiveActionRequest} from "../../../../shared/dtos/employee-archive-action-request.model";
+import {EmployeeArchiveHistoryEntryReadDto} from "../../../../shared/dtos/employee-archive-history-entry-read-dto.model";
+import {MatTabChangeEvent} from "@angular/material/tabs";
+import {MatDialog} from "@angular/material/dialog";
+import {ConfirmationModalComponent} from "../../../../shared/modals/confirmation-modal/confirmation-modal.component";
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+  MAT_NATIVE_DATE_FORMATS,
+  NativeDateAdapter
+} from "@angular/material/core";
 
 @Component({
     selector: 'app-employee-detail',
     templateUrl: './employee-detail.component.html',
     styleUrls: ['./employee-detail.component.css'],
+    providers: [
+      {provide: MAT_DATE_LOCALE, useValue: 'de-DE'},
+      {
+        provide: DateAdapter,
+        useClass: NativeDateAdapter,
+        deps: [MAT_DATE_LOCALE]
+      },
+      {provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS}
+    ],
     standalone: false
 })
 export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> implements OnInit {
@@ -29,10 +52,13 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
   permissionTableColumns: string[] = ['name', 'lead', 'write', 'read', 'affiliated'];
   employeeView$: ReplaySubject<EmployeeViewModel> = new ReplaySubject<EmployeeViewModel>();
   employee$: ReplaySubject<EmployeeDto> = new ReplaySubject<EmployeeDto>();
+  archiveHistory: EmployeeArchiveHistoryEntryReadDto[] = [];
 
   // STATEs
   editMode: boolean = false;
   adminMode: boolean = false;
+  selectedTabIndex = 0;
+  archiveActionForm = new EmployeeArchiveActionForm();
 
   // FORMs
   permissionForm = new UntypedFormGroup({
@@ -70,8 +96,10 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
     private route: ActivatedRoute,
     private userService: UserService,
     private dtoCombinerService: DtoCombinerService,
+    private employeeArchiveService: EmployeeArchiveService,
     protected override helperService: HelperService,
-    private modal: NgbModal
+    private modal: NgbModal,
+    private dialog: MatDialog
   ) {
     super(helperService);
   }
@@ -99,6 +127,7 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
             leadingIds.some(x => employee.permissions.some(y => y.affiliated && y.institutionId == x));
           this.permissions = this.dtoCombinerService.combinePermissionsByEmployee(employee, institutions);
 
+          this.resetArchiveActionForm();
           if (this.editMode) {
             this.employee$.next(this.value);
           }
@@ -108,6 +137,7 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
           });
 
           this.refreshForm();
+          this.loadArchiveState(+id);
         });
     }
   }
@@ -119,6 +149,12 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
     this.emailControl.setValue(this.value.email);
     this.descriptionControl.setValue(this.value.description);
     this.roleControl.setValue(this.value.access?.role);
+
+    if (this.value.archived) {
+      this.detailForm.disable({emitEvent: false});
+    } else {
+      this.detailForm.enable({emitEvent: false});
+    }
   }
 
   getNewValue(): EmployeeDto {
@@ -139,7 +175,7 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
   }
 
   update() {
-    if (this.isSubmitting)
+    if (this.isSubmitting || this.value.archived)
       return;
 
     this.isSubmitting = true;
@@ -148,6 +184,14 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
       next: () => this.handleSuccess("Mitarbeiter geändert"),
       error: () => this.handleFailure("Fehler beim speichern")
     })
+  }
+
+  get showSaveButton(): boolean {
+    return this.editMode && !this.value.archived;
+  }
+
+  get showArchiveTab(): boolean {
+    return this.adminMode;
   }
 
   savePermissions() {
@@ -224,5 +268,95 @@ export class EmployeeDetailComponent extends DetailPageComponent<EmployeeDto> im
           this.resetPassword();
         }
       });
+  }
+
+  onTabChanged(event: MatTabChangeEvent) {
+    this.selectedTabIndex = event.index;
+  }
+
+  get isArchived(): boolean {
+    return this.value.archived;
+  }
+
+  get archiveActionDescription(): string {
+    return this.isArchived
+      ? 'Wollen Sie den Mitarbeiter wirklich reaktivieren?'
+      : 'Wollen Sie den Mitarbeiter wirklich archivieren?';
+  }
+
+  openArchiveConfirmation() {
+    const dialogRef = this.dialog.open(ConfirmationModalComponent, {
+      width: '520px'
+    });
+
+    dialogRef.componentInstance.title = this.isArchived ? 'Mitarbeiter reaktivieren' : 'Mitarbeiter archivieren';
+    dialogRef.componentInstance.description = `${this.archiveActionDescription}<br><br>` +
+      `Mitarbeiter: <b>${this.value.lastName} ${this.value.firstName}</b><br>` +
+      `Datum: <b>${this.formatArchiveActionDate(this.archiveActionForm.actionDate.value)}</b>`;
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.submitArchiveAction();
+      }
+    });
+  }
+
+  private submitArchiveAction() {
+    if (this.isSubmitting || !this.archiveActionForm.valid) {
+      return;
+    }
+
+    this.isSubmitting = true;
+
+    const request = new EmployeeArchiveActionRequest();
+    request.actionDate = this.archiveActionForm.actionDate.value;
+    request.reason = this.archiveActionForm.reason.value;
+    request.remark = this.archiveActionForm.remark.value;
+
+    const action$ = this.isArchived
+      ? this.employeeArchiveService.reactivate(this.value.id, request)
+      : this.employeeArchiveService.archive(this.value.id, request);
+
+    action$.subscribe({
+      next: () => this.handleSuccess(this.isArchived ? 'Mitarbeiter reaktiviert' : 'Mitarbeiter archiviert'),
+      error: () => this.handleFailure(this.isArchived ? 'Fehler beim reaktivieren' : 'Fehler beim archivieren')
+    });
+  }
+
+  private loadArchiveState(id: number) {
+    if (!this.adminMode) {
+      this.archiveHistory = [];
+      return;
+    }
+
+    this.employeeArchiveService.getArchiveHistoryById(id).subscribe({
+      next: history => {
+        this.archiveHistory = history ?? [];
+      },
+      error: () => {
+        this.archiveHistory = [];
+      }
+    });
+  }
+
+  private resetArchiveActionForm() {
+    this.archiveActionForm.actionDate.setValue(new Date(), {emitEvent: false});
+    this.archiveActionForm.reason.setValue('', {emitEvent: false});
+    this.archiveActionForm.remark.setValue('', {emitEvent: false});
+    this.archiveActionForm.markAsPristine();
+    this.archiveActionForm.markAsUntouched();
+  }
+
+  private formatArchiveActionDate(actionDate: string | Date | null): string {
+    if (!actionDate) {
+      return '';
+    }
+
+    const date = actionDate instanceof Date ? actionDate : new Date(actionDate);
+    return date.toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 }

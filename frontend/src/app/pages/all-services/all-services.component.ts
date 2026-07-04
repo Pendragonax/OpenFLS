@@ -188,7 +188,7 @@ export class AllServicesComponent implements OnInit {
 
   loadEmployees() {
     this.employeeService
-      .getAllProjections()
+      .getActiveEmployeeSelections()
       .subscribe(values => {
         this.employees = values;
         this.cdr.detectChanges();
