@@ -1,12 +1,14 @@
 package de.vinz.openfls.domains.clients.archive.dtos
 
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
+import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 class ClientArchiveHistoryEntryReadDto {
     var id: Long = 0
     var actionType: ClientArchiveActionType = ClientArchiveActionType.ARCHIVE
+    var exportFormat: ClientArchiveExportFormat? = null
     var actionDate: LocalDate = LocalDate.now()
     var actionTimestamp: LocalDateTime = LocalDateTime.now()
     var reason: String = ""
@@ -20,6 +22,7 @@ class ClientArchiveHistoryEntryReadDto {
             return ClientArchiveHistoryEntryReadDto().apply {
                 id = dto.id
                 actionType = dto.actionType
+                exportFormat = dto.exportFormat
                 actionDate = dto.actionDate
                 actionTimestamp = dto.actionTimestamp
                 reason = dto.reason

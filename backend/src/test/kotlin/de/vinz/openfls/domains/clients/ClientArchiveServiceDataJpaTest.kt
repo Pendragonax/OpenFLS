@@ -7,7 +7,9 @@ import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActor
+import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
 import de.vinz.openfls.domains.clients.archive.ClientArchiveService
+import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportFormat
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
@@ -31,6 +33,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @DataJpaTest
 @Import(
@@ -277,5 +280,43 @@ class ClientArchiveServiceDataJpaTest {
 
         // Then
         assertThat(history).isEmpty()
+    }
+
+    @Test
+    fun save_withExportHistoryEntry_persistsExportFormatAndAuditSnapshot() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        whenever(institutionService.getEntityById(any())).thenReturn(institution)
+        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate))
+        client.archiveHistoryEntries.add(
+            ClientArchiveHistoryEntry(
+                actionType = ClientArchiveActionType.EXPORT,
+                exportFormat = ClientArchiveExportFormat.JSON,
+                actionDate = LocalDate.of(2026, 6, 13),
+                actionTimestamp = LocalDateTime.of(2026, 6, 13, 11, 15),
+                reason = "Export requested",
+                remark = "JSON export",
+                executingEmployeeId = 8,
+                executingEmployeeFirstname = "Anna",
+                executingEmployeeLastname = "Lead",
+                client = client
+            )
+        )
+
+        // When
+        clientRepository.save(client)
+
+        // Then
+        val saved = clientRepository.findById(client.id)
+        assertThat(saved).isPresent
+        assertThat(saved.get().archiveHistoryEntries).hasSize(1)
+        val entry = saved.get().archiveHistoryEntries.first()
+        assertThat(entry.actionType).isEqualTo(ClientArchiveActionType.EXPORT)
+        assertThat(entry.exportFormat).isEqualTo(ClientArchiveExportFormat.JSON)
+        assertThat(entry.executingEmployeeFirstname).isEqualTo("Anna")
+        assertThat(entry.executingEmployeeLastname).isEqualTo("Lead")
+        assertThat(entry.actionTimestamp).isEqualTo(LocalDateTime.of(2026, 6, 13, 11, 15))
     }
 }

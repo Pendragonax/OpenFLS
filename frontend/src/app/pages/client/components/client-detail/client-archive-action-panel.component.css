@@ -1,0 +1,28 @@
+.archive-panel__title {
+  color: #2f1b66;
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.archive-form {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.archive-form > div {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.archive-form .mat-form-field {
+  width: min(100%, 420px) !important;
+}
+
+.archive-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}

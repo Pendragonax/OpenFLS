@@ -245,6 +245,8 @@ interface ServiceRepository : CrudRepository<Service, Long> {
         @Param("end") end: LocalDate
     ): List<Service>
 
+    fun findByClientIdOrderByStartAsc(clientId: Long): List<Service>
+
     @Query(
         "SELECT u FROM Service u WHERE u.client.id = :clientId " +
                 "AND cast(u.start as LocalDate) >= :start " +

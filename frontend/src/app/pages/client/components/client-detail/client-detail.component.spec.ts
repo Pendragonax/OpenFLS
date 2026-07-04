@@ -3,7 +3,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {convertToParamMap, ActivatedRoute, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {DateAdapter} from '@angular/material/core';
-import {of} from 'rxjs';
+import {Subject, of} from 'rxjs';
 import {vi} from 'vitest';
 
 import {ClientDetailComponent} from './client-detail.component';
@@ -18,12 +18,21 @@ import {InstitutionDto} from '../../../../shared/dtos/institution-dto.model';
 import {CategoryTemplateDto} from '../../../../shared/dtos/category-template-dto.model';
 import {EmployeeDto} from '../../../../shared/dtos/employee-dto.model';
 import {ClientArchiveHistoryEntryReadDto as ArchiveHistoryDto} from '../../../../shared/dtos/client-archive-history-entry-read-dto.model';
+import {ClientArchiveExportStatusDto} from '../../../../shared/dtos/client-archive-export-status-dto.model';
+import {ClientArchiveExportFormat} from '../../../../shared/dtos/client-archive-export-format.model';
+import {ClientArchiveExportRequest} from '../../../../shared/dtos/client-archive-export-request.model';
+import {ClientArchiveActionPanelComponent} from './client-archive-action-panel.component';
+import {ClientArchiveExportPanelComponent} from './client-archive-export-panel.component';
+import {ClientArchiveHistoryPanelComponent} from './client-archive-history-panel.component';
 
 class MockClientsService {
   getById = vi.fn();
   getArchiveHistoryById = vi.fn();
+  getArchiveExportStatusById = vi.fn();
   archive = vi.fn();
   reactivate = vi.fn();
+  requestArchiveExport = vi.fn();
+  downloadArchiveExport = vi.fn();
   update = vi.fn();
 }
 
@@ -68,6 +77,7 @@ describe('ClientDetailComponent', () => {
 
   let currentClient = createClient(false);
   let currentHistory: ClientArchiveHistoryEntryReadDto[] = [];
+  let currentExportStatus: ClientArchiveExportStatusDto | null = null;
   let currentUser = createUser(true, true);
   let currentTab: string | null = null;
   const clientsService = new MockClientsService();
@@ -116,12 +126,21 @@ describe('ClientDetailComponent', () => {
     dialogOpen.mockReset();
     clientsService.getById.mockReset();
     clientsService.getArchiveHistoryById.mockReset();
+    clientsService.getArchiveExportStatusById.mockReset();
     clientsService.archive.mockReset();
     clientsService.reactivate.mockReset();
+    clientsService.requestArchiveExport.mockReset();
+    clientsService.downloadArchiveExport.mockReset();
     clientsService.update.mockReset();
 
     await TestBed.configureTestingModule({
-      declarations: [ClientDetailComponent, InformationRowComponent],
+      declarations: [
+        ClientDetailComponent,
+        InformationRowComponent,
+        ClientArchiveActionPanelComponent,
+        ClientArchiveExportPanelComponent,
+        ClientArchiveHistoryPanelComponent
+      ],
       providers: [
         {provide: ActivatedRoute, useValue: route},
         {provide: Router, useValue: router},
@@ -141,15 +160,18 @@ describe('ClientDetailComponent', () => {
     canLeadInstitution?: boolean;
     tab?: string | null;
     history?: ClientArchiveHistoryEntryReadDto[];
+    exportStatus?: ClientArchiveExportStatusDto | null;
   }) {
     currentClient = createClient(options?.archived ?? false);
     currentHistory = options?.history ?? [];
+    currentExportStatus = options?.exportStatus ?? null;
     currentUser = createUser(options?.isAdmin ?? true, options?.canLeadInstitution ?? true);
     currentTab = options?.tab ?? null;
 
     (route as {snapshot: {queryParamMap: ReturnType<typeof convertToParamMap>}}).snapshot.queryParamMap = convertToParamMap(currentTab ? {tab: currentTab} : {});
     clientsService.getById.mockImplementation(() => of(currentClient));
     clientsService.getArchiveHistoryById.mockImplementation(() => of(currentHistory));
+    clientsService.getArchiveExportStatusById.mockImplementation(() => of(currentExportStatus as ClientArchiveExportStatusDto));
     clientsService.archive.mockImplementation(() => of(currentHistory[0] ?? {
       id: 99,
       actionType: 'ARCHIVE',
@@ -172,6 +194,18 @@ describe('ClientDetailComponent', () => {
       executingEmployeeFirstname: 'Lea',
       executingEmployeeLastname: 'Ding'
     }));
+    clientsService.requestArchiveExport.mockImplementation(() => of(currentExportStatus ?? {
+      ready: true,
+      format: ClientArchiveExportFormat.JSON,
+      requestedAt: '2026-06-13T10:15:00',
+      requestedByEmployeeId: 10,
+      downloadLink: {
+        downloadLink: '/clients/1/archive/export/token-123',
+        downloadLinkExpiresAt: '2026-06-13T10:35:00',
+        downloadedAt: null
+      }
+    }));
+    clientsService.downloadArchiveExport.mockImplementation(() => of(void 0));
 
     fixture = TestBed.createComponent(ClientDetailComponent);
     component = fixture.componentInstance;
@@ -214,18 +248,157 @@ describe('ClientDetailComponent', () => {
     expect(fixture.nativeElement.querySelector('.archive-state-banner')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.archive-columns')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.archive-panel--form')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.archive-panel--export')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.archive-panel--history')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.archive-panel--export .archive-export-stepper')).toBeTruthy();
+    expect(fixture.nativeElement.querySelectorAll('.archive-export-step').length).toBe(3);
+    expect(fixture.nativeElement.querySelector('.archive-history-scroll')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.archive-history-entry--archive')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.archive-history-entry .col-sm-3')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.archive-history-entry__details')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.archive-history-entry__details-column--secondary')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.archive-history-entry__details-column .col-sm-4')).toBeTruthy();
     expect(text).toContain('Status');
     expect(text).toContain('Aktiv');
     expect(text).toContain('Archivieren');
+    expect(text).toContain('Daten exportieren');
+    expect(text).toContain('Angefordert');
+    expect(text).toContain('Wird erstellt');
+    expect(text).toContain('Bereit zum Download');
+    expect(text).not.toContain('Der Export wurde angefordert.');
+    expect(text).not.toContain('Der Export wird erzeugt.');
+    expect(text).not.toContain('Der Downloadlink ist verfügbar.');
+    expect(text).toContain('Export anfordern');
     expect(text).toContain('Archivierung');
     expect(text).toContain('23.05.2026');
     expect(text).toContain('Ausgeführt am');
     expect(text).toContain('23.05.2026 10:15');
     expect(text).toContain('Maria Muster (#42)');
     expect(text).toContain('Extern verwaltet');
+  });
+
+  it('should render export history entries without reason and with export label', () => {
+    const historyEntry: ArchiveHistoryDto = {
+      id: 8,
+      actionType: 'EXPORT',
+      actionDate: '2026-06-13',
+      actionTimestamp: '2026-06-13T11:15:00',
+      reason: 'Export requested',
+      remark: 'JSON',
+      executingEmployeeId: 11,
+      executingEmployeeFirstname: 'Vinz',
+      executingEmployeeLastname: 'Branzk'
+    };
+
+    configureScenario({tab: 'archive', history: [historyEntry]});
+
+    const historyText = fixture.nativeElement.querySelector('.archive-history-entry')?.textContent as string;
+    const historyRows = fixture.nativeElement.querySelectorAll('.archive-history-entry app-information-row');
+
+    expect(historyText).toContain('EXPORT');
+    expect(historyText).not.toContain('Archivierung');
+    expect(historyText).not.toContain('Grund');
+    expect(historyText).not.toContain('Datum');
+    expect(historyRows.length).toBe(3);
+    expect(historyText).toContain('JSON');
+    expect(historyText).toContain('Vinz Branzk (#11)');
+  });
+
+  it('should show a download button for an already prepared export', () => {
+    const exportStatus: ClientArchiveExportStatusDto = {
+      ready: true,
+      format: ClientArchiveExportFormat.JSON,
+      requestedAt: '2026-06-13T10:15:00',
+      requestedByEmployeeId: 10,
+      downloadLink: {
+        downloadLink: '/clients/1/archive/export/token-123',
+        downloadLinkExpiresAt: '2026-06-13T10:35:00',
+        downloadedAt: null
+      }
+    };
+
+    configureScenario({tab: 'archive', exportStatus});
+
+    const text = fixture.nativeElement.textContent as string;
+
+    expect(component.archiveExportStatus?.downloadLink != null).toBe(true);
+    expect(text).toContain('Download (JSON)');
+    expect(text).toContain('Link gültig bis');
+  });
+
+  it('should show a loading state while the export is being requested', () => {
+    configureScenario({tab: 'archive'});
+
+    const exportRequest$ = new Subject<ClientArchiveExportStatusDto>();
+    clientsService.requestArchiveExport.mockReturnValue(exportRequest$.asObservable());
+    component.requestArchiveExport();
+    fixture.detectChanges();
+
+    expect(component.isArchiveExportRequesting).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Export wird erstellt');
+
+    exportRequest$.next({
+      ready: true,
+      format: ClientArchiveExportFormat.JSON,
+      requestedAt: '2026-06-13T10:15:00',
+      requestedByEmployeeId: 10,
+      downloadLink: {
+        downloadLink: '/clients/1/archive/export/token-123',
+        downloadLinkExpiresAt: '2026-06-13T10:35:00',
+        downloadedAt: null
+      }
+    });
+    exportRequest$.complete();
+    fixture.detectChanges();
+
+    expect(component.isArchiveExportRequesting).toBe(false);
+    expect(component.archiveExportStatus?.downloadLink != null).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Download (JSON)');
+  });
+
+  it('should send anonymize flag with the export request', () => {
+    configureScenario({tab: 'archive'});
+
+    component.archiveExportForm.anonymize.setValue(true);
+    component.requestArchiveExport();
+
+    const request = clientsService.requestArchiveExport.mock.calls[0][1] as ClientArchiveExportRequest;
+
+    expect(request.anonymize).toBe(true);
+    expect(request.format).toBe(ClientArchiveExportFormat.JSON);
+  });
+
+  it('should reload archive history after a successful export request', () => {
+    configureScenario({tab: 'archive'});
+
+    const initialHistoryCalls = clientsService.getArchiveHistoryById.mock.calls.length;
+
+    component.requestArchiveExport();
+
+    expect(clientsService.getArchiveHistoryById.mock.calls.length).toBe(initialHistoryCalls + 1);
+  });
+
+  it('should remove the export link after a successful download', () => {
+    const exportStatus: ClientArchiveExportStatusDto = {
+      ready: true,
+      format: ClientArchiveExportFormat.JSON,
+      requestedAt: '2026-06-13T10:15:00',
+      requestedByEmployeeId: 10,
+      downloadLink: {
+        downloadLink: '/clients/1/archive/export/token-123',
+        downloadLinkExpiresAt: '2026-06-13T10:35:00',
+        downloadedAt: null
+      }
+    };
+
+    configureScenario({tab: 'archive', exportStatus});
+    clientsService.downloadArchiveExport.mockReturnValue(of(void 0));
+
+    component.downloadArchiveExport();
+    fixture.detectChanges();
+
+    expect(clientsService.downloadArchiveExport).toHaveBeenCalled();
+    expect(component.archiveExportStatus?.downloadLink != null).toBe(false);
+    expect(fixture.nativeElement.textContent).toContain('Export anfordern');
   });
 
   it('should format archive date input like other german date pickers', () => {

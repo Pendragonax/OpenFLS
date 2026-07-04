@@ -124,88 +124,22 @@
         </div>
 
         <div class="archive-columns">
-          <section class="archive-panel archive-panel--form">
-            <div class="archive-panel__title">Aktion</div>
-            <form [formGroup]="archiveActionForm" class="archive-form">
-              <div>
-                <mat-form-field appearance="fill">
-                  <mat-label>Datum</mat-label>
-                  <input matInput
-                         formControlName="actionDate"
-                         [matDatepicker]="archiveDatePicker"
-                         required>
-                  <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
-                  <mat-datepicker-toggle matSuffix [for]="archiveDatePicker"></mat-datepicker-toggle>
-                  <mat-datepicker #archiveDatePicker></mat-datepicker>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-form-field appearance="fill">
-                  <mat-label>Grund</mat-label>
-                  <input matInput
-                         formControlName="reason"
-                         required>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-form-field appearance="fill">
-                  <mat-label>Bemerkung</mat-label>
-                  <textarea matInput
-                            rows="4"
-                            formControlName="remark"
-                            required></textarea>
-                </mat-form-field>
-              </div>
-            </form>
+          <app-client-archive-action-panel
+            [archiveActionForm]="archiveActionForm"
+            [archived]="value.dto.archived"
+            [isSubmitting]="isSubmitting"
+            (confirm)="openArchiveConfirmation()"></app-client-archive-action-panel>
 
-            <div class="archive-actions">
-              @if (!value.dto.archived) {
-                <button mat-raised-button
-                        color="warn"
-                        [disabled]="!archiveActionForm.valid || isSubmitting"
-                        (click)="openArchiveConfirmation()">Archivieren</button>
-              } @else {
-                <button mat-raised-button
-                        color="primary"
-                        [disabled]="!archiveActionForm.valid || isSubmitting"
-                        (click)="openArchiveConfirmation()">Reaktivieren</button>
-              }
-            </div>
-          </section>
+          <app-client-archive-export-panel
+            [archiveExportForm]="archiveExportForm"
+            [archiveExportStatus]="archiveExportStatus"
+            [isRequesting]="isArchiveExportRequesting"
+            [isDownloading]="isArchiveExportDownloading"
+            (requestExport)="requestArchiveExport()"
+            (downloadExport)="downloadArchiveExport()"></app-client-archive-export-panel>
 
-          <section class="archive-panel archive-panel--history">
-            <div class="archive-panel__title">Historie</div>
-            <div class="archive-history">
-              @if (archiveHistory.length > 0) {
-                @for (entry of archiveHistory; track entry.id) {
-                  <div class="archive-history-entry"
-                       [class.archive-history-entry--archive]="entry.actionType === 'ARCHIVE'"
-                       [class.archive-history-entry--reactivate]="entry.actionType === 'REACTIVATE'">
-                    <div class="archive-history-entry__action">
-                      {{ formatArchiveActionType(entry.actionType) }}
-                    </div>
-                    <app-information-row [title]="'Datum'"
-                                         [content]="formatArchiveActionDate(entry.actionDate)"
-                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
-                    <app-information-row [title]="'Grund'"
-                                         [content]="entry.reason"
-                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
-                    <app-information-row [title]="'Bemerkung'"
-                                         [content]="entry.remark"
-                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
-                    <app-information-row [title]="'Ausgeführt von'"
-                                         [content]="formatArchiveEmployee(entry)"
-                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
-                    <app-information-row [title]="'Ausgeführt am'"
-                                         [content]="formatArchiveActionTimestamp(entry.actionTimestamp)"
-                                         [titleWidthClass]="'col-sm-3 col-md-3 col-lg-3'"></app-information-row>
-                  </div>
-                }
-              } @else {
-                <div class="archive-history__empty">Keine Historie vorhanden.</div>
-              }
-            </div>
-          </section>
+          <app-client-archive-history-panel
+            [archiveHistory]="archiveHistory"></app-client-archive-history-panel>
         </div>
       </div>
     </mat-tab>

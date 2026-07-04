@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Fix Test Coverage"
+  short_description: "Raise main-diff coverage with tests only"
+  default_prompt: "Use $local-fix-test-coverage to improve test coverage for the current branch changes compared with main without changing production code."
