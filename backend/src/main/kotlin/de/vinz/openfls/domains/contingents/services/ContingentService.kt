@@ -95,15 +95,22 @@ class ContingentService(
 
     @Transactional(readOnly = true)
     fun getByEmployeeId(id: Long): List<ContingentDto> {
+        val employee = employeeService.getById(id) ?: return emptyList()
+        if (employee.archived) {
+            return emptyList()
+        }
+
         val entities = contingentRepository.findAllByEmployeeId(id)
         return entities.map { ContingentDto.from(it) }
             .sortedBy { it.employeeId }
     }
 
     @Transactional(readOnly = true)
-    fun getByInstitutionId(id: Long): List<ContingentDto> {
+    fun getByInstitutionId(id: Long, includeArchivedEmployees: Boolean = false): List<ContingentDto> {
         val entities = contingentRepository.findAllByInstitutionId(id)
-        return entities.map { ContingentDto.from(it) }
+        return entities
+            .filter { includeArchivedEmployees || !(it.employee?.archived ?: true) }
+            .map { ContingentDto.from(it) }
             .sortedBy { it.institutionId }
     }
 
