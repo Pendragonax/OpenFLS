@@ -47,6 +47,7 @@ class EmployeeService(
             permissions = null
             unprofessionals = null
             contingents = null
+            archived = false
             access = EmployeeAccess(
                 id = null,
                 username = username,
@@ -94,6 +95,7 @@ class EmployeeService(
         value.access = null
         value.contingents = null
         value.unprofessionals = null
+        value.archived = false
 
         // employee
         val employeeEntity = employeeRepository.save(value).apply {
