@@ -14,6 +14,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 class AssistancePlanEvaluationServiceTest {
 
@@ -28,11 +29,14 @@ class AssistancePlanEvaluationServiceTest {
     @Test
     fun getEvaluationById_withMatchingServices_returnsCalculatedValues() {
         // Given
+        val today = LocalDate.now()
+        val planStart = today.withDayOfMonth(1)
+        val planEnd = planStart.plusDays(6)
         val hourType = HourType(id = 1, title = "Standard")
         val plan = AssistancePlan(
             id = 11,
-            start = LocalDate.of(2026, 5, 1),
-            end = LocalDate.of(2026, 5, 7)
+            start = planStart,
+            end = planEnd
         )
         plan.hours = mutableSetOf(
             AssistancePlanHour(
@@ -46,8 +50,8 @@ class AssistancePlanEvaluationServiceTest {
             listOf(
                 Service(
                     id = 21,
-                    start = LocalDateTime.of(2026, 5, 3, 8, 0),
-                    end = LocalDateTime.of(2026, 5, 3, 9, 0),
+                    start = planStart.atTime(8, 0),
+                    end = planStart.atTime(9, 0),
                     minutes = 60,
                     hourType = hourType,
                     assistancePlan = plan
@@ -57,6 +61,7 @@ class AssistancePlanEvaluationServiceTest {
 
         // When
         val result = evaluationService.getEvaluationById(plan.id)
+        val expectedActualWindow = ChronoUnit.DAYS.between(planStart, minOf(today, planEnd)) + 1
 
         // Then
         assertThat(result.total).hasSize(1)
@@ -64,8 +69,8 @@ class AssistancePlanEvaluationServiceTest {
         assertThat(result.total.first().actual).isEqualTo(1.0)
         assertThat(result.total.first().size).isEqualTo(1)
         assertThat(result.tillToday.first().actual).isEqualTo(1.0)
-        assertThat(result.actualMonth.first().target).isEqualTo(1.0)
-        assertThat(result.actualYear.first().target).isEqualTo(1.0)
+        assertThat(result.actualMonth.first().target).isEqualTo(expectedActualWindow / 7.0)
+        assertThat(result.actualYear.first().target).isEqualTo(expectedActualWindow / 7.0)
         assertThat(result.notMatchingServices).isZero()
         assertThat(result.notMatchingServicesIds).isEmpty()
     }
