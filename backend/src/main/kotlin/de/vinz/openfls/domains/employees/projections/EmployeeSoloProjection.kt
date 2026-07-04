@@ -7,4 +7,5 @@ interface EmployeeSoloProjection {
     val email: String
     val phonenumber: String
     val description: String
+    val archived: Boolean
 }

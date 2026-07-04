@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -43,7 +43,7 @@ class AuthenticationController(
                             "id" to authentication.userId.toString(),
                             "token" to authentication.token,
                             "expiredAt" to authentication.expiredAt))
-        } catch (ex: BadCredentialsException) {
+        } catch (ex: AuthenticationException) {
             logger.error(ex.message, ex)
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()

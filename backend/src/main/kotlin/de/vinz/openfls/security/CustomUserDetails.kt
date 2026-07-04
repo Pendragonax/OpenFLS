@@ -24,7 +24,7 @@ class CustomUserDetails(private var employeeAccess: EmployeeAccess) : UserDetail
 
     override fun isCredentialsNonExpired(): Boolean = true
 
-    override fun isEnabled(): Boolean = true
+    override fun isEnabled(): Boolean = !(employeeAccess.employee?.inactive ?: true)
 
     fun getId(): Long = employeeAccess.id ?: -1
 

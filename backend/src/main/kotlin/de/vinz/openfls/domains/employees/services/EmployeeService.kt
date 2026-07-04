@@ -246,8 +246,9 @@ class EmployeeService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllEmployeeDtos(): List<EmployeeDto> {
+    fun getAllEmployeeDtos(includeArchived: Boolean = false): List<EmployeeDto> {
         return getAll()
+                .filter { includeArchived || !it.archived }
                 .sortedBy { it.lastname.lowercase() }
                 .map { employee -> modelMapper.map(employee, EmployeeDto::class.java).apply {
                     access?.password = ""
@@ -265,7 +266,9 @@ class EmployeeService(
 
     @Transactional(readOnly = true)
     fun getAllProjections(): List<EmployeeSoloProjection> {
-        return employeeRepository.findAllProjectionsBy().sortedBy { it.lastname }
+        return employeeRepository.findAllProjectionsBy()
+            .filter { !it.archived }
+            .sortedBy { it.lastname }
     }
 
     @Transactional(readOnly = true)
@@ -282,7 +285,11 @@ class EmployeeService(
     fun getEmployeeDtoById(id: Long, adminMode: Boolean): EmployeeDto? {
         val entity = getById(id)
 
-        return modelMapper.map(entity, EmployeeDto::class.java)
+        if (entity != null && (!entity.archived || adminMode)) {
+            return modelMapper.map(entity, EmployeeDto::class.java)
+        }
+
+        return null
     }
 
     @Transactional(readOnly = true)

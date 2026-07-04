@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.contingents
 
 import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
 import de.vinz.openfls.domains.contingents.services.ContingentEvaluationService
+import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.ExceptionResponseService
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
@@ -26,6 +28,7 @@ class ContingentEvaluationController(
     private val performanceLoggingService: PerformanceLoggingService,
     private val accessService: AccessService,
     private val contingentCalendarService: ContingentCalendarService,
+    private val employeeService: EmployeeService,
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(ContingentEvaluationController::class.java)
@@ -34,13 +37,20 @@ class ContingentEvaluationController(
     private val logPerformance: Boolean = false
 
     @GetMapping("institution/{institutionId}/{year}")
-    fun getByInstitution(@PathVariable institutionId: Long, @PathVariable year: Int): Any {
+    fun getByInstitution(
+        @PathVariable institutionId: Long,
+        @PathVariable year: Int,
+        @RequestParam(defaultValue = "false") includeArchivedEmployees: Boolean
+    ): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
         return try {
-            val contingentEvaluation =
-                contingentEvaluationService.generateContingentEvaluationFor(year, institutionId)
+            val contingentEvaluation = contingentEvaluationService.generateContingentEvaluationFor(
+                year,
+                institutionId,
+                includeArchivedEmployees = accessService.isAdmin() && includeArchivedEmployees
+            )
             return ResponseEntity.ok(contingentEvaluation)
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
@@ -58,6 +68,11 @@ class ContingentEvaluationController(
                             @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
         return try {
             val startMs = System.currentTimeMillis()
+            val employee = employeeService.getEmployeeDtoById(id, true)
+                ?: throw IllegalArgumentException("employee not found")
+            if (employee.archived) {
+                throw IllegalArgumentException("employee not found")
+            }
             if (accessService.getId() != id &&
                 !accessService.isAdmin() &&
                 !accessService.canReadEmployee(id))

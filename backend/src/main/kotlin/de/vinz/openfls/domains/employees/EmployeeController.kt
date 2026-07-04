@@ -247,12 +247,18 @@ class EmployeeController(
     }
 
     @GetMapping("")
-    fun getAll(): Any {
+    fun getAll(
+        @RequestParam(defaultValue = "false") includeArchived: Boolean
+    ): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = employeeService.getAllEmployeeDtos()
+            val dtos = if (accessService.isAdmin() && includeArchived) {
+                employeeService.getAllEmployeeDtos(includeArchived = true)
+            } else {
+                employeeService.getAllEmployeeDtos()
+            }
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms",
@@ -301,6 +307,7 @@ class EmployeeController(
             val startMs = System.currentTimeMillis()
 
             val dto = employeeService.getEmployeeDtoById(id, accessService.isAdmin())
+                ?: throw IllegalArgumentException("employee not found")
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",
