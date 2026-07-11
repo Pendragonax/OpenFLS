@@ -119,12 +119,12 @@ class InstitutionServiceTest {
         assertThat(result.email).isEqualTo("new@example.com")
         assertThat(result.phonenumber).isEqualTo("222")
         assertThat(entity.permissions).hasSize(2)
-        assertThat(entity.permissions?.map { it.id.employeeId }).containsExactlyInAnyOrder(1L, 3L)
-        val updatedPermission = entity.permissions?.first { it.id.employeeId == 1L }
-        assertThat(updatedPermission?.readEntries).isTrue()
-        assertThat(updatedPermission?.writeEntries).isTrue()
-        assertThat(updatedPermission?.changeInstitution).isTrue()
-        assertThat(updatedPermission?.affiliated).isTrue()
+        assertThat(entity.permissions.map { it.id.employeeId }).containsExactlyInAnyOrder(1L, 3L)
+        val updatedPermission = entity.permissions.first { it.id.employeeId == 1L }
+        assertThat(updatedPermission.readEntries).isTrue()
+        assertThat(updatedPermission.writeEntries).isTrue()
+        assertThat(updatedPermission.changeInstitution).isTrue()
+        assertThat(updatedPermission.affiliated).isTrue()
     }
 
     @Test
