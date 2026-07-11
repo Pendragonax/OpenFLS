@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode.EXACT
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
@@ -22,6 +23,10 @@ class AssistancePlan(
         var start: LocalDate = LocalDate.now(),
 
         var end: LocalDate = LocalDate.now(),
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "hour_mode", nullable = false)
+        var hourMode: AssistancePlanHourMode = EXACT,
 
         @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)

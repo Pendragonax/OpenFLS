@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
@@ -16,6 +17,8 @@ import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.hourTypes.HourTypeRepository
 import de.vinz.openfls.domains.hourTypes.HourTypeService
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
+import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.institutions.InstitutionService
@@ -63,6 +66,9 @@ class AssistancePlanServiceDataJpaTest {
     @Autowired
     lateinit var hourTypeRepository: HourTypeRepository
 
+    @Autowired
+    lateinit var hourCorridorRepository: HourCorridorRepository
+
     @MockitoBean
     lateinit var clientService: ClientService
 
@@ -95,6 +101,7 @@ class AssistancePlanServiceDataJpaTest {
             clientId = client.id
             institutionId = institution.id!!
             sponsorId = sponsor.id
+            hourMode = AssistancePlanHourMode.EXACT
             hours = emptyList()
             goals = listOf(
                 de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateGoalDto().apply {
@@ -142,6 +149,7 @@ class AssistancePlanServiceDataJpaTest {
             clientId = client.id
             institutionId = institution.id!!
             sponsorId = sponsor.id
+            hourMode = AssistancePlanHourMode.EXACT
             hours = listOf(
                 de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateHourDto().apply {
                     weeklyMinutes = 120
@@ -279,6 +287,41 @@ class AssistancePlanServiceDataJpaTest {
     }
 
     @Test
+    fun getIllegalByClientId_corridorPlanWithoutHours_isNotIllegal() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(
+                title = "5 bis 10",
+                weeklyMinutesFrom = 300,
+                weeklyMinutesTill = 600,
+                hourType = hourType
+            )
+        )
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution,
+                hourMode = AssistancePlanHourMode.CORRIDOR,
+                hourCorridor = corridor
+            )
+        )
+
+        // When
+        val illegalPlans = assistancePlanService.getIllegalByClientId(client.id)
+
+        // Then
+        assertThat(illegalPlans).isEmpty()
+    }
+
+    @Test
     fun update_updateDtoWithGoalHours_updatesGoalAndGoalHour() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
@@ -403,6 +446,7 @@ class AssistancePlanServiceDataJpaTest {
             clientId = client.id
             institutionId = institution.id!!
             sponsorId = sponsor.id
+            hourMode = AssistancePlanHourMode.EXACT
             hours = listOf(
                 de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateHourDto().apply {
                     id = existingPlanHour.id
@@ -478,6 +522,7 @@ class AssistancePlanServiceDataJpaTest {
             clientId = client.id
             institutionId = institution.id!!
             sponsorId = sponsor.id
+            hourMode = AssistancePlanHourMode.EXACT
             hours = listOf(
                 de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateHourDto().apply {
                     id = existingPlanHour.id
@@ -515,6 +560,162 @@ class AssistancePlanServiceDataJpaTest {
         assertThatThrownBy { assistancePlanService.update(savedMixedPlan.id, updateDto) }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessage("Bei Hilfeplänen mit Stunden in beiden Bereichen dürfen keine neuen Stunden hinzugefügt werden. Bitte erst bestehende Stunden löschen, bis nur noch ein Bereich Stunden enthält.")
+    }
+
+    @Test
+    fun create_corridorModeDto_persistsHourCorridorAndRejectsHours() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(
+                title = "5 bis 10",
+                weeklyMinutesFrom = 300,
+                weeklyMinutesTill = 600,
+                hourType = hourType
+            )
+        )
+
+        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
+        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+
+        val createDto = AssistancePlanCreateDto().apply {
+            start = LocalDate.of(2026, 1, 1)
+            end = LocalDate.of(2026, 12, 31)
+            clientId = client.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            hourMode = AssistancePlanHourMode.CORRIDOR
+            hourCorridorId = corridor.id
+            goals = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateGoalDto().apply {
+                    title = "Goal 1"
+                    description = "Description"
+                    institutionId = institution.id
+                }
+            )
+        }
+
+        // When
+        val result = assistancePlanService.create(createDto)
+
+        // Then
+        val saved = assistancePlanRepository.findById(result.id).orElseThrow()
+        assertThat(saved.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
+        assertThat(saved.hourCorridor?.id).isEqualTo(corridor.id)
+        assertThat(saved.hours).isEmpty()
+        assertThat(saved.goals).hasSize(1)
+        assertThat(saved.goals.first().hours).isEmpty()
+    }
+
+    @Test
+    fun create_corridorModeDtoWithGoalHours_throwsException() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(
+                title = "5 bis 10",
+                weeklyMinutesFrom = 300,
+                weeklyMinutesTill = 600,
+                hourType = hourType
+            )
+        )
+
+        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
+        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+
+        val createDto = AssistancePlanCreateDto().apply {
+            start = LocalDate.of(2026, 1, 1)
+            end = LocalDate.of(2026, 12, 31)
+            clientId = client.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            hourMode = AssistancePlanHourMode.CORRIDOR
+            hourCorridorId = corridor.id
+            goals = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateGoalDto().apply {
+                    title = "Goal 1"
+                    description = "Description"
+                    institutionId = institution.id
+                    hours = listOf(
+                        de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateHourDto().apply {
+                            weeklyMinutes = 60
+                            hourTypeId = hourType.id
+                        }
+                    )
+                }
+            )
+        }
+
+        // When / Then
+        assertThatThrownBy { assistancePlanService.create(createDto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("corridor assistance plans must not contain goal hours")
+    }
+
+    @Test
+    fun update_exactToCorridorMode_throwsException() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(
+                title = "5 bis 10",
+                weeklyMinutesFrom = 300,
+                weeklyMinutesTill = 600,
+                hourType = hourType
+            )
+        )
+
+        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
+        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+
+        val created = assistancePlanService.create(AssistancePlanCreateDto().apply {
+            start = LocalDate.of(2026, 1, 1)
+            end = LocalDate.of(2026, 12, 31)
+            clientId = client.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            hourMode = AssistancePlanHourMode.EXACT
+            hours = listOf(
+                de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateHourDto().apply {
+                    weeklyMinutes = 120
+                    hourTypeId = hourType.id
+                }
+            )
+        })
+
+        val updateDto = AssistancePlanUpdateDto().apply {
+            id = created.id
+            start = created.start
+            end = created.end
+            clientId = client.id
+            institutionId = institution.id!!
+            sponsorId = sponsor.id
+            hourMode = AssistancePlanHourMode.CORRIDOR
+            hourCorridorId = corridor.id
+            hours = emptyList()
+            goals = emptyList()
+        }
+
+        // When / Then
+        assertThatThrownBy { assistancePlanService.update(created.id, updateDto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("assistance plan hour mode cannot be changed")
     }
 
     @Test

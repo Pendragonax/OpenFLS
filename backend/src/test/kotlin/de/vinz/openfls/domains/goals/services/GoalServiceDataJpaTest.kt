@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.goals.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.goals.dtos.GoalDto
@@ -10,6 +11,8 @@ import de.vinz.openfls.domains.goals.repositories.GoalRepository
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.hourTypes.HourTypeRepository
 import de.vinz.openfls.domains.hourTypes.HourTypeService
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
+import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.institutions.InstitutionService
@@ -44,6 +47,9 @@ class GoalServiceDataJpaTest {
 
     @Autowired
     lateinit var institutionRepository: InstitutionRepository
+
+    @Autowired
+    lateinit var hourCorridorRepository: HourCorridorRepository
 
     @MockitoBean
     lateinit var assistancePlanService: AssistancePlanService
@@ -152,5 +158,37 @@ class GoalServiceDataJpaTest {
         val hours = goalHourRepository.findByGoalId(result.id)
         assertThat(hours).hasSize(1)
         assertThat(hours.first().weeklyMinutes).isEqualTo(180)
+    }
+
+    @Test
+    fun create_corridorAssistancePlanWithGoalHours_throwsException() {
+        // Given
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(
+                title = "5 bis 10",
+                weeklyMinutesFrom = 300,
+                weeklyMinutesTill = 600,
+                hourType = hourType
+            )
+        )
+        val assistancePlan = assistancePlanRepository.save(AssistancePlan(hourMode = AssistancePlanHourMode.CORRIDOR, hourCorridor = corridor))
+        whenever(assistancePlanService.getById(assistancePlan.id)).thenReturn(assistancePlan)
+        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+
+        val dto = GoalDto().apply {
+            title = "Goal"
+            description = "Desc"
+            assistancePlanId = assistancePlan.id
+            hours = mutableSetOf(GoalHourDto().apply {
+                weeklyMinutes = 300
+                hourTypeId = hourType.id
+            })
+        }
+
+        // When / Then
+        assertThatThrownBy { goalService.create(dto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("corridor assistance plans must not contain goal hours")
     }
 }
