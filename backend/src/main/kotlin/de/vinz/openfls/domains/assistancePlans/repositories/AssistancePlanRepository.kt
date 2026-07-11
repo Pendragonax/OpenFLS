@@ -280,4 +280,6 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     fun findWeeklyMinutesFromGoalHoursByAssistancePlanIds(
         @Param("assistancePlanIds") assistancePlanIds: List<Long>
     ): List<AssistancePlanWeeklyMinutesProjection>
+
+    fun countByHourCorridorId(@Param("hourCorridorId") hourCorridorId: Long): Long
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.services.Service
@@ -45,6 +46,11 @@ class AssistancePlan(
 
         @OneToMany(mappedBy = "assistancePlan", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf(),
+
+        @JsonIgnore
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "hour_corridor_id")
+        var hourCorridor: HourCorridor? = null,
 
         @ManyToMany(mappedBy = "assistancePlanFavorites")
         var employees: MutableSet<Employee> = mutableSetOf()
