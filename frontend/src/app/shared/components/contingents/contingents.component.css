@@ -25,3 +25,16 @@ td , th {
 .mat-cell {
   padding: 4px 4px 4px 4px;
 }
+
+.contingent-row--archived {
+  background: #fff3f1;
+}
+
+.contingent-row--archived td {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.contingent-row--archived td:first-child {
+  box-shadow: inset 4px 0 0 #c94a43;
+}

@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {ContingentDto} from "../../dtos/contingent-dto.model";
 import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
@@ -36,13 +36,15 @@ import {createStartEndValidator} from "../../validators/start-end-validator";
 })
 export class ContingentsComponent
   extends TablePageComponent<ContingentDto, [EmployeeDto, InstitutionDto, ContingentDto, boolean]>
-  implements OnInit {
+  implements OnInit, OnChanges {
 
   // INPUTS OUTPUTS
   @Input() employeeView$: ReplaySubject<EmployeeViewModel> = new ReplaySubject<EmployeeViewModel>();
   @Input() institutionView$: ReplaySubject<InstitutionViewModel> = new ReplaySubject<InstitutionViewModel>();
   @Input() hideEmployeeColumn: boolean = false;
   @Input() hideInstitutionColumn: boolean = false;
+  @Input() showArchivedEmployees: boolean = false;
+  @Input() showArchivedEmployeesToggleVisible: boolean = false;
   @Input() set hideAddButton(value: boolean) {
     this.hideAddButtonByInput = value;
     this.updateResolvedHideAddButton();
@@ -57,6 +59,7 @@ export class ContingentsComponent
   @Output() addedValueEvent = new EventEmitter<ContingentDto>();
   @Output() updatedValueEvent = new EventEmitter<ContingentDto>();
   @Output() deletedValueEvent = new EventEmitter<ContingentDto>();
+  @Output() showArchivedEmployeesChange = new EventEmitter<boolean>();
 
   // VARs
   tableColumns = ['employee', 'institution', 'start', 'end', 'hours', 'actions'];
@@ -116,6 +119,12 @@ export class ContingentsComponent
     override modalService: NgbModal,
     override helperService: HelperService) {
     super(modalService, helperService);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['showArchivedEmployees'] && !changes['showArchivedEmployees'].firstChange && (this.institutionView != null || this.employeeView != null)) {
+      this.loadContingents();
+    }
   }
 
   getNewValue(): ContingentDto {
@@ -178,7 +187,7 @@ export class ContingentsComponent
   loadContingents() {
     if (this.employeeView != null) {
       this.contingentService
-        .getCombinationByEmployeeId(this.employeeView.dto.id)
+        .getCombinationByEmployeeId(this.employeeView.dto.id, this.showArchivedEmployees)
         .subscribe((contingents) => {
           this.sourceTableData = contingents;
           this.setTableData(contingents);
@@ -186,7 +195,7 @@ export class ContingentsComponent
     }
     else if (this.institutionView != null) {
       this.contingentService
-        .getCombinationByInstitutionId(this.institutionView.dto.id)
+        .getCombinationByInstitutionId(this.institutionView.dto.id, this.showArchivedEmployees)
         .subscribe({
           next: (values) => {
             this.sourceTableData = values;
@@ -194,6 +203,14 @@ export class ContingentsComponent
           }
         })
     }
+  }
+
+  isArchivedEmployeeContingent(contingent: [EmployeeDto, InstitutionDto, ContingentDto, boolean]): boolean {
+    return contingent[0]?.archived ?? false;
+  }
+
+  onArchivedVisibilityChanged(showArchivedEmployees: boolean) {
+    this.showArchivedEmployeesChange.emit(showArchivedEmployees);
   }
 
   initFormSubscriptions() {

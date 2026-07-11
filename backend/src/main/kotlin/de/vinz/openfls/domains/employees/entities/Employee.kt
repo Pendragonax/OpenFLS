@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.evaluations.Evaluation
+import de.vinz.openfls.domains.employees.archive.EmployeeArchiveHistoryEntry
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.services.Service
 import jakarta.persistence.*
@@ -31,6 +32,9 @@ class Employee(
         @field:Email
         @Column(length = 64)
         var email: String = "",
+
+        @Column(nullable = false)
+        var archived: Boolean = false,
 
         var inactive: Boolean = false,
 
@@ -84,6 +88,15 @@ class Employee(
                 cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf(),
+
+        @JsonIgnoreProperties(value = ["employee", "hibernateLazyInitializer"])
+        @OneToMany(
+                mappedBy = "employee",
+                cascade = [CascadeType.ALL],
+                fetch = FetchType.LAZY,
+                orphanRemoval = true)
+        @OrderBy("actionTimestamp DESC")
+        var archiveHistoryEntries: MutableList<EmployeeArchiveHistoryEntry> = mutableListOf(),
 
         @ManyToMany(
                 fetch = FetchType.LAZY

@@ -13,11 +13,14 @@ export class ContingentOverviewToolbarComponent {
   @Input() selectedHourType: number = 0;
   @Input() exportDisabled: boolean = true;
   @Input() loading: boolean = false;
+  @Input() showArchivedEmployees: boolean = false;
+  @Input() showArchivedEmployeesToggleVisible: boolean = false;
 
   @Output() yearChanged = new EventEmitter<number>();
   @Output() hourTypeChanged = new EventEmitter<number>();
   @Output() exportClicked = new EventEmitter<void>();
   @Output() infoClicked = new EventEmitter<Event>();
+  @Output() showArchivedEmployeesChange = new EventEmitter<boolean>();
 
   onYearSelection(value: number) {
     this.yearChanged.emit(value);
@@ -25,5 +28,9 @@ export class ContingentOverviewToolbarComponent {
 
   onHourTypeSelection(value: number) {
     this.hourTypeChanged.emit(value);
+  }
+
+  onArchivedVisibilityChanged(showArchivedEmployees: boolean) {
+    this.showArchivedEmployeesChange.emit(showArchivedEmployees);
   }
 }

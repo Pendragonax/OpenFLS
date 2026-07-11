@@ -4,7 +4,7 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {EmployeeDto} from "../../shared/dtos/employee-dto.model";
 import {UserService} from "../../shared/services/user.service";
 import {EmployeeViewModel} from "../../shared/models/employee-view.model";
-import {combineLatest} from "rxjs";
+import {combineLatest, map, switchMap} from "rxjs";
 import {Sort} from "@angular/material/sort";
 import {Comparer} from "../../shared/services/comparer.helper";
 import {InstitutionService} from "../../shared/services/institution.service";
@@ -25,6 +25,8 @@ export class EmployeesComponent extends TablePageComponent<EmployeeViewModel, Em
   tableColumns: string[] = ['roles', 'name', 'institution', 'actions'];
 
   deleteServiceCount: number = 0;
+  showArchivedEntries = false;
+  canToggleArchivedEntries = false;
 
   constructor(
     override modalService: NgbModal,
@@ -43,14 +45,19 @@ export class EmployeesComponent extends TablePageComponent<EmployeeViewModel, Em
 
     combineLatest([
       this.userService.leadingInstitutions$,
-      this.employeeService.allValues$,
-      this.institutionService.getAll(),
-      this.userService.isAdmin$]
+      this.userService.user$,
+      this.institutionService.getAll()
+    ]).pipe(
+      switchMap(([leadingIds, user, institutions]) => {
+        this.canToggleArchivedEntries = user.access?.role === 1;
+        return this.employeeService.getAll(this.canToggleArchivedEntries && this.showArchivedEntries)
+          .pipe(map(employees => [leadingIds, user, institutions, employees] as const));
+      })
     ).subscribe({
-      next: ([leadingIds, employees, institutions, isAdmin]) => {
+      next: ([leadingIds, user, institutions, employees]) => {
         this.values = employees.map(value => <EmployeeViewModel>{
           dto: value,
-          editable: isAdmin || this.isEmployeeEditable(leadingIds, value),
+          editable: (user.access?.role === 1) || this.isEmployeeEditable(leadingIds, value),
           administrator: (value?.access?.role ?? 99) <= 1,
           leader: (value?.access?.role ?? 99) <= 2,
           institutions: institutions
@@ -130,6 +137,11 @@ export class EmployeesComponent extends TablePageComponent<EmployeeViewModel, Em
   onSearchStringChanges(searchString: string) {
     this.searchString = searchString
     this.filterTableData()
+  }
+
+  onArchivedVisibilityChanged(showArchivedEntries: boolean) {
+    this.showArchivedEntries = showArchivedEntries;
+    this.loadValues();
   }
 
   override handleDeleteModalOpen(value: EmployeeViewModel) {

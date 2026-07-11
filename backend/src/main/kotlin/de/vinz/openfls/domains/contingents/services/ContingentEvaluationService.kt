@@ -20,9 +20,14 @@ class ContingentEvaluationService(
 ) {
 
     @Transactional(readOnly = true)
-    fun generateContingentEvaluationFor(year: Int, institutionId: Long): ContingentEvaluationDto {
+    fun generateContingentEvaluationFor(
+        year: Int,
+        institutionId: Long,
+        includeArchivedEmployees: Boolean = false
+    ): ContingentEvaluationDto {
         val services = serviceService.getContingentEvaluationServiceDTOsBy(institutionId, year)
         val contingents = contingentService.getAllByInstitutionAndYear(institutionId, year)
+            .filter { includeArchivedEmployees || !it.employee.archived }
         val yearlyAbsences = absenceService.getAllByYear(year)
         val employeeContingentEvaluations =
             getEmployeeContingentEvaluations(year, contingents, services, yearlyAbsences)
@@ -58,6 +63,7 @@ class ContingentEvaluationService(
                         employeeId = contingent.employee.id,
                         lastname = contingent.employee.lastname,
                         firstname = contingent.employee.firstname,
+                        archived = contingent.employee.archived,
                         contingentHours = contingentHours,
                         executedHours = executedEmployeeHours,
                         executedPercent = executedPercent,
@@ -90,6 +96,7 @@ class ContingentEvaluationService(
                         employeeId = contingent.employee.id,
                         lastname = contingent.employee.lastname,
                         firstname = contingent.employee.firstname,
+                        archived = contingent.employee.archived,
                         contingentHours = employeeContingentHours,
                         executedHours = contingentEmployeeEvaluation.executedHours,
                         executedPercent = employeeExecutedPercent,

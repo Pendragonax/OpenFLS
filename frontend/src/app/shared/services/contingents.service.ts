@@ -37,21 +37,21 @@ export class ContingentsService extends Base<ContingentDto> {
     });
   }
 
-  getByEmployeeId(id: Number): Observable<ContingentDto[]> {
+  getByEmployeeId(id: Number, includeArchivedEmployees: boolean = false): Observable<ContingentDto[]> {
     return this.http
-      .get<ContingentDto[]>(`${environment.api_url}${this.url}/employee/${id}`)
+      .get<ContingentDto[]>(`${environment.api_url}${this.url}/employee/${id}?includeArchivedEmployees=${includeArchivedEmployees}`)
   }
 
-  getByInstitutionId(id: Number): Observable<ContingentDto[]> {
+  getByInstitutionId(id: Number, includeArchivedEmployees: boolean = false): Observable<ContingentDto[]> {
     return this.http
-      .get<ContingentDto[]>(`${environment.api_url}${this.url}/institution/${id}`)
+      .get<ContingentDto[]>(`${environment.api_url}${this.url}/institution/${id}?includeArchivedEmployees=${includeArchivedEmployees}`)
   }
 
-  getCombinationByEmployeeId(id: number): Observable<[EmployeeDto, InstitutionDto, ContingentDto, boolean][]> {
+  getCombinationByEmployeeId(id: number, includeArchivedEmployees: boolean = false): Observable<[EmployeeDto, InstitutionDto, ContingentDto, boolean][]> {
     return combineLatest([
       this.employeeService.getById(id),
       this.institutionService.allValues$,
-      this.getByEmployeeId(id),
+      this.getByEmployeeId(id, includeArchivedEmployees),
       this.userService.leadingInstitutions$,
       this.userService.isAdmin$]
     ).pipe(map(([employee, institutions, contingents, leadingIds, isAdmin]) => {
@@ -66,11 +66,11 @@ export class ContingentsService extends Base<ContingentDto> {
     }))
   }
 
-  getCombinationByInstitutionId(id: number): Observable<[EmployeeDto, InstitutionDto, ContingentDto, boolean][]> {
+  getCombinationByInstitutionId(id: number, includeArchivedEmployees: boolean = false): Observable<[EmployeeDto, InstitutionDto, ContingentDto, boolean][]> {
     return combineLatest([
       this.institutionService.getById(id),
-      this.employeeService.allValues$,
-      this.getByInstitutionId(id),
+      this.employeeService.getAll(includeArchivedEmployees),
+      this.getByInstitutionId(id, includeArchivedEmployees),
       this.userService.leadingInstitutions$,
       this.userService.isAdmin$]
     ).pipe(map(([institution, employees, contingents, leadingIds, isAdmin]) => {

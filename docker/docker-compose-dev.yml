@@ -95,5 +95,3 @@ secrets:
 
 volumes:
   open-fls-db:
-    external: true
-    name: openfls_open-fls-db

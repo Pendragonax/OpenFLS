@@ -28,6 +28,22 @@
   box-shadow: 0 2px 6px rgba(20, 35, 70, 0.12);
 }
 
+.contingent-card--archived {
+  background: #fff3f1;
+}
+
+.contingent-card--archived .contingent-card__name,
+.contingent-card--archived .contingent-card__total,
+.contingent-card--archived .contingent-card__label,
+.contingent-card--archived .contingent-card__value {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.contingent-card--archived {
+  box-shadow: inset 4px 0 0 #c94a43, 0 2px 6px rgba(20, 35, 70, 0.12);
+}
+
 .contingent-card__header {
   display: flex;
   flex-direction: column;
@@ -89,6 +105,23 @@
 
 ::ng-deep .contingent-overview app-object-table .fixed-button {
   display: none;
+}
+
+::ng-deep .contingent-overview app-object-table tr.contingent-row--archived {
+  background: #fff3f1;
+}
+
+::ng-deep .contingent-overview app-object-table tr.contingent-row--archived td {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+::ng-deep .contingent-overview app-object-table tr.contingent-row--archived td:first-child {
+  box-shadow: inset 4px 0 0 #c94a43;
+}
+
+::ng-deep .contingent-overview app-object-table tr.contingent-row--archived:hover {
+  background: #fff3f1;
 }
 
 @media (max-width: 900px) {

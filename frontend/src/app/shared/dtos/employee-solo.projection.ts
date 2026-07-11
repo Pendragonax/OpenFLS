@@ -5,4 +5,5 @@ export class EmployeeSolo {
   email: string = "";
   phonenumber: string = "";
   description: string = "";
+  archived: boolean = false;
 }

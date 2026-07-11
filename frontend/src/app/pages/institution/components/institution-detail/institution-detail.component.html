@@ -144,11 +144,17 @@
     <app-contingents class="m-2"
                      [hideInstitutionColumn]="true"
                      [hideAddButton]="true"
+                     [showArchivedEmployees]="showArchivedContingentEmployees"
+                     [showArchivedEmployeesToggleVisible]="canToggleArchivedContingentEmployees"
+                     (showArchivedEmployeesChange)="onArchivedContingentVisibilityChanged($event)"
                      [institutionView$]="value$"></app-contingents>
   </mat-tab>
 
   <mat-tab label="Kontigente Übersicht">
-    <app-contingent-overview [institutionId]="this.institutionId"></app-contingent-overview>
+    <app-contingent-overview [institutionId]="this.institutionId"
+                             [showArchivedEmployees]="showArchivedContingentEmployees"
+                             [showArchivedEmployeesToggleVisible]="canToggleArchivedContingentEmployees"
+                             (showArchivedEmployeesChange)="onArchivedContingentVisibilityChanged($event)"></app-contingent-overview>
   </mat-tab>
 
   <!--CONTRACTS-->
@@ -161,4 +167,3 @@
                           [showArchivedEntriesToggleVisible]="true"></app-assistance-plans>
   </mat-tab>
 </mat-tab-group>
-

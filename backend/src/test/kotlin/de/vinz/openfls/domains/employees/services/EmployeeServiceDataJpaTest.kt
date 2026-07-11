@@ -304,4 +304,58 @@ class EmployeeServiceDataJpaTest(@Autowired private val unprofessionalRepository
         assertThatThrownBy { employeeService.update(9999, dto) }
             .isInstanceOf(EntityNotFoundException::class.java)
     }
+
+    @Test
+    fun getAllEmployeeDtos_defaultHidesArchivedEmployees() {
+        // Given
+        employeeRepository.save(Employee(firstname = "Active", lastname = "Alpha"))
+        employeeRepository.save(Employee(firstname = "Archived", lastname = "Zulu", archived = true))
+
+        // When
+        val result = employeeService.getAllEmployeeDtos()
+
+        // Then
+        assertThat(result).hasSize(1)
+        assertThat(result.single().firstName).isEqualTo("Active")
+    }
+
+    @Test
+    fun getAllEmployeeDtos_includeArchivedReturnsArchivedEmployees() {
+        // Given
+        employeeRepository.save(Employee(firstname = "Active", lastname = "Alpha"))
+        employeeRepository.save(Employee(firstname = "Archived", lastname = "Zulu", archived = true))
+
+        // When
+        val result = employeeService.getAllEmployeeDtos(includeArchived = true)
+
+        // Then
+        assertThat(result).hasSize(2)
+        assertThat(result.any { it.archived }).isTrue()
+    }
+
+    @Test
+    fun getEmployeeDtoById_archivedEmployeeWithoutAdminMode_returnsNull() {
+        // Given
+        val archived = employeeRepository.save(Employee(firstname = "Archived", lastname = "Alpha", archived = true))
+
+        // When
+        val result = employeeService.getEmployeeDtoById(archived.id!!, adminMode = false)
+
+        // Then
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun getAllProjections_defaultHidesArchivedEmployees() {
+        // Given
+        val active = employeeRepository.save(Employee(firstname = "Active", lastname = "Alpha"))
+        employeeRepository.save(Employee(firstname = "Archived", lastname = "Zulu", archived = true))
+
+        // When
+        val result = employeeService.getAllProjections()
+
+        // Then
+        assertThat(result).hasSize(1)
+        assertThat(result.single().id).isEqualTo(active.id)
+    }
 }

@@ -83,6 +83,12 @@ import {
   WorkTimeCardComponent
 } from './pages/employees/components/employee-detail/contingent-evaluation/work-time-card/work-time-card.component';
 import {
+  EmployeeArchiveActionPanelComponent
+} from './pages/employees/components/employee-detail/employee-archive-action-panel.component';
+import {
+  EmployeeArchiveHistoryPanelComponent
+} from './pages/employees/components/employee-detail/employee-archive-history-panel.component';
+import {
   AssistancePlanEvaluationComponent
 } from './shared/components/assistance-plans/components/assistance-plan-evaluation/assistance-plan-evaluation.component';
 import {MatRadioModule} from "@angular/material/radio";
@@ -166,6 +172,8 @@ const routes: Routes = [
         EmployeeNewComponent,
         InstitutionComponent,
         EmployeeDetailComponent,
+        EmployeeArchiveActionPanelComponent,
+        EmployeeArchiveHistoryPanelComponent,
         InstitutionNewComponent,
         InstitutionDetailComponent,
         CategoryComponent,

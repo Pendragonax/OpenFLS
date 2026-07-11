@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {ReplaySubject} from "rxjs";
 import {ContingentEvaluationDto} from "./dtos/contingent-evaluation-dto.model";
 import {ContingentEvaluationService} from "./services/contingent-evaluation.service";
@@ -12,9 +12,12 @@ import {CsvService} from "../../../../../shared/services/csv.service";
     styleUrls: ['./contingent-overview.component.css'],
     standalone: false
 })
-export class ContingentOverviewComponent implements OnInit {
+export class ContingentOverviewComponent implements OnInit, OnChanges {
 
   @Input() institutionId: number = 0
+  @Input() showArchivedEmployees: boolean = false;
+  @Input() showArchivedEmployeesToggleVisible: boolean = false;
+  @Output() showArchivedEmployeesChange = new EventEmitter<boolean>();
 
   informationTitle: string = "Kontingentübersicht Informationen"
   informationContent: {title: string, content: string}[] = [
@@ -33,6 +36,7 @@ export class ContingentOverviewComponent implements OnInit {
 
   header$: ReplaySubject<string[]> = new ReplaySubject()
   data$: ReplaySubject<any[][]> = new ReplaySubject()
+  rowClasses: string[] = []
   tableHeader: string[] = []
   tableData: any[][] = []
 
@@ -57,6 +61,12 @@ export class ContingentOverviewComponent implements OnInit {
     this.loadValues()
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['showArchivedEmployees'] && !changes['showArchivedEmployees'].firstChange) {
+      this.loadValues()
+    }
+  }
+
   onYearChanged(year: number) {
     this.year = year
     this.loadValues()
@@ -72,7 +82,7 @@ export class ContingentOverviewComponent implements OnInit {
     this.isGenerating = true
     this.errorOccurred = false
 
-    this.contingentEvaluationService.getOverviewByInstitutionIdAndYear(this.institutionId, this.year).subscribe({
+      this.contingentEvaluationService.getOverviewByInstitutionIdAndYear(this.institutionId, this.year, this.showArchivedEmployees).subscribe({
       next: value => {
         this.contingentOverView = value
         this.isLoadedInitially = this.selectedHourType > 0
@@ -84,6 +94,10 @@ export class ContingentOverviewComponent implements OnInit {
         this.errorOccurred = true
       }
     })
+  }
+
+  onArchivedVisibilityChanged(showArchivedEmployees: boolean) {
+    this.showArchivedEmployeesChange.emit(showArchivedEmployees);
   }
 
   openValueTypeInfoModal(event) {
@@ -103,6 +117,7 @@ export class ContingentOverviewComponent implements OnInit {
 
   public getData() {
     let result: any[] = []
+    let classes: string[] = []
 
     if (this.contingentOverView != null && this.selectedHourType > 0) {
       for (let employee of this.contingentOverView.employees) {
@@ -145,10 +160,12 @@ export class ContingentOverviewComponent implements OnInit {
         }
 
         result.push(employeeRow)
+        classes.push(employee.archived ? 'contingent-row--archived' : '')
       }
     }
 
     this.tableData = result
+    this.rowClasses = classes
     this.data$.next(result)
   }
 

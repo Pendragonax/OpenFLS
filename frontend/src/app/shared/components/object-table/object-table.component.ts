@@ -14,6 +14,7 @@ export class ObjectTableComponent implements OnInit {
   @Input() columnFixedWidthFromIndex: number = 0;
   @Input() boldColumnIndices: number[] = []
   @Input() exportFilename: string = "table_export"
+  @Input() rowClasses: string[] = []
 
   header: string[] = [];
   data: any[][] = [];

@@ -20,6 +20,8 @@ class EmployeeDto {
 
     var description: String = ""
 
+    var archived: Boolean = false
+
     var inactive: Boolean = false
 
     var institutionId: Long? = null

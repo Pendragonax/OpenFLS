@@ -126,12 +126,20 @@ class ContingentController(
     }
 
     @GetMapping("employee/{id}")
-    fun getByEmployeeId(@PathVariable id: Long): Any {
+    fun getByEmployeeId(
+        @PathVariable id: Long,
+        @RequestParam(defaultValue = "false") includeArchivedEmployees: Boolean
+    ): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(contingentService.getByEmployeeId(id))
+            ResponseEntity.ok(
+                contingentService.getByEmployeeId(
+                    id,
+                    accessService.isAdmin() && includeArchivedEmployees
+                )
+            )
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
         } catch (ex: IllegalArgumentException) {
@@ -144,12 +152,20 @@ class ContingentController(
     }
 
     @GetMapping("institution/{id}")
-    fun getByInstitutionId(@PathVariable id: Long): Any {
+    fun getByInstitutionId(
+        @PathVariable id: Long,
+        @RequestParam(defaultValue = "false") includeArchivedEmployees: Boolean
+    ): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(contingentService.getByInstitutionId(id))
+            ResponseEntity.ok(
+                contingentService.getByInstitutionId(
+                    id,
+                    accessService.isAdmin() && includeArchivedEmployees
+                )
+            )
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
         } catch (ex: IllegalArgumentException) {

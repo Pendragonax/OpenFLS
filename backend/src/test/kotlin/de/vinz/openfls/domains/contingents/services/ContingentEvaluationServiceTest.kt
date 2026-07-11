@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.Mockito.lenient
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
@@ -76,6 +77,7 @@ class ContingentEvaluationServiceTest {
         assertThat(evaluation.employees).hasSize(1)
         val employeeEvaluation = evaluation.employees.first()
         assertThat(employeeEvaluation.employeeId).isEqualTo(employee.id)
+        assertThat(employeeEvaluation.archived).isFalse()
         assertThat(employeeEvaluation.executedHours[0]).isEqualTo(1.0)
         assertThat(employeeEvaluation.executedPercent[0]).isEqualTo(50.0)
         assertThat(employeeEvaluation.missingHours[0]).isEqualTo(1.0)
@@ -183,6 +185,85 @@ class ContingentEvaluationServiceTest {
     }
 
     @Test
+    fun generateContingentEvaluationFor_archivedEmployee_marksArchivedEmployee() {
+        // Given
+        val year = 2024
+        val institutionId = 1L
+        val institution = mockInstitution()
+        val archivedEmployee = mockEmployee(11L, "Anna", "Archive", archived = true)
+        val archivedContingent = mockContingent(
+            id = 2L,
+            employee = archivedEmployee,
+            institution = institution,
+            start = LocalDate.of(year, 1, 1),
+            end = null,
+            weeklyHours = 7.0
+        )
+        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val contingentHours = listOf(2.0, 2.0) + List(11) { 0.0 }
+
+        whenever(serviceService.getContingentEvaluationServiceDTOsBy(institutionId, year)).thenReturn(emptyList())
+        whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(listOf(archivedContingent))
+        whenever(absenceService.getAllByYear(year)).thenReturn(yearlyAbsences)
+        whenever(contingentService.calculateContingentHoursBy(year, archivedContingent, yearlyAbsences))
+            .thenReturn(contingentHours)
+
+        // When
+        val evaluation = contingentEvaluationService.generateContingentEvaluationFor(year, institutionId, includeArchivedEmployees = true)
+
+        // Then
+        assertThat(evaluation.employees).hasSize(1)
+        assertThat(evaluation.employees.first().archived).isTrue()
+    }
+
+    @Test
+    fun generateContingentEvaluationFor_archivedEmployee_isExcludedByDefault() {
+        // Given
+        val year = 2024
+        val institutionId = 1L
+        val institution = mockInstitution()
+        val activeEmployee = mockEmployee(10L, "Hans", "Meiser")
+        val archivedEmployee = mockEmployee(11L, "Anna", "Archive", archived = true)
+        val activeContingent = mockContingent(
+            id = 1L,
+            employee = activeEmployee,
+            institution = institution,
+            start = LocalDate.of(year, 1, 1),
+            end = null,
+            weeklyHours = 7.0
+        )
+        val archivedContingent = mockContingent(
+            id = 2L,
+            employee = archivedEmployee,
+            institution = institution,
+            start = LocalDate.of(year, 1, 1),
+            end = null,
+            weeklyHours = 7.0
+        )
+        val service = mockService(
+            id = 21L,
+            start = LocalDateTime.of(year, 1, 5, 10, 0),
+            minutes = 60,
+            employeeId = activeEmployee.id
+        )
+        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val contingentHours = listOf(2.0, 2.0) + List(11) { 0.0 }
+
+        whenever(serviceService.getContingentEvaluationServiceDTOsBy(institutionId, year)).thenReturn(listOf(service))
+        whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(listOf(activeContingent, archivedContingent))
+        whenever(absenceService.getAllByYear(year)).thenReturn(yearlyAbsences)
+        whenever(contingentService.calculateContingentHoursBy(year, activeContingent, yearlyAbsences))
+            .thenReturn(contingentHours)
+
+        // When
+        val evaluation = contingentEvaluationService.generateContingentEvaluationFor(year, institutionId)
+
+        // Then
+        assertThat(evaluation.employees).hasSize(1)
+        assertThat(evaluation.employees.first().employeeId).isEqualTo(activeEmployee.id)
+    }
+
+    @Test
     fun getExecutedHoursByYearAndEmployee_servicesAcrossMonthsAndAbsence_skipsAbsentServices() {
         // Given
         val year = 2024
@@ -264,11 +345,17 @@ class ContingentEvaluationServiceTest {
 
     private fun mockInstitution(): InstitutionSoloProjection = mock()
 
-    private fun mockEmployee(id: Long, firstName: String, lastName: String): EmployeeSoloProjection {
+    private fun mockEmployee(
+        id: Long,
+        firstName: String,
+        lastName: String,
+        archived: Boolean = false
+    ): EmployeeSoloProjection {
         val employee = mock<EmployeeSoloProjection>()
-        whenever(employee.id).thenReturn(id)
-        whenever(employee.firstname).thenReturn(firstName)
-        whenever(employee.lastname).thenReturn(lastName)
+        lenient().whenever(employee.id).thenReturn(id)
+        lenient().whenever(employee.firstname).thenReturn(firstName)
+        lenient().whenever(employee.lastname).thenReturn(lastName)
+        lenient().whenever(employee.archived).thenReturn(archived)
         return employee
     }
 

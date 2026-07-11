@@ -10,6 +10,7 @@ export class EmployeeDto {
   phonenumber: string = "";
   email: string = "";
   description: string = "";
+  archived: boolean = false;
   inactive: boolean = false;
   institutionId: number | null = null;
   access: EmployeeAccessDto | null = new EmployeeAccessDto();

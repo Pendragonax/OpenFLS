@@ -1,7 +1,16 @@
 <app-info-header [title]="'Mitarbeiter &quot;' + (value ? value.lastName : '') + ' ' + (value ? value.firstName : '') + '&quot;'"></app-info-header>
 
-<mat-tab-group>
+<mat-tab-group [selectedIndex]="selectedTabIndex"
+               (selectedTabChange)="onTabChanged($event)">
   <mat-tab label="Allgemein">
+    @if (value.archived && adminMode) {
+      <div class="container-fluid mt-2">
+        <div class="archive-state-banner archive-state-banner--archived">
+          Der Mitarbeiter ist archiviert. Änderungen an den Stammdaten sind gesperrt.
+        </div>
+      </div>
+    }
+
     <mat-accordion>
       <mat-expansion-panel class="mt-2 mx-2">
         <mat-expansion-panel-header>
@@ -56,13 +65,15 @@
               </mat-form-field>
             </div>
 
-            <div>
-              <button mat-raised-button
-                      color="primary"
-                      class="mat-stroked-button"
-                      (click)="update()"
-                      [disabled]="!detailForm.valid || isSubmitting">Speichern</button>
-            </div>
+            @if (showSaveButton) {
+              <div>
+                <button mat-raised-button
+                        color="primary"
+                        class="mat-stroked-button"
+                        (click)="update()"
+                        [disabled]="!detailForm.valid || isSubmitting">Speichern</button>
+              </div>
+            }
           </form>
           </div>
         }
@@ -209,7 +220,7 @@
             <button mat-raised-button
                     color="primary"
                     class="mat-stroked-button m-1 w-auto"
-                    [disabled]="(value ? value.inactive : false) || isSubmitting"
+                    [disabled]="(value ? value.inactive : false) || isSubmitting || value.archived"
                     *showOnRole="'admin'"
                     (click)="updateInactiveState(true)">Mitarbeiter deaktivieren</button>
           </div>
@@ -218,7 +229,7 @@
             <button mat-raised-button
                     color="primary"
                     class="mat-stroked-button m-1 w-auto"
-                    [disabled]="!(value ? value.inactive : false) || isSubmitting"
+                    [disabled]="!(value ? value.inactive : false) || isSubmitting || value.archived"
                     *showOnRole="'admin'"
                     (click)="updateInactiveState(false)">Mitarbeiter aktivieren</button>
           </div>
@@ -255,6 +266,10 @@
            *showOnRole="'leader'">
     <app-contingents class="mb-2"
                      [hideEmployeeColumn]="true"
+                     [hideAddButton]="hideContingentAddButton"
+                     [showArchivedEmployees]="showArchivedContingentEmployees"
+                     [showArchivedEmployeesToggleVisible]="true"
+                     (showArchivedEmployeesChange)="onArchivedContingentVisibilityChanged($event)"
                      [employeeView$]="employeeView$"></app-contingents>
   </mat-tab>
 
@@ -265,6 +280,30 @@
                                  [navigateToMyServices]=false
                                  [disableCalendarMenu]="true"
                                  [hideRefresh]="true"></app-contingent-evaluation>
+    </mat-tab>
+  }
+
+  @if (showArchiveTab) {
+    <mat-tab label="Archiv">
+      <div class="container-fluid mt-2 archive-tab">
+        <div class="archive-state-banner" [class.archive-state-banner--archived]="value.archived">
+          <div class="archive-state-banner__eyebrow">Status</div>
+          <div class="archive-state-banner__status">
+            {{ value.archived ? 'Archiviert' : 'Aktiv' }}
+          </div>
+        </div>
+
+        <div class="archive-columns">
+          <app-employee-archive-action-panel
+            [archiveActionForm]="archiveActionForm"
+            [archived]="value.archived"
+            [isSubmitting]="isSubmitting"
+            (confirm)="openArchiveConfirmation()"></app-employee-archive-action-panel>
+
+          <app-employee-archive-history-panel
+            [archiveHistory]="archiveHistory"></app-employee-archive-history-panel>
+        </div>
+      </div>
     </mat-tab>
   }
 </mat-tab-group>

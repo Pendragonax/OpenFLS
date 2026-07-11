@@ -41,6 +41,18 @@
     <!--FILTER CONTAINER-->
   </div>
 
+  @if (showArchivedEmployeesToggleVisible && !isSubmitting) {
+    <div class="row my-2 justify-content-center">
+      <div class="col-auto">
+        <mat-slide-toggle
+          [checked]="showArchivedEmployees"
+          (change)="onArchivedVisibilityChanged($event.checked)">
+          Archivierte Kontingente anzeigen
+        </mat-slide-toggle>
+      </div>
+    </div>
+  }
+
   <!--TABLE-->
   <div class="row mt-2 mx-0 mb-3">
 
@@ -172,7 +184,9 @@
         </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+      <tr mat-row
+          *matRowDef="let row; columns: tableColumns;"
+          [class.contingent-row--archived]="isArchivedEmployeeContingent(row)"></tr>
       </table>
     }
   </div>

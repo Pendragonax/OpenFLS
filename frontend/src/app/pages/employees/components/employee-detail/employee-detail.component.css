@@ -5,3 +5,138 @@
 .mat-header-cell {
   padding: 4px 4px 4px 4px;
 }
+
+.archive-tab {
+  height: calc(100vh - 240px);
+  min-height: 680px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.archive-state-banner {
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid #cfd3de;
+  border-left: 6px solid #673ab7;
+  border-radius: 16px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #f8f6fd 0%, #ffffff 100%);
+  box-shadow: 0 10px 24px rgba(71, 39, 121, 0.08);
+  text-align: center;
+}
+
+.archive-state-banner--archived {
+  border-left-color: #b3261e;
+  background: linear-gradient(135deg, #fff4f2 0%, #ffffff 100%);
+}
+
+.archive-state-banner__eyebrow {
+  color: #5e35b1;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.archive-state-banner--archived .archive-state-banner__eyebrow {
+  color: #b3261e;
+}
+
+.archive-state-banner__status {
+  color: #2f1b66;
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.archive-state-banner--archived .archive-state-banner__status {
+  color: #8e1f18;
+}
+
+.archive-columns {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.1fr);
+  gap: 24px;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+
+.archive-panel {
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 18px 20px 20px;
+  border: 1px solid #d9dbe7;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.05);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.archive-panel--history {
+  flex: 1;
+  overflow: hidden;
+}
+
+@media (max-width: 1400px) {
+  .archive-tab {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .archive-columns {
+    grid-template-columns: minmax(320px, 1fr);
+    grid-template-areas:
+      "form"
+      "history";
+  }
+
+  .archive-panel--form {
+    grid-area: form;
+  }
+
+  .archive-panel--history {
+    grid-area: history;
+    justify-self: center;
+    width: min(750px, calc(100vw - 120px));
+    max-width: 750px;
+    min-width: 620px;
+    flex: none;
+  }
+}
+
+@media (max-width: 991px) {
+  .archive-columns {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+    grid-template-areas: none;
+  }
+
+  .archive-panel {
+    max-width: 100%;
+  }
+
+  .archive-panel--history {
+    grid-area: auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    justify-self: stretch;
+  }
+
+  .archive-tab {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+}
