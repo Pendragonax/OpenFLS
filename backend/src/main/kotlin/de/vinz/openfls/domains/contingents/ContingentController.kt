@@ -134,7 +134,12 @@ class ContingentController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(contingentService.getByEmployeeId(id, includeArchivedEmployees))
+            ResponseEntity.ok(
+                contingentService.getByEmployeeId(
+                    id,
+                    accessService.isAdmin() && includeArchivedEmployees
+                )
+            )
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
         } catch (ex: IllegalArgumentException) {

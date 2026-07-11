@@ -65,6 +65,7 @@ class ContingentControllerWebMvcTest {
     @Test
     fun getByEmployeeId_withIncludeArchived_forwardsOptIn() {
         // Given
+        given(accessService.isAdmin()).willReturn(true)
         given(contingentService.getByEmployeeId(7L, true)).willReturn(emptyList())
 
         // When
@@ -75,5 +76,21 @@ class ContingentControllerWebMvcTest {
         // Then
         assertThat(result.response.status).isEqualTo(200)
         verify(contingentService).getByEmployeeId(7L, true)
+    }
+
+    @Test
+    fun getByEmployeeId_nonAdminIgnoresOptIn() {
+        // Given
+        given(accessService.isAdmin()).willReturn(false)
+        given(contingentService.getByEmployeeId(7L, false)).willReturn(emptyList())
+
+        // When
+        val result = mockMvc.get("/contingents/employee/7") {
+            param("includeArchivedEmployees", "true")
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        verify(contingentService).getByEmployeeId(7L, false)
     }
 }
