@@ -154,12 +154,16 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
+               ap.hourMode as hourMode,
+               hc.weeklyMinutesFrom as hourCorridorWeeklyMinutesFrom,
+               hc.weeklyMinutesTill as hourCorridorWeeklyMinutesTill,
                ap.start as start,
                ap.end as end
         FROM AssistancePlan ap
         JOIN ap.client c
         JOIN ap.institution i
         JOIN ap.sponsor s
+        LEFT JOIN ap.hourCorridor hc
         WHERE ap.client.id = :clientId
         ORDER BY ap.start DESC
         """
@@ -179,12 +183,16 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
+               ap.hourMode as hourMode,
+               hc.weeklyMinutesFrom as hourCorridorWeeklyMinutesFrom,
+               hc.weeklyMinutesTill as hourCorridorWeeklyMinutesTill,
                ap.start as start,
                ap.end as end
         FROM AssistancePlan ap
         JOIN ap.client c
         JOIN ap.institution i
         JOIN ap.sponsor s
+        LEFT JOIN ap.hourCorridor hc
         WHERE ap.institution.id = :institutionId
         ORDER BY ap.start DESC
         """
@@ -204,12 +212,16 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
+               ap.hourMode as hourMode,
+               hc.weeklyMinutesFrom as hourCorridorWeeklyMinutesFrom,
+               hc.weeklyMinutesTill as hourCorridorWeeklyMinutesTill,
                ap.start as start,
                ap.end as end
         FROM AssistancePlan ap
         JOIN ap.client c
         JOIN ap.institution i
         JOIN ap.sponsor s
+        LEFT JOIN ap.hourCorridor hc
         WHERE ap.sponsor.id = :sponsorId
         ORDER BY ap.start DESC
         """
@@ -229,6 +241,9 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
+               ap.hourMode as hourMode,
+               hc.weeklyMinutesFrom as hourCorridorWeeklyMinutesFrom,
+               hc.weeklyMinutesTill as hourCorridorWeeklyMinutesTill,
                ap.start as start,
                ap.end as end
         FROM Employee e
@@ -236,6 +251,7 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
         JOIN ap.client c
         JOIN ap.institution i
         JOIN ap.sponsor s
+        LEFT JOIN ap.hourCorridor hc
         WHERE e.id = :employeeId
         ORDER BY ap.start DESC
         """

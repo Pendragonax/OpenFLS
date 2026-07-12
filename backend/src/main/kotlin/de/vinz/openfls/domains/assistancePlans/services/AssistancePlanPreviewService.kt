@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistingProjection
@@ -123,11 +124,8 @@ class AssistancePlanPreviewService(
                 assistancePlanHourWeeklyMinutes,
                 goalHourWeeklyMinutes
             ),
-            hasIllegalHoursByAssistancePlanId = getHasIllegalHoursByAssistancePlanId(
-                assistancePlanIds,
-                assistancePlanHourWeeklyMinutes,
-                goalHourWeeklyMinutes
-            ),
+            assistancePlanIdsWithPlanHours = assistancePlanHourWeeklyMinutes.map { it.assistancePlanId }.toSet(),
+            assistancePlanIdsWithGoalHours = goalHourWeeklyMinutes.map { it.assistancePlanId }.toSet(),
             executedMinutesByAssistancePlanId = getExecutedMinutesByAssistancePlanId(assistancePlanIds, yearStart, now)
         )
     }
@@ -137,13 +135,24 @@ class AssistancePlanPreviewService(
         favoriteAssistancePlanIds: Set<Long>,
         context: PreviewContext
     ): AssistancePlanPreviewDto {
-        val approvedWeeklyMinutes = context.weeklyApprovedMinutesByAssistancePlanId[projection.id] ?: 0.0
-        val approvedHoursPerWeek = TimeDoubleService.convertDoubleToTimeDouble(approvedWeeklyMinutes / 60.0)
+        val approvedRangeMinutes = if (projection.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            val from = projection.hourCorridorWeeklyMinutesFrom?.toDouble() ?: 0.0
+            val till = projection.hourCorridorWeeklyMinutesTill?.toDouble() ?: from
+            from to till
+        } else {
+            val approvedWeeklyMinutes = context.weeklyApprovedMinutesByAssistancePlanId[projection.id] ?: 0.0
+            approvedWeeklyMinutes to approvedWeeklyMinutes
+        }
+        val approvedHoursFrom = TimeDoubleService.convertDoubleToTimeDouble(approvedRangeMinutes.first / 60.0)
+        val approvedHoursTo = TimeDoubleService.convertDoubleToTimeDouble(approvedRangeMinutes.second / 60.0)
+        val approvedHoursPerWeek = TimeDoubleService.convertDoubleToTimeDouble(
+            ((approvedRangeMinutes.first + approvedRangeMinutes.second) / 2.0) / 60.0
+        )
         val approvedHoursThisYear = TimeDoubleService.convertDoubleToTimeDouble(
             calculateApprovedHoursInYear(
                 projection.start,
                 projection.end,
-                approvedWeeklyMinutes,
+                (approvedRangeMinutes.first + approvedRangeMinutes.second) / 2.0,
                 context.yearStart,
                 context.periodEnd
             )
@@ -166,7 +175,10 @@ class AssistancePlanPreviewService(
             end = projection.end,
             isActive = isActiveOn(projection, context.now),
             isFavorite = favoriteAssistancePlanIds.contains(projection.id),
-            hasIllegalHours = context.hasIllegalHoursByAssistancePlanId[projection.id] ?: false,
+            hasIllegalHours = hasIllegalHours(projection, context),
+            hourMode = projection.hourMode,
+            approvedHoursFrom = approvedHoursFrom,
+            approvedHoursTo = approvedHoursTo,
             approvedHoursPerWeek = approvedHoursPerWeek,
             approvedHoursThisYear = approvedHoursThisYear,
             executedHoursThisYear = executedHoursThisYear
@@ -194,24 +206,6 @@ class AssistancePlanPreviewService(
             } else {
                 goalHourMinutes[assistancePlanId] ?: 0.0
             }
-        }
-    }
-
-    private fun getHasIllegalHoursByAssistancePlanId(
-        assistancePlanIds: List<Long>,
-        assistancePlanHourWeeklyMinutes: List<AssistancePlanWeeklyMinutesProjection>,
-        goalHourWeeklyMinutes: List<AssistancePlanWeeklyMinutesProjection>
-    ): Map<Long, Boolean> {
-        val assistancePlanIdsWithPlanHours = assistancePlanHourWeeklyMinutes
-            .map { it.assistancePlanId }
-            .toSet()
-
-        val assistancePlanIdsWithGoalHours = goalHourWeeklyMinutes
-            .map { it.assistancePlanId }
-            .toSet()
-
-        return assistancePlanIds.associateWith { assistancePlanId ->
-            assistancePlanIdsWithPlanHours.contains(assistancePlanId) && assistancePlanIdsWithGoalHours.contains(assistancePlanId)
         }
     }
 
@@ -253,7 +247,21 @@ class AssistancePlanPreviewService(
         val yearStart: LocalDate,
         val periodEnd: LocalDate,
         val weeklyApprovedMinutesByAssistancePlanId: Map<Long, Double>,
-        val hasIllegalHoursByAssistancePlanId: Map<Long, Boolean>,
+        val assistancePlanIdsWithPlanHours: Set<Long>,
+        val assistancePlanIdsWithGoalHours: Set<Long>,
         val executedMinutesByAssistancePlanId: Map<Long, Long>
     )
+
+    private fun hasIllegalHours(
+        projection: AssistancePlanPreviewProjection,
+        context: PreviewContext
+    ): Boolean {
+        val hasPlanHours = context.assistancePlanIdsWithPlanHours.contains(projection.id)
+        val hasGoalHours = context.assistancePlanIdsWithGoalHours.contains(projection.id)
+
+        return when (projection.hourMode) {
+            AssistancePlanHourMode.CORRIDOR -> hasPlanHours || hasGoalHours
+            AssistancePlanHourMode.EXACT -> hasPlanHours && hasGoalHours || (!hasPlanHours && !hasGoalHours)
+        }
+    }
 }

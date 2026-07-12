@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.assistancePlans.projections
 
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
 import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import de.vinz.openfls.domains.sponsors.projections.SponsorSoloProjection
@@ -15,6 +16,7 @@ interface AssistancePlanProjection {
     val sponsor: SponsorSoloProjection
     val institution: InstitutionSoloProjection
     val hourMode: AssistancePlanHourMode
+    val hourCorridor: HourCorridor?
     val hours: List<AssistancePlanHourProjection>
     val goals: List<GoalProjection>
 }

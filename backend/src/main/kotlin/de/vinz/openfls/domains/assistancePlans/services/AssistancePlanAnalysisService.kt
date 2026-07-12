@@ -1,11 +1,13 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthCollectionDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.goals.projections.GoalProjection
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
@@ -182,18 +184,17 @@ class AssistancePlanAnalysisService(
                                        assistancePlan: AssistancePlanProjection,
                                        hourTypeId: Long): AssistancePlanAnalysisMonthDto {
         val approvedHours =
-                if (existsAssistancePlanHours(assistancePlan)) {
+                if (isCorridor(assistancePlan)) {
+                    getApprovedCorridorHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
+                } else if (existsAssistancePlanHours(assistancePlan)) {
                     getApprovedAssistancePlanHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
                 } else {
                     getApprovedGoalHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
                 }
         val executedHours = getExecutedHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
-        val executedPercent =
-                if (approvedHours > 0)
-                    TimeDoubleService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
-                else
-                    0.0
-        val missingHours = TimeDoubleService.diffTimeDoubles(approvedHours, executedHours)
+        val approvedRange = getApprovedRangeInMonth(year, month, assistancePlan, hourTypeId)
+        val executedPercent = calculateExecutedPercent(executedHours, approvedRange.first, approvedRange.second, approvedHours)
+        val missingHours = calculateMissingHours(executedHours, approvedRange.first, approvedRange.second)
 
         return getAnalysisInMonth(
                 year,
@@ -217,18 +218,17 @@ class AssistancePlanAnalysisService(
                            month: Int,
                            assistancePlan: AssistancePlanProjection): AssistancePlanAnalysisMonthDto {
         val approvedHours =
-                if (existsAssistancePlanHours(assistancePlan)) {
+                if (isCorridor(assistancePlan)) {
+                    getApprovedCorridorHoursInMonth(year, month, assistancePlan)
+                } else if (existsAssistancePlanHours(assistancePlan)) {
                     getApprovedAssistancePlanHoursInMonth(year, month, assistancePlan)
                 } else {
                     getApprovedGoalHoursInMonth(year, month, assistancePlan)
                 }
         val executedHours = getExecutedHoursInMonth(year, month, assistancePlan)
-        val executedPercent =
-                if (approvedHours > 0)
-                    TimeDoubleService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
-                else
-                    0.0
-        val missingHours = TimeDoubleService.diffTimeDoubles(approvedHours, executedHours)
+        val approvedRange = getApprovedRangeInMonth(year, month, assistancePlan)
+        val executedPercent = calculateExecutedPercent(executedHours, approvedRange.first, approvedRange.second, approvedHours)
+        val missingHours = calculateMissingHours(executedHours, approvedRange.first, approvedRange.second)
 
         return getAnalysisInMonth(
                 year,
@@ -252,7 +252,7 @@ class AssistancePlanAnalysisService(
                 start = assistancePlan.start,
                 end = assistancePlan.end,
                 clientFirstName = assistancePlan.client.firstName,
-                clientLastName = assistancePlan.client.lastName,
+                clientLastName = if (isCorridor(assistancePlan)) "${assistancePlan.client.lastName} [Kor]" else assistancePlan.client.lastName,
                 year = year,
                 month = month,
                 approvedHours = approvedHours,
@@ -323,6 +323,9 @@ class AssistancePlanAnalysisService(
     fun getApprovedAssistancePlanHoursInMonth(year: Int,
                                               month: Int,
                                               assistancePlan: AssistancePlanProjection): Double {
+        if (isCorridor(assistancePlan)) {
+            return getApprovedCorridorHoursInMonth(year, month, assistancePlan)
+        }
         val dailyMinutes = assistancePlan.hours.sumOf { it.weeklyMinutes } / 7.0
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
         return TimeDoubleService.convertDoubleToTimeDouble(
@@ -333,6 +336,9 @@ class AssistancePlanAnalysisService(
                                                           month: Int,
                                                           assistancePlan: AssistancePlanProjection,
                                                           hourTypeId: Long): Double {
+        if (isCorridor(assistancePlan)) {
+            return getApprovedCorridorHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
+        }
         val hours = assistancePlan.hours.filter { it.hourType.id == hourTypeId }
         val dailyMinutes = hours.sumOf { it.weeklyMinutes } / 7.0
         val days = countMatchingDaysInMonth(year, month, assistancePlan)
@@ -388,6 +394,115 @@ class AssistancePlanAnalysisService(
         val hours = services.sumOf { it.minutes.toDouble() } / 60
 
         return TimeDoubleService.convertDoubleToTimeDouble(hours)
+    }
+
+    private fun getApprovedCorridorHoursInMonth(
+        year: Int,
+        month: Int,
+        assistancePlan: AssistancePlanProjection
+    ): Double {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0
+        val days = countMatchingDaysInMonth(year, month, assistancePlan)
+        return corridorApprovedHours(corridor, days)
+    }
+
+    private fun getApprovedCorridorHoursByHourTypeIdInMonth(
+        year: Int,
+        month: Int,
+        assistancePlan: AssistancePlanProjection,
+        hourTypeId: Long
+    ): Double {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0
+        if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+            return 0.0
+        }
+        val days = countMatchingDaysInMonth(year, month, assistancePlan)
+        return corridorApprovedHours(corridor, days)
+    }
+
+    private fun getApprovedRangeInMonth(
+        year: Int,
+        month: Int,
+        assistancePlan: AssistancePlanProjection
+    ): Pair<Double, Double> {
+        return if (isCorridor(assistancePlan)) {
+            val corridor = assistancePlan.hourCorridor
+            val days = countMatchingDaysInMonth(year, month, assistancePlan)
+            val from = corridor?.let { corridorApprovedHoursForDays(it, days, it.weeklyMinutesFrom) } ?: 0.0
+            val till = corridor?.let { corridorApprovedHoursForDays(it, days, it.weeklyMinutesTill) } ?: from
+            from to till
+        } else {
+            val approvedHours = if (existsAssistancePlanHours(assistancePlan)) {
+                getApprovedAssistancePlanHoursInMonth(year, month, assistancePlan)
+            } else {
+                getApprovedGoalHoursInMonth(year, month, assistancePlan)
+            }
+            approvedHours to approvedHours
+        }
+    }
+
+    private fun getApprovedRangeInMonth(
+        year: Int,
+        month: Int,
+        assistancePlan: AssistancePlanProjection,
+        hourTypeId: Long
+    ): Pair<Double, Double> {
+        return if (isCorridor(assistancePlan)) {
+            val corridor = assistancePlan.hourCorridor
+            if (corridor?.hourType?.id != hourTypeId) {
+                0.0 to 0.0
+            } else {
+                val days = countMatchingDaysInMonth(year, month, assistancePlan)
+                val from = corridorApprovedHoursForDays(corridor, days, corridor.weeklyMinutesFrom)
+                val till = corridorApprovedHoursForDays(corridor, days, corridor.weeklyMinutesTill)
+                from to till
+            }
+        } else {
+            val approvedHours = if (existsAssistancePlanHours(assistancePlan)) {
+                getApprovedAssistancePlanHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
+            } else {
+                getApprovedGoalHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
+            }
+            approvedHours to approvedHours
+        }
+    }
+
+    private fun calculateExecutedPercent(
+        executedHours: Double,
+        approvedHoursFrom: Double,
+        approvedHoursTo: Double,
+        approvedHours: Double
+    ): Double {
+        if (approvedHoursTo <= 0.0) {
+            return 0.0
+        }
+
+        return when {
+            executedHours < approvedHoursFrom -> TimeDoubleService.roundDoubleToTwoDigits(executedHours * 100 / approvedHoursFrom)
+            executedHours > approvedHoursTo -> TimeDoubleService.roundDoubleToTwoDigits(executedHours * 100 / approvedHoursTo)
+            else -> TimeDoubleService.roundDoubleToTwoDigits(executedHours * 100 / approvedHours)
+        }
+    }
+
+    private fun calculateMissingHours(executedHours: Double, approvedHoursFrom: Double, approvedHoursTo: Double): Double {
+        return when {
+            executedHours < approvedHoursFrom -> TimeDoubleService.diffTimeDoubles(approvedHoursFrom, executedHours)
+            executedHours > approvedHoursTo -> TimeDoubleService.diffTimeDoubles(approvedHoursTo, executedHours)
+            else -> 0.0
+        }
+    }
+
+    private fun corridorApprovedHours(corridor: HourCorridor, days: Int): Double {
+        val weeklyMinutesMean = (corridor.weeklyMinutesFrom + corridor.weeklyMinutesTill) / 2.0
+        return TimeDoubleService.convertDoubleToTimeDouble((weeklyMinutesMean / 7.0) * days / 60.0)
+    }
+
+    private fun corridorApprovedHoursForDays(corridor: HourCorridor, days: Int, weeklyMinutes: Int): Double {
+        return TimeDoubleService.convertDoubleToTimeDouble((weeklyMinutes / 7.0) * days / 60.0)
+    }
+
+    private fun isCorridor(assistancePlan: AssistancePlanProjection): Boolean {
+        return assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR
     }
 
     private fun countMatchingDaysInMonth(year: Int, month: Int, assistancePlan: AssistancePlanProjection): Int {

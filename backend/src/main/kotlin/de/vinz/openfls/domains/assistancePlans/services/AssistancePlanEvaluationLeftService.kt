@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDTO
 import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDTO.HourTypeEvaluationDTO
 import de.vinz.openfls.domains.goals.entities.Goal
@@ -24,6 +25,7 @@ class AssistancePlanEvaluationLeftService(
         val assistancePlan =
             assistancePlanService.getById(assistancePlanId) ?: throw IllegalArgumentException("No such assistance-plan")
         val hourTypes = getDistinctHourTypesIn(assistancePlan)
+        val approvedRangeMinutes = getApprovedRangeMinutes(assistancePlan)
 
         val hourTypeEvaluation = hourTypes.map { hourType ->
             val approvedMinutesLeftInWeek = getApprovedMinutesLeftIn(date, assistancePlan, hourType.id)
@@ -43,11 +45,17 @@ class AssistancePlanEvaluationLeftService(
 
         return ApprovedHoursLeftResponseDTO(
             assistancePlanId = assistancePlan.id,
+            hourMode = assistancePlan.hourMode,
+            approvedHoursFrom = TimeDoubleService.convertDoubleToTimeDouble(approvedRangeMinutes.first / 60.0),
+            approvedHoursTo = TimeDoubleService.convertDoubleToTimeDouble(approvedRangeMinutes.second / 60.0),
             hourTypeEvaluation = hourTypeEvaluation
         )
     }
 
     private fun getDistinctHourTypesIn(assistancePlan: AssistancePlan): Set<HourType> {
+        if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            return assistancePlan.hourCorridor?.hourType?.let { setOf(it) } ?: emptySet()
+        }
         val hourTypeIdsFromHours = assistancePlan.hours.mapNotNull { it.hourType }.toSet()
         val hourTypeIdsFromGoals = assistancePlan.goals.flatMap { goal -> goal.hours }.filter { it.hourType != null }
             .mapNotNull { it.hourType }.toSet()
@@ -93,6 +101,9 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
+        if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            return getApprovedCorridorMinutesIn(start, end, assistancePlan, hourTypeId)
+        }
         val days = countMatchingDaysIn(start, end, assistancePlan)
 
         val approvedMinutes = if (assistancePlan.hours.isEmpty()) {
@@ -108,6 +119,9 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
+        if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            return getApprovedCorridorMinutesIn(assistancePlan, hourTypeId)
+        }
         val days = DateService.countDaysOfYearBetweenStartAndEnd(
             assistancePlan.start,
             assistancePlan.end
@@ -126,6 +140,9 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
+        if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            return getApprovedCorridorMinutesIn(year, assistancePlan, hourTypeId)
+        }
         val days = countMatchingDaysIn(year, assistancePlan)
 
         val approvedMinutes = if (assistancePlan.hours.isEmpty()) {
@@ -142,6 +159,9 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
+        if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            return getApprovedCorridorMinutesIn(year, month, assistancePlan, hourTypeId)
+        }
         val days = countMatchingDaysIn(year, month, assistancePlan)
 
         val approvedMinutes = if (assistancePlan.hours.isEmpty()) {
@@ -279,6 +299,85 @@ class AssistancePlanEvaluationLeftService(
             month = month
         )
         return services.sumOf { it.minutes }
+    }
+
+    private fun getApprovedRangeMinutes(assistancePlan: AssistancePlan): Pair<Double, Double> {
+        if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            val corridor = assistancePlan.hourCorridor
+            val from = corridor?.weeklyMinutesFrom?.toDouble() ?: 0.0
+            val till = corridor?.weeklyMinutesTill?.toDouble() ?: from
+            return from to till
+        }
+
+        val approvedWeeklyMinutes = when {
+            assistancePlan.hours.isNotEmpty() -> assistancePlan.hours.sumOf { it.weeklyMinutes.toDouble() }
+            assistancePlan.goals.isNotEmpty() -> assistancePlan.goals.sumOf { goal ->
+                goal.hours.sumOf { it.weeklyMinutes.toDouble() }
+            }
+            else -> 0.0
+        }
+        return approvedWeeklyMinutes to approvedWeeklyMinutes
+    }
+
+    private fun getApprovedCorridorMinutesIn(
+        start: LocalDate,
+        end: LocalDate,
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Double {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0
+        if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+            return 0.0
+        }
+        val days = countMatchingDaysIn(start, end, assistancePlan)
+        return corridorApprovedMinutes(corridor, days)
+    }
+
+    private fun getApprovedCorridorMinutesIn(
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Double {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0
+        if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+            return 0.0
+        }
+        val days = DateService.countDaysOfYearBetweenStartAndEnd(
+            assistancePlan.start,
+            assistancePlan.end
+        )
+        return corridorApprovedMinutes(corridor, days)
+    }
+
+    private fun getApprovedCorridorMinutesIn(
+        year: Int,
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Double {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0
+        if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+            return 0.0
+        }
+        val days = countMatchingDaysIn(year, assistancePlan)
+        return corridorApprovedMinutes(corridor, days)
+    }
+
+    private fun getApprovedCorridorMinutesIn(
+        year: Int,
+        month: Int,
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Double {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0
+        if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+            return 0.0
+        }
+        val days = countMatchingDaysIn(year, month, assistancePlan)
+        return corridorApprovedMinutes(corridor, days)
+    }
+
+    private fun corridorApprovedMinutes(corridor: de.vinz.openfls.domains.hourCorridors.HourCorridor, days: Int): Double {
+        val weeklyMinutesMean = (corridor.weeklyMinutesFrom + corridor.weeklyMinutesTill) / 2.0
+        return weeklyMinutesMean / 7.0 * days
     }
 
     private fun getWeekStartAndEnd(date: LocalDate): Pair<LocalDate, LocalDate> {

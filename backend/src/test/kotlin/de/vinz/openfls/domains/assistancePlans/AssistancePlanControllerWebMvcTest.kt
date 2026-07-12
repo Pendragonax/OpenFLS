@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
@@ -164,6 +165,9 @@ class AssistancePlanControllerWebMvcTest {
             isActive = true,
             isFavorite = isFavorite,
             hasIllegalHours = false,
+            hourMode = AssistancePlanHourMode.EXACT,
+            approvedHoursFrom = 7.0,
+            approvedHoursTo = 7.0,
             approvedHoursPerWeek = 7.0,
             approvedHoursThisYear = 366.0,
             executedHoursThisYear = 100.0

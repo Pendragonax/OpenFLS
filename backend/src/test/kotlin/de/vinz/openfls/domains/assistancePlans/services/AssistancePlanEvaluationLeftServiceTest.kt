@@ -2,8 +2,10 @@ package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import de.vinz.openfls.domains.services.services.ServiceService
@@ -60,6 +62,44 @@ class AssistancePlanEvaluationLeftServiceTest {
 
         // Then
         assertThat(result.hourTypeEvaluation).isEmpty()
+    }
+
+    @Test
+    fun createAssistancePlanHourTypeAnalysis_corridorPlan_returnsCorridorRangeAndHourType() {
+        // Given
+        val date = LocalDate.of(2024, 2, 1)
+        val hourType = HourType(id = 20, title = "Korridor")
+        val corridor = HourCorridor(
+            id = 5,
+            title = "5 bis 10",
+            weeklyMinutesFrom = 300,
+            weeklyMinutesTill = 600,
+            hourType = hourType
+        )
+        val plan = AssistancePlan(
+            id = 5,
+            start = LocalDate.of(2024, 1, 1),
+            end = LocalDate.of(2024, 12, 31),
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        whenever(assistancePlanService.getById(5)).thenReturn(plan)
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+
+        // When
+        val result = evaluationService.createAssistancePlanHourTypeAnalysis(date, 5)
+
+        // Then
+        assertThat(result.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
+        assertThat(result.approvedHoursFrom).isEqualTo(5.0)
+        assertThat(result.approvedHoursTo).isEqualTo(10.0)
+        assertThat(result.hourTypeEvaluation).hasSize(1)
+        assertThat(result.hourTypeEvaluation.first().hourTypeName).isEqualTo("Korridor")
     }
 
     @Test

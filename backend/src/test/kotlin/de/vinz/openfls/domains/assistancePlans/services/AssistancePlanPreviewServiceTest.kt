@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.services
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistingProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
@@ -70,6 +71,9 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().id).isEqualTo(5L)
         assertThat(result.first().isFavorite).isTrue()
         assertThat(result.first().hasIllegalHours).isTrue()
+        assertThat(result.first().hourMode).isEqualTo(AssistancePlanHourMode.EXACT)
+        assertThat(result.first().approvedHoursFrom).isEqualTo(2.0)
+        assertThat(result.first().approvedHoursTo).isEqualTo(2.0)
         assertThat(result.first().approvedHoursPerWeek).isEqualTo(2.0)
         assertThat(result.first().executedHoursThisYear).isEqualTo(3.0)
         assertThat(result.first().approvedHoursThisYear)
@@ -280,6 +284,44 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().executedHoursThisYear).isEqualTo(expectedExecutedTimeDouble)
     }
 
+    @Test
+    fun getPreviewDtosByClientId_withCorridorPlan_usesCorridorRangeAndMode() {
+        val now = LocalDate.now()
+        val yearStart = LocalDate.of(now.year, 1, 1)
+        val periodEnd = now
+        val planStart = now.minusDays(3)
+        val planEnd = now.plusDays(3)
+        val projection = previewProjection(
+            planId = 77L,
+            planStart = planStart,
+            planEnd = planEnd,
+            clientArchived = false,
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridorWeeklyMinutesFrom = 300,
+            hourCorridorWeeklyMinutesTill = 600
+        )
+
+        whenever(assistancePlanRepository.findPreviewProjectionsByClientId(10L))
+            .thenReturn(listOf(projection))
+        whenever(assistancePlanRepository.findFavoriteAssistancePlanIdsByEmployeeId(20L))
+            .thenReturn(listOf(77L))
+        whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(77L)))
+            .thenReturn(emptyList())
+        whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(77L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(77L), yearStart, periodEnd))
+            .thenReturn(emptyList())
+
+        val result = previewService.getPreviewDtosByClientId(10L, 20L)
+
+        assertThat(result).hasSize(1)
+        assertThat(result.first().hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
+        assertThat(result.first().approvedHoursFrom).isEqualTo(5.0)
+        assertThat(result.first().approvedHoursTo).isEqualTo(10.0)
+        assertThat(result.first().approvedHoursPerWeek).isEqualTo(7.3)
+        assertThat(result.first().hasIllegalHours).isFalse()
+    }
+
     private fun expectedApprovedHoursThisYear(
         approvedWeeklyMinutes: Double,
         planStart: LocalDate,
@@ -298,7 +340,15 @@ class AssistancePlanPreviewServiceTest {
         return TimeDoubleService.convertDoubleToTimeDouble(hours)
     }
 
-    private fun previewProjection(planId: Long, planStart: LocalDate, planEnd: LocalDate, clientArchived: Boolean): AssistancePlanPreviewProjection {
+    private fun previewProjection(
+        planId: Long,
+        planStart: LocalDate,
+        planEnd: LocalDate,
+        clientArchived: Boolean,
+        hourMode: AssistancePlanHourMode = AssistancePlanHourMode.EXACT,
+        hourCorridorWeeklyMinutesFrom: Int? = null,
+        hourCorridorWeeklyMinutesTill: Int? = null
+    ): AssistancePlanPreviewProjection {
         return object : AssistancePlanPreviewProjection {
             override val id: Long = planId
             override val clientId: Long = 101
@@ -309,6 +359,9 @@ class AssistancePlanPreviewServiceTest {
             override val institutionName: String = "Schule"
             override val sponsorName: String = "Kostentraeger"
             override val clientArchived: Boolean = clientArchived
+            override val hourMode: AssistancePlanHourMode = hourMode
+            override val hourCorridorWeeklyMinutesFrom: Int? = hourCorridorWeeklyMinutesFrom
+            override val hourCorridorWeeklyMinutesTill: Int? = hourCorridorWeeklyMinutesTill
             override val start: LocalDate = planStart
             override val end: LocalDate = planEnd
         }
