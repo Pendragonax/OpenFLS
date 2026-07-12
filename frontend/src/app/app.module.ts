@@ -3,7 +3,6 @@ import {BrowserModule} from '@angular/platform-browser';
 import {AppRoutingModule} from './app-routing.module';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {AppComponent} from './app.component';
-import {RouterModule, Routes} from '@angular/router';
 import {LoginComponent} from './pages/login/login.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {AuthInterceptor} from "./interceptors/auth.interceptor";
@@ -65,6 +64,7 @@ import {
 } from './pages/client/components/client-detail/client-archive-history-panel.component';
 import {AssistancePlansComponent} from './pages/assistance-plans/assistance-plans/assistance-plans.component';
 import {HourTypeComponent} from './pages/hour-type/hour-type.component';
+import {HourCorridorsComponent} from './pages/hour-corridors/hour-corridors.component';
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
@@ -155,11 +155,6 @@ import {
 import {AssistancePlanEditComponent} from "./pages/assistance-plans/assistance-plan-edit/assistance-plan-edit.component";
 import {MarkdownModule} from "ngx-markdown";
 
-const routes: Routes = [
-  {path: '', pathMatch: 'full', redirectTo: ''},
-  {path: 'login', component: LoginComponent}
-];
-
 @NgModule({ declarations: [
         AppComponent,
         LoginComponent,
@@ -192,6 +187,7 @@ const routes: Routes = [
         ClientArchiveHistoryPanelComponent,
         AssistancePlansComponent,
         HourTypeComponent,
+        HourCorridorsComponent,
         ServiceNewComponent,
         ServiceEditComponent,
         ServiceClientEntriesComponent,
@@ -231,7 +227,7 @@ const routes: Routes = [
     exports: [
         ShowOnRoleDirective
     ],
-    bootstrap: [AppComponent], imports: [RouterModule.forRoot(routes),
+    bootstrap: [AppComponent], imports: [
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,

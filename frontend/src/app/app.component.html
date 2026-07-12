@@ -61,6 +61,12 @@
              [routerLink]="'hour_types'"
              (click)="isMenuCollapsed = true">Stundentypen</a>
         </li>
+        <li class="nav-item" *showOnRole="'admin'">
+          <a class="nav-link"
+             routerLinkActive="active"
+             [routerLink]="'hour_corridors'"
+             (click)="isMenuCollapsed = true">Stundenkorridore</a>
+        </li>
       </ul>
     </div>
 

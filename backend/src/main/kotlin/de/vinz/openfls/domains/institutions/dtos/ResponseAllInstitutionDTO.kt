@@ -17,7 +17,7 @@ data class ResponseAllInstitutionDTO(
                 name = entity.name,
                 email = entity.email,
                 phonenumber = entity.phonenumber,
-                permissions = entity.permissions?.map { PermissionDto.of(it) } ?: emptyList()
+                permissions = entity.permissions.map { PermissionDto.of(it) } ?: emptyList()
             )
         }
     }

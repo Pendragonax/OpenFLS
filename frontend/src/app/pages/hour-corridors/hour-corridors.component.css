@@ -1,0 +1,141 @@
+::ng-deep .cdk-overlay-container {
+  z-index: 1200 !important;
+}
+
+.mat-form-field {
+  width: 300px;
+}
+
+.corridor-table-wrap {
+  width: 100%;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.corridor-table {
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.corridor-cards {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.corridor-card {
+  background: #ffffff;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.corridor-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.corridor-card-row + .corridor-card-row {
+  margin-top: 6px;
+}
+
+.corridor-card-label {
+  color: #6a7386;
+  font-size: 0.9rem;
+}
+
+.corridor-card-value {
+  color: #2f3a4b;
+  font-weight: 600;
+  text-align: right;
+}
+
+.corridor-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 8px;
+  border-top: 1px solid #edf1f7;
+  padding-top: 6px;
+}
+
+.corridor-card-hint {
+  margin-top: 4px;
+  text-align: right;
+}
+
+.delete-hint {
+  font-size: 0.8rem;
+  line-height: 1.15;
+  max-width: 180px;
+}
+
+.time-range {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.time-group {
+  text-align: center;
+}
+
+.time-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 6px;
+}
+
+.time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 auto;
+  border: 1px solid #c8d0df;
+  border-radius: 12px;
+  background: #f5f8fd;
+  padding: 8px 10px;
+}
+
+.time-pill--invalid {
+  border-color: #d32f2f;
+}
+
+.time-input {
+  width: 56px;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #25304a;
+  outline: none;
+  text-align: right;
+}
+
+.time-input[type="number"] {
+  text-align: right;
+}
+
+.time-unit {
+  font-size: 0.85rem;
+  color: #5c6780;
+}
+
+@media (max-width: 800px) {
+  .corridor-table {
+    display: none;
+  }
+
+  .corridor-cards {
+    display: flex;
+  }
+
+  .time-pill {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

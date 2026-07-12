@@ -25,7 +25,7 @@ data class InstitutionSoloDto(
 
                 fun ofSoloProjection(institutionSoloProjection: InstitutionSoloProjection): InstitutionSoloDto {
                         return InstitutionSoloDto(
-                                id = institutionSoloProjection.id ?: 0,
+                                id = institutionSoloProjection.id,
                                 name = institutionSoloProjection.name,
                                 email = institutionSoloProjection.email,
                                 phonenumber = institutionSoloProjection.phonenumber

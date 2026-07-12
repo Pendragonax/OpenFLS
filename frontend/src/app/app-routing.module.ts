@@ -18,6 +18,7 @@ import {ClientComponent} from "./pages/client/client.component";
 import {ClientNewComponent} from "./pages/client/components/client-new/client-new.component";
 import {ClientDetailComponent} from "./pages/client/components/client-detail/client-detail.component";
 import {HourTypeComponent} from "./pages/hour-type/hour-type.component";
+import {HourCorridorsComponent} from "./pages/hour-corridors/hour-corridors.component";
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
@@ -53,6 +54,7 @@ const routes: Routes = [
   { path: 'assistance_plans/analysis/:id', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/analysis/:id/:tab', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },
   { path: 'hour_types', component: HourTypeComponent, canActivate: [AuthGuard] },
+  { path: 'hour_corridors', component: HourCorridorsComponent, canActivate: [AuthGuard] },
   { path: 'services/my', component: MyServicesComponent, canActivate: [AuthGuard] },
   { path: 'services/my/:start/:end', component: MyServicesComponent, canActivate: [AuthGuard] },
   { path: 'services/all', component: AllServicesComponent, canActivate: [AuthGuard] },

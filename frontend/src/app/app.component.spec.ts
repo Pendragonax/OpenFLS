@@ -4,31 +4,36 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { AppComponent } from './app.component';
 import { UserService } from './shared/services/user.service';
 import { TokenStorageService } from './shared/services/token.storage.service';
+import {ShowOnRoleDirective} from './directives/show-on-role.directive';
 
 describe('AppComponent', () => {
   let isAuthenticated$: BehaviorSubject<boolean>;
   let user$: BehaviorSubject<any>;
   let expireTimeString$: Subject<string>;
+  let roles$: BehaviorSubject<string[]>;
 
   beforeEach(async () => {
     isAuthenticated$ = new BehaviorSubject<boolean>(true);
     user$ = new BehaviorSubject<any>({ id: 1, firstName: 'Max', lastName: 'Mustermann', access: { role: 1 } });
     expireTimeString$ = new Subject<string>();
+    roles$ = new BehaviorSubject<string[]>(['admin', 'leader', 'user']);
 
     await TestBed.configureTestingModule({
       imports: [],
       declarations: [
-        AppComponent
+        AppComponent,
+        ShowOnRoleDirective
       ],
       providers: [
         {
           provide: UserService,
           useValue: {
             isAuthenticated$,
-            user$,
-            checkAuthentication: () => {},
-            logout: () => {},
-          },
+          user$,
+          roles$,
+          checkAuthentication: () => {},
+          logout: () => {},
+        },
         },
         {
           provide: TokenStorageService,
@@ -57,6 +62,7 @@ describe('AppComponent', () => {
     const component = fixture.componentInstance;
     component.isAuthenticated = true;
     isAuthenticated$.next(true);
+    roles$.next(['admin', 'leader', 'user']);
     user$.next({ id: 1, firstName: 'Max', lastName: 'Mustermann', access: { role: 1 } });
     expireTimeString$.next('10m');
     fixture.detectChanges();
@@ -64,6 +70,20 @@ describe('AppComponent', () => {
     const brand = compiled.querySelector('.navbar-brand');
     expect(brand).not.toBeNull();
     expect(brand!.textContent).toContain('OpenFLS');
+  });
+
+  it('should render the corridor admin navigation entry for admins', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const component = fixture.componentInstance;
+    component.isAuthenticated = true;
+    isAuthenticated$.next(true);
+    roles$.next(['admin', 'leader', 'user']);
+    user$.next({ id: 1, firstName: 'Max', lastName: 'Mustermann', access: { role: 1 } });
+    expireTimeString$.next('10m');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Stundenkorridore');
   });
 
   it('unsubscribe_afterDestroy_doesNotUpdateState', () => {
