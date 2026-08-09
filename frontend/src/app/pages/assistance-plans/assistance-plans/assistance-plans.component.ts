@@ -20,6 +20,7 @@ import {SponsorDto} from '../../../shared/dtos/sponsor-dto.model';
 import {ClientViewModel} from '../../../shared/models/client-view.model';
 import {InstitutionViewModel} from '../../../shared/models/institution-view.model';
 import {AssistancePlanPreviewDto} from '../../../shared/dtos/assistance-plan-preview-dto.model';
+import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
 
 type AssistancePlanPreviewRow = {
   preview: AssistancePlanPreviewDto;
@@ -47,6 +48,7 @@ export class AssistancePlansComponent
   extends TablePageComponent<AssistancePlanPreviewDto, AssistancePlanPreviewRow>
   implements OnInit, OnChanges {
   readonly illegalHoursTooltip = 'Sowohl der Hilfeplan als auch die Ziele haben Stunden zugewiesen. Dies stellt ein Problem bei der Berechnung dar.';
+  readonly AssistancePlanHourMode = AssistancePlanHourMode;
 
   @Input() client$: ReplaySubject<ClientViewModel> = new ReplaySubject<ClientViewModel>();
   @Input() sponsor$: ReplaySubject<SponsorDto> = new ReplaySubject<SponsorDto>();
@@ -466,7 +468,27 @@ export class AssistancePlansComponent
     return isActive ? 'Aktiv' : 'Inaktiv';
   }
 
+  getHourModeRange(preview: AssistancePlanPreviewDto): string {
+    if (preview.hourMode !== AssistancePlanHourMode.CORRIDOR) {
+      return '';
+    }
+
+    return `${this.formatHourValue(preview.approvedHoursFrom)} h - ${this.formatHourValue(preview.approvedHoursTo)} h`;
+  }
+
+  getWeeklyHoursDisplay(preview: AssistancePlanPreviewDto): string {
+    if (this.isCorridorPlan(preview)) {
+      return this.getHourModeRange(preview);
+    }
+
+    return `${this.formatHourValue(preview.approvedHoursPerWeek)}`;
+  }
+
   getExecutedHoursPercent(preview: AssistancePlanPreviewDto): number {
+    if (this.isCorridorPlan(preview)) {
+      return this.getCorridorExecutedHoursPercent(preview);
+    }
+
     const approvedMinutes = this.convertTimeDoubleToMinutes(preview.approvedHoursThisYear);
     if (approvedMinutes <= 0) {
       return 0;
@@ -477,6 +499,10 @@ export class AssistancePlansComponent
     return Math.max(0, Math.min(100, Number(percent.toFixed(1))));
   }
 
+  isCorridorPlan(preview: AssistancePlanPreviewDto): boolean {
+    return preview.hourMode === AssistancePlanHourMode.CORRIDOR;
+  }
+
   private convertTimeDoubleToMinutes(value: number): number {
     const sign = value < 0 ? -1 : 1;
     const absoluteValue = Math.abs(value);
@@ -485,12 +511,23 @@ export class AssistancePlansComponent
     return sign * (hours * 60 + minutes);
   }
 
+  private formatHourValue(value: number): string {
+    return value.toLocaleString('de-DE', {maximumFractionDigits: 2});
+  }
+
   getHoursTooltip(preview: AssistancePlanPreviewDto): string {
     return `Dieses Jahr bis heute\nBewilligt: ${preview.approvedHoursThisYear}\nGeleistet: ${preview.executedHoursThisYear}`;
   }
 
   getExecutedHoursProgressClass(preview: AssistancePlanPreviewDto): string {
     const percent = this.getExecutedHoursPercent(preview);
+    if (this.isCorridorPlan(preview)) {
+      if (percent >= 40 && percent <= 60) {
+        return 'hours-progress-fill--ok';
+      }
+      return 'hours-progress-fill--bad';
+    }
+
     if (percent >= 95) {
       return 'hours-progress-fill--ok';
     }
@@ -498,6 +535,35 @@ export class AssistancePlansComponent
       return 'hours-progress-fill--warn';
     }
     return 'hours-progress-fill--bad';
+  }
+
+  private getCorridorExecutedHoursPercent(preview: AssistancePlanPreviewDto): number {
+    const approvedFrom = this.convertTimeDoubleToMinutes(preview.approvedHoursThisYearFrom);
+    const approvedTill = this.convertTimeDoubleToMinutes(preview.approvedHoursThisYearTill);
+    const executed = this.convertTimeDoubleToMinutes(preview.executedHoursThisYear);
+
+    if (approvedFrom <= 0 || approvedTill <= 0) {
+      return 0;
+    }
+
+    if (executed < approvedFrom) {
+      return this.clampPercent((executed * 40) / approvedFrom);
+    }
+
+    if (executed > approvedTill) {
+      return this.clampPercent(60 + (executed * 40) / (approvedFrom + approvedTill));
+    }
+
+    const corridorWidth = approvedTill - approvedFrom;
+    if (corridorWidth <= 0) {
+      return 40;
+    }
+
+    return this.clampPercent(40 + ((executed - approvedFrom) * 20) / corridorWidth);
+  }
+
+  private clampPercent(value: number): number {
+    return Math.max(0, Math.min(100, Number(value.toFixed(1))));
   }
 
   onSearchStringChanges(searchString: string) {

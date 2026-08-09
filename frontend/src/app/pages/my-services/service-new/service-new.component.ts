@@ -13,6 +13,7 @@ import {InstitutionService} from "../../../shared/services/institution.service";
 import {ClientsService} from "../../../shared/services/clients.service";
 import {HourTypeService} from "../../../shared/services/hour-type.service";
 import {SponsorService} from "../../../shared/services/sponsor.service";
+import {HourCorridorService} from "../../../shared/services/hour-corridor.service";
 import {ActivatedRoute} from "@angular/router";
 import {Converter} from "../../../shared/services/converter.helper";
 import {HelperService} from "../../../shared/services/helper.service";
@@ -23,7 +24,10 @@ import {ServiceService} from "../../../shared/services/service.service";
 import {ClientAndDateServiceDto} from "../../../shared/dtos/client-and-date-response-dto.model";
 import {catchError, combineLatest, finalize, map, of, startWith, switchMap} from "rxjs";
 import {AssistancePlanService} from "../../../shared/services/assistance-plan.service";
-import {AssistancePlanHourTypeEvaluationLeftDto} from "../../../shared/dtos/assistance-plan-evaluation-left.dto";
+import {
+  AssistancePlanEvaluationLeftDto,
+  AssistancePlanHourTypeEvaluationLeftDto
+} from "../../../shared/dtos/assistance-plan-evaluation-left.dto";
 
 @Component({
   selector: 'app-service-new',
@@ -49,6 +53,7 @@ export class ServiceNewComponent extends ServiceFormBase {
   useDuration = false;
   clientEntries: ClientAndDateServiceDto[] = [];
   clientEntriesLoading = false;
+  assistanceInfoEvaluation: AssistancePlanEvaluationLeftDto | null = null;
   assistanceInfo: AssistancePlanHourTypeEvaluationLeftDto[] = [];
   assistanceInfoLoading = false;
   constructor(
@@ -57,6 +62,7 @@ export class ServiceNewComponent extends ServiceFormBase {
     clientService: ClientsService,
     hourTypeService: HourTypeService,
     sponsorService: SponsorService,
+    hourCorridorService: HourCorridorService,
     serviceService: ServiceService,
     private readonly assistancePlanService: AssistancePlanService,
     route: ActivatedRoute,
@@ -70,6 +76,7 @@ export class ServiceNewComponent extends ServiceFormBase {
       clientService,
       hourTypeService,
       sponsorService,
+      hourCorridorService,
       serviceService,
       route,
       converter,
@@ -398,6 +405,7 @@ export class ServiceNewComponent extends ServiceFormBase {
         takeUntilDestroyed(this.destroyRef),
         switchMap((assistancePlanId) => {
           if (!assistancePlanId) {
+            this.assistanceInfoEvaluation = null;
             this.assistanceInfo = [];
             this.assistanceInfoLoading = false;
             return of([]);
@@ -405,8 +413,14 @@ export class ServiceNewComponent extends ServiceFormBase {
 
           this.assistanceInfoLoading = true;
           return this.assistancePlanService.getEvaluationLeftById(Number(assistancePlanId)).pipe(
-            map(response => response.hourTypeEvaluation ?? []),
-            catchError(() => of([])),
+            map(response => {
+              this.assistanceInfoEvaluation = response;
+              return response.hourTypeEvaluation ?? [];
+            }),
+            catchError(() => {
+              this.assistanceInfoEvaluation = null;
+              return of([]);
+            }),
             finalize(() => {
               this.assistanceInfoLoading = false;
             })

@@ -75,6 +75,10 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().approvedHoursFrom).isEqualTo(2.0)
         assertThat(result.first().approvedHoursTo).isEqualTo(2.0)
         assertThat(result.first().approvedHoursPerWeek).isEqualTo(2.0)
+        assertThat(result.first().approvedHoursThisYearFrom)
+            .isEqualTo(expectedApprovedHoursThisYear(120.0, yearStart, now.plusDays(30), yearStart, now))
+        assertThat(result.first().approvedHoursThisYearTill)
+            .isEqualTo(expectedApprovedHoursThisYear(120.0, yearStart, now.plusDays(30), yearStart, now))
         assertThat(result.first().executedHoursThisYear).isEqualTo(3.0)
         assertThat(result.first().approvedHoursThisYear)
             .isEqualTo(expectedApprovedHoursThisYear(120.0, yearStart, now.plusDays(30), yearStart, now))
@@ -319,6 +323,12 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().approvedHoursFrom).isEqualTo(5.0)
         assertThat(result.first().approvedHoursTo).isEqualTo(10.0)
         assertThat(result.first().approvedHoursPerWeek).isEqualTo(7.3)
+        assertThat(result.first().approvedHoursThisYearFrom)
+            .isEqualTo(expectedApprovedHoursThisYear(300.0, planStart, planEnd, yearStart, now))
+        assertThat(result.first().approvedHoursThisYearTill)
+            .isEqualTo(expectedApprovedHoursThisYear(600.0, planStart, planEnd, yearStart, now))
+        assertThat(result.first().approvedHoursThisYear)
+            .isEqualTo(expectedApprovedHoursThisYear(450.0, planStart, planEnd, yearStart, now))
         assertThat(result.first().hasIllegalHours).isFalse()
     }
 

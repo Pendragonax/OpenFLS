@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.goals.dtos.GoalDto
 import de.vinz.openfls.domains.hourTypes.HourTypeDto
 import java.time.LocalDate
@@ -12,8 +13,9 @@ class AssistancePlanForServiceEditingDto {
     var institutionId: Long = 0
     var institutionName: String = ""
     var sponsorId: Long = 0
+    var hourMode: AssistancePlanHourMode = AssistancePlanHourMode.EXACT
+    var hourCorridorId: Long = 0
     var goals: MutableSet<GoalDto> = mutableSetOf()
     var hours: MutableSet<AssistancePlanHourDto> = mutableSetOf()
     var possibleDocumentationHourTypes: Array<HourTypeDto> = emptyArray()
 }
-

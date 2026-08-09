@@ -64,24 +64,47 @@ class AssistancePlanEvaluationLeftService(
     }
 
     private fun getApprovedMinutesLeftIn(assistancePlan: AssistancePlan, hourTypeId: Long): Double {
-        val approvedMinutes = getApprovedMinutesByHourTypeIdIn(assistancePlan, hourTypeId)
         val executedMinutes = getExecutedMinutesByHourTypeIdIn(assistancePlan, hourTypeId)
-        return approvedMinutes - executedMinutes
+
+        return if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            val approvedRangeMinutes = getApprovedCorridorMinutesRangeIn(
+                assistancePlan.start,
+                assistancePlan.end,
+                assistancePlan,
+                hourTypeId
+            )
+            calculateCorridorMinutesLeft(executedMinutes.toDouble(), approvedRangeMinutes.first, approvedRangeMinutes.second)
+        } else {
+            val approvedMinutes = getApprovedMinutesByHourTypeIdIn(assistancePlan, hourTypeId)
+            approvedMinutes - executedMinutes
+        }
     }
 
     private fun getApprovedMinutesLeftIn(date: LocalDate, assistancePlan: AssistancePlan, hourTypeId: Long): Double {
         val weekDates = getWeekStartAndEnd(date)
         val startOfTheWeek = weekDates.first
         val endOfTheWeek = weekDates.second
-        val approvedMinutes = getApprovedMinutesByHourTypeIdIn(startOfTheWeek, endOfTheWeek, assistancePlan, hourTypeId)
         val executedMinutes = getExecutedMinutesByHourTypeIdIn(startOfTheWeek, endOfTheWeek, assistancePlan, hourTypeId)
-        return approvedMinutes - executedMinutes
+
+        return if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            val approvedRangeMinutes = getApprovedCorridorMinutesRangeIn(startOfTheWeek, endOfTheWeek, assistancePlan, hourTypeId)
+            calculateCorridorMinutesLeft(executedMinutes.toDouble(), approvedRangeMinutes.first, approvedRangeMinutes.second)
+        } else {
+            val approvedMinutes = getApprovedMinutesByHourTypeIdIn(startOfTheWeek, endOfTheWeek, assistancePlan, hourTypeId)
+            approvedMinutes - executedMinutes
+        }
     }
 
     private fun getApprovedMinutesLeftIn(year: Int, assistancePlan: AssistancePlan, hourTypeId: Long): Double {
-        val approvedMinutes = getApprovedMinutesByHourTypeIdIn(year, assistancePlan, hourTypeId)
         val executedMinutes = getExecutedMinutesByHourTypeIdIn(year, assistancePlan, hourTypeId)
-        return approvedMinutes - executedMinutes
+
+        return if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            val approvedRangeMinutes = getApprovedCorridorMinutesRangeIn(year, assistancePlan, hourTypeId)
+            calculateCorridorMinutesLeft(executedMinutes.toDouble(), approvedRangeMinutes.first, approvedRangeMinutes.second)
+        } else {
+            val approvedMinutes = getApprovedMinutesByHourTypeIdIn(year, assistancePlan, hourTypeId)
+            approvedMinutes - executedMinutes
+        }
     }
 
     private fun getApprovedMinutesLeftIn(
@@ -90,9 +113,15 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Double {
-        val approvedMinutes = getApprovedMinutesByHourTypeIdIn(year, month, assistancePlan, hourTypeId)
         val executedMinutes = getExecutedMinutesByHourTypeIdIn(year, month, assistancePlan, hourTypeId)
-        return approvedMinutes - executedMinutes
+
+        return if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            val approvedRangeMinutes = getApprovedCorridorMinutesRangeIn(year, month, assistancePlan, hourTypeId)
+            calculateCorridorMinutesLeft(executedMinutes.toDouble(), approvedRangeMinutes.first, approvedRangeMinutes.second)
+        } else {
+            val approvedMinutes = getApprovedMinutesByHourTypeIdIn(year, month, assistancePlan, hourTypeId)
+            approvedMinutes - executedMinutes
+        }
     }
 
     private fun getApprovedMinutesByHourTypeIdIn(
@@ -375,9 +404,72 @@ class AssistancePlanEvaluationLeftService(
         return corridorApprovedMinutes(corridor, days)
     }
 
+    private fun getApprovedCorridorMinutesRangeIn(
+        start: LocalDate,
+        end: LocalDate,
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Pair<Double, Double> {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0 to 0.0
+        if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+            return 0.0 to 0.0
+        }
+        val days = countMatchingDaysIn(start, end, assistancePlan)
+        val from = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesFrom)
+        val till = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesTill)
+        return from to till
+    }
+
+    private fun getApprovedCorridorMinutesRangeIn(
+        year: Int,
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Pair<Double, Double> {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0 to 0.0
+        if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+            return 0.0 to 0.0
+        }
+        val days = countMatchingDaysIn(year, assistancePlan)
+        val from = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesFrom)
+        val till = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesTill)
+        return from to till
+    }
+
+    private fun getApprovedCorridorMinutesRangeIn(
+        year: Int,
+        month: Int,
+        assistancePlan: AssistancePlan,
+        hourTypeId: Long
+    ): Pair<Double, Double> {
+        val corridor = assistancePlan.hourCorridor ?: return 0.0 to 0.0
+        if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+            return 0.0 to 0.0
+        }
+        val days = countMatchingDaysIn(year, month, assistancePlan)
+        val from = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesFrom)
+        val till = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesTill)
+        return from to till
+    }
+
     private fun corridorApprovedMinutes(corridor: de.vinz.openfls.domains.hourCorridors.HourCorridor, days: Int): Double {
         val weeklyMinutesMean = (corridor.weeklyMinutesFrom + corridor.weeklyMinutesTill) / 2.0
         return weeklyMinutesMean / 7.0 * days
+    }
+
+    private fun corridorApprovedMinutesForDays(
+        corridor: de.vinz.openfls.domains.hourCorridors.HourCorridor,
+        days: Int,
+        weeklyMinutes: Int
+    ): Double {
+        return weeklyMinutes / 7.0 * days
+    }
+
+    private fun calculateCorridorMinutesLeft(executedMinutes: Double, approvedMinutesFrom: Double, approvedMinutesTo: Double): Double {
+        return when {
+            executedMinutes < approvedMinutesFrom -> approvedMinutesFrom - executedMinutes
+            executedMinutes > approvedMinutesTo -> approvedMinutesTo - executedMinutes
+            else -> 0.0
+        }
     }
 
     private fun getWeekStartAndEnd(date: LocalDate): Pair<LocalDate, LocalDate> {

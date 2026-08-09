@@ -93,19 +93,25 @@
 
         <div class="beta-section">
           <div class="beta-section-title">Stundenanteile</div>
-          @if (!canAddPlanHours) {
-            <div class="ap-section-hint">Stundenanteile können nicht hinzugefügt werden, solange in Zielen Stunden hinterlegt sind.</div>
+          @if (isCorridorMode) {
+            <div class="ap-section-hint">Korridorpläne nutzen den gewählten Stundenkorridor statt eigener Stundenanteile.</div>
+          } @else {
+            @if (!canAddPlanHours) {
+              <div class="ap-section-hint">Stundenanteile können nicht hinzugefügt werden, solange in Zielen Stunden hinterlegt sind.</div>
+            }
+            <app-assistance-plan-hours-page
+              [hours]="updateValue.hours"
+              [editable]="true"
+              [canAddHours]="canAddPlanHours"
+              (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
           }
-          <app-assistance-plan-hours-page
-            [hours]="updateValue.hours"
-            [editable]="true"
-            [canAddHours]="canAddPlanHours"
-            (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
         </div>
 
         <div class="beta-section">
           <div class="beta-section-title">Ziele</div>
-          @if (!canAddGoalHours) {
+          @if (isCorridorMode) {
+            <div class="ap-section-hint">In Korridorplänen werden Zielstunden nicht angeboten.</div>
+          } @else if (!canAddGoalHours) {
             <div class="ap-section-hint">In Zielen können keine Stunden hinzugefügt werden, solange Stundenanteile gesetzt sind.</div>
           }
           <app-assistance-plan-goals

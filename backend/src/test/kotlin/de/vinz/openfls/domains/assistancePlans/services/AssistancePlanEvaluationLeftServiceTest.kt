@@ -103,6 +103,105 @@ class AssistancePlanEvaluationLeftServiceTest {
     }
 
     @Test
+    fun createAssistancePlanHourTypeAnalysis_corridorPlan_withExecutedWithinRange_returnsZeroLeft() {
+        // Given
+        val date = LocalDate.of(2024, 3, 13)
+        val hourType = HourType(id = 21, title = "Korridor")
+        val corridor = HourCorridor(
+            id = 6,
+            title = "5 bis 10",
+            weeklyMinutesFrom = 300,
+            weeklyMinutesTill = 600,
+            hourType = hourType
+        )
+        val plan = AssistancePlan(
+            id = 6,
+            start = LocalDate.of(2024, 3, 11),
+            end = LocalDate.of(2024, 3, 17),
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        whenever(assistancePlanService.getById(6)).thenReturn(plan)
+        stubExecutedMinutes(420, date)
+
+        // When
+        val result = evaluationService.createAssistancePlanHourTypeAnalysis(date, 6)
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(0.0)
+        assertThat(evaluation.leftComplete).isEqualTo(0.0)
+    }
+
+    @Test
+    fun createAssistancePlanHourTypeAnalysis_corridorPlan_withExecutedBelowRange_returnsPositiveDifference() {
+        // Given
+        val date = LocalDate.of(2024, 3, 13)
+        val hourType = HourType(id = 22, title = "Korridor")
+        val corridor = HourCorridor(
+            id = 7,
+            title = "5 bis 10",
+            weeklyMinutesFrom = 300,
+            weeklyMinutesTill = 600,
+            hourType = hourType
+        )
+        val plan = AssistancePlan(
+            id = 7,
+            start = LocalDate.of(2024, 3, 11),
+            end = LocalDate.of(2024, 3, 17),
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        whenever(assistancePlanService.getById(7)).thenReturn(plan)
+        stubExecutedMinutes(240, date)
+
+        // When
+        val result = evaluationService.createAssistancePlanHourTypeAnalysis(date, 7)
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(1.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(1.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(1.0)
+        assertThat(evaluation.leftComplete).isEqualTo(1.0)
+    }
+
+    @Test
+    fun createAssistancePlanHourTypeAnalysis_corridorPlan_withExecutedAboveRange_returnsNegativeDifference() {
+        // Given
+        val date = LocalDate.of(2024, 3, 13)
+        val hourType = HourType(id = 23, title = "Korridor")
+        val corridor = HourCorridor(
+            id = 8,
+            title = "5 bis 10",
+            weeklyMinutesFrom = 300,
+            weeklyMinutesTill = 600,
+            hourType = hourType
+        )
+        val plan = AssistancePlan(
+            id = 8,
+            start = LocalDate.of(2024, 3, 11),
+            end = LocalDate.of(2024, 3, 17),
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        whenever(assistancePlanService.getById(8)).thenReturn(plan)
+        stubExecutedMinutes(720, date)
+
+        // When
+        val result = evaluationService.createAssistancePlanHourTypeAnalysis(date, 8)
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(-2.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(-2.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(-2.0)
+        assertThat(evaluation.leftComplete).isEqualTo(-2.0)
+    }
+
+    @Test
     fun createAssistancePlanHourTypeAnalysis_noServices_returnsZeroLeftForAllHourTypes() {
         // Given
         val date = LocalDate.of(2024, 2, 1)
@@ -248,6 +347,16 @@ class AssistancePlanEvaluationLeftServiceTest {
         val goalHour = GoalHour(weeklyMinutes = weeklyMinutes, hourType = hourType, goal = goal)
         goal.hours.add(goalHour)
         return goal
+    }
+
+    private fun stubExecutedMinutes(minutes: Int, date: LocalDate) {
+        val services = listOf(generateService(date, minutes))
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(services)
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+            .thenReturn(services)
+        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(services)
     }
 
     @Suppress("unused")

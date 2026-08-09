@@ -148,6 +148,24 @@ class AssistancePlanPreviewService(
         val approvedHoursPerWeek = TimeDoubleService.convertDoubleToTimeDouble(
             ((approvedRangeMinutes.first + approvedRangeMinutes.second) / 2.0) / 60.0
         )
+        val approvedHoursThisYearFrom = TimeDoubleService.convertDoubleToTimeDouble(
+            calculateApprovedHoursInYear(
+                projection.start,
+                projection.end,
+                approvedRangeMinutes.first,
+                context.yearStart,
+                context.periodEnd
+            )
+        )
+        val approvedHoursThisYearTill = TimeDoubleService.convertDoubleToTimeDouble(
+            calculateApprovedHoursInYear(
+                projection.start,
+                projection.end,
+                approvedRangeMinutes.second,
+                context.yearStart,
+                context.periodEnd
+            )
+        )
         val approvedHoursThisYear = TimeDoubleService.convertDoubleToTimeDouble(
             calculateApprovedHoursInYear(
                 projection.start,
@@ -180,6 +198,8 @@ class AssistancePlanPreviewService(
             approvedHoursFrom = approvedHoursFrom,
             approvedHoursTo = approvedHoursTo,
             approvedHoursPerWeek = approvedHoursPerWeek,
+            approvedHoursThisYearFrom = approvedHoursThisYearFrom,
+            approvedHoursThisYearTill = approvedHoursThisYearTill,
             approvedHoursThisYear = approvedHoursThisYear,
             executedHoursThisYear = executedHoursThisYear
         )

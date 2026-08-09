@@ -278,7 +278,7 @@
                 *matCellDef="let row">
               <span class="hours-cell-content">
                 <span [ngClass]="{'hours-value-illegal': row.preview.hasIllegalHours}">
-                  {{ row.preview.approvedHoursPerWeek }}
+                  {{ getWeeklyHoursDisplay(row.preview) }}
                 </span>
                 @if (row.preview.hasIllegalHours) {
                   <mat-icon class="illegal-hours-icon"
@@ -303,7 +303,12 @@
                 *matCellDef="let row">
               <div class="year-status-cell">
                 <div class="year-status-bar">
-                  <div class="year-status-track">
+                  <div class="year-status-track"
+                       [ngClass]="{'year-status-track--corridor': isCorridorPlan(row.preview)}">
+                    @if (isCorridorPlan(row.preview)) {
+                      <span class="hours-progress-threshold hours-progress-threshold--from"></span>
+                      <span class="hours-progress-threshold hours-progress-threshold--till"></span>
+                    }
                     <div class="hours-progress-fill"
                          [ngClass]="getExecutedHoursProgressClass(row.preview)"
                          [style.width.%]="getExecutedHoursPercent(row.preview)"></div>
@@ -393,9 +398,9 @@
                       {{ getStatusLabel(row.preview.isActive) }}
                     </span>
                   }
-                  @if (isRowReadOnly(row)) {
-                    <span class="plan-readonly-pill plan-readonly-pill--archived">Archiviert</span>
-                  }
+                @if (isRowReadOnly(row)) {
+                  <span class="plan-readonly-pill plan-readonly-pill--archived">Archiviert</span>
+                }
                 </div>
               </div>
 
@@ -422,7 +427,7 @@
                   <span class="timeline-label">h/Woche</span>
                   <span class="timeline-value-light hours-cell-content">
                     <span [ngClass]="{'hours-value-illegal': row.preview.hasIllegalHours}">
-                      {{row.preview.approvedHoursPerWeek}}
+                      {{ getWeeklyHoursDisplay(row.preview) }}
                     </span>
                     @if (row.preview.hasIllegalHours) {
                       <mat-icon class="illegal-hours-icon"
@@ -437,7 +442,12 @@
                      matTooltipClass="hours-week-tooltip">
                   <span class="timeline-hours-value">
                     <span class="year-status-bar">
-                      <span class="year-status-track">
+                      <span class="year-status-track"
+                            [ngClass]="{'year-status-track--corridor': isCorridorPlan(row.preview)}">
+                        @if (isCorridorPlan(row.preview)) {
+                          <span class="hours-progress-threshold hours-progress-threshold--from"></span>
+                          <span class="hours-progress-threshold hours-progress-threshold--till"></span>
+                        }
                         <span class="hours-progress-fill"
                               [ngClass]="getExecutedHoursProgressClass(row.preview)"
                               [style.width.%]="getExecutedHoursPercent(row.preview)"></span>

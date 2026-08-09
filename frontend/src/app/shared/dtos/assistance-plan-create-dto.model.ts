@@ -1,10 +1,14 @@
 
+import {AssistancePlanHourMode} from "./assistance-plan-hour-mode.model";
+
 export class AssistancePlanCreateDto {
   start: string = Date.now().toLocaleString();
   end: string = Date.now().toLocaleString();
   clientId: number = 0;
   institutionId: number = 0;
   sponsorId: number = 0;
+  hourMode: AssistancePlanHourMode = AssistancePlanHourMode.EXACT;
+  hourCorridorId: number = 0;
   hours: AssistancePlanCreateHourDto[] = [];
   goals: AssistancePlanCreateGoalDto[] = [];
 }

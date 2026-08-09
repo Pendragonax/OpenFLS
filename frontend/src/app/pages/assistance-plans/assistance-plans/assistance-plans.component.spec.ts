@@ -2,6 +2,7 @@ import {of, ReplaySubject} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {AssistancePlansComponent} from './assistance-plans.component';
 import {AssistancePlanPreviewDto} from '../../../shared/dtos/assistance-plan-preview-dto.model';
+import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
 
 function preview(overrides: Partial<AssistancePlanPreviewDto>): AssistancePlanPreviewDto {
   return {
@@ -19,7 +20,12 @@ function preview(overrides: Partial<AssistancePlanPreviewDto>): AssistancePlanPr
     isFavorite: false,
     hasIllegalHours: false,
     clientArchived: false,
+    hourMode: AssistancePlanHourMode.EXACT,
+    approvedHoursFrom: 0,
+    approvedHoursTo: 0,
     approvedHoursPerWeek: 0,
+    approvedHoursThisYearFrom: 0,
+    approvedHoursThisYearTill: 0,
     approvedHoursThisYear: 0,
     executedHoursThisYear: 0,
     ...overrides
@@ -147,6 +153,27 @@ describe('AssistancePlansComponent', () => {
     expect(component.getStatusLabel(isActive)).toBe(expected);
   });
 
+  it('renders corridor range in the weekly-hours field for corridor mode previews', () => {
+    const {component} = createComponent();
+    const corridorPreview = preview({
+      hourMode: AssistancePlanHourMode.CORRIDOR,
+      approvedHoursFrom: 3.5,
+      approvedHoursTo: 4.5
+    });
+
+    expect(component.getWeeklyHoursDisplay(corridorPreview)).toBe('3,5 h - 4,5 h');
+  });
+
+  it('renders the existing weekly-hours value for exact mode previews', () => {
+    const {component} = createComponent();
+    const exactPreview = preview({
+      hourMode: AssistancePlanHourMode.EXACT,
+      approvedHoursPerWeek: 7.5
+    });
+
+    expect(component.getWeeklyHoursDisplay(exactPreview)).toBe('7,5');
+  });
+
   it.each([
     {approved: 2.0, executed: 1.3, expected: 75},
     {approved: 1.15, executed: 0.45, expected: 60},
@@ -173,6 +200,24 @@ Geleistet: 4.5`);
   });
 
   it.each([
+    {from: 5.0, till: 10.0, executed: 2.5, expected: 22.7},
+    {from: 5.0, till: 10.0, executed: 7.5, expected: 51.3},
+    {from: 5.0, till: 10.0, executed: 12.5, expected: 94.2}
+  ])('calculates corridor progress percentage for executed=$executed', ({from, till, executed, expected}) => {
+    const {component} = createComponent();
+    const value = component.getExecutedHoursPercent(
+      preview({
+        hourMode: AssistancePlanHourMode.CORRIDOR,
+        approvedHoursThisYearFrom: from,
+        approvedHoursThisYearTill: till,
+        executedHoursThisYear: executed
+      })
+    );
+
+    expect(value).toBeCloseTo(expected, 1);
+  });
+
+  it.each([
     {approved: 10.0, executed: 8.59, expected: 'hours-progress-fill--bad'},
     {approved: 10.0, executed: 9.0, expected: 'hours-progress-fill--warn'},
     {approved: 10.0, executed: 9.5, expected: 'hours-progress-fill--ok'}
@@ -180,6 +225,24 @@ Geleistet: 4.5`);
     const {component} = createComponent();
     const cssClass = component.getExecutedHoursProgressClass(
       preview({approvedHoursThisYear: approved, executedHoursThisYear: executed})
+    );
+
+    expect(cssClass).toBe(expected);
+  });
+
+  it.each([
+    {executed: 2.0, expected: 'hours-progress-fill--bad'},
+    {executed: 5.0, expected: 'hours-progress-fill--ok'},
+    {executed: 11.0, expected: 'hours-progress-fill--bad'}
+  ])('returns corridor progress class by 40/60 threshold for executed=$executed', ({executed, expected}) => {
+    const {component} = createComponent();
+    const cssClass = component.getExecutedHoursProgressClass(
+      preview({
+        hourMode: AssistancePlanHourMode.CORRIDOR,
+        approvedHoursThisYearFrom: 5.0,
+        approvedHoursThisYearTill: 10.0,
+        executedHoursThisYear: executed
+      })
     );
 
     expect(cssClass).toBe(expected);

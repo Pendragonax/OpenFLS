@@ -1,5 +1,10 @@
+import {AssistancePlanHourMode} from "./assistance-plan-hour-mode.model";
+
 export class AssistancePlanEvaluationLeftDto {
   assistancePlanId: number = 0;
+  hourMode: AssistancePlanHourMode = AssistancePlanHourMode.EXACT;
+  approvedHoursFrom: number = 0;
+  approvedHoursTo: number = 0;
   hourTypeEvaluation: AssistancePlanHourTypeEvaluationLeftDto[] = [];
 }
 

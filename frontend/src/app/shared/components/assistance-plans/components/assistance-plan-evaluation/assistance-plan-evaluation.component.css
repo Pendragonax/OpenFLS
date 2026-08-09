@@ -12,3 +12,28 @@ td , th {
   background-color: var(--bs-primary);
   color: white;
 }
+
+.plan-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #edf0f6;
+  color: #355070;
+  border: 1px solid #cfd6e3;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.plan-mode-pill--corridor {
+  background: #e6f4fb;
+  color: #0f5f8a;
+  border-color: #b9dff0;
+}
+
+.plan-mode-pill__details {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.9;
+}

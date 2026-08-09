@@ -302,6 +302,8 @@ class ClientService(
         planDto.institutionId = plan.institution?.id ?: 0
         planDto.institutionName = plan.institution?.name ?: ""
         planDto.sponsorId = plan.sponsor?.id ?: 0
+        planDto.hourMode = plan.hourMode
+        planDto.hourCorridorId = plan.hourCorridor?.id ?: 0
         planDto.possibleDocumentationHourTypes = extractPossibleDocumentationHourTypes(plan)
         return planDto
     }

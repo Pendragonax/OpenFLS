@@ -22,6 +22,7 @@ import {
   AssistancePlanUpdateGoalHourDto,
   AssistancePlanUpdateHourDto
 } from '../../../shared/dtos/assistance-plan-update-dto.model';
+import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
 import {ClientDto} from '../../../shared/dtos/client-dto.model';
 import {InstitutionDto} from '../../../shared/dtos/institution-dto.model';
 import {SponsorDto} from '../../../shared/dtos/sponsor-dto.model';
@@ -42,6 +43,8 @@ export function mapAssistancePlanDtoToUpdateDto(value: AssistancePlanDto): Assis
     clientId: value.clientId,
     institutionId: value.institutionId,
     sponsorId: value.sponsorId,
+    hourMode: value.hourMode,
+    hourCorridorId: value.hourCorridorId,
     hours: (value.hours ?? []).map(hour => ({
       id: hour.id,
       assistancePlanId: hour.assistancePlanId,
@@ -121,20 +124,28 @@ export class AssistancePlanEditComponent extends NewPageComponent<AssistancePlan
     return this.generalForm.valid && !this.hasEndDateError && !this.isSubmitting && !this.isLoading;
   }
 
+  get isExactMode(): boolean {
+    return this.updateValue.hourMode !== AssistancePlanHourMode.CORRIDOR;
+  }
+
+  get isCorridorMode(): boolean {
+    return this.updateValue.hourMode === AssistancePlanHourMode.CORRIDOR;
+  }
+
   get hasPlanHours(): boolean {
-    return this.updateValue.hours.length > 0;
+    return this.isExactMode && this.updateValue.hours.length > 0;
   }
 
   get hasGoalHours(): boolean {
-    return this.updateValue.goals.some(goal => (goal.hours?.length ?? 0) > 0);
+    return this.isExactMode && this.updateValue.goals.some(goal => (goal.hours?.length ?? 0) > 0);
   }
 
   get canAddPlanHours(): boolean {
-    return !this.hasGoalHours;
+    return this.isExactMode && !this.hasGoalHours;
   }
 
   get canAddGoalHours(): boolean {
-    return !this.hasPlanHours;
+    return this.isExactMode && !this.hasPlanHours;
   }
 
   get hasExistingPlans(): boolean {
@@ -369,6 +380,8 @@ export class AssistancePlanEditComponent extends NewPageComponent<AssistancePlan
     this.generalForm.end.setValue(endDate);
     this.generalForm.sponsor.setValue(plan.sponsorId);
     this.generalForm.institution.setValue(plan.institutionId);
+    this.generalForm.hourMode.setValue(plan.hourMode, {emitEvent: false});
+    this.generalForm.hourCorridor.setValue(plan.hourCorridorId, {emitEvent: false});
   }
 
   private loadClient(clientId: number) {

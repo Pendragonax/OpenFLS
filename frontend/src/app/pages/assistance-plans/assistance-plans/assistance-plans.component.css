@@ -1,14 +1,10 @@
 .plan-readonly-pill {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
   border-radius: 999px;
   background: #e6eef7;
-  color: #355070;
-  border: 1px solid #bfd0e6;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
+  color:#355070;
+  border:1px solid #bfd0e6;
 }
 
 .plan-readonly-pill--archived {
@@ -21,14 +17,14 @@
   background-color: whitesmoke;
 }
 
-td, th {
+td,th {
   white-space: normal;
   word-wrap: break-word;
-  max-width: 130px;
+  max-width:130px;
 }
 
 .assistance-row--readonly {
-  background: #fff3f1;
+  background:#fff3f1;
 }
 
 .assistance-row--readonly td {
@@ -55,7 +51,7 @@ td, th {
 }
 
 .width-350 {
-  width: 350px;
+  width:350px;
 }
 
 .assistance-timeline {
@@ -100,7 +96,6 @@ font-style: italic;
 .timeline-card--readonly .hours-progress-text-left,
 .timeline-card--readonly .hours-progress-text-right {
 color: rgba(47, 58, 75, 0.72);
-font-style: italic;
 }
 
 .timeline-card--readonly .plan-status-pill--active {
@@ -204,12 +199,8 @@ border-top: 1px solid #e9edf4;
 .plan-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   border-radius: 999px;
   padding: 4px 10px;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.2;
   border: 1px solid transparent;
 }
 
@@ -224,7 +215,6 @@ border-top: 1px solid #e9edf4;
   color: #2f8d67;
   background: #dcf5ea;
   border-color: #9fd9c0;
-  font-weight: 600;
 }
 
 .plan-status-pill--active .plan-status-dot {
@@ -271,6 +261,10 @@ border-top: 1px solid #e9edf4;
   border: 1px solid #dde2ec;
 }
 
+.year-status-track--corridor {
+  background: linear-gradient(90deg, #f6f7fa 0%, #edf0f6 100%);
+}
+
 .hours-progress-fill {
   position: absolute;
   inset: 0;
@@ -289,6 +283,23 @@ border-top: 1px solid #e9edf4;
 
 .hours-progress-fill--ok {
   background: linear-gradient(90deg, #65b98f 0%, #4a8c6f 100%);
+}
+
+.hours-progress-threshold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 2;
+  background: rgba(47, 58, 75, 0.7);
+}
+
+.hours-progress-threshold--from {
+  left: 40%;
+}
+
+.hours-progress-threshold--till {
+  left: 60%;
 }
 
 .timeline-hours-value {
