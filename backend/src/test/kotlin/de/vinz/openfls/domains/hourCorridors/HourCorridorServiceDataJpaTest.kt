@@ -139,6 +139,41 @@ class HourCorridorServiceDataJpaTest {
     }
 
     @Test
+    fun getAll_multipleCorridors_returnsGroupedAssistancePlanCounts() {
+        // Given
+        val hourType = hourTypeRepository.save(HourType(title = "Fachleistungsstunde", price = 12.5))
+        val firstCorridor = hourCorridorRepository.save(
+            HourCorridor(title = "A", weeklyMinutesFrom = 60, weeklyMinutesTill = 120, hourType = hourType)
+        )
+        val secondCorridor = hourCorridorRepository.save(
+            HourCorridor(title = "B", weeklyMinutesFrom = 120, weeklyMinutesTill = 180, hourType = hourType)
+        )
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                hourCorridor = firstCorridor
+            )
+        )
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                hourCorridor = firstCorridor
+            )
+        )
+
+        // When
+        val result = hourCorridorService.getAll()
+
+        // Then
+        assertThat(result).extracting<Long> { it.id }
+            .containsExactly(firstCorridor.id, secondCorridor.id)
+        assertThat(result.first().assistancePlanCount).isEqualTo(2)
+        assertThat(result.last().assistancePlanCount).isEqualTo(0)
+    }
+
+    @Test
     fun delete_referencedCorridor_throwsException() {
         // Given
         val hourType = hourTypeRepository.save(HourType(title = "Fachleistungsstunde", price = 12.5))

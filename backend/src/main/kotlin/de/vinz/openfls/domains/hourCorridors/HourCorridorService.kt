@@ -69,10 +69,11 @@ class HourCorridorService(
 
     @Transactional(readOnly = true)
     fun getAll(): List<HourCorridorDto> {
-        return hourCorridorRepository.findAll()
+        val entities = hourCorridorRepository.findAll()
             .toList()
             .sortedBy { it.title.lowercase() }
-            .map { HourCorridorDto.from(it, countByAssistancePlan(it.id)) }
+        val assistancePlanCounts = countByAssistancePlanIds(entities.map { it.id })
+        return entities.map { HourCorridorDto.from(it, assistancePlanCounts[it.id] ?: 0L) }
     }
 
     @Transactional(readOnly = true)
@@ -94,6 +95,14 @@ class HourCorridorService(
     @Transactional(readOnly = true)
     fun countByAssistancePlan(id: Long): Long {
         return assistancePlanRepository.countByHourCorridorId(id)
+    }
+
+    private fun countByAssistancePlanIds(ids: List<Long>): Map<Long, Long> {
+        if (ids.isEmpty()) {
+            return emptyMap()
+        }
+        return assistancePlanRepository.countByHourCorridorIds(ids)
+            .associate { it.hourCorridorId to it.assistancePlanCount }
     }
 
     private fun validateRange(weeklyMinutesFrom: Int, weeklyMinutesTill: Int) {

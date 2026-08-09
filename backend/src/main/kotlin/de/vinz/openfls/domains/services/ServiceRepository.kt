@@ -147,6 +147,21 @@ interface ServiceRepository : CrudRepository<Service, Long> {
         end: LocalDate
     ): List<AssistancePlanServiceMinutesProjection>
 
+    @Query(
+        """
+        SELECT u.assistancePlan.id as assistancePlanId,
+               u.minutes as minutes
+        FROM Service u
+        WHERE u.assistancePlan.id in :assistancePlanIds
+          AND cast(u.start as LocalDate) >= u.assistancePlan.start
+          AND cast(u.start as LocalDate) <= :end
+        """
+    )
+    fun findMinutesByAssistancePlanIdsFromPlanStartToEnd(
+        @Param("assistancePlanIds") assistancePlanIds: List<Long>,
+        @Param("end") end: LocalDate
+    ): List<AssistancePlanServiceMinutesProjection>
+
     @Query("SELECT u FROM Service u WHERE u.institution.id = :institutionId AND cast(u.start as LocalDate) = :date")
     fun findByInstitutionIdAndDate(
         @Param("institutionId") institutionId: Long,

@@ -130,10 +130,8 @@ class AssistancePlanPreviewService(
             assistancePlanIdsWithGoalHours = goalHourWeeklyMinutes.map { it.assistancePlanId }.toSet(),
             executedMinutesByAssistancePlanId = executedMinutesByAssistancePlanId,
             executedMinutesByAssistancePlanPeriodByAssistancePlanId = getExecutedMinutesByAssistancePlanPeriodByAssistancePlanId(
-                previews,
-                yearStart,
-                now,
-                executedMinutesByAssistancePlanId
+                assistancePlanIds,
+                now
             )
         )
     }
@@ -313,28 +311,14 @@ class AssistancePlanPreviewService(
     }
 
     private fun getExecutedMinutesByAssistancePlanPeriodByAssistancePlanId(
-        previews: List<AssistancePlanPreviewProjection>,
-        yearStart: LocalDate,
-        periodEnd: LocalDate,
-        executedMinutesByAssistancePlanId: Map<Long, Long>
+        assistancePlanIds: List<Long>,
+        periodEnd: LocalDate
     ): Map<Long, Long> {
-        return previews.associate { projection ->
-            val minutes = if (projection.start.isAfter(periodEnd)) {
-                0L
-            } else if (projection.start == yearStart) {
-                // The yearly query already covers exactly this period.
-                executedMinutesByAssistancePlanId[projection.id] ?: 0L
-            } else {
-                serviceRepository
-                    .findMinutesByAssistancePlanIdsAndStartAndEnd(
-                        listOf(projection.id),
-                        projection.start,
-                        periodEnd
-                    )
-                    .sumOf { it.minutes.toLong() }
-            }
-            projection.id to minutes
-        }
+        val minutesByAssistancePlanId = serviceRepository
+            .findMinutesByAssistancePlanIdsFromPlanStartToEnd(assistancePlanIds, periodEnd)
+            .groupBy { it.assistancePlanId }
+            .mapValues { (_, minutes) -> minutes.sumOf { it.minutes.toLong() } }
+        return assistancePlanIds.associateWith { minutesByAssistancePlanId[it] ?: 0L }
     }
 
     private fun calculateApprovedHoursInYear(

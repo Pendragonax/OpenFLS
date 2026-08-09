@@ -166,6 +166,55 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
         assertThat(result.first().minutes).isEqualTo(120)
     }
 
+    @Test
+    fun findMinutesByAssistancePlanIdsFromPlanStartToEnd_returnsRowsFromEachPlanStart() {
+        val base = createBaseData()
+        val now = LocalDate.now()
+        val assistancePlan = assistancePlanRepository.save(
+            AssistancePlan(
+                start = now.minusDays(10),
+                end = now.plusDays(10),
+                client = base.client,
+                sponsor = base.sponsor,
+                institution = base.institution
+            )
+        )
+
+        serviceRepository.save(
+            Service(
+                start = now.minusDays(5).atStartOfDay(),
+                end = now.minusDays(5).atStartOfDay().plusHours(1),
+                minutes = 60,
+                client = base.client,
+                employee = base.employee,
+                institution = base.institution,
+                hourType = base.hourType,
+                assistancePlan = assistancePlan
+            )
+        )
+        serviceRepository.save(
+            Service(
+                start = now.minusDays(11).atStartOfDay(),
+                end = now.minusDays(11).atStartOfDay().plusHours(1),
+                minutes = 120,
+                client = base.client,
+                employee = base.employee,
+                institution = base.institution,
+                hourType = base.hourType,
+                assistancePlan = assistancePlan
+            )
+        )
+
+        val result = serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(
+            listOf(assistancePlan.id),
+            now
+        )
+
+        assertThat(result).hasSize(1)
+        assertThat(result.first().assistancePlanId).isEqualTo(assistancePlan.id)
+        assertThat(result.first().minutes).isEqualTo(60)
+    }
+
     private fun createBaseData(): BaseData {
         val institution = institutionRepository.save(
             Institution(name = "Institution", email = "institution@test.de", phonenumber = "123")

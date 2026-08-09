@@ -10,7 +10,8 @@
 .plan-readonly-pill--archived {
   background: #fff0ef;
   color: #a62821;
-  border-color: #f0b5b2;
+  border-color: #a62821;
+  padding: 4px 10px;
 }
 
 .mat-row:hover {
@@ -44,6 +45,8 @@ td,th {
 
 .assistance-status-column {
   width: 1%;
+  min-width: max-content;
+  max-width: none !important;
   white-space: nowrap;
 }
 
@@ -156,7 +159,7 @@ color: rgba(47, 58, 75, 0.72);
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .timeline-date {

@@ -75,7 +75,7 @@
             <ng-container matColumnDef="weeklyMinutesFrom">
               <th mat-header-cell
                   mat-sort-header="{{tableColumns[2]}}"
-                  *matHeaderCellDef> Von </th>
+                  *matHeaderCellDef> Wochenzeit von </th>
               <td mat-cell
                   *matCellDef="let corridor"> {{formatWeeklyMinutes(corridor.weeklyMinutesFrom)}} </td>
             </ng-container>
@@ -83,7 +83,7 @@
             <ng-container matColumnDef="weeklyMinutesTill">
               <th mat-header-cell
                   mat-sort-header="{{tableColumns[3]}}"
-                  *matHeaderCellDef> Bis </th>
+                  *matHeaderCellDef> Wochenzeit bis </th>
               <td mat-cell
                   *matCellDef="let corridor"> {{formatWeeklyMinutes(corridor.weeklyMinutesTill)}} </td>
             </ng-container>
@@ -150,11 +150,11 @@
                   <span class="corridor-card-value">{{ getHourTypeTitle(corridor) }}</span>
                 </div>
                 <div class="corridor-card-row">
-                  <span class="corridor-card-label">Von</span>
+                  <span class="corridor-card-label">Wochenzeit von</span>
                   <span class="corridor-card-value">{{ formatWeeklyMinutes(corridor.weeklyMinutesFrom) }}</span>
                 </div>
                 <div class="corridor-card-row">
-                  <span class="corridor-card-label">Bis</span>
+                  <span class="corridor-card-label">Wochenzeit bis</span>
                   <span class="corridor-card-value">{{ formatWeeklyMinutes(corridor.weeklyMinutesTill) }}</span>
                 </div>
                 <div class="corridor-card-row">
@@ -215,7 +215,7 @@
 
             <div class="time-range">
               <div class="time-group">
-                <div class="time-label">Von</div>
+                <div class="time-label">Wochenzeit von</div>
                 <div class="time-pill" [class.time-pill--invalid]="editForm.invalid">
                   <input type="number"
                          class="time-input"
@@ -239,7 +239,7 @@
               </div>
 
               <div class="time-group">
-                <div class="time-label">Bis</div>
+                <div class="time-label">Wochenzeit bis</div>
                 <div class="time-pill" [class.time-pill--invalid]="editForm.invalid">
                   <input type="number"
                          class="time-input"

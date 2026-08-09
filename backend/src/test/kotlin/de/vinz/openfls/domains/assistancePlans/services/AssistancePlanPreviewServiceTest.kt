@@ -57,13 +57,15 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(5L, 120)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(5L)))
             .thenReturn(listOf(weeklyMinutesProjection(5L, 300)))
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, periodEnd))
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(5L), periodEnd))
             .thenReturn(
                 listOf(
                     serviceMinutesProjection(5L, 120),
                     serviceMinutesProjection(5L, 60)
                 )
             )
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, periodEnd))
+            .thenReturn(listOf(serviceMinutesProjection(5L, 120), serviceMinutesProjection(5L, 60)))
 
         val result = previewService.getPreviewDtosByClientId(10L, 20L)
 
@@ -95,7 +97,7 @@ class AssistancePlanPreviewServiceTest {
             .isEqualTo(result.first().executedHoursThisYear)
         assertThat(result.first().approvedHoursLeftThisAssistancePlan)
             .isEqualTo(result.first().approvedHoursLeftThisYear)
-        verify(serviceRepository).findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, now)
+        verify(serviceRepository).findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(5L), now)
     }
 
     @Test
@@ -109,7 +111,7 @@ class AssistancePlanPreviewServiceTest {
         verify(assistancePlanRepository, never()).findFavoriteAssistancePlanIdsByEmployeeId(any())
         verify(assistancePlanRepository, never()).findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(any())
         verify(assistancePlanRepository, never()).findWeeklyMinutesFromGoalHoursByAssistancePlanIds(any())
-        verify(serviceRepository, never()).findMinutesByAssistancePlanIdsAndStartAndEnd(any(), any(), any())
+        verify(serviceRepository, never()).findMinutesByAssistancePlanIdsFromPlanStartToEnd(any(), any())
     }
 
     @Test
@@ -126,6 +128,8 @@ class AssistancePlanPreviewServiceTest {
         whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(6L)))
             .thenReturn(listOf(weeklyMinutesProjection(6L, 180)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(6L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(6L), periodEnd))
             .thenReturn(emptyList())
         whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(6L), yearStart, periodEnd))
             .thenReturn(emptyList())
@@ -152,6 +156,8 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(7L, 210)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(7L)))
             .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(7L), periodEnd))
+            .thenReturn(emptyList())
         whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(7L), yearStart, periodEnd))
             .thenReturn(emptyList())
 
@@ -177,6 +183,8 @@ class AssistancePlanPreviewServiceTest {
         whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(8L)))
             .thenReturn(listOf(weeklyMinutesProjection(8L, 180)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(8L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(8L), periodEnd))
             .thenReturn(emptyList())
         whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(8L), yearStart, periodEnd))
             .thenReturn(emptyList())
@@ -207,6 +215,8 @@ class AssistancePlanPreviewServiceTest {
         whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(9L)))
             .thenReturn(listOf(weeklyMinutesProjection(9L, 240)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(9L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(9L), periodEnd))
             .thenReturn(emptyList())
         whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(9L), yearStart, periodEnd))
             .thenReturn(emptyList())
@@ -273,6 +283,13 @@ class AssistancePlanPreviewServiceTest {
                 if (weeklyGoalMinutes == 0) emptyList()
                 else listOf(weeklyMinutesProjection(55L, weeklyGoalMinutes))
             )
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(55L), periodEnd))
+            .thenReturn(
+                listOf(
+                    serviceMinutesProjection(55L, executedMinutesA),
+                    serviceMinutesProjection(55L, executedMinutesB)
+                )
+            )
         whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(55L), yearStart, periodEnd))
             .thenReturn(
                 listOf(
@@ -326,6 +343,8 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(emptyList())
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(77L)))
             .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(77L), periodEnd))
+            .thenReturn(emptyList())
         whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(77L), yearStart, periodEnd))
             .thenReturn(emptyList())
 
@@ -367,6 +386,8 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(emptyList())
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(78L)))
             .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(78L), now))
+            .thenReturn(listOf(serviceMinutesProjection(78L, 2_400)))
         whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(78L), yearStart, now))
             .thenReturn(listOf(serviceMinutesProjection(78L, 2_400)))
 
@@ -399,6 +420,8 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(emptyList())
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(79L)))
             .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(79L), now))
+            .thenReturn(listOf(serviceMinutesProjection(79L, 4_000)))
         whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(79L), yearStart, now))
             .thenReturn(listOf(serviceMinutesProjection(79L, 4_000)))
 

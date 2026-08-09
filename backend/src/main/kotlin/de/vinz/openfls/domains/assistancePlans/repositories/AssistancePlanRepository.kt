@@ -5,6 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistin
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
+import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorUsageProjection
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -298,4 +299,17 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     ): List<AssistancePlanWeeklyMinutesProjection>
 
     fun countByHourCorridorId(@Param("hourCorridorId") hourCorridorId: Long): Long
+
+    @Query(
+        """
+        SELECT ap.hourCorridor.id as hourCorridorId,
+               COUNT(ap.id) as assistancePlanCount
+        FROM AssistancePlan ap
+        WHERE ap.hourCorridor.id in :hourCorridorIds
+        GROUP BY ap.hourCorridor.id
+        """
+    )
+    fun countByHourCorridorIds(
+        @Param("hourCorridorIds") hourCorridorIds: List<Long>
+    ): List<HourCorridorUsageProjection>
 }
