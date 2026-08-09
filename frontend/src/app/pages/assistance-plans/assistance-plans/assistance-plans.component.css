@@ -23,6 +23,29 @@ td,th {
   max-width:130px;
 }
 
+.assistance-date-column {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+  white-space: nowrap;
+}
+
+.assistance-weekly-hours-column {
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
+  white-space: nowrap;
+}
+
+.assistance-sponsor-column {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .assistance-row--readonly {
   background:#fff3f1;
 }
@@ -173,6 +196,14 @@ color: #2f3a4b;
   color: #2f3a4b;
 }
 
+.timeline-sponsor-value {
+  min-width: 0;
+  width: min(220px, 55%);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .timeline-actions {
 display: flex;
 justify-content: space-between;
@@ -303,13 +334,16 @@ border-top: 1px solid #e9edf4;
 }
 
 .timeline-hours-value {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 250px;
+  width: 100%;
+  min-width: 0;
 }
 
 .timeline-row-hours-bar .timeline-hours-value {
+  display: flex;
+  flex: 1 1 auto;
   width: 100%;
   min-width: 0;
   text-align: left;
@@ -320,6 +354,7 @@ border-top: 1px solid #e9edf4;
 }
 
 .hours-progress-text-left,
+.hours-progress-text-center,
 .hours-progress-text-right {
   position: absolute;
   top: 50%;
@@ -331,6 +366,14 @@ border-top: 1px solid #e9edf4;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 46%;
+}
+
+.hours-progress-text-center {
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #2f3a4b;
+  font-weight: 500;
+  font-size: 11px;
 }
 
 .hours-progress-text-left {
@@ -366,9 +409,9 @@ border-top: 1px solid #e9edf4;
 
 .year-status-column-header,
 .year-status-column-cell {
-  width: clamp(110px, 14vw, 190px);
-  min-width: 110px;
-  max-width: 190px !important;
+  width: 14vw;
+  min-width: 190px;
+  max-width: none !important;
 }
 
 @media (max-width: 1100px) {

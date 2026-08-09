@@ -210,24 +210,24 @@
             <th mat-header-cell
                 [style.display]="(!hideSponsorColumn) ? '' : 'none'"
                 mat-sort-header="{{tableColumns[2]}}"
-                class="hide-on-small px-2 desktop-hide-1150"
+                class="hide-on-small px-2 desktop-hide-1150 assistance-sponsor-column"
                 *matHeaderCellDef>Kostenträger
             </th>
             <td mat-cell
                 [style.display]="(!hideSponsorColumn) ? '' : 'none'"
                 *matCellDef="let row"
-                class="hide-on-small px-2 desktop-hide-1150">{{row.preview.sponsorName}}
+                class="hide-on-small px-2 desktop-hide-1150 assistance-sponsor-column">{{row.preview.sponsorName}}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="start">
             <th mat-header-cell
                 mat-sort-header="{{tableColumns[3]}}"
-                class="px-2"
+                class="px-2 assistance-date-column"
                 *matHeaderCellDef>Beginn
             </th>
             <td mat-cell
-                class="px-2"
+                class="px-2 assistance-date-column"
                 *matCellDef="let row">{{ getDateString(row.preview.start) }}
             </td>
           </ng-container>
@@ -235,11 +235,11 @@
           <ng-container matColumnDef="end">
             <th mat-header-cell
                 mat-sort-header="{{tableColumns[4]}}"
-                class="px-2"
+                class="px-2 assistance-date-column"
                 *matHeaderCellDef>Ende
             </th>
             <td mat-cell
-                class="px-2"
+                class="px-2 assistance-date-column"
                 *matCellDef="let row">{{ getDateString(row.preview.end) }}
             </td>
           </ng-container>
@@ -270,11 +270,11 @@
           <ng-container matColumnDef="hours">
             <th mat-header-cell
                 mat-sort-header="{{tableColumns[6]}}"
-                class="px-2"
+                class="px-2 assistance-weekly-hours-column"
                 *matHeaderCellDef>h/Woche
             </th>
             <td mat-cell
-                class="px-2"
+                class="px-2 assistance-weekly-hours-column"
                 *matCellDef="let row">
               <span class="hours-cell-content">
                 <span [ngClass]="{'hours-value-illegal': row.preview.hasIllegalHours}">
@@ -314,6 +314,7 @@
                          [style.width.%]="getExecutedHoursPercent(row.preview)"></div>
                   </div>
                   <span class="hours-progress-text-left">{{ row.preview.executedHoursThisYear }} h</span>
+                  <span class="hours-progress-text-center">{{ getApprovedHoursLeftDisplay(row.preview) }} h</span>
                   <span class="hours-progress-text-right">{{ row.preview.approvedHoursThisYear }} h</span>
                 </div>
               </div>
@@ -420,7 +421,7 @@
                 @if (!hideSponsorColumn) {
                   <div class="timeline-row">
                     <span class="timeline-label">Kostenträger</span>
-                    <span class="timeline-value-light">{{row.preview.sponsorName}}</span>
+                    <span class="timeline-value-light timeline-sponsor-value">{{row.preview.sponsorName}}</span>
                   </div>
                 }
                 <div class="timeline-row">
@@ -453,6 +454,7 @@
                               [style.width.%]="getExecutedHoursPercent(row.preview)"></span>
                       </span>
                       <span class="hours-progress-text-left">{{ row.preview.executedHoursThisYear }} h</span>
+                      <span class="hours-progress-text-center">{{ getApprovedHoursLeftDisplay(row.preview) }} h</span>
                       <span class="hours-progress-text-right">{{ row.preview.approvedHoursThisYear }} h</span>
                     </span>
                   </span>

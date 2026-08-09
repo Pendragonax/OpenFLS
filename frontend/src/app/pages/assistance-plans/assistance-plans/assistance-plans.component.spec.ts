@@ -175,6 +175,16 @@ describe('AssistancePlansComponent', () => {
   });
 
   it.each([
+    {approvedHoursLeftThisYear: 2.3, expected: '+2,3'},
+    {approvedHoursLeftThisYear: 0, expected: '+0'},
+    {approvedHoursLeftThisYear: -1.45, expected: '-1,45'}
+  ])('formats approved hours left with an explicit sign', ({approvedHoursLeftThisYear, expected}) => {
+    const {component} = createComponent();
+
+    expect(component.getApprovedHoursLeftDisplay(preview({approvedHoursLeftThisYear}))).toBe(expected);
+  });
+
+  it.each([
     {approved: 2.0, executed: 1.3, expected: 75},
     {approved: 1.15, executed: 0.45, expected: 60},
     {approved: 0, executed: 1.0, expected: 0},
@@ -197,6 +207,23 @@ describe('AssistancePlansComponent', () => {
     expect(text).toBe(`Dieses Jahr bis heute
 Bewilligt: 12.3
 Geleistet: 4.5`);
+  });
+
+  it('builds corridor hours tooltip with approved range and executed hours', () => {
+    const {component} = createComponent();
+    const text = component.getHoursTooltip(
+      preview({
+        hourMode: AssistancePlanHourMode.CORRIDOR,
+        approvedHoursThisYearFrom: 5.3,
+        approvedHoursThisYearTill: 10.15,
+        executedHoursThisYear: 7.2
+      })
+    );
+
+    expect(text).toBe(`Dieses Jahr bis heute
+Bewilligt von: 5.3
+Bewilligt bis: 10.15
+Geleistet: 7.2`);
   });
 
   it.each([

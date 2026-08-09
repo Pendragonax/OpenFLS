@@ -473,7 +473,7 @@ export class AssistancePlansComponent
       return '';
     }
 
-    return `${this.formatHourValue(preview.approvedHoursFrom)} h - ${this.formatHourValue(preview.approvedHoursTo)} h`;
+    return `${this.formatHourValue(preview.approvedHoursFrom)} - ${this.formatHourValue(preview.approvedHoursTo)}`;
   }
 
   getWeeklyHoursDisplay(preview: AssistancePlanPreviewDto): string {
@@ -515,7 +515,16 @@ export class AssistancePlansComponent
     return value.toLocaleString('de-DE', {maximumFractionDigits: 2});
   }
 
+  getApprovedHoursLeftDisplay(preview: AssistancePlanPreviewDto): string {
+    const sign = preview.approvedHoursLeftThisYear < 0 ? '-' : '+';
+    return `${sign}${this.formatHourValue(Math.abs(preview.approvedHoursLeftThisYear))}`;
+  }
+
   getHoursTooltip(preview: AssistancePlanPreviewDto): string {
+    if (this.isCorridorPlan(preview)) {
+      return `Dieses Jahr bis heute\nBewilligt von: ${preview.approvedHoursThisYearFrom}\nBewilligt bis: ${preview.approvedHoursThisYearTill}\nGeleistet: ${preview.executedHoursThisYear}`;
+    }
+
     return `Dieses Jahr bis heute\nBewilligt: ${preview.approvedHoursThisYear}\nGeleistet: ${preview.executedHoursThisYear}`;
   }
 
