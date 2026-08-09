@@ -30,6 +30,8 @@ import {
   AssistancePlansAnalysisMonthDto
 } from "./dtos/assistance-plans-analysis-month-dto";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ObjectTableRowColors} from '../../shared/components/object-table/object-table.component';
+import {AssistancePlanHourMode} from '../../shared/dtos/assistance-plan-hour-mode.model';
 
 @Component({
     selector: 'app-service-evaluation-overview',
@@ -63,6 +65,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   columns: string[] = []
   data: string[][] = []
+  rowColors: Map<number, ObjectTableRowColors> = new Map()
   columnFixedWidthFromIndex: number = 0
   boldColumnIndices: number[] = [2]
 
@@ -314,7 +317,15 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   }
 
   private generateTableData(source: OverviewAssistancePlan[]) {
-    const data = source.map(value => {
+    this.rowColors = new Map()
+    const data = source.map((value, rowIndex) => {
+      if (value.assistancePlanDto?.hourMode === AssistancePlanHourMode.CORRIDOR) {
+        this.rowColors.set(rowIndex, {
+          fontColor: '#000000',
+          backgroundColor: '#eef6ff'
+        })
+      }
+
       // client name
       let result = [(value.clientDto?.lastName ?? "") + " " + (value.clientDto?.firstName ?? "unbekannt")];
 
@@ -370,6 +381,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   private getDataObserverWithoutSeparateHeader() {
     return {
       next: (value: AssistancePlansAnalysisMonthDto) => {
+        this.rowColors = new Map();
         let fullData = this.assistancePlanAnalysisService.convertToArray(value)
         let header = fullData[0]
         let data = fullData.slice(1)

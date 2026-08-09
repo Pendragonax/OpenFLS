@@ -2,6 +2,11 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ReplaySubject} from "rxjs";
 import {CsvService} from "../../services/csv.service";
 
+export interface ObjectTableRowColors {
+  fontColor: string;
+  backgroundColor: string;
+}
+
 @Component({
     selector: 'app-object-table',
     templateUrl: './object-table.component.html',
@@ -15,6 +20,7 @@ export class ObjectTableComponent implements OnInit {
   @Input() boldColumnIndices: number[] = []
   @Input() exportFilename: string = "table_export"
   @Input() rowClasses: string[] = []
+  @Input() rowColors: Map<number, ObjectTableRowColors> = new Map()
 
   header: string[] = [];
   data: any[][] = [];
@@ -40,6 +46,10 @@ export class ObjectTableComponent implements OnInit {
 
   boldIndicesContains(value: number): boolean {
     return this.boldColumnIndices.includes(value)
+  }
+
+  getRowColors(rowIndex: number): ObjectTableRowColors | null {
+    return this.rowColors.get(rowIndex) ?? null;
   }
 
   exportAsCSV() {

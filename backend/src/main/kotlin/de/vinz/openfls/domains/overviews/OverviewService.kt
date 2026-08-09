@@ -568,8 +568,6 @@ class OverviewService(
             .toMutableList()
 
         result.add(0, AssistancePlanOverviewDTO(AssistancePlanDto(), allClient, defaultValuesArray))
-        result.filter { it.assistancePlanDto.id > 0 && isCorridor(it.assistancePlanDto) }
-            .forEach { it.clientDto.lastName = "${it.clientDto.lastName} [Kor]" }
 
         return result
     }
