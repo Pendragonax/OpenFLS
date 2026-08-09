@@ -24,4 +24,9 @@ export class AssistancePlanPreviewDto {
   approvedHoursThisYear: number = 0;
   executedHoursThisYear: number = 0;
   approvedHoursLeftThisYear: number = 0;
+  approvedHoursThisAssistancePlanFrom: number = 0;
+  approvedHoursThisAssistancePlanTill: number = 0;
+  approvedHoursThisAssistancePlan: number = 0;
+  executedHoursThisAssistancePlan: number = 0;
+  approvedHoursLeftThisAssistancePlan: number = 0;
 }

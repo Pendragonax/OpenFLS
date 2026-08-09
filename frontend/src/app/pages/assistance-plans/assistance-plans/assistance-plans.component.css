@@ -30,6 +30,11 @@ td,th {
   white-space: nowrap;
 }
 
+.assistance-client-column {
+  width: auto;
+  max-width: none !important;
+}
+
 .assistance-weekly-hours-column {
   width: 130px;
   min-width: 130px;
@@ -37,6 +42,12 @@ td,th {
   white-space: nowrap;
 }
 
+.assistance-status-column {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.assistance-institution-column,
 .assistance-sponsor-column {
   width: 140px;
   min-width: 140px;
@@ -207,7 +218,8 @@ color: #2f3a4b;
 .timeline-actions {
 display: flex;
 justify-content: space-between;
-flex-wrap: nowrap;
+flex-wrap: wrap;
+gap: 8px;
 padding-top: 12px;
 margin-top: 10px;
 border-top: 1px solid #e9edf4;
@@ -215,7 +227,10 @@ border-top: 1px solid #e9edf4;
 
 .actions-column-header,
 .actions-column-cell {
+  width: 250px;
   min-width: 180px;
+  max-width: 250px !important;
+  box-sizing: border-box;
   white-space: nowrap;
 }
 
@@ -225,6 +240,7 @@ border-top: 1px solid #e9edf4;
   justify-content: center;
   flex-wrap: nowrap;
   gap: 2px;
+  max-width: 250px;
 }
 
 .plan-status-pill {
@@ -373,7 +389,6 @@ border-top: 1px solid #e9edf4;
   transform: translate(-50%, -50%);
   color: #2f3a4b;
   font-weight: 500;
-  font-size: 11px;
 }
 
 .hours-progress-text-left {
@@ -409,9 +424,68 @@ border-top: 1px solid #e9edf4;
 
 .year-status-column-header,
 .year-status-column-cell {
-  width: 14vw;
+  width: auto;
   min-width: 190px;
   max-width: none !important;
+}
+
+.year-status-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.year-status-period-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid #dfe3ec;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.year-status-period-toggle mat-radio-button {
+  margin: 0;
+  padding: 0 15px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5568;
+  border-left: 1px solid #dfe3ec;
+}
+
+.year-status-period-toggle mat-radio-button:first-child {
+  border-left: 0;
+}
+
+.year-status-period-toggle mat-radio-button.mat-radio-checked,
+.year-status-period-toggle mat-radio-button.mat-mdc-radio-checked {
+  color: #ffffff;
+  background: color-mix(in srgb, var(--bs-primary) 78%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bs-primary) 78%, #ffffff);
+}
+
+.year-status-period-toggle ::ng-deep .mat-radio-container,
+.year-status-period-toggle ::ng-deep .mdc-radio {
+  display: none !important;
+}
+
+.year-status-period-toggle ::ng-deep .mat-radio-label-content,
+.year-status-period-toggle ::ng-deep .mdc-form-field > label {
+  padding-left: 0;
+}
+
+.year-status-period-toggle mat-radio-button.mat-radio-checked ::ng-deep .mat-radio-label-content,
+.year-status-period-toggle mat-radio-button.mat-mdc-radio-checked ::ng-deep .mdc-form-field > label {
+  color: #ffffff !important;
+}
+
+.mobile-year-status-period {
+  display: none;
 }
 
 @media (max-width: 1100px) {
@@ -432,6 +506,7 @@ border-top: 1px solid #e9edf4;
   }
 
   .hours-progress-text-left,
+  .hours-progress-text-center,
   .hours-progress-text-right {
     font-size: 12px;
   }
@@ -439,6 +514,7 @@ border-top: 1px solid #e9edf4;
 
 @media (max-width: 1300px) and (min-width: 801px) {
   .hours-progress-text-left,
+  .hours-progress-text-center,
   .hours-progress-text-right {
     font-size: 11px;
   }
@@ -452,8 +528,8 @@ border-top: 1px solid #e9edf4;
   }
 }
 
-@media (max-width: 1150px) and (min-width: 801px) {
-  .assistance-table .desktop-hide-1150 {
+@media (max-width: 1310px) and (min-width: 801px) {
+  .assistance-table .desktop-hide-1310 {
     display: none !important;
   }
 }
@@ -469,6 +545,15 @@ border-top: 1px solid #e9edf4;
 }
 
 @media (max-width: 1100px) {
+  .mobile-year-status-period {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+  }
+
   .filters-desktop {
     display: none;
   }

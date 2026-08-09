@@ -26,5 +26,10 @@ data class AssistancePlanPreviewDto(
     val approvedHoursThisYearTill: Double,
     val approvedHoursThisYear: Double,
     val executedHoursThisYear: Double,
-    val approvedHoursLeftThisYear: Double
+    val approvedHoursLeftThisYear: Double,
+    val approvedHoursThisAssistancePlanFrom: Double,
+    val approvedHoursThisAssistancePlanTill: Double,
+    val approvedHoursThisAssistancePlan: Double,
+    val executedHoursThisAssistancePlan: Double,
+    val approvedHoursLeftThisAssistancePlan: Double
 )

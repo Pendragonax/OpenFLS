@@ -173,7 +173,12 @@ class AssistancePlanControllerWebMvcTest {
             approvedHoursThisYearTill = 366.0,
             approvedHoursThisYear = 366.0,
             executedHoursThisYear = 100.0,
-            approvedHoursLeftThisYear = 266.0
+            approvedHoursLeftThisYear = 266.0,
+            approvedHoursThisAssistancePlanFrom = 366.0,
+            approvedHoursThisAssistancePlanTill = 366.0,
+            approvedHoursThisAssistancePlan = 366.0,
+            executedHoursThisAssistancePlan = 100.0,
+            approvedHoursLeftThisAssistancePlan = 266.0
         )
     }
 }

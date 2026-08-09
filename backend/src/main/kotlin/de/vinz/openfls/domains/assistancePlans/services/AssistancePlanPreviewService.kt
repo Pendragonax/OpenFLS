@@ -115,6 +115,8 @@ class AssistancePlanPreviewService(
         val goalHourWeeklyMinutes = assistancePlanRepository
             .findWeeklyMinutesFromGoalHoursByAssistancePlanIds(assistancePlanIds)
 
+        val executedMinutesByAssistancePlanId = getExecutedMinutesByAssistancePlanId(assistancePlanIds, yearStart, now)
+
         return PreviewContext(
             now = now,
             yearStart = yearStart,
@@ -126,7 +128,13 @@ class AssistancePlanPreviewService(
             ),
             assistancePlanIdsWithPlanHours = assistancePlanHourWeeklyMinutes.map { it.assistancePlanId }.toSet(),
             assistancePlanIdsWithGoalHours = goalHourWeeklyMinutes.map { it.assistancePlanId }.toSet(),
-            executedMinutesByAssistancePlanId = getExecutedMinutesByAssistancePlanId(assistancePlanIds, yearStart, now)
+            executedMinutesByAssistancePlanId = executedMinutesByAssistancePlanId,
+            executedMinutesByAssistancePlanPeriodByAssistancePlanId = getExecutedMinutesByAssistancePlanPeriodByAssistancePlanId(
+                previews,
+                yearStart,
+                now,
+                executedMinutesByAssistancePlanId
+            )
         )
     }
 
@@ -183,6 +191,41 @@ class AssistancePlanPreviewService(
             approvedHoursThisYearTill,
             executedHoursThisYear
         )
+        val approvedHoursThisAssistancePlanFrom = TimeDoubleService.convertDoubleToTimeDouble(
+            calculateApprovedHoursInYear(
+                projection.start,
+                projection.end,
+                approvedRangeMinutes.first,
+                projection.start,
+                context.periodEnd
+            )
+        )
+        val approvedHoursThisAssistancePlanTill = TimeDoubleService.convertDoubleToTimeDouble(
+            calculateApprovedHoursInYear(
+                projection.start,
+                projection.end,
+                approvedRangeMinutes.second,
+                projection.start,
+                context.periodEnd
+            )
+        )
+        val approvedHoursThisAssistancePlan = TimeDoubleService.convertDoubleToTimeDouble(
+            calculateApprovedHoursInYear(
+                projection.start,
+                projection.end,
+                (approvedRangeMinutes.first + approvedRangeMinutes.second) / 2.0,
+                projection.start,
+                context.periodEnd
+            )
+        )
+        val executedHoursThisAssistancePlan = TimeDoubleService.convertDoubleToTimeDouble(
+            (context.executedMinutesByAssistancePlanPeriodByAssistancePlanId[projection.id] ?: 0L) / 60.0
+        )
+        val approvedHoursLeftThisAssistancePlan = calculateApprovedHoursLeftThisYear(
+            approvedHoursThisAssistancePlanFrom,
+            approvedHoursThisAssistancePlanTill,
+            executedHoursThisAssistancePlan
+        )
 
         return AssistancePlanPreviewDto(
             id = projection.id,
@@ -207,7 +250,12 @@ class AssistancePlanPreviewService(
             approvedHoursThisYearTill = approvedHoursThisYearTill,
             approvedHoursThisYear = approvedHoursThisYear,
             executedHoursThisYear = executedHoursThisYear,
-            approvedHoursLeftThisYear = approvedHoursLeftThisYear
+            approvedHoursLeftThisYear = approvedHoursLeftThisYear,
+            approvedHoursThisAssistancePlanFrom = approvedHoursThisAssistancePlanFrom,
+            approvedHoursThisAssistancePlanTill = approvedHoursThisAssistancePlanTill,
+            approvedHoursThisAssistancePlan = approvedHoursThisAssistancePlan,
+            executedHoursThisAssistancePlan = executedHoursThisAssistancePlan,
+            approvedHoursLeftThisAssistancePlan = approvedHoursLeftThisAssistancePlan
         )
     }
 
@@ -264,6 +312,31 @@ class AssistancePlanPreviewService(
             .mapValues { (_, minutes) -> minutes.sumOf { it.minutes.toLong() } }
     }
 
+    private fun getExecutedMinutesByAssistancePlanPeriodByAssistancePlanId(
+        previews: List<AssistancePlanPreviewProjection>,
+        yearStart: LocalDate,
+        periodEnd: LocalDate,
+        executedMinutesByAssistancePlanId: Map<Long, Long>
+    ): Map<Long, Long> {
+        return previews.associate { projection ->
+            val minutes = if (projection.start.isAfter(periodEnd)) {
+                0L
+            } else if (projection.start == yearStart) {
+                // The yearly query already covers exactly this period.
+                executedMinutesByAssistancePlanId[projection.id] ?: 0L
+            } else {
+                serviceRepository
+                    .findMinutesByAssistancePlanIdsAndStartAndEnd(
+                        listOf(projection.id),
+                        projection.start,
+                        periodEnd
+                    )
+                    .sumOf { it.minutes.toLong() }
+            }
+            projection.id to minutes
+        }
+    }
+
     private fun calculateApprovedHoursInYear(
         start: LocalDate,
         end: LocalDate,
@@ -293,7 +366,8 @@ class AssistancePlanPreviewService(
         val weeklyApprovedMinutesByAssistancePlanId: Map<Long, Double>,
         val assistancePlanIdsWithPlanHours: Set<Long>,
         val assistancePlanIdsWithGoalHours: Set<Long>,
-        val executedMinutesByAssistancePlanId: Map<Long, Long>
+        val executedMinutesByAssistancePlanId: Map<Long, Long>,
+        val executedMinutesByAssistancePlanPeriodByAssistancePlanId: Map<Long, Long>
     )
 
     private fun hasIllegalHours(

@@ -85,6 +85,16 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().approvedHoursLeftThisYear).isEqualTo(
             TimeDoubleService.diffTimeDoubles(result.first().approvedHoursThisYearFrom, result.first().executedHoursThisYear)
         )
+        assertThat(result.first().approvedHoursThisAssistancePlanFrom)
+            .isEqualTo(result.first().approvedHoursThisYearFrom)
+        assertThat(result.first().approvedHoursThisAssistancePlanTill)
+            .isEqualTo(result.first().approvedHoursThisYearTill)
+        assertThat(result.first().approvedHoursThisAssistancePlan)
+            .isEqualTo(result.first().approvedHoursThisYear)
+        assertThat(result.first().executedHoursThisAssistancePlan)
+            .isEqualTo(result.first().executedHoursThisYear)
+        assertThat(result.first().approvedHoursLeftThisAssistancePlan)
+            .isEqualTo(result.first().approvedHoursLeftThisYear)
         verify(serviceRepository).findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, now)
     }
 

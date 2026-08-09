@@ -28,6 +28,7 @@ type AssistancePlanPreviewRow = {
 };
 
 type AssistancePlanContext = 'none' | 'client' | 'sponsor' | 'institution' | 'favorites';
+type AssistancePlanStatusPeriod = 'assistancePlan' | 'year';
 
 @Component({
   selector: 'app-assistance-plans',
@@ -68,6 +69,7 @@ export class AssistancePlansComponent
   @Output() deletedValueEvent = new EventEmitter<AssistancePlanPreviewDto>();
 
   tableColumns = ['client', 'institution', 'sponsor', 'start', 'end', 'status', 'hours', 'yearStatus', 'actions'];
+  statusPeriod: AssistancePlanStatusPeriod = 'assistancePlan';
 
   deleteServiceCount: number = 0;
   client: ClientViewModel = new ClientViewModel();
@@ -484,17 +486,17 @@ export class AssistancePlansComponent
     return `${this.formatHourValue(preview.approvedHoursPerWeek)}`;
   }
 
-  getExecutedHoursPercent(preview: AssistancePlanPreviewDto): number {
+  getExecutedHoursPercent(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod = 'year'): number {
     if (this.isCorridorPlan(preview)) {
-      return this.getCorridorExecutedHoursPercent(preview);
+      return this.getCorridorExecutedHoursPercent(preview, period);
     }
 
-    const approvedMinutes = this.convertTimeDoubleToMinutes(preview.approvedHoursThisYear);
+    const approvedMinutes = this.convertTimeDoubleToMinutes(this.getApprovedHours(preview, period));
     if (approvedMinutes <= 0) {
       return 0;
     }
 
-    const executedMinutes = this.convertTimeDoubleToMinutes(preview.executedHoursThisYear);
+    const executedMinutes = this.convertTimeDoubleToMinutes(this.getExecutedHours(preview, period));
     const percent = (executedMinutes * 100) / approvedMinutes;
     return Math.max(0, Math.min(100, Number(percent.toFixed(1))));
   }
@@ -515,21 +517,24 @@ export class AssistancePlansComponent
     return value.toLocaleString('de-DE', {maximumFractionDigits: 2});
   }
 
-  getApprovedHoursLeftDisplay(preview: AssistancePlanPreviewDto): string {
-    const sign = preview.approvedHoursLeftThisYear < 0 ? '-' : '+';
-    return `${sign}${this.formatHourValue(Math.abs(preview.approvedHoursLeftThisYear))}`;
+  getApprovedHoursLeftDisplay(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod = 'year'): string {
+    const value = this.getApprovedHoursLeft(preview, period);
+    const sign = value < 0 ? '-' : '+';
+    return `${sign}${this.formatHourValue(Math.abs(value))}`;
   }
 
-  getHoursTooltip(preview: AssistancePlanPreviewDto): string {
+  getHoursTooltip(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod = 'year'): string {
+    const executedHours = this.getExecutedHours(preview, period);
+    const periodLabel = period === 'assistancePlan' ? 'Dieser Hilfeplan bis heute' : 'Dieses Jahr bis heute';
     if (this.isCorridorPlan(preview)) {
-      return `Dieses Jahr bis heute\nBewilligt von: ${preview.approvedHoursThisYearFrom}\nBewilligt bis: ${preview.approvedHoursThisYearTill}\nGeleistet: ${preview.executedHoursThisYear}`;
+      return `${periodLabel}\nBewilligt von: ${this.getApprovedHoursFrom(preview, period)}\nBewilligt bis: ${this.getApprovedHoursTill(preview, period)}\nGeleistet: ${executedHours}`;
     }
 
-    return `Dieses Jahr bis heute\nBewilligt: ${preview.approvedHoursThisYear}\nGeleistet: ${preview.executedHoursThisYear}`;
+    return `${periodLabel}\nBewilligt: ${this.getApprovedHours(preview, period)}\nGeleistet: ${executedHours}`;
   }
 
-  getExecutedHoursProgressClass(preview: AssistancePlanPreviewDto): string {
-    const percent = this.getExecutedHoursPercent(preview);
+  getExecutedHoursProgressClass(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod = 'year'): string {
+    const percent = this.getExecutedHoursPercent(preview, period);
     if (this.isCorridorPlan(preview)) {
       if (percent >= 40 && percent <= 60) {
         return 'hours-progress-fill--ok';
@@ -546,10 +551,10 @@ export class AssistancePlansComponent
     return 'hours-progress-fill--bad';
   }
 
-  private getCorridorExecutedHoursPercent(preview: AssistancePlanPreviewDto): number {
-    const approvedFrom = this.convertTimeDoubleToMinutes(preview.approvedHoursThisYearFrom);
-    const approvedTill = this.convertTimeDoubleToMinutes(preview.approvedHoursThisYearTill);
-    const executed = this.convertTimeDoubleToMinutes(preview.executedHoursThisYear);
+  private getCorridorExecutedHoursPercent(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
+    const approvedFrom = this.convertTimeDoubleToMinutes(this.getApprovedHoursFrom(preview, period));
+    const approvedTill = this.convertTimeDoubleToMinutes(this.getApprovedHoursTill(preview, period));
+    const executed = this.convertTimeDoubleToMinutes(this.getExecutedHours(preview, period));
 
     if (approvedFrom <= 0 || approvedTill <= 0) {
       return 0;
@@ -573,6 +578,26 @@ export class AssistancePlansComponent
 
   private clampPercent(value: number): number {
     return Math.max(0, Math.min(100, Number(value.toFixed(1))));
+  }
+
+  private getApprovedHoursFrom(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
+    return period === 'assistancePlan' ? preview.approvedHoursThisAssistancePlanFrom : preview.approvedHoursThisYearFrom;
+  }
+
+  private getApprovedHoursTill(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
+    return period === 'assistancePlan' ? preview.approvedHoursThisAssistancePlanTill : preview.approvedHoursThisYearTill;
+  }
+
+  private getApprovedHours(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
+    return period === 'assistancePlan' ? preview.approvedHoursThisAssistancePlan : preview.approvedHoursThisYear;
+  }
+
+  private getExecutedHours(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
+    return period === 'assistancePlan' ? preview.executedHoursThisAssistancePlan : preview.executedHoursThisYear;
+  }
+
+  private getApprovedHoursLeft(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
+    return period === 'assistancePlan' ? preview.approvedHoursLeftThisAssistancePlan : preview.approvedHoursLeftThisYear;
   }
 
   onSearchStringChanges(searchString: string) {

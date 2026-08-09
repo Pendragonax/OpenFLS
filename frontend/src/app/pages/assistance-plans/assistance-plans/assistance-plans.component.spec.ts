@@ -28,6 +28,12 @@ function preview(overrides: Partial<AssistancePlanPreviewDto>): AssistancePlanPr
     approvedHoursThisYearTill: 0,
     approvedHoursThisYear: 0,
     executedHoursThisYear: 0,
+    approvedHoursLeftThisYear: 0,
+    approvedHoursThisAssistancePlanFrom: 0,
+    approvedHoursThisAssistancePlanTill: 0,
+    approvedHoursThisAssistancePlan: 0,
+    executedHoursThisAssistancePlan: 0,
+    approvedHoursLeftThisAssistancePlan: 0,
     ...overrides
   };
 }
@@ -145,6 +151,26 @@ describe('AssistancePlansComponent', () => {
     expect(component.isRowReadOnly({preview: preview({clientArchived: false}), editable: true})).toBe(false);
   });
 
+  it('uses the complete assistance plan period by default and switches status calculations to the calendar year', () => {
+    const {component} = createComponent();
+    const assistancePlanPreview = preview({
+      approvedHoursThisAssistancePlan: 10,
+      executedHoursThisAssistancePlan: 5,
+      approvedHoursLeftThisAssistancePlan: 5,
+      approvedHoursThisYear: 8,
+      executedHoursThisYear: 2,
+      approvedHoursLeftThisYear: 6
+    });
+
+    expect(component.statusPeriod).toBe('assistancePlan');
+    expect(component.getExecutedHoursPercent(assistancePlanPreview, component.statusPeriod)).toBe(50);
+
+    component.statusPeriod = 'year';
+
+    expect(component.getExecutedHoursPercent(assistancePlanPreview, component.statusPeriod)).toBe(25);
+    expect(component.getApprovedHoursLeftDisplay(assistancePlanPreview, component.statusPeriod)).toBe('+6');
+  });
+
   it.each([
     {isActive: true, expected: 'Aktiv'},
     {isActive: false, expected: 'Inaktiv'}
@@ -161,7 +187,7 @@ describe('AssistancePlansComponent', () => {
       approvedHoursTo: 4.5
     });
 
-    expect(component.getWeeklyHoursDisplay(corridorPreview)).toBe('3,5 h - 4,5 h');
+    expect(component.getWeeklyHoursDisplay(corridorPreview)).toBe('3,5 - 4,5');
   });
 
   it('renders the existing weekly-hours value for exact mode previews', () => {
