@@ -178,6 +178,11 @@ class AssistancePlanPreviewService(
         val executedHoursThisYear = TimeDoubleService.convertDoubleToTimeDouble(
             (context.executedMinutesByAssistancePlanId[projection.id] ?: 0L) / 60.0
         )
+        val approvedHoursLeftThisYear = calculateApprovedHoursLeftThisYear(
+            approvedHoursThisYearFrom,
+            approvedHoursThisYearTill,
+            executedHoursThisYear
+        )
 
         return AssistancePlanPreviewDto(
             id = projection.id,
@@ -201,8 +206,27 @@ class AssistancePlanPreviewService(
             approvedHoursThisYearFrom = approvedHoursThisYearFrom,
             approvedHoursThisYearTill = approvedHoursThisYearTill,
             approvedHoursThisYear = approvedHoursThisYear,
-            executedHoursThisYear = executedHoursThisYear
+            executedHoursThisYear = executedHoursThisYear,
+            approvedHoursLeftThisYear = approvedHoursLeftThisYear
         )
+    }
+
+    private fun calculateApprovedHoursLeftThisYear(
+        approvedHoursThisYearFrom: Double,
+        approvedHoursThisYearTill: Double,
+        executedHoursThisYear: Double
+    ): Double {
+        val approvedFrom = TimeDoubleService.convertTimeDoubleToDouble(approvedHoursThisYearFrom)
+        val approvedTill = TimeDoubleService.convertTimeDoubleToDouble(approvedHoursThisYearTill)
+        val executed = TimeDoubleService.convertTimeDoubleToDouble(executedHoursThisYear)
+
+        return when {
+            executed < approvedFrom ->
+                TimeDoubleService.diffTimeDoubles(approvedHoursThisYearFrom, executedHoursThisYear)
+            executed >= approvedTill ->
+                TimeDoubleService.diffTimeDoubles(approvedHoursThisYearTill, executedHoursThisYear)
+            else -> 0.0
+        }
     }
 
     private fun isActiveOn(projection: AssistancePlanPreviewProjection, date: LocalDate): Boolean {

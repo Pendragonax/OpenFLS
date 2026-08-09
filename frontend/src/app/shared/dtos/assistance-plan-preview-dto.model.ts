@@ -23,4 +23,5 @@ export class AssistancePlanPreviewDto {
   approvedHoursThisYearTill: number = 0;
   approvedHoursThisYear: number = 0;
   executedHoursThisYear: number = 0;
+  approvedHoursLeftThisYear: number = 0;
 }

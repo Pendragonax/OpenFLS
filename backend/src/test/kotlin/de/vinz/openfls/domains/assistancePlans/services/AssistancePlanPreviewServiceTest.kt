@@ -82,6 +82,9 @@ class AssistancePlanPreviewServiceTest {
         assertThat(result.first().executedHoursThisYear).isEqualTo(3.0)
         assertThat(result.first().approvedHoursThisYear)
             .isEqualTo(expectedApprovedHoursThisYear(120.0, yearStart, now.plusDays(30), yearStart, now))
+        assertThat(result.first().approvedHoursLeftThisYear).isEqualTo(
+            TimeDoubleService.diffTimeDoubles(result.first().approvedHoursThisYearFrom, result.first().executedHoursThisYear)
+        )
         verify(serviceRepository).findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, now)
     }
 
@@ -329,7 +332,72 @@ class AssistancePlanPreviewServiceTest {
             .isEqualTo(expectedApprovedHoursThisYear(600.0, planStart, planEnd, yearStart, now))
         assertThat(result.first().approvedHoursThisYear)
             .isEqualTo(expectedApprovedHoursThisYear(450.0, planStart, planEnd, yearStart, now))
+        assertThat(result.first().approvedHoursLeftThisYear)
+            .isEqualTo(result.first().approvedHoursThisYearFrom)
         assertThat(result.first().hasIllegalHours).isFalse()
+    }
+
+    @Test
+    fun getPreviewDtosByClientId_withCorridorPlan_returnsZeroWhenExecutedHoursAreWithinRange() {
+        val now = LocalDate.now()
+        val yearStart = LocalDate.of(now.year, 1, 1)
+        val projection = previewProjection(
+            planId = 78L,
+            planStart = yearStart,
+            planEnd = LocalDate.of(now.year, 12, 31),
+            clientArchived = false,
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridorWeeklyMinutesFrom = 60,
+            hourCorridorWeeklyMinutesTill = 120
+        )
+
+        whenever(assistancePlanRepository.findPreviewProjectionsByClientId(10L)).thenReturn(listOf(projection))
+        whenever(assistancePlanRepository.findFavoriteAssistancePlanIdsByEmployeeId(20L)).thenReturn(emptyList())
+        whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(78L)))
+            .thenReturn(emptyList())
+        whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(78L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(78L), yearStart, now))
+            .thenReturn(listOf(serviceMinutesProjection(78L, 2_400)))
+
+        val result = previewService.getPreviewDtosByClientId(10L, 20L).first()
+
+        assertThat(result.executedHoursThisYear).isBetween(
+            result.approvedHoursThisYearFrom,
+            result.approvedHoursThisYearTill
+        )
+        assertThat(result.approvedHoursLeftThisYear).isEqualTo(0.0)
+    }
+
+    @Test
+    fun getPreviewDtosByClientId_withCorridorPlan_returnsNegativeDifferenceAboveUpperBound() {
+        val now = LocalDate.now()
+        val yearStart = LocalDate.of(now.year, 1, 1)
+        val projection = previewProjection(
+            planId = 79L,
+            planStart = yearStart,
+            planEnd = LocalDate.of(now.year, 12, 31),
+            clientArchived = false,
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridorWeeklyMinutesFrom = 60,
+            hourCorridorWeeklyMinutesTill = 120
+        )
+
+        whenever(assistancePlanRepository.findPreviewProjectionsByClientId(10L)).thenReturn(listOf(projection))
+        whenever(assistancePlanRepository.findFavoriteAssistancePlanIdsByEmployeeId(20L)).thenReturn(emptyList())
+        whenever(assistancePlanRepository.findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(listOf(79L)))
+            .thenReturn(emptyList())
+        whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(79L)))
+            .thenReturn(emptyList())
+        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(79L), yearStart, now))
+            .thenReturn(listOf(serviceMinutesProjection(79L, 4_000)))
+
+        val result = previewService.getPreviewDtosByClientId(10L, 20L).first()
+
+        assertThat(result.executedHoursThisYear).isGreaterThan(result.approvedHoursThisYearTill)
+        assertThat(result.approvedHoursLeftThisYear).isEqualTo(
+            TimeDoubleService.diffTimeDoubles(result.approvedHoursThisYearTill, result.executedHoursThisYear)
+        )
     }
 
     private fun expectedApprovedHoursThisYear(
