@@ -170,6 +170,6 @@ describe('ServiceNewComponent', () => {
   });
 
   it('labels corridor plans in the helper', () => {
-    expect(component.getAssistancePlanModeLabel({hourMode: AssistancePlanHourMode.CORRIDOR} as any)).toBe('Korridor');
+    expect(component.getAssistancePlanModeLabel({hourMode: AssistancePlanHourMode.CORRIDOR} as any)).toBe('Korridor ·');
   });
 });
