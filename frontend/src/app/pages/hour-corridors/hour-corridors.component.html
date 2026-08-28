@@ -121,6 +121,7 @@
                             class="m-1"
                             *showOnRole="'admin'"
                             [disabled]="isDeleteDisabled(corridor)"
+                            matTooltip="Löschen ist nur möglich, wenn kein Hilfeplan mit diesem Korridor verbunden ist."
                             (click)="openDeleteConfirmation(deleteContent, corridor)">
                       <mat-icon>delete</mat-icon>
                     </button>
@@ -132,6 +133,7 @@
                             (click)="openHistoryModal(corridor)">
                       <mat-icon>history</mat-icon>
                     </button>
+                    <button mat-icon-button color="primary" class="m-1" *showOnRole="'admin'" matTooltip="Verknüpfte Hilfepläne anzeigen" (click)="openAssistancePlansModal(corridor)"><mat-icon>link</mat-icon></button>
                   </div>
                   @if (isDeleteDisabled(corridor)) {
                     <div class="delete-hint text-muted">
@@ -178,9 +180,10 @@
                   </button>
                   <button mat-icon-button
                           color="warn"
-                          *showOnRole="'admin'"
-                          [disabled]="isDeleteDisabled(corridor)"
-                          (click)="openDeleteConfirmation(deleteContent, corridor)">
+                            *showOnRole="'admin'"
+                            [disabled]="isDeleteDisabled(corridor)"
+                            matTooltip="Löschen ist nur möglich, wenn kein Hilfeplan mit diesem Korridor verbunden ist."
+                            (click)="openDeleteConfirmation(deleteContent, corridor)">
                     <mat-icon>delete</mat-icon>
                   </button>
                   <button mat-icon-button
@@ -190,6 +193,7 @@
                           (click)="openHistoryModal(corridor)">
                     <mat-icon>history</mat-icon>
                   </button>
+                  <button mat-icon-button color="primary" *showOnRole="'admin'" matTooltip="Verknüpfte Hilfepläne anzeigen" (click)="openAssistancePlansModal(corridor)"><mat-icon>link</mat-icon></button>
                 </div>
                 @if (isDeleteDisabled(corridor)) {
                   <div class="corridor-card-hint delete-hint text-muted">

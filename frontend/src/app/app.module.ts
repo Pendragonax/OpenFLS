@@ -66,6 +66,7 @@ import {AssistancePlansComponent} from './pages/assistance-plans/assistance-plan
 import {HourTypeComponent} from './pages/hour-type/hour-type.component';
 import {HourCorridorsComponent} from './pages/hour-corridors/hour-corridors.component';
 import {HourCorridorAuditHistoryComponent} from './pages/hour-corridors/hour-corridor-audit-history.component';
+import {HourCorridorAssistancePlansComponent} from './pages/hour-corridors/hour-corridor-assistance-plans.component';
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
@@ -190,6 +191,7 @@ import {MarkdownModule} from "ngx-markdown";
         HourTypeComponent,
         HourCorridorsComponent,
         HourCorridorAuditHistoryComponent,
+        HourCorridorAssistancePlansComponent,
         ServiceNewComponent,
         ServiceEditComponent,
         ServiceClientEntriesComponent,

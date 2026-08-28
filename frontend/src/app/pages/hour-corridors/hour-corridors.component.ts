@@ -10,6 +10,7 @@ import {HourTypeService} from '../../shared/services/hour-type.service';
 import {HourCorridorDto} from '../../shared/dtos/hour-corridor-dto.model';
 import {HourCorridorService} from '../../shared/services/hour-corridor.service';
 import {HourCorridorAuditHistoryComponent} from './hour-corridor-audit-history.component';
+import {HourCorridorAssistancePlansComponent} from './hour-corridor-assistance-plans.component';
 
 const weeklyDurationValidator = (control: AbstractControl): ValidationErrors | null => {
   const hours = Number(control.get('weeklyHoursPart')?.value ?? 0);
@@ -282,6 +283,12 @@ export class HourCorridorsComponent extends TablePageComponent<HourCorridorDto, 
 
   openHistoryModal(corridor: HourCorridorDto) {
     const modalRef = this.modalService.open(HourCorridorAuditHistoryComponent, {centered: true, size: 'lg', scrollable: true});
+    modalRef.componentInstance.corridorId = corridor.id;
+    modalRef.componentInstance.corridorTitle = corridor.title;
+  }
+
+  openAssistancePlansModal(corridor: HourCorridorDto) {
+    const modalRef = this.modalService.open(HourCorridorAssistancePlansComponent, {centered: true, size: 'lg', scrollable: true});
     modalRef.componentInstance.corridorId = corridor.id;
     modalRef.componentInstance.corridorTitle = corridor.title;
   }

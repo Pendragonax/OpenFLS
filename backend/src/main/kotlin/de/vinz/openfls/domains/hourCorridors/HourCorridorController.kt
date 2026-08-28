@@ -153,4 +153,16 @@ class HourCorridorController(
             performanceLoggingService.logPerformance("getHistory", startMs, logger)
         }
     }
+
+    @GetMapping("{id}/assistance-plans")
+    fun getAssistancePlans(@PathVariable id: Long): Any {
+        return try {
+            if (!accessService.isAdmin()) throw IllegalAccessException("no permission to read linked assistance plans")
+            ResponseEntity.ok(hourCorridorService.getAssistancePlans(id))
+        } catch (ex: IllegalAccessException) {
+            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
+        } catch (ex: Exception) {
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        }
+    }
 }

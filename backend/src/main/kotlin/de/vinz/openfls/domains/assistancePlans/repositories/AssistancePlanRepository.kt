@@ -6,12 +6,16 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreview
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
 import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorUsageProjection
+import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorAssistancePlanProjection
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
+
+    @Query("SELECT ap.id as id, ap.start as start, ap.end as end, c.firstName as clientFirstName, c.lastName as clientLastName FROM AssistancePlan ap JOIN ap.client c WHERE ap.hourCorridor.id = :hourCorridorId ORDER BY ap.start DESC, ap.id DESC")
+    fun findHourCorridorAssistancePlans(@Param("hourCorridorId") hourCorridorId: Long): List<HourCorridorAssistancePlanProjection>
 
     @Query(
         "SELECT DISTINCT ap from AssistancePlan ap " +

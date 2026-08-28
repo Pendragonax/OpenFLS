@@ -4,6 +4,7 @@ import de.vinz.openfls.domains.hourCorridors.dtos.CreateHourCorridorDto
 import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorDto
 import de.vinz.openfls.domains.hourCorridors.dtos.UpdateHourCorridorDto
 import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorAuditLogDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorAssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.hourTypes.HourTypeService
 import org.springframework.data.repository.findByIdOrNull
@@ -110,6 +111,10 @@ class HourCorridorService(
     fun countByAssistancePlan(id: Long): Long {
         return assistancePlanRepository.countByHourCorridorId(id)
     }
+
+    @Transactional(readOnly = true)
+    fun getAssistancePlans(id: Long): List<HourCorridorAssistancePlanDto> =
+        assistancePlanRepository.findHourCorridorAssistancePlans(id).map(HourCorridorAssistancePlanDto::from)
 
     @Transactional(readOnly = true)
     fun getAuditHistory(id: Long): List<HourCorridorAuditLogDto> =
