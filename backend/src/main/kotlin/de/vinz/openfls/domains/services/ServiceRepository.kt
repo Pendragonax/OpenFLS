@@ -139,6 +139,8 @@ interface ServiceRepository : CrudRepository<Service, Long> {
         WHERE u.assistancePlan.id in :assistancePlanIds
           AND cast(u.start as LocalDate) >= :start
           AND cast(u.start as LocalDate) <= :end
+          AND cast(u.start as LocalDate) >= u.assistancePlan.start
+          AND cast(u.start as LocalDate) <= u.assistancePlan.end
         """
     )
     fun findMinutesByAssistancePlanIdsAndStartAndEnd(
@@ -154,6 +156,7 @@ interface ServiceRepository : CrudRepository<Service, Long> {
         FROM Service u
         WHERE u.assistancePlan.id in :assistancePlanIds
           AND cast(u.start as LocalDate) >= u.assistancePlan.start
+          AND cast(u.start as LocalDate) <= u.assistancePlan.end
           AND cast(u.start as LocalDate) <= :end
         """
     )

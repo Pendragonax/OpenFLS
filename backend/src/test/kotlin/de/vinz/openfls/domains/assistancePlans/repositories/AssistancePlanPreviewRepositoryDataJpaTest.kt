@@ -122,8 +122,8 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
 
         val assistancePlan = assistancePlanRepository.save(
             AssistancePlan(
-                start = yearStart,
-                end = yearEnd,
+                start = LocalDate.of(now.year, 3, 1),
+                end = LocalDate.of(now.year, 9, 30),
                 client = base.client,
                 sponsor = base.sponsor,
                 institution = base.institution
@@ -132,8 +132,8 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
 
         serviceRepository.save(
             Service(
-                start = LocalDateTime.of(now.year, 2, 1, 9, 0),
-                end = LocalDateTime.of(now.year, 2, 1, 10, 0),
+                start = LocalDateTime.of(now.year, 5, 1, 9, 0),
+                end = LocalDateTime.of(now.year, 5, 1, 10, 0),
                 minutes = 120,
                 client = base.client,
                 employee = base.employee,
@@ -144,9 +144,21 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
         )
         serviceRepository.save(
             Service(
-                start = LocalDateTime.of(now.year - 1, 12, 31, 9, 0),
-                end = LocalDateTime.of(now.year - 1, 12, 31, 10, 0),
+                start = LocalDateTime.of(now.year, 1, 31, 9, 0),
+                end = LocalDateTime.of(now.year, 1, 31, 10, 0),
                 minutes = 60,
+                client = base.client,
+                employee = base.employee,
+                institution = base.institution,
+                hourType = base.hourType,
+                assistancePlan = assistancePlan
+            )
+        )
+        serviceRepository.save(
+            Service(
+                start = LocalDateTime.of(now.year, 10, 1, 9, 0),
+                end = LocalDateTime.of(now.year, 10, 1, 10, 0),
+                minutes = 45,
                 client = base.client,
                 employee = base.employee,
                 institution = base.institution,

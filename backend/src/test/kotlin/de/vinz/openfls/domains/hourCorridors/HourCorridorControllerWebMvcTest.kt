@@ -115,6 +115,19 @@ class HourCorridorControllerWebMvcTest {
     }
 
     @Test
+    fun getAll_nonAdmin_returnsDtos() {
+        given(accessService.isAdmin()).willReturn(false)
+        given(hourCorridorService.getAll()).willReturn(
+            listOf(HourCorridorDto(id = 1, title = "5 bis 10", weeklyMinutesFrom = 300, weeklyMinutesTill = 600, hourTypeId = 1))
+        )
+
+        val result = mockMvc.get("/hour_corridors").andReturn()
+
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"title\":\"5 bis 10\"")
+    }
+
+    @Test
     fun countByAssistancePlan_admin_returnsCount() {
         // Given
         given(accessService.isAdmin()).willReturn(true)

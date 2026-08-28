@@ -90,7 +90,6 @@ class HourCorridorController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            if (!accessService.isAdmin()) throw IllegalAccessException("no permission to read hour corridors")
             ResponseEntity.ok(hourCorridorService.getAll())
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
@@ -108,7 +107,6 @@ class HourCorridorController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            if (!accessService.isAdmin()) throw IllegalAccessException("no permission to read hour corridors")
             ResponseEntity.ok(hourCorridorService.getDtoById(id))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
@@ -126,7 +124,6 @@ class HourCorridorController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            if (!accessService.isAdmin()) throw IllegalAccessException("no permission to read hour corridors")
             ResponseEntity.ok(hourCorridorService.countByAssistancePlan(id))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
@@ -143,7 +140,6 @@ class HourCorridorController(
     fun getHistory(@PathVariable id: Long): Any {
         val startMs = System.currentTimeMillis()
         return try {
-            if (!accessService.isAdmin()) throw IllegalAccessException("no permission to read hour corridor history")
             ResponseEntity.ok(hourCorridorService.getAuditHistory(id))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
@@ -157,7 +153,6 @@ class HourCorridorController(
     @GetMapping("{id}/assistance-plans")
     fun getAssistancePlans(@PathVariable id: Long): Any {
         return try {
-            if (!accessService.isAdmin()) throw IllegalAccessException("no permission to read linked assistance plans")
             ResponseEntity.ok(hourCorridorService.getAssistancePlans(id))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
