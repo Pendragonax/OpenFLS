@@ -66,7 +66,8 @@ class AssistancePlanAnalysisServiceTest {
         val expectedMonthlyTo = TimeDoubleService.convertDoubleToTimeDouble((monthDays * 10.0) / 7.0)
 
         assertThat(result.first().approvedHours).isEqualTo(expectedApprovedHours)
-        assertThat(entry.clientLastName).isEqualTo("Muster [Kor]")
+        assertThat(entry.clientLastName).isEqualTo("Muster")
+        assertThat(entry.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
         assertThat(entry.missingHours).isNegative()
         assertThat(entry.executedPercent).isEqualTo(
             TimeDoubleService.roundDoubleToTwoDigits((executedMinutes / 60.0) * 100 / expectedMonthlyTo)
@@ -107,7 +108,7 @@ class AssistancePlanAnalysisServiceTest {
         val expectedMonthlyTo = TimeDoubleService.convertDoubleToTimeDouble((monthDays * 10.0) / 7.0)
 
         assertThat(result.approvedHours).isEqualTo(expectedApprovedHours)
-        assertThat(result.clientLastName).isEqualTo("Muster [Kor]")
+        assertThat(result.clientLastName).isEqualTo("Muster")
         assertThat(result.missingHours).isEqualTo(
             TimeDoubleService.diffTimeDoubles(expectedMonthlyTo, TimeDoubleService.convertDoubleToTimeDouble(executedMinutes / 60.0))
         )

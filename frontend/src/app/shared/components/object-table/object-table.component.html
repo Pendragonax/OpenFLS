@@ -32,6 +32,8 @@
         *matRowDef="let row; let rowIndex = index; columns: header;"
         class="overview-row-height"
         [ngClass]="rowClasses[rowIndex]"
-        [ngStyle]="getRowColors(rowIndex)"></tr>
+        [ngStyle]="getRowColors(rowIndex)"
+        [matTooltip]="getRowDescription(rowIndex)">
+    </tr>
   </table>
 </div>
