@@ -124,6 +124,14 @@
                             (click)="openDeleteConfirmation(deleteContent, corridor)">
                       <mat-icon>delete</mat-icon>
                     </button>
+                    <button mat-icon-button
+                            color="accent"
+                            class="m-1"
+                            *showOnRole="'admin'"
+                            aria-label="Änderungshistorie anzeigen"
+                            (click)="openHistoryModal(corridor)">
+                      <mat-icon>history</mat-icon>
+                    </button>
                   </div>
                   @if (isDeleteDisabled(corridor)) {
                     <div class="delete-hint text-muted">
@@ -174,6 +182,13 @@
                           [disabled]="isDeleteDisabled(corridor)"
                           (click)="openDeleteConfirmation(deleteContent, corridor)">
                     <mat-icon>delete</mat-icon>
+                  </button>
+                  <button mat-icon-button
+                          color="accent"
+                          *showOnRole="'admin'"
+                          aria-label="Änderungshistorie anzeigen"
+                          (click)="openHistoryModal(corridor)">
+                    <mat-icon>history</mat-icon>
                   </button>
                 </div>
                 @if (isDeleteDisabled(corridor)) {
@@ -301,5 +316,6 @@
                 (click)="modal.close(false)">Abbrechen</button>
       </div>
     </ng-template>
+
   </div>
 </div>

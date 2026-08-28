@@ -9,6 +9,7 @@ import {HourTypeDto} from '../../shared/dtos/hour-type-dto.model';
 import {HourTypeService} from '../../shared/services/hour-type.service';
 import {HourCorridorDto} from '../../shared/dtos/hour-corridor-dto.model';
 import {HourCorridorService} from '../../shared/services/hour-corridor.service';
+import {HourCorridorAuditHistoryComponent} from './hour-corridor-audit-history.component';
 
 const weeklyDurationValidator = (control: AbstractControl): ValidationErrors | null => {
   const hours = Number(control.get('weeklyHoursPart')?.value ?? 0);
@@ -277,6 +278,12 @@ export class HourCorridorsComponent extends TablePageComponent<HourCorridorDto, 
     }
 
     return `${value.assistancePlanCount} Hilfepläne verknüpft`;
+  }
+
+  openHistoryModal(corridor: HourCorridorDto) {
+    const modalRef = this.modalService.open(HourCorridorAuditHistoryComponent, {centered: true, size: 'lg', scrollable: true});
+    modalRef.componentInstance.corridorId = corridor.id;
+    modalRef.componentInstance.corridorTitle = corridor.title;
   }
 
   selectAll(event: FocusEvent) {

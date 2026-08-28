@@ -14,11 +14,12 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
+import de.vinz.openfls.TimeConfiguration
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 
 @DataJpaTest
-@Import(HourCorridorService::class)
+@Import(HourCorridorService::class, TimeConfiguration::class)
 class HourCorridorServiceDataJpaTest {
 
     @Autowired
@@ -26,6 +27,9 @@ class HourCorridorServiceDataJpaTest {
 
     @Autowired
     lateinit var hourCorridorRepository: HourCorridorRepository
+
+    @Autowired
+    lateinit var auditLogRepository: HourCorridorAuditLogRepository
 
     @Autowired
     lateinit var hourTypeRepository: HourTypeRepository
@@ -58,6 +62,9 @@ class HourCorridorServiceDataJpaTest {
         assertThat(saved.get().weeklyMinutesFrom).isEqualTo(300)
         assertThat(saved.get().weeklyMinutesTill).isEqualTo(600)
         assertThat(saved.get().hourType?.id).isEqualTo(hourType.id)
+        val history = hourCorridorService.getAuditHistory(result.id)
+        assertThat(history).hasSize(1)
+        assertThat(history[0].action).isEqualTo(HourCorridorAuditAction.CREATE)
     }
 
     @Test
@@ -109,6 +116,13 @@ class HourCorridorServiceDataJpaTest {
         assertThat(saved.get().weeklyMinutesFrom).isEqualTo(360)
         assertThat(saved.get().weeklyMinutesTill).isEqualTo(720)
         assertThat(saved.get().hourType?.id).isEqualTo(secondHourType.id)
+        assertThat(hourCorridorService.getAuditHistory(result.id)).extracting<String> { it.action.name }
+            .containsExactly("UPDATE")
+        val updateAudit = hourCorridorService.getAuditHistory(result.id)[0]
+        assertThat(updateAudit.beforeTitle).isEqualTo("Alt")
+        assertThat(updateAudit.afterTitle).isEqualTo("Neu")
+        assertThat(updateAudit.beforeWeeklyMinutesFrom).isEqualTo(240)
+        assertThat(updateAudit.afterWeeklyMinutesFrom).isEqualTo(360)
     }
 
     @Test
@@ -197,5 +211,22 @@ class HourCorridorServiceDataJpaTest {
         assertThatThrownBy { hourCorridorService.delete(corridor.id) }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessage("hour corridor is used by 1 assistance plans")
+    }
+
+    @Test
+    fun delete_unusedCorridor_keepsAuditHistory() {
+        val hourType = hourTypeRepository.save(HourType(title = "Fachleistungsstunde", price = 12.5))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(title = "5 bis 10", weeklyMinutesFrom = 300, weeklyMinutesTill = 600, hourType = hourType)
+        )
+
+        hourCorridorService.delete(corridor.id)
+
+        assertThat(hourCorridorRepository.findById(corridor.id)).isEmpty
+        val history = hourCorridorService.getAuditHistory(corridor.id)
+        assertThat(history).hasSize(1)
+        assertThat(history[0].action).isEqualTo(HourCorridorAuditAction.DELETE)
+        assertThat(history[0].beforeTitle).isEqualTo("5 bis 10")
+        assertThat(history[0].afterTitle).isNull()
     }
 }

@@ -66,4 +66,12 @@ describe('HourCorridorService', () => {
     expect(reload.request.method).toBe('GET');
     reload.flush([]);
   });
+
+  it('getAuditHistory_should_request_history_endpoint', () => {
+    service.getAuditHistory(12).subscribe();
+
+    const request = httpMock.expectOne(`${environment.api_url}hour_corridors/12/history`);
+    expect(request.request.method).toBe('GET');
+    request.flush([]);
+  });
 });

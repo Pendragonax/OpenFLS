@@ -138,4 +138,19 @@ class HourCorridorController(
             performanceLoggingService.logPerformance("countByAssistancePlan", startMs, logger)
         }
     }
+
+    @GetMapping("{id}/history")
+    fun getHistory(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+        return try {
+            if (!accessService.isAdmin()) throw IllegalAccessException("no permission to read hour corridor history")
+            ResponseEntity.ok(hourCorridorService.getAuditHistory(id))
+        } catch (ex: IllegalAccessException) {
+            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
+        } catch (ex: Exception) {
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getHistory", startMs, logger)
+        }
+    }
 }
