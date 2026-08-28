@@ -3,7 +3,6 @@ package de.vinz.openfls.domains.assistancePlans.services
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
-import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistingProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
@@ -11,13 +10,15 @@ import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Clock
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @Service
 class AssistancePlanPreviewService(
     private val assistancePlanRepository: AssistancePlanRepository,
-    private val serviceRepository: ServiceRepository
+    private val serviceRepository: ServiceRepository,
+    private val clock: Clock
 ) {
 
     @Transactional(readOnly = true)
@@ -107,7 +108,7 @@ class AssistancePlanPreviewService(
     }
 
     private fun buildPreviewContext(previews: List<AssistancePlanPreviewProjection>): PreviewContext {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val assistancePlanIds = previews.map { it.id }
         val assistancePlanHourWeeklyMinutes = assistancePlanRepository

@@ -18,7 +18,10 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import de.vinz.openfls.services.TimeDoubleService
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.util.stream.Stream
 import org.junit.jupiter.params.ParameterizedTest
@@ -34,16 +37,17 @@ class AssistancePlanPreviewServiceTest {
     @Mock
     lateinit var serviceRepository: ServiceRepository
 
+    private val clock = Clock.fixed(Instant.parse("2026-07-01T12:00:00Z"), ZoneOffset.UTC)
     private lateinit var previewService: AssistancePlanPreviewService
 
     @BeforeEach
     fun setUp() {
-        previewService = AssistancePlanPreviewService(assistancePlanRepository, serviceRepository)
+        previewService = AssistancePlanPreviewService(assistancePlanRepository, serviceRepository, clock)
     }
 
     @Test
     fun getPreviewDtosByClientId_calculatesApprovedAndExecutedHoursInKotlin() {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
 
@@ -116,7 +120,7 @@ class AssistancePlanPreviewServiceTest {
 
     @Test
     fun getPreviewDtosByClientId_filtersArchivedPlansUnlessIncluded() {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
         val projection = previewProjection(6L, now.minusDays(10), now.plusDays(10), true)
@@ -144,7 +148,7 @@ class AssistancePlanPreviewServiceTest {
 
     @Test
     fun getFavoritePreviewDtosByEmployeeId_marksAllReturnedPlansAsFavorite() {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
 
@@ -173,7 +177,7 @@ class AssistancePlanPreviewServiceTest {
 
     @Test
     fun getFavoritePreviewDtosByEmployeeId_filtersArchivedPlansForLeads() {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
         val projection = previewProjection(8L, now.minusDays(10), now.plusDays(10), true)
@@ -203,7 +207,7 @@ class AssistancePlanPreviewServiceTest {
 
     @Test
     fun getPreviewDtosBySponsorId_filtersArchivedPlansUnlessIncluded() {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
         val projection = previewProjection(9L, now.minusDays(10), now.plusDays(10), true)
@@ -262,7 +266,7 @@ class AssistancePlanPreviewServiceTest {
         executedMinutesB: Int,
         expectedExecutedTimeDouble: Double
     ) {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
         val planStart = now.minusDays(3)
@@ -320,7 +324,7 @@ class AssistancePlanPreviewServiceTest {
 
     @Test
     fun getPreviewDtosByClientId_withCorridorPlan_usesCorridorRangeAndMode() {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val periodEnd = now
         val planStart = now.minusDays(3)
@@ -368,7 +372,7 @@ class AssistancePlanPreviewServiceTest {
 
     @Test
     fun getPreviewDtosByClientId_withCorridorPlan_returnsZeroWhenExecutedHoursAreWithinRange() {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val projection = previewProjection(
             planId = 78L,
@@ -402,7 +406,7 @@ class AssistancePlanPreviewServiceTest {
 
     @Test
     fun getPreviewDtosByClientId_withCorridorPlan_returnsNegativeDifferenceAboveUpperBound() {
-        val now = LocalDate.now()
+        val now = LocalDate.now(clock)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val projection = previewProjection(
             planId = 79L,

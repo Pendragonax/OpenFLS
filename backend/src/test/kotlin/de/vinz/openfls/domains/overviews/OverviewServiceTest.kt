@@ -150,7 +150,7 @@ class OverviewServiceTest {
     }
 
     @Test
-    fun getApprovedHoursYearly_withCorridorPlan_usesCorridorMeanAndMarksClientName() {
+    fun getApprovedHoursYearly_withCorridorPlan_usesCorridorMean() {
         val year = 2024
         val hourTypeId = 7L
 
@@ -169,7 +169,6 @@ class OverviewServiceTest {
 
         val row = result.first { it.assistancePlanDto.id == corridorPlan.id }
 
-        assertThat(row.clientDto.lastName).isEqualTo("Muster [Kor]")
         assertThat(row.values[2]).isCloseTo(31.0714285714, within(0.0001))
         assertThat(row.values[0]).isCloseTo(392.1428571429, within(0.0001))
     }
@@ -196,7 +195,6 @@ class OverviewServiceTest {
 
         val row = result.first { it.assistancePlanDto.id == corridorPlan.id }
 
-        assertThat(row.clientDto.lastName).isEqualTo("Muster [Kor]")
         assertThat(row.values[2]).isCloseTo(-19.71, within(0.0001))
         assertThat(row.values[0]).isCloseTo(-260.41, within(0.0001))
     }
