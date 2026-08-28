@@ -186,10 +186,11 @@ class OverviewService(
         }
 
         // Populate values for each assistance plan
+        val hourCorridors = loadHourCorridors(assistancePlanDTOs)
         assistancePlanDTOs.forEach { planDto ->
             val overviewDTO =
                 assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == planDto.id } ?: return@forEach
-            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(planDto, hourTypeId)
+            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(planDto, hourTypeId, hourCorridors)
 
             (1..daysInMonth).forEach { day ->
                 val date = LocalDate.of(year, month, day)
@@ -221,10 +222,11 @@ class OverviewService(
             getAssistancePlanOverviewDTOsWithoutValues(assistancePlanDTOs, clientSimpleDTOs, monthCount)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
+        val hourCorridors = loadHourCorridors(assistancePlanDTOs)
         assistancePlanDTOs.forEach { assistancePlanDto ->
             val assistancePlanOverviewDTO =
                 assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == assistancePlanDto.id }
-            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId)
+            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId, hourCorridors)
 
             if (assistancePlanOverviewDTO != null) {
                 for (i in 1..monthCount) {
@@ -368,13 +370,14 @@ class OverviewService(
         hourTypeId: Long?,
         toTimeDouble: Boolean
     ): List<AssistancePlanOverviewDTO> {
+        val hourCorridors = loadHourCorridors(executedOverviewDTOs.map { it.assistancePlanDto })
         executedOverviewDTOs.forEach { executedOverviewDTO ->
             val singleApprovedOverviewDTO =
                 approvedOverviewDTOs.find { it.assistancePlanDto.id == executedOverviewDTO.assistancePlanDto.id }
 
             if (singleApprovedOverviewDTO != null) {
                 if (isCorridor(executedOverviewDTO.assistancePlanDto)) {
-                    val corridor = getHourCorridor(executedOverviewDTO.assistancePlanDto)
+                    val corridor = hourCorridors[executedOverviewDTO.assistancePlanDto.hourCorridorId]
                     if (corridor != null && (hourTypeId == null || (corridor.hourType?.id ?: 0) == hourTypeId)) {
                         for (i in 1 until executedOverviewDTO.values.size) {
                             val daysInPeriod = if (month != null) {
@@ -574,12 +577,13 @@ class OverviewService(
 
     internal fun getDailyHoursOfAssistancePlanByHourType(
         assistancePlanDto: AssistancePlanDto,
-        hourTypeId: Long?
+        hourTypeId: Long?,
+        hourCorridors: Map<Long, HourCorridor> = loadHourCorridors(listOf(assistancePlanDto))
     ): Double =
         if (hourTypeId == null) {
             0.0
         } else if (isCorridor(assistancePlanDto)) {
-            val corridor = getHourCorridor(assistancePlanDto) ?: return 0.0
+            val corridor = hourCorridors[assistancePlanDto.hourCorridorId] ?: return 0.0
             if ((corridor.hourType?.id ?: 0) != hourTypeId) {
                 0.0
             } else {
@@ -597,12 +601,15 @@ class OverviewService(
                 .sumOf { it.weeklyMinutes / 7.0 / 60.0 }
         }
 
-    private fun getHourCorridor(assistancePlanDto: AssistancePlanDto): HourCorridor? {
-        if (!isCorridor(assistancePlanDto) || assistancePlanDto.hourCorridorId <= 0) {
-            return null
-        }
-
-        return hourCorridorRepository.findById(assistancePlanDto.hourCorridorId).orElse(null)
+    private fun loadHourCorridors(assistancePlanDTOs: List<AssistancePlanDto>): Map<Long, HourCorridor> {
+        val ids = assistancePlanDTOs.asSequence()
+            .filter(::isCorridor)
+            .map { it.hourCorridorId }
+            .filter { it > 0 }
+            .distinct()
+            .toList()
+        if (ids.isEmpty()) return emptyMap()
+        return hourCorridorRepository.findAllById(ids).associateBy { it.id }
     }
 
     private fun isCorridor(assistancePlanDto: AssistancePlanDto): Boolean {

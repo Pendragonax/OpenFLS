@@ -157,7 +157,7 @@ class OverviewServiceTest {
         val client = clientDto(1L, "Max", "Muster", archived = false)
         val corridorPlan = planDto(11L, client.id, year, null, hourTypeId, corridor = true)
         val corridor = corridorEntity(5L, hourTypeId, 300, 600)
-        `when`(hourCorridorRepository.findById(5L)).thenReturn(Optional.of(corridor))
+        `when`(hourCorridorRepository.findAllById(listOf(5L))).thenReturn(listOf(corridor))
 
         val result = overviewService.getApprovedHoursYearly(
             listOf(corridorPlan),
@@ -181,7 +181,7 @@ class OverviewServiceTest {
         val client = clientDto(1L, "Max", "Muster", archived = false)
         val corridorPlan = planDto(11L, client.id, year, null, hourTypeId, corridor = true)
         val corridor = corridorEntity(5L, hourTypeId, 300, 600)
-        `when`(hourCorridorRepository.findById(5L)).thenReturn(Optional.of(corridor))
+        `when`(hourCorridorRepository.findAllById(listOf(5L))).thenReturn(listOf(corridor))
 
         val services = listOf(service(11L, LocalDate.of(2024, 2, 10), 60))
         val result = overviewService.getDifferenceHoursYearly(
