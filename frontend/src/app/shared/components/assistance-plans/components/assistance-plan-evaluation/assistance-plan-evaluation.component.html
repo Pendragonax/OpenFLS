@@ -1,5 +1,20 @@
 <div class="container-fluid fw-light my-2">
   <div class="row">
+    <div class="col-12 mb-3">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="beta-plan-mode-pill"
+              [class.beta-plan-mode-pill--corridor]="assistancePlan.hourMode === 'CORRIDOR'">
+          {{ assistancePlan.hourMode === 'CORRIDOR' ? 'Korridor' : 'Exakt' }}
+          @if (assistancePlan.hourMode === 'CORRIDOR' && assistancePlan.hourCorridor != null) {
+            <span class="beta-plan-mode-pill__details">
+              {{ assistancePlan.hourCorridor.title }}
+              · {{ assistancePlan.hourCorridor.weeklyMinutesFrom / 60 | number:'1.0-2' }} h - {{ assistancePlan.hourCorridor.weeklyMinutesTill / 60 | number:'1.0-2' }} h
+            </span>
+          }
+        </span>
+      </div>
+    </div>
+
     <div class="col">
       <form [formGroup]="configForm">
         <div class="row mt-3">

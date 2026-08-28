@@ -122,8 +122,8 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
 
         val assistancePlan = assistancePlanRepository.save(
             AssistancePlan(
-                start = yearStart,
-                end = yearEnd,
+                start = LocalDate.of(now.year, 3, 1),
+                end = LocalDate.of(now.year, 9, 30),
                 client = base.client,
                 sponsor = base.sponsor,
                 institution = base.institution
@@ -132,8 +132,8 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
 
         serviceRepository.save(
             Service(
-                start = LocalDateTime.of(now.year, 2, 1, 9, 0),
-                end = LocalDateTime.of(now.year, 2, 1, 10, 0),
+                start = LocalDateTime.of(now.year, 5, 1, 9, 0),
+                end = LocalDateTime.of(now.year, 5, 1, 10, 0),
                 minutes = 120,
                 client = base.client,
                 employee = base.employee,
@@ -144,9 +144,21 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
         )
         serviceRepository.save(
             Service(
-                start = LocalDateTime.of(now.year - 1, 12, 31, 9, 0),
-                end = LocalDateTime.of(now.year - 1, 12, 31, 10, 0),
+                start = LocalDateTime.of(now.year, 1, 31, 9, 0),
+                end = LocalDateTime.of(now.year, 1, 31, 10, 0),
                 minutes = 60,
+                client = base.client,
+                employee = base.employee,
+                institution = base.institution,
+                hourType = base.hourType,
+                assistancePlan = assistancePlan
+            )
+        )
+        serviceRepository.save(
+            Service(
+                start = LocalDateTime.of(now.year, 10, 1, 9, 0),
+                end = LocalDateTime.of(now.year, 10, 1, 10, 0),
+                minutes = 45,
                 client = base.client,
                 employee = base.employee,
                 institution = base.institution,
@@ -164,6 +176,55 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
         assertThat(result).hasSize(1)
         assertThat(result.first().assistancePlanId).isEqualTo(assistancePlan.id)
         assertThat(result.first().minutes).isEqualTo(120)
+    }
+
+    @Test
+    fun findMinutesByAssistancePlanIdsFromPlanStartToEnd_returnsRowsFromEachPlanStart() {
+        val base = createBaseData()
+        val now = LocalDate.now()
+        val assistancePlan = assistancePlanRepository.save(
+            AssistancePlan(
+                start = now.minusDays(10),
+                end = now.plusDays(10),
+                client = base.client,
+                sponsor = base.sponsor,
+                institution = base.institution
+            )
+        )
+
+        serviceRepository.save(
+            Service(
+                start = now.minusDays(5).atStartOfDay(),
+                end = now.minusDays(5).atStartOfDay().plusHours(1),
+                minutes = 60,
+                client = base.client,
+                employee = base.employee,
+                institution = base.institution,
+                hourType = base.hourType,
+                assistancePlan = assistancePlan
+            )
+        )
+        serviceRepository.save(
+            Service(
+                start = now.minusDays(11).atStartOfDay(),
+                end = now.minusDays(11).atStartOfDay().plusHours(1),
+                minutes = 120,
+                client = base.client,
+                employee = base.employee,
+                institution = base.institution,
+                hourType = base.hourType,
+                assistancePlan = assistancePlan
+            )
+        )
+
+        val result = serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(
+            listOf(assistancePlan.id),
+            now
+        )
+
+        assertThat(result).hasSize(1)
+        assertThat(result.first().assistancePlanId).isEqualTo(assistancePlan.id)
+        assertThat(result.first().minutes).isEqualTo(60)
     }
 
     private fun createBaseData(): BaseData {

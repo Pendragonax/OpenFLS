@@ -2,6 +2,7 @@ import {of, ReplaySubject} from 'rxjs';
 import {describe, expect, it, vi} from 'vitest';
 import {AssistancePlansComponent} from './assistance-plans.component';
 import {AssistancePlanPreviewDto} from '../../../shared/dtos/assistance-plan-preview-dto.model';
+import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
 
 function preview(overrides: Partial<AssistancePlanPreviewDto>): AssistancePlanPreviewDto {
   return {
@@ -19,9 +20,20 @@ function preview(overrides: Partial<AssistancePlanPreviewDto>): AssistancePlanPr
     isFavorite: false,
     hasIllegalHours: false,
     clientArchived: false,
+    hourMode: AssistancePlanHourMode.EXACT,
+    approvedHoursFrom: 0,
+    approvedHoursTo: 0,
     approvedHoursPerWeek: 0,
+    approvedHoursThisYearFrom: 0,
+    approvedHoursThisYearTill: 0,
     approvedHoursThisYear: 0,
     executedHoursThisYear: 0,
+    approvedHoursLeftThisYear: 0,
+    approvedHoursThisAssistancePlanFrom: 0,
+    approvedHoursThisAssistancePlanTill: 0,
+    approvedHoursThisAssistancePlan: 0,
+    executedHoursThisAssistancePlan: 0,
+    approvedHoursLeftThisAssistancePlan: 0,
     ...overrides
   };
 }
@@ -139,12 +151,63 @@ describe('AssistancePlansComponent', () => {
     expect(component.isRowReadOnly({preview: preview({clientArchived: false}), editable: true})).toBe(false);
   });
 
+  it('uses the complete assistance plan period by default and switches status calculations to the calendar year', () => {
+    const {component} = createComponent();
+    const assistancePlanPreview = preview({
+      approvedHoursThisAssistancePlan: 10,
+      executedHoursThisAssistancePlan: 5,
+      approvedHoursLeftThisAssistancePlan: 5,
+      approvedHoursThisYear: 8,
+      executedHoursThisYear: 2,
+      approvedHoursLeftThisYear: 6
+    });
+
+    expect(component.statusPeriod).toBe('assistancePlan');
+    expect(component.getExecutedHoursPercent(assistancePlanPreview, component.statusPeriod)).toBe(50);
+
+    component.statusPeriod = 'year';
+
+    expect(component.getExecutedHoursPercent(assistancePlanPreview, component.statusPeriod)).toBe(25);
+    expect(component.getApprovedHoursLeftDisplay(assistancePlanPreview, component.statusPeriod)).toBe('+6');
+  });
+
   it.each([
     {isActive: true, expected: 'Aktiv'},
     {isActive: false, expected: 'Inaktiv'}
   ])('returns status label for isActive=$isActive', ({isActive, expected}) => {
     const {component} = createComponent();
     expect(component.getStatusLabel(isActive)).toBe(expected);
+  });
+
+  it('renders corridor range in the weekly-hours field for corridor mode previews', () => {
+    const {component} = createComponent();
+    const corridorPreview = preview({
+      hourMode: AssistancePlanHourMode.CORRIDOR,
+      approvedHoursFrom: 3.5,
+      approvedHoursTo: 4.5
+    });
+
+    expect(component.getWeeklyHoursDisplay(corridorPreview)).toBe('3,5 - 4,5');
+  });
+
+  it('renders the existing weekly-hours value for exact mode previews', () => {
+    const {component} = createComponent();
+    const exactPreview = preview({
+      hourMode: AssistancePlanHourMode.EXACT,
+      approvedHoursPerWeek: 7.5
+    });
+
+    expect(component.getWeeklyHoursDisplay(exactPreview)).toBe('7,5');
+  });
+
+  it.each([
+    {approvedHoursLeftThisYear: 2.3, expected: '+2,3'},
+    {approvedHoursLeftThisYear: 0, expected: '+0'},
+    {approvedHoursLeftThisYear: -1.45, expected: '-1,45'}
+  ])('formats approved hours left with an explicit sign', ({approvedHoursLeftThisYear, expected}) => {
+    const {component} = createComponent();
+
+    expect(component.getApprovedHoursLeftDisplay(preview({approvedHoursLeftThisYear}))).toBe(expected);
   });
 
   it.each([
@@ -172,6 +235,41 @@ Bewilligt: 12.3
 Geleistet: 4.5`);
   });
 
+  it('builds corridor hours tooltip with approved range and executed hours', () => {
+    const {component} = createComponent();
+    const text = component.getHoursTooltip(
+      preview({
+        hourMode: AssistancePlanHourMode.CORRIDOR,
+        approvedHoursThisYearFrom: 5.3,
+        approvedHoursThisYearTill: 10.15,
+        executedHoursThisYear: 7.2
+      })
+    );
+
+    expect(text).toBe(`Dieses Jahr bis heute
+Bewilligt von: 5.3
+Bewilligt bis: 10.15
+Geleistet: 7.2`);
+  });
+
+  it.each([
+    {from: 5.0, till: 10.0, executed: 2.5, expected: 22.7},
+    {from: 5.0, till: 10.0, executed: 7.5, expected: 51.3},
+    {from: 5.0, till: 10.0, executed: 12.5, expected: 94.2}
+  ])('calculates corridor progress percentage for executed=$executed', ({from, till, executed, expected}) => {
+    const {component} = createComponent();
+    const value = component.getExecutedHoursPercent(
+      preview({
+        hourMode: AssistancePlanHourMode.CORRIDOR,
+        approvedHoursThisYearFrom: from,
+        approvedHoursThisYearTill: till,
+        executedHoursThisYear: executed
+      })
+    );
+
+    expect(value).toBeCloseTo(expected, 1);
+  });
+
   it.each([
     {approved: 10.0, executed: 8.59, expected: 'hours-progress-fill--bad'},
     {approved: 10.0, executed: 9.0, expected: 'hours-progress-fill--warn'},
@@ -180,6 +278,24 @@ Geleistet: 4.5`);
     const {component} = createComponent();
     const cssClass = component.getExecutedHoursProgressClass(
       preview({approvedHoursThisYear: approved, executedHoursThisYear: executed})
+    );
+
+    expect(cssClass).toBe(expected);
+  });
+
+  it.each([
+    {executed: 2.0, expected: 'hours-progress-fill--bad'},
+    {executed: 5.0, expected: 'hours-progress-fill--ok'},
+    {executed: 11.0, expected: 'hours-progress-fill--bad'}
+  ])('returns corridor progress class by 40/60 threshold for executed=$executed', ({executed, expected}) => {
+    const {component} = createComponent();
+    const cssClass = component.getExecutedHoursProgressClass(
+      preview({
+        hourMode: AssistancePlanHourMode.CORRIDOR,
+        approvedHoursThisYearFrom: 5.0,
+        approvedHoursThisYearTill: 10.0,
+        executedHoursThisYear: executed
+      })
     );
 
     expect(cssClass).toBe(expected);

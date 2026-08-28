@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
@@ -13,6 +14,7 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProject
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
 import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.sponsors.SponsorService
@@ -27,6 +29,7 @@ import java.time.temporal.ChronoUnit
 class AssistancePlanService(
         private val assistancePlanRepository: AssistancePlanRepository,
         private val assistancePlanHourRepository: AssistancePlanHourRepository,
+        private val hourCorridorRepository: HourCorridorRepository,
         private val goalRepository: GoalRepository,
         private val goalHourRepository: GoalHourRepository,
         private val clientService: ClientService,
@@ -38,11 +41,13 @@ class AssistancePlanService(
 
     @Transactional
     fun create(valueDto: AssistancePlanCreateDto): AssistancePlanDto {
-        validateHoursPlacement(valueDto)
+        validateModeAndHours(valueDto)
 
         val entity = AssistancePlan().apply {
             start = valueDto.start
             end = valueDto.end
+            hourMode = valueDto.hourMode
+            hourCorridor = resolveHourCorridor(valueDto)
         }
 
         entity.client = clientService.getById(valueDto.clientId)
@@ -91,7 +96,16 @@ class AssistancePlanService(
         return mapToDto(savedEntity)
     }
 
-    private fun validateHoursPlacement(valueDto: AssistancePlanCreateDto) {
+    private fun validateModeAndHours(valueDto: AssistancePlanCreateDto) {
+        if (valueDto.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            validateCorridorModeInput(
+                hourCorridorId = valueDto.hourCorridorId,
+                hoursPresent = valueDto.hours.isNotEmpty(),
+                goalHoursPresent = valueDto.goals.any { it.hours.isNotEmpty() }
+            )
+            return
+        }
+
         val hasPlanHours = valueDto.hours.isNotEmpty()
         val hasGoalHours = valueDto.goals.any { it.hours.isNotEmpty() }
 
@@ -99,6 +113,10 @@ class AssistancePlanService(
             throw IllegalArgumentException(
                 "Stunden dürfen entweder direkt im Hilfeplan oder in den Zielen hinterlegt sein, nicht in beiden Bereichen gleichzeitig."
             )
+        }
+
+        if (valueDto.hourCorridorId > 0) {
+            throw IllegalArgumentException("exact assistance plans must not reference an hour corridor")
         }
     }
 
@@ -111,10 +129,12 @@ class AssistancePlanService(
 
         val entity = assistancePlanRepository.findByIdOrNull(id)
             ?: throw IllegalArgumentException("assistance plan not found")
-        validateHoursPlacement(entity, valueDto)
+        validateModeAndHours(entity, valueDto)
 
         entity.start = valueDto.start
         entity.end = valueDto.end
+        entity.hourMode = valueDto.hourMode
+        entity.hourCorridor = resolveHourCorridor(valueDto)
 
         entity.client = clientService.getById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
@@ -199,11 +219,27 @@ class AssistancePlanService(
         return mapToDto(savedEntity)
     }
 
-    private fun validateHoursPlacement(entity: AssistancePlan, valueDto: AssistancePlanUpdateDto) {
+    private fun validateModeAndHours(entity: AssistancePlan, valueDto: AssistancePlanUpdateDto) {
+        if (entity.hourMode != valueDto.hourMode) {
+            throw IllegalArgumentException("assistance plan hour mode cannot be changed")
+        }
+
+        if (entity.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            validateCorridorModeInput(
+                hourCorridorId = valueDto.hourCorridorId,
+                hoursPresent = valueDto.hours.isNotEmpty(),
+                goalHoursPresent = valueDto.goals.any { it.hours.isNotEmpty() }
+            )
+            return
+        }
+
         val hasPlanHours = valueDto.hours.isNotEmpty()
         val hasGoalHours = valueDto.goals.any { it.hours.isNotEmpty() }
 
         if (!hasPlanHours || !hasGoalHours) {
+            if (valueDto.hourCorridorId > 0) {
+                throw IllegalArgumentException("exact assistance plans must not reference an hour corridor")
+            }
             return
         }
 
@@ -230,6 +266,10 @@ class AssistancePlanService(
             throw IllegalArgumentException(
                 "Bei Hilfeplänen mit Stunden in beiden Bereichen dürfen keine neuen Stunden hinzugefügt werden. Bitte erst bestehende Stunden löschen, bis nur noch ein Bereich Stunden enthält."
             )
+        }
+
+        if (valueDto.hourCorridorId > 0) {
+            throw IllegalArgumentException("exact assistance plans must not reference an hour corridor")
         }
     }
 
@@ -370,18 +410,64 @@ class AssistancePlanService(
     }
 
     private fun isIllegalAssistancePlan(assistancePlan: AssistancePlanProjection): Boolean {
-        val containsHoursAndGoalHours = assistancePlan.hours.isNotEmpty() && assistancePlan.goals.isNotEmpty() && assistancePlan.goals.any { goal -> goal.hours.isNotEmpty() }
-        val containsNoHoursAndNoGoalHours = assistancePlan.hours.isEmpty() && (
-                (assistancePlan.goals.isNotEmpty() && assistancePlan.goals.all { goal -> goal.hours.isEmpty() }) ||
-                        assistancePlan.goals.isEmpty())
-        return containsHoursAndGoalHours || containsNoHoursAndNoGoalHours
+        return when (assistancePlan.hourMode) {
+            AssistancePlanHourMode.CORRIDOR -> {
+                assistancePlan.hours.isNotEmpty() || assistancePlan.goals.any { goal -> goal.hours.isNotEmpty() }
+            }
+            AssistancePlanHourMode.EXACT -> {
+                val containsHoursAndGoalHours = assistancePlan.hours.isNotEmpty() &&
+                    assistancePlan.goals.isNotEmpty() &&
+                    assistancePlan.goals.any { goal -> goal.hours.isNotEmpty() }
+                val containsNoHoursAndNoGoalHours = assistancePlan.hours.isEmpty() && (
+                    (assistancePlan.goals.isNotEmpty() && assistancePlan.goals.all { goal -> goal.hours.isEmpty() }) ||
+                        assistancePlan.goals.isEmpty()
+                    )
+                containsHoursAndGoalHours || containsNoHoursAndNoGoalHours
+            }
+        }
     }
 
     private fun mapToDto(entity: AssistancePlan): AssistancePlanDto {
         val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
         dto.institutionName = entity.institution?.name ?: ""
         dto.clientArchived = entity.client?.archived ?: false
+        dto.hourMode = entity.hourMode
+        dto.hourCorridorId = entity.hourCorridor?.id ?: 0
         return dto
+    }
+
+    private fun resolveHourCorridor(valueDto: AssistancePlanCreateDto): de.vinz.openfls.domains.hourCorridors.HourCorridor? {
+        if (valueDto.hourMode != AssistancePlanHourMode.CORRIDOR) {
+            return null
+        }
+
+        return hourCorridorRepository.findByIdOrNull(valueDto.hourCorridorId)
+            ?: throw IllegalArgumentException("hour corridor with id ${valueDto.hourCorridorId} not found")
+    }
+
+    private fun resolveHourCorridor(valueDto: AssistancePlanUpdateDto): de.vinz.openfls.domains.hourCorridors.HourCorridor? {
+        if (valueDto.hourMode != AssistancePlanHourMode.CORRIDOR) {
+            return null
+        }
+
+        return hourCorridorRepository.findByIdOrNull(valueDto.hourCorridorId)
+            ?: throw IllegalArgumentException("hour corridor with id ${valueDto.hourCorridorId} not found")
+    }
+
+    private fun validateCorridorModeInput(
+        hourCorridorId: Long,
+        hoursPresent: Boolean,
+        goalHoursPresent: Boolean
+    ) {
+        if (hourCorridorId <= 0) {
+            throw IllegalArgumentException("corridor assistance plans require an hour corridor")
+        }
+        if (hoursPresent) {
+            throw IllegalArgumentException("corridor assistance plans must not contain plan hours")
+        }
+        if (goalHoursPresent) {
+            throw IllegalArgumentException("corridor assistance plans must not contain goal hours")
+        }
     }
 
     private fun isVisible(
@@ -393,4 +479,3 @@ class AssistancePlanService(
         return !archived || includeArchived || leadingInstitutionIds.contains(institutionId ?: 0)
     }
 }
-

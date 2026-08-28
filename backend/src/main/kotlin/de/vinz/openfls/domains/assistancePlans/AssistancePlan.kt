@@ -1,9 +1,11 @@
 package de.vinz.openfls.domains.assistancePlans
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode.EXACT
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.services.Service
@@ -21,6 +23,10 @@ class AssistancePlan(
         var start: LocalDate = LocalDate.now(),
 
         var end: LocalDate = LocalDate.now(),
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "hour_mode", nullable = false)
+        var hourMode: AssistancePlanHourMode = EXACT,
 
         @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
@@ -45,6 +51,11 @@ class AssistancePlan(
 
         @OneToMany(mappedBy = "assistancePlan", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf(),
+
+        @JsonIgnore
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "hour_corridor_id")
+        var hourCorridor: HourCorridor? = null,
 
         @ManyToMany(mappedBy = "assistancePlanFavorites")
         var employees: MutableSet<Employee> = mutableSetOf()

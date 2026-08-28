@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.goals.dtos.GoalDto
 import java.time.LocalDate
 import jakarta.validation.Valid
@@ -24,6 +25,10 @@ class AssistancePlanDto {
 
     @field:NotNull(message = "sponsorId is null")
     var sponsorId: Long = 0
+
+    var hourMode: AssistancePlanHourMode = AssistancePlanHourMode.EXACT
+
+    var hourCorridorId: Long = 0
 
     var clientArchived: Boolean = false
 

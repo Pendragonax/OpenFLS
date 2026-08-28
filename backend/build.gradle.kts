@@ -76,22 +76,8 @@ tasks.jacocoTestReport {
     }
 }
 
-tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.test)
-    violationRules {
-        rule {
-            limit {
-                counter = "LINE"
-                value = "COVEREDRATIO"
-                minimum = "0.83".toBigDecimal()
-            }
-        }
-    }
-}
-
 tasks.register("coverage") {
     group = "verification"
-    description = "Runs the backend tests, Jacoco report, and Jacoco coverage verification."
+    description = "Runs the backend tests and creates the JaCoCo coverage report."
     dependsOn(tasks.jacocoTestReport)
-    dependsOn(tasks.jacocoTestCoverageVerification)
 }

@@ -1,34 +1,67 @@
 .plan-readonly-pill {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
   border-radius: 999px;
   background: #e6eef7;
-  color: #355070;
-  border: 1px solid #bfd0e6;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
+  color:#355070;
+  border:1px solid #bfd0e6;
 }
 
 .plan-readonly-pill--archived {
   background: #fff0ef;
   color: #a62821;
-  border-color: #f0b5b2;
+  border-color: #a62821;
+  padding: 4px 10px;
 }
 
 .mat-row:hover {
   background-color: whitesmoke;
 }
 
-td, th {
+td,th {
   white-space: normal;
   word-wrap: break-word;
+  max-width:130px;
+}
+
+.assistance-date-column {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+  white-space: nowrap;
+}
+
+.assistance-client-column {
+  width: auto;
+  max-width: none !important;
+}
+
+.assistance-weekly-hours-column {
+  width: 130px;
+  min-width: 130px;
   max-width: 130px;
+  white-space: nowrap;
+}
+
+.assistance-status-column {
+  width: 1%;
+  min-width: max-content;
+  max-width: none !important;
+  white-space: nowrap;
+}
+
+.assistance-institution-column,
+.assistance-sponsor-column {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .assistance-row--readonly {
-  background: #fff3f1;
+  background:#fff3f1;
 }
 
 .assistance-row--readonly td {
@@ -55,7 +88,7 @@ td, th {
 }
 
 .width-350 {
-  width: 350px;
+  width:350px;
 }
 
 .assistance-timeline {
@@ -100,7 +133,6 @@ font-style: italic;
 .timeline-card--readonly .hours-progress-text-left,
 .timeline-card--readonly .hours-progress-text-right {
 color: rgba(47, 58, 75, 0.72);
-font-style: italic;
 }
 
 .timeline-card--readonly .plan-status-pill--active {
@@ -127,7 +159,7 @@ font-style: italic;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .timeline-date {
@@ -178,10 +210,19 @@ color: #2f3a4b;
   color: #2f3a4b;
 }
 
+.timeline-sponsor-value {
+  min-width: 0;
+  width: min(220px, 55%);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .timeline-actions {
 display: flex;
 justify-content: space-between;
-flex-wrap: nowrap;
+flex-wrap: wrap;
+gap: 8px;
 padding-top: 12px;
 margin-top: 10px;
 border-top: 1px solid #e9edf4;
@@ -189,7 +230,10 @@ border-top: 1px solid #e9edf4;
 
 .actions-column-header,
 .actions-column-cell {
+  width: 250px;
   min-width: 180px;
+  max-width: 250px !important;
+  box-sizing: border-box;
   white-space: nowrap;
 }
 
@@ -199,17 +243,14 @@ border-top: 1px solid #e9edf4;
   justify-content: center;
   flex-wrap: nowrap;
   gap: 2px;
+  max-width: 250px;
 }
 
 .plan-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   border-radius: 999px;
   padding: 4px 10px;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.2;
   border: 1px solid transparent;
 }
 
@@ -224,7 +265,6 @@ border-top: 1px solid #e9edf4;
   color: #2f8d67;
   background: #dcf5ea;
   border-color: #9fd9c0;
-  font-weight: 600;
 }
 
 .plan-status-pill--active .plan-status-dot {
@@ -271,6 +311,10 @@ border-top: 1px solid #e9edf4;
   border: 1px solid #dde2ec;
 }
 
+.year-status-track--corridor {
+  background: linear-gradient(90deg, #f6f7fa 0%, #edf0f6 100%);
+}
+
 .hours-progress-fill {
   position: absolute;
   inset: 0;
@@ -291,14 +335,34 @@ border-top: 1px solid #e9edf4;
   background: linear-gradient(90deg, #65b98f 0%, #4a8c6f 100%);
 }
 
+.hours-progress-threshold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 2;
+  background: rgba(47, 58, 75, 0.7);
+}
+
+.hours-progress-threshold--from {
+  left: 40%;
+}
+
+.hours-progress-threshold--till {
+  left: 60%;
+}
+
 .timeline-hours-value {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 250px;
+  width: 100%;
+  min-width: 0;
 }
 
 .timeline-row-hours-bar .timeline-hours-value {
+  display: flex;
+  flex: 1 1 auto;
   width: 100%;
   min-width: 0;
   text-align: left;
@@ -309,6 +373,7 @@ border-top: 1px solid #e9edf4;
 }
 
 .hours-progress-text-left,
+.hours-progress-text-center,
 .hours-progress-text-right {
   position: absolute;
   top: 50%;
@@ -320,6 +385,13 @@ border-top: 1px solid #e9edf4;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 46%;
+}
+
+.hours-progress-text-center {
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #2f3a4b;
+  font-weight: 500;
 }
 
 .hours-progress-text-left {
@@ -355,9 +427,68 @@ border-top: 1px solid #e9edf4;
 
 .year-status-column-header,
 .year-status-column-cell {
-  width: clamp(110px, 14vw, 190px);
-  min-width: 110px;
-  max-width: 190px !important;
+  width: auto;
+  min-width: 190px;
+  max-width: none !important;
+}
+
+.year-status-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.year-status-period-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid #dfe3ec;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.year-status-period-toggle mat-radio-button {
+  margin: 0;
+  padding: 0 15px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5568;
+  border-left: 1px solid #dfe3ec;
+}
+
+.year-status-period-toggle mat-radio-button:first-child {
+  border-left: 0;
+}
+
+.year-status-period-toggle mat-radio-button.mat-radio-checked,
+.year-status-period-toggle mat-radio-button.mat-mdc-radio-checked {
+  color: #ffffff;
+  background: color-mix(in srgb, var(--bs-primary) 78%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bs-primary) 78%, #ffffff);
+}
+
+.year-status-period-toggle ::ng-deep .mat-radio-container,
+.year-status-period-toggle ::ng-deep .mdc-radio {
+  display: none !important;
+}
+
+.year-status-period-toggle ::ng-deep .mat-radio-label-content,
+.year-status-period-toggle ::ng-deep .mdc-form-field > label {
+  padding-left: 0;
+}
+
+.year-status-period-toggle mat-radio-button.mat-radio-checked ::ng-deep .mat-radio-label-content,
+.year-status-period-toggle mat-radio-button.mat-mdc-radio-checked ::ng-deep .mdc-form-field > label {
+  color: #ffffff !important;
+}
+
+.mobile-year-status-period {
+  display: none;
 }
 
 @media (max-width: 1100px) {
@@ -378,6 +509,7 @@ border-top: 1px solid #e9edf4;
   }
 
   .hours-progress-text-left,
+  .hours-progress-text-center,
   .hours-progress-text-right {
     font-size: 12px;
   }
@@ -385,6 +517,7 @@ border-top: 1px solid #e9edf4;
 
 @media (max-width: 1300px) and (min-width: 801px) {
   .hours-progress-text-left,
+  .hours-progress-text-center,
   .hours-progress-text-right {
     font-size: 11px;
   }
@@ -398,8 +531,8 @@ border-top: 1px solid #e9edf4;
   }
 }
 
-@media (max-width: 1150px) and (min-width: 801px) {
-  .assistance-table .desktop-hide-1150 {
+@media (max-width: 1310px) and (min-width: 801px) {
+  .assistance-table .desktop-hide-1310 {
     display: none !important;
   }
 }
@@ -415,6 +548,15 @@ border-top: 1px solid #e9edf4;
 }
 
 @media (max-width: 1100px) {
+  .mobile-year-status-period {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+  }
+
   .filters-desktop {
     display: none;
   }

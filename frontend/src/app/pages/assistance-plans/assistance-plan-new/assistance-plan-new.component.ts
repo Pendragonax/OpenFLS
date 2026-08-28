@@ -8,6 +8,7 @@ import {
   NativeDateAdapter
 } from '@angular/material/core';
 import {ActivatedRoute} from '@angular/router';
+import {Validators} from '@angular/forms';
 import {combineLatest} from 'rxjs';
 import {NewPageComponent} from '../../../shared/components/new-page.component';
 import {AssistancePlanDto} from '../../../shared/dtos/assistance-plan-dto.model';
@@ -15,6 +16,7 @@ import {
   AssistancePlanCreateDto,
   AssistancePlanCreateHourDto
 } from '../../../shared/dtos/assistance-plan-create-dto.model';
+import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
 import {ClientDto} from '../../../shared/dtos/client-dto.model';
 import {InstitutionDto} from '../../../shared/dtos/institution-dto.model';
 import {SponsorDto} from '../../../shared/dtos/sponsor-dto.model';
@@ -24,9 +26,11 @@ import {ClientsService} from '../../../shared/services/clients.service';
 import {Converter} from '../../../shared/services/converter.helper';
 import {HelperService} from '../../../shared/services/helper.service';
 import {InstitutionService} from '../../../shared/services/institution.service';
+import {HourCorridorService} from '../../../shared/services/hour-corridor.service';
 import {SponsorService} from '../../../shared/services/sponsor.service';
 import {UserService} from '../../../shared/services/user.service';
 import {AssistancePlanInfoForm} from '../components/assistance-plan-info-form/assistance-plan-info-form';
+import {HourCorridorDto} from '../../../shared/dtos/hour-corridor-dto.model';
 
 @Component({
   selector: 'app-assistance-plan-new-page',
@@ -44,9 +48,12 @@ import {AssistancePlanInfoForm} from '../components/assistance-plan-info-form/as
   standalone: false
 })
 export class AssistancePlanNewPageComponent extends NewPageComponent<AssistancePlanDto> implements OnInit {
+  readonly AssistancePlanHourMode = AssistancePlanHourMode;
+
   client: ClientDto = new ClientDto();
   institutions: InstitutionDto[] = [];
   sponsors: SponsorDto[] = [];
+  hourCorridors: HourCorridorDto[] = [];
   affiliatedInstitutions: InstitutionDto[] = [];
   existingPlans: AssistancePlanExistingDto[] = [];
   existingPlansLoading = false;
@@ -63,6 +70,7 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
     private route: ActivatedRoute,
     private clientService: ClientsService,
     private userService: UserService,
+    private hourCorridorService: HourCorridorService,
     private converter: Converter
   ) {
     super(helperService, location);
@@ -88,7 +96,7 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
   }
 
   get hasPlanHours(): boolean {
-    return this.createValue.hours.length > 0;
+    return this.isExactMode && this.createValue.hours.length > 0;
   }
 
   get hasGoalHours(): boolean {
@@ -96,11 +104,23 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
   }
 
   get canAddPlanHours(): boolean {
-    return !this.hasGoalHours;
+    return this.isExactMode && !this.hasGoalHours;
   }
 
   get canAddGoalHours(): boolean {
-    return !this.hasPlanHours;
+    return this.isExactMode && !this.hasPlanHours;
+  }
+
+  get isExactMode(): boolean {
+    return this.generalForm.hourMode.value !== AssistancePlanHourMode.CORRIDOR;
+  }
+
+  get isCorridorMode(): boolean {
+    return this.generalForm.hourMode.value === AssistancePlanHourMode.CORRIDOR;
+  }
+
+  get selectedHourMode(): AssistancePlanHourMode {
+    return this.generalForm.hourMode.value ?? AssistancePlanHourMode.EXACT;
   }
 
   get hasExistingPlans(): boolean {
@@ -136,14 +156,17 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
     combineLatest([
       this.institutionService.allValues$,
       this.sponsorService.allValues$,
+      this.hourCorridorService.allValues$,
       this.userService.affiliatedInstitutions$,
       this.userService.isAdmin$
-    ]).subscribe(([institutions, sponsors, affiliatedIds, isAdmin]) => {
+    ]).subscribe(([institutions, sponsors, hourCorridors, affiliatedIds, isAdmin]) => {
       this.institutions = institutions;
       this.sponsors = sponsors;
+      this.hourCorridors = hourCorridors;
       this.affiliatedInstitutions = this.institutions.filter(value =>
         isAdmin || affiliatedIds.some(id => id === value.id)
       );
+      this.syncHourModeState(this.selectedHourMode, false);
     });
 
     this.loadClient();
@@ -206,6 +229,12 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
       this.value.institutionId = institutionId;
       this.createValue.institutionId = institutionId;
     });
+    this.generalForm.hourMode.valueChanges.subscribe(value => {
+      this.syncHourModeState(value ?? AssistancePlanHourMode.EXACT, true);
+    });
+    this.generalForm.hourCorridor.valueChanges.subscribe(value => {
+      this.createValue.hourCorridorId = Number(value ?? 0);
+    });
 
     if (this.hasStartDate) {
       this.generalForm.end.enable({emitEvent: false});
@@ -227,11 +256,30 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
   }
 
   onHoursChange(hours: AssistancePlanCreateHourDto[]) {
-    this.createValue.hours = [...hours];
+    this.createValue.hours = this.isCorridorMode ? [] : [...hours];
   }
 
   onGoalsChange(goals: AssistancePlanCreateDto['goals']) {
-    this.createValue.goals = [...goals];
+    this.createValue.goals = this.isCorridorMode
+      ? goals.map(goal => ({...goal, hours: []}))
+      : [...goals];
+  }
+
+  getHourModeLabel(mode: AssistancePlanHourMode | null | undefined): string {
+    return mode === AssistancePlanHourMode.CORRIDOR ? 'Korridor' : 'Exakt';
+  }
+
+  getHourModeRange(corridorId: number): string {
+    const corridor = this.hourCorridors.find(value => value.id === corridorId);
+    if (!corridor) {
+      return 'n/a';
+    }
+
+    return `${this.formatWeeklyMinutes(corridor.weeklyMinutesFrom)} - ${this.formatWeeklyMinutes(corridor.weeklyMinutesTill)}`;
+  }
+
+  getHourCorridorLabel(corridor: HourCorridorDto): string {
+    return `${corridor.title} · ${this.formatWeeklyMinutes(corridor.weeklyMinutesFrom)} - ${this.formatWeeklyMinutes(corridor.weeklyMinutesTill)} · ${corridor.hourTypeTitle}`;
   }
 
   getExistingPlanTimeRange(plan: AssistancePlanExistingDto): string {
@@ -331,6 +379,29 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
 
     const date = value instanceof Date ? value : new Date(value as string | number);
     return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private syncHourModeState(mode: AssistancePlanHourMode, emitEvent: boolean) {
+    this.createValue.hourMode = mode;
+
+    if (mode === AssistancePlanHourMode.CORRIDOR) {
+      this.createValue.hours = [];
+      this.createValue.goals = this.createValue.goals.map(goal => ({
+        ...goal,
+        hours: []
+      }));
+      this.generalForm.hourCorridor.setValidators([Validators.required]);
+    } else {
+      this.createValue.hourCorridorId = 0;
+      this.generalForm.hourCorridor.setValue(null, {emitEvent: false});
+      this.generalForm.hourCorridor.clearValidators();
+    }
+
+    this.generalForm.hourCorridor.updateValueAndValidity({emitEvent});
+  }
+
+  private formatWeeklyMinutes(minutes: number): string {
+    return (minutes / 60).toFixed(2).replace(/\.?0+$/, '');
   }
 
   private syncCreateDtoFromForm() {

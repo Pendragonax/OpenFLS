@@ -4,6 +4,8 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
+import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
 import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDTO
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.services.ServiceRepository
@@ -23,6 +25,7 @@ class OverviewService(
     private val accessService: AccessService,
     private val serviceRepository: ServiceRepository,
     private val assistancePlanRepository: AssistancePlanRepository,
+    private val hourCorridorRepository: HourCorridorRepository,
     private val clientRepository: ClientRepository,
     private val modelMapper: ModelMapper
 ) {
@@ -183,10 +186,11 @@ class OverviewService(
         }
 
         // Populate values for each assistance plan
+        val hourCorridors = loadHourCorridors(assistancePlanDTOs)
         assistancePlanDTOs.forEach { planDto ->
             val overviewDTO =
                 assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == planDto.id } ?: return@forEach
-            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(planDto, hourTypeId)
+            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(planDto, hourTypeId, hourCorridors)
 
             (1..daysInMonth).forEach { day ->
                 val date = LocalDate.of(year, month, day)
@@ -218,10 +222,11 @@ class OverviewService(
             getAssistancePlanOverviewDTOsWithoutValues(assistancePlanDTOs, clientSimpleDTOs, monthCount)
         val allAssistancePlanOverviewDTO = assistancePlanOverviewDTOs[0]
 
+        val hourCorridors = loadHourCorridors(assistancePlanDTOs)
         assistancePlanDTOs.forEach { assistancePlanDto ->
             val assistancePlanOverviewDTO =
                 assistancePlanOverviewDTOs.find { it.assistancePlanDto.id == assistancePlanDto.id }
-            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId)
+            val hoursPerDay = getDailyHoursOfAssistancePlanByHourType(assistancePlanDto, hourTypeId, hourCorridors)
 
             if (assistancePlanOverviewDTO != null) {
                 for (i in 1..monthCount) {
@@ -321,7 +326,14 @@ class OverviewService(
             services, assistancePlanDTOs, clientSimpleDTOs, year, false
         )
 
-        return subtractApprovedFromExecutedOverview(executedOverviewDTOs, approvedOverviewDTOs, toTimeDouble)
+        return subtractApprovedFromExecutedOverview(
+            executedOverviewDTOs,
+            approvedOverviewDTOs,
+            year,
+            null,
+            hourTypeId,
+            toTimeDouble
+        )
     }
 
     internal fun getDifferenceHoursMonthly(
@@ -340,21 +352,56 @@ class OverviewService(
             services, assistancePlanDTOs, clientSimpleDTOs, year, month, false
         )
 
-        return subtractApprovedFromExecutedOverview(executedOverviewDTOs, approvedOverviewDTOs, toTimeDouble)
+        return subtractApprovedFromExecutedOverview(
+            executedOverviewDTOs,
+            approvedOverviewDTOs,
+            year,
+            month,
+            hourTypeId,
+            toTimeDouble
+        )
     }
 
     internal fun subtractApprovedFromExecutedOverview(
         executedOverviewDTOs: List<AssistancePlanOverviewDTO>,
         approvedOverviewDTOs: List<AssistancePlanOverviewDTO>,
+        year: Int,
+        month: Int?,
+        hourTypeId: Long?,
         toTimeDouble: Boolean
     ): List<AssistancePlanOverviewDTO> {
-        executedOverviewDTOs.map { executedOverviewDTO ->
+        val hourCorridors = loadHourCorridors(executedOverviewDTOs.map { it.assistancePlanDto })
+        executedOverviewDTOs.forEach { executedOverviewDTO ->
             val singleApprovedOverviewDTO =
                 approvedOverviewDTOs.find { it.assistancePlanDto.id == executedOverviewDTO.assistancePlanDto.id }
 
             if (singleApprovedOverviewDTO != null) {
-                for (i in 0 until executedOverviewDTO.values.size) {
-                    executedOverviewDTO.values[i] -= singleApprovedOverviewDTO.values[i]
+                if (isCorridor(executedOverviewDTO.assistancePlanDto)) {
+                    val corridor = hourCorridors[executedOverviewDTO.assistancePlanDto.hourCorridorId]
+                    if (corridor != null && (hourTypeId == null || (corridor.hourType?.id ?: 0) == hourTypeId)) {
+                        for (i in 1 until executedOverviewDTO.values.size) {
+                            val daysInPeriod = if (month != null) {
+                                1
+                            } else {
+                                DateService.countDaysOfAssistancePlan(year, i, executedOverviewDTO.assistancePlanDto).toInt()
+                            }
+                            val approvedHoursFrom =
+                                corridorApprovedHoursForDays(daysInPeriod, corridor.weeklyMinutesFrom)
+                            val approvedHoursTo =
+                                corridorApprovedHoursForDays(daysInPeriod, corridor.weeklyMinutesTill)
+                            executedOverviewDTO.values[i] =
+                                calculateCorridorDifference(executedOverviewDTO.values[i], approvedHoursFrom, approvedHoursTo)
+                        }
+                        executedOverviewDTO.values[0] = executedOverviewDTO.values.drop(1).sum()
+                    } else {
+                        for (i in 0 until executedOverviewDTO.values.size) {
+                            executedOverviewDTO.values[i] -= singleApprovedOverviewDTO.values[i]
+                        }
+                    }
+                } else {
+                    for (i in 0 until executedOverviewDTO.values.size) {
+                        executedOverviewDTO.values[i] -= singleApprovedOverviewDTO.values[i]
+                    }
                 }
             }
         }
@@ -519,7 +566,7 @@ class OverviewService(
             val client = clientDTOs.find { it.id == plan.clientId }
                 ?: throw IllegalArgumentException("Client with ID ${plan.clientId} not found")
 
-            AssistancePlanOverviewDTO(plan, client, defaultValuesArray.copyOf())
+            AssistancePlanOverviewDTO(plan, copyClient(client), defaultValuesArray.copyOf())
         }.sortedBy { it.clientDto.lastName }
             .toMutableList()
 
@@ -530,10 +577,19 @@ class OverviewService(
 
     internal fun getDailyHoursOfAssistancePlanByHourType(
         assistancePlanDto: AssistancePlanDto,
-        hourTypeId: Long?
+        hourTypeId: Long?,
+        hourCorridors: Map<Long, HourCorridor> = loadHourCorridors(listOf(assistancePlanDto))
     ): Double =
         if (hourTypeId == null) {
             0.0
+        } else if (isCorridor(assistancePlanDto)) {
+            val corridor = hourCorridors[assistancePlanDto.hourCorridorId] ?: return 0.0
+            if ((corridor.hourType?.id ?: 0) != hourTypeId) {
+                0.0
+            } else {
+                val weeklyMinutesMean = (corridor.weeklyMinutesFrom + corridor.weeklyMinutesTill) / 2.0
+                weeklyMinutesMean / 7.0 / 60.0
+            }
         } else if (assistancePlanDto.hours.size > 0) {
             assistancePlanDto.hours
                 .filter { it.hourTypeId == hourTypeId }
@@ -544,6 +600,45 @@ class OverviewService(
                 .filter { it.hourTypeId == hourTypeId }
                 .sumOf { it.weeklyMinutes / 7.0 / 60.0 }
         }
+
+    private fun loadHourCorridors(assistancePlanDTOs: List<AssistancePlanDto>): Map<Long, HourCorridor> {
+        val ids = assistancePlanDTOs.asSequence()
+            .filter(::isCorridor)
+            .map { it.hourCorridorId }
+            .filter { it > 0 }
+            .distinct()
+            .toList()
+        if (ids.isEmpty()) return emptyMap()
+        return hourCorridorRepository.findAllById(ids).associateBy { it.id }
+    }
+
+    private fun isCorridor(assistancePlanDto: AssistancePlanDto): Boolean {
+        return assistancePlanDto.hourMode == de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode.CORRIDOR
+    }
+
+    private fun corridorApprovedHoursForDays(days: Int, weeklyMinutes: Int): Double {
+        return TimeDoubleService.roundDoubleToTwoDigits((weeklyMinutes / 7.0) * days / 60.0)
+    }
+
+    private fun calculateCorridorDifference(executedHours: Double, approvedHoursFrom: Double, approvedHoursTo: Double): Double {
+        return when {
+            executedHours < approvedHoursFrom -> executedHours - approvedHoursFrom
+            executedHours > approvedHoursTo -> executedHours - approvedHoursTo
+            else -> 0.0
+        }
+    }
+
+    private fun copyClient(client: ClientSimpleDto): ClientSimpleDto {
+        return ClientSimpleDto().apply {
+            id = client.id
+            firstName = client.firstName
+            lastName = client.lastName
+            phoneNumber = client.phoneNumber
+            email = client.email
+            archived = client.archived
+            institution = client.institution
+        }
+    }
 
     @Throws(IllegalTimeException::class)
     internal fun checkYearMonth(year: Int, month: Int?) {

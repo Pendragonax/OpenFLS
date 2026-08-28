@@ -11,12 +11,15 @@ import {UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {ClientDto} from "../../shared/dtos/client-dto.model";
 import {ClientForServiceEditingDto} from "../../shared/dtos/client-for-service-editing-dto.model";
 import {AssistancePlanDto} from "../../shared/dtos/assistance-plan-dto.model";
+import {AssistancePlanHourMode} from "../../shared/dtos/assistance-plan-hour-mode.model";
 import {Converter} from "../../shared/services/converter.helper";
 import {GoalDto} from "../../shared/dtos/goal-dto.model";
 import {HourTypeDto} from "../../shared/dtos/hour-type-dto.model";
 import {CategoryDto} from "../../shared/dtos/category-dto.model";
 import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
+import {HourCorridorDto} from "../../shared/dtos/hour-corridor-dto.model";
 import {SponsorService} from "../../shared/services/sponsor.service";
+import {HourCorridorService} from "../../shared/services/hour-corridor.service";
 import {ActivatedRoute} from "@angular/router";
 import {ServiceService} from "../../shared/services/service.service";
 import {Location} from "@angular/common";
@@ -27,6 +30,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 @Directive()
 export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnInit {
   protected readonly destroyRef = inject(DestroyRef);
+  readonly AssistancePlanHourMode = AssistancePlanHourMode;
 
   // STATES
   editMode = false;
@@ -35,6 +39,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
   institutions: InstitutionDto[] = []
   hourTypes: HourTypeDto[] = []
   assistancePlanHourTypes: HourTypeDto[] = []
+  hourCorridors: HourCorridorDto[] = []
   clients: ClientDto[] = [];
   sponsors: SponsorDto[] = [];
   categories: CategoryDto[] = [];
@@ -125,6 +130,7 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
     private clientService: ClientsService,
     private hourTypeService: HourTypeService,
     private sponsorService: SponsorService,
+    private hourCorridorService: HourCorridorService,
     protected serviceService: ServiceService,
     private route: ActivatedRoute,
     protected converter: Converter,
@@ -166,16 +172,18 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       this.institutionService.allValues$,
       this.clientService.allValues$,
       this.hourTypeService.allValues$,
+      this.hourCorridorService.allValues$,
       this.userService.user$,
       this.sponsorService.allValues$
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(([writeableInstitutions, institutions, clients, hourTypes, user, sponsors]) => {
+      .subscribe(([writeableInstitutions, institutions, clients, hourTypes, hourCorridors, user, sponsors]) => {
         // base
         this.institutions = institutions.filter(value => writeableInstitutions.some(inst => inst == value.id));
         this.clients = clients;
         this.filteredClients = this.getSelectableClients(clients).slice(0, 5);
         this.hourTypes = hourTypes;
+        this.hourCorridors = hourCorridors;
         this.sponsors = sponsors;
 
         // service
@@ -205,17 +213,19 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
       this.institutionService.allValues$,
       this.clientService.allValues$,
       this.hourTypeService.allValues$,
+      this.hourCorridorService.allValues$,
       this.sponsorService.allValues$,
       this.clientService.getByIdForServiceEditing(service.clientId)
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(([writeableInstitutions, institutions, clients, hourTypes, sponsors, client]) => {
+      .subscribe(([writeableInstitutions, institutions, clients, hourTypes, hourCorridors, sponsors, client]) => {
         // base
         this.institutions = institutions.filter(value => writeableInstitutions.some(inst => inst == value.id));
         this.clients = clients;
         this.filteredClients = this.getSelectableClients(clients)
           .filter(value => value.id === service.clientId);
         this.hourTypes = hourTypes;
+        this.hourCorridors = hourCorridors;
         this.sponsors = sponsors;
 
         // service
@@ -445,6 +455,31 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
     }
   }
 
+  getAssistancePlanModeLabel(plan: AssistancePlanDto | null | undefined): string {
+    return plan?.hourMode === AssistancePlanHourMode.CORRIDOR ? 'Korridor ·' : 'Exakt';
+  }
+
+  getAssistancePlanModeDetails(plan: AssistancePlanDto | null | undefined): string {
+    if (!plan) {
+      return '';
+    }
+
+    if (plan.hourMode !== AssistancePlanHourMode.CORRIDOR) {
+      return 'Exakter Hilfeplan';
+    }
+
+    const corridor = this.hourCorridors.find(value => value.id === plan.hourCorridorId);
+    if (!corridor) {
+      return 'Korridor';
+    }
+
+    return `${this.getHourCorridorLabel(corridor)}`;
+  }
+
+  getHourCorridorLabel(corridor: HourCorridorDto): string {
+    return `·· ${corridor.title}`;
+  }
+
   resetAssistancePlan() {
     this.assistancePlanSelected = false;
     this.value.assistancePlanId = 0;
@@ -469,6 +504,10 @@ export class ServiceFormBase extends NewPageComponent<ServiceDto> implements OnI
   resetCategories() {
     this.selectedCategories = [];
     this.value.categorys = [];
+  }
+
+  private formatWeeklyMinutes(minutes: number): string {
+    return (minutes / 60).toFixed(2).replace(/\.?0+$/, '');
   }
 
   create() {

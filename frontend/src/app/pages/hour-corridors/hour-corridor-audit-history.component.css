@@ -1,0 +1,12 @@
+.audit-history { min-height: 120px; }
+.audit-title { font-weight: 600; color: #2f3a4b; margin-bottom: 14px; }
+.audit-loading { display: flex; justify-content: center; padding: 20px; }
+.audit-entry { border-left: 3px solid #9aa8bf; padding: 10px 12px; margin-bottom: 10px; background: #f7f9fc; border-radius: 0 6px 6px 0; }
+.audit-entry-header, .audit-change { display: flex; align-items: center; gap: 10px; }
+.audit-entry-header { justify-content: space-between; }
+.audit-action { font-weight: 600; color: #2f3a4b; }
+.audit-entry-meta { color: #6a7386; font-size: .85rem; margin: 2px 0 8px; }
+.audit-change-column { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.audit-change-label { color: #6a7386; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+.audit-arrow { color: #60708a; flex: 0 0 auto; }
+.audit-time { color: #5c6780; font-size: .85rem; }

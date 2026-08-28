@@ -5,12 +5,17 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistin
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
+import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorUsageProjection
+import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorAssistancePlanProjection
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import java.time.LocalDate
 
 interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
+
+    @Query("SELECT ap.id as id, ap.start as start, ap.end as end, c.firstName as clientFirstName, c.lastName as clientLastName FROM AssistancePlan ap JOIN ap.client c WHERE ap.hourCorridor.id = :hourCorridorId ORDER BY ap.start DESC, ap.id DESC")
+    fun findHourCorridorAssistancePlans(@Param("hourCorridorId") hourCorridorId: Long): List<HourCorridorAssistancePlanProjection>
 
     @Query(
         "SELECT DISTINCT ap from AssistancePlan ap " +
@@ -154,12 +159,16 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
+               ap.hourMode as hourMode,
+               hc.weeklyMinutesFrom as hourCorridorWeeklyMinutesFrom,
+               hc.weeklyMinutesTill as hourCorridorWeeklyMinutesTill,
                ap.start as start,
                ap.end as end
         FROM AssistancePlan ap
         JOIN ap.client c
         JOIN ap.institution i
         JOIN ap.sponsor s
+        LEFT JOIN ap.hourCorridor hc
         WHERE ap.client.id = :clientId
         ORDER BY ap.start DESC
         """
@@ -179,12 +188,16 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
+               ap.hourMode as hourMode,
+               hc.weeklyMinutesFrom as hourCorridorWeeklyMinutesFrom,
+               hc.weeklyMinutesTill as hourCorridorWeeklyMinutesTill,
                ap.start as start,
                ap.end as end
         FROM AssistancePlan ap
         JOIN ap.client c
         JOIN ap.institution i
         JOIN ap.sponsor s
+        LEFT JOIN ap.hourCorridor hc
         WHERE ap.institution.id = :institutionId
         ORDER BY ap.start DESC
         """
@@ -204,12 +217,16 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
+               ap.hourMode as hourMode,
+               hc.weeklyMinutesFrom as hourCorridorWeeklyMinutesFrom,
+               hc.weeklyMinutesTill as hourCorridorWeeklyMinutesTill,
                ap.start as start,
                ap.end as end
         FROM AssistancePlan ap
         JOIN ap.client c
         JOIN ap.institution i
         JOIN ap.sponsor s
+        LEFT JOIN ap.hourCorridor hc
         WHERE ap.sponsor.id = :sponsorId
         ORDER BY ap.start DESC
         """
@@ -229,6 +246,9 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
                c.archived as clientArchived,
                i.name as institutionName,
                s.name as sponsorName,
+               ap.hourMode as hourMode,
+               hc.weeklyMinutesFrom as hourCorridorWeeklyMinutesFrom,
+               hc.weeklyMinutesTill as hourCorridorWeeklyMinutesTill,
                ap.start as start,
                ap.end as end
         FROM Employee e
@@ -236,6 +256,7 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
         JOIN ap.client c
         JOIN ap.institution i
         JOIN ap.sponsor s
+        LEFT JOIN ap.hourCorridor hc
         WHERE e.id = :employeeId
         ORDER BY ap.start DESC
         """
@@ -280,4 +301,19 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     fun findWeeklyMinutesFromGoalHoursByAssistancePlanIds(
         @Param("assistancePlanIds") assistancePlanIds: List<Long>
     ): List<AssistancePlanWeeklyMinutesProjection>
+
+    fun countByHourCorridorId(@Param("hourCorridorId") hourCorridorId: Long): Long
+
+    @Query(
+        """
+        SELECT ap.hourCorridor.id as hourCorridorId,
+               COUNT(ap.id) as assistancePlanCount
+        FROM AssistancePlan ap
+        WHERE ap.hourCorridor.id in :hourCorridorIds
+        GROUP BY ap.hourCorridor.id
+        """
+    )
+    fun countByHourCorridorIds(
+        @Param("hourCorridorIds") hourCorridorIds: List<Long>
+    ): List<HourCorridorUsageProjection>
 }

@@ -14,7 +14,8 @@
                       'fw-bold': boldIndicesContains(columnIndex)}">
           {{ column }}
         </th>
-        <td mat-cell *matCellDef="let element" class="table-font-size"
+        <td mat-cell *matCellDef="let element; let rowIndex = dataIndex" class="table-font-size"
+            [ngStyle]="getRowColors(rowIndex)"
             [ngClass]="{'overview-fixed-column-width text-center': columnIndex >= columnFixedWidthFromIndex,
                       'fw-bold': boldIndicesContains(columnIndex)}">
           @if (isNumberColumn(columnIndex)) {
@@ -30,6 +31,9 @@
     <tr mat-row
         *matRowDef="let row; let rowIndex = index; columns: header;"
         class="overview-row-height"
-        [ngClass]="rowClasses[rowIndex] ?? ''"></tr>
+        [ngClass]="rowClasses[rowIndex]"
+        [ngStyle]="getRowColors(rowIndex)"
+        [matTooltip]="getRowDescription(rowIndex)">
+    </tr>
   </table>
 </div>

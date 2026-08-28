@@ -132,6 +132,19 @@
     </div>
   </div>
 
+  <div class="mobile-year-status-period">
+    <span>Erfüllt bis heute</span>
+    <mat-radio-group
+      class="year-status-period-toggle"
+      aria-label="Zeitraum der Stundenstatusanzeige"
+      color="primary"
+      [value]="statusPeriod"
+      (change)="statusPeriod = $event.value">
+      <mat-radio-button value="assistancePlan">Hilfeplan</mat-radio-button>
+      <mat-radio-button value="year">Kalenderjahr</mat-radio-button>
+    </mat-radio-group>
+  </div>
+
   <div class="row mt-2">
     @if (!isSubmitting) {
       @if (showArchivedEntriesToggleVisible) {
@@ -181,12 +194,12 @@
             <th mat-header-cell
                 [style.display]="(!hideClientColumn) ? '' : 'none'"
                 mat-sort-header="{{tableColumns[0]}}"
-                class="hide-on-small px-4"
+                class="hide-on-small px-4 assistance-client-column"
                 *matHeaderCellDef>Klient
             </th>
             <td mat-cell
                 [style.display]="(!hideClientColumn) ? '' : 'none'"
-                class="hide-on-small px-4"
+                class="hide-on-small px-4 assistance-client-column"
                 *matCellDef="let row">
             <span>{{row.preview.clientLastname}} {{row.preview.clientFirstname}}</span>
             </td>
@@ -196,12 +209,12 @@
             <th mat-header-cell
                 [style.display]="(!hideInstitutionColumn) ? '' : 'none'"
                 mat-sort-header="{{tableColumns[1]}}"
-                class="hide-on-small px-2 desktop-hide-1150"
+                class="hide-on-small px-2 desktop-hide-1310 assistance-institution-column"
                 *matHeaderCellDef>Bereich
             </th>
             <td mat-cell
                 [style.display]="(!hideInstitutionColumn) ? '' : 'none'"
-                class="hide-on-small px-2 desktop-hide-1150"
+                class="hide-on-small px-2 desktop-hide-1310 assistance-institution-column"
                 *matCellDef="let row">{{row.preview.institutionName}}
             </td>
           </ng-container>
@@ -210,24 +223,24 @@
             <th mat-header-cell
                 [style.display]="(!hideSponsorColumn) ? '' : 'none'"
                 mat-sort-header="{{tableColumns[2]}}"
-                class="hide-on-small px-2 desktop-hide-1150"
+                class="hide-on-small px-2 desktop-hide-1310 assistance-sponsor-column"
                 *matHeaderCellDef>Kostenträger
             </th>
             <td mat-cell
                 [style.display]="(!hideSponsorColumn) ? '' : 'none'"
                 *matCellDef="let row"
-                class="hide-on-small px-2 desktop-hide-1150">{{row.preview.sponsorName}}
+                class="hide-on-small px-2 desktop-hide-1310 assistance-sponsor-column">{{row.preview.sponsorName}}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="start">
             <th mat-header-cell
                 mat-sort-header="{{tableColumns[3]}}"
-                class="px-2"
+                class="px-2 assistance-date-column"
                 *matHeaderCellDef>Beginn
             </th>
             <td mat-cell
-                class="px-2"
+                class="px-2 assistance-date-column"
                 *matCellDef="let row">{{ getDateString(row.preview.start) }}
             </td>
           </ng-container>
@@ -235,11 +248,11 @@
           <ng-container matColumnDef="end">
             <th mat-header-cell
                 mat-sort-header="{{tableColumns[4]}}"
-                class="px-2"
+                class="px-2 assistance-date-column"
                 *matHeaderCellDef>Ende
             </th>
             <td mat-cell
-                class="px-2"
+                class="px-2 assistance-date-column"
                 *matCellDef="let row">{{ getDateString(row.preview.end) }}
             </td>
           </ng-container>
@@ -247,11 +260,11 @@
           <ng-container matColumnDef="status">
             <th mat-header-cell
                 mat-sort-header="{{tableColumns[5]}}"
-                class="px-2"
+                class="px-2 assistance-status-column"
                 *matHeaderCellDef>Status
             </th>
             <td mat-cell
-                class="px-2"
+                class="px-2 assistance-status-column"
                 *matCellDef="let row">
               <div class="status-cell">
                 @if (row.preview.isActive) {
@@ -270,15 +283,15 @@
           <ng-container matColumnDef="hours">
             <th mat-header-cell
                 mat-sort-header="{{tableColumns[6]}}"
-                class="px-2"
+                class="px-2 assistance-weekly-hours-column"
                 *matHeaderCellDef>h/Woche
             </th>
             <td mat-cell
-                class="px-2"
+                class="px-2 assistance-weekly-hours-column"
                 *matCellDef="let row">
               <span class="hours-cell-content">
                 <span [ngClass]="{'hours-value-illegal': row.preview.hasIllegalHours}">
-                  {{ row.preview.approvedHoursPerWeek }}
+                  {{ getWeeklyHoursDisplay(row.preview) }}
                 </span>
                 @if (row.preview.hasIllegalHours) {
                   <mat-icon class="illegal-hours-icon"
@@ -292,24 +305,41 @@
 
           <ng-container matColumnDef="yearStatus">
             <th mat-header-cell
-                mat-sort-header="{{tableColumns[7]}}"
                 class="px-2 year-status-column-header"
-                *matHeaderCellDef>Erfüllt "dieses Jahr" bis "jetzt"
+                *matHeaderCellDef>
+              <div class="year-status-header-content">
+                <span>Erfüllt bis heute</span>
+                <mat-radio-group
+                  class="year-status-period-toggle"
+                  aria-label="Zeitraum der Stundenstatusanzeige"
+                  color="primary"
+                  [value]="statusPeriod"
+                  (change)="statusPeriod = $event.value">
+                  <mat-radio-button value="assistancePlan">Hilfeplan</mat-radio-button>
+                  <mat-radio-button value="year">Kalenderjahr</mat-radio-button>
+                </mat-radio-group>
+              </div>
             </th>
             <td mat-cell
                 class="px-2 year-status-column-cell"
-                [matTooltip]="getHoursTooltip(row.preview)"
+                [matTooltip]="getHoursTooltip(row.preview, statusPeriod)"
                 matTooltipClass="hours-week-tooltip"
                 *matCellDef="let row">
               <div class="year-status-cell">
                 <div class="year-status-bar">
-                  <div class="year-status-track">
+                  <div class="year-status-track"
+                       [ngClass]="{'year-status-track--corridor': isCorridorPlan(row.preview)}">
+                    @if (isCorridorPlan(row.preview)) {
+                      <span class="hours-progress-threshold hours-progress-threshold--from"></span>
+                      <span class="hours-progress-threshold hours-progress-threshold--till"></span>
+                    }
                     <div class="hours-progress-fill"
-                         [ngClass]="getExecutedHoursProgressClass(row.preview)"
-                         [style.width.%]="getExecutedHoursPercent(row.preview)"></div>
+                         [ngClass]="getExecutedHoursProgressClass(row.preview, statusPeriod)"
+                         [style.width.%]="getExecutedHoursPercent(row.preview, statusPeriod)"></div>
                   </div>
-                  <span class="hours-progress-text-left">{{ row.preview.executedHoursThisYear }} h</span>
-                  <span class="hours-progress-text-right">{{ row.preview.approvedHoursThisYear }} h</span>
+                  <span class="hours-progress-text-left">{{ statusPeriod === 'assistancePlan' ? row.preview.executedHoursThisAssistancePlan : row.preview.executedHoursThisYear }} h</span>
+                  <span class="hours-progress-text-center">{{ getApprovedHoursLeftDisplay(row.preview, statusPeriod) }} h</span>
+                  <span class="hours-progress-text-right">{{ statusPeriod === 'assistancePlan' ? row.preview.approvedHoursThisAssistancePlan : row.preview.approvedHoursThisYear }} h</span>
                 </div>
               </div>
             </td>
@@ -393,9 +423,9 @@
                       {{ getStatusLabel(row.preview.isActive) }}
                     </span>
                   }
-                  @if (isRowReadOnly(row)) {
-                    <span class="plan-readonly-pill plan-readonly-pill--archived">Archiviert</span>
-                  }
+                @if (isRowReadOnly(row)) {
+                  <span class="plan-readonly-pill plan-readonly-pill--archived">Archiviert</span>
+                }
                 </div>
               </div>
 
@@ -415,14 +445,14 @@
                 @if (!hideSponsorColumn) {
                   <div class="timeline-row">
                     <span class="timeline-label">Kostenträger</span>
-                    <span class="timeline-value-light">{{row.preview.sponsorName}}</span>
+                    <span class="timeline-value-light timeline-sponsor-value">{{row.preview.sponsorName}}</span>
                   </div>
                 }
                 <div class="timeline-row">
                   <span class="timeline-label">h/Woche</span>
                   <span class="timeline-value-light hours-cell-content">
                     <span [ngClass]="{'hours-value-illegal': row.preview.hasIllegalHours}">
-                      {{row.preview.approvedHoursPerWeek}}
+                      {{ getWeeklyHoursDisplay(row.preview) }}
                     </span>
                     @if (row.preview.hasIllegalHours) {
                       <mat-icon class="illegal-hours-icon"
@@ -433,17 +463,23 @@
                   </span>
                 </div>
                 <div class="timeline-row timeline-row-hours-bar"
-                     [matTooltip]="getHoursTooltip(row.preview)"
+                     [matTooltip]="getHoursTooltip(row.preview, statusPeriod)"
                      matTooltipClass="hours-week-tooltip">
                   <span class="timeline-hours-value">
                     <span class="year-status-bar">
-                      <span class="year-status-track">
+                      <span class="year-status-track"
+                            [ngClass]="{'year-status-track--corridor': isCorridorPlan(row.preview)}">
+                        @if (isCorridorPlan(row.preview)) {
+                          <span class="hours-progress-threshold hours-progress-threshold--from"></span>
+                          <span class="hours-progress-threshold hours-progress-threshold--till"></span>
+                        }
                         <span class="hours-progress-fill"
-                              [ngClass]="getExecutedHoursProgressClass(row.preview)"
-                              [style.width.%]="getExecutedHoursPercent(row.preview)"></span>
+                              [ngClass]="getExecutedHoursProgressClass(row.preview, statusPeriod)"
+                              [style.width.%]="getExecutedHoursPercent(row.preview, statusPeriod)"></span>
                       </span>
-                      <span class="hours-progress-text-left">{{ row.preview.executedHoursThisYear }} h</span>
-                      <span class="hours-progress-text-right">{{ row.preview.approvedHoursThisYear }} h</span>
+                      <span class="hours-progress-text-left">{{ statusPeriod === 'assistancePlan' ? row.preview.executedHoursThisAssistancePlan : row.preview.executedHoursThisYear }} h</span>
+                      <span class="hours-progress-text-center">{{ getApprovedHoursLeftDisplay(row.preview, statusPeriod) }} h</span>
+                      <span class="hours-progress-text-right">{{ statusPeriod === 'assistancePlan' ? row.preview.approvedHoursThisAssistancePlan : row.preview.approvedHoursThisYear }} h</span>
                     </span>
                   </span>
                 </div>

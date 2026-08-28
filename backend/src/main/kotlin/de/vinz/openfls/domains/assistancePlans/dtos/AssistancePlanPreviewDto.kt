@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import java.time.LocalDate
 
 data class AssistancePlanPreviewDto(
@@ -17,7 +18,18 @@ data class AssistancePlanPreviewDto(
     val isActive: Boolean,
     val isFavorite: Boolean,
     val hasIllegalHours: Boolean,
+    val hourMode: AssistancePlanHourMode,
+    val approvedHoursFrom: Double,
+    val approvedHoursTo: Double,
     val approvedHoursPerWeek: Double,
+    val approvedHoursThisYearFrom: Double,
+    val approvedHoursThisYearTill: Double,
     val approvedHoursThisYear: Double,
-    val executedHoursThisYear: Double
+    val executedHoursThisYear: Double,
+    val approvedHoursLeftThisYear: Double,
+    val approvedHoursThisAssistancePlanFrom: Double,
+    val approvedHoursThisAssistancePlanTill: Double,
+    val approvedHoursThisAssistancePlan: Double,
+    val executedHoursThisAssistancePlan: Double,
+    val approvedHoursLeftThisAssistancePlan: Double
 )

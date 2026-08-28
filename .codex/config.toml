@@ -1,6 +1,6 @@
 [mcp_servers.local]
 command = "npx"
-args = ["-y", "@modelcontextprotocol/server-filesystem", "/home/vinz/projects/OpenFLS"]
+args = ["-y", "@modelcontextprotocol/server-filesystem@2026.7.10", "/home/vinz/projects/OpenFLS"]
 enabled = true
 
 [mcp_servers.local.tools.write_file]
@@ -8,10 +8,22 @@ approval_mode = "approve"
 
 [mcp_servers.spring_docs]
 command = "npx"
-args = ["-y", "@enokdev/springdocs-mcp@latest"]
+args = ["-y", "@enokdev/springdocs-mcp@1.2.8"]
 enabled = true
 
 [mcp_servers.angular_docs]
 command = "npx"
-args = ["-y", "@upstash/context7-mcp@latest"]
+args = ["-y", "@upstash/context7-mcp@4.0.3"]
+enabled = true
+
+# React ist erst für eine ausdrücklich beauftragte Migration vorgesehen.
+# Bis dahin bleibt die Angular-Dokumentationsquelle maßgeblich.
+
+# Browser-Automatisierung und End-to-End-Prüfungen nur gegen freigegebene
+# Testumgebungen verwenden.
+[mcp_servers.playwright]
+command = "npx"
+args = ["-y", "@playwright/mcp@0.0.79"]
+startup_timeout_sec = 60
+default_tools_approval_mode = "prompt"
 enabled = true

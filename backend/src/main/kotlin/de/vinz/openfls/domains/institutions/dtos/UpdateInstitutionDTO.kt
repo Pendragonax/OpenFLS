@@ -16,7 +16,7 @@ data class UpdateInstitutionDTO(
                 name = institution.name,
                 email = institution.email,
                 phonenumber = institution.phonenumber,
-                permissions = institution.permissions?.map { PermissionDto.of(it) } ?: listOf()
+                permissions = institution.permissions.map { PermissionDto.of(it) } ?: listOf()
             )
         }
     }

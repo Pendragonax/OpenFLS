@@ -1,6 +1,7 @@
 import {of} from 'rxjs';
 import {describe, expect, it} from 'vitest';
 import {AssistancePlanDto} from '../../../shared/dtos/assistance-plan-dto.model';
+import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
 import {AssistancePlanExistingDto} from '../../../shared/dtos/assistance-plan-existing-dto.model';
 import {AssistancePlanEditComponent, mapAssistancePlanDtoToUpdateDto} from './assistance-plan-edit.component';
 
@@ -13,6 +14,8 @@ describe('mapAssistancePlanDtoToUpdateDto', () => {
       clientId: 9,
       institutionId: 5,
       sponsorId: 3,
+      hourMode: AssistancePlanHourMode.CORRIDOR,
+      hourCorridorId: 44,
       hours: [
         {id: 101, weeklyMinutes: 180, assistancePlanId: 12, hourTypeId: 7}
       ],
@@ -34,6 +37,8 @@ describe('mapAssistancePlanDtoToUpdateDto', () => {
 
     expect(result.id).toBe(12);
     expect(result.clientId).toBe(9);
+    expect(result.hourMode).toBe(AssistancePlanHourMode.CORRIDOR);
+    expect(result.hourCorridorId).toBe(44);
     expect(result.hours[0].id).toBe(101);
     expect(result.hours[0].assistancePlanId).toBe(12);
     expect(result.goals[0].id).toBe(201);

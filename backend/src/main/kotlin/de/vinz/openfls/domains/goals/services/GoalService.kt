@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.goals.services
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.goals.dtos.GoalDto
 import de.vinz.openfls.domains.goals.dtos.GoalHourDto
 import de.vinz.openfls.domains.goals.entities.Goal
@@ -31,6 +32,7 @@ class GoalService(
 
         entity.assistancePlan = assistancePlanService.getById(valueDto.assistancePlanId)
                 ?: throw IllegalArgumentException("assistance plan [id = ${valueDto.assistancePlanId}] not found")
+        validateGoalHoursForAssistancePlan(entity.assistancePlan!!, valueDto.hours.isNotEmpty())
 
         if (valueDto.institutionId != null) {
             entity.institution = institutionService.getEntityById(valueDto.institutionId!!)
@@ -86,6 +88,7 @@ class GoalService(
 
         entity.assistancePlan = assistancePlanService.getById(valueDto.assistancePlanId)
                 ?: throw IllegalArgumentException("assistance plan [id = ${valueDto.assistancePlanId}] not found")
+        validateGoalHoursForAssistancePlan(entity.assistancePlan!!, valueDto.hours.isNotEmpty())
 
         if (valueDto.institutionId != null) {
             entity.institution = institutionService.getEntityById(valueDto.institutionId!!)
@@ -177,6 +180,12 @@ class GoalService(
 
         return entities.map {
             modelMapper.map(it, GoalDto::class.java)
+        }
+    }
+
+    private fun validateGoalHoursForAssistancePlan(assistancePlan: de.vinz.openfls.domains.assistancePlans.AssistancePlan, hasGoalHours: Boolean) {
+        if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR && hasGoalHours) {
+            throw IllegalArgumentException("corridor assistance plans must not contain goal hours")
         }
     }
 }

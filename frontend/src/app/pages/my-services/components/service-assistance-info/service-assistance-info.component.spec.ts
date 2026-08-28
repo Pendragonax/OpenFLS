@@ -21,4 +21,21 @@ describe('ServiceAssistanceInfoComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('does not render the corridor summary pill anymore', () => {
+    component.assistancePlanSelected = true;
+    component.evaluation = {
+      assistancePlanId: 1,
+      hourMode: 'CORRIDOR',
+      approvedHoursFrom: 4,
+      approvedHoursTo: 6,
+      hourTypeEvaluation: []
+    } as any;
+    component.info = [{hourTypeName: 'Pflege', leftThisWeek: 1, leftThisMonth: 1, leftThisYear: 1, leftComplete: 1}];
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).not.toContain('Korridor');
+    expect(fixture.nativeElement.textContent).not.toContain('4 h - 6 h');
+  });
 });

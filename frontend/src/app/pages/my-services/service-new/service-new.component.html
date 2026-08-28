@@ -170,6 +170,12 @@
                   <div class="beta-plan-trigger-text">
                     <span class="beta-plan-meta">{{ getDateString(selectedAssistancePlan ?? undefined) }} | {{ getSponsorName(selectedAssistancePlan ?? undefined) }}</span>
                     <span class="beta-plan-institution-pill">{{ getInstitutionName(selectedAssistancePlan ?? undefined) }}</span>
+                    <span class="beta-plan-institution-pill">
+                      {{ getAssistancePlanModeLabel(selectedAssistancePlan) }}
+                      @if (selectedAssistancePlan?.hourMode === AssistancePlanHourMode.CORRIDOR) {
+                        <span>{{ getAssistancePlanModeDetails(selectedAssistancePlan) }}</span>
+                      }
+                    </span>
                   </div>
                 </mat-select-trigger>
                 @for (plan of filteredAssistancePlans; track plan.id) {
@@ -178,6 +184,12 @@
                       <div class="beta-plan-date">
                       <span class="beta-plan-meta">{{ getDateString(plan) }} | {{ getSponsorName(plan) }}</span>
                       <span class="beta-plan-institution-pill">{{ getInstitutionName(plan) }}</span>
+                      <span class="beta-plan-institution-pill">
+                        {{ getAssistancePlanModeLabel(plan) }}
+                        @if (plan.hourMode === AssistancePlanHourMode.CORRIDOR) {
+                          <span>{{ getAssistancePlanModeDetails(plan) }}</span>
+                        }
+                      </span>
                       </div>
                     </div>
                   </mat-option>
@@ -237,6 +249,7 @@
     <app-service-assistance-info
       [assistancePlanSelected]="assistancePlanSelected"
       [loading]="assistanceInfoLoading"
+      [evaluation]="assistanceInfoEvaluation"
       [info]="assistanceInfo"></app-service-assistance-info>
 
     <div class="beta-section">

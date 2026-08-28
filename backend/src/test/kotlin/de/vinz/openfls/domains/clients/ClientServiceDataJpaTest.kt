@@ -10,6 +10,9 @@ import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
+import de.vinz.openfls.domains.hourCorridors.HourCorridor
+import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.hourTypes.HourTypeRepository
 import de.vinz.openfls.domains.institutions.Institution
@@ -51,6 +54,9 @@ class ClientServiceDataJpaTest {
 
     @Autowired
     lateinit var hourTypeRepository: HourTypeRepository
+
+    @Autowired
+    lateinit var hourCorridorRepository: HourCorridorRepository
 
     @MockitoBean
     lateinit var institutionService: InstitutionService
@@ -264,11 +270,22 @@ class ClientServiceDataJpaTest {
             end = LocalDate.of(2026, 6, 30),
             client = client,
             sponsor = sponsor,
-            institution = institutionA
+            institution = institutionA,
+            hourMode = AssistancePlanHourMode.CORRIDOR
         )
         val hourTypeA = hourTypeRepository.save(HourType(title = "Direkt", price = 10.0))
         val hourTypeB = hourTypeRepository.save(HourType(title = "Indirekt", price = 20.0))
         val hourTypeC = hourTypeRepository.save(HourType(title = "Beratung", price = 30.0))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(
+                title = "5 bis 10",
+                weeklyMinutesFrom = 300,
+                weeklyMinutesTill = 600,
+                hourType = hourTypeA
+            )
+        )
+
+        includedPlan.hourCorridor = corridor
 
         includedPlan.hours.add(AssistancePlanHour(weeklyMinutes = 60, hourType = hourTypeA, assistancePlan = includedPlan))
         includedPlan.hours.add(AssistancePlanHour(weeklyMinutes = 30, hourType = hourTypeB, assistancePlan = includedPlan))
@@ -294,9 +311,12 @@ class ClientServiceDataJpaTest {
         // Then
         assertThat(result).isNotNull
         assertThat(result!!.assistancePlans).hasSize(1)
-        assertThat(result.assistancePlans.first().institutionId).isEqualTo(institutionA.id)
-        assertThat(result.assistancePlans.first().institutionName).isEqualTo("Inst A")
-        assertThat(result.assistancePlans.first().possibleDocumentationHourTypes.map { it.title })
+        val assistancePlan = result.assistancePlans.first()
+        assertThat(assistancePlan.institutionId).isEqualTo(institutionA.id)
+        assertThat(assistancePlan.institutionName).isEqualTo("Inst A")
+        assertThat(assistancePlan.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
+        assertThat(assistancePlan.hourCorridorId).isEqualTo(corridor.id)
+        assertThat(assistancePlan.possibleDocumentationHourTypes.map { it.title })
             .containsExactlyInAnyOrder("Beratung", "Direkt", "Indirekt")
     }
 

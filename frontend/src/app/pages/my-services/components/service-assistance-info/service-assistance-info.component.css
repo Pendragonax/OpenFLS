@@ -12,6 +12,12 @@
   gap: 8px;
 }
 
+.beta-plan-summary {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
 .beta-plan-row {
   display: grid;
   grid-template-columns: minmax(120px, 0.8fr) minmax(320px, 1fr);
@@ -66,6 +72,13 @@
 
 .beta-plan-pill--negative {
   background: #d9534f;
+}
+
+.beta-plan-mode-pill__details {
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.9;
 }
 
 .beta-empty {

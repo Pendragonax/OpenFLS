@@ -58,6 +58,26 @@
               }
             </mat-select>
           </mat-form-field>
+
+          <mat-form-field appearance="outline" class="beta-field">
+            <mat-label>Stundenmodus</mat-label>
+            <mat-select formControlName="hourMode">
+              @for (mode of [AssistancePlanHourMode.EXACT, AssistancePlanHourMode.CORRIDOR]; track mode) {
+                <mat-option [value]="mode">{{ getHourModeLabel(mode) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          @if (isCorridorMode) {
+            <mat-form-field appearance="outline" class="beta-field">
+              <mat-label>Stundenkorridor</mat-label>
+              <mat-select formControlName="hourCorridor" required>
+                @for (corridor of hourCorridors; track corridor.id) {
+                  <mat-option [value]="corridor.id">{{ getHourCorridorLabel(corridor) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
         </form>
 
         <div class="ap-existing-plans">
@@ -85,19 +105,27 @@
 
       <div class="beta-section">
         <div class="beta-section-title">Stundenanteile</div>
-        @if (canAddPlanHours) {
+        @if (isExactMode && canAddPlanHours) {
           <app-assistance-plan-hours-page
             [hours]="createValue.hours"
             [editable]="isHoursSectionActive"
             (hoursChange)="onHoursChange($event)"></app-assistance-plan-hours-page>
         } @else {
-          <div class="ap-section-hint">Stundenanteile können nicht hinzugefügt werden, solange in Zielen Stunden hinterlegt sind.</div>
+          <div class="ap-section-hint">
+            @if (isCorridorMode) {
+              Korridorpläne nutzen den gewählten Stundenkorridor statt eigener Stundenanteile.
+            } @else {
+              Stundenanteile können nicht hinzugefügt werden, solange in Zielen Stunden hinterlegt sind.
+            }
+          </div>
         }
       </div>
 
       <div class="beta-section">
         <div class="beta-section-title">Ziele</div>
-        @if (!canAddGoalHours) {
+        @if (isCorridorMode) {
+          <div class="ap-section-hint">In Korridorplänen werden Zielstunden nicht angeboten.</div>
+        } @else if (!canAddGoalHours) {
           <div class="ap-section-hint">In Zielen können keine Stunden hinzugefügt werden, solange Stundenanteile gesetzt sind.</div>
         }
         <app-assistance-plan-goals

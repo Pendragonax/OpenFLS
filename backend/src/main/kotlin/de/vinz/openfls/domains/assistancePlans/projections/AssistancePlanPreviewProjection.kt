@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.projections
 
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import java.time.LocalDate
 
 interface AssistancePlanPreviewProjection {
@@ -12,6 +13,9 @@ interface AssistancePlanPreviewProjection {
     val clientArchived: Boolean
     val institutionName: String
     val sponsorName: String
+    val hourMode: AssistancePlanHourMode
+    val hourCorridorWeeklyMinutesFrom: Int?
+    val hourCorridorWeeklyMinutesTill: Int?
     val start: LocalDate
     val end: LocalDate
 }

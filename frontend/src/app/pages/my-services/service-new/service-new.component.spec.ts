@@ -1,37 +1,39 @@
 import '@testbed';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { of } from 'rxjs';
-import { ServiceNewComponent } from './service-new.component';
-import { UserService } from '../../../shared/services/user.service';
-import { InstitutionService } from '../../../shared/services/institution.service';
-import { ClientsService } from '../../../shared/services/clients.service';
-import { HourTypeService } from '../../../shared/services/hour-type.service';
-import { CategoriesService } from '../../../shared/services/categories.service';
-import { SponsorService } from '../../../shared/services/sponsor.service';
-import { ServiceService } from '../../../shared/services/service.service';
-import { AssistancePlanService } from '../../../shared/services/assistance-plan.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Converter } from '../../../shared/services/converter.helper';
-import { HelperService } from '../../../shared/services/helper.service';
-import { Location } from '@angular/common';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
+import {of} from 'rxjs';
+import {ServiceNewComponent} from './service-new.component';
+import {UserService} from '../../../shared/services/user.service';
+import {InstitutionService} from '../../../shared/services/institution.service';
+import {ClientsService} from '../../../shared/services/clients.service';
+import {HourTypeService} from '../../../shared/services/hour-type.service';
+import {CategoriesService} from '../../../shared/services/categories.service';
+import {SponsorService} from '../../../shared/services/sponsor.service';
+import {HourCorridorService} from '../../../shared/services/hour-corridor.service';
+import {ServiceService} from '../../../shared/services/service.service';
+import {AssistancePlanService} from '../../../shared/services/assistance-plan.service';
+import {ActivatedRoute, Router} from '@angular/router';
+import {Converter} from '../../../shared/services/converter.helper';
+import {HelperService} from '../../../shared/services/helper.service';
+import {Location} from '@angular/common';
+import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
 
 class MockUserService {
   writeableInstitutions$ = of([1]);
-  user$ = of({ id: 1 });
+  user$ = of({id: 1});
 }
 
 class MockInstitutionService {
-  allValues$ = of([{ id: 1, name: 'Inst' }]);
+  allValues$ = of([{id: 1, name: 'Inst'}]);
 }
 
 class MockClientsService {
-  allValues$ = of([{ id: 1, firstName: 'Max', lastName: 'M' }]);
+  allValues$ = of([{id: 1, firstName: 'Max', lastName: 'M'}]);
   getByIdForServiceEditing() {
     return of({
       id: 1,
       assistancePlans: [],
-      categoryTemplate: { categories: [] }
+      categoryTemplate: {categories: []}
     });
   }
 }
@@ -46,9 +48,13 @@ class MockSponsorService {
   allValues$ = of([]);
 }
 
+class MockHourCorridorService {
+  allValues$ = of([]);
+}
+
 class MockServiceService {
   getClientAndDateServices() {
-    return of({ services: [] });
+    return of({services: []});
   }
   getByAssistancePlan() {
     return of([]);
@@ -82,7 +88,7 @@ class MockServiceService {
 
 class MockAssistancePlanService {
   getEvaluationLeftById() {
-    return of({ hourTypeEvaluation: [] });
+    return of({hourTypeEvaluation: []});
   }
 }
 
@@ -124,23 +130,24 @@ describe('ServiceNewComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ServiceNewComponent],
       providers: [
-        { provide: UserService, useClass: MockUserService },
-        { provide: InstitutionService, useClass: MockInstitutionService },
-        { provide: ClientsService, useClass: MockClientsService },
-        { provide: HourTypeService, useClass: MockHourTypeService },
-        { provide: CategoriesService, useClass: MockCategoriesService },
-        { provide: SponsorService, useClass: MockSponsorService },
-        { provide: ServiceService, useClass: MockServiceService },
-        { provide: AssistancePlanService, useClass: MockAssistancePlanService },
-        { provide: ActivatedRoute, useClass: MockActivatedRoute },
-        { provide: Router, useClass: MockRouter },
-        { provide: Converter, useClass: MockConverter },
-        { provide: HelperService, useClass: MockHelperService },
-        { provide: Location, useClass: MockLocation }
+        {provide: UserService, useClass: MockUserService},
+        {provide: InstitutionService, useClass: MockInstitutionService},
+        {provide: ClientsService, useClass: MockClientsService},
+        {provide: HourTypeService, useClass: MockHourTypeService},
+        {provide: CategoriesService, useClass: MockCategoriesService},
+        {provide: SponsorService, useClass: MockSponsorService},
+        {provide: HourCorridorService, useClass: MockHourCorridorService},
+        {provide: ServiceService, useClass: MockServiceService},
+        {provide: AssistancePlanService, useClass: MockAssistancePlanService},
+        {provide: ActivatedRoute, useClass: MockActivatedRoute},
+        {provide: Router, useClass: MockRouter},
+        {provide: Converter, useClass: MockConverter},
+        {provide: HelperService, useClass: MockHelperService},
+        {provide: Location, useClass: MockLocation}
       ],
       schemas: [NO_ERRORS_SCHEMA]
     })
-      .overrideComponent(ServiceNewComponent, { set: { template: '' } })
+      .overrideComponent(ServiceNewComponent, {set: {template: ''}})
       .compileComponents();
 
     fixture = TestBed.createComponent(ServiceNewComponent);
@@ -160,5 +167,9 @@ describe('ServiceNewComponent', () => {
     component.hourTypeControl.setValue(1);
 
     expect(component.canSave).toBe(false);
+  });
+
+  it('labels corridor plans in the helper', () => {
+    expect(component.getAssistancePlanModeLabel({hourMode: AssistancePlanHourMode.CORRIDOR} as any)).toBe('Korridor ·');
   });
 });

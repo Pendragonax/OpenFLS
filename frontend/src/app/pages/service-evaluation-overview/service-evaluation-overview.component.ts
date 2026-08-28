@@ -30,6 +30,8 @@ import {
   AssistancePlansAnalysisMonthDto
 } from "./dtos/assistance-plans-analysis-month-dto";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ObjectTableRowColors} from '../../shared/components/object-table/object-table.component';
+import {AssistancePlanHourMode} from '../../shared/dtos/assistance-plan-hour-mode.model';
 
 @Component({
     selector: 'app-service-evaluation-overview',
@@ -63,6 +65,8 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   columns: string[] = []
   data: string[][] = []
+  rowColors: Map<number, ObjectTableRowColors> = new Map()
+  rowDescriptions: Map<number, string> = new Map()
   columnFixedWidthFromIndex: number = 0
   boldColumnIndices: number[] = [2]
 
@@ -314,7 +318,19 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   }
 
   private generateTableData(source: OverviewAssistancePlan[]) {
-    const data = source.map(value => {
+    this.rowColors = new Map()
+    this.rowDescriptions = new Map()
+    const data = source.map((value, rowIndex) => {
+      if (value.assistancePlanDto?.hourMode === AssistancePlanHourMode.CORRIDOR) {
+        this.rowColors.set(rowIndex, {
+          fontColor: '#000000',
+          backgroundColor: '#eef6ff'
+        })
+        this.rowDescriptions.set(rowIndex, 'Korridor-Hilfeplan')
+      } else if (value.assistancePlanDto?.id) {
+        this.rowDescriptions.set(rowIndex, 'Exakter Hilfeplan')
+      }
+
       // client name
       let result = [(value.clientDto?.lastName ?? "") + " " + (value.clientDto?.firstName ?? "unbekannt")];
 
@@ -370,6 +386,17 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   private getDataObserverWithoutSeparateHeader() {
     return {
       next: (value: AssistancePlansAnalysisMonthDto) => {
+        this.rowColors = new Map();
+        this.rowDescriptions = new Map();
+        value.assistancePlanAnalysis.forEach((plan, index) => {
+          const rowIndex = index + 1;
+          if (plan.hourMode === AssistancePlanHourMode.CORRIDOR) {
+            this.rowColors.set(rowIndex, {fontColor: '#000000', backgroundColor: '#eef6ff'});
+            this.rowDescriptions.set(rowIndex, 'Korridor-Hilfeplan');
+          } else {
+            this.rowDescriptions.set(rowIndex, 'Exakter Hilfeplan');
+          }
+        });
         let fullData = this.assistancePlanAnalysisService.convertToArray(value)
         let header = fullData[0]
         let data = fullData.slice(1)
