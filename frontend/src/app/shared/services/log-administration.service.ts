@@ -7,6 +7,7 @@ import {LogEntryDto, LogSettingsDto} from '../dtos/log-entry-dto.model';
 import {TokenStorageService} from './token.storage.service';
 
 export interface LogQuery { from?: string; to?: string; query?: string; level?: string; logger?: string; thread?: string; all?: boolean; }
+export interface LogPage { content: LogEntryDto[]; page: number; size: number; totalElements: number; totalPages: number; hasNext: boolean; }
 
 @Injectable({providedIn: 'root'})
 export class LogAdministrationService {
@@ -14,6 +15,9 @@ export class LogAdministrationService {
 
   days(): Observable<string[]> { return this.http.get<string[]>(`${environment.api_url}admin/logs/days`); }
   entries(query: LogQuery): Observable<LogEntryDto[]> { return this.http.get<LogEntryDto[]>(`${environment.api_url}admin/logs`, {params: this.params(query)}); }
+  page(query: LogQuery, page = 0, size = 100): Observable<LogPage> {
+    return this.http.get<LogPage>(`${environment.api_url}admin/logs/page`, {params: this.params({...query, page, size})});
+  }
   settings(): Observable<LogSettingsDto> { return this.http.get<LogSettingsDto>(`${environment.api_url}admin/logs/settings`); }
   setLevel(logger: string, level: string | null): Observable<LogSettingsDto> { return this.http.patch<LogSettingsDto>(`${environment.api_url}admin/logs/settings`, {logger, level}); }
   resetLevel(logger: string): Observable<LogSettingsDto> { return this.http.delete<LogSettingsDto>(`${environment.api_url}admin/logs/settings/${encodeURIComponent(logger)}`); }
@@ -51,7 +55,7 @@ export class LogAdministrationService {
     return apiUrl.toString();
   }
 
-  private params(query: LogQuery): HttpParams {
+  private params(query: LogQuery & {page?: number; size?: number}): HttpParams {
     return Object.entries(query).reduce((params, [key, value]) => value === undefined || value === '' ? params : params.set(key, String(value)), new HttpParams());
   }
 }

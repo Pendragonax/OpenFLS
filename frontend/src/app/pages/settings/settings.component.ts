@@ -13,6 +13,10 @@ import {DateCompleteSelectionComponent} from '../../shared/components/date-compl
 export class SettingsComponent implements OnInit, OnDestroy {
   readonly levels = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
   entries: LogEntryDto[] = [];
+  page = 0;
+  pageSize = 100;
+  totalEntries = 0;
+  hasNextPage = false;
   days: string[] = [];
   settings: LogSettingsDto | null = null;
   mobileTab: 'filter' | 'live' | 'levels' = 'filter';
@@ -25,7 +29,22 @@ export class SettingsComponent implements OnInit, OnDestroy {
   constructor(private logs: LogAdministrationService, private modal: NgbModal, private dialog: MatDialog) {}
   ngOnInit(): void { this.load(); this.liveSubscription = this.logs.liveEntries().subscribe(entry => this.addLiveEntry(entry)); }
   ngOnDestroy(): void { this.liveSubscription?.unsubscribe(); }
-  load(): void { this.logs.days().subscribe(days => this.days = days); this.logs.entries(this.query()).subscribe(entries => this.entries = entries); this.logs.settings().subscribe(settings => this.settings = settings); }
+  load(): void {
+    this.page = 0;
+    this.logs.days().subscribe(days => this.days = days);
+    this.loadPage();
+    this.logs.settings().subscribe(settings => this.settings = settings);
+  }
+  loadPage(): void {
+    this.logs.page(this.query(), this.page, this.pageSize).subscribe(result => {
+      this.entries = result.content;
+      this.totalEntries = result.totalElements;
+      this.hasNextPage = result.hasNext;
+    });
+  }
+  previousPage(): void { if (this.page > 0) { this.page--; this.loadPage(); } }
+  nextPage(): void { if (this.hasNextPage) { this.page++; this.loadPage(); } }
+  totalPages(): number { return Math.max(1, Math.ceil(this.totalEntries / this.pageSize)); }
   resetFilters(): void { const today = new Date(); this.filter.reset({from: today, to: today, query: '', level: '', logger: '', thread: '', all: false}); this.dateSelection?.setRange(today, today); this.load(); }
   onDateChanged(value: {start: Date; end: Date}): void { this.filter.patchValue({from: value.start, to: value.end}); }
   setGlobalLevel(level: string): void { this.logs.setLevel('ROOT', level).subscribe(settings => this.settings = settings); }
@@ -40,10 +59,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
   levelClass(level: string): string { return `log-${level.toLowerCase()}`; }
   isNew(entry: LogEntryDto): boolean { return this.newEntryKeys.has(this.entryKey(entry)); }
   private addLiveEntry(entry: LogEntryDto): void {
+    if (this.page !== 0) return;
     if (!this.matches(entry)) return;
     const key = this.entryKey(entry);
     this.newEntryKeys.add(key);
     this.entries = [entry, ...this.entries].slice(0, 5000);
+    this.totalEntries++;
     window.setTimeout(() => this.newEntryKeys.delete(key), 1250);
   }
   private matches(entry: LogEntryDto): boolean {

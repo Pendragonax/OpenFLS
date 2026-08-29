@@ -4,13 +4,15 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import de.vinz.openfls.domains.logging.dto.LogEntryDto
 import de.vinz.openfls.domains.logging.dto.LogLevelDto
+import de.vinz.openfls.domains.logging.dto.LogPageDto
 import de.vinz.openfls.domains.logging.dto.LogQueryDto
 import de.vinz.openfls.domains.logging.dto.LogSettingsDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import jakarta.annotation.PostConstruct
-import java.io.ByteArrayOutputStream
+import java.io.BufferedReader
+import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -19,7 +21,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import kotlin.io.path.name
 
 @Service
 class LogAdministrationService(
@@ -45,11 +46,29 @@ class LogAdministrationService(
     }
 
     fun entries(query: LogQueryDto): List<LogEntryDto> {
-        val days = selectedDays(query)
-        return days.flatMap { parse(logPath().resolve("open-fls-backend.$it.log")) }
-            .filter { matches(it, query) }
-            .sortedByDescending { it.timestamp }
-            .take(5_000)
+        return page(query, 0, 5_000).content
+    }
+
+    fun page(query: LogQueryDto, page: Int, size: Int): LogPageDto {
+        val safePage = page.coerceAtLeast(0)
+        // Keep the legacy non-paginated endpoint capped at 5,000 while the
+        // paginated UI normally requests a much smaller page.
+        val safeSize = size.coerceIn(1, 5_000)
+        val offset = safePage.toLong() * safeSize
+        val retained = java.util.PriorityQueue<LogEntryDto>(compareBy { it.timestamp })
+        var total = 0L
+        selectedDays(query).forEach { day ->
+            streamEntries(logPath().resolve("open-fls-backend.$day.log")) { entry ->
+                if (!matches(entry, query)) return@streamEntries
+                total++
+                retained.add(entry)
+                while (retained.size > offset + safeSize) retained.poll()
+            }
+        }
+        val content = retained.toList().sortedByDescending { it.timestamp }
+            .drop(offset.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()).take(safeSize)
+        val totalPages = if (total == 0L) 0 else ((total + safeSize - 1) / safeSize).toInt()
+        return LogPageDto(content, safePage, safeSize, total, totalPages, (safePage + 1) < totalPages)
     }
 
     fun deleteFrom(from: Instant?) {
@@ -72,15 +91,21 @@ class LogAdministrationService(
         }
     }
 
-    fun export(query: LogQueryDto): ByteArray = ByteArrayOutputStream().use { bytes ->
-        ZipOutputStream(bytes).use { zip ->
-            entries(query).groupBy { it.timestamp.substring(0, 10) }.forEach { (day, entries) ->
+    fun streamExport(query: LogQueryDto, output: OutputStream) {
+        ZipOutputStream(output).use { zip ->
+            selectedDays(query).sorted().forEach { day ->
+                val path = logPath().resolve("open-fls-backend.$day.log")
+                if (!Files.exists(path)) return@forEach
                 zip.putNextEntry(ZipEntry("open-fls-backend.$day.log"))
-                zip.write(entries.sortedBy { it.timestamp }.joinToString("\n") { format(it) }.toByteArray(StandardCharsets.UTF_8))
+                streamEntries(path) { entry ->
+                    if (matches(entry, query)) {
+                        zip.write(format(entry).toByteArray(StandardCharsets.UTF_8))
+                        zip.write('\n'.code)
+                    }
+                }
                 zip.closeEntry()
             }
         }
-        bytes.toByteArray()
     }
 
     fun settings(): LogSettingsDto {
@@ -118,15 +143,24 @@ class LogAdministrationService(
 
     private fun parse(path: Path): List<LogEntryDto> {
         if (!Files.exists(path)) return emptyList()
-        val result = mutableListOf<LogEntryDto>(); var current: LogEntryDto? = null
-        Files.readAllLines(path).forEach { line ->
+        val result = mutableListOf<LogEntryDto>()
+        streamEntries(path) { result.add(it) }
+        return result
+    }
+
+    private fun streamEntries(path: Path, consumer: (LogEntryDto) -> Unit) {
+        if (!Files.exists(path)) return
+        var current: LogEntryDto? = null
+        Files.newBufferedReader(path, StandardCharsets.UTF_8).use { reader ->
+            reader.forEachLine { line ->
             val match = entryStart.matchEntire(line)
             if (match != null) {
-                current?.let(result::add)
+                current?.let(consumer)
                 current = LogEntryDto(Instant.parse(match.groupValues[1].replace(Regex("([+-]\\d{2})(\\d{2})$"), "$1:$2")).toString(), match.groupValues[3], match.groupValues[4], match.groupValues[2], match.groupValues[5])
             } else if (current != null) current = current!!.copy(message = current!!.message + "\n" + line)
+            }
         }
-        current?.let(result::add); return result
+        current?.let(consumer)
     }
 
     private fun matches(entry: LogEntryDto, query: LogQueryDto) = listOfNotNull(query.query?.let { entry.message.contains(it, true) || entry.logger.contains(it, true) }, query.level?.let { entry.level.equals(it, true) }, query.logger?.let { entry.logger.contains(it, true) }, query.thread?.let { entry.thread.contains(it, true) }).all { it }

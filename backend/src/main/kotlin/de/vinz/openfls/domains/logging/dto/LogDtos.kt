@@ -21,3 +21,12 @@ data class LogQueryDto(
     val thread: String? = null,
     val all: Boolean = false
 )
+
+data class LogPageDto(
+    val content: List<LogEntryDto>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+    val hasNext: Boolean
+)

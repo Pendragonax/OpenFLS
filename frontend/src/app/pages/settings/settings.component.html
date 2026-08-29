@@ -31,6 +31,11 @@
         <div *ngFor="let entry of entries" class="log-entry" [ngClass]="levelClass(entry.level)" [class.log-entry--new]="isNew(entry)"><time>{{entry.timestamp | date:'dd.MM.yyyy HH:mm:ss.SSS'}}</time><strong>{{entry.level}}</strong><span class="thread">{{entry.thread}}</span><div class="log-message"><code>{{entry.logger}}</code><pre>{{entry.message}}</pre></div><button mat-icon-button color="warn" matTooltip="Diesen und ältere Einträge löschen" (click)="deleteFrom(entry)"><mat-icon>delete_sweep</mat-icon></button></div>
         <p *ngIf="entries.length === 0" class="empty-state">Keine Einträge für die Auswahl.</p>
       </div>
+      <footer class="log-pagination" *ngIf="totalEntries > pageSize">
+        <button mat-stroked-button type="button" (click)="previousPage()" [disabled]="page === 0">Zurück</button>
+        <span>Seite {{page + 1}} von {{totalPages()}} ({{totalEntries}} Einträge)</span>
+        <button mat-stroked-button type="button" (click)="nextPage()" [disabled]="!hasNextPage">Weiter</button>
+      </footer>
     </section>
 
     <aside class="level-panel panel-surface" aria-label="Log-Level konfigurieren">
