@@ -56,7 +56,7 @@ class InstitutionServiceTest {
             permissions = permissions
         )
         val savedEntity = Institution.of(dto).apply { id = 5L }
-        whenever(institutionRepository.save(any())).thenReturn(savedEntity)
+        whenever(institutionRepository.save(any<Institution>())).thenReturn(savedEntity)
 
         // When
         val result = institutionService.create(dto)
@@ -109,7 +109,7 @@ class InstitutionServiceTest {
             )
         )
         whenever(institutionRepository.findById(10L)).thenReturn(Optional.of(entity))
-        whenever(institutionRepository.save(any())).thenAnswer { it.arguments[0] as Institution }
+        whenever(institutionRepository.save(any<Institution>())).thenAnswer { it.arguments[0] as Institution }
 
         // When
         val result = institutionService.update(dto)
