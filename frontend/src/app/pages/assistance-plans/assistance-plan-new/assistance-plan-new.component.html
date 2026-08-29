@@ -72,8 +72,20 @@
             <mat-form-field appearance="outline" class="beta-field">
               <mat-label>Stundenkorridor</mat-label>
               <mat-select formControlName="hourCorridor" required>
+                <mat-select-trigger>
+                  @if (getSelectedHourCorridor(); as corridor) {
+                    <span class="ap-corridor-trigger-title">{{ corridor.title }}</span>
+                    <span class="ap-corridor-trigger-time">{{ getHourModeRange(corridor.id) }}</span>
+                  }
+                </mat-select-trigger>
                 @for (corridor of hourCorridors; track corridor.id) {
-                  <mat-option [value]="corridor.id">{{ getHourCorridorLabel(corridor) }}</mat-option>
+                  <mat-option [value]="corridor.id">
+                    <div class="ap-corridor-option">
+                      <span class="ap-corridor-option-title">{{ corridor.title }}</span>
+                      <span class="ap-corridor-option-time"><mat-icon>schedule</mat-icon>{{ getHourModeRange(corridor.id) }}</span>
+                      <span class="ap-corridor-option-type">{{ corridor.hourTypeTitle }}</span>
+                    </div>
+                  </mat-option>
                 }
               </mat-select>
             </mat-form-field>

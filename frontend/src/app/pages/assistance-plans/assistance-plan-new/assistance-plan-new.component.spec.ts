@@ -3,6 +3,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {AssistancePlanNewPageComponent} from './assistance-plan-new.component';
 import {AssistancePlanExistingDto} from '../../../shared/dtos/assistance-plan-existing-dto.model';
 import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
+import {HourCorridorDto} from '../../../shared/dtos/hour-corridor-dto.model';
 
 describe('AssistancePlanNewPageComponent', () => {
   function createComponent(existingPlans: AssistancePlanExistingDto[]) {
@@ -52,5 +53,14 @@ describe('AssistancePlanNewPageComponent', () => {
     expect(component.createValue.hourMode).toBe(AssistancePlanHourMode.CORRIDOR);
     expect(component.createValue.hours).toEqual([]);
     expect(component.createValue.goals.every(goal => goal.hours.length === 0)).toBe(true);
+  });
+
+  it('formats corridor minutes as hours and minutes with a unit', () => {
+    const {component} = createComponent([]);
+    const corridor = new HourCorridorDto({
+      title: 'Korridor', weeklyMinutesFrom: 6, weeklyMinutesTill: 481, hourTypeTitle: 'Fachleistung'
+    });
+
+    expect(component.getHourCorridorLabel(corridor)).toBe('Korridor · 0:06 h - 8:01 h · Fachleistung');
   });
 });
