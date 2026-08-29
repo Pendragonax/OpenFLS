@@ -1,6 +1,9 @@
 package de.vinz.openfls.domains.services.dtos
 
 import de.vinz.openfls.domains.services.projections.ServiceProjection
+import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
+import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
+import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import java.time.LocalDateTime
 
 data class ServiceProjectionDto(
@@ -24,9 +27,12 @@ data class ServiceProjectionDto(
         fun from(source: ServiceProjection) = ServiceProjectionDto(
             source.id, source.start, source.end, source.minutes, source.title, source.content,
             source.groupService, source.archivedService,
-            InstitutionDto(source.institution.id, source.institution.name, source.institution.email, source.institution.phonenumber),
-            EmployeeDto(source.employee.id, source.employee.firstname, source.employee.lastname, source.employee.email, source.employee.phonenumber, source.employee.description, source.employee.archived),
-            ClientDto(source.client.id, source.client.firstName, source.client.lastName, source.client.phoneNumber, source.client.email, source.client.archived)
+            (source.institution as InstitutionSoloProjection?)?.let { InstitutionDto(it.id, it.name, it.email, it.phonenumber) }
+                ?: InstitutionDto(0, "", "", ""),
+            (source.employee as EmployeeSoloProjection?)?.let { EmployeeDto(it.id, it.firstname, it.lastname, it.email, it.phonenumber, it.description, it.archived) }
+                ?: EmployeeDto(0, "", "", "", "", "", false),
+            (source.client as ClientSoloProjection?)?.let { ClientDto(it.id, it.firstName, it.lastName, it.phoneNumber, it.email, it.archived) }
+                ?: ClientDto(0, "", "", "", "", false)
         )
     }
 }

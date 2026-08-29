@@ -362,7 +362,7 @@ class ServiceController(
             val userId = accessService.getId()
             val isAdmin = accessService.isAdmin()
 
-            val dtos = serviceService.getByEmployeeAndStartAndEnd(id, start, end)
+            val dtos = serviceService.getProjectionDtosByEmployeeAndStartAndEnd(id, start, end)
                     .filter { isAdmin || it.employee.id == userId || leadingInstitutionIds.contains(it.institution.id) }
                     .sortedBy { it.start }
 

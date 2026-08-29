@@ -198,7 +198,11 @@ class ServiceService(
             .map { modelMapper.map(it, ServiceDto::class.java) }
     }
 
-    fun getByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<ServiceProjectionDto> {
+    fun getByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<ServiceProjection> {
+        return serviceRepository.findByEmployeeAndStartAndEnd(employeeId, start, end)
+    }
+
+    fun getProjectionDtosByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<ServiceProjectionDto> {
         return serviceRepository.findByEmployeeAndStartAndEnd(employeeId, start, end).map(ServiceProjectionDto::from)
     }
 
