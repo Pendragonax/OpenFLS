@@ -1,17 +1,6 @@
 <div class="logs-workspace" [class.mobile-tab-filter]="mobileTab === 'filter'" [class.mobile-tab-live]="mobileTab === 'live'" [class.mobile-tab-levels]="mobileTab === 'levels'">
   <header class="settings-toolbar">
     <h1>Einstellungen &gt; Protokolle</h1>
-    <section class="filter-panel" aria-label="Protokoll filtern">
-      <form [formGroup]="filter" class="filters" (ngSubmit)="load()">
-        <app-date-complete-selection class="date-range-filter" [start]="filter.value.from" [end]="filter.value.to" (dateChanged)="onDateChanged($event)"></app-date-complete-selection>
-        <mat-form-field appearance="outline"><mat-label>Freitext</mat-label><input matInput formControlName="query"></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Klasse</mat-label><input matInput formControlName="logger"></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Thread</mat-label><input matInput formControlName="thread"></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Log-Level</mat-label><mat-select formControlName="level"><mat-option value="">Alle</mat-option><mat-option *ngFor="let level of levels" [value]="level">{{level}}</mat-option></mat-select></mat-form-field>
-        <mat-checkbox class="all-days" formControlName="all">Alle Tage</mat-checkbox>
-        <div class="filter-actions"><button mat-raised-button color="primary" type="submit"><mat-icon>filter_alt</mat-icon> Filtern</button><button mat-stroked-button type="button" (click)="resetFilters()"><mat-icon>restart_alt</mat-icon> Zurücksetzen</button><button mat-stroked-button type="button" (click)="export()"><mat-icon>download</mat-icon> ZIP exportieren</button></div>
-      </form>
-    </section>
   </header>
 
   <nav class="mobile-log-tabs" aria-label="Ansicht wählen">
@@ -26,6 +15,16 @@
         <div><h2>Live-Protokoll</h2><p><span class="live-indicator"></span>Aktualisiert sich automatisch</p></div>
         <div class="live-actions"><span class="entry-count">{{entries.length}} Einträge</span><button mat-stroked-button color="warn" type="button" (click)="deleteAll()"><mat-icon>delete_forever</mat-icon><span>Alle Logs löschen</span></button></div>
       </header>
+      <section class="filter-panel" aria-label="Protokoll filtern">
+        <form [formGroup]="filter" class="filters" (ngSubmit)="load()">
+          <app-date-complete-selection class="date-range-filter" [start]="filter.value.from" [end]="filter.value.to" (dateChanged)="onDateChanged($event)"></app-date-complete-selection>
+          <mat-form-field appearance="outline"><mat-label>Freitext</mat-label><input matInput formControlName="query"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Klasse</mat-label><input matInput formControlName="logger"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Thread</mat-label><input matInput formControlName="thread"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Log-Level</mat-label><mat-select formControlName="level"><mat-option value="">Alle</mat-option><mat-option *ngFor="let level of levels" [value]="level">{{level}}</mat-option></mat-select></mat-form-field>
+          <div class="toolbar-secondary"><mat-checkbox class="all-days" formControlName="all">Alle Tage</mat-checkbox><div class="filter-actions"><button mat-raised-button color="primary" type="submit" matTooltip="Filter anwenden"><mat-icon>filter_alt</mat-icon><span>Filtern</span></button><button mat-stroked-button type="button" (click)="resetFilters()" matTooltip="Filter zurücksetzen"><mat-icon>restart_alt</mat-icon><span>Zurücksetzen</span></button><button mat-stroked-button type="button" (click)="export()" matTooltip="Als ZIP exportieren"><mat-icon>download</mat-icon><span>ZIP exportieren</span></button></div></div>
+        </form>
+      </section>
       <div class="log-notice"><span>Neue Einträge stehen oben und werden kurz hervorgehoben.</span><span><mat-icon>info</mat-icon> „Alle Tage“ nur für eine gezielte Suche aktivieren. Verfügbare Tage: {{ days.join(', ') || 'keine' }}.</span></div>
       <div class="log-list">
         <div class="log-table-head"><span>Zeitpunkt</span><span>Level</span><span>Thread</span><span>Klasse / Nachricht</span><span></span></div>

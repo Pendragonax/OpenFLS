@@ -11,13 +11,13 @@
   <mat-hint class="fw-light">Tag.Monat.Jahr – Tag.Monat.Jahr</mat-hint>
   <mat-date-range-picker #picker (closed)="setStartAndEnd(rangeStart, rangeEnd)"></mat-date-range-picker>
   <span matPrefix class="date-prefix-desktop">
-    <button class="my-auto ms-1"
+    <button type="button" class="my-auto ms-1"
             mat-icon-button
             [disabled]="disabled"
             (click)="decreaseDate(1)">
       <mat-icon>keyboard_arrow_left</mat-icon>
     </button>
-    <button mat-icon-button
+    <button type="button" mat-icon-button
             [matTooltip]="'heute'"
             [disabled]="disabled"
             (click)="setDateToToday($event)">
@@ -25,7 +25,7 @@
     </button>
   </span>
   <span matSuffix class="date-suffix-desktop">
-    <button class="my-auto me-1"
+    <button type="button" class="my-auto me-1"
             mat-icon-button
             [disabled]="disabled"
             (click)="increaseDate(1)">
@@ -34,13 +34,13 @@
   </span>
   <span matPrefix class="date-prefix-mobile">
     <span class="date-prefix-row">
-      <button class="my-auto ms-1"
+      <button type="button" class="my-auto ms-1"
               mat-icon-button
               [disabled]="disabled"
               (click)="decreaseDate(1)">
         <mat-icon>keyboard_arrow_left</mat-icon>
       </button>
-      <button class="my-auto me-1"
+      <button type="button" class="my-auto me-1"
               mat-icon-button
               [disabled]="disabled"
               (click)="increaseDate(1)">
@@ -48,7 +48,7 @@
       </button>
     </span>
     <span class="date-prefix-row">
-      <button mat-icon-button
+      <button type="button" mat-icon-button
               [matTooltip]="'heute'"
               [disabled]="disabled"
               (click)="setDateToToday($event)">
