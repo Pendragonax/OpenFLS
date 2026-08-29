@@ -36,7 +36,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity)
+            ResponseEntity.ok(PermissionDto.of(entity))
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -60,7 +60,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity)
+            ResponseEntity.ok(PermissionDto.of(entity))
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -108,7 +108,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entities)
+            ResponseEntity.ok(entities.map(PermissionDto::of))
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -133,7 +133,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity)
+            ResponseEntity.ok(entity?.let(PermissionDto::of))
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -157,7 +157,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity)
+            ResponseEntity.ok(entity.map(PermissionDto::of))
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -181,7 +181,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity)
+            ResponseEntity.ok(entity.map(PermissionDto::of))
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 

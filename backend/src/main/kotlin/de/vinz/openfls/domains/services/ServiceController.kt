@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.PermissionService
 import de.vinz.openfls.domains.services.dtos.ServiceDto
+import de.vinz.openfls.domains.services.dtos.ServiceProjectionDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
 import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
@@ -236,7 +237,7 @@ class ServiceController(
             if (!accessService.canModifyAssistancePlan(id))
                 throw IllegalArgumentException("no permission to load the services of this assistance plan")
 
-            val dtos = serviceService.getIllegalByAssistancePlan(id)
+            val dtos = serviceService.getIllegalByAssistancePlan(id).map(ServiceProjectionDto::from)
 
             if (logPerformance) {
                 logger.info(String.format("%s getIllegalByAssistancePlan took %s ms and found %d entities",
@@ -269,7 +270,7 @@ class ServiceController(
             if (!accessService.canModifyAssistancePlan(id))
                 throw IllegalArgumentException("no permission to load the services of this assistance plan")
 
-            val dtos = serviceService.getByAssistancePlanAndNotBetweenStartAndEnd(id, start, end)
+            val dtos = serviceService.getByAssistancePlanAndNotBetweenStartAndEnd(id, start, end).map(ServiceProjectionDto::from)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByAssistancePlanAndStartAndEnd took %s ms and found %d entities",
@@ -298,7 +299,7 @@ class ServiceController(
                 throw IllegalArgumentException("No permission to load the illegal services of this employee")
             }
 
-            val dtos = serviceService.getIllegalByEmployee(id)
+            val dtos = serviceService.getIllegalByEmployee(id).map(ServiceProjectionDto::from)
 
             if (logPerformance) {
                 logger.info(String.format("%s getIllegalByEmployee took %s ms and found %d entities",
@@ -364,6 +365,7 @@ class ServiceController(
             val dtos = serviceService.getByEmployeeAndStartAndEnd(id, start, end)
                     .filter { isAdmin || it.employee.id == userId || leadingInstitutionIds.contains(it.institution.id) }
                     .sortedBy { it.start }
+                    .map(ServiceProjectionDto::from)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByEmployeeAndStartAndEnd took %s ms and found %d entities",
@@ -395,6 +397,7 @@ class ServiceController(
             }
 
             val dtos = serviceService.getDtosByInstitutionIdAndStartAndEnd(id, start, end)
+                    .map(ServiceProjectionDto::from)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByInstitutionIdAndStartAndEnd took %s ms and found %d entities",
@@ -453,7 +456,7 @@ class ServiceController(
                 throw IllegalArgumentException("no permission to load the services of this institution")
             }
 
-            val dtos = serviceService.getIllegalByInstitutionId(id)
+            val dtos = serviceService.getIllegalByInstitutionId(id).map(ServiceProjectionDto::from)
 
             if (logPerformance) {
                 logger.info(String.format("%s getIllegalByInstitutionId took %s ms and found %d entities",
@@ -549,7 +552,7 @@ class ServiceController(
             }
 
             val readableInstitutions = accessService.getReadRightsInstitutionIds();
-            val dtos = serviceService.getProjections(institutionId, clientId, start, end, readableInstitutions)
+            val dtos = serviceService.getProjections(institutionId, clientId, start, end, readableInstitutions).map(ServiceProjectionDto::from)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByInstitutionIdAndClientIdAndStartAndEnd took %s ms and found %d entities",
@@ -589,7 +592,7 @@ class ServiceController(
                 throw ServicePermissionDeniedException()
 
             val readableInstitutions = accessService.getReadRightsInstitutionIds();
-            val dtos = serviceService.getProjections(institutionId, employeeId, clientId, start, end, readableInstitutions)
+            val dtos = serviceService.getProjections(institutionId, employeeId, clientId, start, end, readableInstitutions).map(ServiceProjectionDto::from)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByInstitutionIdAndEmployeeIdAndClientIdAndStartAndEnd took %s ms and found %d entities",
