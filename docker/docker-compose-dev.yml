@@ -1,7 +1,7 @@
 services:
   db:
     container_name: open_fls_db
-    image: mysql:8.4.0
+    image: mysql:8.4.11
     restart: always
     env_file: docker-compose.env
     volumes:
