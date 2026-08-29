@@ -9,10 +9,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
@@ -22,20 +22,17 @@ jobs:
         working-directory: backend
         run: |
           chmod +x gradlew
-          ./gradlew clean test
-
-      - name: Run backend build
-        working-directory: backend
-        run: |
-          chmod +x gradlew
-          ./gradlew assemble
+          ./gradlew clean build
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
+      - name: Pin npm 10
+        run: npm install --global npm@10.9.2
 
       - name: Run frontend tests
         working-directory: frontend
@@ -62,7 +59,7 @@ jobs:
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push prod backend image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: backend
           file: backend/Dockerfile
@@ -73,7 +70,7 @@ jobs:
             ghcr.io/pendragonax/openfls-backend:${{ steps.vars.outputs.version }}
 
       - name: Build and push prod frontend image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: frontend
           file: frontend/Dockerfile

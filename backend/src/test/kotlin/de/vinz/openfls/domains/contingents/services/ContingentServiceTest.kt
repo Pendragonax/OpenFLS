@@ -79,7 +79,7 @@ class ContingentServiceTest {
         )
         whenever(employeeService.getById(dto.employeeId)).thenReturn(employee)
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
-        whenever(contingentRepository.save(any())).thenReturn(saved)
+        whenever(contingentRepository.save(any<Contingent>())).thenReturn(saved)
 
         // When
         val result = contingentService.create(dto)
@@ -177,7 +177,7 @@ class ContingentServiceTest {
         whenever(contingentRepository.existsById(dto.id)).thenReturn(true)
         whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId))
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(Institution(id = dto.institutionId))
-        whenever(contingentRepository.save(any())).thenReturn(saved)
+        whenever(contingentRepository.save(any<Contingent>())).thenReturn(saved)
 
         // When
         val result = contingentService.update(dto)

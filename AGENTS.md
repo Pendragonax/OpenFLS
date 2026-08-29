@@ -222,6 +222,13 @@ Die vorhandenen Compose-Dateien haben folgende Bedeutung:
 4. Die passenden Tests ausführen und Ergebnis sowie Restrisiken dokumentieren.
 5. Bei Backend- oder Laufzeitänderungen die betroffenen Docker-Scopes prüfen.
 
+### Verbindliche Backend-Prüfung
+
+Nach jeder Änderung am Backend ist zusätzlich zu gezielten Tests immer ein
+vollständiger `./gradlew clean build` im Verzeichnis `backend/` auszuführen.
+Die Arbeit gilt erst als geprüft, wenn dieser Clean-Build ohne Fehler
+durchläuft; verbleibende Warnungen werden in der Übergabe dokumentiert.
+
 ## Dokumentation und Entscheidungen
 
 - Architekturentscheidungen, fachliche Annahmen, Migrationshinweise und bewusst

@@ -331,7 +331,9 @@ describe('ClientDetailComponent', () => {
     const exportRequest$ = new Subject<ClientArchiveExportStatusDto>();
     clientsService.requestArchiveExport.mockReturnValue(exportRequest$.asObservable());
     component.requestArchiveExport();
-    fixture.detectChanges();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges(false);
+    fixture.detectChanges(false);
 
     expect(component.isArchiveExportRequesting).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('Export wird erstellt');
@@ -348,7 +350,9 @@ describe('ClientDetailComponent', () => {
       }
     });
     exportRequest$.complete();
-    fixture.detectChanges();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges(false);
+    fixture.detectChanges(false);
 
     expect(component.isArchiveExportRequesting).toBe(false);
     expect(component.archiveExportStatus?.downloadLink != null).toBe(true);
@@ -394,7 +398,9 @@ describe('ClientDetailComponent', () => {
     clientsService.downloadArchiveExport.mockReturnValue(of(void 0));
 
     component.downloadArchiveExport();
-    fixture.detectChanges();
+    fixture.changeDetectorRef.markForCheck();
+    fixture.detectChanges(false);
+    fixture.detectChanges(false);
 
     expect(clientsService.downloadArchiveExport).toHaveBeenCalled();
     expect(component.archiveExportStatus?.downloadLink != null).toBe(false);

@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.PermissionService
 import de.vinz.openfls.domains.services.dtos.ServiceDto
+import de.vinz.openfls.domains.services.dtos.ServiceProjectionDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
 import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
@@ -361,7 +362,7 @@ class ServiceController(
             val userId = accessService.getId()
             val isAdmin = accessService.isAdmin()
 
-            val dtos = serviceService.getByEmployeeAndStartAndEnd(id, start, end)
+            val dtos = serviceService.getProjectionDtosByEmployeeAndStartAndEnd(id, start, end)
                     .filter { isAdmin || it.employee.id == userId || leadingInstitutionIds.contains(it.institution.id) }
                     .sortedBy { it.start }
 

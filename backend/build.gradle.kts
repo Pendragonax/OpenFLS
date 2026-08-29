@@ -2,12 +2,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.springframework.boot") version "3.5.10"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "3.5.16"
+    id("io.spring.dependency-management") version "1.1.7"
     jacoco
-    kotlin("jvm") version "2.3.0"
-    kotlin("plugin.spring") version "2.3.0"
-    kotlin("plugin.jpa") version "2.3.0"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.spring") version "2.3.21"
+    kotlin("plugin.jpa") version "2.3.21"
 }
 
 group = "de.vinz"
@@ -24,11 +24,11 @@ repositories {
     mavenCentral()
 }
 
-val flywayVersion = "11.20.3"
-val modelMapperVersion = "3.1.0"
-val mysqlConnectorVersion = "9.0.0"
-val commonsCsvVersion = "1.10.0"
-val mockitoKotlinVersion = "5.4.0"
+val flywayVersion = "13.4.0"
+val modelMapperVersion = "3.2.6"
+val mysqlConnectorVersion = "26.7.0"
+val commonsCsvVersion = "1.14.1"
+val mockitoKotlinVersion = "6.3.0"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

@@ -27,7 +27,7 @@ class CsvService {
                     .builder()
                     .setHeader(*header)
                     .setDelimiter(";")
-                    .build()
+                    .get()
             try {
                 val out = ByteArrayOutputStream()
                 val printer = CSVPrinter(PrintWriter(out), csvFormat)
