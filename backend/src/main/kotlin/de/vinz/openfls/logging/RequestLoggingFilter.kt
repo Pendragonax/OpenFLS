@@ -3,6 +3,7 @@ package de.vinz.openfls.logging
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -28,7 +29,7 @@ class RequestLoggingFilter : OncePerRequestFilter() {
             filterChain.doFilter(request, response)
         } catch (ex: Exception) {
             requestFailed = true
-            StructuredLog.error(org.slf4j.LoggerFactory.getLogger(RequestLoggingFilter::class.java), "http.request.failed", ex)
+            StructuredLog.error(LoggerFactory.getLogger(RequestLoggingFilter::class.java), "http.request.failed", ex)
             throw ex
         } finally {
             val method = request.method

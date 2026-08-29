@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.employees
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.employees.archive.EmployeeArchiveActionRequest
 import de.vinz.openfls.domains.employees.archive.EmployeeArchiveActor
@@ -49,13 +50,13 @@ class EmployeeArchiveController(
                 )
             )
         } catch (ex: UserNotAllowedException) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.FORBIDDEN)
         } catch (ex: EmployeeArchiveStateException) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.CONFLICT)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.BAD_REQUEST)
         }
     }
@@ -76,13 +77,13 @@ class EmployeeArchiveController(
                 )
             )
         } catch (ex: UserNotAllowedException) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.FORBIDDEN)
         } catch (ex: EmployeeArchiveStateException) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.CONFLICT)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.BAD_REQUEST)
         }
     }

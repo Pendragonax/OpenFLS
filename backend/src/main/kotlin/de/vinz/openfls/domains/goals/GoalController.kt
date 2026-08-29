@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.goals
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.goals.dtos.GoalDto
 import de.vinz.openfls.domains.goals.services.GoalService
@@ -45,7 +46,7 @@ class GoalController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -79,7 +80,7 @@ class GoalController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -110,7 +111,7 @@ class GoalController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -135,7 +136,7 @@ class GoalController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,

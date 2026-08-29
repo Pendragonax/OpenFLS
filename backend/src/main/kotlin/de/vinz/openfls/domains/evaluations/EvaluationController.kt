@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.evaluations
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.evaluations.dtos.EvaluationRequestDto
 import de.vinz.openfls.domains.permissions.AccessService
@@ -47,7 +48,7 @@ class EvaluationController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.localizedMessage,
@@ -74,7 +75,7 @@ class EvaluationController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.localizedMessage,
@@ -98,7 +99,7 @@ class EvaluationController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.localizedMessage,
@@ -122,7 +123,7 @@ class EvaluationController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -146,7 +147,7 @@ class EvaluationController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -171,7 +172,7 @@ class EvaluationController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -197,7 +198,7 @@ class EvaluationController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,

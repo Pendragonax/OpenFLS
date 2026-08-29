@@ -8,10 +8,10 @@ import de.vinz.openfls.domains.logging.dto.LogPageDto
 import de.vinz.openfls.domains.logging.dto.LogQueryDto
 import de.vinz.openfls.domains.logging.dto.LogSettingsDto
 import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import jakarta.annotation.PostConstruct
-import java.io.BufferedReader
 import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -21,10 +21,11 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import java.util.PriorityQueue
 
 @Service
 class LogAdministrationService(
-    @Value("\${openfls.logging.directory:./logs}") private val logDirectory: String
+    @param:Value("\${openfls.logging.directory:./logs}") private val logDirectory: String
 ) {
     private var startupRootLevel: Level = Level.INFO
     private var startupClassLevels: Map<String, Level?> = emptyMap()
@@ -34,8 +35,8 @@ class LogAdministrationService(
     @PostConstruct
     fun captureStartupLevels() {
         val context = LoggerFactory.getILoggerFactory() as LoggerContext
-        startupRootLevel = context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).level ?: Level.INFO
-        startupClassLevels = context.loggerList.filter { it.name != org.slf4j.Logger.ROOT_LOGGER_NAME }
+        startupRootLevel = context.getLogger(Logger.ROOT_LOGGER_NAME).level ?: Level.INFO
+        startupClassLevels = context.loggerList.filter { it.name != Logger.ROOT_LOGGER_NAME }
             .associate { it.name to it.level }
     }
 
@@ -55,7 +56,7 @@ class LogAdministrationService(
         // paginated UI normally requests a much smaller page.
         val safeSize = size.coerceIn(1, 5_000)
         val offset = safePage.toLong() * safeSize
-        val retained = java.util.PriorityQueue<LogEntryDto>(compareBy { it.timestamp })
+        val retained = PriorityQueue<LogEntryDto>(compareBy { it.timestamp })
         var total = 0L
         selectedDays(query).forEach { day ->
             streamEntries(logPath().resolve("open-fls-backend.$day.log")) { entry ->
@@ -110,26 +111,29 @@ class LogAdministrationService(
 
     fun settings(): LogSettingsDto {
         val context = LoggerFactory.getILoggerFactory() as LoggerContext
-        return LogSettingsDto(context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).level.levelStr,
+        return LogSettingsDto(context.getLogger(Logger.ROOT_LOGGER_NAME).level.levelStr,
             context.loggerList.filter { it.level != null && it.name != "ROOT" }.map { LogLevelDto(it.name, it.level.levelStr) }.sortedBy { it.logger })
     }
 
     fun setLevel(logger: String, level: String?) {
-        val target = (LoggerFactory.getILoggerFactory() as LoggerContext).getLogger(if (logger == "ROOT") org.slf4j.Logger.ROOT_LOGGER_NAME else logger)
+        val target = (LoggerFactory.getILoggerFactory() as LoggerContext).getLogger(if (logger == "ROOT") Logger.ROOT_LOGGER_NAME else logger)
         target.level = level?.takeIf { it.isNotBlank() }?.uppercase()?.let(Level::valueOf)
     }
 
     fun resetLevel(logger: String) {
         val context = LoggerFactory.getILoggerFactory() as LoggerContext
-        val target = context.getLogger(if (logger == "ROOT") org.slf4j.Logger.ROOT_LOGGER_NAME else logger)
-        target.level = startupClassLevels[logger]
+        if (logger == "ROOT") {
+            context.getLogger(Logger.ROOT_LOGGER_NAME).level = startupRootLevel
+            return
+        }
+        context.getLogger(logger).level = startupClassLevels[logger]
     }
 
     fun resetLevels() {
         val context = LoggerFactory.getILoggerFactory() as LoggerContext
-        context.loggerList.filter { it.name != org.slf4j.Logger.ROOT_LOGGER_NAME }
+        context.loggerList.filter { it.name != Logger.ROOT_LOGGER_NAME }
             .forEach { it.level = startupClassLevels[it.name] }
-        context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).level = startupRootLevel
+        context.getLogger(Logger.ROOT_LOGGER_NAME).level = startupRootLevel
     }
 
     private fun selectedDays(query: LogQueryDto): List<String> {

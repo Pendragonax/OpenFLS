@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.clients
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
@@ -41,7 +42,7 @@ class ClientController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -72,7 +73,7 @@ class ClientController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -107,7 +108,7 @@ class ClientController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -135,7 +136,7 @@ class ClientController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -163,7 +164,7 @@ class ClientController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -192,7 +193,7 @@ class ClientController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -225,7 +226,7 @@ class ClientController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,

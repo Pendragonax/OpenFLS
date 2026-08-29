@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.institutions
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDTO
 import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDTO
@@ -40,7 +41,7 @@ class InstitutionController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.localizedMessage,
@@ -70,7 +71,7 @@ class InstitutionController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -98,7 +99,7 @@ class InstitutionController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -122,7 +123,7 @@ class InstitutionController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 emptyList(),
@@ -147,7 +148,7 @@ class InstitutionController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     emptyList(),
@@ -171,7 +172,7 @@ class InstitutionController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
