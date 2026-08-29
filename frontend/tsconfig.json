@@ -6,6 +6,7 @@
     "outDir": "./dist/openfls",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "esModuleInterop": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -13,10 +14,8 @@
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
     "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "es2022",
@@ -25,11 +24,7 @@
       "@testbed": [
         "src/init-testbed.ts"
       ]
-    },
-    "lib": [
-      "es2022",
-      "dom"
-    ]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

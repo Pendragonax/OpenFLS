@@ -12,26 +12,28 @@
   } @else if (entries.length === 0) {
     <p class="text-muted mb-0">Für diesen Stundenkorridor liegen noch keine Einträge vor.</p>
   } @else {
-    <div class="audit-entry" *ngFor="let entry of entries">
-      <div class="audit-entry-header">
-        <span class="audit-action">{{ actionLabel(entry.action) }}</span>
-        <span class="text-muted">{{ entry.changedAt | date:'dd.MM.yyyy, HH:mm' }}</span>
-      </div>
-      <div class="audit-entry-meta">{{ entry.actor }}</div>
-      <div class="audit-change">
-        <div class="audit-change-column">
-          <span class="audit-change-label">Vorher</span>
-          <span>{{ entry.beforeTitle || '–' }}</span>
-          <span class="audit-time">{{ formatMinutes(entry.beforeWeeklyMinutesFrom) }} – {{ formatMinutes(entry.beforeWeeklyMinutesTill) }}</span>
+    @for (entry of entries; track entry) {
+      <div class="audit-entry">
+        <div class="audit-entry-header">
+          <span class="audit-action">{{ actionLabel(entry.action) }}</span>
+          <span class="text-muted">{{ entry.changedAt | date:'dd.MM.yyyy, HH:mm' }}</span>
         </div>
-        <mat-icon class="audit-arrow" aria-hidden="true">arrow_forward</mat-icon>
-        <div class="audit-change-column">
-          <span class="audit-change-label">Nachher</span>
-          <span>{{ entry.afterTitle || '–' }}</span>
-          <span class="audit-time">{{ formatMinutes(entry.afterWeeklyMinutesFrom) }} – {{ formatMinutes(entry.afterWeeklyMinutesTill) }}</span>
+        <div class="audit-entry-meta">{{ entry.actor }}</div>
+        <div class="audit-change">
+          <div class="audit-change-column">
+            <span class="audit-change-label">Vorher</span>
+            <span>{{ entry.beforeTitle || '–' }}</span>
+            <span class="audit-time">{{ formatMinutes(entry.beforeWeeklyMinutesFrom) }} – {{ formatMinutes(entry.beforeWeeklyMinutesTill) }}</span>
+          </div>
+          <mat-icon class="audit-arrow" aria-hidden="true">arrow_forward</mat-icon>
+          <div class="audit-change-column">
+            <span class="audit-change-label">Nachher</span>
+            <span>{{ entry.afterTitle || '–' }}</span>
+            <span class="audit-time">{{ formatMinutes(entry.afterWeeklyMinutesFrom) }} – {{ formatMinutes(entry.afterWeeklyMinutesTill) }}</span>
+          </div>
         </div>
       </div>
-    </div>
+    }
   }
 </div>
 

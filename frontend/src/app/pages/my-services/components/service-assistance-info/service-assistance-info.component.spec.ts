@@ -15,10 +15,10 @@ describe('ServiceAssistanceInfoComponent', () => {
 
     fixture = TestBed.createComponent(ServiceAssistanceInfoComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 

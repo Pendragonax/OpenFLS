@@ -1,10 +1,10 @@
 import { defineConfig } from 'vitest/config';
 import angular from '@analogjs/vite-plugin-angular';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  plugins: [angular({ tsconfig: 'tsconfig.vitest.json' }), tsconfigPaths()],
+  plugins: [angular({ tsconfig: 'tsconfig.vitest.json' })],
   resolve: {
+    tsconfigPaths: true,
     dedupe: [
       '@angular/core',
       '@angular/common',
