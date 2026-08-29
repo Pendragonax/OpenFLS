@@ -37,7 +37,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -61,7 +61,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -85,7 +85,7 @@ class PermissionController(
 
             ResponseEntity.ok()
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -109,7 +109,7 @@ class PermissionController(
 
             ResponseEntity.ok(entities)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -134,7 +134,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -158,7 +158,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -182,7 +182,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,

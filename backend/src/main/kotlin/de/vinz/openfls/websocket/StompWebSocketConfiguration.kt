@@ -1,6 +1,7 @@
 package de.vinz.openfls.websocket
 
 import org.springframework.context.annotation.Configuration
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.simp.config.ChannelRegistration
@@ -21,7 +22,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 class StompWebSocketConfiguration(
     private val jwtDecoder: JwtDecoder,
-    private val topicAccessPolicies: List<StompTopicAccessPolicy>
+    private val topicAccessPolicies: List<StompTopicAccessPolicy>,
+    @param:Qualifier("allowedOriginPatterns") private val allowedOriginPatterns: List<String>
 ) : WebSocketMessageBrokerConfigurer {
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
         registry.enableSimpleBroker("/topic", "/queue")
@@ -29,7 +31,7 @@ class StompWebSocketConfiguration(
     }
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*")
+        registry.addEndpoint("/ws").setAllowedOriginPatterns(*allowedOriginPatterns.toTypedArray())
     }
 
     override fun configureClientInboundChannel(registration: ChannelRegistration) {

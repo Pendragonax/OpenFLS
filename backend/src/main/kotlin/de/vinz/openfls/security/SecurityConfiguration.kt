@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
+import de.vinz.openfls.logging.StructuredLog
 import org.modelmapper.ModelMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -59,6 +60,14 @@ class SecurityConfiguration {
 
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+
+    /**
+     * The WebSocket handshake must use exactly the same origin allow-list as
+     * the HTTP CORS configuration. Exposing the immutable value as a bean keeps
+     * both security boundaries in sync without duplicating configuration.
+     */
+    @Bean
+    fun allowedOriginPatterns(): List<String> = corsAllowedOriginPatterns.toList()
 
     @Bean
     @Throws(Exception::class)
@@ -120,8 +129,14 @@ class SecurityConfiguration {
 
         http.oauth2ResourceServer { oauth2 -> oauth2
                 .jwt(Customizer.withDefaults())
-                .authenticationEntryPoint(BearerTokenAuthenticationEntryPoint())
-                .accessDeniedHandler(BearerTokenAccessDeniedHandler())
+                .authenticationEntryPoint { request, response, exception ->
+                    StructuredLog.audit("authentication.token.rejected", "denied", "http.path", request.requestURI)
+                    BearerTokenAuthenticationEntryPoint().commence(request, response, exception)
+                }
+                .accessDeniedHandler { request, response, exception ->
+                    StructuredLog.audit("authorization.denied", "denied", "http.path", request.requestURI)
+                    BearerTokenAccessDeniedHandler().handle(request, response, exception)
+                }
         }
 
         return http.build()
@@ -151,7 +166,7 @@ class SecurityConfiguration {
 
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
-        logger.info("Allowed cors origin patterns: $corsAllowedOriginPatterns");
+        logger.info("event_name=security.cors.configured outcome=success allowed_origin_pattern_count={}", corsAllowedOriginPatterns.size)
         val config = CorsConfiguration().apply {
             allowCredentials = true
             allowedOriginPatterns = corsAllowedOriginPatterns

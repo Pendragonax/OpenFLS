@@ -52,7 +52,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -81,7 +81,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -116,7 +116,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -144,7 +144,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -173,7 +173,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -198,7 +198,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -227,7 +227,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -252,7 +252,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -281,7 +281,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -306,7 +306,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -335,7 +335,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -360,7 +360,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -385,7 +385,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -414,7 +414,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(response)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -446,7 +446,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
@@ -475,7 +475,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
@@ -506,7 +506,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
@@ -537,7 +537,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
@@ -568,7 +568,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST

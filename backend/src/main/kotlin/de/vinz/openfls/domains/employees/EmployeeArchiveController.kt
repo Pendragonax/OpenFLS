@@ -49,13 +49,13 @@ class EmployeeArchiveController(
                 )
             )
         } catch (ex: UserNotAllowedException) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.FORBIDDEN)
         } catch (ex: EmployeeArchiveStateException) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.CONFLICT)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.BAD_REQUEST)
         }
     }
@@ -76,13 +76,13 @@ class EmployeeArchiveController(
                 )
             )
         } catch (ex: UserNotAllowedException) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.FORBIDDEN)
         } catch (ex: EmployeeArchiveStateException) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.CONFLICT)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(ex.message, HttpStatus.BAD_REQUEST)
         }
     }

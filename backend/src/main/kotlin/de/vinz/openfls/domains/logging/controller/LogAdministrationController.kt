@@ -4,6 +4,7 @@ import de.vinz.openfls.domains.logging.dto.LogLevelDto
 import de.vinz.openfls.domains.logging.dto.LogQueryDto
 import de.vinz.openfls.domains.logging.dto.LogSettingsDto
 import de.vinz.openfls.domains.logging.service.LogAdministrationService
+import de.vinz.openfls.logging.StructuredLog
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -20,23 +21,23 @@ import java.time.Instant
 @RestController
 @RequestMapping("/admin/logs")
 class LogAdministrationController(private val logService: LogAdministrationService) {
-    @GetMapping("/days") fun days(): List<String> = logService.availableDays()
-    @GetMapping fun entries(query: LogQueryDto) = logService.entries(query)
-    @GetMapping("/settings") fun settings(): LogSettingsDto = logService.settings()
+    @GetMapping("/days") fun days(): List<String> = logService.availableDays().also { StructuredLog.audit("logging.days.read", "success") }
+    @GetMapping fun entries(query: LogQueryDto) = logService.entries(query).also { StructuredLog.audit("logging.entries.read", "success") }
+    @GetMapping("/settings") fun settings(): LogSettingsDto = logService.settings().also { StructuredLog.audit("logging.settings.read", "success") }
 
     @PatchMapping("/settings") fun setLevel(@RequestBody value: LogLevelDto): LogSettingsDto {
-        logService.setLevel(value.logger, value.level); return logService.settings()
+        logService.setLevel(value.logger, value.level); StructuredLog.audit("logging.level.change", "success", "logger", value.logger); return logService.settings()
     }
 
     @DeleteMapping("/settings/{logger}") fun resetLevel(@PathVariable logger: String): LogSettingsDto {
-        logService.resetLevel(logger); return logService.settings()
+        logService.resetLevel(logger); StructuredLog.audit("logging.level.reset", "success", "logger", logger); return logService.settings()
     }
 
-    @DeleteMapping("/settings") fun resetLevels(): LogSettingsDto { logService.resetLevels(); return logService.settings() }
-    @DeleteMapping fun delete(@RequestParam(required = false) from: String?) { logService.deleteFrom(from?.let(Instant::parse)) }
+    @DeleteMapping("/settings") fun resetLevels(): LogSettingsDto { logService.resetLevels(); StructuredLog.audit("logging.level.reset_all", "success"); return logService.settings() }
+    @DeleteMapping fun delete(@RequestParam(required = false) from: String?) { logService.deleteFrom(from?.let(Instant::parse)); StructuredLog.audit("logging.technical.delete", "success") }
 
     @GetMapping("/export") fun export(query: LogQueryDto): ResponseEntity<ByteArray> = ResponseEntity.ok()
         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=openhls-logs.zip")
         .contentType(MediaType.parseMediaType("application/zip"))
-        .body(logService.export(query))
+        .body(logService.export(query)).also { StructuredLog.audit("logging.technical.export", "success") }
 }

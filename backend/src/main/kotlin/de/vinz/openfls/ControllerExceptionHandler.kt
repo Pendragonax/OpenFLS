@@ -1,5 +1,6 @@
 package de.vinz.openfls
 
+import de.vinz.openfls.logging.StructuredLog
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,8 +17,8 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleTypeMismatch(ex: MethodArgumentTypeMismatchException, request: WebRequest?): ResponseEntity<Any>? {
         val name = ex.name
         val type = ex.requiredType!!.simpleName
-        val value = ex.value
-        val message = String.format("'%s' should be a valid '%s' and '%s' isn't", name, type, value)
+        StructuredLog.validationFailure(name)
+        val message = String.format("'%s' should be a valid '%s'", name, type)
         return handleExceptionInternal(ex, message, HttpHeaders(), HttpStatus.BAD_REQUEST, request!!);
     }
 }

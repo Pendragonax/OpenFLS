@@ -41,7 +41,7 @@ class AbsenceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -66,7 +66,7 @@ class AbsenceController(
 
             ResponseEntity.ok().build<Any>()
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -91,7 +91,7 @@ class AbsenceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,

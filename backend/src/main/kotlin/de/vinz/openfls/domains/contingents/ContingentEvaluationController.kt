@@ -88,7 +88,7 @@ class ContingentEvaluationController(
 
             ResponseEntity.ok(calendarDto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,

@@ -38,7 +38,7 @@ class GoalTimeEvaluationController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            de.vinz.openfls.logging.StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.localizedMessage,
