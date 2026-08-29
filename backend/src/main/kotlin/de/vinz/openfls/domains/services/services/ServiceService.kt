@@ -2,11 +2,13 @@ package de.vinz.openfls.domains.services.services
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.goals.dtos.GoalDto
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.dtos.ServiceXLDto
+import de.vinz.openfls.domains.services.dtos.ServiceProjectionDto
 import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
 import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
@@ -162,7 +164,25 @@ class ServiceService(
     }
 
     fun getDtosByEmployeeAndDate(employeeId: Long, date: LocalDate): List<ServiceDto> {
-        return getByEmployeeAndDate(employeeId, date).map { modelMapper.map(it, ServiceDto::class.java) }
+        return getByEmployeeAndDate(employeeId, date).map(::toDto)
+    }
+
+    private fun toDto(service: Service): ServiceDto = ServiceDto().apply {
+        id = service.id
+        start = service.start
+        end = service.end
+        minutes = service.minutes
+        title = service.title
+        content = service.content
+        unfinished = service.unfinished
+        groupService = service.groupService
+        archivedService = service.archivedService
+        employeeId = service.employee?.id ?: 0
+        clientId = service.client?.id ?: 0
+        institutionId = service.institution?.id ?: 0
+        assistancePlanId = service.assistancePlan?.id ?: 0
+        hourTypeId = service.hourType?.id ?: 0
+        goals = service.goals.map { GoalDto().apply { id = it.id; title = it.title } }.toMutableSet()
     }
 
     fun getIllegalByEmployee(employeeId: Long): List<ServiceProjection> {
@@ -195,8 +215,8 @@ class ServiceService(
         return serviceRepository.findIllegalByInstitutionId(id)
     }
 
-    fun getDtosByInstitutionIdAndDate(institutionId: Long, date: LocalDate): List<ServiceProjection> {
-        return getByInstitutionIdAndDate(institutionId, date)
+    fun getDtosByInstitutionIdAndDate(institutionId: Long, date: LocalDate): List<ServiceProjectionDto> {
+        return getByInstitutionIdAndDate(institutionId, date).map(ServiceProjectionDto::from)
     }
 
     fun getByInstitutionIdAndDate(institutionId: Long, date: LocalDate): List<ServiceProjection> {
