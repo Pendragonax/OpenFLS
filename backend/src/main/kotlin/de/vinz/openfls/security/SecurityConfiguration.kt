@@ -88,6 +88,8 @@ class SecurityConfiguration {
                 auth.requestMatchers(HttpMethod.POST, "/login/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/changelog/**").permitAll()
                         .requestMatchers("/change_role/**").hasAuthority("ADMIN")
+                        .requestMatchers("/admin/logs/**").hasAuthority("ADMIN")
+                        .requestMatchers("/ws", "/ws/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/employees/assistance_plan/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/employees/assistance_plan/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/employees/assistance_plan/**").authenticated()

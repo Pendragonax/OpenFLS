@@ -31,10 +31,13 @@ import {
   AssistancePlanNewPageComponent
 } from "./pages/assistance-plans/assistance-plan-new/assistance-plan-new.component";
 import {AssistancePlanEditComponent} from "./pages/assistance-plans/assistance-plan-edit/assistance-plan-edit.component";
+import {SettingsComponent} from './pages/settings/settings.component';
+import {AdminGuard} from './core/admin.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard, AdminGuard] },
   { path: 'employees', component: EmployeesComponent, canActivate: [AuthGuard] },
   { path: 'employees/new', component: EmployeeNewComponent, canActivate: [AuthGuard] },
   { path: 'employees/detail/:id', component: EmployeeDetailComponent, canActivate: [AuthGuard] },
@@ -70,7 +73,8 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
   providers: [
-    AuthGuard
+    AuthGuard,
+    AdminGuard
   ]
 })
 export class AppRoutingModule { }

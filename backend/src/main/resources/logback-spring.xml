@@ -6,25 +6,35 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>./logs/open-fls-backend.log</file>
+    <property name="LOG_DIR" value="${openfls.logging.directory:-./logs}" />
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/open-fls-backend.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
         <encoder>
-            <pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [%thread] %-5level %logger - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <appender name="PERFORMANCE" class="ch.qos.logback.core.FileAppender">
+    <appender name="PERFORMANCE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="de.vinz.openfls.logback.PerformanceLogbackFilter"/>
-        <file>./logs/open-fls-backend-performance.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/open-fls-backend-performance.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
         <encoder>
-            <pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} [%thread] %-5level %logger - %msg%n</pattern>
         </encoder>
     </appender>
+
+    <appender name="LIVE" class="de.vinz.openfls.logback.LiveLogAppender" />
 
     <root level="info">
         <appender-ref ref="console" />
         <appender-ref ref="FILE" />
         <appender-ref ref="PERFORMANCE" />
+        <appender-ref ref="LIVE" />
     </root>
 </configuration>
-

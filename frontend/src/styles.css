@@ -11,6 +11,11 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+/* Material dropdowns must remain above Bootstrap modals. */
+.cdk-overlay-container {
+  z-index: 2000 !important;
+}
+
 .box {
   background-color: pink;
 }
