@@ -89,6 +89,15 @@
     </button>
 
     <button mat-icon-button
+            *showOnRole="'admin'"
+            [matTooltip]="'Einstellungen'"
+            class="m-1 my-3 my-lg-0 text-white"
+            [routerLink]="'settings'"
+            (click)="isMenuCollapsed = true">
+      <mat-icon class="text-white">settings</mat-icon>
+    </button>
+
+    <button mat-icon-button
             [matTooltip]="'Logout'"
             class="m-1 my-3 my-lg-0 text-white" (click)="logout()">
       <mat-icon class="text-white">exit_to_app</mat-icon>

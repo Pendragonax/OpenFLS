@@ -38,7 +38,7 @@ import java.time.LocalDateTime
     de.vinz.openfls.domains.permissions.PermissionService::class,
     TestBeans::class
 )
-class EmployeeServiceDataJpaTest(@Autowired private val unprofessionalRepository: UnprofessionalRepository) {
+class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepository: UnprofessionalRepository) {
 
     @Autowired
     lateinit var employeeService: EmployeeService

@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.services
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.employees.services.EmployeeService
@@ -57,7 +58,7 @@ class ServiceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     employeeService.getById(valueDto.employeeId).apply {
@@ -92,7 +93,7 @@ class ServiceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -124,7 +125,7 @@ class ServiceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -151,7 +152,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -184,7 +185,7 @@ class ServiceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -215,7 +216,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -246,7 +247,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -279,7 +280,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -308,7 +309,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -340,7 +341,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -373,7 +374,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -404,7 +405,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -434,7 +435,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -463,7 +464,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -494,7 +495,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -526,7 +527,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -559,7 +560,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -599,14 +600,14 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: ServicePermissionDeniedException) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
                     HttpStatus.FORBIDDEN
             )
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -634,7 +635,7 @@ class ServiceController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -667,7 +668,7 @@ class ServiceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -681,7 +682,7 @@ class ServiceController(
         return try {
             ResponseEntity.ok(serviceService.countByEmployee(id))
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -695,7 +696,7 @@ class ServiceController(
         return try {
             ResponseEntity.ok(serviceService.countByClient(id))
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -709,7 +710,7 @@ class ServiceController(
         return try {
             ResponseEntity.ok(serviceService.countByAssistancePlan(id))
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -723,7 +724,7 @@ class ServiceController(
         return try {
             ResponseEntity.ok(serviceService.countByGoal(id))
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -749,7 +750,7 @@ class ServiceController(
 
             ResponseEntity.ok(response)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,

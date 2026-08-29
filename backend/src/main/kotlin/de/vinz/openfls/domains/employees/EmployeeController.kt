@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.employees
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
 import de.vinz.openfls.domains.employees.services.EmployeeService
@@ -43,7 +44,7 @@ class EmployeeController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.localizedMessage,
@@ -72,7 +73,7 @@ class EmployeeController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -101,7 +102,7 @@ class EmployeeController(
 
             return ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -133,7 +134,7 @@ class EmployeeController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -158,7 +159,7 @@ class EmployeeController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -183,7 +184,7 @@ class EmployeeController(
 
             ResponseEntity.ok()
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -208,7 +209,7 @@ class EmployeeController(
 
             ResponseEntity.ok()
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -238,7 +239,7 @@ class EmployeeController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -268,7 +269,7 @@ class EmployeeController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -292,7 +293,7 @@ class EmployeeController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -317,7 +318,7 @@ class EmployeeController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,

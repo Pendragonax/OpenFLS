@@ -4,6 +4,7 @@ import de.vinz.openfls.domains.authentication.models.EUserRoles
 import de.vinz.openfls.domains.authentication.dtos.PasswordDto
 import de.vinz.openfls.domains.authentication.dtos.AuthenticationRequestDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.logging.StructuredLog
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,6 +31,7 @@ class AuthenticationController(
             val startMs = System.currentTimeMillis()
 
             val authentication = authenticationService.login(request.username, request.password)
+            StructuredLog.audit("authentication.login", "success", "user", authentication.userId.toString())
 
             if (logPerformance) {
                 logger.info(String.format("%s login took %s ms",
@@ -44,7 +46,8 @@ class AuthenticationController(
                             "token" to authentication.token,
                             "expiredAt" to authentication.expiredAt))
         } catch (ex: AuthenticationException) {
-            logger.error(ex.message, ex)
+            StructuredLog.audit("authentication.login", "failure")
+            StructuredLog.error(logger, "authentication.login.failed", ex)
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
@@ -57,6 +60,7 @@ class AuthenticationController(
             val startMs = System.currentTimeMillis()
 
             authenticationService.changePassword(passwordDto)
+            StructuredLog.audit("authentication.password.change", "success")
 
             if (logPerformance) {
                 logger.info(String.format("%s changePassword took %s ms",
@@ -66,7 +70,7 @@ class AuthenticationController(
 
             ResponseEntity(HttpStatus.OK)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "authentication.password.change.failed", ex)
 
             ResponseEntity(
                     ex.localizedMessage,
@@ -82,6 +86,7 @@ class AuthenticationController(
             val startMs = System.currentTimeMillis()
 
             authenticationService.changeRole(id, EUserRoles.fromId(role))
+            StructuredLog.audit("authorization.role.change", "success", "user", id.toString())
 
             if (logPerformance) {
                 logger.info(String.format("%s changeRole took %s ms",
@@ -91,7 +96,7 @@ class AuthenticationController(
 
             ResponseEntity(HttpStatus.OK)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "authorization.role.change.failed", ex)
 
             ResponseEntity(
                     ex.localizedMessage,
@@ -122,7 +127,7 @@ class AuthenticationController(
 
             return ResponseEntity.ok(employee.get())
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "authentication.user.read.failed", ex)
 
             ResponseEntity(
                     ex.localizedMessage,

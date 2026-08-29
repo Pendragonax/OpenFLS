@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.contingents
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
 import de.vinz.openfls.domains.contingents.services.ContingentEvaluationService
@@ -88,7 +89,7 @@ class ContingentEvaluationController(
 
             ResponseEntity.ok(calendarDto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,

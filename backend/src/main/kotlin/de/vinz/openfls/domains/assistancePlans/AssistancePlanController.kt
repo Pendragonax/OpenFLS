@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.assistancePlans
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
@@ -52,7 +53,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -81,7 +82,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -116,7 +117,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -144,7 +145,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -173,7 +174,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -198,7 +199,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -227,7 +228,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -252,7 +253,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -281,7 +282,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -306,7 +307,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -335,7 +336,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -360,7 +361,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -385,7 +386,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -414,7 +415,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(response)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -446,7 +447,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
@@ -475,7 +476,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
@@ -506,7 +507,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
@@ -537,7 +538,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST
@@ -568,7 +569,7 @@ class AssistancePlanController(
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST

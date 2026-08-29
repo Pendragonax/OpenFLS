@@ -1,0 +1,55 @@
+<div class="logs-workspace" [class.mobile-tab-filter]="mobileTab === 'filter'" [class.mobile-tab-live]="mobileTab === 'live'" [class.mobile-tab-levels]="mobileTab === 'levels'">
+  <header class="settings-toolbar">
+    <h1>Einstellungen &gt; Protokolle</h1>
+  </header>
+
+  <nav class="mobile-log-tabs" aria-label="Ansicht wählen">
+    <button mat-button type="button" [class.active]="mobileTab === 'filter'" (click)="mobileTab = 'filter'"><mat-icon>filter_alt</mat-icon> Filter</button>
+    <button mat-button type="button" [class.active]="mobileTab === 'live'" (click)="mobileTab = 'live'"><mat-icon>subject</mat-icon> Live-Protokoll</button>
+    <button mat-button type="button" [class.active]="mobileTab === 'levels'" (click)="mobileTab = 'levels'"><mat-icon>tune</mat-icon> Log-Level</button>
+  </nav>
+
+  <main class="logs-main-layout">
+    <section class="live-panel panel-surface" aria-label="Live-Protokoll">
+      <header class="panel-header live-header">
+        <div><h2>Live-Protokoll</h2><p><span class="live-indicator"></span>Aktualisiert sich automatisch</p></div>
+        <div class="live-actions"><span class="entry-count">{{entries.length}} Einträge</span><button mat-stroked-button color="warn" type="button" (click)="deleteAll()"><mat-icon>delete_forever</mat-icon><span>Alle Logs löschen</span></button></div>
+      </header>
+      <section class="filter-panel" aria-label="Protokoll filtern">
+        <form [formGroup]="filter" class="filters" (ngSubmit)="load()">
+          <app-date-complete-selection class="date-range-filter" [start]="filter.value.from" [end]="filter.value.to" (dateChanged)="onDateChanged($event)"></app-date-complete-selection>
+          <mat-form-field appearance="outline"><mat-label>Freitext</mat-label><input matInput formControlName="query"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Klasse</mat-label><input matInput formControlName="logger"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Thread</mat-label><input matInput formControlName="thread"></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Log-Level</mat-label><mat-select formControlName="level"><mat-option value="">Alle</mat-option><mat-option *ngFor="let level of levels" [value]="level">{{level}}</mat-option></mat-select></mat-form-field>
+          <div class="toolbar-secondary"><mat-checkbox class="all-days" formControlName="all">Alle Tage</mat-checkbox><div class="filter-actions"><button mat-raised-button color="primary" type="submit" matTooltip="Filter anwenden"><mat-icon>filter_alt</mat-icon><span>Filtern</span></button><button mat-stroked-button type="button" (click)="resetFilters()" matTooltip="Filter zurücksetzen"><mat-icon>restart_alt</mat-icon><span>Zurücksetzen</span></button><button mat-stroked-button type="button" (click)="export()" matTooltip="Als ZIP exportieren"><mat-icon>download</mat-icon><span>ZIP exportieren</span></button></div></div>
+        </form>
+      </section>
+      <div class="log-notice"><span>Neue Einträge stehen oben und werden kurz hervorgehoben.</span><span><mat-icon>info</mat-icon> „Alle Tage“ nur für eine gezielte Suche aktivieren. Verfügbare Tage: {{ days.join(', ') || 'keine' }}.</span></div>
+      <div class="log-list">
+        <div class="log-table-head"><span>Zeitpunkt</span><span>Level</span><span>Thread</span><span>Klasse / Nachricht</span><span></span></div>
+        <div *ngFor="let entry of entries" class="log-entry" [ngClass]="levelClass(entry.level)" [class.log-entry--new]="isNew(entry)"><time>{{entry.timestamp | date:'dd.MM.yyyy HH:mm:ss.SSS'}}</time><strong>{{entry.level}}</strong><span class="thread">{{entry.thread}}</span><div class="log-message"><code>{{entry.logger}}</code><pre>{{entry.message}}</pre></div><button mat-icon-button color="warn" matTooltip="Diesen und ältere Einträge löschen" (click)="deleteFrom(entry)"><mat-icon>delete_sweep</mat-icon></button></div>
+        <p *ngIf="entries.length === 0" class="empty-state">Keine Einträge für die Auswahl.</p>
+      </div>
+      <footer class="log-pagination" *ngIf="totalEntries > pageSize">
+        <button mat-stroked-button type="button" (click)="previousPage()" [disabled]="page === 0">Zurück</button>
+        <span>Seite {{page + 1}} von {{totalPages()}} ({{totalEntries}} Einträge)</span>
+        <button mat-stroked-button type="button" (click)="nextPage()" [disabled]="!hasNextPage">Weiter</button>
+      </footer>
+    </section>
+
+    <aside class="level-panel panel-surface" aria-label="Log-Level konfigurieren">
+      <header class="panel-header"><div><h2>Log-Level Konfiguration</h2><p>Aktuell global: {{ settings?.rootLevel || '–' }}</p></div></header>
+      <div class="level-settings">
+        <mat-form-field appearance="outline"><mat-label>Globales Log-Level</mat-label><mat-select [value]="settings?.rootLevel" (selectionChange)="setGlobalLevel($event.value)"><mat-option *ngFor="let level of levels" [value]="level">{{level}}</mat-option></mat-select></mat-form-field>
+        <button mat-stroked-button type="button" (click)="resetLevels()"><mat-icon>restart_alt</mat-icon> Startwerte wiederherstellen</button>
+        <div class="class-level-summary"><div class="summary-header"><span>Klassen-Ausnahmen</span><button mat-icon-button color="primary" matTooltip="Klasse hinzufügen" type="button" (click)="openClassLevelModal(classLevelModal)"><mat-icon>add</mat-icon></button></div><div class="summary-scroll"><div class="summary-row" *ngFor="let configured of settings?.classLevels"><code [matTooltip]="configured.logger">{{configured.logger}}</code><span class="level-badge">{{configured.level}}</span><button mat-icon-button color="primary" matTooltip="Log-Level ändern" type="button" (click)="openClassLevelModal(classLevelModal, configured)"><mat-icon>edit</mat-icon></button><button mat-icon-button color="warn" matTooltip="Auf Startwert zurücksetzen" type="button" (click)="resetClassLevel(configured.logger)"><mat-icon>delete_outline</mat-icon></button></div><p class="summary-empty" *ngIf="!settings?.classLevels?.length">Keine Klassen-Ausnahmen konfiguriert.</p></div></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<ng-template #classLevelModal let-modal>
+  <div class="modal-header"><h2 class="modal-title">Klassen-Level konfigurieren</h2><button type="button" class="btn-close" aria-label="Schließen" (click)="modal.dismiss()"></button></div>
+  <form [formGroup]="classLevelForm" (ngSubmit)="addClassLevel(modal)"><div class="modal-body"><mat-form-field appearance="outline" class="w-100"><mat-label>Logger-Pfad</mat-label><input matInput formControlName="logger" placeholder="de.vinz.openfls.domains.logging"><mat-hint>Vollständiger Package- oder Klassenpfad</mat-hint></mat-form-field><mat-form-field appearance="outline" class="w-100 mt-3"><mat-label>Log-Level</mat-label><mat-select formControlName="level"><mat-option *ngFor="let level of levels" [value]="level">{{level}}</mat-option></mat-select></mat-form-field></div><div class="modal-footer"><button mat-button type="button" (click)="modal.dismiss()">Abbrechen</button><button mat-raised-button color="primary" type="submit">Speichern</button></div></form>
+</ng-template>

@@ -229,3 +229,6 @@ Die vorhandenen Compose-Dateien haben folgende Bedeutung:
 - Bestehende Entscheidungen werden nicht überschrieben, sondern ergänzt.
 - Für Spring Boot, Spring Data, Spring Security oder Angular werden bevorzugt
   die jeweiligen offiziellen Dokumentationsquellen verwendet.
+- Für alle Änderungen am Logging ist der verbindliche [Logging Guide](docs/logging-guide.md)
+  zu beachten. Er definiert Mindestfelder, Log-Level, Datenschutz, Audit-/Security-
+  Trennung sowie Aufbewahrung und Löschung.

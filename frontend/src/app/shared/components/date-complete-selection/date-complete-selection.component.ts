@@ -96,6 +96,13 @@ export class DateCompleteSelectionComponent {
     this.dateChanged.emit({start: this.start, end: this.end});
   }
 
+  setRange(start: Date, end: Date): void {
+    this.start = start;
+    this.end = end;
+    this.startControl.setValue(start);
+    this.endControl.setValue(end);
+  }
+
   setStartAndEnd(start, end) {
     if (start.value == null || end.value == null || start.value === "" || end.value === "") {
       return

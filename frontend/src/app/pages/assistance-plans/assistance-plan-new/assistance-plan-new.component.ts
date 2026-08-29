@@ -282,6 +282,10 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
     return `${corridor.title} · ${this.formatWeeklyMinutes(corridor.weeklyMinutesFrom)} - ${this.formatWeeklyMinutes(corridor.weeklyMinutesTill)} · ${corridor.hourTypeTitle}`;
   }
 
+  getSelectedHourCorridor(): HourCorridorDto | undefined {
+    return this.hourCorridors.find(corridor => corridor.id === Number(this.generalForm.hourCorridor.value));
+  }
+
   getExistingPlanTimeRange(plan: AssistancePlanExistingDto): string {
     return `${this.toGermanDate(plan.start)} - ${this.toGermanDate(plan.end)}`;
   }
@@ -401,7 +405,10 @@ export class AssistancePlanNewPageComponent extends NewPageComponent<AssistanceP
   }
 
   private formatWeeklyMinutes(minutes: number): string {
-    return (minutes / 60).toFixed(2).replace(/\.?0+$/, '');
+    const totalMinutes = Math.max(0, Math.round(Number(minutes) || 0));
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+    return `${hours}:${String(remainingMinutes).padStart(2, '0')} h`;
   }
 
   private syncCreateDtoFromForm() {

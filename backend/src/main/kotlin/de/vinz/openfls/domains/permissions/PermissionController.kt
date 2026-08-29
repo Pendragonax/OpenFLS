@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.permissions
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.sponsors.SponsorController
 import de.vinz.openfls.logback.PerformanceLogbackFilter
@@ -37,7 +38,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -61,7 +62,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -85,7 +86,7 @@ class PermissionController(
 
             ResponseEntity.ok()
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -109,7 +110,7 @@ class PermissionController(
 
             ResponseEntity.ok(entities)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -134,7 +135,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -158,7 +159,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,
@@ -182,7 +183,7 @@ class PermissionController(
 
             ResponseEntity.ok(entity)
         } catch (ex: Exception) {
-            logger.error(ex.message, ex)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                     ex.message,

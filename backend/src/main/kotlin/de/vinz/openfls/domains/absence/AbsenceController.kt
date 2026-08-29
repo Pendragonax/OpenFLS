@@ -1,4 +1,5 @@
 package de.vinz.openfls.domains.absence
+import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.absence.dtos.CreateAbsenceDTO
 import de.vinz.openfls.domains.permissions.AccessService
@@ -41,7 +42,7 @@ class AbsenceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -66,7 +67,7 @@ class AbsenceController(
 
             ResponseEntity.ok().build<Any>()
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
@@ -91,7 +92,7 @@ class AbsenceController(
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            logger.error(ex.message)
+            StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
