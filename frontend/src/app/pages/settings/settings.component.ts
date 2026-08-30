@@ -22,6 +22,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   mobileTab: 'filter' | 'live' | 'levels' = 'filter';
   private liveSubscription?: Subscription;
   private readonly newEntryKeys = new Set<string>();
+  private readonly expandedEntryKeys = new Set<string>();
   @ViewChild(DateCompleteSelectionComponent) dateSelection?: DateCompleteSelectionComponent;
   filter = new UntypedFormGroup({from: new UntypedFormControl(new Date()), to: new UntypedFormControl(new Date()), query: new UntypedFormControl(''), level: new UntypedFormControl(''), logger: new UntypedFormControl(''), thread: new UntypedFormControl(''), all: new UntypedFormControl(false)});
 
@@ -40,6 +41,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.entries = result.content;
       this.totalEntries = result.totalElements;
       this.hasNextPage = result.hasNext;
+      this.expandedEntryKeys.clear();
     });
   }
   previousPage(): void { if (this.page > 0) { this.page--; this.loadPage(); } }
@@ -58,6 +60,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
   export(): void { this.logs.export(this.query()).subscribe(data => { const link = document.createElement('a'); link.href = URL.createObjectURL(data); link.download = 'openfls-logs.zip'; link.click(); URL.revokeObjectURL(link.href); }); }
   levelClass(level: string): string { return `log-${level.toLowerCase()}`; }
   isNew(entry: LogEntryDto): boolean { return this.newEntryKeys.has(this.entryKey(entry)); }
+  hasStacktrace(entry: LogEntryDto): boolean { return !!entry.stacktrace && entry.stacktrace.trim().length > 0; }
+  isStacktraceExpanded(entry: LogEntryDto): boolean { return this.expandedEntryKeys.has(this.entryKey(entry)); }
+  toggleStacktrace(entry: LogEntryDto): void {
+    const key = this.entryKey(entry);
+    if (this.expandedEntryKeys.has(key)) this.expandedEntryKeys.delete(key); else this.expandedEntryKeys.add(key);
+  }
   private addLiveEntry(entry: LogEntryDto): void {
     if (this.page !== 0) return;
     if (!this.matches(entry)) return;
@@ -71,7 +79,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     const filter = this.filter.value;
     const date = entry.timestamp.substring(0, 10);
     const from = this.dateValue(filter.from); const to = this.dateValue(filter.to);
-    return (filter.all || (!from || date >= from) && (!to || date <= to)) && (!filter.level || entry.level === filter.level) && (!filter.logger || entry.logger.toLowerCase().includes(filter.logger.toLowerCase())) && (!filter.thread || entry.thread.toLowerCase().includes(filter.thread.toLowerCase())) && (!filter.query || `${entry.message} ${entry.logger}`.toLowerCase().includes(filter.query.toLowerCase()));
+    return (filter.all || (!from || date >= from) && (!to || date <= to)) && (!filter.level || entry.level === filter.level) && (!filter.logger || entry.logger.toLowerCase().includes(filter.logger.toLowerCase())) && (!filter.thread || entry.thread.toLowerCase().includes(filter.thread.toLowerCase())) && (!filter.query || `${entry.message} ${entry.logger} ${entry.stacktrace ?? ''}`.toLowerCase().includes(filter.query.toLowerCase()));
   }
   private query() { return {...this.filter.value, from: this.dateValue(this.filter.value.from), to: this.dateValue(this.filter.value.to)}; }
   private dateValue(value: Date | string | null | undefined): string | undefined { if (!value) return undefined; const date = value instanceof Date ? value : new Date(value); return Number.isNaN(date.valueOf()) ? undefined : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }

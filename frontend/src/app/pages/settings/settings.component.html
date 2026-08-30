@@ -31,7 +31,12 @@
     <div class="log-list">
       <div class="log-table-head"><span>Zeitpunkt</span><span>Level</span><span>Thread</span><span>Klasse / Nachricht</span><span></span></div>
       @for (entry of entries; track entry) {
-        <div class="log-entry" [ngClass]="levelClass(entry.level)" [class.log-entry--new]="isNew(entry)"><time>{{entry.timestamp | date:'dd.MM.yyyy HH:mm:ss.SSS'}}</time><strong>{{entry.level}}</strong><span class="thread">{{entry.thread}}</span><div class="log-message"><code>{{entry.logger}}</code><pre>{{entry.message}}</pre></div><button mat-icon-button color="warn" matTooltip="Diesen und ältere Einträge löschen" (click)="deleteFrom(entry)"><mat-icon>delete_sweep</mat-icon></button></div>
+        <div class="log-entry" [ngClass]="levelClass(entry.level)" [class.log-entry--new]="isNew(entry)"><time>{{entry.timestamp | date:'dd.MM.yyyy HH:mm:ss.SSS'}}</time><strong>{{entry.level}}</strong><span class="thread">{{entry.thread}}</span><div class="log-message"><code>{{entry.logger}}</code><pre>{{entry.message}}</pre>@if (hasStacktrace(entry)) {
+          <button mat-button type="button" class="stacktrace-toggle" (click)="toggleStacktrace(entry)" [attr.aria-expanded]="isStacktraceExpanded(entry)"><mat-icon>{{ isStacktraceExpanded(entry) ? 'unfold_less' : 'unfold_more' }}</mat-icon><span>{{ isStacktraceExpanded(entry) ? 'Stacktrace ausblenden' : 'Stacktrace anzeigen' }}</span></button>
+          @if (isStacktraceExpanded(entry)) {
+            <pre class="stacktrace">{{entry.stacktrace}}</pre>
+          }
+        }</div><button mat-icon-button color="warn" matTooltip="Diesen und ältere Einträge löschen" (click)="deleteFrom(entry)"><mat-icon>delete_sweep</mat-icon></button></div>
       }
       @if (entries.length === 0) {
         <p class="empty-state">Keine Einträge für die Auswahl.</p>

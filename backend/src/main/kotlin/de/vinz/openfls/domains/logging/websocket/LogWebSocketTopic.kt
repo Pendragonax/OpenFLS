@@ -5,6 +5,7 @@ import de.vinz.openfls.logback.LiveLogAppender
 import de.vinz.openfls.websocket.StompTopicAccessPolicy
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.classic.spi.ThrowableProxyUtil
 import jakarta.annotation.PostConstruct
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.security.core.Authentication
@@ -25,7 +26,8 @@ class LogWebSocketPublisher(private val messagingTemplate: SimpMessagingTemplate
             level = event.level.levelStr,
             logger = event.loggerName,
             thread = event.threadName,
-            message = event.formattedMessage
+            message = event.formattedMessage,
+            stacktrace = event.throwableProxy?.let(ThrowableProxyUtil::asString)
         ))
     }
 

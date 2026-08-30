@@ -23,7 +23,9 @@ class RequestLoggingFilter : OncePerRequestFilter() {
             ?: UUID.randomUUID().toString()
         val startedAt = System.nanoTime()
         var requestFailed = false
-        MDC.put("correlation_id", correlationId)
+        MDC.put(StructuredLog.MDC_CORRELATION_ID, correlationId)
+        MDC.put(StructuredLog.MDC_HTTP_METHOD, request.method)
+        MDC.put(StructuredLog.MDC_HTTP_PATH, request.requestURI)
         response.setHeader("X-Correlation-ID", correlationId)
         try {
             filterChain.doFilter(request, response)
@@ -41,7 +43,9 @@ class RequestLoggingFilter : OncePerRequestFilter() {
                     StructuredLog.audit("http.state_change", "success", "http.path", path)
                 }
             }
-            MDC.remove("correlation_id")
+            MDC.remove(StructuredLog.MDC_CORRELATION_ID)
+            MDC.remove(StructuredLog.MDC_HTTP_METHOD)
+            MDC.remove(StructuredLog.MDC_HTTP_PATH)
         }
     }
 

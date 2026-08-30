@@ -1,6 +1,8 @@
 package de.vinz.openfls.domains.goalTimeEvaluations;
 
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -10,6 +12,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 @ControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class GoalTimeEvaluationExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(NoGoalFoundWithHourTypeException::class)

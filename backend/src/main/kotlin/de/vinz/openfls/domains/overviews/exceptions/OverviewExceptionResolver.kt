@@ -2,6 +2,8 @@ package de.vinz.openfls.domains.overviews.exceptions
 
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -10,6 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.*
 
 @ControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class OverviewExceptionResolver: ResponseEntityExceptionHandler() {
     @ExceptionHandler
     fun overviewIllegalTimeException(ex: IllegalTimeException): ResponseEntity<ErrorMessageModel> {
