@@ -81,10 +81,18 @@ Die aktuelle OpenFLS-Datenbank enthält keine Routinen oder Events. Werden solch
 Objekte später eingeführt, muss der Dump-Aufruf bewusst erweitert werden; MySQL
 benötigt dafür zusätzliche globale Leserechte.
 
-Ein Backup gilt erst nach einem isolierten Restore-Test als belastbar. Dieser
-wird als separater nächster Baustein implementiert und erhält ein eigenes,
-temporäres MySQL-Volume. Der Produktiv-Restore bleibt bis dahin ein berechtigter
-Administrationsvorgang.
+Ein Backup kann mit einem isolierten Restore-Test geprüft werden:
+
+```bash
+scripts/database_restore_test.sh
+```
+
+Der Test verwendet standardmäßig die neueste `.sql.gz`-Sicherung, importiert sie
+in eine eigene temporäre MySQL-Instanz ohne veröffentlichte Ports, prüft Tabellen
+und Flyway-Historie und entfernt Container, Netzwerk und Test-Volume danach
+wieder. Das Ergebnis steht in `status/restore-test-latest.json`. Eine bestimmte
+Sicherung kann als erstes Argument übergeben werden. Der Produktiv-Restore
+bleibt ein berechtigter Administrationsvorgang.
 
 Für Bestandskunden beschreibt [backup-migration.md](backup-migration.md) die
 sichere Umstellung auf den neuen Service vor einem OpenFLS-Release.

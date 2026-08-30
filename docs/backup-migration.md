@@ -106,4 +106,4 @@ Freigabeschwelle.
 Die neue Aufräumroutine entfernt ausschließlich ihre eigenen `.sql.gz`-Dateien
 und zugehörige Metadaten. Vorhandene alte `.tgz`-Sicherungen bleiben erhalten.
 Ihre Übernahme in das externe Kundenarchiv oder ihre kontrollierte Löschung wird
-erst nach dem späteren isolierten Restore-Test entschieden.
+erst nach dem isolierten Restore-Test entschieden.

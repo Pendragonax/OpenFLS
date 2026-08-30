@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
+# Stellt ein Backup in die Produktivdatenbank wieder her. Dieses Skript stoppt
+# den Stack und ist deshalb ausschließlich für berechtigte Administration gedacht.
 
 set -euo pipefail
 
+# Beschreibt Optionen und schützt vor unbeabsichtigter nicht-interaktiver Nutzung.
 usage() {
   cat <<'EOF'
 Usage:
@@ -21,6 +24,7 @@ Environment:
 EOF
 }
 
+# Einheitliche Ausgabe für normale Hinweise, Warnungen und Abbrüche.
 log() {
   echo "[INFO] $*"
 }
@@ -39,6 +43,7 @@ require_command() {
   command -v "$cmd" >/dev/null 2>&1 || die "required command not found: $cmd"
 }
 
+# Hält alle Optionen und Eingaben getrennt, bevor eine Docker-Aktion erfolgt.
 VERIFY_CHECKSUM=true
 DO_PRE_BACKUP=true
 ASSUME_YES=false
@@ -46,6 +51,7 @@ SOURCE_FILE=""
 COMPOSE_FILE_PATH="${COMPOSE_FILE_PATH:-}"
 RESTORE_STOP_SERVICES="${RESTORE_STOP_SERVICES:-}"
 
+# Liest Kommandozeilenoptionen und akzeptiert genau eine Sicherungsdatei.
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -y|--yes)
@@ -89,12 +95,14 @@ done
   die "missing backup file"
 }
 
+# Unterstützt beide Compose-Varianten.
 if command -v docker-compose >/dev/null 2>&1; then
   COMPOSE=(docker-compose)
 else
   COMPOSE=(docker compose)
 fi
 
+# Wählt bei Bedarf interaktiv den passenden Betriebs-Scope aus.
 choose_compose_file() {
   local defaults=(
     "docker/docker-compose.yml"
@@ -141,10 +149,12 @@ if [ -z "$COMPOSE_FILE_PATH" ]; then
   choose_compose_file
 fi
 
+# Kapselt alle weiteren Compose-Aufrufe mit der gewählten Datei.
 compose() {
   "${COMPOSE[@]}" -f "$COMPOSE_FILE_PATH" "$@"
 }
 
+# Prüft Werkzeuge und Eingaben, bevor der laufende Stack beeinflusst wird.
 require_command gzip
 require_command sha256sum
 require_command awk
@@ -157,6 +167,7 @@ if [ -n "$RESTORE_STOP_SERVICES" ]; then
   warn "--stop-services/RESTORE_STOP_SERVICES is deprecated and ignored; full stack restart is always used"
 fi
 
+# Validiert komprimierte Sicherungen standardmäßig vor jeder Wiederherstellung.
 if [[ "$SOURCE_FILE" == *.sql.gz ]] && $VERIFY_CHECKSUM; then
   CHECKSUM_FILE="${SOURCE_FILE}.sha256"
   [ -f "$CHECKSUM_FILE" ] || die "checksum file not found: $CHECKSUM_FILE"
@@ -171,6 +182,7 @@ if [[ "$SOURCE_FILE" == *.sql.gz ]] && $VERIFY_CHECKSUM; then
   log "checksum verified for $SOURCE_FILE"
 fi
 
+# Fordert eine ausdrückliche Bestätigung, weil der folgende Ablauf den Stack neu startet.
 if ! $ASSUME_YES; then
   echo "Compose file: $COMPOSE_FILE_PATH"
   echo "Restore will import '$SOURCE_FILE' into service 'db' and perform a full compose restart (down/up)."
@@ -182,6 +194,7 @@ if ! $ASSUME_YES; then
   }
 fi
 
+# Startet den Stack auch nach Fehlern wieder, damit die Anwendung nicht unnötig offline bleibt.
 cleanup() {
   local exit_code="$1"
   if [ "$exit_code" -ne 0 ]; then
@@ -192,12 +205,14 @@ cleanup() {
 }
 trap 'cleanup $?' EXIT
 
+# Erstellt standardmäßig eine Sicherung des aktuellen Stands vor dem Überschreiben.
 if $DO_PRE_BACKUP; then
   [ -f "scripts/database_backup.sh" ] || die "pre-backup script not found: scripts/database_backup.sh"
   log "creating pre-restore safety backup"
   COMPOSE_FILE_PATH="$COMPOSE_FILE_PATH" scripts/database_backup.sh
 fi
 
+# Stoppt den Stack, startet nur MySQL und wartet anschließend auf dessen Bereitschaft.
 log "stopping complete compose stack"
 compose down
 
@@ -215,6 +230,7 @@ until compose exec -T db sh -c 'MYSQL_PWD="$(cat /run/secrets/db_root_password)"
   sleep 2
 done
 
+# Importiert abhängig vom Dateiformat in die konfigurierte Produktivdatenbank.
 log "restoring database from $SOURCE_FILE"
 if [[ "$SOURCE_FILE" == *.sql.gz ]]; then
   gzip -dc "$SOURCE_FILE" | compose exec -T db sh -c \
@@ -230,6 +246,7 @@ else
     'MYSQL_PWD="$(cat /run/secrets/db_root_password)" mysql --binary-mode=1 -uroot "$MYSQL_DATABASE"'
 fi
 
+# Bringt nach erfolgreichem Import alle Dienste wieder online.
 log "starting complete compose stack"
 compose up -d
 
