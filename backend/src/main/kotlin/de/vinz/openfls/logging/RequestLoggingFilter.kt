@@ -15,7 +15,11 @@ import java.util.UUID
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class RequestLoggingFilter : OncePerRequestFilter() {
-    override fun shouldNotFilter(request: HttpServletRequest): Boolean = request.requestURI.startsWith("/ws")
+    // Der STOMP-/WebSocket-Handshake darf nicht durch diesen Filter laufen, sonst
+    // scheitert der Upgrade mit HTTP 400. requestURI enthaelt den Context-Path
+    // (z. B. "/api/ws"), deshalb wird er mit einbezogen.
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean =
+        request.requestURI.startsWith("${request.contextPath}/ws")
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val correlationId = request.getHeader("X-Correlation-ID")

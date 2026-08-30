@@ -1,0 +1,15 @@
+# Der Image-Build fuehrt "./gradlew clean build" selbst aus - lokale Build- und
+# Cache-Artefakte gehoeren nicht in den Build-Kontext.
+build
+.gradle
+.kotlin
+target
+logs
+*.log
+.idea
+*.iml
+.git
+.gitignore
+Dockerfile
+.dockerignore
+run.env

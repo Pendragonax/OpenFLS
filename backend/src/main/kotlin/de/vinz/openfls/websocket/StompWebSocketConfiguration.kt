@@ -31,7 +31,13 @@ class StompWebSocketConfiguration(
     }
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
-        registry.addEndpoint("/ws").setAllowedOriginPatterns(*allowedOriginPatterns.toTypedArray())
+        // Ist keine Origin-Liste konfiguriert (Default-/Prod-Profil hinter dem
+        // Reverse-Proxy), wird "*" verwendet. Das ist hier vertretbar, weil der
+        // STOMP-CONNECT ein gueltiges Bearer-JWT im Frame verlangt (siehe
+        // configureClientInboundChannel) - es werden keine Cookies ausgewertet,
+        // CSWSH ist damit nicht moeglich.
+        val origins = allowedOriginPatterns.ifEmpty { listOf("*") }
+        registry.addEndpoint("/ws").setAllowedOriginPatterns(*origins.toTypedArray())
     }
 
     override fun configureClientInboundChannel(registration: ChannelRegistration) {

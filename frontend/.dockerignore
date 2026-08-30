@@ -1,0 +1,13 @@
+# node_modules wird im Image per "npm ci" neu installiert - niemals aus dem
+# Build-Kontext kopieren (spart ~550 MB Kontext und den langsamen chown-Schritt).
+node_modules
+.angular
+dist
+coverage
+.git
+.gitignore
+*.log
+.vscode
+.idea
+Dockerfile
+.dockerignore

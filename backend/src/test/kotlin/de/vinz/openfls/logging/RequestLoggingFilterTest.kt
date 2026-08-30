@@ -66,6 +66,26 @@ class RequestLoggingFilterTest {
     }
 
     @Test
+    fun doFilter_skipsTheWebSocketHandshakeUnderTheContextPath() {
+        // Given: STOMP endpoint "/ws" served under context path "/api". The filter
+        // must not touch the response, otherwise the upgrade fails with HTTP 400.
+        val handshake = MockHttpServletRequest("GET", "/api/ws")
+        handshake.contextPath = "/api"
+        val handshakeResponse = MockHttpServletResponse()
+        val restCall = MockHttpServletRequest("GET", "/api/employees")
+        restCall.contextPath = "/api"
+        val restResponse = MockHttpServletResponse()
+
+        // When
+        filter.doFilter(handshake, handshakeResponse, MockFilterChain())
+        filter.doFilter(restCall, restResponse, MockFilterChain())
+
+        // Then: the handshake passed through untouched, the REST call was processed
+        assertThat(handshakeResponse.getHeader("X-Correlation-ID")).isNull()
+        assertThat(restResponse.getHeader("X-Correlation-ID")).isNotBlank()
+    }
+
+    @Test
     fun doFilter_whenChainThrows_propagatesExceptionAndStillClearsMdc() {
         // Given
         val request = MockHttpServletRequest("POST", "/api/employees")
