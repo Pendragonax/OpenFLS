@@ -112,3 +112,8 @@ Die neue Aufräumroutine entfernt ausschließlich ihre eigenen `.sql.gz`-Dateien
 und zugehörige Metadaten. Vorhandene alte `.tgz`-Sicherungen bleiben erhalten.
 Ihre Übernahme in das externe Kundenarchiv oder ihre kontrollierte Löschung wird
 erst nach dem isolierten Restore-Test entschieden.
+
+Muss eine solche alte Sicherung (Version ≤ 3.1, Format `.tgz` / `.sql.gz` /
+`.sql`) wieder eingespielt werden, beschreibt der Abschnitt
+[„Wiederherstellung einer alten Sicherung"](backup-operation.md#wiederherstellung-einer-alten-sicherung-version--31)
+in `backup-operation.md` den Ablauf inklusive Flyway-Vorwärtsmigration.

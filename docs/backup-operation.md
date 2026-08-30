@@ -150,6 +150,59 @@ bleibt ein berechtigter Administrationsvorgang.
 Für Bestandskunden beschreibt [backup-migration.md](backup-migration.md) die
 sichere Umstellung auf den neuen Service vor einem OpenFLS-Release.
 
+## Wiederherstellung einer alten Sicherung (Version ≤ 3.1)
+
+`scripts/database_restore.sh` versteht auch die vor dieser Umstellung erzeugten
+Formate: `.tgz` (alter `databack/mysql-backup`-Container), `.sql.gz` (altes
+manuelles Skript) und unkomprimierte `.sql`-Dumps. Ein neues Prüfsummen- oder
+Statusformat wird dafür nicht vorausgesetzt.
+
+1. **Format bestimmen.**
+
+   ```bash
+   file /pfad/zur/alten-sicherung
+   tar tzf /pfad/zur/alten-sicherung 2>/dev/null | head   # bei .tgz: zeigt die enthaltene .sql
+   ```
+
+2. **Einspielen.** Der `--no-pre-backup`-Schalter überspringt das
+   Vorab-Sicherungs-Backup (das über den neuen `backup`-Container/-Benutzer
+   liefe und hier nur stört).
+
+   ```bash
+   COMPOSE_FILE_PATH=docker/docker-compose.yml \
+     scripts/database_restore.sh --no-pre-backup /pfad/zur/alten-sicherung.tgz
+   ```
+
+   - `.tgz` benötigt **kein** `--skip-checksum` (eine Prüfsumme wird nur für
+     `.sql.gz` erwartet). Ein `.sql.gz` **ohne** danebenliegende `.sha256`-Datei
+     wird mit `--skip-checksum` eingespielt.
+   - Bestätigung mit `restore` eingeben, oder `-y` für den nicht-interaktiven
+     Lauf. Das Skript stoppt den Stack, startet nur `db`, legt das Schema an
+     (`CREATE DATABASE IF NOT EXISTS`), importiert und fährt alles wieder hoch.
+
+3. **Für einen reinen Alt-Stand** vorher das Datenvolume leeren, damit keine
+   Tabellen einer neueren Schema-Version zurückbleiben:
+
+   ```bash
+   docker compose -f docker/docker-compose.yml down -v
+   COMPOSE_FILE_PATH=docker/docker-compose.yml \
+     scripts/database_restore.sh --no-pre-backup /pfad/zur/alten-sicherung.tgz
+   ```
+
+4. **Flyway migriert danach vorwärts.** Ein 3.1-Dump bringt `flyway_schema_history`
+   nur bis `V4` mit. Startet anschließend das aktuelle Backend, wendet Flyway
+   automatisch alle seitdem hinzugekommenen Migrationen (`V5` … aufwärts) an –
+   der normale Upgrade-Weg, aber ein großer Sprung. Deshalb:
+
+   - Zuerst **gegen eine Wegwerf-DB testen**: den Dump in eine temporäre
+     MySQL-Instanz importieren und das aktuelle Backend einmal dagegen starten,
+     um zu prüfen, dass alle Migrationen fehlerfrei durchlaufen.
+   - Ein **Downgrade ist danach nicht mehr möglich** – sobald die neuen
+     Migrationen liefen, kann ein älteres Backend nicht mehr gegen die Datenbank.
+     Wer bei der alten Version bleiben will, lässt das alte Backend-Image gegen
+     die wiederhergestellte Datenbank laufen und startet die neuen Migrationen
+     nicht.
+
 ## OpenFLS-Oberfläche
 
 OpenFLS bietet unter `Einstellungen` (nur für die Administrationsrolle) zwei
