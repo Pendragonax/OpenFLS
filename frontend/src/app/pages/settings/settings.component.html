@@ -1,7 +1,15 @@
-<div class="logs-workspace" [class.mobile-tab-filter]="mobileTab === 'filter'" [class.mobile-tab-live]="mobileTab === 'live'" [class.mobile-tab-levels]="mobileTab === 'levels'">
+<div class="logs-workspace" [class.section-backup]="section === 'backup'" [class.mobile-tab-filter]="mobileTab === 'filter'" [class.mobile-tab-live]="mobileTab === 'live'" [class.mobile-tab-levels]="mobileTab === 'levels'">
   <header class="settings-toolbar">
-    <h1>Einstellungen &gt; Protokolle</h1>
+    <h1>Einstellungen &gt; {{ section === 'backup' ? 'Datensicherung' : 'Protokolle' }}</h1>
+    <nav class="section-switch" aria-label="Einstellungsbereich wählen">
+      <button mat-button type="button" [class.active]="section === 'logs'" (click)="selectSection('logs')"><mat-icon>subject</mat-icon> Protokolle</button>
+      <button mat-button type="button" [class.active]="section === 'backup'" (click)="selectSection('backup')"><mat-icon>settings_backup_restore</mat-icon> Datensicherung</button>
+    </nav>
   </header>
+
+  @if (section === 'backup') {
+    <app-backup></app-backup>
+  } @else {
 
   <nav class="mobile-log-tabs" aria-label="Ansicht wählen">
     <button mat-button type="button" [class.active]="mobileTab === 'filter'" (click)="mobileTab = 'filter'"><mat-icon>filter_alt</mat-icon> Filter</button>
@@ -66,6 +74,7 @@
 </div>
 </aside>
 </main>
+  }
 </div>
 
 <ng-template #classLevelModal let-modal>

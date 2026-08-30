@@ -33,11 +33,16 @@ gestartet werden.
    aktualisieren.**
    Der laufende MySQL-Container und das Daten-Volume bleiben unverändert.
 
-3. **Backup-Secret anlegen.**
+3. **Backup-Secret und Statusverzeichnis anlegen.**
    Lege in der Installation `secrets/db_backup_password.secret` mit einem
    zufällig erzeugten, ausschließlich für Backups verwendeten Passwort an.
    Die Datei darf nur für die zuständige Administration lesbar sein und wird
-   nicht versioniert.
+   nicht versioniert. Lege außerdem das Statusverzeichnis an, damit Docker den
+   Bind-Mount-Pfad nicht als `root` erzeugt:
+
+   ```bash
+   mkdir -p docker/backup/status
+   ```
 
 4. **Backup-Konto auf der noch laufenden Datenbank einrichten.**
 

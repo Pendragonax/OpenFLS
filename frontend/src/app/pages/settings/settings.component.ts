@@ -1,4 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs';
 import {LogEntryDto, LogSettingsDto} from '../../shared/dtos/log-entry-dto.model';
@@ -12,6 +13,7 @@ import {DateCompleteSelectionComponent} from '../../shared/components/date-compl
 @Component({selector: 'app-settings', templateUrl: './settings.component.html', styleUrls: ['./settings.component.css'], standalone: false})
 export class SettingsComponent implements OnInit, OnDestroy {
   readonly levels = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
+  section: 'logs' | 'backup' = 'logs';
   entries: LogEntryDto[] = [];
   page = 0;
   pageSize = 100;
@@ -27,9 +29,22 @@ export class SettingsComponent implements OnInit, OnDestroy {
   filter = new UntypedFormGroup({from: new UntypedFormControl(new Date()), to: new UntypedFormControl(new Date()), query: new UntypedFormControl(''), level: new UntypedFormControl(''), logger: new UntypedFormControl(''), thread: new UntypedFormControl(''), all: new UntypedFormControl(false)});
 
   classLevelForm = new UntypedFormGroup({logger: new UntypedFormControl(''), level: new UntypedFormControl('INFO')});
-  constructor(private logs: LogAdministrationService, private modal: NgbModal, private dialog: MatDialog) {}
-  ngOnInit(): void { this.load(); this.liveSubscription = this.logs.liveEntries().subscribe(entry => this.addLiveEntry(entry)); }
+  constructor(
+    private logs: LogAdministrationService,
+    private modal: NgbModal,
+    private dialog: MatDialog,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => this.section = params.get('section') === 'backup' ? 'backup' : 'logs');
+    this.load();
+    this.liveSubscription = this.logs.liveEntries().subscribe(entry => this.addLiveEntry(entry));
+  }
   ngOnDestroy(): void { this.liveSubscription?.unsubscribe(); }
+  selectSection(section: 'logs' | 'backup'): void {
+    this.router.navigate(section === 'backup' ? ['/settings', 'backup'] : ['/settings']);
+  }
   load(): void {
     this.page = 0;
     this.logs.days().subscribe(days => this.days = days);

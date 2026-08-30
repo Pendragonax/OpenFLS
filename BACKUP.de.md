@@ -8,6 +8,9 @@ einschließlich Installation, Status, Alarmierung und Kundenpflichten steht in
 Für bestehende Kundeninstallationen steht der verbindliche Umstellungsablauf in
 [docs/backup-migration.md](docs/backup-migration.md).
 
+OpenFLS zeigt unter `Einstellungen` (Bereiche Protokolle / Datensicherung, nur
+Administrationsrolle) eine Nur-Lese-Statusübersicht des Backup-Dienstes.
+
 Der bestehende manuelle Produktiv-Restore bleibt bis zur Einführung des
 separaten Restore-Test- und Restore-Prozesses ein ausschließlich berechtigter
 Administrationsvorgang.

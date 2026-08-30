@@ -7,5 +7,8 @@ including installation, status, alerting, and customer responsibilities, are in
 For existing customer installations, follow
 [docs/backup-migration.md](docs/backup-migration.md).
 
+OpenFLS shows a read-only status view of the backup service under
+`Einstellungen` (Protokolle / Datensicherung, admin role only).
+
 The existing manual production restore remains a privileged administrative
 procedure until the separate restore-test and restore workflow is introduced.

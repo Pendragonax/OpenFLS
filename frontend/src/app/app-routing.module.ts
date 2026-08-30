@@ -38,6 +38,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: '', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'settings/:section', component: SettingsComponent, canActivate: [AuthGuard, AdminGuard] },
   { path: 'employees', component: EmployeesComponent, canActivate: [AuthGuard] },
   { path: 'employees/new', component: EmployeeNewComponent, canActivate: [AuthGuard] },
   { path: 'employees/detail/:id', component: EmployeeDetailComponent, canActivate: [AuthGuard] },

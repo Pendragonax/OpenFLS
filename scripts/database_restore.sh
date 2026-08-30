@@ -206,10 +206,22 @@ cleanup() {
 trap 'cleanup $?' EXIT
 
 # Erstellt standardmäßig eine Sicherung des aktuellen Stands vor dem Überschreiben.
+# Läuft der Backup-Dienst nicht (z. B. gestoppter Stack oder nach 'down -v'),
+# wird der Schritt mit Warnung übersprungen - ein Restore soll daran nicht
+# scheitern. Wer den Schritt gar nicht will, nutzt --no-pre-backup.
 if $DO_PRE_BACKUP; then
-  [ -f "scripts/database_backup.sh" ] || die "pre-backup script not found: scripts/database_backup.sh"
-  log "creating pre-restore safety backup"
-  COMPOSE_FILE_PATH="$COMPOSE_FILE_PATH" scripts/database_backup.sh
+  pre_backup_script="$(cd "$(dirname "$0")" && pwd)/database_backup.sh"
+  [ -f "$pre_backup_script" ] || pre_backup_script="scripts/database_backup.sh"
+  if [ -z "$(compose ps -q backup 2>/dev/null)" ]; then
+    warn "backup service is not running - skipping the pre-restore safety backup"
+    warn "make sure an independent copy of the current database exists before continuing"
+  elif [ ! -f "$pre_backup_script" ]; then
+    warn "pre-backup script not found ($pre_backup_script) - skipping the pre-restore safety backup"
+  else
+    log "creating pre-restore safety backup"
+    COMPOSE_FILE_PATH="$COMPOSE_FILE_PATH" "$pre_backup_script" \
+      || warn "pre-restore safety backup failed - continuing with the restore as requested"
+  fi
 fi
 
 # Stoppt den Stack, startet nur MySQL und wartet anschließend auf dessen Bereitschaft.
@@ -229,6 +241,12 @@ until compose exec -T db sh -c 'MYSQL_PWD="$(cat /run/secrets/db_root_password)"
   fi
   sleep 2
 done
+
+# Stellt das Zielschema sicher - der Dump enthält kein CREATE DATABASE, und nach
+# 'down -v' kann die Datenbank leer oder frisch initialisiert sein.
+log "ensuring target database exists"
+compose exec -T db sh -c \
+  'MYSQL_PWD="$(cat /run/secrets/db_root_password)" mysql -uroot -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`"'
 
 # Importiert abhängig vom Dateiformat in die konfigurierte Produktivdatenbank.
 log "restoring database from $SOURCE_FILE"

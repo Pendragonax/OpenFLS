@@ -49,6 +49,7 @@ import {MatDatepickerModule} from "@angular/material/datepicker";
 import {MatNativeDateModule} from "@angular/material/core";
 import {ShowOnRoleDirective} from './directives/show-on-role.directive';
 import {SettingsComponent} from './pages/settings/settings.component';
+import {BackupComponent} from './pages/backup/backup.component';
 import {SponsorComponent} from './pages/sponsor/sponsor.component';
 import {SponsorDetailComponent} from './pages/sponsor/components/sponsor-detail/sponsor-detail.component';
 import {ClientComponent} from './pages/client/client.component';
@@ -181,6 +182,7 @@ import {MarkdownModule} from "ngx-markdown";
         ContingentsComponent,
         ShowOnRoleDirective,
         SettingsComponent,
+        BackupComponent,
         SponsorComponent,
         SponsorDetailComponent,
         ClientComponent,

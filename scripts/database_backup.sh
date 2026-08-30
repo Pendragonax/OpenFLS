@@ -17,4 +17,4 @@ COMPOSE_FILE_PATH="${COMPOSE_FILE_PATH:-docker/docker-compose.yml}"
 [ -f "$COMPOSE_FILE_PATH" ] || { echo "Compose file not found: $COMPOSE_FILE_PATH" >&2; exit 2; }
 
 # Ersetzt diesen Prozess durch den eigentlichen Einmal-Backup-Job im Container.
-exec "${COMPOSE[@]}" -f "$COMPOSE_FILE_PATH" exec -T backup /usr/local/bin/openfls-backup-job
+exec "${COMPOSE[@]}" -f "$COMPOSE_FILE_PATH" exec -T backup bash /opt/openfls-scripts/database_backup_job.sh

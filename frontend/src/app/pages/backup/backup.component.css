@@ -1,0 +1,383 @@
+/* Visuelles Vokabular bewusst an settings.component.css (Protokolle) angelehnt.
+   Kein eigener Scrollbereich: die Ansicht wächst und nutzt den Seiten-Scroll. */
+.backup-view {
+  padding: .75rem;
+  background: #f7f9fc;
+  color: #2f3a4b;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.backup-notice {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .5rem .85rem;
+  border: 1px solid rgba(0, 0, 0, .1);
+  border-radius: 4px;
+  background: #fff;
+  font-size: .8rem;
+}
+
+.backup-notice strong {
+  font-size: .85rem;
+}
+
+.backup-notice .spacer {
+  flex: 1;
+}
+
+.backup-notice .updated {
+  color: #687386;
+  font-size: .74rem;
+}
+
+.backup-notice button {
+  min-height: 30px;
+  padding: 0 .55rem;
+  background: #fff;
+  color: #31435a;
+  font-size: .74rem;
+  border-color: rgba(0, 0, 0, .18);
+}
+
+.backup-notice button mat-icon {
+  margin-right: .15rem;
+  font-size: 17px;
+  width: 17px;
+  height: 17px;
+}
+
+.state-dot {
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.state-ok .state-dot {
+  background: #2e9d5b;
+  box-shadow: 0 0 0 3px #e3f5ea;
+}
+
+.state-warn .state-dot {
+  background: #d09500;
+  box-shadow: 0 0 0 3px #fbf1d8;
+}
+
+.state-error .state-dot {
+  background: #c94a43;
+  box-shadow: 0 0 0 3px #f7dedc;
+}
+
+.state-unknown .state-dot {
+  background: #8a97a8;
+  box-shadow: 0 0 0 3px #e9edf2;
+}
+
+.state-ok {
+  border-left: 4px solid #228b5c;
+}
+
+.state-warn {
+  border-left: 4px solid #d09500;
+}
+
+.state-error {
+  border-left: 4px solid #c94a43;
+}
+
+.state-unknown {
+  border-left: 4px solid #8a97a8;
+}
+
+.backup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: .75rem;
+}
+
+.panel-surface {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, .12);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 60px;
+  padding: .6rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
+  background: #fbfcfe;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #2e3d51;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.panel-header p {
+  margin: .15rem 0 0;
+  color: #687386;
+  font-size: .76rem;
+}
+
+.panel-body {
+  padding: .75rem 1rem;
+}
+
+dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+dl > div {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: .5rem;
+  align-items: baseline;
+}
+
+dt {
+  color: #687386;
+  font-size: .78rem;
+}
+
+dd {
+  margin: 0;
+  font-size: .82rem;
+}
+
+code {
+  font-family: monospace;
+  font-size: .76rem;
+  color: #345b82;
+  word-break: break-word;
+}
+
+code.break {
+  word-break: break-all;
+}
+
+.hint-mono {
+  font-family: monospace;
+  font-size: .74rem;
+  color: #687386;
+}
+
+.badge {
+  display: inline-block;
+  padding: .1rem .45rem;
+  border-radius: .25rem;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: rgba(34, 139, 92, .12);
+  color: #228b5c;
+}
+
+.badge-failure {
+  background: rgba(201, 74, 67, .12);
+  color: #c94a43;
+}
+
+.badge-unknown {
+  background: #eef2f7;
+  color: #53657a;
+}
+
+/* Handlungshinweis bei Fehlern */
+.hint-panel {
+  border-color: #e7bdb9;
+}
+
+.hint-head {
+  background: #fdf1f0;
+  border-bottom-color: #e7bdb9;
+}
+
+.hint-head h2 {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  color: #a3392f;
+}
+
+.hint-head mat-icon {
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+}
+
+.hint-panel .panel-body p {
+  margin: 0 0 .5rem;
+  font-size: .84rem;
+  line-height: 1.5;
+}
+
+.hint-panel pre {
+  margin: .3rem 0;
+  padding: .5rem .6rem;
+  border-radius: 3px;
+  background: #2f3a4b;
+  color: #eaf0f7;
+  font-size: .76rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.hint-foot {
+  margin-top: .6rem !important;
+  color: #687386;
+  font-size: .78rem !important;
+}
+
+/* Wiederherstellung */
+.restore-header {
+  cursor: pointer;
+}
+
+.restore-body {
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.restore-body ol {
+  margin: .5rem 0;
+  padding-left: 1.2rem;
+}
+
+.restore-body li {
+  margin: .35rem 0;
+}
+
+.restore-body pre {
+  margin: .3rem 0 0;
+  padding: .45rem .55rem;
+  border-left: 2px solid rgba(0, 0, 0, .2);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, .05);
+  color: #3b4657;
+  font-size: .74rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.restore-note {
+  display: flex;
+  align-items: flex-start;
+  gap: .35rem;
+  margin: .6rem 0 0;
+  color: #687386;
+  font-size: .78rem;
+}
+
+.restore-note mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+/* Verlauf – Gitter wie .log-list / .log-table-head, aber ohne inneren Scroll. */
+.history-scroll {
+  overflow-x: auto;
+}
+
+.history-head,
+.history-row {
+  display: grid;
+  grid-template-columns: 160px 110px 110px minmax(200px, 1fr);
+  gap: .65rem;
+  padding: .5rem .75rem;
+}
+
+.history-head {
+  background: #f1f4f8;
+  border-bottom: 1px solid rgba(0, 0, 0, .1);
+  color: #687386;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.history-row {
+  align-items: start;
+  border-bottom: 1px solid rgba(0, 0, 0, .09);
+  border-left: 4px solid transparent;
+  font-family: monospace;
+  font-size: .78rem;
+}
+
+.history-row:hover {
+  background: #f6f8fb;
+}
+
+.history-row.row-success {
+  border-left-color: #228b5c;
+  background: rgba(34, 139, 92, .06);
+}
+
+.history-row.row-failure {
+  border-left-color: #c94a43;
+  background: rgba(201, 74, 67, .08);
+}
+
+.history-row.row-unknown {
+  border-left-color: #8a97a8;
+}
+
+.history-row time {
+  color: #687386;
+}
+
+.history-row strong {
+  font-weight: 600;
+}
+
+.history-row .details {
+  min-width: 0;
+  color: #53657a;
+  overflow-wrap: anywhere;
+}
+
+.history-row .msg {
+  display: block;
+  color: #687386;
+  font-size: .72rem;
+}
+
+.empty-state {
+  padding: 1.5rem;
+  margin: 0;
+  text-align: center;
+  color: #687386;
+  font-size: .82rem;
+}
+
+@media (max-width: 700px) {
+  .history-head {
+    display: none;
+  }
+
+  .history-row {
+    grid-template-columns: 1fr auto;
+    gap: .3rem .6rem;
+  }
+
+  .history-row .details {
+    grid-column: 1 / -1;
+  }
+}

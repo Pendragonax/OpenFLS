@@ -7,9 +7,12 @@ umask 077
 # Wählt den auf dem System verfügbaren Compose-Befehl.
 if command -v docker-compose >/dev/null 2>&1; then COMPOSE=(docker-compose); else COMPOSE=(docker compose); fi
 
+# Ermittelt den Projektstamm unabhängig vom aktuellen Arbeitsverzeichnis.
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 # Konfiguriert Ablage, eigene Test-Compose-Datei und isolierten Projektnamen.
-BACKUP_DIR="${BACKUP_DIR:-$PWD/docker/backup}"
-COMPOSE_FILE="${RESTORE_TEST_COMPOSE_FILE:-docker/docker-compose-restore-test.yml}"
+BACKUP_DIR="${BACKUP_DIR:-$ROOT_DIR/docker/backup}"
+COMPOSE_FILE="${RESTORE_TEST_COMPOSE_FILE:-$ROOT_DIR/docker/docker-compose-restore-test.yml}"
 PROJECT_NAME="${RESTORE_TEST_PROJECT_NAME:-openfls-restore-test}"
 SOURCE_FILE="${1:-}"
 
@@ -31,7 +34,7 @@ mkdir -p "$STATUS_DIR"
 started_epoch="$(date +%s)"
 write_status() {
   local outcome="$1" message="$2"
-  printf '{"timestamp":"%s","level":"%s","event_name":"restore_test.completed","outcome":"%s","service":"openfls-restore-test","message":"%s","backup_file":"%s","duration_seconds":%s}\n' \
+  printf '{"schema_version":1,"timestamp":"%s","level":"%s","event_name":"restore_test.completed","outcome":"%s","service":"openfls-restore-test","message":"%s","backup_file":"%s","duration_seconds":%s}\n' \
     "$(date -u +'%Y-%m-%dT%H:%M:%S.000Z')" "$( [ "$outcome" = success ] && echo INFO || echo ERROR )" "$outcome" "$message" "$(basename "$SOURCE_FILE")" "$(( $(date +%s) - started_epoch ))" > "$STATUS_DIR/restore-test-latest.json"
   cat "$STATUS_DIR/restore-test-latest.json" >> "$STATUS_DIR/restore-test-history.jsonl"
 }
