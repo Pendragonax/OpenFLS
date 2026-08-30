@@ -16,28 +16,37 @@ services:
 
   backup:
     container_name: open_fls_backup
-    image: databack/mysql-backup@sha256:6acb182b8cfb1e05f3c486fd8f6c1d72897ef636eb413a5e7f1c6a3f5def3033
-    user: "${UID:-1000}:${GID:-1000}"
+    image: mysql:8.4.11
     restart: always
+    user: "${UID:-1000}:${GID:-1000}"
     env_file: docker-compose.env
-    environment:
-      DB_SERVER: ${MYSQL_HOST:-open_fls_db}
-      DB_PORT: "3306"
-      DB_USER: root
-      DB_PASS_FILE: /run/secrets/db_root_password
-      DB_DUMP_INCLUDE: ${MYSQL_DATABASE:-openfls}
-      DB_DUMP_TARGET: /backup
-      DB_DUMP_FREQUENCY: ${BACKUP_INTERVAL_MINUTES:-1440}
-      DB_DUMP_RETENTION: ${BACKUP_RETENTION_DAYS:-30}d
     volumes:
       - ./backup:/backup
+      - type: bind
+        source: ../scripts/database_backup_job.sh
+        target: /usr/local/bin/openfls-backup-job
+        read_only: true
+      - type: bind
+        source: ../scripts/database_backup_service.sh
+        target: /usr/local/bin/openfls-backup-service
+        read_only: true
+      - type: bind
+        source: ../scripts/database_backup_healthcheck.sh
+        target: /usr/local/bin/openfls-backup-healthcheck
+        read_only: true
     depends_on:
       - db
     secrets:
-      - db_root_password
+      - db_backup_password
     networks:
       - open-fls-network
-    command: ["dump"]
+    command: ["bash", "/usr/local/bin/openfls-backup-service"]
+    healthcheck:
+      test: ["CMD-SHELL", "/usr/local/bin/openfls-backup-healthcheck"]
+      interval: 5m
+      timeout: 10s
+      retries: 2
+      start_period: 10m
 
   adminer:
     container_name: open_fls_adminer
@@ -107,6 +116,8 @@ secrets:
     file: ../secrets/db_root_password.secret
   db_user:
     file: ../secrets/db_user.secret
+  db_backup_password:
+    file: ../secrets/db_backup_password.secret
   jwt_private_key:
     file: ../secrets/jwt_private_key.secret
   jwt_public_key:
