@@ -5,7 +5,7 @@ set -Eeuo pipefail
 
 # Liest ausschließlich die vom Backup-Job erzeugte Statusdatei.
 STATUS_FILE="${BACKUP_STATUS_DIR:-/backup/status}/latest.json"
-BACKUP_MAX_AGE_HOURS="${BACKUP_MAX_AGE_HOURS:-7}"
+BACKUP_MAX_AGE_HOURS="${BACKUP_MAX_AGE_HOURS:-26}"
 
 # Ungültige Konfiguration oder fehlender Status bedeutet: Container ist ungesund.
 case "$BACKUP_MAX_AGE_HOURS" in *[!0-9]*|'') exit 1;; esac

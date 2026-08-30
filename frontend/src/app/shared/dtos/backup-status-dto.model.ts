@@ -20,7 +20,12 @@ export interface BackupRunDto {
 
 export interface BackupConfigDto {
   database: string | null;
-  intervalSeconds: number | null;
+  /** Local time of day the backup runs, `HH:MM`. */
+  backupTime: string | null;
+  /** IANA timezone `backupTime` is interpreted in. */
+  timezone: string | null;
+  /** Whole days between two backups (>= 1); 1 means daily. */
+  intervalDays: number | null;
   retryIntervalSeconds: number | null;
   retentionDays: number | null;
   historyMaxEntries: number | null;
@@ -36,6 +41,8 @@ export interface BackupStatusDto {
   maxAgeHours: number;
   overall: BackupOverall;
   config: BackupConfigDto | null;
+  /** ISO-8601 instant of the next scheduled daily backup, or null. */
+  nextExpectedBackup: string | null;
 }
 
 export interface BackupHistoryEntryDto {

@@ -217,26 +217,20 @@ export class BackupComponent implements OnInit, OnDestroy {
     }
   }
 
-  nextExpectedBackup(): Date | null {
-    const timestamp = this.status?.lastBackup?.timestamp;
-    const intervalSeconds = this.status?.config?.intervalSeconds;
-    if (!timestamp || !intervalSeconds) {
-      return null;
-    }
-    const base = new Date(timestamp).getTime();
-    if (Number.isNaN(base)) {
-      return null;
-    }
-    return new Date(base + intervalSeconds * 1000);
-  }
-
   configRows(config: BackupConfigDto | null | undefined): ConfigRow[] {
     if (!config) {
       return [];
     }
+    const zoneSuffix = config.timezone ? ` (${config.timezone})` : '';
+    const cadence = (config.intervalDays ?? 1) <= 1
+      ? 'täglich'
+      : `alle ${config.intervalDays} Tage`;
+    const schedule = config.backupTime
+      ? `${cadence} um ${config.backupTime} Uhr${zoneSuffix}`
+      : '–';
     return [
       {label: 'Datenbank', value: config.database ?? '–'},
-      {label: 'Intervall', value: this.formatEvery(config.intervalSeconds)},
+      {label: 'Zeitplan', value: schedule},
       {label: 'Wiederholung nach Fehler', value: this.formatEvery(config.retryIntervalSeconds)},
       {label: 'Lokale Aufbewahrung', value: config.retentionDays != null ? `${config.retentionDays} Tage` : '–'},
       {label: 'Verlauf (max. Einträge)', value: config.historyMaxEntries != null ? String(config.historyMaxEntries) : '–'},

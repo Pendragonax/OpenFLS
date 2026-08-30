@@ -30,8 +30,12 @@ data class BackupRunDto(
  */
 data class BackupConfigDto(
     val database: String?,
-    /** Seconds between scheduled backups. */
-    val intervalSeconds: Long?,
+    /** Local time of day the backup runs, `HH:MM`. */
+    val backupTime: String?,
+    /** IANA timezone [backupTime] is interpreted in, e.g. `Europe/Berlin`. */
+    val timezone: String?,
+    /** Whole days between two backups (>= 1); 1 means daily. */
+    val intervalDays: Long?,
     /** Seconds the scheduler waits after a failed run before retrying. */
     val retryIntervalSeconds: Long?,
     /** Local retention of dump files, in days. */
@@ -57,7 +61,9 @@ data class BackupStatusDto(
     val maxAgeHours: Long,
     /** `ok`, `overdue`, `failed` or `unknown`. */
     val overall: String,
-    val config: BackupConfigDto?
+    val config: BackupConfigDto?,
+    /** ISO-8601 instant of the next scheduled daily backup, or `null` when unknown. */
+    val nextExpectedBackup: String?
 )
 
 /** One entry of the merged backup / restore-test history. */

@@ -35,7 +35,8 @@ class BackupStatusControllerWebMvcTest {
                 backupOverdue = false,
                 maxAgeHours = 7,
                 overall = "ok",
-                config = null
+                config = null,
+                nextExpectedBackup = null
             )
         )
 

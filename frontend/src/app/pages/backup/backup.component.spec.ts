@@ -23,15 +23,18 @@ describe('BackupComponent', () => {
     },
     lastRestoreTest: null,
     backupOverdue: false,
-    maxAgeHours: 7,
+    maxAgeHours: 26,
     overall: 'ok',
+    nextExpectedBackup: '2026-08-31T00:30:00.000Z',
     config: {
       database: 'openfls',
-      intervalSeconds: 21600,
+      backupTime: '02:30',
+      timezone: 'Europe/Berlin',
+      intervalDays: 1,
       retryIntervalSeconds: 300,
       retentionDays: 14,
-      historyMaxEntries: 1000,
-      maxAgeHours: 7,
+      historyMaxEntries: 100,
+      maxAgeHours: 26,
       staleLockSeconds: 43200,
       generatedAt: '2026-08-30T00:00:00.000Z'
     }
@@ -61,7 +64,7 @@ describe('BackupComponent', () => {
     expect(component).toBeTruthy();
     expect(component.status?.overall).toBe('ok');
     expect(component.history.length).toBe(2);
-    expect(component.status?.config?.intervalSeconds).toBe(21600);
+    expect(component.status?.config?.backupTime).toBe('02:30');
     expect(component.loading).toBe(false);
   });
 
@@ -78,23 +81,18 @@ describe('BackupComponent', () => {
     expect(component.formatDuration(null)).toBe('–');
   });
 
-  it('formatEvery renders hours and minutes', () => {
-    expect(component.formatEvery(21600)).toBe('alle 6 Stunden');
-    expect(component.formatEvery(3600)).toBe('jede Stunde');
+  it('formatEvery renders minutes for the retry interval', () => {
     expect(component.formatEvery(300)).toBe('alle 5 Minuten');
+    expect(component.formatEvery(3600)).toBe('jede Stunde');
     expect(component.formatEvery(null)).toBe('–');
   });
 
-  it('nextExpectedBackup adds the interval to the last backup timestamp', () => {
-    const next = component.nextExpectedBackup();
-    expect(next).not.toBeNull();
-    expect(next!.toISOString()).toBe('2026-08-30T08:00:00.000Z');
-  });
-
-  it('configRows lists the effective configuration', () => {
+  it('configRows shows the schedule with time, timezone and cadence', () => {
     const rows = component.configRows(status.config);
     expect(rows.find(r => r.label === 'Lokale Aufbewahrung')?.value).toBe('14 Tage');
-    expect(rows.find(r => r.label === 'Intervall')?.value).toBe('alle 6 Stunden');
+    expect(rows.find(r => r.label === 'Zeitplan')?.value).toBe('täglich um 02:30 Uhr (Europe/Berlin)');
+    expect(component.configRows({...status.config!, intervalDays: 2}).find(r => r.label === 'Zeitplan')?.value)
+      .toBe('alle 2 Tage um 02:30 Uhr (Europe/Berlin)');
   });
 
   it('failureHint is null while the backup is healthy', () => {

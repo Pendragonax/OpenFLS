@@ -13,6 +13,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 /**
  * Reads the operational status of the external backup service from its status
@@ -59,7 +63,32 @@ class BackupStatusService(
             overdue -> "overdue"
             else -> "ok"
         }
-        return BackupStatusDto(lastBackup, lastRestoreTest, overdue, maxAgeHours, overall, readConfig())
+        val config = readConfig()
+        return BackupStatusDto(
+            lastBackup, lastRestoreTest, overdue, maxAgeHours, overall, config,
+            nextExpectedBackup(config, lastBackup)
+        )
+    }
+
+    /**
+     * Next time a backup is expected: the configured time of day, on the first
+     * date that is both today-or-later and at least [BackupConfigDto.intervalDays]
+     * calendar days after the last successful backup.
+     */
+    private fun nextExpectedBackup(config: BackupConfigDto?, lastBackup: BackupRunDto?): String? {
+        val localTime = config?.backupTime?.let { runCatching { LocalTime.parse(it) }.getOrNull() } ?: return null
+        val zone = runCatching { ZoneId.of(config.timezone ?: "UTC") }.getOrElse { ZoneId.of("UTC") }
+        val intervalDays = (config.intervalDays ?: 1L).coerceAtLeast(1L)
+        val now = ZonedDateTime.now(zone)
+        val lastSuccessDate = lastBackup
+            ?.takeIf { it.outcome == "success" }
+            ?.timestamp
+            ?.let { runCatching { Instant.parse(it) }.getOrNull() }
+            ?.atZone(zone)?.toLocalDate()
+        val earliestDate = lastSuccessDate?.plusDays(intervalDays) ?: now.toLocalDate()
+        var next = maxOf(earliestDate, now.toLocalDate()).atTime(localTime).atZone(zone)
+        if (!next.isAfter(now)) next = next.plusDays(1)
+        return next.toInstant().toString()
     }
 
     fun history(limit: Int): List<BackupHistoryEntryDto> {
@@ -85,7 +114,9 @@ class BackupStatusService(
         val node = readSingleObject(BACKUP_CONFIG) ?: return null
         return BackupConfigDto(
             database = node.textOrNull("database"),
-            intervalSeconds = node.longOrNull("interval_seconds"),
+            backupTime = node.textOrNull("backup_time"),
+            timezone = node.textOrNull("timezone"),
+            intervalDays = node.longOrNull("interval_days"),
             retryIntervalSeconds = node.longOrNull("retry_interval_seconds"),
             retentionDays = node.longOrNull("retention_days"),
             historyMaxEntries = node.longOrNull("history_max_entries"),

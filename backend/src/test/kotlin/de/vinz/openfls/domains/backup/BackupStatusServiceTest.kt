@@ -199,28 +199,53 @@ class BackupStatusServiceTest {
         assertThat(history.first().outcome).isEqualTo("success")
     }
 
+    private fun configJson(intervalDays: Int = 1) =
+        """{"schema_version":1,"database":"openfls","backup_time":"02:30","timezone":"Europe/Berlin","interval_days":$intervalDays,"retry_interval_seconds":300,"retention_days":14,"history_max_entries":100,"max_age_hours":26,"stale_lock_seconds":43200,"generated_at":"2026-08-30T13:00:00.000Z"}"""
+
     @Test
     fun status_readsConfigJson() {
         write("latest.json", backupLine(Instant.now().toString()))
-        write(
-            "config.json",
-            """{"database":"openfls","interval_seconds":21600,"retry_interval_seconds":300,"retention_days":14,"history_max_entries":1000,"max_age_hours":7,"stale_lock_seconds":43200,"generated_at":"2026-08-30T13:00:00.000Z"}"""
-        )
+        write("config.json", configJson(intervalDays = 3))
 
         val config = service().status().config
 
         assertThat(config).isNotNull
-        assertThat(config?.intervalSeconds).isEqualTo(21600)
+        assertThat(config?.backupTime).isEqualTo("02:30")
+        assertThat(config?.timezone).isEqualTo("Europe/Berlin")
+        assertThat(config?.intervalDays).isEqualTo(3)
         assertThat(config?.retentionDays).isEqualTo(14)
         assertThat(config?.retryIntervalSeconds).isEqualTo(300)
         assertThat(config?.database).isEqualTo("openfls")
     }
 
     @Test
-    fun status_withoutConfigJson_hasNullConfig() {
+    fun status_withoutConfigJson_hasNullConfigAndNextExpectedBackup() {
         write("latest.json", backupLine(Instant.now().toString()))
 
-        assertThat(service().status().config).isNull()
+        val status = service().status()
+        assertThat(status.config).isNull()
+        assertThat(status.nextExpectedBackup).isNull()
+    }
+
+    @Test
+    fun status_nextExpectedBackup_isTheConfiguredTimeAndRespectsTheDayInterval() {
+        write("latest.json", backupLine(Instant.now().toString()))
+        write("config.json", configJson(intervalDays = 1))
+        val daily = java.time.Instant.parse(service().status().nextExpectedBackup)
+
+        write("config.json", configJson(intervalDays = 3))
+        val everyThirdDay = java.time.Instant.parse(service().status().nextExpectedBackup)
+
+        // Both land on 02:30 Europe/Berlin (00:30 or 01:30 UTC depending on DST).
+        for (instant in listOf(daily, everyThirdDay)) {
+            assertThat(instant).isAfter(java.time.Instant.now())
+            assertThat(instant.atZone(java.time.ZoneOffset.UTC).hour).isIn(0, 1)
+            assertThat(instant.atZone(java.time.ZoneOffset.UTC).minute).isEqualTo(30)
+        }
+        // interval 1 -> ~1 day out (last success was today); interval 3 -> ~3 days out.
+        assertThat(daily).isBefore(java.time.Instant.now().plus(java.time.Duration.ofHours(48)))
+        assertThat(everyThirdDay).isAfter(daily.plus(java.time.Duration.ofHours(24)))
+        assertThat(everyThirdDay).isBefore(java.time.Instant.now().plus(java.time.Duration.ofDays(5)))
     }
 
     @Test

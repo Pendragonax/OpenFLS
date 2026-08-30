@@ -36,7 +36,7 @@
             <div><dt>Ergebnis</dt><dd><span class="badge" [ngClass]="'badge-' + (backup.outcome || 'unknown')">{{ outcomeLabel(backup.outcome) }}</span></dd></div>
             <div><dt>Größe</dt><dd>{{ formatBytes(backup.sizeBytes) }}</dd></div>
             <div><dt>Dauer</dt><dd>{{ formatDuration(backup.durationSeconds) }}</dd></div>
-            <div><dt>Nächste erwartet</dt><dd>{{ nextExpectedBackup() ? (nextExpectedBackup() | date:'dd.MM.yyyy HH:mm') : '–' }}</dd></div>
+            <div><dt>Nächste erwartet</dt><dd>{{ status?.nextExpectedBackup ? (status?.nextExpectedBackup | date:'dd.MM.yyyy HH:mm') : '–' }}</dd></div>
             <div><dt>Datei</dt><dd><code>{{ backup.backupFile || '–' }}</code></dd></div>
             <div><dt>SHA-256</dt><dd><code class="break">{{ backup.sha256 || '–' }}</code></dd></div>
           </dl>

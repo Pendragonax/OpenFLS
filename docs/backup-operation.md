@@ -3,8 +3,15 @@
 ## Einfaches Betriebsmodell
 
 Der Compose-Service `backup` startet zusammen mit OpenFLS und bleibt dauerhaft
-aktiv. Er erstellt beim Start einen logischen MySQL-Dump und danach alle sechs
-Stunden. Bei einem Fehler wartet er fünf Minuten und versucht es erneut.
+aktiv. Er prüft jeden Tag zur konfigurierten Uhrzeit (`BACKUP_TIME`, Standard
+`02:30` in `BACKUP_TIMEZONE`, Standard `Europe/Berlin`), ob seit dem letzten
+erfolgreichen Backup mindestens `BACKUP_INTERVAL_DAYS` Kalendertage vergangen
+sind, und erstellt in diesem Fall genau einen logischen MySQL-Dump.
+`BACKUP_INTERVAL_DAYS=1` bedeutet täglich, `2` alle 48 Stunden usw.; Werte
+kleiner als `1` gelten als `1`. Bei einem Fehler wird alle
+`BACKUP_RETRY_INTERVAL_SECONDS` (Standard fünf Minuten) wiederholt, bis der Lauf
+erfolgreich ist. Ist beim Start bereits ein Backup fällig (oder liegt noch
+keines vor), wird es sofort einmal nachgeholt.
 
 Es sind keine Systemd-Dienste, Host-Timer oder zusätzlichen Konfigurationsdateien
 erforderlich. Die Backups liegen eindeutig unter `docker/backup`, relativ zur
@@ -65,7 +72,7 @@ Dumpen nötigen Rechte für Views und Trigger.
 `status/latest.json` enthält das jüngste Ergebnis; `status/history.jsonl` hält
 bis zu 1.000 abgeschlossene Läufe fest (eine JSON-Zeile je Lauf, mit
 abschließendem Zeilenumbruch); `status/config.json` enthält die effektive
-Betriebskonfiguration (Intervall, Aufbewahrung, Grenzwerte) und wird beim Start
+Betriebskonfiguration (Backup-Uhrzeit, Zeitzone, Abstand in Tagen, Aufbewahrung, Grenzwerte) und wird beim Start
 des Backup-Dienstes geschrieben. Diese Dateien enthalten weder Zugangsdaten noch
 Fachdaten und sind die Datenquelle für die OpenFLS-Oberfläche.
 
@@ -88,7 +95,7 @@ erhöht, nicht bei rein additiven Feldern.
 
 Der Backup-Container erhält den Status `unhealthy`, wenn kein erfolgreiches
 Backup vorliegt, ein Lauf fehlgeschlagen ist oder das letzte erfolgreiche Backup
-älter als sieben Stunden ist. Die zuständige Administration kann den Zustand und
+älter als `BACKUP_MAX_AGE_HOURS` (Standard 26 Stunden) ist. Die zuständige Administration kann den Zustand und
 die strukturierten Logs mit folgenden Standardbefehlen prüfen:
 
 ```bash
@@ -106,13 +113,20 @@ Die Werte stehen zentral in `docker/docker-compose.env` und werden über
 `env_file` vom `backup`-Service gelesen. Sie können dort bei Bedarf angepasst
 werden:
 
-- `BACKUP_INTERVAL_SECONDS=21600` – reguläres Intervall (sechs Stunden)
+- `BACKUP_TIME=02:30` – Uhrzeit des Backups (HH:MM, 24h)
+- `BACKUP_TIMEZONE=Europe/Berlin` – Zeitzone, in der `BACKUP_TIME` gilt.
+  Gültige Werte sind IANA-Zonennamen (z. B. `Europe/Berlin`, `UTC`); die
+  vollständige Liste steht im Container unter `/usr/share/zoneinfo` bzw. unter
+  <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones> (Spalte
+  „TZ identifier“).
+- `BACKUP_INTERVAL_DAYS=1` – Abstand in ganzen Tagen zwischen zwei Backups
+  (`1` = täglich, `2` = alle 48 h …); Werte < 1 gelten als 1
 - `BACKUP_RETRY_INTERVAL_SECONDS=300` – Wiederholung nach Fehler (fünf Minuten)
 - `BACKUP_STALE_LOCK_SECONDS=43200` – ab diesem Alter gilt eine Sperre als
   verwaist (z. B. nach einem harten Container-Absturz mitten im Dump) und wird
   automatisch gebrochen
 - `BACKUP_RETENTION_DAYS=14` – lokale Aufbewahrung
-- `BACKUP_MAX_AGE_HOURS=7` – Grenze für den Healthcheck
+- `BACKUP_MAX_AGE_HOURS=26` – Grenze für den Healthcheck (täglich + Puffer)
 
 ## Grenzen
 
@@ -146,7 +160,7 @@ Bereiche, umschaltbar in der Kopfzeile: `Protokolle` (Standard) und
 - Gesamtstatus (`Backup aktuell`, `überfällig`, `fehlgeschlagen`, `unbekannt`),
 - Zeitpunkt, Größe, Dauer, Prüfsumme und nächste erwartete Sicherung,
 - Ergebnis des letzten Restore-Tests,
-- gemeldete Konfiguration aus `config.json` (Intervall, Aufbewahrung,
+- gemeldete Konfiguration aus `config.json` (Zeitplan mit Uhrzeit, Zeitzone und Tagesabstand, Aufbewahrung,
   Wiederholung nach Fehler, Überfälligkeitsgrenze, Verlaufsgröße),
 - bei Fehlern einen konkreten Handlungshinweis, abgeleitet aus dem Feld
   `reason` des Backup-Jobs (`backup_user_missing`, `backup_secret_missing`,
