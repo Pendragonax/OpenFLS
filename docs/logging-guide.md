@@ -47,6 +47,8 @@ Jeder relevante Eintrag enthält, soweit verfügbar:
 | `user_id` | interne oder pseudonymisierte Benutzer-ID, niemals unnötige Klardaten |
 | `object_id` | betroffene Ressource, sofern für die Rekonstruktion erforderlich |
 | `exception.type` | Exception-Typ bei Fehlern |
+| `exception.root_type` | Typ der Ursache (Root-Cause) bei verschachtelten Fehlern |
+| `exception.message` | gekürzte, sanitisierte Exception-Nachricht; ohne Geheimnisse oder sensible Nutzdaten |
 | `exception.stacktrace` | Stacktrace bei Fehlern, ohne Geheimnisse oder sensible Nutzdaten |
 
 Felder werden flach und konsistent benannt. Neue Felder brauchen einen klaren Auswertungszweck. Die Benennung soll sich an den [OpenTelemetry Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/) orientieren.
@@ -60,6 +62,8 @@ Felder werden flach und konsistent benannt. Neue Felder brauchen einen klaren Au
 - `TRACE`: Sehr detaillierte, kurzfristige Analyse; nicht dauerhaft in Produktion aktivieren.
 
 Ein Fehler darf nicht auf mehreren Schichten ohne zusätzlichen Kontext mehrfach geloggt werden. Exception-Stacktraces gehören normalerweise an die Stelle, an der der Fehler behandelt oder abschließend verworfen wird.
+
+Im Backend erfolgt Exception-Logging zentral über `StructuredLog.error`. Diese Methode hängt die `Throwable` immer als letztes Argument an, sodass Logback den vollständigen Stacktrace ausgibt (`%wEx` in `logback-spring.xml`). Erwartete, fachlich behandelte Exceptions (`IllegalArgumentException`, `AccessDeniedException`, projektinterne `*Exception` unterhalb von `de.vinz.openfls`) werden auf `WARN` geloggt, alle übrigen auf `ERROR`. Nicht anderweitig behandelte Exceptions fängt `GlobalExceptionHandler` (`@Order(LOWEST_PRECEDENCE)`) ab, loggt sie einmalig strukturiert und liefert dem Client einen stabilen `errorCode` samt `correlation_id` statt der rohen Exception-Nachricht.
 
 ## Was niemals im Klartext geloggt werden darf
 
@@ -103,6 +107,7 @@ Die Admin-Ansicht darf technische Diagnose-Logs filtern und exportieren. Lösche
 - Der globale Log-Level ist standardmäßig ausreichend für Betrieb und Security. `DEBUG`/`TRACE` sind gezielte Diagnoseoptionen.
 - Frontend-Logs enthalten keine Klient:innendaten, Tokens oder vollständigen API-Payloads. Erwartete Benutzerfehler gehören in die UI und nicht automatisch in `ERROR`.
 - WebSocket-, Export- und Admin-Aktionen werden mit Correlation-ID und Ergebnis protokolliert.
+- In der Admin-Log-Ansicht trägt jeder Eintrag den Stacktrace als eigenes Feld (`LogEntryDto.stacktrace`); die Oberfläche blendet ihn hinter einem Ausklapp-Button pro Zeile ein. Datei-Einträge und Live-Einträge (`ThrowableProxyUtil`) füllen dasselbe Feld, der ZIP-Export hängt den Stacktrace unverändert wieder an seinen Eintrag an.
 - Neue Logging-Verträge werden als DTOs bzw. strukturierte Ereignisse dokumentiert; JPA-Entities werden nicht in Lognachrichten serialisiert.
 
 ## Review-Checkliste

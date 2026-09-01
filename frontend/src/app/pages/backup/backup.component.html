@@ -1,0 +1,128 @@
+<div class="backup-view">
+  <div class="backup-notice" [ngClass]="overallClass(status?.overall)">
+    <span class="state-dot"></span>
+    <strong>{{ overallLabel(status?.overall) }}</strong>
+    <span *ngIf="status?.backupOverdue && status?.overall !== 'failed' && status?.overall !== 'unknown'">
+      Letzte erfolgreiche Sicherung älter als {{ status?.maxAgeHours }} h.
+    </span>
+    <span *ngIf="loadError">Status konnte nicht gelesen werden.</span>
+    <span class="spacer"></span>
+    <span class="updated" *ngIf="lastUpdated">Stand {{ lastUpdated | date:'HH:mm:ss' }}</span>
+    <button mat-stroked-button type="button" (click)="refresh()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon><span>Aktualisieren</span>
+    </button>
+  </div>
+
+  <section class="panel-surface hint-panel" *ngIf="failureHint() as hint">
+    <header class="panel-header hint-head">
+      <div><h2><mat-icon>build</mat-icon> {{ hint.title }}</h2><p>Was jetzt zu tun ist</p></div>
+    </header>
+    <div class="panel-body">
+      <p>{{ hint.body }}</p>
+      <pre *ngFor="let command of hint.commands">{{ command }}</pre>
+      <p class="hint-foot" *ngIf="run(status, 'lastBackup')?.message">
+        Meldung des Dienstes: <code>{{ run(status, 'lastBackup')?.message }}</code>
+      </p>
+    </div>
+  </section>
+
+  <div class="backup-grid">
+    <section class="panel-surface">
+      <header class="panel-header"><div><h2>Letzte Sicherung</h2><p>UTC-Zeitstempel</p></div></header>
+      <div class="panel-body">
+        <ng-container *ngIf="run(status, 'lastBackup') as backup; else noBackup">
+          <dl>
+            <div><dt>Zeitpunkt</dt><dd>{{ backup.timestamp ? (backup.timestamp | date:'dd.MM.yyyy HH:mm:ss') : '–' }}</dd></div>
+            <div><dt>Ergebnis</dt><dd><span class="badge" [ngClass]="'badge-' + (backup.outcome || 'unknown')">{{ outcomeLabel(backup.outcome) }}</span></dd></div>
+            <div><dt>Größe</dt><dd>{{ formatBytes(backup.sizeBytes) }}</dd></div>
+            <div><dt>Dauer</dt><dd>{{ formatDuration(backup.durationSeconds) }}</dd></div>
+            <div><dt>Nächste erwartet</dt><dd>{{ status?.nextExpectedBackup ? (status?.nextExpectedBackup | date:'dd.MM.yyyy HH:mm') : '–' }}</dd></div>
+            <div><dt>Datei</dt><dd><code>{{ backup.backupFile || '–' }}</code></dd></div>
+            <div><dt>SHA-256</dt><dd><code class="break">{{ backup.sha256 || '–' }}</code></dd></div>
+          </dl>
+        </ng-container>
+        <ng-template #noBackup><p class="empty-state">Noch keine Sicherung erfasst.</p></ng-template>
+      </div>
+    </section>
+
+    <section class="panel-surface">
+      <header class="panel-header"><div><h2>Letzter Restore-Test</h2><p>Isolierter Testimport</p></div></header>
+      <div class="panel-body">
+        <ng-container *ngIf="run(status, 'lastRestoreTest') as restoreTest; else noRestoreTest">
+          <dl>
+            <div><dt>Zeitpunkt</dt><dd>{{ restoreTest.timestamp ? (restoreTest.timestamp | date:'dd.MM.yyyy HH:mm:ss') : '–' }}</dd></div>
+            <div><dt>Ergebnis</dt><dd><span class="badge" [ngClass]="'badge-' + (restoreTest.outcome || 'unknown')">{{ outcomeLabel(restoreTest.outcome) }}</span></dd></div>
+            <div><dt>Dauer</dt><dd>{{ formatDuration(restoreTest.durationSeconds) }}</dd></div>
+            <div><dt>Geprüfte Datei</dt><dd><code>{{ restoreTest.backupFile || '–' }}</code></dd></div>
+          </dl>
+        </ng-container>
+        <ng-template #noRestoreTest>
+          <p class="empty-state">Noch kein Restore-Test durchgeführt.<br>
+            <span class="hint-mono">scripts/database_restore_test.sh</span></p>
+        </ng-template>
+      </div>
+    </section>
+
+    <section class="panel-surface">
+      <header class="panel-header"><div><h2>Konfiguration</h2><p>Vom Backup-Dienst gemeldet</p></div></header>
+      <div class="panel-body">
+        <dl *ngIf="configRows(status?.config).length; else noConfig">
+          <div *ngFor="let row of configRows(status?.config)"><dt>{{ row.label }}</dt><dd>{{ row.value }}</dd></div>
+        </dl>
+        <ng-template #noConfig><p class="empty-state">Keine Konfigurationsdatei gefunden. Backup-Container neu starten.</p></ng-template>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel-surface">
+    <header class="panel-header restore-header" (click)="restoreHelpOpen = !restoreHelpOpen">
+      <div><h2>Wiederherstellung auf dem System</h2><p>Privilegierter Administrationsvorgang – nicht über die Weboberfläche</p></div>
+      <button mat-icon-button type="button" [attr.aria-expanded]="restoreHelpOpen" aria-label="Erklärung ein-/ausklappen">
+        <mat-icon>{{ restoreHelpOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+    </header>
+    <div class="panel-body restore-body" *ngIf="restoreHelpOpen">
+      <p>
+        Ein produktiver Restore stoppt den gesamten Stack; OpenFLS ist währenddessen nicht erreichbar.
+        Er wird direkt auf dem Kundenserver ausgeführt, nicht aus dieser Oberfläche.
+      </p>
+      <ol>
+        <li>Optional zuerst prüfen, ob die Sicherung importierbar ist (isoliert, ohne Produktivbetrieb):
+          <pre>scripts/database_restore_test.sh</pre>
+        </li>
+        <li>Sicherungsdatei wählen – die Dumps liegen auf dem Server unter <code>docker/backup/</code>
+          als <code>&lt;zeitpunkt&gt;-openfls.sql.gz</code> mit zugehöriger <code>.sha256</code>.</li>
+        <li>Restore starten (verifiziert die Prüfsumme, erstellt zuvor ein Sicherheits-Backup des
+          aktuellen Stands, fährt den Stack herunter, importiert und startet neu):
+          <pre>scripts/database_restore.sh docker/backup/&lt;zeitpunkt&gt;-openfls.sql.gz</pre>
+        </li>
+        <li>Zur Bestätigung <code>restore</code> eingeben, wenn das Skript danach fragt.</li>
+        <li>Nach dem Wiederanlauf in dieser Ansicht prüfen, dass wieder eine erfolgreiche Sicherung
+          erscheint, und die Wiederherstellung im Betriebsprotokoll dokumentieren.</li>
+      </ol>
+      <p class="restore-note">
+        <mat-icon>info</mat-icon>
+        <code>scripts/database_restore.sh --help</code> zeigt weitere Optionen (Compose-Datei wählen,
+        Sicherheits-Backup überspringen, Prüfsumme überspringen).
+      </p>
+    </div>
+  </section>
+
+  <section class="panel-surface history-panel">
+    <header class="panel-header"><div><h2>Verlauf</h2><p>Backup- und Restore-Test-Läufe (UTC)</p></div></header>
+    <div class="history-scroll">
+      <div class="history-head"><span>Zeitpunkt</span><span>Vorgang</span><span>Ergebnis</span><span>Details</span></div>
+      <div class="history-row" *ngFor="let entry of history" [ngClass]="'row-' + (entry.outcome || 'unknown')">
+        <time>{{ entry.timestamp ? (entry.timestamp | date:'dd.MM.yyyy HH:mm:ss') : '–' }}</time>
+        <span>{{ kindLabel(entry.kind) }}</span>
+        <strong [ngClass]="'badge-' + (entry.outcome || 'unknown')">{{ outcomeLabel(entry.outcome) }}</strong>
+        <div class="details">
+          <span *ngIf="entry.kind === 'backup' && entry.sizeBytes != null">{{ formatBytes(entry.sizeBytes) }} · </span>
+          <span *ngIf="entry.durationSeconds != null">{{ formatDuration(entry.durationSeconds) }}</span>
+          <span class="msg" *ngIf="entry.message">{{ entry.message }}</span>
+        </div>
+      </div>
+      <p class="empty-state" *ngIf="history.length === 0">Kein Verlauf vorhanden.</p>
+    </div>
+  </section>
+</div>

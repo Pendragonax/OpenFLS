@@ -15,7 +15,11 @@ import java.util.UUID
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class RequestLoggingFilter : OncePerRequestFilter() {
-    override fun shouldNotFilter(request: HttpServletRequest): Boolean = request.requestURI.startsWith("/ws")
+    // Der STOMP-/WebSocket-Handshake darf nicht durch diesen Filter laufen, sonst
+    // scheitert der Upgrade mit HTTP 400. requestURI enthaelt den Context-Path
+    // (z. B. "/api/ws"), deshalb wird er mit einbezogen.
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean =
+        request.requestURI.startsWith("${request.contextPath}/ws")
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val correlationId = request.getHeader("X-Correlation-ID")
@@ -23,7 +27,9 @@ class RequestLoggingFilter : OncePerRequestFilter() {
             ?: UUID.randomUUID().toString()
         val startedAt = System.nanoTime()
         var requestFailed = false
-        MDC.put("correlation_id", correlationId)
+        MDC.put(StructuredLog.MDC_CORRELATION_ID, correlationId)
+        MDC.put(StructuredLog.MDC_HTTP_METHOD, request.method)
+        MDC.put(StructuredLog.MDC_HTTP_PATH, request.requestURI)
         response.setHeader("X-Correlation-ID", correlationId)
         try {
             filterChain.doFilter(request, response)
@@ -41,7 +47,9 @@ class RequestLoggingFilter : OncePerRequestFilter() {
                     StructuredLog.audit("http.state_change", "success", "http.path", path)
                 }
             }
-            MDC.remove("correlation_id")
+            MDC.remove(StructuredLog.MDC_CORRELATION_ID)
+            MDC.remove(StructuredLog.MDC_HTTP_METHOD)
+            MDC.remove(StructuredLog.MDC_HTTP_PATH)
         }
     }
 

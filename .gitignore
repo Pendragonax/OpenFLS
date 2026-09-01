@@ -1,5 +1,9 @@
 logs/
-backup/
+# Local database dump directory only - not the "backup" domain source folders.
+/docker/backup/
+/backup/
+# Local dev env for running the backend from the IDE (template: run.env.example).
+/backend/run.env
 ssl/
 secrets/
 .idea/

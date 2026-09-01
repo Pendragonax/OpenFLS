@@ -1,4 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
 import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs';
 import {LogEntryDto, LogSettingsDto} from '../../shared/dtos/log-entry-dto.model';
@@ -12,6 +13,7 @@ import {DateCompleteSelectionComponent} from '../../shared/components/date-compl
 @Component({selector: 'app-settings', templateUrl: './settings.component.html', styleUrls: ['./settings.component.css'], standalone: false})
 export class SettingsComponent implements OnInit, OnDestroy {
   readonly levels = ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR'];
+  section: 'logs' | 'backup' = 'logs';
   entries: LogEntryDto[] = [];
   page = 0;
   pageSize = 100;
@@ -22,13 +24,27 @@ export class SettingsComponent implements OnInit, OnDestroy {
   mobileTab: 'filter' | 'live' | 'levels' = 'filter';
   private liveSubscription?: Subscription;
   private readonly newEntryKeys = new Set<string>();
+  private readonly expandedEntryKeys = new Set<string>();
   @ViewChild(DateCompleteSelectionComponent) dateSelection?: DateCompleteSelectionComponent;
   filter = new UntypedFormGroup({from: new UntypedFormControl(new Date()), to: new UntypedFormControl(new Date()), query: new UntypedFormControl(''), level: new UntypedFormControl(''), logger: new UntypedFormControl(''), thread: new UntypedFormControl(''), all: new UntypedFormControl(false)});
 
   classLevelForm = new UntypedFormGroup({logger: new UntypedFormControl(''), level: new UntypedFormControl('INFO')});
-  constructor(private logs: LogAdministrationService, private modal: NgbModal, private dialog: MatDialog) {}
-  ngOnInit(): void { this.load(); this.liveSubscription = this.logs.liveEntries().subscribe(entry => this.addLiveEntry(entry)); }
+  constructor(
+    private logs: LogAdministrationService,
+    private modal: NgbModal,
+    private dialog: MatDialog,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => this.section = params.get('section') === 'backup' ? 'backup' : 'logs');
+    this.load();
+    this.liveSubscription = this.logs.liveEntries().subscribe(entry => this.addLiveEntry(entry));
+  }
   ngOnDestroy(): void { this.liveSubscription?.unsubscribe(); }
+  selectSection(section: 'logs' | 'backup'): void {
+    this.router.navigate(section === 'backup' ? ['/settings', 'backup'] : ['/settings']);
+  }
   load(): void {
     this.page = 0;
     this.logs.days().subscribe(days => this.days = days);
@@ -40,6 +56,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.entries = result.content;
       this.totalEntries = result.totalElements;
       this.hasNextPage = result.hasNext;
+      this.expandedEntryKeys.clear();
     });
   }
   previousPage(): void { if (this.page > 0) { this.page--; this.loadPage(); } }
@@ -58,6 +75,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
   export(): void { this.logs.export(this.query()).subscribe(data => { const link = document.createElement('a'); link.href = URL.createObjectURL(data); link.download = 'openfls-logs.zip'; link.click(); URL.revokeObjectURL(link.href); }); }
   levelClass(level: string): string { return `log-${level.toLowerCase()}`; }
   isNew(entry: LogEntryDto): boolean { return this.newEntryKeys.has(this.entryKey(entry)); }
+  hasStacktrace(entry: LogEntryDto): boolean { return !!entry.stacktrace && entry.stacktrace.trim().length > 0; }
+  isStacktraceExpanded(entry: LogEntryDto): boolean { return this.expandedEntryKeys.has(this.entryKey(entry)); }
+  toggleStacktrace(entry: LogEntryDto): void {
+    const key = this.entryKey(entry);
+    if (this.expandedEntryKeys.has(key)) this.expandedEntryKeys.delete(key); else this.expandedEntryKeys.add(key);
+  }
   private addLiveEntry(entry: LogEntryDto): void {
     if (this.page !== 0) return;
     if (!this.matches(entry)) return;
@@ -71,7 +94,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     const filter = this.filter.value;
     const date = entry.timestamp.substring(0, 10);
     const from = this.dateValue(filter.from); const to = this.dateValue(filter.to);
-    return (filter.all || (!from || date >= from) && (!to || date <= to)) && (!filter.level || entry.level === filter.level) && (!filter.logger || entry.logger.toLowerCase().includes(filter.logger.toLowerCase())) && (!filter.thread || entry.thread.toLowerCase().includes(filter.thread.toLowerCase())) && (!filter.query || `${entry.message} ${entry.logger}`.toLowerCase().includes(filter.query.toLowerCase()));
+    return (filter.all || (!from || date >= from) && (!to || date <= to)) && (!filter.level || entry.level === filter.level) && (!filter.logger || entry.logger.toLowerCase().includes(filter.logger.toLowerCase())) && (!filter.thread || entry.thread.toLowerCase().includes(filter.thread.toLowerCase())) && (!filter.query || `${entry.message} ${entry.logger} ${entry.stacktrace ?? ''}`.toLowerCase().includes(filter.query.toLowerCase()));
   }
   private query() { return {...this.filter.value, from: this.dateValue(this.filter.value.from), to: this.dateValue(this.filter.value.to)}; }
   private dateValue(value: Date | string | null | undefined): string | undefined { if (!value) return undefined; const date = value instanceof Date ? value : new Date(value); return Number.isNaN(date.valueOf()) ? undefined : `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }

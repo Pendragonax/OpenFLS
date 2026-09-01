@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "spring-docs": {
+      "command": "npx",
+      "args": ["-y", "@enokdev/springdocs-mcp@1.2.8"]
+    },
+    "angular-docs": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@4.0.3"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.79"]
+    }
+  }
+}

@@ -8,11 +8,34 @@ import org.springframework.security.oauth2.jwt.Jwt
 
 /**
  * Central logging facade. Its methods deliberately accept only identifiers and
- * fixed event names; request payloads, credentials and exception messages must
- * never be passed to it.
+ * fixed event names; request payloads and credentials must never be passed to it.
+ *
+ * Exception details are handled by [error]: it always attaches the [Throwable] so
+ * Logback renders a stacktrace, records the exception type and its root cause, and
+ * adds a sanitized exception message for triage.
  */
 object StructuredLog {
     private val auditLogger = LoggerFactory.getLogger("de.vinz.openfls.audit")
+
+    /** MDC keys populated per request by `RequestLoggingFilter`. */
+    const val MDC_CORRELATION_ID = "correlation_id"
+    const val MDC_HTTP_METHOD = "http.method"
+    const val MDC_HTTP_PATH = "http.path"
+
+    private const val MAX_CAUSE_DEPTH = 20
+
+    /**
+     * Exception types that represent an expected, already-handled outcome (bad input,
+     * missing permission, violated business rule). They are logged at `WARN`; every
+     * other exception is treated as an unexpected fault and logged at `ERROR`. Both
+     * cases carry the full stacktrace.
+     */
+    private val EXPECTED_EXCEPTION_TYPES = setOf(
+        "java.lang.IllegalArgumentException",
+        "java.util.NoSuchElementException",
+        "org.springframework.security.access.AccessDeniedException",
+        "org.springframework.web.server.ResponseStatusException",
+    )
 
     fun audit(eventName: String, outcome: String, objectType: String? = null, objectId: String? = null) {
         auditLogger.info(fields(eventName, outcome, objectType, objectId))
@@ -39,10 +62,39 @@ object StructuredLog {
         )
     }
 
+    /**
+     * Logs a failed operation with its exception. The [exception] is passed as the
+     * trailing argument so SLF4J/Logback appends the stacktrace. Known, expected
+     * exception types are logged at `WARN`, everything else at `ERROR`.
+     */
     fun error(logger: Logger, eventName: String, exception: Throwable) {
-        logger.error(
-            "${fields(eventName, "failure")} exception.type=${safe(exception.javaClass.name)} message=Unhandled_application_error"
-        )
+        val rootCause = rootCause(exception)
+        val base = fields(eventName, "failure")
+        val exType = safe(exception.javaClass.name)
+        val rootType = safe(rootCause.javaClass.name)
+        val exMessage = safe(exception.message ?: "none")
+        val format = "{} exception.type={} exception.root_type={} exception.message={}"
+        if (isExpected(exception) || isExpected(rootCause)) {
+            logger.warn(format, base, exType, rootType, exMessage, exception)
+        } else {
+            logger.error(format, base, exType, rootType, exMessage, exception)
+        }
+    }
+
+    private fun isExpected(throwable: Throwable): Boolean {
+        val name = throwable.javaClass.name
+        return name in EXPECTED_EXCEPTION_TYPES ||
+            (name.startsWith("de.vinz.openfls.") && name.endsWith("Exception"))
+    }
+
+    private fun rootCause(throwable: Throwable): Throwable {
+        var current = throwable
+        var depth = 0
+        while (current.cause != null && current.cause !== current && depth < MAX_CAUSE_DEPTH) {
+            current = current.cause!!
+            depth++
+        }
+        return current
     }
 
     private fun fields(eventName: String, outcome: String, objectType: String? = null, objectId: String? = null): String {
@@ -50,7 +102,9 @@ object StructuredLog {
         return buildList {
             add("event_name=${safe(eventName)}")
             add("outcome=${safe(outcome)}")
-            MDC.get("correlation_id")?.let { add("correlation_id=${safe(it)}") }
+            MDC.get(MDC_CORRELATION_ID)?.let { add("correlation_id=${safe(it)}") }
+            MDC.get(MDC_HTTP_METHOD)?.let { add("http.method=${safe(it)}") }
+            MDC.get(MDC_HTTP_PATH)?.let { add("http.path=${safe(it)}") }
             actor?.let { add("user_id=$it") }
             objectType?.let { add("object_type=${safe(it)}") }
             objectId?.let { add("object_id=${safe(it)}") }

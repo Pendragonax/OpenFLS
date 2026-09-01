@@ -161,13 +161,17 @@ class LogAdministrationService(
             if (match != null) {
                 current?.let(consumer)
                 current = LogEntryDto(Instant.parse(match.groupValues[1].replace(Regex("([+-]\\d{2})(\\d{2})$"), "$1:$2")).toString(), match.groupValues[3], match.groupValues[4], match.groupValues[2], match.groupValues[5])
-            } else if (current != null) current = current!!.copy(message = current!!.message + "\n" + line)
+            } else if (current != null) {
+                // Continuation lines (exception stacktrace, "Caused by", "... N more") are
+                // kept separately so the UI can hide them behind a per-entry toggle.
+                current = current!!.copy(stacktrace = current!!.stacktrace?.let { "$it\n$line" } ?: line)
+            }
             }
         }
         current?.let(consumer)
     }
 
-    private fun matches(entry: LogEntryDto, query: LogQueryDto) = listOfNotNull(query.query?.let { entry.message.contains(it, true) || entry.logger.contains(it, true) }, query.level?.let { entry.level.equals(it, true) }, query.logger?.let { entry.logger.contains(it, true) }, query.thread?.let { entry.thread.contains(it, true) }).all { it }
-    private fun format(entry: LogEntryDto) = "${entry.timestamp.replace("Z", "+00:00").replace(Regex("([+-]\\d{2}):(\\d{2})$"), "$1$2")} [${entry.thread}] ${entry.level.padEnd(5)} ${entry.logger} - ${entry.message}"
+    private fun matches(entry: LogEntryDto, query: LogQueryDto) = listOfNotNull(query.query?.let { entry.message.contains(it, true) || entry.logger.contains(it, true) || entry.stacktrace?.contains(it, true) == true }, query.level?.let { entry.level.equals(it, true) }, query.logger?.let { entry.logger.contains(it, true) }, query.thread?.let { entry.thread.contains(it, true) }).all { it }
+    private fun format(entry: LogEntryDto) = "${entry.timestamp.replace("Z", "+00:00").replace(Regex("([+-]\\d{2}):(\\d{2})$"), "$1$2")} [${entry.thread}] ${entry.level.padEnd(5)} ${entry.logger} - ${entry.message}" + (entry.stacktrace?.let { "\n$it" } ?: "")
     private fun logPath(): Path = Path.of(logDirectory).also { Files.createDirectories(it) }
 }
