@@ -3,6 +3,7 @@ package de.vinz.openfls.domains.employees.entities
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.evaluations.Evaluation
 import de.vinz.openfls.domains.employees.archive.EmployeeArchiveHistoryEntry
@@ -107,6 +108,16 @@ class Employee(
                 inverseJoinColumns = [JoinColumn(name = "assistance_plan_id")])
         @JsonIgnoreProperties(value = ["employees", "hibernateLazyInitializer"])
         var assistancePlanFavorites: MutableSet<AssistancePlan> = mutableSetOf(),
+
+        @ManyToMany(
+                fetch = FetchType.LAZY
+        )
+        @JoinTable(
+                name = "client_favorites",
+                joinColumns = [JoinColumn(name = "employee_id")],
+                inverseJoinColumns = [JoinColumn(name = "client_id")])
+        @JsonIgnore
+        var clientFavorites: MutableSet<Client> = mutableSetOf(),
 ) {
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true

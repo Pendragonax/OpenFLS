@@ -1,0 +1,116 @@
+<mat-card class="plan-card">
+  <div class="card-header">
+    <div class="card-header-title">
+      <mat-icon aria-hidden="true">assignment</mat-icon>
+      <span>{{ planTitle }}</span>
+    </div>
+    @if (!isDenied && preview != null) {
+      <div class="card-header-actions">
+        <mat-radio-group class="plan-period-toggle"
+                         aria-label="Auswertungszeitraum"
+                         color="primary"
+                         [value]="statusPeriod"
+                         (change)="setStatusPeriod($event.value)">
+          <mat-radio-button value="assistancePlan">Hilfeplan</mat-radio-button>
+          <mat-radio-button value="year">Kalenderjahr</mat-radio-button>
+        </mat-radio-group>
+        <button mat-icon-button
+                color="primary"
+                matTooltip="Hilfeplan editieren"
+                [routerLink]="['/assistance_plans/edit', preview.id]">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (isDenied) {
+    <app-no-permission-panel
+      title="Hilfeplan nicht sichtbar"
+      description="Sie haben keine Leseberechtigung für die Einrichtung dieser Klient:in. Der Hilfeplan und seine Auswertung werden deshalb nicht angezeigt."></app-no-permission-panel>
+  } @else if (preview == null) {
+    <div class="card-empty">Für diese Klient:in ist kein Hilfeplan hinterlegt.</div>
+  } @else {
+    <div class="plan-body">
+      <div class="plan-facts">
+        <div class="plan-fact">
+          <span class="plan-fact-label">Zeitraum</span>
+          <span class="plan-fact-value">{{ getDateString(preview.start) }} – {{ getDateString(preview.end) }}</span>
+        </div>
+        <div class="plan-fact">
+          <span class="plan-fact-label">Kostenträger</span>
+          <span class="plan-fact-value">{{ preview.sponsorName }}</span>
+        </div>
+        <div class="plan-fact">
+          <span class="plan-fact-label">Einrichtung</span>
+          <span class="plan-fact-value">{{ preview.institutionName }}</span>
+        </div>
+        <div class="plan-fact">
+          <span class="plan-fact-label">{{ hourModeLabel }}</span>
+          <span class="plan-fact-value">{{ weeklyHours }} h / Woche</span>
+        </div>
+      </div>
+
+      <div class="plan-status">
+        <span class="plan-status-pill"
+              [ngClass]="preview.isActive ? 'plan-status-pill--active' : 'plan-status-pill--inactive'">
+          {{ preview.isActive ? 'Aktiv' : 'Inaktiv' }}
+        </span>
+        @if (preview.hasIllegalHours) {
+          <span class="plan-status-pill plan-status-pill--warning"
+                matTooltip="Sowohl der Hilfeplan als auch die Ziele haben Stunden zugewiesen. Dies stellt ein Problem bei der Berechnung dar.">
+            Stundenkonflikt
+          </span>
+        }
+        @if (assistancePlanCount > 1) {
+          <span class="plan-status-hint">{{ assistancePlanCount }} Hilfepläne insgesamt</span>
+        }
+      </div>
+
+      <div class="plan-progress">
+        <div class="year-status-track" [ngClass]="{'year-status-track--corridor': isCorridorPlan}">
+          @if (isCorridorPlan) {
+            <span class="hours-progress-threshold hours-progress-threshold--from"></span>
+            <span class="hours-progress-threshold hours-progress-threshold--till"></span>
+          }
+          <div class="hours-progress-fill"
+               [ngClass]="progressClass"
+               [style.width.%]="progressPercent"></div>
+        </div>
+
+        <div class="plan-progress-legend">
+          <span class="plan-progress-legend-item">Geleistet: <strong>{{ executedHours }} h</strong></span>
+          @if (isCorridorPlan) {
+            <span class="plan-progress-legend-item">
+              Bewilligt: <strong>{{ approvedHoursFrom }} – {{ approvedHoursTill }} h</strong>
+            </span>
+          } @else {
+            <span class="plan-progress-legend-item">Bewilligt: <strong>{{ approvedHours }} h</strong></span>
+          }
+          <span class="plan-progress-legend-item">Differenz: <strong>{{ hoursLeftDisplay }} h</strong></span>
+        </div>
+
+        <div class="plan-progress-summary">{{ progressSummary }}</div>
+      </div>
+
+      <div class="plan-links">
+        <a mat-button color="primary" [routerLink]="['/assistance_plans/analysis', preview.id, '1']">
+          <mat-icon>insights</mat-icon>
+          Zeitauswertungen
+        </a>
+        <a mat-button color="primary" [routerLink]="['/assistance_plans/analysis', preview.id, '0']">
+          <mat-icon>flag</mat-icon>
+          Ziele
+        </a>
+        <a mat-button color="primary" [routerLink]="['/assistance_plans/analysis', preview.id, '3']">
+          <mat-icon>table_chart</mat-icon>
+          Tabellarische Ansicht
+        </a>
+        <a mat-button color="primary" [routerLink]="['/assistance_plans/analysis', preview.id, '2']">
+          <mat-icon>fact_check</mat-icon>
+          Evaluationen
+        </a>
+      </div>
+    </div>
+  }
+</mat-card>

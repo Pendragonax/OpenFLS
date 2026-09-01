@@ -1,11 +1,13 @@
 package de.vinz.openfls.domains.services
 
+import de.vinz.openfls.domains.services.dtos.ClientLatestServiceDto
 import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
 import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
 import de.vinz.openfls.domains.services.projections.AssistancePlanServiceMinutesProjection
 import de.vinz.openfls.domains.services.projections.ServiceCalendarProjection
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -264,6 +266,30 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     ): List<Service>
 
     fun findByClientIdOrderByStartAsc(clientId: Long): List<Service>
+
+    @Query(
+        """
+        SELECT new de.vinz.openfls.domains.services.dtos.ClientLatestServiceDto(
+            s.id, s.start, s.end, s.minutes, s.title, s.content,
+            i.id, i.name,
+            e.id, e.firstname, e.lastname,
+            ap.id)
+        FROM Service s
+        JOIN s.institution i
+        JOIN s.employee e
+        JOIN s.assistancePlan ap
+        WHERE s.client.id = :clientId
+        AND (:isAdmin = true OR e.id = :employeeId OR i.id IN :readableInstitutionIds)
+        ORDER BY s.start DESC, s.id DESC
+        """
+    )
+    fun findLatestClientServiceDtosByClientId(
+        @Param("clientId") clientId: Long,
+        @Param("employeeId") employeeId: Long,
+        @Param("readableInstitutionIds") readableInstitutionIds: List<Long>,
+        @Param("isAdmin") isAdmin: Boolean,
+        pageable: Pageable
+    ): List<ClientLatestServiceDto>
 
     @Query(
         "SELECT u FROM Service u WHERE u.client.id = :clientId " +

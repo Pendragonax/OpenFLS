@@ -121,6 +121,7 @@ class ClientArchiveService(
                 remark = remark
             ).also {
                 employeeService.deleteAssistancePlanFavoritesByClientId(clientId)
+                employeeService.deleteClientFavoritesByClientId(clientId)
             }
             ClientArchiveActionType.REACTIVATE -> clientService.reactivate(
                 clientId = clientId,

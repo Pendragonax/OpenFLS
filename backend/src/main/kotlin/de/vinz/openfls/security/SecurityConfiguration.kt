@@ -124,6 +124,8 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
                         .requestMatchers(HttpMethod.PUT, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
                         .requestMatchers(HttpMethod.DELETE, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
+                        .requestMatchers("/client_dashboards/**").authenticated()
+                        .requestMatchers("/client_tasks/**").authenticated()
                         .anyRequest().authenticated()
             }
         }

@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.repositories
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPeriodDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistingProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
@@ -276,6 +277,19 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     fun findFavoriteAssistancePlanIdsByEmployeeId(
         @Param("employeeId") employeeId: Long
     ): List<Long>
+
+    @Query(
+        """
+        SELECT new de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPeriodDto(
+            ap.id, c.id, ap.start, ap.end)
+        FROM AssistancePlan ap
+        JOIN ap.client c
+        WHERE c.id IN :clientIds
+        """
+    )
+    fun findPeriodDtosByClientIds(
+        @Param("clientIds") clientIds: List<Long>
+    ): List<AssistancePlanPeriodDto>
 
     @Query(
         """

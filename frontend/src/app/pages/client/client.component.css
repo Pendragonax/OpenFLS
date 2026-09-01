@@ -22,3 +22,22 @@
 .client-row--archived:hover {
   background: #fff8f7;
 }
+
+/* Six icon buttons now live in this cell (favourite, dashboard, entries, edit,
+   info, delete) - tight, non-wrapping packing keeps them on one line instead of
+   Bootstrap's m-1 margins pushing the row wider than the column. */
+.actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+.actions-row .mat-mdc-icon-button {
+  --mdc-icon-button-state-layer-size: 32px;
+  --mdc-icon-button-icon-size: 20px;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+}

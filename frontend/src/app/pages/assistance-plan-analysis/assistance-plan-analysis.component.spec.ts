@@ -85,6 +85,13 @@ describe('GoalEvaluationComponent', () => {
     expect(readOnlyNext).toHaveBeenCalledWith(true);
   });
 
+  it('accepts tab index 3 ("tab. Ansichten") from the URL', () => {
+    fixture.detectChanges();
+    params$.next({tab: '3', id: '5'});
+
+    expect(component.tabIndex).toBe(3);
+  });
+
   it('unsubscribe_afterDestroy_doesNotUpdateState', () => {
     // Given
     fixture.detectChanges();

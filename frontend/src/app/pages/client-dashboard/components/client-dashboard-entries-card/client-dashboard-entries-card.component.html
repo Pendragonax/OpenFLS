@@ -1,0 +1,52 @@
+<mat-card class="entries-card">
+  <div class="card-header">
+    <div class="card-header-title">
+      <mat-icon aria-hidden="true">history_edu</mat-icon>
+      <span>Letzte Einträge</span>
+      @if (!isDenied && entries.length > 0) {
+        <span class="entries-count">{{ entries.length }} / {{ limit }}</span>
+      }
+    </div>
+    @if (!isDenied) {
+      <a mat-icon-button
+         color="primary"
+         matTooltip="Alle Einträge"
+         [routerLink]="allEntriesLink">
+        <mat-icon>list_alt</mat-icon>
+      </a>
+    }
+  </div>
+
+  @if (isDenied) {
+    <app-no-permission-panel
+      title="Einträge nicht sichtbar"
+      description="Sie haben keine Leseberechtigung für die Einrichtung dieser Klient:in. Die dokumentierten Einträge werden deshalb nicht angezeigt."></app-no-permission-panel>
+  } @else if (entries.length === 0) {
+    <div class="card-empty">Es sind keine für Sie sichtbaren Einträge vorhanden.</div>
+  } @else {
+    @if (entries.length < limit) {
+      <div class="entries-hint">Es liegen insgesamt nur {{ entries.length }} Einträge vor.</div>
+    }
+    <ul class="entry-list">
+      @for (entry of entries; track entry.id) {
+        <li class="entry-item">
+          <a class="entry-link" [routerLink]="getDayRouterLink(entry)">
+            <div class="entry-head">
+              <span class="entry-date">{{ getDateString(entry.start) }}</span>
+              <span class="entry-time">{{ getTimeString(entry.start) }} – {{ getTimeString(entry.end) }}</span>
+              <span class="entry-minutes">{{ entry.minutes }} min</span>
+            </div>
+            <div class="entry-title">{{ entry.title || 'Ohne Titel' }}</div>
+            @if (entry.content) {
+              <div class="entry-content">{{ entry.content }}</div>
+            }
+            <div class="entry-footer">
+              <span [class.entry-employee--own]="isOwnEntry(entry)">{{ getEmployeeName(entry) }}</span>
+              · {{ entry.institutionName }}
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</mat-card>

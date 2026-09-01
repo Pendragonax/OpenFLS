@@ -1,0 +1,67 @@
+<div class="dashboard-wrapper">
+
+  @if (isLoading) {
+    <app-loading-spinner></app-loading-spinner>
+  }
+
+  @if (loadFailed) {
+    <div class="dashboard-error">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <span>Das Dashboard konnte nicht geladen werden.</span>
+      <button mat-stroked-button color="primary" (click)="loadDashboard()">Erneut versuchen</button>
+    </div>
+  }
+
+  @if (dashboard != null && !isLoading) {
+    <header class="dashboard-header">
+      <div class="dashboard-header-main">
+        <h1 class="dashboard-title">{{ clientName }}</h1>
+        <div class="dashboard-subtitle">
+          <span class="dashboard-chip">{{ dashboard.institutionName }}</span>
+          @if (dashboard.archived) {
+            <span class="dashboard-chip dashboard-chip--archived">Archiviert</span>
+          }
+        </div>
+      </div>
+
+      <div class="dashboard-header-actions">
+        <button mat-icon-button
+                color="primary"
+                [matTooltip]="dashboard.favorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
+                (click)="toggleFavorite()">
+          <mat-icon>{{ dashboard.favorite ? 'star' : 'star_border' }}</mat-icon>
+        </button>
+        <button mat-stroked-button color="primary" (click)="openClientDetail()">
+          <mat-icon>badge</mat-icon>
+          Stammdaten
+        </button>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <!-- DOM order matches the mobile stack (Hilfeplan, Einträge, Aufgaben); the
+           desktop grid places each column independently via CSS below. -->
+      <div class="dashboard-column dashboard-column-plan">
+        <app-client-dashboard-plan-card [access]="dashboard.assistancePlanAccess"
+                                        [preview]="dashboard.currentAssistancePlan"
+                                        [assistancePlanCount]="dashboard.assistancePlanCount"
+                                        [clientId]="dashboard.clientId"></app-client-dashboard-plan-card>
+      </div>
+
+      <div class="dashboard-column dashboard-column-entries">
+        <app-client-dashboard-entries-card [access]="dashboard.servicesAccess"
+                                           [entries]="dashboard.latestServices"
+                                           [clientId]="dashboard.clientId"
+                                           [currentEmployeeId]="currentEmployeeId"
+                                           [allEntriesLink]="allEntriesRouterLink"></app-client-dashboard-entries-card>
+      </div>
+
+      <div class="dashboard-column dashboard-column-tasks">
+        <app-client-dashboard-tasks-card [clientId]="dashboard.clientId"
+                                         [tasks]="dashboard.tasks"
+                                         [currentEmployeeId]="currentEmployeeId"
+                                         (tasksChanged)="onTasksChanged($event)"></app-client-dashboard-tasks-card>
+      </div>
+    </div>
+  }
+</div>

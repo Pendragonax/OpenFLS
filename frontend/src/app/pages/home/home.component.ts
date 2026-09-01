@@ -31,7 +31,7 @@ export class HomeComponent implements OnInit {
   private readonly pwdPattern = '(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&].{8,}';
   readonly favorite$ = new ReplaySubject<boolean>(1);
   readonly currentEmployee$ = new ReplaySubject<EmployeeDto>(1);
-  private readonly tabKeys = ['favorites', 'hours', 'general'] as const;
+  private readonly tabKeys = ['clients', 'favorites', 'hours', 'general'] as const;
   selectedTabIndex = 0;
 
   readonly homeVm$: Observable<HomeViewModel>;

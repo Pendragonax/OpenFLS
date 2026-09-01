@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPeriodDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
@@ -75,6 +76,18 @@ class AssistancePlanPreviewService(
         val previews = assistancePlanRepository.findFavoritePreviewProjectionsByEmployeeId(employeeId)
             .filter { includeArchived || !it.clientArchived || leadingInstitutionIds.contains(it.institutionId) }
         return createPreviewDtos(previews, previews.map { it.id }.toSet())
+    }
+
+    /**
+     * Plan periods of several clients at once, used by overviews that only need to
+     * know whether a client currently has a running assistance plan.
+     */
+    @Transactional(readOnly = true)
+    fun getPeriodDtosByClientIds(clientIds: List<Long>): List<AssistancePlanPeriodDto> {
+        if (clientIds.isEmpty()) {
+            return emptyList()
+        }
+        return assistancePlanRepository.findPeriodDtosByClientIds(clientIds)
     }
 
     @Transactional(readOnly = true)

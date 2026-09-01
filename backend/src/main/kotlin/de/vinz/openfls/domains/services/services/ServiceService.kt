@@ -5,6 +5,7 @@ import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.goals.dtos.GoalDto
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.services.dtos.ClientLatestServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.dtos.ServiceXLDto
@@ -14,6 +15,7 @@ import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProje
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
@@ -280,6 +282,30 @@ class ServiceService(
             start,
             end
         ).map(ServiceProjectionDto::from)
+    }
+
+    /**
+     * Latest entries of a client, already restricted to what the requesting employee
+     * may read: own entries always, foreign entries only for readable institutions.
+     */
+    fun getLatestDtosByClientId(
+        clientId: Long,
+        employeeId: Long,
+        readableInstitutionIds: List<Long>,
+        isAdmin: Boolean,
+        limit: Int
+    ): List<ClientLatestServiceDto> {
+        if (limit <= 0) {
+            return emptyList()
+        }
+
+        return serviceRepository.findLatestClientServiceDtosByClientId(
+            clientId = clientId,
+            employeeId = employeeId,
+            readableInstitutionIds = readableInstitutionIds.ifEmpty { listOf(-1L) },
+            isAdmin = isAdmin,
+            pageable = PageRequest.of(0, limit)
+        )
     }
 
     fun getDtosByClientAndDate(clientId: Long, date: LocalDate): List<ServiceDto> {

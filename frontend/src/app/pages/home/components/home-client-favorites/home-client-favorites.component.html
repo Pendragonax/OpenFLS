@@ -1,0 +1,74 @@
+<div class="favorites-wrapper">
+  <div class="favorites-toolbar">
+    <app-search-field class="favorites-search"
+                      (onSearchStringChanges)="onSearchStringChanges($event)"></app-search-field>
+    <button mat-icon-button color="primary" matTooltip="Aktualisieren" (click)="loadFavorites()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <!-- Centers the cards on the remaining viewport height while there's room to
+       spare (few favourites); grows past that and behaves like a normal
+       top-down list once there are enough to fill or exceed the screen. See
+       .favorites-body / .favorites-wrapper in the stylesheet. -->
+  <div class="favorites-body">
+    @if (isLoading) {
+      <app-loading-spinner></app-loading-spinner>
+    }
+
+    @if (loadFailed) {
+      <div class="favorites-error">Die Favoriten konnten nicht geladen werden.</div>
+    }
+
+    @if (!isLoading && !loadFailed && favorites.length === 0) {
+      <div class="favorites-empty">
+        <mat-icon aria-hidden="true">star_border</mat-icon>
+        <span>Sie haben noch keine Klient:innen favorisiert. Öffnen Sie ein Klient:innen-Dashboard und markieren Sie es mit dem Stern.</span>
+      </div>
+    }
+
+    <div class="favorites-grid">
+      @for (favorite of filteredFavorites; track favorite.clientId) {
+        <a class="favorite-card"
+           [ngClass]="{'favorite-card--archived': favorite.archived}"
+           [routerLink]="['/clients/dashboard', favorite.clientId]">
+          <div class="favorite-card-head">
+            <span class="favorite-name">{{ getFullName(favorite) }}</span>
+            <button mat-icon-button
+                    color="primary"
+                    matTooltip="Aus Favoriten entfernen"
+                    (click)="removeFavorite(favorite, $event)">
+              <mat-icon>star</mat-icon>
+            </button>
+          </div>
+
+          <div class="favorite-status-icons">
+            <mat-icon class="status-icon"
+                      [ngClass]="favorite.hasActiveAssistancePlan ? 'status-icon--plan-active' : 'status-icon--plan-inactive'"
+                      [matTooltip]="favorite.hasActiveAssistancePlan ? 'Hilfeplan aktiv' : 'Kein aktiver Hilfeplan'">
+              {{ favorite.hasActiveAssistancePlan ? 'assignment_turned_in' : 'assignment_late' }}
+            </mat-icon>
+
+            <mat-icon class="status-icon status-icon--tasks"
+                      [matBadge]="favorite.openTaskCount"
+                      [matBadgeHidden]="favorite.openTaskCount === 0"
+                      [matBadgeColor]="favorite.overdueTaskCount > 0 ? 'warn' : 'primary'"
+                      [matTooltip]="getTaskTooltip(favorite)">
+              checklist
+            </mat-icon>
+
+            @if (favorite.archived) {
+              <mat-icon class="status-icon status-icon--archived" matTooltip="Archiviert">archive</mat-icon>
+            }
+          </div>
+
+          <div class="favorite-institution">{{ favorite.institutionName }}</div>
+
+          @if (favorite.assistancePlanEnd) {
+            <div class="favorite-footer">Hilfeplan bis {{ getDateString(favorite.assistancePlanEnd) }}</div>
+          }
+        </a>
+      }
+    </div>
+  </div>
+</div>

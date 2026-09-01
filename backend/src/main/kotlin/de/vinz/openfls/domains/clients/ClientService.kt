@@ -8,6 +8,7 @@ import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
 import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
 import de.vinz.openfls.domains.clients.dtos.ClientDto
+import de.vinz.openfls.domains.clients.dtos.ClientFavoriteRowDto
 import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
@@ -178,6 +179,19 @@ class ClientService(
                 .filter { includeArchived || !it.archived || leadingInstitutionIds.contains(it.institution?.id ?: 0) }
                 .map { modelMapper.map(it, ClientSoloDto::class.java) }
                 .sortedBy { it.lastName.lowercase() }
+    }
+
+    /**
+     * Base data of the clients an employee marked as favourite.
+     */
+    @Transactional(readOnly = true)
+    fun getFavoriteRowDtosByEmployeeId(employeeId: Long): List<ClientFavoriteRowDto> {
+        return clientRepository.findFavoriteRowDtosByEmployeeId(employeeId)
+    }
+
+    @Transactional(readOnly = true)
+    fun isFavoriteOfEmployee(clientId: Long, employeeId: Long): Boolean {
+        return clientRepository.findFavoriteClientIdsByEmployeeId(employeeId).contains(clientId)
     }
 
     @Transactional(readOnly = true)

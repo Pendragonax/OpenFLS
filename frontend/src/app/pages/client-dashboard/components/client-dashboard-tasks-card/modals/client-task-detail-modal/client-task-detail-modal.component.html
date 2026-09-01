@@ -1,0 +1,65 @@
+<h1 mat-dialog-title>{{ task.title }}</h1>
+
+<div mat-dialog-content class="task-detail-content">
+  @if (task.description) {
+    <p class="task-detail-description">{{ task.description }}</p>
+  }
+
+  <div class="task-detail-facts">
+    <div class="task-detail-fact">
+      <span class="task-detail-fact-label">Angelegt von</span>
+      <span class="task-detail-fact-value">{{ task.createdByName }}, {{ getDateString(task.createdAt) }}</span>
+    </div>
+    <div class="task-detail-fact">
+      <span class="task-detail-fact-label">Fällig am</span>
+      <span class="task-detail-fact-value">
+        {{ getDateString(task.dueDate) }}
+        @if (task.overdue) {
+          <span class="task-detail-overdue">überfällig</span>
+        }
+      </span>
+    </div>
+  </div>
+
+  @if (task.done) {
+    <div class="task-detail-completion">
+      <div class="task-detail-fact">
+        <span class="task-detail-fact-label">Erledigt von</span>
+        <span class="task-detail-fact-value">{{ task.completedByName }}, {{ getDateString(task.completedOn) }}</span>
+      </div>
+      @if (task.completionComment) {
+        <p class="task-detail-comment">„{{ task.completionComment }}“</p>
+      }
+    </div>
+  } @else {
+    <form class="task-detail-complete-form" [formGroup]="completeForm" (ngSubmit)="complete()">
+      <mat-form-field appearance="outline" class="task-modal-field">
+        <mat-label>Kommentar</mat-label>
+        <textarea matInput formControlName="comment" rows="3" maxlength="1024"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="task-modal-field task-modal-field--date">
+        <mat-label>Erledigt am</mat-label>
+        <input matInput
+               formControlName="completedOn"
+               [matDatepicker]="completedOnPicker"
+               required>
+        <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="completedOnPicker"></mat-datepicker-toggle>
+        <mat-datepicker #completedOnPicker></mat-datepicker>
+      </mat-form-field>
+    </form>
+  }
+</div>
+
+<div mat-dialog-actions class="justify-content-end">
+  <button mat-button type="button" (click)="close()">Schließen</button>
+  @if (task.done) {
+    <button mat-raised-button color="primary" [disabled]="isSubmitting" (click)="reopen()">Wieder öffnen</button>
+  } @else {
+    <button mat-raised-button
+            color="primary"
+            [disabled]="completeForm.invalid || isSubmitting"
+            (click)="complete()">Abhaken</button>
+  }
+</div>

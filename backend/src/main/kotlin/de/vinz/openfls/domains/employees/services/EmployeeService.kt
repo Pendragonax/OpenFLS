@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.employees.services
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanResponseDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
@@ -14,6 +15,7 @@ import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionDto
 import de.vinz.openfls.domains.permissions.PermissionService
+import jakarta.persistence.EntityManager
 import jakarta.persistence.EntityNotFoundException
 import org.modelmapper.ModelMapper
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -29,7 +31,8 @@ class EmployeeService(
         private val assistancePlanRepository: AssistancePlanRepository,
         private val accessService: AccessService,
         private val passwordEncoder: PasswordEncoder,
-        private val modelMapper: ModelMapper
+        private val modelMapper: ModelMapper,
+        private val entityManager: EntityManager
 ) {
     companion object {
         private val USERNAME_PATTERN = Regex("^[A-Za-z0-9ÄÖÜäöüß]+$")
@@ -219,6 +222,53 @@ class EmployeeService(
             employee.assistancePlanFavorites.removeIf { it.id == assistancePlanId }
             employeeRepository.save(employee)
         }
+    }
+
+    @Transactional(readOnly = true)
+    fun getClientFavoriteIds(employeeId: Long): List<Long> {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+
+        return employee.clientFavorites.map { it.id }
+    }
+
+    @Transactional
+    fun addClientAsFavorite(clientId: Long, employeeId: Long) {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+
+        if (employee.clientFavorites.none { it.id == clientId }) {
+            employee.clientFavorites.add(entityManager.getReference(Client::class.java, clientId))
+            employeeRepository.save(employee)
+        }
+    }
+
+    @Transactional
+    fun deleteClientAsFavorite(clientId: Long, employeeId: Long) {
+        val employee = employeeRepository.findById(employeeId)
+                .orElseThrow { EntityNotFoundException() }
+
+        if (employee.clientFavorites.any { it.id == clientId }) {
+            employee.clientFavorites.removeIf { it.id == clientId }
+            employeeRepository.save(employee)
+        }
+    }
+
+    /**
+     * Removes a client from the favourites of every employee. Used when the client is
+     * archived or deleted, so nobody keeps a dead entry on their home view.
+     */
+    @Transactional
+    fun deleteClientFavoritesByClientId(clientId: Long): Int {
+        var removedFavorites = 0
+        employeeRepository.findAll().forEach { employee ->
+            if (employee.clientFavorites.removeIf { it.id == clientId }) {
+                removedFavorites++
+                employeeRepository.save(employee)
+            }
+        }
+
+        return removedFavorites
     }
 
     @Transactional

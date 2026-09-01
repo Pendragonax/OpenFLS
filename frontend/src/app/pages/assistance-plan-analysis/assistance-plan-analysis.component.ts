@@ -29,7 +29,7 @@ import {AssistancePlan} from '../../shared/projections/assistance-plan.projectio
 export class AssistancePlanAnalysisComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
-  private validTabIndices = [0, 1, 2];
+  private validTabIndices = [0, 1, 2, 3];
   private tabParamName = 'tab';
   private idParamName = 'id';
 

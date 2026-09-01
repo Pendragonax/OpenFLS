@@ -3,6 +3,7 @@ import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/clients")
 class ClientController(
         private val clientService: ClientService,
+        private val clientDeletionService: ClientDeletionService,
+        private val employeeService: EmployeeService,
         private val accessService: AccessService) {
 
     private val logger: Logger = LoggerFactory.getLogger(ClientController::class.java)
@@ -98,7 +101,11 @@ class ClientController(
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
-            clientService.delete(id)
+            clientDeletionService.delete(
+                clientId = id,
+                actorId = accessService.getId(),
+                actorName = actorName()
+            )
 
             if (logPerformance) {
                 logger.info(String.format("%s delete took %s ms",
@@ -233,5 +240,11 @@ class ClientController(
                 HttpStatus.BAD_REQUEST
             )
         }
+    }
+
+    private fun actorName(): String {
+        val employee = employeeService.getEmployeeDtoById(accessService.getId(), false)
+            ?: return "Unbekannt"
+        return "${employee.firstName} ${employee.lastName}".trim().ifBlank { "Unbekannt" }
     }
 }
