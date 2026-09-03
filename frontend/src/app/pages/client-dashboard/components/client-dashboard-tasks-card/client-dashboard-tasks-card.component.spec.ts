@@ -31,6 +31,7 @@ describe('ClientDashboardTasksCardComponent', () => {
   let fixture: ComponentFixture<ClientDashboardTasksCardComponent>;
   let clientTaskService: {
     getByClientId: ReturnType<typeof vi.fn>;
+    getCompletedByClientId: ReturnType<typeof vi.fn>;
   };
   let helperService: { openSnackBar: ReturnType<typeof vi.fn> };
   let matDialog: { open: ReturnType<typeof vi.fn> };
@@ -38,7 +39,7 @@ describe('ClientDashboardTasksCardComponent', () => {
   /** Mocks the next MatDialog.open() call and returns its (fake) dialogRef. */
   function mockDialogOpen(closedWith: unknown): { componentInstance: any } {
     const dialogRef = {
-      componentInstance: {},
+      componentInstance: {initialize: vi.fn()},
       afterClosed: () => of(closedWith)
     };
     matDialog.open.mockReturnValueOnce(dialogRef);
@@ -47,7 +48,8 @@ describe('ClientDashboardTasksCardComponent', () => {
 
   beforeEach(async () => {
     clientTaskService = {
-      getByClientId: vi.fn(() => of([task()]))
+      getByClientId: vi.fn(() => of([task()])),
+      getCompletedByClientId: vi.fn(() => of({content: [task({id: 2, done: true})], page: 0, size: 10, totalElements: 1, totalPages: 1}))
     };
     helperService = {openSnackBar: vi.fn()};
     matDialog = {open: vi.fn()};
@@ -76,7 +78,7 @@ describe('ClientDashboardTasksCardComponent', () => {
 
     component.toggleDoneTasks();
 
-    expect(component.visibleTasks.map(value => value.id)).toEqual([1, 2]);
+    expect(component.visibleTasks.map(value => value.id)).toEqual([2]);
   });
 
   it('opens the create modal for the client of the dashboard', () => {
@@ -123,7 +125,7 @@ describe('ClientDashboardTasksCardComponent', () => {
     component.openDetailModal(clicked);
 
     expect(matDialog.open).toHaveBeenCalledWith(ClientTaskDetailModalComponent);
-    expect(dialogRef.componentInstance.task).toBe(clicked);
+    expect(dialogRef.componentInstance.initialize).toHaveBeenCalledWith(clicked);
   });
 
   it('reloads the tasks once the detail modal reports a change', () => {

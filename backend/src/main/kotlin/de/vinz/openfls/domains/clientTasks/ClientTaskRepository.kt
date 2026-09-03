@@ -2,6 +2,8 @@ package de.vinz.openfls.domains.clientTasks
 
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCountDto
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import java.time.LocalDate
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -19,6 +21,14 @@ interface ClientTaskRepository : CrudRepository<ClientTask, Long> {
         """
     )
     fun findAllByClientId(@Param("clientId") clientId: Long): List<ClientTask>
+
+    fun findAllByClientIdAndDoneOrderByDueDateAscIdAsc(clientId: Long, done: Boolean): List<ClientTask>
+
+    fun findAllByClientIdAndDoneOrderByCompletedAtDescIdDesc(
+        clientId: Long,
+        done: Boolean,
+        pageable: Pageable
+    ): Page<ClientTask>
 
 
     @Query(

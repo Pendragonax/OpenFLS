@@ -24,7 +24,7 @@
   </div>
 
   @if (visibleTasks.length === 0) {
-    <div class="card-empty">Es sind keine offenen Aufgaben vorhanden.</div>
+    <div class="card-empty">{{ showDoneTasks ? 'Es sind keine erledigten Aufgaben vorhanden.' : 'Es sind keine offenen Aufgaben vorhanden.' }}</div>
   } @else {
     <ul class="task-list">
       @for (task of visibleTasks; track task.id) {
@@ -36,6 +36,11 @@
             (click)="openDetailModal(task)"
             (keydown.enter)="openDetailModal(task)">
           <div class="task-title">{{ task.title }}</div>
+          @if (!task.done) {
+            <div class="task-row-actions">
+              <button mat-icon-button color="primary" class="task-edit-action" matTooltip="Aufgabe ändern" (click)="openEditModal(task, $event)"><mat-icon>edit</mat-icon></button>
+            </div>
+          }
           @if (!task.done) {
             <div class="task-meta">
               <span>Angelegt von
@@ -51,5 +56,9 @@
         </li>
       }
     </ul>
+  }
+  @if (showDoneTasks) {
+    <mat-paginator [length]="completedTotal" [pageIndex]="completedPage" [pageSize]="10"
+                   [hidePageSize]="true" (page)="onCompletedPage($event)"></mat-paginator>
   }
 </mat-card>

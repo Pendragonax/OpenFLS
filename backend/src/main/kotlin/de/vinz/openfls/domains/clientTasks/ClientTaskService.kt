@@ -3,6 +3,7 @@ package de.vinz.openfls.domains.clientTasks
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskAuditLogDto
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCountDto
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskDto
+import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskPageDto
 import de.vinz.openfls.domains.clientTasks.dtos.CompleteClientTaskDto
 import de.vinz.openfls.domains.clientTasks.dtos.CreateClientTaskDto
 import de.vinz.openfls.domains.clientTasks.dtos.UpdateClientTaskDto
@@ -12,6 +13,7 @@ import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.logging.StructuredLog
 import jakarta.persistence.EntityManager
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Clock
@@ -19,8 +21,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 /**
- * Use cases around client tasks. Tasks may be read, created and completed by every
- * employee; the audit trail records who changed what and when.
+ * Use cases around client tasks. Every mutation writes an audit entry. Completed
+ * tasks are immutable but may still be deleted.
  */
 @Service
 class ClientTaskService(
@@ -33,7 +35,19 @@ class ClientTaskService(
     @Transactional(readOnly = true)
     fun getDtosByClientId(clientId: Long): List<ClientTaskDto> {
         val today = LocalDate.now(clock)
-        return clientTaskRepository.findAllByClientId(clientId).map { toDto(it, today) }
+        return clientTaskRepository.findAllByClientIdAndDoneOrderByDueDateAscIdAsc(clientId, false)
+            .map { toDto(it, today) }
+    }
+
+    @Transactional(readOnly = true)
+    fun getCompletedDtosByClientId(clientId: Long, page: Int, size: Int = 10): ClientTaskPageDto {
+        if (page < 0 || size !in 1..100) throw InvalidClientTaskException("invalid pagination")
+        val result = clientTaskRepository.findAllByClientIdAndDoneOrderByCompletedAtDescIdDesc(
+            clientId, true, PageRequest.of(page, size)
+        )
+        val today = LocalDate.now(clock)
+        return ClientTaskPageDto(result.content.map { toDto(it, today) }, result.number, result.size,
+            result.totalElements, result.totalPages)
     }
 
     @Transactional(readOnly = true)
@@ -61,6 +75,7 @@ class ClientTaskService(
     @Transactional(readOnly = true)
     fun getAuditHistory(taskId: Long): List<ClientTaskAuditLogDto> {
         return clientTaskAuditLogRepository.findAllByClientTaskIdOrderByChangedAtDesc(taskId)
+            .filter { it.action == ClientTaskAuditAction.UPDATE || it.action == ClientTaskAuditAction.COMPLETE }
             .map { toDto(it) }
     }
 
@@ -90,6 +105,7 @@ class ClientTaskService(
             actorName = actorName,
             changedAt = now,
             afterTitle = saved.title,
+            afterDescription = saved.description,
             afterDueDate = saved.dueDate,
             afterDone = false
         )
@@ -99,14 +115,16 @@ class ClientTaskService(
     }
 
     @Transactional
-    fun update(valueDto: UpdateClientTaskDto, actorId: Long, actorName: String): ClientTaskDto {
-        val task = clientTaskRepository.findById(valueDto.id)
+    fun update(id: Long, valueDto: UpdateClientTaskDto, actorId: Long, actorName: String): ClientTaskDto {
+        val task = clientTaskRepository.findById(id)
             .orElseThrow { ClientTaskNotFoundException("client task not found") }
         if (valueDto.title.isBlank()) {
             throw InvalidClientTaskException("title must not be blank")
         }
+        if (task.done) throw InvalidClientTaskException("completed tasks cannot be changed")
 
         val beforeTitle = task.title
+        val beforeDescription = task.description
         val beforeDueDate = task.dueDate
 
         task.title = valueDto.title.trim()
@@ -124,29 +142,13 @@ class ClientTaskService(
             changedAt = now,
             beforeTitle = beforeTitle,
             afterTitle = saved.title,
+            beforeDescription = beforeDescription,
+            afterDescription = saved.description,
             beforeDueDate = beforeDueDate,
             afterDueDate = saved.dueDate
         )
         StructuredLog.audit("client.task.updated", "success", "client.task", saved.id.toString())
 
-        return toDto(saved, LocalDate.now(clock))
-    }
-
-    @Transactional
-    fun reopen(id: Long, comment: String, actorId: Long, actorName: String): ClientTaskDto {
-        val task = clientTaskRepository.findById(id)
-            .orElseThrow { ClientTaskNotFoundException("client task not found") }
-        if (!task.done) throw InvalidClientTaskException("client task is not done")
-        val now = LocalDateTime.now(clock)
-        task.done = false
-        task.completedBy = null
-        task.completedAt = null
-        task.completedOn = null
-        task.completionComment = null
-        val saved = clientTaskRepository.save(task)
-        writeAuditLog(task = saved, action = ClientTaskAuditAction.REOPEN, actorId = actorId, actorName = actorName,
-            changedAt = now, beforeDone = true, afterDone = false, comment = comment.trim().ifBlank { null })
-        StructuredLog.audit("client.task.reopened", "success", "client.task", saved.id.toString())
         return toDto(saved, LocalDate.now(clock))
     }
 
@@ -194,6 +196,7 @@ class ClientTaskService(
             actorName = actorName,
             changedAt = LocalDateTime.now(clock),
             beforeTitle = task.title,
+            beforeDescription = task.description,
             beforeDueDate = task.dueDate,
             beforeDone = task.done
         )
@@ -222,6 +225,7 @@ class ClientTaskService(
                 actorName = actorName,
                 changedAt = now,
                 beforeTitle = task.title,
+                beforeDescription = task.description,
                 beforeDueDate = task.dueDate,
                 beforeDone = task.done
             )
@@ -249,6 +253,8 @@ class ClientTaskService(
         changedAt: LocalDateTime,
         beforeTitle: String? = null,
         afterTitle: String? = null,
+        beforeDescription: String? = null,
+        afterDescription: String? = null,
         beforeDueDate: LocalDate? = null,
         afterDueDate: LocalDate? = null,
         beforeDone: Boolean? = null,
@@ -265,6 +271,8 @@ class ClientTaskService(
                 actor = actorName.take(128),
                 beforeTitle = beforeTitle,
                 afterTitle = afterTitle,
+                beforeDescription = beforeDescription,
+                afterDescription = afterDescription,
                 beforeDueDate = beforeDueDate,
                 afterDueDate = afterDueDate,
                 beforeDone = beforeDone,
@@ -303,6 +311,8 @@ class ClientTaskService(
             actor = log.actor,
             beforeTitle = log.beforeTitle,
             afterTitle = log.afterTitle,
+            beforeDescription = log.beforeDescription,
+            afterDescription = log.afterDescription,
             beforeDueDate = log.beforeDueDate,
             afterDueDate = log.afterDueDate,
             beforeDone = log.beforeDone,

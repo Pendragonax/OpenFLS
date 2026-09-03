@@ -27,14 +27,15 @@ function task(overrides: Partial<ClientTaskDto> = {}): ClientTaskDto {
 describe('ClientTaskDetailModalComponent', () => {
   let component: ClientTaskDetailModalComponent;
   let fixture: ComponentFixture<ClientTaskDetailModalComponent>;
-  let clientTaskService: { complete: ReturnType<typeof vi.fn>; reopen: ReturnType<typeof vi.fn> };
+  let clientTaskService: { complete: ReturnType<typeof vi.fn>; getHistory: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn> };
   let helperService: { openSnackBar: ReturnType<typeof vi.fn> };
   let dialogRef: { close: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     clientTaskService = {
       complete: vi.fn(() => of(task({done: true}))),
-      reopen: vi.fn(() => of(task()))
+      getHistory: vi.fn(() => of([])),
+      delete: vi.fn(() => of(task()))
     };
     helperService = {openSnackBar: vi.fn()};
     dialogRef = {close: vi.fn()};
@@ -83,27 +84,6 @@ describe('ClientTaskDetailModalComponent', () => {
     expect(dialogRef.close).not.toHaveBeenCalled();
     expect(component.isSubmitting).toBe(false);
     expect(helperService.openSnackBar).toHaveBeenCalledWith('Aufgabe konnte nicht abgehakt werden');
-  });
-
-  it('reopens a done task and closes with the result', () => {
-    component.task = task({done: true});
-    const reopened = task({done: false});
-    clientTaskService.reopen.mockReturnValueOnce(of(reopened));
-
-    component.reopen();
-
-    expect(clientTaskService.reopen).toHaveBeenCalledWith(1, '');
-    expect(dialogRef.close).toHaveBeenCalledWith(reopened);
-  });
-
-  it('reports a failed reopen without closing', () => {
-    component.task = task({done: true});
-    clientTaskService.reopen.mockReturnValueOnce(throwError(() => new Error('boom')));
-
-    component.reopen();
-
-    expect(dialogRef.close).not.toHaveBeenCalled();
-    expect(helperService.openSnackBar).toHaveBeenCalledWith('Aufgabe konnte nicht wieder geöffnet werden');
   });
 
   it('closes with null when dismissed without acting', () => {

@@ -24,10 +24,17 @@ export interface CreateClientTaskDto {
 }
 
 export interface UpdateClientTaskDto {
-  id: number;
   title: string;
   description: string;
   dueDate: string;
+}
+
+export interface ClientTaskPageDto {
+  content: ClientTaskDto[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface CompleteClientTaskDto {
@@ -35,7 +42,7 @@ export interface CompleteClientTaskDto {
   completedOn: string;
 }
 
-export type ClientTaskAuditAction = 'CREATE' | 'UPDATE' | 'COMPLETE' | 'REOPEN' | 'DELETE';
+export type ClientTaskAuditAction = 'CREATE' | 'UPDATE' | 'COMPLETE' | 'DELETE';
 
 export interface ClientTaskAuditLogDto {
   id: number;
@@ -45,6 +52,8 @@ export interface ClientTaskAuditLogDto {
   actor: string;
   beforeTitle: string | null;
   afterTitle: string | null;
+  beforeDescription: string | null;
+  afterDescription: string | null;
   beforeDueDate: string | null;
   afterDueDate: string | null;
   beforeDone: boolean | null;

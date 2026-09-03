@@ -2,7 +2,9 @@ import {Component} from '@angular/core';
 import {FormControl, FormGroup, NonNullableFormBuilder, Validators} from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from '@angular/material/core';
-import {ClientTaskDto} from '../../../../../../shared/dtos/client-task-dto.model';
+import {ClientTaskAuditLogDto, ClientTaskDto} from '../../../../../../shared/dtos/client-task-dto.model';
+import {MatDialog} from '@angular/material/dialog';
+import {ConfirmationModalComponent} from '../../../../../../shared/modals/confirmation-modal/confirmation-modal.component';
 import {ClientTaskService} from '../../../../../../shared/services/client-task.service';
 import {HelperService} from '../../../../../../shared/services/helper.service';
 import {Converter} from '../../../../../../shared/services/converter.helper';
@@ -30,6 +32,7 @@ export class ClientTaskDetailModalComponent {
 
   task!: ClientTaskDto;
   isSubmitting = false;
+  history: ClientTaskAuditLogDto[] = [];
 
   readonly completeForm: FormGroup<{
     comment: FormControl<string>;
@@ -41,12 +44,18 @@ export class ClientTaskDetailModalComponent {
     private formBuilder: NonNullableFormBuilder,
     private clientTaskService: ClientTaskService,
     private helperService: HelperService,
-    private converter: Converter
+    private converter: Converter,
+    private matDialog: MatDialog
   ) {
     this.completeForm = this.formBuilder.group({
       comment: this.formBuilder.control('', [Validators.maxLength(1024)]),
       completedOn: this.formBuilder.control(ClientTaskDetailModalComponent.today(), [Validators.required])
     });
+  }
+
+  initialize(task: ClientTaskDto) {
+    this.task = task;
+    this.clientTaskService.getHistory(task.id).subscribe(history => this.history = history);
   }
 
   /**
@@ -76,17 +85,36 @@ export class ClientTaskDetailModalComponent {
     });
   }
 
-  reopen() {
-    if (this.isSubmitting) return;
-    this.isSubmitting = true;
-    this.clientTaskService.reopen(this.task.id, '').subscribe({
-      next: task => { this.helperService.openSnackBar('Aufgabe wieder geöffnet'); this.dialogRef.close(task); },
-      error: () => { this.isSubmitting = false; this.helperService.openSnackBar('Aufgabe konnte nicht wieder geöffnet werden'); }
+  close() {
+    this.dialogRef.close(null);
+  }
+
+  deleteTask() {
+    const ref = this.matDialog.open(ConfirmationModalComponent);
+    ref.componentInstance.description = 'Wollen Sie diese Aufgabe wirklich löschen?';
+    ref.afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.isSubmitting = true;
+      this.clientTaskService.delete(this.task.id).subscribe({
+        next: () => { this.helperService.openSnackBar('Aufgabe gelöscht'); this.dialogRef.close(this.task); },
+        error: () => { this.isSubmitting = false; this.helperService.openSnackBar('Aufgabe konnte nicht gelöscht werden'); }
+      });
     });
   }
 
-  close() {
-    this.dialogRef.close(null);
+  historyLabel(entry: ClientTaskAuditLogDto): string {
+    return entry.action === 'COMPLETE' ? 'Aufgabe abgehakt' : 'Aufgabe geändert';
+  }
+
+  historyChanges(entry: ClientTaskAuditLogDto): string[] {
+    if (entry.action !== 'UPDATE') return [];
+    const changes: string[] = [];
+    if (entry.beforeTitle !== entry.afterTitle) changes.push(`Titel: ${entry.beforeTitle ?? '–'} → ${entry.afterTitle ?? '–'}`);
+    if (entry.beforeDescription !== entry.afterDescription) changes.push('Beschreibung geändert');
+    if (entry.beforeDueDate !== entry.afterDueDate) {
+      changes.push(`Fällig: ${this.getDateString(entry.beforeDueDate)} → ${this.getDateString(entry.afterDueDate)}`);
+    }
+    return changes;
   }
 
   getDateString(value: string | null): string {

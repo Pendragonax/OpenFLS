@@ -12,7 +12,7 @@ Route: `/clients/dashboard/:id`
 | --- | --- | --- |
 | Aktueller/Nächster/Aktuellster Hilfeplan | Ausgewählter Hilfeplan mit Zeitraum, Kostenträger, Einrichtung, Stundenmodus und Fortschrittsbalken (Titel benennt, welcher der drei Fälle vorliegt) | Hilfeplan-Bearbeitung (Stift-Icon), Zeitauswertungen, Ziele, Tabellarische Ansicht, Evaluationen |
 | Letzte Einträge | Bis zu fünf für die anfragende Person sichtbare Einträge mit Datum, Titel, Inhalt und Mitarbeiter:in; ein Zähler zeigt, wie viele es tatsächlich sind | Eintragsliste, vorausgewählt auf den Zeitraum des angezeigten Hilfeplans |
-| Aufgaben | Offene und – auf Wunsch – erledigte Aufgaben der Klient:in, in der Kachel nur als Kurzzeile | Anlegen und die volle Ansicht inkl. Abhaken/Wiederöffnen öffnen als Modal (Klick auf die Aufgabe bzw. auf „+“) |
+| Aufgaben | Offene sowie paginiert jeweils zehn erledigte Aufgaben der Klient:in | Anlegen, Ändern, Abhaken, Löschen und Detailansicht mit Historie |
 
 Der Kopfbereich erlaubt das Favorisieren der Klient:in und den Sprung in die
 Stammdaten.
@@ -50,7 +50,7 @@ fehlende Dokumentation wirken. Statt der Daten erscheint dann ein Hinweisfeld.
 | Hilfeplan-Kachel (inkl. Fortschrittsbalken) | Admin, Leitung, zugehörige oder lesende Mitarbeitende der Einrichtung der Klient:in |
 | Letzte Einträge | wie Hilfeplan; zusätzlich wird je Eintrag gefiltert: eigene Einträge immer, fremde nur aus lesbaren Einrichtungen |
 | Aufgaben | alle angemeldeten Mitarbeitenden |
-| Aufgaben-Historie | Admin und Leitung der Einrichtung der Klient:in |
+| Aufgaben-Historie | alle angemeldeten Mitarbeitenden |
 
 Archivierte Klient:innen und Pläne bleiben nur für Admins und Leitungskräfte
 sichtbar. Das entspricht der bestehenden Regel der Klient:innen-Listen.
@@ -65,8 +65,10 @@ Damit die Kachel nicht durch beliebig langen Freitext gesprengt wird, zeigt die
 Kurzzeile im Dashboard bewusst wenig: bei offenen Aufgaben nur Titel, anlegende
 Person mit Datum und Fälligkeitsdatum; bei abgehakten Aufgaben nur Titel und wer
 sie wann erledigt hat. Beschreibung und Abhak-Kommentar erscheinen erst im
-Detail-Modal, das sich per Klick auf die Aufgabe öffnet – dort liegen auch
-Abhaken und Wiederöffnen. Anlegen läuft über ein eigenes Modal (Klick auf „+“).
+Detail-Modal, das sich per Klick auf die Aufgabe öffnet. Offene Aufgaben besitzen
+getrennte Aktionen zum Ändern und Abhaken. Erledigte Aufgaben sind unveränderlich
+und können nicht wieder geöffnet, aber weiterhin gelöscht werden. Die erledigten
+Aufgaben werden serverseitig in Seiten zu je zehn Einträgen geladen.
 
 Bewusste fachliche Entscheidung: **Aufgaben sind bewusst nicht
 berechtigungsgefiltert.** Jede angemeldete Person darf sie sehen, anlegen und
@@ -77,8 +79,9 @@ sowie Vorher-/Nachher-Werten. Aufgabentexte sollten deshalb keine besonders
 schützenswerten Inhalte enthalten; die Oberfläche weist Aufgaben als
 organisatorische Notizen aus, nicht als Falldokumentation.
 
-Löschen ist Admins vorbehalten und wird ebenfalls protokolliert – der Audit-Eintrag
-bleibt nach dem Löschen der Aufgabe bestehen.
+Anlegen, Ändern, Abhaken und Löschen werden jeweils als eigene Audit-Aktion
+protokolliert. In der Detailansicht erscheinen bewusst nur Änderungen und
+Abhakvorgänge; Anlage- und Löschereignisse bleiben ausschließlich im Audit-Log.
 
 Wird eine Klient:in archiviert, entfernt das System sie aus allen Favoritenlisten
 (wie schon bisher bei den Hilfeplan-Favoriten). Wird eine Klient:in gelöscht,
@@ -104,12 +107,12 @@ läuft und wie viele Aufgaben offen bzw. überfällig sind.
 | POST | `/client_dashboards/favorites/client/{clientId}` | authentifiziert |
 | DELETE | `/client_dashboards/favorites/client/{clientId}` | authentifiziert |
 | GET | `/client_tasks/client/{clientId}` | authentifiziert |
+| GET | `/client_tasks/client/{clientId}/completed?page=0&size=10` | authentifiziert |
 | POST | `/client_tasks` | authentifiziert |
-| PUT | `/client_tasks/{id}` | authentifiziert |
+| PUT | `/client_tasks/{id}/change` | authentifiziert; nur offene Aufgaben |
 | POST | `/client_tasks/{id}/complete` | authentifiziert |
-| POST | `/client_tasks/{id}/reopen` | authentifiziert |
-| DELETE | `/client_tasks/{id}` | Admin |
-| GET | `/client_tasks/{id}/history` | Admin oder Leitung der Einrichtung |
+| DELETE | `/client_tasks/{id}` | authentifiziert; offene und erledigte Aufgaben |
+| GET | `/client_tasks/{id}/history` | authentifiziert; liefert Ändern und Abhaken |
 
 ## Migration
 
@@ -121,6 +124,4 @@ verändert; die Migration ist rein additiv.
 
 - Das Dashboard lädt seine Abschnitte in einem Aufruf. Wächst der Umfang,
   sollten die Abschnitte auf eigene Endpunkte aufgeteilt werden.
-- Die Aufgaben-Historie ist bisher nur über die API abrufbar und noch nicht in
-  der Oberfläche dargestellt.
 - Aufgaben sind nicht Teil des Klient:innen-Archiv-Exports.

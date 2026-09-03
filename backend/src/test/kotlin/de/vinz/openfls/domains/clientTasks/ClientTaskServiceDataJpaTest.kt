@@ -171,35 +171,6 @@ class ClientTaskServiceDataJpaTest {
     }
 
     @Test
-    fun reopen_completedTask_clearsCompletionAndKeepsAuditTrail() {
-        val created = clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Doch nicht fertig", dueDate = LocalDate.of(2026, 3, 20)),
-            actorId = creatorId,
-            actorName = "Anna Autorin"
-        )
-        clientTaskService.complete(
-            created.id,
-            CompleteClientTaskDto(comment = "zu früh", completedOn = LocalDate.of(2026, 3, 9)),
-            completerId,
-            "Ben Bearbeiter"
-        )
-
-        val reopened = clientTaskService.reopen(created.id, "war noch offen", creatorId, "Anna Autorin")
-
-        assertThat(reopened.done).isFalse()
-        assertThat(reopened.completedByName).isNull()
-        assertThat(reopened.completionComment).isNull()
-
-        val auditLogs = clientTaskAuditLogRepository.findAllByClientTaskIdOrderByChangedAtDesc(created.id)
-        assertThat(auditLogs.map { it.action })
-            .containsExactlyInAnyOrder(
-                ClientTaskAuditAction.CREATE,
-                ClientTaskAuditAction.COMPLETE,
-                ClientTaskAuditAction.REOPEN
-            )
-    }
-
-    @Test
     fun update_changedTitleAndDueDate_isRecordedWithBeforeAndAfter() {
         val created = clientTaskService.create(
             CreateClientTaskDto(clientId = clientId, title = "Alter Titel", dueDate = LocalDate.of(2026, 3, 20)),
@@ -208,8 +179,8 @@ class ClientTaskServiceDataJpaTest {
         )
 
         clientTaskService.update(
+            created.id,
             UpdateClientTaskDto(
-                id = created.id,
                 title = "Neuer Titel",
                 description = "",
                 dueDate = LocalDate.of(2026, 4, 1)
@@ -225,6 +196,74 @@ class ClientTaskServiceDataJpaTest {
         assertThat(updateLog.afterTitle).isEqualTo("Neuer Titel")
         assertThat(updateLog.beforeDueDate).isEqualTo(LocalDate.of(2026, 3, 20))
         assertThat(updateLog.afterDueDate).isEqualTo(LocalDate.of(2026, 4, 1))
+    }
+
+    @Test
+    fun update_completedTask_isRejected() {
+        val created = clientTaskService.create(
+            CreateClientTaskDto(clientId = clientId, title = "Erledigt", dueDate = LocalDate.of(2026, 3, 20)),
+            creatorId, "Anna Autorin"
+        )
+        clientTaskService.complete(
+            created.id, CompleteClientTaskDto(completedOn = LocalDate.of(2026, 3, 10)),
+            completerId, "Ben Bearbeiter"
+        )
+
+        assertThatThrownBy {
+            clientTaskService.update(
+                created.id,
+                UpdateClientTaskDto(title = "Manipuliert", dueDate = LocalDate.of(2026, 4, 1)),
+                creatorId,
+                "Anna Autorin"
+            )
+        }.isInstanceOf(InvalidClientTaskException::class.java)
+    }
+
+    @Test
+    fun getCompletedDtosByClientId_returnsTenItemsPerPage() {
+        repeat(11) { index ->
+            val created = clientTaskService.create(
+                CreateClientTaskDto(clientId = clientId, title = "Aufgabe $index", dueDate = LocalDate.of(2026, 3, 20)),
+                creatorId, "Anna Autorin"
+            )
+            clientTaskService.complete(
+                created.id, CompleteClientTaskDto(completedOn = LocalDate.of(2026, 3, 10)),
+                completerId, "Ben Bearbeiter"
+            )
+        }
+
+        val first = clientTaskService.getCompletedDtosByClientId(clientId, 0)
+        val second = clientTaskService.getCompletedDtosByClientId(clientId, 1)
+
+        assertThat(first.content).hasSize(10)
+        assertThat(first.totalElements).isEqualTo(11)
+        assertThat(first.totalPages).isEqualTo(2)
+        assertThat(second.content).hasSize(1)
+    }
+
+    @Test
+    fun getAuditHistory_onlyReturnsChangeAndCompleteActions() {
+        val created = clientTaskService.create(
+            CreateClientTaskDto(clientId = clientId, title = "Alt", description = "Vorher", dueDate = LocalDate.of(2026, 3, 20)),
+            creatorId, "Anna Autorin"
+        )
+        clientTaskService.update(
+            created.id,
+            UpdateClientTaskDto(title = "Neu", description = "Nachher", dueDate = LocalDate.of(2026, 3, 21)),
+            creatorId,
+            "Anna Autorin"
+        )
+        clientTaskService.complete(
+            created.id, CompleteClientTaskDto(completedOn = LocalDate.of(2026, 3, 10)),
+            completerId, "Ben Bearbeiter"
+        )
+
+        val history = clientTaskService.getAuditHistory(created.id)
+
+        assertThat(history.map { it.action }).containsExactlyInAnyOrder(ClientTaskAuditAction.COMPLETE, ClientTaskAuditAction.UPDATE)
+        val update = history.first { it.action == ClientTaskAuditAction.UPDATE }
+        assertThat(update.beforeDescription).isEqualTo("Vorher")
+        assertThat(update.afterDescription).isEqualTo("Nachher")
     }
 
     @Test

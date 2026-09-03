@@ -16,9 +16,9 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 /**
- * Client tasks are readable, creatable and completable by every authenticated
- * employee. Deleting a task and reading its audit history stay restricted, because
- * both touch documented history.
+ * Each fachliche task action has its own endpoint. Tasks can be created, changed,
+ * completed and deleted by authenticated employees; a completed task cannot be
+ * changed or reopened. The detail history exposes changes and completions only.
  */
 @RestController
 @RequestMapping("/client_tasks")
@@ -52,6 +52,25 @@ class ClientTaskController(
         }
     }
 
+    @GetMapping("client/{clientId}/completed")
+    fun getCompletedByClientId(
+        @PathVariable clientId: Long,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "10") size: Int
+    ): Any {
+        val startMs = System.currentTimeMillis()
+        return try {
+            if (!clientService.existsById(clientId)) throw InvalidClientTaskException("client not found")
+            ResponseEntity.ok(clientTaskService.getCompletedDtosByClientId(clientId, page, size))
+        } catch (ex: IllegalArgumentException) {
+            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
+        } catch (ex: Exception) {
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getCompletedByClientId", startMs, logger)
+        }
+    }
+
     @PostMapping
     fun create(@Valid @RequestBody valueDto: CreateClientTaskDto): Any {
         val startMs = System.currentTimeMillis()
@@ -72,13 +91,12 @@ class ClientTaskController(
         }
     }
 
-    @PutMapping("{id}")
+    @PutMapping("{id}/change")
     fun update(@PathVariable id: Long, @Valid @RequestBody valueDto: UpdateClientTaskDto): Any {
         val startMs = System.currentTimeMillis()
 
         return try {
-            if (id != valueDto.id) throw InvalidClientTaskException("path id and dto id are not the same")
-            ResponseEntity.ok(clientTaskService.update(valueDto, actorId(), actorName()))
+            ResponseEntity.ok(clientTaskService.update(id, valueDto, actorId(), actorName()))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
         } catch (ex: IllegalArgumentException) {
@@ -107,31 +125,11 @@ class ClientTaskController(
         }
     }
 
-    @PostMapping("{id}/reopen")
-    fun reopen(@PathVariable id: Long, @RequestBody(required = false) valueDto: CompleteClientTaskDto?): Any {
-        val startMs = System.currentTimeMillis()
-
-        return try {
-            ResponseEntity.ok(clientTaskService.reopen(id, valueDto?.comment ?: "", actorId(), actorName()))
-        } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
-        } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
-        } catch (ex: Exception) {
-            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
-        } finally {
-            performanceLoggingService.logPerformance("reopen", startMs, logger)
-        }
-    }
-
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
         val startMs = System.currentTimeMillis()
 
         return try {
-            if (!accessService.isAdmin())
-                throw IllegalAccessException("no permission to delete client tasks")
-
             val dto = clientTaskService.getDtoById(id)
             clientTaskService.delete(id, actorId(), actorName())
             ResponseEntity.ok(dto)
@@ -151,16 +149,7 @@ class ClientTaskController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            val clientId = clientTaskService.getClientIdById(id)
-            val institutionId = clientService.getDtoById(
-                id = clientId,
-                includeArchived = true,
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )?.institution?.id ?: 0
-
-            if (!accessService.isAdmin() && !accessService.isLeader(institutionId))
-                throw IllegalAccessException("no permission to read the audit history of client tasks")
-
+            if (!clientTaskService.existsById(id)) throw InvalidClientTaskException("client task not found")
             ResponseEntity.ok(clientTaskService.getAuditHistory(id))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)

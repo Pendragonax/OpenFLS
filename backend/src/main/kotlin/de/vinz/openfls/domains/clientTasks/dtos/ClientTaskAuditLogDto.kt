@@ -12,6 +12,8 @@ data class ClientTaskAuditLogDto(
     val actor: String,
     val beforeTitle: String?,
     val afterTitle: String?,
+    val beforeDescription: String?,
+    val afterDescription: String?,
     val beforeDueDate: LocalDate?,
     val afterDueDate: LocalDate?,
     val beforeDone: Boolean?,

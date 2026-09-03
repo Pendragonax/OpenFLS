@@ -81,6 +81,7 @@ import {
 import {
   ClientTaskDetailModalComponent
 } from './pages/client-dashboard/components/client-dashboard-tasks-card/modals/client-task-detail-modal/client-task-detail-modal.component';
+import {ClientTaskEditModalComponent} from './pages/client-dashboard/components/client-dashboard-tasks-card/modals/client-task-edit-modal/client-task-edit-modal.component';
 import {
   HomeClientFavoritesComponent
 } from './pages/home/components/home-client-favorites/home-client-favorites.component';
@@ -221,6 +222,7 @@ import {MarkdownModule} from "ngx-markdown";
         ClientDashboardTasksCardComponent,
         ClientTaskCreateModalComponent,
         ClientTaskDetailModalComponent,
+        ClientTaskEditModalComponent,
         HomeClientFavoritesComponent,
         NoPermissionPanelComponent,
         HourTypeComponent,

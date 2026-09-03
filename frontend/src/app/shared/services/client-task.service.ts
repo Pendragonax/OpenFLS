@@ -5,6 +5,7 @@ import {environment} from '../../../environments/environment';
 import {
   ClientTaskAuditLogDto,
   ClientTaskDto,
+  ClientTaskPageDto,
   CompleteClientTaskDto,
   CreateClientTaskDto,
   UpdateClientTaskDto
@@ -27,20 +28,20 @@ export class ClientTaskService {
     return this.http.get<ClientTaskDto[]>(`${this.url}/client/${clientId}`);
   }
 
+  getCompletedByClientId(clientId: number, page: number, size: number = 10): Observable<ClientTaskPageDto> {
+    return this.http.get<ClientTaskPageDto>(`${this.url}/client/${clientId}/completed?page=${page}&size=${size}`);
+  }
+
   create(value: CreateClientTaskDto): Observable<ClientTaskDto> {
     return this.http.post<ClientTaskDto>(this.url, value);
   }
 
-  update(value: UpdateClientTaskDto): Observable<ClientTaskDto> {
-    return this.http.put<ClientTaskDto>(`${this.url}/${value.id}`, value);
+  update(id: number, value: UpdateClientTaskDto): Observable<ClientTaskDto> {
+    return this.http.put<ClientTaskDto>(`${this.url}/${id}/change`, value);
   }
 
   complete(id: number, value: CompleteClientTaskDto): Observable<ClientTaskDto> {
     return this.http.post<ClientTaskDto>(`${this.url}/${id}/complete`, value);
-  }
-
-  reopen(id: number, comment: string): Observable<ClientTaskDto> {
-    return this.http.post<ClientTaskDto>(`${this.url}/${id}/reopen`, {comment, completedOn: new Date().toISOString().substring(0, 10)});
   }
 
   delete(id: number): Observable<ClientTaskDto> {

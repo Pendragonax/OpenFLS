@@ -6,6 +6,8 @@ import {HelperService} from '../../../../shared/services/helper.service';
 import {Converter} from '../../../../shared/services/converter.helper';
 import {ClientTaskCreateModalComponent} from './modals/client-task-create-modal/client-task-create-modal.component';
 import {ClientTaskDetailModalComponent} from './modals/client-task-detail-modal/client-task-detail-modal.component';
+import {ClientTaskEditModalComponent} from './modals/client-task-edit-modal/client-task-edit-modal.component';
+import {PageEvent} from '@angular/material/paginator';
 
 /**
  * Tasks of a client. Every employee may create a task and tick it off with a
@@ -27,6 +29,9 @@ export class ClientDashboardTasksCardComponent {
   @Output() tasksChanged = new EventEmitter<ClientTaskDto[]>();
 
   showDoneTasks = false;
+  completedTasks: ClientTaskDto[] = [];
+  completedTotal = 0;
+  completedPage = 0;
 
   constructor(
     private matDialog: MatDialog,
@@ -41,16 +46,19 @@ export class ClientDashboardTasksCardComponent {
   }
 
   get doneTasks(): ClientTaskDto[] {
-    return this.tasks.filter(task => task.done);
+    return this.completedTasks;
   }
 
   get visibleTasks(): ClientTaskDto[] {
-    return this.showDoneTasks ? this.tasks : this.openTasks;
+    return this.showDoneTasks ? this.doneTasks : this.openTasks;
   }
 
   toggleDoneTasks() {
     this.showDoneTasks = !this.showDoneTasks;
+    if (this.showDoneTasks) this.loadCompleted(0);
   }
+
+  onCompletedPage(event: PageEvent) { this.loadCompleted(event.pageIndex); }
 
   openCreateModal() {
     const dialogRef = this.matDialog.open(ClientTaskCreateModalComponent);
@@ -67,13 +75,20 @@ export class ClientDashboardTasksCardComponent {
    *  completion comment are only ever shown here. */
   openDetailModal(task: ClientTaskDto) {
     const dialogRef = this.matDialog.open(ClientTaskDetailModalComponent);
-    dialogRef.componentInstance.task = task;
+    dialogRef.componentInstance.initialize(task);
 
     dialogRef.afterClosed().subscribe(updatedTask => {
       if (updatedTask) {
         this.reload();
       }
     });
+  }
+
+  openEditModal(task: ClientTaskDto, event: Event) {
+    event.stopPropagation();
+    const dialogRef = this.matDialog.open(ClientTaskEditModalComponent);
+    dialogRef.componentInstance.initialize(task);
+    dialogRef.afterClosed().subscribe(updated => { if (updated) this.reload(); });
   }
 
   getDateString(value: string | null): string {
@@ -90,8 +105,24 @@ export class ClientDashboardTasksCardComponent {
       next: (tasks) => {
         this.tasks = tasks;
         this.tasksChanged.emit(tasks);
+        if (this.showDoneTasks) this.loadCompleted(this.completedPage);
       },
       error: () => this.helperService.openSnackBar('Aufgaben konnten nicht geladen werden')
+    });
+  }
+
+  private loadCompleted(page: number) {
+    this.clientTaskService.getCompletedByClientId(this.clientId, page).subscribe({
+      next: result => {
+        if (result.content.length === 0 && result.totalElements > 0 && page > 0) {
+          this.loadCompleted(page - 1);
+          return;
+        }
+        this.completedTasks = result.content;
+        this.completedTotal = result.totalElements;
+        this.completedPage = result.page;
+      },
+      error: () => this.helperService.openSnackBar('Erledigte Aufgaben konnten nicht geladen werden')
     });
   }
 }

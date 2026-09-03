@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.clientTasks
 
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskDto
+import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskPageDto
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.employees.dtos.EmployeeDto
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -114,18 +116,32 @@ class ClientTaskControllerWebMvcTest {
     }
 
     @Test
-    fun delete_nonAdmin_isForbidden() {
-        given(accessService.isAdmin()).willReturn(false)
+    fun change_usesPathIdAndDedicatedActionEndpoint() {
+        given(clientTaskService.update(eq(1L), any(), eq(7L), eq("Anna Autorin"))).willReturn(taskDto())
 
-        val result = mockMvc.delete("/client_tasks/1").andReturn()
+        val result = mockMvc.put("/client_tasks/1/change") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"title":"Bericht","description":"Neu","dueDate":"2026-03-20"}"""
+        }.andReturn()
 
-        assertThat(result.response.status).isEqualTo(403)
-        verify(clientTaskService, never()).delete(any(), any(), any())
+        assertThat(result.response.status).isEqualTo(200)
+        verify(clientTaskService).update(eq(1L), any(), eq(7L), eq("Anna Autorin"))
     }
 
     @Test
-    fun delete_admin_removesTheTask() {
-        given(accessService.isAdmin()).willReturn(true)
+    fun completed_returnsRequestedPage() {
+        given(clientService.existsById(3L)).willReturn(true)
+        given(clientTaskService.getCompletedDtosByClientId(3L, 1, 10))
+            .willReturn(ClientTaskPageDto(listOf(taskDto().copy(done = true)), 1, 10, 11, 2))
+
+        val result = mockMvc.get("/client_tasks/client/3/completed?page=1&size=10").andReturn()
+
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"totalElements\":11")
+    }
+
+    @Test
+    fun delete_removesTheTask() {
         given(clientTaskService.getDtoById(1L)).willReturn(taskDto())
 
         val result = mockMvc.delete("/client_tasks/1").andReturn()
@@ -135,26 +151,18 @@ class ClientTaskControllerWebMvcTest {
     }
 
     @Test
-    fun getHistory_withoutLeadingPermission_isForbidden() {
-        given(clientTaskService.getClientIdById(1L)).willReturn(3L)
-        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(clientService.getDtoById(eq(3L), any(), any())).willReturn(clientDto())
-        given(accessService.isAdmin()).willReturn(false)
-        given(accessService.isLeader(5L)).willReturn(false)
+    fun getHistory_unknownTask_returnsBadRequest() {
+        given(clientTaskService.existsById(1L)).willReturn(false)
 
         val result = mockMvc.get("/client_tasks/1/history").andReturn()
 
-        assertThat(result.response.status).isEqualTo(403)
+        assertThat(result.response.status).isEqualTo(400)
         verify(clientTaskService, never()).getAuditHistory(any())
     }
 
     @Test
-    fun getHistory_leaderOfTheInstitution_seesTheAuditTrail() {
-        given(clientTaskService.getClientIdById(1L)).willReturn(3L)
-        given(accessService.getLeadingInstitutionIds()).willReturn(listOf(5L))
-        given(clientService.getDtoById(eq(3L), any(), any())).willReturn(clientDto())
-        given(accessService.isAdmin()).willReturn(false)
-        given(accessService.isLeader(5L)).willReturn(true)
+    fun getHistory_existingTask_returnsTheAuditTrail() {
+        given(clientTaskService.existsById(1L)).willReturn(true)
         given(clientTaskService.getAuditHistory(1L)).willReturn(emptyList())
 
         val result = mockMvc.get("/client_tasks/1/history").andReturn()

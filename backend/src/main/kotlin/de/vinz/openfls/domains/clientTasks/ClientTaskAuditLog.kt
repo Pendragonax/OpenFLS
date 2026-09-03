@@ -40,6 +40,12 @@ class ClientTaskAuditLog(
         @Column(name = "after_title", length = 128)
         var afterTitle: String? = null,
 
+        @Column(name = "before_description", length = 1024)
+        var beforeDescription: String? = null,
+
+        @Column(name = "after_description", length = 1024)
+        var afterDescription: String? = null,
+
         @Column(name = "before_due_date")
         var beforeDueDate: LocalDate? = null,
 

@@ -4,6 +4,5 @@ enum class ClientTaskAuditAction {
     CREATE,
     UPDATE,
     COMPLETE,
-    REOPEN,
     DELETE
 }

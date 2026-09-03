@@ -43,6 +43,8 @@ CREATE TABLE `client_task_audit_logs`
     `actor`             varchar(128) NOT NULL,
     `before_title`      varchar(128)          DEFAULT NULL,
     `after_title`       varchar(128)          DEFAULT NULL,
+    `before_description` varchar(1024)        DEFAULT NULL,
+    `after_description`  varchar(1024)        DEFAULT NULL,
     `before_due_date`   date                  DEFAULT NULL,
     `after_due_date`    date                  DEFAULT NULL,
     `before_done`       bit(1)                DEFAULT NULL,

@@ -1,8 +1,12 @@
 :host {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 100%;
   min-height: 0;
+  overflow-x: hidden;
 }
 
 .tasks-card {
@@ -12,7 +16,10 @@
   gap: 12px;
   height: 100%;
   min-height: 0;
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .card-header {
@@ -70,10 +77,16 @@
   gap: 8px;
   flex: 1 1 auto;
   min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
 .task-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -81,8 +94,24 @@
   border-radius: 0 6px 6px 0;
   background: rgba(47, 58, 75, 0.03);
   padding: 6px 10px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   cursor: pointer;
 }
+
+.task-row-actions { display: flex; position: absolute; top: 2px; right: 4px; }
+.task-row-actions .task-edit-action {
+  --mdc-icon-button-state-layer-size: 32px;
+  --mdc-icon-button-icon-size: 18px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+.task-title { padding-right: 40px; }
 
 .task-item:hover,
 .task-item:focus-visible {
