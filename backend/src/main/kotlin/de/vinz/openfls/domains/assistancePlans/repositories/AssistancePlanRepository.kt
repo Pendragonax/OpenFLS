@@ -20,12 +20,19 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
     @Query(
         "SELECT DISTINCT ap from AssistancePlan ap " +
+            "left join fetch ap.client " +
+            "left join fetch ap.sponsor " +
+            "left join fetch ap.institution " +
+            "left join fetch ap.hourCorridor hc " +
+            "left join fetch hc.hourType " +
             "left join fetch ap.goals g " +
-            "left join fetch g.hours " +
-            "left join fetch ap.hours " +
+            "left join fetch g.hours gh " +
+            "left join fetch gh.hourType " +
+            "left join fetch ap.hours aph " +
+            "left join fetch aph.hourType " +
             "where ap.id=:id"
     )
-    fun findProjectionById(id: Long): AssistancePlanProjection
+    fun findDetailedById(id: Long): AssistancePlan?
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE :end >= u.start AND :start <= u.end")

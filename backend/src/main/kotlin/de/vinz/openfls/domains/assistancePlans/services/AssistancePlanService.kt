@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanProjectionDto
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.goals.repositories.GoalHourRepository
@@ -301,8 +302,8 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getProjectionById(id: Long): AssistancePlanProjection? {
-        return assistancePlanRepository.findProjectionById(id)
+    fun getProjectionById(id: Long): AssistancePlanProjectionDto? {
+        return assistancePlanRepository.findDetailedById(id)?.let(AssistancePlanProjectionDto::of)
     }
 
     @Transactional(readOnly = true)

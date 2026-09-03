@@ -27,13 +27,17 @@ import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.sponsors.Sponsor
 import de.vinz.openfls.domains.sponsors.SponsorRepository
 import de.vinz.openfls.domains.sponsors.SponsorService
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanProjectionDto
 import de.vinz.openfls.testsupport.TestBeans
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
@@ -80,6 +84,117 @@ class AssistancePlanServiceDataJpaTest {
 
     @MockitoBean
     lateinit var hourTypeService: HourTypeService
+
+    @Autowired
+    lateinit var testEntityManager: TestEntityManager
+
+    @Test
+    fun getProjectionById_corridorPlan_returnsFullyPopulatedDetachedDto() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(
+                title = "5 bis 10",
+                weeklyMinutesFrom = 300,
+                weeklyMinutesTill = 600,
+                hourType = hourType
+            )
+        )
+        val plan = assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution,
+                hourMode = AssistancePlanHourMode.CORRIDOR,
+                hourCorridor = corridor
+            )
+        )
+        val goal = Goal(title = "Goal 1", description = "Description", institution = institution, assistancePlan = plan)
+        goal.hours.add(GoalHour(weeklyMinutes = 45, hourType = hourType, goal = goal))
+        plan.goals.add(goal)
+        plan.hours.add(AssistancePlanHour(weeklyMinutes = 120, hourType = hourType, assistancePlan = plan))
+        assistancePlanRepository.save(plan)
+
+        // simulate a fresh request: nothing pre-loaded in the persistence context
+        testEntityManager.flush()
+        testEntityManager.clear()
+
+        // When
+        val result = assistancePlanService.getProjectionById(plan.id)
+
+        // detach everything -> mirrors serialization after the transaction/session has closed
+        testEntityManager.clear()
+
+        // Then
+        assertThat(result).isInstanceOf(AssistancePlanProjectionDto::class.java)
+        val dto = result!!
+        assertThat(dto.client.firstName).isEqualTo("Max")
+        assertThat(dto.client.lastName).isEqualTo("Mustermann")
+        assertThat(dto.sponsor.name).isEqualTo("Sponsor")
+        assertThat(dto.institution.name).isEqualTo("Inst")
+        assertThat(dto.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
+        val corridorDto = dto.hourCorridor
+        assertThat(corridorDto).isNotNull
+        assertThat(corridorDto!!.title).isEqualTo("5 bis 10")
+        assertThat(corridorDto.hourTypeId).isEqualTo(hourType.id)
+        assertThat(corridorDto.hourTypeTitle).isEqualTo("Standard")
+        assertThat(dto.hours).hasSize(1)
+        assertThat(dto.hours.first().hourType.title).isEqualTo("Standard")
+        assertThat(dto.goals).hasSize(1)
+        assertThat(dto.goals.first().hours).hasSize(1)
+        assertThat(dto.goals.first().hours.first().hourType.title).isEqualTo("Standard")
+
+        // the DTO must be serializable without any Hibernate session (no leaked lazy proxies)
+        val objectMapper = jacksonObjectMapper().findAndRegisterModules()
+        assertThatCode { objectMapper.writeValueAsString(dto) }.doesNotThrowAnyException()
+    }
+
+    @Test
+    fun getProjectionById_exactPlanWithoutCorridor_returnsDtoWithNullCorridor() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Erika", lastName = "Beispiel", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = false, payExact = true))
+        val plan = assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution,
+                hourMode = AssistancePlanHourMode.EXACT
+            )
+        )
+
+        testEntityManager.flush()
+        testEntityManager.clear()
+
+        // When
+        val result = assistancePlanService.getProjectionById(plan.id)
+        testEntityManager.clear()
+
+        // Then
+        assertThat(result).isNotNull
+        assertThat(result!!.hourCorridor).isNull()
+        assertThat(result.client.firstName).isEqualTo("Erika")
+        assertThat(result.goals).isEmpty()
+        assertThat(result.hours).isEmpty()
+
+        val objectMapper = jacksonObjectMapper().findAndRegisterModules()
+        assertThatCode { objectMapper.writeValueAsString(result) }.doesNotThrowAnyException()
+    }
+
+    @Test
+    fun getProjectionById_unknownId_returnsNull() {
+        assertThat(assistancePlanService.getProjectionById(9_999_999L)).isNull()
+    }
 
     @Test
     fun create_validCreateDto_withGoalHoursOnly_persistsGoalsAndGoalHours() {
