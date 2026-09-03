@@ -11,6 +11,8 @@ import {ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
 import {AssistancePlan} from '../../shared/projections/assistance-plan.projection';
+import {EAssistancePlanEvaluationType} from './components/assistance-plan-time-evaluation-filter/EAssistancePlanEvaluationType';
+import {AssistancePlanHourMode} from '../../shared/dtos/assistance-plan-hour-mode.model';
 import {vi} from 'vitest';
 
 describe('GoalEvaluationComponent', () => {
@@ -90,6 +92,42 @@ describe('GoalEvaluationComponent', () => {
     params$.next({tab: '3', id: '5'});
 
     expect(component.tabIndex).toBe(3);
+  });
+
+  it('renders three assistance-plan rows (from/till/average) for corridor plans', () => {
+    component.selectedGoalEvaluationHourType = EAssistancePlanEvaluationType.Approved;
+    component.goalTimesEvaluation = {
+      assistancePlanId: 1,
+      hourMode: AssistancePlanHourMode.CORRIDOR,
+      executedHours: [], summedExecutedHours: [],
+      approvedHours: [], summedApprovedHours: [],
+      approvedHoursLeft: [], summedApprovedHoursLeft: [],
+      goalTimeEvaluations: [
+        {id: 11, title: 'Ziel A', description: '', executedHours: [1], summedExecutedHours: [1],
+          approvedHours: [0], summedApprovedHours: [0], approvedHoursLeft: [0], summedApprovedHoursLeft: [0]}
+      ],
+      corridorAssistancePlanEvaluations: [
+        {id: 0, title: 'Untergrenze', description: '', executedHours: [0], summedExecutedHours: [0],
+          approvedHours: [10], summedApprovedHours: [10], approvedHoursLeft: [10], summedApprovedHoursLeft: [10]},
+        {id: 0, title: 'Obergrenze', description: '', executedHours: [0], summedExecutedHours: [0],
+          approvedHours: [15], summedApprovedHours: [15], approvedHoursLeft: [15], summedApprovedHoursLeft: [15]},
+        {id: 0, title: 'Durchschnitt', description: '', executedHours: [0], summedExecutedHours: [0],
+          approvedHours: [12.5], summedApprovedHours: [12.5], approvedHoursLeft: [12.5], summedApprovedHoursLeft: [12.5]}
+      ]
+    } as any;
+
+    let rows: string[][] = [];
+    component.data$.subscribe(value => (rows = value as string[][]));
+    component.updateGoalTimeTable();
+
+    expect(rows.length).toBe(4);
+    expect(rows[0][0]).toBe('Ziel: Ziel A');
+    expect(rows[1][0]).toBe('Hilfeplan: Untergrenze');
+    expect(rows[2][0]).toBe('Hilfeplan: Obergrenze');
+    expect(rows[3][0]).toBe('Hilfeplan: Durchschnitt');
+    expect(rows[1][1]).toBe('10.00');
+    expect(rows[2][1]).toBe('15.00');
+    expect(rows[3][1]).toBe('12.50');
   });
 
   it('unsubscribe_afterDestroy_doesNotUpdateState', () => {

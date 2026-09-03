@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.goalTimeEvaluations
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalsTimeEvaluationDto
@@ -31,6 +32,16 @@ class GoalTimeEvaluationService(
 
     private val logger: Logger = LoggerFactory.getLogger(GoalTimeEvaluationService::class.java)
 
+    /**
+     * Die drei Hilfeplan-Zeilen bei Korridor-Plänen inkl. der Ableitung der wöchentlichen
+     * Minuten aus den Korridorgrenzen (von, bis).
+     */
+    private val corridorRowDefinitions: List<Pair<String, (Int, Int) -> Double>> = listOf(
+            "Untergrenze" to { from, _ -> from.toDouble() },
+            "Obergrenze" to { _, till -> till.toDouble() },
+            "Durchschnitt" to { from, till -> (from + till) / 2.0 }
+    )
+
     @Throws(AssistancePlanNotFoundException::class, NoGoalFoundWithHourTypeException::class)
     fun getByAssistancePlanIdAndHourTypeIdAndYear(assistancePlanId: Long,
                                                   hourTypeId: Long,
@@ -38,6 +49,10 @@ class GoalTimeEvaluationService(
         val assistancePlan = assistancePlanRepository
                 .findById(assistancePlanId)
                 .orElseThrow { AssistancePlanNotFoundException(assistancePlanId) }
+
+        if (assistancePlan.hourMode == AssistancePlanHourMode.CORRIDOR) {
+            return createCorridorGoalsTimeEvaluationDto(assistancePlan, hourTypeId, year)
+        }
 
         val goalsWithHourType = assistancePlan.goals
                 .filter { it.hours.any { goalHour -> goalHour.hourType!!.id == hourTypeId } }
@@ -69,6 +84,147 @@ class GoalTimeEvaluationService(
             createEmptyGoalsTimeEvaluationDto(assistancePlanId, goalsWithHourType)
         }
     }
+
+    /**
+     * Zeitauswertung für Korridor-Hilfepläne.
+     *
+     * Korridor-Pläne besitzen weder Plan- noch Zielstunden; die genehmigte Wochenminuten-
+     * Spanne liegt ausschließlich auf dem [de.vinz.openfls.domains.hourCorridors.HourCorridor].
+     * Daraus werden für den Hilfeplan drei Zeilen erzeugt (Untergrenze, Obergrenze,
+     * Durchschnitt). Die Ziele erhalten nur executedHours/summedExecutedHours; alle
+     * genehmigten Werte sind 0. Wird ein anderer Stundentyp als der des Korridors
+     * angefragt, ist das Ergebnis leer (alle Werte 0), aber kein Fehler.
+     */
+    private fun createCorridorGoalsTimeEvaluationDto(
+            assistancePlan: AssistancePlan,
+            hourTypeId: Long,
+            year: Int
+    ): GoalsTimeEvaluationDto {
+        val start = assistancePlan.start
+        val end = assistancePlan.end
+        val corridor = assistancePlan.hourCorridor
+        val activeCorridor = corridor?.takeIf { it.hourType?.id == hourTypeId }
+
+        val services = if (activeCorridor != null) {
+            serviceRepository.findServicesByAssistancePlanIdAndStartIsBetween(
+                    assistancePlan.id,
+                    LocalDateTime.of(start, LocalTime.of(0, 0, 0)),
+                    LocalDateTime.of(end, LocalTime.of(23, 59, 59))
+            )
+        } else {
+            emptyList()
+        }
+
+        val executedHours = if (activeCorridor != null)
+            getMonthlyExecutedHoursInYear(assistancePlan, hourTypeId, start, end, year, services, false)
+        else emptyMonthlyHours()
+        val summedExecutedHours = if (activeCorridor != null)
+            getMonthlyExecutedHoursInYear(assistancePlan, hourTypeId, start, end, year, services, true)
+        else emptyMonthlyHours()
+
+        val goalEvaluations = assistancePlan.goals
+                .map { goal -> createCorridorGoalTimeEvaluationDto(goal, hourTypeId, start, end, year, services, activeCorridor != null) }
+                .sortedBy { it.title }
+                .toMutableList()
+
+        val corridorRows = corridorRowDefinitions.map { (title, weeklyMinutesOf) ->
+            if (activeCorridor != null) {
+                createCorridorAssistancePlanRow(
+                        title = title,
+                        weeklyMinutes = weeklyMinutesOf(activeCorridor.weeklyMinutesFrom, activeCorridor.weeklyMinutesTill),
+                        start = start,
+                        end = end,
+                        year = year,
+                        executedHours = executedHours,
+                        summedExecutedHours = summedExecutedHours
+                )
+            } else {
+                emptyGoalTimeEvaluationDto(title = title)
+            }
+        }.toMutableList()
+
+        return GoalsTimeEvaluationDto().apply {
+            this.assistancePlanId = assistancePlan.id
+            this.hourMode = AssistancePlanHourMode.CORRIDOR
+            this.executedHours = executedHours
+            this.summedExecutedHours = summedExecutedHours
+            this.approvedHours = emptyMonthlyHours()
+            this.summedApprovedHours = emptyMonthlyHours()
+            this.approvedHoursLeft = emptyMonthlyHours()
+            this.summedApprovedHoursLeft = emptyMonthlyHours()
+            this.goalTimeEvaluations = goalEvaluations
+            this.corridorAssistancePlanEvaluations = corridorRows
+        }
+    }
+
+    private fun createCorridorGoalTimeEvaluationDto(
+            goal: Goal,
+            hourTypeId: Long,
+            start: LocalDate,
+            end: LocalDate,
+            year: Int,
+            services: List<de.vinz.openfls.domains.services.Service>,
+            matchesHourType: Boolean
+    ): GoalTimeEvaluationDto {
+        val executedHours = if (matchesHourType)
+            getMonthlyExecutedHoursInYear(goal, hourTypeId, start, end, year, services, false)
+        else emptyMonthlyHours()
+        val summedExecutedHours = if (matchesHourType)
+            getMonthlyExecutedHoursInYear(goal, hourTypeId, start, end, year, services, true)
+        else emptyMonthlyHours()
+
+        return GoalTimeEvaluationDto().apply {
+            this.id = goal.id
+            this.title = goal.title
+            this.description = goal.description
+            this.executedHours = executedHours
+            this.summedExecutedHours = summedExecutedHours
+            this.approvedHours = emptyMonthlyHours()
+            this.summedApprovedHours = emptyMonthlyHours()
+            this.approvedHoursLeft = emptyMonthlyHours()
+            this.summedApprovedHoursLeft = emptyMonthlyHours()
+        }
+    }
+
+    private fun createCorridorAssistancePlanRow(
+            title: String,
+            weeklyMinutes: Double,
+            start: LocalDate,
+            end: LocalDate,
+            year: Int,
+            executedHours: List<Double>,
+            summedExecutedHours: List<Double>
+    ): GoalTimeEvaluationDto {
+        val dailyHours = (weeklyMinutes / 7.0) / 60.0
+        val approvedHours = getMonthlyApprovedHoursInYear(getApprovedHoursMonthly(dailyHours, start, end, false), year)
+        val summedApprovedHours = getMonthlyApprovedHoursInYear(getApprovedHoursMonthly(dailyHours, start, end, true), year)
+
+        return GoalTimeEvaluationDto().apply {
+            this.id = 0
+            this.title = title
+            this.description = ""
+            this.executedHours = executedHours
+            this.summedExecutedHours = summedExecutedHours
+            this.approvedHours = approvedHours
+            this.summedApprovedHours = summedApprovedHours
+            this.approvedHoursLeft = getApprovedHoursLeft(approvedHours, executedHours).toMutableList()
+            this.summedApprovedHoursLeft = getApprovedHoursLeft(summedApprovedHours, summedExecutedHours).toMutableList()
+        }
+    }
+
+    private fun emptyGoalTimeEvaluationDto(title: String): GoalTimeEvaluationDto {
+        return GoalTimeEvaluationDto().apply {
+            this.title = title
+            this.executedHours = emptyMonthlyHours()
+            this.summedExecutedHours = emptyMonthlyHours()
+            this.approvedHours = emptyMonthlyHours()
+            this.summedApprovedHours = emptyMonthlyHours()
+            this.approvedHoursLeft = emptyMonthlyHours()
+            this.summedApprovedHoursLeft = emptyMonthlyHours()
+        }
+    }
+
+    private fun emptyMonthlyHours(): List<Double> = List(12) { 0.0 }
 
     private fun createGoalsTimeEvaluationDto(
             assistancePlan: AssistancePlan,
