@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProject
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.goals.projections.GoalProjection
-import de.vinz.openfls.domains.hourCorridors.HourCorridor
+import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorSoloProjection
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
@@ -429,8 +429,8 @@ class AssistancePlanAnalysisService(
         return if (isCorridor(assistancePlan)) {
             val corridor = assistancePlan.hourCorridor
             val days = countMatchingDaysInMonth(year, month, assistancePlan)
-            val from = corridor?.let { corridorApprovedHoursForDays(it, days, it.weeklyMinutesFrom) } ?: 0.0
-            val till = corridor?.let { corridorApprovedHoursForDays(it, days, it.weeklyMinutesTill) } ?: from
+            val from = corridor?.let { corridorApprovedHoursForDays(days, it.weeklyMinutesFrom) } ?: 0.0
+            val till = corridor?.let { corridorApprovedHoursForDays(days, it.weeklyMinutesTill) } ?: from
             from to till
         } else {
             val approvedHours = if (existsAssistancePlanHours(assistancePlan)) {
@@ -454,8 +454,8 @@ class AssistancePlanAnalysisService(
                 0.0 to 0.0
             } else {
                 val days = countMatchingDaysInMonth(year, month, assistancePlan)
-                val from = corridorApprovedHoursForDays(corridor, days, corridor.weeklyMinutesFrom)
-                val till = corridorApprovedHoursForDays(corridor, days, corridor.weeklyMinutesTill)
+                val from = corridorApprovedHoursForDays(days, corridor.weeklyMinutesFrom)
+                val till = corridorApprovedHoursForDays(days, corridor.weeklyMinutesTill)
                 from to till
             }
         } else {
@@ -493,12 +493,12 @@ class AssistancePlanAnalysisService(
         }
     }
 
-    private fun corridorApprovedHours(corridor: HourCorridor, days: Int): Double {
+    private fun corridorApprovedHours(corridor: HourCorridorSoloProjection, days: Int): Double {
         val weeklyMinutesMean = (corridor.weeklyMinutesFrom + corridor.weeklyMinutesTill) / 2.0
         return TimeDoubleService.convertDoubleToTimeDouble((weeklyMinutesMean / 7.0) * days / 60.0)
     }
 
-    private fun corridorApprovedHoursForDays(corridor: HourCorridor, days: Int, weeklyMinutes: Int): Double {
+    private fun corridorApprovedHoursForDays(days: Int, weeklyMinutes: Int): Double {
         return TimeDoubleService.convertDoubleToTimeDouble((weeklyMinutes / 7.0) * days / 60.0)
     }
 

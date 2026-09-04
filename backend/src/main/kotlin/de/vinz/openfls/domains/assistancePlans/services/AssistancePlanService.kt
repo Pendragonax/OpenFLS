@@ -329,9 +329,10 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getIllegalByClientId(id: Long): List<AssistancePlanProjection> {
-        val assistancePlans = assistancePlanRepository.findProjectionsByClientId(id)
-        return assistancePlans.filter { isIllegalAssistancePlan(it) }
+    fun getIllegalByClientId(id: Long): List<AssistancePlanProjectionDto> {
+        return assistancePlanRepository.findDetailedByClientId(id)
+            .filter { isIllegalAssistancePlan(it) }
+            .map(AssistancePlanProjectionDto::of)
     }
 
     @Transactional(readOnly = true)
@@ -347,9 +348,10 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getIllegalBySponsorId(id: Long): List<AssistancePlanProjection> {
-        val assistancePlans = assistancePlanRepository.findProjectionsBySponsorId(id)
-        return assistancePlans.filter { isIllegalAssistancePlan(it) }
+    fun getIllegalBySponsorId(id: Long): List<AssistancePlanProjectionDto> {
+        return assistancePlanRepository.findDetailedBySponsorId(id)
+            .filter { isIllegalAssistancePlan(it) }
+            .map(AssistancePlanProjectionDto::of)
     }
 
     @Transactional(readOnly = true)
@@ -365,9 +367,10 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getIllegalByInstitutionId(id: Long): List<AssistancePlanProjection> {
-        val assistancePlans = assistancePlanRepository.findProjectionsByInstitutionId(id)
-        return assistancePlans.filter { isIllegalAssistancePlan(it) }
+    fun getIllegalByInstitutionId(id: Long): List<AssistancePlanProjectionDto> {
+        return assistancePlanRepository.findDetailedByInstitutionId(id)
+            .filter { isIllegalAssistancePlan(it) }
+            .map(AssistancePlanProjectionDto::of)
     }
 
     @Transactional(readOnly = true)
@@ -410,7 +413,7 @@ class AssistancePlanService(
         return assistancePlanRepository.findProjectionByInstitutionIdAndSponsorIdAndStartAndEnd(institutionId, sponsorId, start, end)
     }
 
-    private fun isIllegalAssistancePlan(assistancePlan: AssistancePlanProjection): Boolean {
+    private fun isIllegalAssistancePlan(assistancePlan: AssistancePlan): Boolean {
         return when (assistancePlan.hourMode) {
             AssistancePlanHourMode.CORRIDOR -> {
                 assistancePlan.hours.isNotEmpty() || assistancePlan.goals.any { goal -> goal.hours.isNotEmpty() }

@@ -89,9 +89,14 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
         @Param("clientId") clientId: Long
     ): List<AssistancePlanExistingProjection>
 
-    @Query("SELECT u FROM AssistancePlan u " +
+    @Query("SELECT DISTINCT u FROM AssistancePlan u " +
+            "LEFT JOIN FETCH u.client " +
+            "LEFT JOIN FETCH u.sponsor " +
+            "LEFT JOIN FETCH u.institution " +
+            "LEFT JOIN FETCH u.hourCorridor hc " +
+            "LEFT JOIN FETCH hc.hourType " +
             "WHERE u.client.id = :clientId")
-    fun findProjectionsByClientId(@Param("clientId") id: Long): List<AssistancePlanProjection>
+    fun findDetailedByClientId(@Param("clientId") id: Long): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.sponsor.id = :sponsorId")
@@ -109,21 +114,27 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
     fun findBySponsorIdAndYear(@Param("sponsorId") id: Long,
                                @Param("year") year: Int): List<AssistancePlan>
 
-    @Query("SELECT u FROM AssistancePlan u " +
+    @Query("SELECT DISTINCT u FROM AssistancePlan u " +
+            "LEFT JOIN FETCH u.client " +
+            "LEFT JOIN FETCH u.sponsor " +
+            "LEFT JOIN FETCH u.institution " +
+            "LEFT JOIN FETCH u.hourCorridor hc " +
+            "LEFT JOIN FETCH hc.hourType " +
             "WHERE u.sponsor.id = :sponsorId")
-    fun findProjectionsBySponsorId(@Param("sponsorId") id: Long): List<AssistancePlanProjection>
+    fun findDetailedBySponsorId(@Param("sponsorId") id: Long): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId")
     fun findByInstitutionId(@Param("institutionId") id: Long): List<AssistancePlan>
 
-    @Query("SELECT u FROM AssistancePlan u " +
+    @Query("SELECT DISTINCT u FROM AssistancePlan u " +
+            "LEFT JOIN FETCH u.client " +
+            "LEFT JOIN FETCH u.sponsor " +
+            "LEFT JOIN FETCH u.institution " +
+            "LEFT JOIN FETCH u.hourCorridor hc " +
+            "LEFT JOIN FETCH hc.hourType " +
             "WHERE u.institution.id = :institutionId")
-    fun findProjectionsByInstitutionId(@Param("institutionId") id: Long): List<AssistancePlanProjection>
-
-    @Query("SELECT u FROM AssistancePlan u " +
-            "WHERE u.institution.id = :institutionId")
-    fun findProjectionByInstitutionId(@Param("institutionId") institutionId: Long): List<AssistancePlanProjection>
+    fun findDetailedByInstitutionId(@Param("institutionId") id: Long): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId" +

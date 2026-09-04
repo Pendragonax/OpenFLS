@@ -6,8 +6,9 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthD
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.goals.projections.GoalProjection
-import de.vinz.openfls.domains.hourCorridors.HourCorridor
+import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorSoloProjection
 import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.hourTypes.projections.HourTypeSoloProjection
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import de.vinz.openfls.domains.services.services.ServiceService
@@ -118,13 +119,18 @@ class AssistancePlanAnalysisServiceTest {
     }
 
     private fun corridorProjection(start: LocalDate, end: LocalDate, hourType: HourType): AssistancePlanProjection {
-        val corridor = HourCorridor(
-            id = 5,
-            title = "5 bis 10",
-            weeklyMinutesFrom = 300,
-            weeklyMinutesTill = 600,
-            hourType = hourType
-        )
+        val corridorHourType = object : HourTypeSoloProjection {
+            override val id: Long = hourType.id
+            override val title: String = hourType.title
+            override val price: Double = hourType.price
+        }
+        val corridor = object : HourCorridorSoloProjection {
+            override val id: Long = 5
+            override val title: String = "5 bis 10"
+            override val weeklyMinutesFrom: Int = 300
+            override val weeklyMinutesTill: Int = 600
+            override val hourType: HourTypeSoloProjection = corridorHourType
+        }
 
         return object : AssistancePlanProjection {
             override val id: Long = 5
@@ -134,7 +140,7 @@ class AssistancePlanAnalysisServiceTest {
             override val sponsor: SponsorSoloProjection = sponsorProjection()
             override val institution: InstitutionSoloProjection = institutionProjection()
             override val hourMode: AssistancePlanHourMode = AssistancePlanHourMode.CORRIDOR
-            override val hourCorridor: HourCorridor? = corridor
+            override val hourCorridor: HourCorridorSoloProjection? = corridor
             override val hours: List<de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourProjection> = emptyList()
             override val goals: List<GoalProjection> = emptyList()
         }

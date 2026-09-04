@@ -437,6 +437,66 @@ class AssistancePlanServiceDataJpaTest {
     }
 
     @Test
+    fun getIllegalByClientId_illegalMixedHoursPlan_returnsFullyPopulatedDetachedDto() {
+        // Given – an EXACT plan carrying both plan hours and goal hours is illegal
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
+        val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+        val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", categoryTemplate = categoryTemplate, institution = institution))
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+
+        val illegalPlan = AssistancePlan(
+            start = LocalDate.of(2026, 1, 1),
+            end = LocalDate.of(2026, 12, 31),
+            client = client,
+            sponsor = sponsor,
+            institution = institution,
+            hourMode = AssistancePlanHourMode.EXACT
+        )
+        illegalPlan.hours = mutableSetOf(AssistancePlanHour(weeklyMinutes = 120, hourType = hourType, assistancePlan = illegalPlan))
+        val goal = Goal(title = "Goal 1", description = "Description", institution = institution, assistancePlan = illegalPlan)
+        goal.hours = mutableSetOf(GoalHour(weeklyMinutes = 60, hourType = hourType, goal = goal))
+        illegalPlan.goals = mutableSetOf(goal)
+        assistancePlanRepository.save(illegalPlan)
+
+        // a second, valid plan (goal hours only) for the same client must be filtered out
+        val validPlan = AssistancePlan(
+            start = LocalDate.of(2025, 1, 1),
+            end = LocalDate.of(2025, 12, 31),
+            client = client,
+            sponsor = sponsor,
+            institution = institution,
+            hourMode = AssistancePlanHourMode.EXACT
+        )
+        val validGoal = Goal(title = "Goal ok", description = "", institution = institution, assistancePlan = validPlan)
+        validGoal.hours = mutableSetOf(GoalHour(weeklyMinutes = 30, hourType = hourType, goal = validGoal))
+        validPlan.goals = mutableSetOf(validGoal)
+        assistancePlanRepository.save(validPlan)
+
+        testEntityManager.flush()
+        testEntityManager.clear()
+
+        // When
+        val result = assistancePlanService.getIllegalByClientId(client.id)
+
+        // detach everything -> mirrors serialization after the transaction/session has closed
+        testEntityManager.clear()
+
+        // Then
+        assertThat(result).hasSize(1)
+        val dto = result.first()
+        assertThat(dto.client.firstName).isEqualTo("Max")
+        assertThat(dto.sponsor.name).isEqualTo("Sponsor")
+        assertThat(dto.institution.name).isEqualTo("Inst")
+        assertThat(dto.hourMode).isEqualTo(AssistancePlanHourMode.EXACT)
+        assertThat(dto.hours).hasSize(1)
+        assertThat(dto.goals).hasSize(1)
+
+        val objectMapper = jacksonObjectMapper().findAndRegisterModules()
+        assertThatCode { objectMapper.writeValueAsString(result) }.doesNotThrowAnyException()
+    }
+
+    @Test
     fun update_updateDtoWithGoalHours_updatesGoalAndGoalHour() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
