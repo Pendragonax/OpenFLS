@@ -145,7 +145,7 @@ class ClientArchiveExportService(
     private fun requireVisibleClient(
         clientId: Long,
         actor: ClientArchiveActor
-    ) = clientService.getById(clientId)?.also { client ->
+    ) = clientService.getEntityById(clientId)?.also { client ->
         if (!actor.isAdmin && !actor.leadingInstitutionIds.contains(client.institution?.id ?: 0)) {
             throw UserNotAllowedException()
         }

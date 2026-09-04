@@ -82,7 +82,7 @@ class ClientArchiveServiceDataJpaTest {
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
         val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate))
         val actor = ClientArchiveActor(
             employeeId = 8,
@@ -118,7 +118,7 @@ class ClientArchiveServiceDataJpaTest {
         val otherInstitution = institutionRepository.save(Institution(name = "Other", email = "x@y.z", phonenumber = "2"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
         val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate))
         val actor = ClientArchiveActor(
             employeeId = 8,
@@ -146,7 +146,7 @@ class ClientArchiveServiceDataJpaTest {
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
         val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate))
         val actor = ClientArchiveActor(
             employeeId = 8,
@@ -191,7 +191,7 @@ class ClientArchiveServiceDataJpaTest {
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
         val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor"))
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
         val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate))
         val otherClient = clientRepository.save(Client(firstName = "Other", lastName = "Client", institution = institution, categoryTemplate = categoryTemplate))
         val archivePlanOne = assistancePlanRepository.save(
@@ -272,7 +272,7 @@ class ClientArchiveServiceDataJpaTest {
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
         val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate))
 
         // When
@@ -288,7 +288,7 @@ class ClientArchiveServiceDataJpaTest {
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
         val client = clientRepository.save(Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate))
         client.archiveHistoryEntries.add(
             ClientArchiveHistoryEntry(

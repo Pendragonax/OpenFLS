@@ -43,7 +43,7 @@ class AssistancePlanEvaluationLeftServiceTest {
     fun createAssistancePlanHourTypeAnalysis_unknownAssistancePlan_throwsIllegalArgument() {
         // Given
         val date = LocalDate.of(2024, 2, 1)
-        whenever(assistancePlanService.getById(999)).thenReturn(null)
+        whenever(assistancePlanService.getEntityById(999)).thenReturn(null)
 
         // When / Then
         assertThatThrownBy { evaluationService.createAssistancePlanHourTypeAnalysis(date, 999) }
@@ -55,7 +55,7 @@ class AssistancePlanEvaluationLeftServiceTest {
         // Given
         val date = LocalDate.of(2024, 2, 1)
         val plan = AssistancePlan(id = 1, start = LocalDate.of(2024, 1, 1), end = LocalDate.of(2024, 12, 31))
-        whenever(assistancePlanService.getById(1)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(1)).thenReturn(plan)
 
         // When
         val result = evaluationService.createAssistancePlanHourTypeAnalysis(date, 1)
@@ -83,7 +83,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             hourMode = AssistancePlanHourMode.CORRIDOR,
             hourCorridor = corridor
         )
-        whenever(assistancePlanService.getById(5)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(5)).thenReturn(plan)
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(emptyList())
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
@@ -121,7 +121,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             hourMode = AssistancePlanHourMode.CORRIDOR,
             hourCorridor = corridor
         )
-        whenever(assistancePlanService.getById(6)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(6)).thenReturn(plan)
         stubExecutedMinutes(420, date)
 
         // When
@@ -154,7 +154,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             hourMode = AssistancePlanHourMode.CORRIDOR,
             hourCorridor = corridor
         )
-        whenever(assistancePlanService.getById(7)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(7)).thenReturn(plan)
         stubExecutedMinutes(240, date)
 
         // When
@@ -187,7 +187,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             hourMode = AssistancePlanHourMode.CORRIDOR,
             hourCorridor = corridor
         )
-        whenever(assistancePlanService.getById(8)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(8)).thenReturn(plan)
         stubExecutedMinutes(720, date)
 
         // When
@@ -213,7 +213,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             end = LocalDate.of(2024, 12, 31),
             goals = mutableSetOf(goal)
         )
-        whenever(assistancePlanService.getById(2)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(2)).thenReturn(plan)
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(emptyList())
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
@@ -246,7 +246,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             end = LocalDate.of(2023, 12, 31),
             goals = mutableSetOf(goal)
         )
-        whenever(assistancePlanService.getById(3)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(3)).thenReturn(plan)
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(emptyList())
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
@@ -277,7 +277,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             end = LocalDate.of(2024, 2, 28),
             goals = mutableSetOf(goal)
         )
-        whenever(assistancePlanService.getById(4)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(4)).thenReturn(plan)
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(emptyList())
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
@@ -310,7 +310,7 @@ class AssistancePlanEvaluationLeftServiceTest {
             end = LocalDate.of(2025, 12, 31),
             hours = mutableSetOf(AssistancePlanHour(weeklyMinutes = 420, hourType = hourType))
         )
-        whenever(assistancePlanService.getById(4)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(4)).thenReturn(plan)
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(listOf(generateService(date, 60)))
         whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))

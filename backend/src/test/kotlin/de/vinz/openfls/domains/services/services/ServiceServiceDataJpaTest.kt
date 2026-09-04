@@ -45,7 +45,7 @@ class ServiceServiceDataJpaTest {
         val entity = Service(start = start, end = end, title = "A")
 
         // When
-        val result = serviceService.create(entity)
+        val result = serviceService.createEntity(entity)
 
         // Then
         val saved = serviceRepository.findById(result.id)
@@ -57,7 +57,7 @@ class ServiceServiceDataJpaTest {
     fun create_archivedClient_throwsException() {
         // Given
         val archivedClient = Client(id = 11, archived = true)
-        whenever(clientService.getById(11)).thenReturn(archivedClient)
+        whenever(clientService.getEntityById(11)).thenReturn(archivedClient)
         val entity = Service(
             start = LocalDateTime.of(2026, 2, 1, 9, 0),
             end = LocalDateTime.of(2026, 2, 1, 10, 0),
@@ -65,7 +65,7 @@ class ServiceServiceDataJpaTest {
         )
 
         // When / Then
-        assertThatThrownBy { serviceService.create(entity) }
+        assertThatThrownBy { serviceService.createEntity(entity) }
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessage("client is archived")
     }
@@ -75,7 +75,7 @@ class ServiceServiceDataJpaTest {
         // Given
         val archivedClient = Client(id = 12, archived = true)
         val assistancePlan = AssistancePlan(id = 44, client = archivedClient)
-        whenever(assistancePlanService.getById(44)).thenReturn(assistancePlan)
+        whenever(assistancePlanService.getEntityById(44)).thenReturn(assistancePlan)
         val entity = Service(
             start = LocalDateTime.of(2026, 2, 1, 9, 0),
             end = LocalDateTime.of(2026, 2, 1, 10, 0),
@@ -83,13 +83,13 @@ class ServiceServiceDataJpaTest {
         )
 
         // When / Then
-        assertThatThrownBy { serviceService.create(entity) }
+        assertThatThrownBy { serviceService.createEntity(entity) }
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessage("client is archived")
     }
 
     @Test
-    fun getDtoById_archivedClient_populatesArchivedServiceFlag() {
+    fun getById_archivedClient_populatesArchivedServiceFlag() {
         // Given
         val archivedClient = clientRepository.save(Client(firstName = "Archived", lastName = "Client", archived = true))
         val savedService = serviceRepository.save(
@@ -101,7 +101,7 @@ class ServiceServiceDataJpaTest {
         )
 
         // When
-        val result = serviceService.getDtoById(savedService.id)
+        val result = serviceService.getById(savedService.id)
 
         // Then
         assertThat(result).isNotNull
@@ -114,7 +114,7 @@ class ServiceServiceDataJpaTest {
         val entity = Service(id = 1, start = LocalDateTime.now(), end = LocalDateTime.now().plusHours(1))
 
         // When / Then
-        assertThatThrownBy { serviceService.create(entity) }
+        assertThatThrownBy { serviceService.createEntity(entity) }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -126,7 +126,7 @@ class ServiceServiceDataJpaTest {
         val entity = Service(start = start, end = end)
 
         // When / Then
-        assertThatThrownBy { serviceService.create(entity) }
+        assertThatThrownBy { serviceService.createEntity(entity) }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -136,7 +136,7 @@ class ServiceServiceDataJpaTest {
         val entity = Service(id = 0, start = LocalDateTime.now(), end = LocalDateTime.now().plusHours(1))
 
         // When / Then
-        assertThatThrownBy { serviceService.update(entity) }
+        assertThatThrownBy { serviceService.updateEntity(entity) }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -146,7 +146,7 @@ class ServiceServiceDataJpaTest {
         val entity = Service(id = 9999, start = LocalDateTime.now(), end = LocalDateTime.now().plusHours(1))
 
         // When / Then
-        assertThatThrownBy { serviceService.update(entity) }
+        assertThatThrownBy { serviceService.updateEntity(entity) }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -154,7 +154,7 @@ class ServiceServiceDataJpaTest {
     fun update_archivedClient_throwsException() {
         // Given
         val archivedClient = Client(id = 12, archived = true)
-        whenever(clientService.getById(12)).thenReturn(archivedClient)
+        whenever(clientService.getEntityById(12)).thenReturn(archivedClient)
         val existing = serviceRepository.save(Service(start = LocalDateTime.of(2026, 2, 1, 8, 0), end = LocalDateTime.of(2026, 2, 1, 9, 0)))
         val updated = Service(
             id = existing.id,
@@ -164,7 +164,7 @@ class ServiceServiceDataJpaTest {
         )
 
         // When / Then
-        assertThatThrownBy { serviceService.update(updated) }
+        assertThatThrownBy { serviceService.updateEntity(updated) }
             .isInstanceOf(IllegalStateException::class.java)
             .hasMessage("client is archived")
     }
@@ -173,7 +173,7 @@ class ServiceServiceDataJpaTest {
     fun delete_archivedClient_throwsException() {
         // Given
         val archivedClient = clientRepository.save(Client(firstName = "Archived", lastName = "Client", archived = true))
-        whenever(clientService.getById(archivedClient.id)).thenReturn(archivedClient)
+        whenever(clientService.getEntityById(archivedClient.id)).thenReturn(archivedClient)
         val existing = serviceRepository.save(
             Service(
                 start = LocalDateTime.of(2026, 2, 1, 8, 0),
@@ -195,7 +195,7 @@ class ServiceServiceDataJpaTest {
         val updated = Service(id = existing.id, start = LocalDateTime.of(2026, 2, 1, 10, 0), end = LocalDateTime.of(2026, 2, 1, 9, 0))
 
         // When / Then
-        assertThatThrownBy { serviceService.update(updated) }
+        assertThatThrownBy { serviceService.updateEntity(updated) }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -206,7 +206,7 @@ class ServiceServiceDataJpaTest {
         val updated = Service(id = existing.id, start = LocalDateTime.of(2026, 2, 1, 8, 0), end = LocalDateTime.of(2026, 2, 1, 10, 0))
 
         // When
-        val result = serviceService.update(updated)
+        val result = serviceService.updateEntity(updated)
 
         // Then
         val saved = serviceRepository.findById(result.id)

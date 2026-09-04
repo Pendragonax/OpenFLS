@@ -27,7 +27,7 @@ class ServiceService(
     private val clientService: ClientService,
     private val assistancePlanService: AssistancePlanService,
     private val modelMapper: org.modelmapper.ModelMapper
-) : de.vinz.openfls.services.GenericService<Service> {
+) {
 
     @Transactional
     fun create(serviceDto: ServiceDto): ServiceDto {
@@ -37,11 +37,11 @@ class ServiceService(
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
         entity.employee?.unprofessionals = null
-        return modelMapper.map(create(entity), ServiceDto::class.java)
+        return modelMapper.map(createEntity(entity), ServiceDto::class.java)
     }
 
     @Transactional
-    override fun create(value: Service): Service {
+    fun createEntity(value: Service): Service {
         if (value.id > 0)
             throw IllegalArgumentException("id is greater than 0")
         if (value.start >= value.end)
@@ -62,13 +62,13 @@ class ServiceService(
 
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
-        val savedEntity = update(entity)
+        val savedEntity = updateEntity(entity)
 
         return modelMapper.map(savedEntity, ServiceDto::class.java)
     }
 
     @Transactional
-    override fun update(value: Service): Service {
+    fun updateEntity(value: Service): Service {
         if (value.id <= 0)
             throw IllegalArgumentException("id is set")
         if (!serviceRepository.existsById(value.id))
@@ -89,7 +89,7 @@ class ServiceService(
     }
 
     @Transactional
-    override fun delete(id: Long) {
+    fun delete(id: Long) {
         val existingService = serviceRepository.findByIdOrNull(id)
             ?: throw IllegalArgumentException("id not found")
         ensureClientIsMutable(existingService.client?.id)
@@ -110,10 +110,10 @@ class ServiceService(
     }
 
     fun getAllDtos(): List<ServiceDto> {
-        return getAll().map { modelMapper.map(it, ServiceDto::class.java) }
+        return getAllEntities().map { modelMapper.map(it, ServiceDto::class.java) }
     }
 
-    override fun getAll(): List<Service> {
+    fun getAllEntities(): List<Service> {
         return serviceRepository.findAll().toList()
     }
 
@@ -131,15 +131,15 @@ class ServiceService(
         return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
-    fun getDtoById(id: Long): ServiceDto? {
-        return modelMapper.map(getById(id), ServiceDto::class.java)
+    fun getById(id: Long): ServiceDto? {
+        return modelMapper.map(getEntityById(id), ServiceDto::class.java)
     }
 
-    override fun getById(id: Long): Service? {
+    fun getEntityById(id: Long): Service? {
         return serviceRepository.findByIdOrNull(id)
     }
 
-    override fun existsById(id: Long): Boolean {
+    fun existsById(id: Long): Boolean {
         return serviceRepository.existsById(id)
     }
 
@@ -431,7 +431,7 @@ class ServiceService(
             return
         }
 
-        if (clientService.getById(clientId)?.archived == true) {
+        if (clientService.getEntityById(clientId)?.archived == true) {
             throw IllegalStateException("client is archived")
         }
     }
@@ -441,7 +441,7 @@ class ServiceService(
             return
         }
 
-        if (assistancePlanService.getById(assistancePlanId)?.client?.archived == true) {
+        if (assistancePlanService.getEntityById(assistancePlanId)?.client?.archived == true) {
             throw IllegalStateException("client is archived")
         }
     }

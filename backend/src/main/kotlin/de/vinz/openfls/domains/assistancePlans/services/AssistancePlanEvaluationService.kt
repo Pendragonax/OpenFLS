@@ -20,7 +20,7 @@ class AssistancePlanEvaluationService(
 
     @Transactional(readOnly = true)
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
-        val assistancePlan = assistancePlanService.getById(id) ?: throw IllegalArgumentException("id not found ")
+        val assistancePlan = assistancePlanService.getEntityById(id) ?: throw IllegalArgumentException("id not found ")
         val services = serviceService.getByAssistancePlan(id)
         val eval = AssistancePlanEvalDto()
 

@@ -71,7 +71,7 @@ class HourCorridorController(
         return try {
             if (!accessService.isAdmin()) throw IllegalAccessException("no permission to delete hour corridors")
             if (!hourCorridorService.existsById(id)) throw InvalidHourCorridorDtoException("hour corridor not found")
-            val dto = hourCorridorService.getDtoById(id)
+            val dto = hourCorridorService.getById(id)
             hourCorridorService.delete(id)
             ResponseEntity.ok(dto)
         } catch (ex: IllegalAccessException) {
@@ -107,7 +107,7 @@ class HourCorridorController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(hourCorridorService.getDtoById(id))
+            ResponseEntity.ok(hourCorridorService.getById(id))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
         } catch (ex: IllegalArgumentException) {

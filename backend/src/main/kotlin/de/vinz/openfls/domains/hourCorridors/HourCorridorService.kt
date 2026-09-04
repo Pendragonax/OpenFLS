@@ -27,7 +27,7 @@ class HourCorridorService(
     fun create(hourCorridorDto: CreateHourCorridorDto): HourCorridorDto {
         validateRange(hourCorridorDto.weeklyMinutesFrom, hourCorridorDto.weeklyMinutesTill)
 
-        val hourType = hourTypeService.getById(hourCorridorDto.hourTypeId)
+        val hourType = hourTypeService.getEntityById(hourCorridorDto.hourTypeId)
             ?: throw IllegalArgumentException("hour type with id ${hourCorridorDto.hourTypeId} not found")
 
         val entity = hourCorridorRepository.save(
@@ -52,7 +52,7 @@ class HourCorridorService(
 
         validateRange(hourCorridorDto.weeklyMinutesFrom, hourCorridorDto.weeklyMinutesTill)
 
-        val hourType = hourTypeService.getById(hourCorridorDto.hourTypeId)
+        val hourType = hourTypeService.getEntityById(hourCorridorDto.hourTypeId)
             ?: throw IllegalArgumentException("hour type with id ${hourCorridorDto.hourTypeId} not found")
 
         val entity = hourCorridorRepository.save(
@@ -92,13 +92,13 @@ class HourCorridorService(
     }
 
     @Transactional(readOnly = true)
-    fun getDtoById(id: Long): HourCorridorDto? {
+    fun getById(id: Long): HourCorridorDto? {
         val entity = hourCorridorRepository.findById(id).orElse(null)
         return entity?.let { HourCorridorDto.from(it, countByAssistancePlan(it.id)) }
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): HourCorridor? {
+    fun getEntityById(id: Long): HourCorridor? {
         return hourCorridorRepository.findByIdOrNull(id)
     }
 

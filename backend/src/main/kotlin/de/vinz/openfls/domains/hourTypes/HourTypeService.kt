@@ -32,13 +32,13 @@ class HourTypeService(private val hourTypeRepository: HourTypeRepository) {
     }
 
     @Transactional(readOnly = true)
-    fun getDtoById(id: Long): HourTypeDto? {
+    fun getById(id: Long): HourTypeDto? {
         val entity = hourTypeRepository.findById(id).orElse(null)
         return entity?.let { HourTypeDto.from(it) }
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): HourType? {
+    fun getEntityById(id: Long): HourType? {
         return hourTypeRepository.findById(id).orElse(null)
     }
 

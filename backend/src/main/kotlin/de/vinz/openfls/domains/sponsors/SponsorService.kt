@@ -33,13 +33,13 @@ class SponsorService(private val sponsorRepository: SponsorRepository) {
     }
 
     @Transactional(readOnly = true)
-    fun getDtoById(id: Long): SponsorDto? {
+    fun getById(id: Long): SponsorDto? {
         val entities = sponsorRepository.findById(id).orElse(null)
         return SponsorDto.from(entities)
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): Sponsor? {
+    fun getEntityById(id: Long): Sponsor? {
         return sponsorRepository.findById(id).orElse(null)
     }
 

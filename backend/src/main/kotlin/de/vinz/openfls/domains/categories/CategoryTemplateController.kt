@@ -62,7 +62,7 @@ class CategoryTemplateController(
             throw InvalidCategoryTemplateDtoException("category template not found")
 
         return try {
-            val dto = categoryTemplateService.getDtoById(id)
+            val dto = categoryTemplateService.getById(id)
             categoryTemplateService.delete(id)
 
             ResponseEntity.ok(dto)
@@ -93,7 +93,7 @@ class CategoryTemplateController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(categoryTemplateService.getDtoById(id))
+            ResponseEntity.ok(categoryTemplateService.getById(id))
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {

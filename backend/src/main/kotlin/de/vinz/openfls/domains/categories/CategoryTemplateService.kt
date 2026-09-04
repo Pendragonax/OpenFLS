@@ -57,13 +57,13 @@ class CategoryTemplateService(private val categoryTemplateRepository: CategoryTe
     }
 
     @Transactional(readOnly = true)
-    fun getDtoById(id: Long): CategoryTemplateDto? {
+    fun getById(id: Long): CategoryTemplateDto? {
         val entity = categoryTemplateRepository.findById(id).orElse(null)
         return entity?.let { CategoryTemplateDto.from(it) }
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): CategoryTemplate? {
+    fun getEntityById(id: Long): CategoryTemplate? {
         return categoryTemplateRepository.findByIdOrNull(id)
     }
 

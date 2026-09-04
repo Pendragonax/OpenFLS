@@ -50,7 +50,7 @@ class HourCorridorServiceDataJpaTest {
             weeklyMinutesTill = 600,
             hourTypeId = hourType.id
         )
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         // When
         val result = hourCorridorService.create(dto)
@@ -104,7 +104,7 @@ class HourCorridorServiceDataJpaTest {
             weeklyMinutesTill = 720,
             hourTypeId = secondHourType.id
         )
-        whenever(hourTypeService.getById(secondHourType.id)).thenReturn(secondHourType)
+        whenever(hourTypeService.getEntityById(secondHourType.id)).thenReturn(secondHourType)
 
         // When
         val result = hourCorridorService.update(dto)

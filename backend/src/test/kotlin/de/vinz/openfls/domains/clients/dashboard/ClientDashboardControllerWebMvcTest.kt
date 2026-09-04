@@ -47,7 +47,7 @@ class ClientDashboardControllerWebMvcTest {
     @BeforeEach
     fun setUp() {
         given(accessService.getId()).willReturn(7L)
-        given(clientService.getDtoById(eq(3L), any(), any())).willReturn(ClientDto().apply {
+        given(clientService.getById(eq(3L), any(), any())).willReturn(ClientDto().apply {
             id = 3
             firstName = "Max"
             lastName = "Mustermann"
@@ -109,7 +109,7 @@ class ClientDashboardControllerWebMvcTest {
 
     @Test
     fun getDashboard_unknownClient_returnsBadRequest() {
-        given(clientService.getDtoById(eq(404L), any(), any())).willReturn(null)
+        given(clientService.getById(eq(404L), any(), any())).willReturn(null)
 
         val result = mockMvc.get("/client_dashboards/client/404").andReturn()
 

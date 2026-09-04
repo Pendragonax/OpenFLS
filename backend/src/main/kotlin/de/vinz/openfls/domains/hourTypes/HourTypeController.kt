@@ -62,7 +62,7 @@ class HourTypeController(private val hourTypeService: HourTypeService,
             throw InvalidHourTypeDtoException("Type of hour with id $id does not exists.")
 
         return try {
-            val dto = hourTypeService.getDtoById(id)
+            val dto = hourTypeService.getById(id)
             hourTypeService.delete(id)
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -92,7 +92,7 @@ class HourTypeController(private val hourTypeService: HourTypeService,
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(hourTypeService.getDtoById(id))
+            ResponseEntity.ok(hourTypeService.getById(id))
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {

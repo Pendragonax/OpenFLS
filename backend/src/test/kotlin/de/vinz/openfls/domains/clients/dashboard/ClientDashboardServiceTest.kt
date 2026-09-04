@@ -47,7 +47,7 @@ class ClientDashboardServiceTest {
 
     @Test
     fun getDashboard_withReadPermission_returnsRunningPlanAndEntries() {
-        whenever(clientService.getDtoById(any(), any(), any())).thenReturn(clientDto())
+        whenever(clientService.getById(any(), any(), any())).thenReturn(clientDto())
         whenever(clientService.isFavoriteOfEmployee(any(), any())).thenReturn(true)
         whenever(assistancePlanPreviewService.getPreviewDtosByClientId(any(), any(), any()))
             .thenReturn(listOf(endedPlan(), runningPlan(), futurePlan()))
@@ -78,7 +78,7 @@ class ClientDashboardServiceTest {
 
     @Test
     fun getDashboard_withoutReadPermission_deniesPlanAndEntriesButKeepsTasks() {
-        whenever(clientService.getDtoById(any(), any(), any())).thenReturn(clientDto())
+        whenever(clientService.getById(any(), any(), any())).thenReturn(clientDto())
         whenever(clientService.isFavoriteOfEmployee(any(), any())).thenReturn(false)
         whenever(clientTaskService.getDtosByClientId(any())).thenReturn(listOf(openTask()))
 
@@ -107,7 +107,7 @@ class ClientDashboardServiceTest {
 
     @Test
     fun getDashboard_withoutRunningPlan_fallsBackToPlanThatEndedLast() {
-        whenever(clientService.getDtoById(any(), any(), any())).thenReturn(clientDto())
+        whenever(clientService.getById(any(), any(), any())).thenReturn(clientDto())
         whenever(clientService.isFavoriteOfEmployee(any(), any())).thenReturn(false)
         whenever(assistancePlanPreviewService.getPreviewDtosByClientId(any(), any(), any()))
             .thenReturn(listOf(endedPlan(), endedPlan().copy(id = 42, end = today.minusDays(1))))
@@ -130,7 +130,7 @@ class ClientDashboardServiceTest {
 
     @Test
     fun getDashboard_unknownClient_returnsNull() {
-        whenever(clientService.getDtoById(any(), any(), any())).thenReturn(null)
+        whenever(clientService.getById(any(), any(), any())).thenReturn(null)
 
         val dashboard = clientDashboardService.getDashboard(
             clientId = 404,

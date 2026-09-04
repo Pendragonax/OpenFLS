@@ -205,10 +205,10 @@ class AssistancePlanServiceDataJpaTest {
         val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
         val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
 
-        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val createDto = AssistancePlanCreateDto().apply {
             start = LocalDate.of(2026, 1, 1)
@@ -253,10 +253,10 @@ class AssistancePlanServiceDataJpaTest {
         val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
         val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
 
-        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val createDto = AssistancePlanCreateDto().apply {
             start = LocalDate.of(2026, 1, 1)
@@ -293,7 +293,7 @@ class AssistancePlanServiceDataJpaTest {
     }
 
     @Test
-    fun getAssistancePlanDtosByClientId_sortsByStartDesc() {
+    fun getByClientId_sortsByStartDesc() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
@@ -329,7 +329,7 @@ class AssistancePlanServiceDataJpaTest {
         )
 
         // When
-        val result = assistancePlanService.getAssistancePlanDtosByClientId(client.id)
+        val result = assistancePlanService.getByClientId(client.id)
 
         // Then
         assertThat(result).hasSize(3)
@@ -342,7 +342,7 @@ class AssistancePlanServiceDataJpaTest {
     }
 
     @Test
-    fun getAssistancePlanDtosByClientId_filtersArchivedClientUnlessIncluded() {
+    fun getByClientId_filtersArchivedClientUnlessIncluded() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
@@ -359,8 +359,8 @@ class AssistancePlanServiceDataJpaTest {
         )
 
         // When
-        val hiddenResult = assistancePlanService.getAssistancePlanDtosByClientId(client.id)
-        val visibleResult = assistancePlanService.getAssistancePlanDtosByClientId(
+        val hiddenResult = assistancePlanService.getByClientId(client.id)
+        val visibleResult = assistancePlanService.getByClientId(
             client.id,
             includeArchived = true
         )
@@ -372,7 +372,7 @@ class AssistancePlanServiceDataJpaTest {
     }
 
     @Test
-    fun getAssistancePlanDtoById_filtersArchivedClientUnlessIncluded() {
+    fun getById_filtersArchivedClientUnlessIncluded() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
@@ -389,8 +389,8 @@ class AssistancePlanServiceDataJpaTest {
         )
 
         // When
-        val hiddenResult = assistancePlanService.getAssistancePlanDtoById(plan.id)
-        val visibleResult = assistancePlanService.getAssistancePlanDtoById(
+        val hiddenResult = assistancePlanService.getById(plan.id)
+        val visibleResult = assistancePlanService.getById(
             plan.id,
             includeArchived = true
         )
@@ -505,10 +505,10 @@ class AssistancePlanServiceDataJpaTest {
         val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
         val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
 
-        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val created = assistancePlanService.create(AssistancePlanCreateDto().apply {
             start = LocalDate.of(2026, 1, 1)
@@ -586,10 +586,10 @@ class AssistancePlanServiceDataJpaTest {
         val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
         val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
 
-        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val mixedPlan = AssistancePlan(
             start = LocalDate.of(2026, 1, 1),
@@ -661,10 +661,10 @@ class AssistancePlanServiceDataJpaTest {
         val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
         val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
 
-        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val mixedPlan = AssistancePlan(
             start = LocalDate.of(2026, 1, 1),
@@ -754,9 +754,9 @@ class AssistancePlanServiceDataJpaTest {
             )
         )
 
-        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
 
         val createDto = AssistancePlanCreateDto().apply {
             start = LocalDate.of(2026, 1, 1)
@@ -804,9 +804,9 @@ class AssistancePlanServiceDataJpaTest {
             )
         )
 
-        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
 
         val createDto = AssistancePlanCreateDto().apply {
             start = LocalDate.of(2026, 1, 1)
@@ -854,10 +854,10 @@ class AssistancePlanServiceDataJpaTest {
             )
         )
 
-        whenever(clientService.getById(client.id)).thenReturn(client)
+        whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val created = assistancePlanService.create(AssistancePlanCreateDto().apply {
             start = LocalDate.of(2026, 1, 1)
@@ -912,9 +912,9 @@ class AssistancePlanServiceDataJpaTest {
             )
         )
 
-        whenever(clientService.getById(archivedClient.id)).thenReturn(archivedClient)
+        whenever(clientService.getEntityById(archivedClient.id)).thenReturn(archivedClient)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(sponsorService.getById(sponsor.id)).thenReturn(sponsor)
+        whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
 
         val updateDto = AssistancePlanUpdateDto().apply {
             id = plan.id

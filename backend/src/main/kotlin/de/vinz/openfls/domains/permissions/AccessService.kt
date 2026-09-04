@@ -86,7 +86,7 @@ class AccessService(
             if (isAdmin())
                 return true
 
-            val clientInstitutionId = clientService.getById(clientId)?.institution?.id ?: 0
+            val clientInstitutionId = clientService.getEntityById(clientId)?.institution?.id ?: 0
 
             isAffiliated(getId(), clientInstitutionId)
         } catch (ex: Exception) {
@@ -101,7 +101,7 @@ class AccessService(
                 return true
 
             val institutionId = assistancePlanService
-                .getById(goalService.getById(goalId)?.institution?.id ?: 0)
+                .getEntityById(goalService.getEntityById(goalId)?.institution?.id ?: 0)
                 ?.institution?.id ?: 0
 
             isAffiliated(getId(), institutionId)
@@ -116,7 +116,7 @@ class AccessService(
             if (isAdmin())
                 return true
 
-            val institutionId = assistancePlanService.getById(assistancePlanId)?.institution?.id ?: 0
+            val institutionId = assistancePlanService.getEntityById(assistancePlanId)?.institution?.id ?: 0
 
             isAffiliated(getId(), institutionId)
         } catch (ex: Exception) {

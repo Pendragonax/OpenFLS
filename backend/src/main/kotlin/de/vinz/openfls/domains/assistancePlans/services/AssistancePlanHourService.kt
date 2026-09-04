@@ -20,8 +20,8 @@ class AssistancePlanHourService(
     @Transactional
     fun save(assistancePlanHour: AssistancePlanHourDto): AssistancePlanHourProjection {
         val mappedEntity = modelMapper.map(assistancePlanHour, AssistancePlanHour::class.java)
-        mappedEntity.assistancePlan = assistancePlanService.getById(mappedEntity.assistancePlan?.id ?: 0)
-        mappedEntity.hourType = hourTypeService.getById(mappedEntity.hourType?.id ?: 0)
+        mappedEntity.assistancePlan = assistancePlanService.getEntityById(mappedEntity.assistancePlan?.id ?: 0)
+        mappedEntity.hourType = hourTypeService.getEntityById(mappedEntity.hourType?.id ?: 0)
 
         val savedEntity = assistancePlanHourRepository.save(mappedEntity)
         return AssistancePlanHourProjection.from(savedEntity)

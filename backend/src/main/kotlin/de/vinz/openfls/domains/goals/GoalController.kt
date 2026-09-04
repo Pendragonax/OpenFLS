@@ -100,7 +100,7 @@ class GoalController(
             if (!goalService.existsById(id))
                 throw IllegalArgumentException("goal not found")
 
-            val dto = goalService.getDtoById(id)
+            val dto = goalService.getById(id)
             goalService.delete(id)
 
             if (logPerformance) {

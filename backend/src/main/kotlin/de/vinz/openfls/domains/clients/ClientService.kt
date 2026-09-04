@@ -14,7 +14,7 @@ import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
 import de.vinz.openfls.domains.hourTypes.HourTypeDto
 import de.vinz.openfls.domains.institutions.InstitutionService
-import de.vinz.openfls.services.GenericService
+
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,21 +27,21 @@ class ClientService(
         private val institutionService: InstitutionService,
         private val categoryTemplateService: CategoryTemplateService,
         private val modelMapper: ModelMapper
-) : GenericService<Client> {
+) {
 
     @Transactional
     fun create(value: ClientDto): ClientDto {
         val clientEntity = modelMapper.map(value, Client::class.java)
-        val resultClientEntity = create(clientEntity)
+        val resultClientEntity = createEntity(clientEntity)
         val clientDto = modelMapper.map(resultClientEntity, ClientDto::class.java)
         return sortClientDto(clientDto, resultClientEntity)
     }
 
     @Transactional
-    override fun create(value: Client): Client {
+    fun createEntity(value: Client): Client {
         value.institution = institutionService.getEntityById(value.institution?.id ?: 0)
                 ?: throw IllegalArgumentException("institution not found")
-        value.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate?.id ?: 0)
+        value.categoryTemplate = categoryTemplateService.getEntityById(value.categoryTemplate?.id ?: 0)
                 ?: throw IllegalArgumentException("category template not found")
         value.archived = false
 
@@ -51,14 +51,14 @@ class ClientService(
     @Transactional
     fun update(value: ClientDto): ClientDto {
         val clientEntity = modelMapper.map(value, Client::class.java)
-        val resultClientEntity = update(clientEntity)
+        val resultClientEntity = updateEntity(clientEntity)
         val clientDto = modelMapper.map(resultClientEntity, ClientDto::class.java)
         return sortClientDto(clientDto, resultClientEntity)
     }
 
     @Transactional
     @Throws(ClientArchiveStateException::class)
-    override fun update(value: Client): Client {
+    fun updateEntity(value: Client): Client {
         val existingClient = clientRepository.findById(value.id)
                 .orElseThrow { IllegalArgumentException("client not found") }
 
@@ -72,7 +72,7 @@ class ClientService(
         existingClient.email = value.email
         existingClient.institution = institutionService.getEntityById(value.institution?.id ?: 0)
                 ?: throw IllegalArgumentException("institution not found")
-        existingClient.categoryTemplate = categoryTemplateService.getById(value.categoryTemplate?.id ?: 0)
+        existingClient.categoryTemplate = categoryTemplateService.getEntityById(value.categoryTemplate?.id ?: 0)
                 ?: throw IllegalArgumentException("category template not found")
 
         return clientRepository.save(existingClient)
@@ -134,7 +134,7 @@ class ClientService(
 
     @Transactional(readOnly = true)
     fun getArchiveHistoryById(clientId: Long): List<ClientArchiveHistoryEntryDto> {
-        val client = getById(clientId) ?: return emptyList()
+        val client = getEntityById(clientId) ?: return emptyList()
         return client.archiveHistoryEntries
             .sortedByDescending { it.actionTimestamp }
             .map { ClientArchiveHistoryEntryDto.from(it) }
@@ -142,8 +142,8 @@ class ClientService(
 
     @Transactional
     @Throws(ClientArchiveStateException::class)
-    override fun delete(id: Long) {
-        val client = getById(id) ?: throw IllegalArgumentException("client not found")
+    fun delete(id: Long) {
+        val client = getEntityById(id) ?: throw IllegalArgumentException("client not found")
 
         if (client.archived) {
             throw ClientArchiveStateException("client is archived")
@@ -153,7 +153,7 @@ class ClientService(
     }
 
     @Transactional(readOnly = true)
-    override fun getAll(): List<Client> {
+    fun getAllEntities(): List<Client> {
         return clientRepository.findAll().toList()
     }
 
@@ -195,12 +195,12 @@ class ClientService(
     }
 
     @Transactional(readOnly = true)
-    fun getDtoById(
+    fun getById(
         id: Long,
         includeArchived: Boolean = false,
         leadingInstitutionIds: List<Long> = emptyList()
     ): ClientDto? {
-        val entity = getById(id)
+        val entity = getEntityById(id)
 
         if (entity != null && isVisible(entity.archived, entity.institution?.id, includeArchived, leadingInstitutionIds)) {
             val clientDto = modelMapper.map(entity, ClientDto::class.java)
@@ -217,7 +217,7 @@ class ClientService(
         includeArchived: Boolean = false,
         leadingInstitutionIds: List<Long> = emptyList()
     ): ClientForServiceEditingDto? {
-        val entity = getById(clientId)
+        val entity = getEntityById(clientId)
 
         if (entity != null && isVisible(entity.archived, entity.institution?.id, includeArchived, leadingInstitutionIds)) {
             val clientDto = modelMapper.map(entity, ClientForServiceEditingDto::class.java)
@@ -234,12 +234,12 @@ class ClientService(
     }
 
     @Transactional(readOnly = true)
-    override fun getById(id: Long): Client? {
+    fun getEntityById(id: Long): Client? {
         return clientRepository.findById(id).orElse(null)
     }
 
     @Transactional(readOnly = true)
-    override fun existsById(id: Long): Boolean {
+    fun existsById(id: Long): Boolean {
         return clientRepository.existsById(id)
     }
 
@@ -254,7 +254,7 @@ class ClientService(
         reason: String,
         remark: String
     ): ClientArchiveHistoryEntry {
-        val client = getById(clientId) ?: throw IllegalArgumentException("client not found")
+        val client = getEntityById(clientId) ?: throw IllegalArgumentException("client not found")
 
         when (actionType) {
             ClientArchiveActionType.ARCHIVE -> {

@@ -73,7 +73,7 @@ class ClientControllerWebMvcTest {
         }
         given(accessService.isAdmin()).willReturn(true)
         given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(clientService.getDtoById(clientId, true, emptyList())).willReturn(dto)
+        given(clientService.getById(clientId, true, emptyList())).willReturn(dto)
 
         // When
         val result = mockMvc.get("/clients/$clientId").andReturn()

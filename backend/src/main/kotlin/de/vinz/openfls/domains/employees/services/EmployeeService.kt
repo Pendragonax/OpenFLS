@@ -376,7 +376,7 @@ class EmployeeService(
                 this.id?.employeeId = employee.id
                 this.id?.sponsorId = this.sponsor?.id
             } }
-            .map { unprofessionalService.create(it) }
+            .map { unprofessionalService.createEntity(it) }
             .toMutableSet()
     }
 

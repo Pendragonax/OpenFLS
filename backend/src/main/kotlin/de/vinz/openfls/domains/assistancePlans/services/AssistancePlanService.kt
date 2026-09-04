@@ -51,20 +51,20 @@ class AssistancePlanService(
             hourCorridor = resolveHourCorridor(valueDto)
         }
 
-        entity.client = clientService.getById(valueDto.clientId)
+        entity.client = clientService.getEntityById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
         if (entity.client?.archived == true) {
             throw IllegalStateException("client is archived")
         }
         entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
-        entity.sponsor = sponsorService.getById(valueDto.sponsorId)
+        entity.sponsor = sponsorService.getEntityById(valueDto.sponsorId)
                 ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
         entity.hours = valueDto.hours
                 .map { hourDto ->
                     AssistancePlanHour().apply {
                         weeklyMinutes = hourDto.weeklyMinutes
-                        hourType = hourTypeService.getById(hourDto.hourTypeId)
+                        hourType = hourTypeService.getEntityById(hourDto.hourTypeId)
                             ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
                         assistancePlan = entity
                     }
@@ -84,7 +84,7 @@ class AssistancePlanService(
             goalEntity.hours = goalDto.hours.map { hourDto ->
                 GoalHour().apply {
                     weeklyMinutes = hourDto.weeklyMinutes
-                    hourType = hourTypeService.getById(hourDto.hourTypeId)
+                    hourType = hourTypeService.getEntityById(hourDto.hourTypeId)
                         ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
                     goal = goalEntity
                 }
@@ -137,14 +137,14 @@ class AssistancePlanService(
         entity.hourMode = valueDto.hourMode
         entity.hourCorridor = resolveHourCorridor(valueDto)
 
-        entity.client = clientService.getById(valueDto.clientId)
+        entity.client = clientService.getEntityById(valueDto.clientId)
                 ?: throw IllegalArgumentException("client [id = ${valueDto.clientId}] not found")
         if (entity.client?.archived == true) {
             throw IllegalStateException("client is archived")
         }
         entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution [id = ${valueDto.institutionId}] not found")
-        entity.sponsor = sponsorService.getById(valueDto.sponsorId)
+        entity.sponsor = sponsorService.getEntityById(valueDto.sponsorId)
                 ?: throw IllegalArgumentException("sponsor [id = ${valueDto.sponsorId}] not found")
 
         val planHours = valueDto.hours
@@ -152,7 +152,7 @@ class AssistancePlanService(
                 AssistancePlanHour().apply {
                     this.id = hourDto.id
                     weeklyMinutes = hourDto.weeklyMinutes
-                    hourType = hourTypeService.getById(hourDto.hourTypeId)
+                    hourType = hourTypeService.getEntityById(hourDto.hourTypeId)
                         ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
                     assistancePlan = entity
                 }
@@ -188,7 +188,7 @@ class AssistancePlanService(
                 GoalHour().apply {
                     this.id = hourDto.id
                     weeklyMinutes = hourDto.weeklyMinutes
-                    hourType = hourTypeService.getById(hourDto.hourTypeId)
+                    hourType = hourTypeService.getEntityById(hourDto.hourTypeId)
                         ?: throw IllegalArgumentException("hour type with id ${hourDto.hourTypeId} not found")
                     goal = savedGoal
                 }
@@ -280,7 +280,7 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllAssistancePlanDtos(
+    fun getAll(
         includeArchived: Boolean = false,
         leadingInstitutionIds: List<Long> = emptyList()
     ): List<AssistancePlanDto> {
@@ -291,7 +291,7 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAssistancePlanDtoById(
+    fun getById(
         id: Long,
         includeArchived: Boolean = false,
         leadingInstitutionIds: List<Long> = emptyList()
@@ -307,7 +307,7 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): AssistancePlan? {
+    fun getEntityById(id: Long): AssistancePlan? {
         return assistancePlanRepository.findByIdOrNull(id)
     }
 
@@ -317,7 +317,7 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAssistancePlanDtosByClientId(
+    fun getByClientId(
         id: Long,
         includeArchived: Boolean = false,
         leadingInstitutionIds: List<Long> = emptyList()
@@ -336,7 +336,7 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAssistancePlanDtosBySponsorId(
+    fun getBySponsorId(
         id: Long,
         includeArchived: Boolean = false,
         leadingInstitutionIds: List<Long> = emptyList()
@@ -355,7 +355,7 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
-    fun getAssistancePlanDtosByInstitutionId(
+    fun getByInstitutionId(
         id: Long,
         includeArchived: Boolean = false,
         leadingInstitutionIds: List<Long> = emptyList()

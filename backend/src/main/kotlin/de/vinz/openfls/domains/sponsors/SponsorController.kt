@@ -59,7 +59,7 @@ class SponsorController(val sponsorService: SponsorService,
             throw InvalidSponsorDtoException("sponsor not found")
 
         return try {
-            val dto = sponsorService.getDtoById(id)
+            val dto = sponsorService.getById(id)
             sponsorService.delete(id)
 
             ResponseEntity.ok(dto)
@@ -89,7 +89,7 @@ class SponsorController(val sponsorService: SponsorService,
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(sponsorService.getDtoById(id))
+            ResponseEntity.ok(sponsorService.getById(id))
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {

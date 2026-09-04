@@ -96,7 +96,7 @@ class ClientController(
             if (!clientService.existsById(id))
                 throw IllegalArgumentException("client not found")
 
-            val dto = clientService.getDtoById(
+            val dto = clientService.getById(
                 id,
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
@@ -186,7 +186,7 @@ class ClientController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dto = clientService.getDtoById(
+            val dto = clientService.getById(
                 id,
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()

@@ -23,7 +23,7 @@ class AssistancePlanEvaluationLeftService(
 
     fun createAssistancePlanHourTypeAnalysis(date: LocalDate, assistancePlanId: Long): ApprovedHoursLeftResponseDto {
         val assistancePlan =
-            assistancePlanService.getById(assistancePlanId) ?: throw IllegalArgumentException("No such assistance-plan")
+            assistancePlanService.getEntityById(assistancePlanId) ?: throw IllegalArgumentException("No such assistance-plan")
         val hourTypes = getDistinctHourTypesIn(assistancePlan)
         val approvedRangeMinutes = getApprovedRangeMinutes(assistancePlan)
 

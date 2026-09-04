@@ -43,8 +43,8 @@ class AssistancePlanHourServiceDataJpaTest {
         // Given
         val assistancePlan = assistancePlanRepository.save(AssistancePlan())
         val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
-        whenever(assistancePlanService.getById(assistancePlan.id)).thenReturn(assistancePlan)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(assistancePlanService.getEntityById(assistancePlan.id)).thenReturn(assistancePlan)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val dto = AssistancePlanHourDto().apply {
             weeklyMinutes = 480

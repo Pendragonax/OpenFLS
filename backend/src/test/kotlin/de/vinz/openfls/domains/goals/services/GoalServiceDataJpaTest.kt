@@ -66,9 +66,9 @@ class GoalServiceDataJpaTest {
         val assistancePlan = assistancePlanRepository.save(AssistancePlan())
         val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
-        whenever(assistancePlanService.getById(assistancePlan.id)).thenReturn(assistancePlan)
+        whenever(assistancePlanService.getEntityById(assistancePlan.id)).thenReturn(assistancePlan)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val dto = GoalDto().apply {
             title = "Goal"
@@ -94,7 +94,7 @@ class GoalServiceDataJpaTest {
     @Test
     fun create_missingAssistancePlan_throwsException() {
         // Given
-        whenever(assistancePlanService.getById(9999)).thenReturn(null)
+        whenever(assistancePlanService.getEntityById(9999)).thenReturn(null)
         val dto = GoalDto().apply {
             title = "Goal"
             description = "Desc"
@@ -110,7 +110,7 @@ class GoalServiceDataJpaTest {
     fun update_missingGoal_throwsException() {
         // Given
         val assistancePlan = assistancePlanRepository.save(AssistancePlan())
-        whenever(assistancePlanService.getById(assistancePlan.id)).thenReturn(assistancePlan)
+        whenever(assistancePlanService.getEntityById(assistancePlan.id)).thenReturn(assistancePlan)
         val dto = GoalDto().apply {
             id = 9999
             title = "Goal"
@@ -128,8 +128,8 @@ class GoalServiceDataJpaTest {
         // Given
         val assistancePlan = assistancePlanRepository.save(AssistancePlan())
         val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
-        whenever(assistancePlanService.getById(assistancePlan.id)).thenReturn(assistancePlan)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(assistancePlanService.getEntityById(assistancePlan.id)).thenReturn(assistancePlan)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val existing = goalRepository.save(de.vinz.openfls.domains.goals.entities.Goal(
             title = "Old",
@@ -173,8 +173,8 @@ class GoalServiceDataJpaTest {
             )
         )
         val assistancePlan = assistancePlanRepository.save(AssistancePlan(hourMode = AssistancePlanHourMode.CORRIDOR, hourCorridor = corridor))
-        whenever(assistancePlanService.getById(assistancePlan.id)).thenReturn(assistancePlan)
-        whenever(hourTypeService.getById(hourType.id)).thenReturn(hourType)
+        whenever(assistancePlanService.getEntityById(assistancePlan.id)).thenReturn(assistancePlan)
+        whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val dto = GoalDto().apply {
             title = "Goal"

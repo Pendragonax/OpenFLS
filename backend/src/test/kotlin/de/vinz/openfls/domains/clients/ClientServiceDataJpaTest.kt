@@ -70,7 +70,7 @@ class ClientServiceDataJpaTest {
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
 
         val dto = ClientDto().apply {
             firstName = "Max"
@@ -125,7 +125,7 @@ class ClientServiceDataJpaTest {
         val existing = clientRepository.save(Client(firstName = "Old", lastName = "Name", institution = institution, categoryTemplate = categoryTemplate))
 
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
 
         val dto = ClientDto().apply {
             id = existing.id
@@ -153,7 +153,7 @@ class ClientServiceDataJpaTest {
             Client(firstName = "Old", lastName = "Name", institution = institution, categoryTemplate = categoryTemplate, archived = true)
         )
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
-        whenever(categoryTemplateService.getById(any())).thenReturn(categoryTemplate)
+        whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
 
         val dto = ClientDto().apply {
             id = existing.id
@@ -170,7 +170,7 @@ class ClientServiceDataJpaTest {
     }
 
     @Test
-    fun getDtoById_setsInstitutionNameForAssistancePlans() {
+    fun getById_setsInstitutionNameForAssistancePlans() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst A", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
@@ -191,7 +191,7 @@ class ClientServiceDataJpaTest {
         clientRepository.save(client)
 
         // When
-        val result = clientService.getDtoById(client.id)
+        val result = clientService.getById(client.id)
 
         // Then
         assertThat(result).isNotNull
@@ -200,7 +200,7 @@ class ClientServiceDataJpaTest {
     }
 
     @Test
-    fun getDtoById_filtersArchivedClientsUnlessIncluded() {
+    fun getById_filtersArchivedClientsUnlessIncluded() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
@@ -209,8 +209,8 @@ class ClientServiceDataJpaTest {
         )
 
         // When
-        val hiddenResult = clientService.getDtoById(archivedClient.id)
-        val visibleResult = clientService.getDtoById(archivedClient.id, includeArchived = true)
+        val hiddenResult = clientService.getById(archivedClient.id)
+        val visibleResult = clientService.getById(archivedClient.id, includeArchived = true)
 
         // Then
         assertThat(hiddenResult).isNull()

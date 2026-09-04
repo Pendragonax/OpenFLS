@@ -82,7 +82,7 @@ class AssistancePlanControllerWebMvcTest {
         val planId = 12L
         given(accessService.isAdmin()).willReturn(true)
         given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(assistancePlanService.getAssistancePlanDtoById(planId, true, emptyList()))
+        given(assistancePlanService.getById(planId, true, emptyList()))
             .willReturn(
                 AssistancePlanDto().apply {
                     id = planId

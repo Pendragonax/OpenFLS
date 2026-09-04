@@ -81,7 +81,7 @@ class ServiceController(
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
             if (!accessService.isAdmin() &&
-                    serviceService.getById(id)?.employee?.id != accessService.getId())
+                    serviceService.getEntityById(id)?.employee?.id != accessService.getId())
                 throw IllegalArgumentException("Your not the owner of this service or the admin")
 
             val dto = serviceService.update(valueDto)
@@ -109,13 +109,13 @@ class ServiceController(
             val startMs = System.currentTimeMillis()
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
-            val service = serviceService.getById(id) ?: throw IllegalArgumentException("service not found")
+            val service = serviceService.getEntityById(id) ?: throw IllegalArgumentException("service not found")
 
             val isOwner = service.employee?.id == accessService.getId()
             if (!accessService.isAdmin() && !isOwner)
                 throw IllegalArgumentException("No permission to delete this service")
 
-            val dto = serviceService.getDtoById(id)
+            val dto = serviceService.getById(id)
             serviceService.delete(id)
 
             if (logPerformance) {
@@ -171,7 +171,7 @@ class ServiceController(
             if (!serviceService.existsById(id))
                 throw IllegalArgumentException("service not found")
 
-            val dto = serviceService.getDtoById(id)
+            val dto = serviceService.getById(id)
 
             if (dto != null && !accessService.isAdmin() &&
                     !accessService.canReadEntries(dto.institutionId))

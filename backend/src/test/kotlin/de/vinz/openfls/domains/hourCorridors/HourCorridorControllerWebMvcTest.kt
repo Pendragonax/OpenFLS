@@ -146,7 +146,7 @@ class HourCorridorControllerWebMvcTest {
         // Given
         given(accessService.isAdmin()).willReturn(true)
         given(hourCorridorService.existsById(3L)).willReturn(true)
-        given(hourCorridorService.getDtoById(3L)).willReturn(
+        given(hourCorridorService.getById(3L)).willReturn(
             HourCorridorDto(id = 3, title = "5 bis 10", weeklyMinutesFrom = 300, weeklyMinutesTill = 600, hourTypeId = 1)
         )
         doThrow(IllegalArgumentException("hour corridor is used by 1 assistance plans"))

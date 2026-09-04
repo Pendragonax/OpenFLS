@@ -49,7 +49,7 @@ class ClientDashboardService(
         canModifyClient: Boolean,
         readableInstitutionIds: List<Long>
     ): ClientDashboardDto? {
-        val client = clientService.getDtoById(
+        val client = clientService.getById(
             id = clientId,
             includeArchived = includeArchived,
             leadingInstitutionIds = emptyList()

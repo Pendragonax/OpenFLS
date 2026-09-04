@@ -44,7 +44,7 @@ class UnprofessionalServiceDataJpaTest {
         )
 
         // When
-        val result = unprofessionalService.create(entity)
+        val result = unprofessionalService.createEntity(entity)
 
         // Then
         val saved = unprofessionalRepository.findByEmployeeId(employee.id!!)
@@ -71,7 +71,7 @@ class UnprofessionalServiceDataJpaTest {
         )
 
         // When
-        val result = unprofessionalService.update(updated)
+        val result = unprofessionalService.updateEntity(updated)
 
         // Then
         val saved = unprofessionalRepository.findByEmployeeId(employee.id!!)

@@ -45,7 +45,7 @@ class AssistancePlanEvaluationServiceTest {
                 assistancePlan = plan
             )
         )
-        whenever(assistancePlanService.getById(plan.id)).thenReturn(plan)
+        whenever(assistancePlanService.getEntityById(plan.id)).thenReturn(plan)
         whenever(serviceService.getByAssistancePlan(plan.id)).thenReturn(
             listOf(
                 Service(
@@ -78,7 +78,7 @@ class AssistancePlanEvaluationServiceTest {
     @Test
     fun getEvaluationById_missingPlan_throwsException() {
         // Given
-        whenever(assistancePlanService.getById(99L)).thenReturn(null)
+        whenever(assistancePlanService.getEntityById(99L)).thenReturn(null)
 
         // When / Then
         assertThatThrownBy { evaluationService.getEvaluationById(99L) }

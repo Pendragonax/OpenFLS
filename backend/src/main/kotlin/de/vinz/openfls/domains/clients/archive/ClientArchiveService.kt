@@ -71,7 +71,7 @@ class ClientArchiveService(
         actor: ClientArchiveActor,
         exportFormat: ClientArchiveExportFormat
     ): ClientArchiveHistoryEntryDto {
-        val client = clientService.getById(clientId)
+        val client = clientService.getEntityById(clientId)
             ?: throw IllegalArgumentException("client not found")
 
         val historyEntry = ClientArchiveHistoryEntry(
@@ -100,7 +100,7 @@ class ClientArchiveService(
         remark: String,
         actor: ClientArchiveActor
     ): ClientArchiveHistoryEntryDto {
-        val client = clientService.getById(clientId)
+        val client = clientService.getEntityById(clientId)
             ?: throw IllegalArgumentException("client not found")
 
         if (!actor.isAdmin && !actor.leadingInstitutionIds.contains(client.institution?.id ?: 0)) {

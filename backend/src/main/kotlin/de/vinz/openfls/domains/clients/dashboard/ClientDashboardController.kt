@@ -35,7 +35,7 @@ class ClientDashboardController(
         return try {
             val employeeId = accessService.getId()
             val isAdmin = accessService.isAdmin()
-            val institutionId = clientService.getDtoById(
+            val institutionId = clientService.getById(
                 id = clientId,
                 includeArchived = true,
                 leadingInstitutionIds = emptyList()

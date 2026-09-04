@@ -102,7 +102,7 @@ class AssistancePlanController(
             if (!assistancePlanService.existsById(id))
                 throw IllegalArgumentException("assistance plan not found")
 
-            val dto = assistancePlanService.getAssistancePlanDtoById(
+            val dto = assistancePlanService.getById(
                 id,
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
@@ -132,7 +132,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = assistancePlanService.getAllAssistancePlanDtos(
+            val dtos = assistancePlanService.getAll(
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
@@ -160,7 +160,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dto = assistancePlanService.getAssistancePlanDtoById(
+            val dto = assistancePlanService.getById(
                 id,
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
@@ -214,7 +214,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = assistancePlanService.getAssistancePlanDtosByClientId(
+            val dtos = assistancePlanService.getByClientId(
                 id,
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
@@ -268,7 +268,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = assistancePlanService.getAssistancePlanDtosBySponsorId(
+            val dtos = assistancePlanService.getBySponsorId(
                 id,
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
@@ -322,7 +322,7 @@ class AssistancePlanController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = assistancePlanService.getAssistancePlanDtosByInstitutionId(
+            val dtos = assistancePlanService.getByInstitutionId(
                 id,
                 includeArchived = accessService.isAdmin() || accessService.isLeader(id),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
@@ -432,7 +432,7 @@ class AssistancePlanController(
             val dtos = assistancePlanPreviewService.getPreviewDtosByClientId(
                 id,
                 userId,
-                includeArchived = accessService.isAdmin() || accessService.isLeader(clientService.getById(id)?.institution?.id ?: 0)
+                includeArchived = accessService.isAdmin() || accessService.isLeader(clientService.getEntityById(id)?.institution?.id ?: 0)
             )
 
             if (logPerformance) {
@@ -461,7 +461,7 @@ class AssistancePlanController(
             val startMs = System.currentTimeMillis()
             val dtos = assistancePlanPreviewService.getExistingDtosByClientId(
                 id,
-                includeArchived = accessService.isAdmin() || accessService.isLeader(clientService.getById(id)?.institution?.id ?: 0)
+                includeArchived = accessService.isAdmin() || accessService.isLeader(clientService.getEntityById(id)?.institution?.id ?: 0)
             )
 
             if (logPerformance) {

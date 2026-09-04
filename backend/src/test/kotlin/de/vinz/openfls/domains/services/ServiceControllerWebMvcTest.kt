@@ -116,8 +116,8 @@ class ServiceControllerWebMvcTest {
         )
 
         given(serviceService.existsById(serviceId)).willReturn(true)
-        given(serviceService.getById(serviceId)).willReturn(service)
-        given(serviceService.getDtoById(serviceId)).willReturn(ServiceDto().apply { id = serviceId })
+        given(serviceService.getEntityById(serviceId)).willReturn(service)
+        given(serviceService.getById(serviceId)).willReturn(ServiceDto().apply { id = serviceId })
         given(accessService.isAdmin()).willReturn(false)
         given(accessService.getId()).willReturn(employeeId)
 
@@ -140,7 +140,7 @@ class ServiceControllerWebMvcTest {
         )
 
         given(serviceService.existsById(serviceId)).willReturn(true)
-        given(serviceService.getById(serviceId)).willReturn(service)
+        given(serviceService.getEntityById(serviceId)).willReturn(service)
         given(accessService.isAdmin()).willReturn(false)
         given(accessService.getId()).willReturn(5L)
 
