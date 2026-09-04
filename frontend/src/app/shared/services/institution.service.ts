@@ -27,15 +27,15 @@ export class InstitutionService {
     });
   }
 
-  create(value: CreateInstitutionDto) : Observable<CreateInstitutionDto> {
+  create(value: CreateInstitutionDto) : Observable<InstitutionDto> {
     return this.http
-      .post<CreateInstitutionDto>(`${environment.api_url}${this.url}`, value)
+      .post<InstitutionDto>(`${environment.api_url}${this.url}`, value)
       .pipe(tap(() => this.initialLoad()));
   }
 
-  update(id: number, value: UpdateInstitutionDto) : Observable<UpdateInstitutionDto> {
+  update(id: number, value: UpdateInstitutionDto) : Observable<InstitutionDto> {
     return this.http
-      .put<UpdateInstitutionDto>(`${environment.api_url}${this.url}/${id}`, value)
+      .put<InstitutionDto>(`${environment.api_url}${this.url}/${id}`, value)
       .pipe(tap(() => this.initialLoad()));
   }
 

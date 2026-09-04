@@ -1,6 +1,6 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDTO
+import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDto
 import de.vinz.openfls.domains.overviews.exceptions.CsvCreationFailedException
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
@@ -17,7 +17,7 @@ class CsvService {
         }
 
         @Throws(CsvCreationFailedException::class)
-        fun getCsvFileStream(overviewData: List<AssistancePlanOverviewDTO>): ByteArrayInputStream {
+        fun getCsvFileStream(overviewData: List<AssistancePlanOverviewDto>): ByteArrayInputStream {
             val headerList = mutableListOf("Nachname", "Vorname", "Hilfeplan-Start", "Hilfeplan-Ende", "Kostenträger-ID")
             headerList.addAll(overviewData[0].values.mapIndexed{ index, _ -> if (index == 0) "Gesamt" else "$index" })
             val header: Array<String> = headerList.toTypedArray()
@@ -40,7 +40,7 @@ class CsvService {
             }
         }
 
-        private fun convertToArray(overview: AssistancePlanOverviewDTO): Array<String> {
+        private fun convertToArray(overview: AssistancePlanOverviewDto): Array<String> {
             val result = mutableListOf(
                     overview.clientDto.lastName,
                     overview.clientDto.firstName,

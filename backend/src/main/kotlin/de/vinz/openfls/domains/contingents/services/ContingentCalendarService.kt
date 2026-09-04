@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.absence.AbsenceService
-import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarInformationDTO
+import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarInformationDto
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarDayInformation
 import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarInformation
@@ -54,18 +54,18 @@ class ContingentCalendarService(
         calendarDayInformations: List<ContingentCalendarDayInformation>,
         contingents: List<ContingentDto>,
         absenceDates: List<LocalDate>
-    ): ContingentCalendarInformationDTO {
+    ): ContingentCalendarInformationDto {
         val contingentMinutes =
             ceil(contingentService.calculateContingentMinutesForWorkdayBy(LocalDate.now(), contingents)).toInt()
 
         if (absenceDates.contains(LocalDate.now())) {
-            return generateContingentInformationDTO(0, 0)
+            return generateContingentInformationDto(0, 0)
         }
 
         val todayCalendarDay = calendarDayInformations.firstOrNull { it.date.isEqual(LocalDate.now()) }
         val executedMinutes = todayCalendarDay?.let { it.executedHours * 60 + it.executedMinutes } ?: 0
 
-        return generateContingentInformationDTO(executedMinutes, contingentMinutes)
+        return generateContingentInformationDto(executedMinutes, contingentMinutes)
     }
 
     private fun generateForThisWeek(
@@ -73,7 +73,7 @@ class ContingentCalendarService(
         calendarDayInformations: List<ContingentCalendarDayInformation>,
         contingents: List<ContingentDto>,
         absenceDates: List<LocalDate>
-    ): ContingentCalendarInformationDTO {
+    ): ContingentCalendarInformationDto {
         val thisWeekStart = end.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
 
         return generateFor(thisWeekStart, end, calendarDayInformations, contingents, absenceDates)
@@ -84,7 +84,7 @@ class ContingentCalendarService(
         calendarDayInformations: List<ContingentCalendarDayInformation>,
         contingents: List<ContingentDto>,
         absenceDates: List<LocalDate>
-    ): ContingentCalendarInformationDTO {
+    ): ContingentCalendarInformationDto {
         val thisMonthStart = end.withDayOfMonth(1)
 
         return generateFor(thisMonthStart, end, calendarDayInformations, contingents, absenceDates)
@@ -96,14 +96,14 @@ class ContingentCalendarService(
         calendarDayInformations: List<ContingentCalendarDayInformation>,
         contingents: List<ContingentDto>,
         absenceDates: List<LocalDate>
-    ): ContingentCalendarInformationDTO {
+    ): ContingentCalendarInformationDto {
         val contingentMinutes = contingentService.calculateContingentMinutesFor(start, end, contingents)
         val executedMinutes = sumExecutedMinutesFor(start, end, calendarDayInformations)
         val absenceMinutes = absenceDates
             .filter { !it.isBefore(start) && !it.isAfter(end) }
             .sumOf { contingentService.calculateContingentMinutesForWorkdayBy(it, contingents).toInt() }
 
-        return generateContingentInformationDTO(executedMinutes, contingentMinutes - absenceMinutes)
+        return generateContingentInformationDto(executedMinutes, contingentMinutes - absenceMinutes)
     }
 
     private fun generateContingentCalendarDayInformationFor(
@@ -163,10 +163,10 @@ class ContingentCalendarService(
         )
     }
 
-    private fun generateContingentInformationDTO(
+    private fun generateContingentInformationDto(
         executedMinutes: Int,
         contingentMinutes: Int
-    ): ContingentCalendarInformationDTO {
+    ): ContingentCalendarInformationDto {
         val differenceMinutes = executedMinutes - contingentMinutes
         val executedPercentage = if (contingentMinutes == 0) {
             1.0
@@ -174,7 +174,7 @@ class ContingentCalendarService(
             executedMinutes.toDouble() / contingentMinutes.toDouble()
         }
 
-        return ContingentCalendarInformationDTO(
+        return ContingentCalendarInformationDto(
             executedPercentage = round(executedPercentage * 10000) / 100,
             warningPercent = warningPercent,
             executedHours = executedMinutes / 60,

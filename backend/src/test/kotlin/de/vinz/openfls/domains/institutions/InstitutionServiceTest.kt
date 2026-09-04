@@ -1,9 +1,8 @@
 package de.vinz.openfls.domains.institutions
 
 import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
-import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDTO
-import de.vinz.openfls.domains.institutions.dtos.ResponseByIDInstitutionDTO
-import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDTO
+import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDto
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionDto
@@ -13,13 +12,11 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.modelmapper.ModelMapper
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import java.util.Optional
 
@@ -32,14 +29,11 @@ class InstitutionServiceTest {
     @Mock
     lateinit var employeeRepository: EmployeeRepository
 
-    @Mock
-    lateinit var modelMapper: ModelMapper
-
     private lateinit var institutionService: InstitutionService
 
     @BeforeEach
     fun setUp() {
-        institutionService = InstitutionService(institutionRepository, employeeRepository, modelMapper)
+        institutionService = InstitutionService(institutionRepository, employeeRepository)
     }
 
     @Test
@@ -49,7 +43,7 @@ class InstitutionServiceTest {
             permissionDto(1L, 10L, read = true, write = false, change = false, affiliated = true),
             permissionDto(2L, 10L, read = true, write = true, change = true, affiliated = false)
         )
-        val dto = CreateInstitutionDTO(
+        val dto = CreateInstitutionDto(
             name = "Alpha",
             email = "alpha@example.com",
             phonenumber = "12345",
@@ -98,7 +92,7 @@ class InstitutionServiceTest {
             phonenumber = "111",
             permissions = existingPermissions
         )
-        val dto = UpdateInstitutionDTO(
+        val dto = UpdateInstitutionDto(
             id = 10L,
             name = "New",
             email = "new@example.com",
@@ -130,7 +124,7 @@ class InstitutionServiceTest {
     @Test
     fun update_missingEntity_throwsIllegalArgumentException() {
         // Given
-        val dto = UpdateInstitutionDTO(id = 999L)
+        val dto = UpdateInstitutionDto(id = 999L)
         whenever(institutionRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When
@@ -155,7 +149,7 @@ class InstitutionServiceTest {
     }
 
     @Test
-    fun getAllSoloDTOs_whenProjectionsExist_returnsSortedMappedDTOs() {
+    fun getAllSolo_whenProjectionsExist_returnsSortedMappedDtos() {
         // Given
         val projection1 = mockSoloProjection(id = 1L, name = "beta", email = "b@x", phonenumber = "1")
         val projection2 = mockSoloProjection(id = 2L, name = "Alpha", email = "a@x", phonenumber = "2")
@@ -164,7 +158,7 @@ class InstitutionServiceTest {
         )
 
         // When
-        val result = institutionService.getAllSoloDTOs()
+        val result = institutionService.getAllSolo()
 
         // Then
         assertThat(result).hasSize(2)
@@ -173,13 +167,13 @@ class InstitutionServiceTest {
     }
 
     @Test
-    fun getAllDTOs_whenEntitiesExist_returnsSortedDTOs() {
+    fun getAll_whenEntitiesExist_returnsSortedDtos() {
         // Given
         val entity1 = Institution(id = 1L, name = "beta", email = "b@x", phonenumber = "1")
         val entity2 = Institution(id = 2L, name = "Alpha", email = "a@x", phonenumber = "2")
         whenever(institutionRepository.findAll()).thenReturn(listOf(entity1, entity2))
         // When
-        val result = institutionService.getAllDTOs()
+        val result = institutionService.getAll()
 
         // Then
         assertThat(result).hasSize(2)
@@ -202,15 +196,13 @@ class InstitutionServiceTest {
     }
 
     @Test
-    fun getDTOById_whenEntityExists_returnsMappedDto() {
+    fun getById_whenEntityExists_returnsMappedDto() {
         // Given
-        val entity = Institution(id = 7L, name = "Alpha")
-        val dto = ResponseByIDInstitutionDTO(id = 7L, name = "Alpha")
+        val entity = Institution(id = 7L, name = "Alpha", email = "a@x", phonenumber = "1")
         whenever(institutionRepository.findById(7L)).thenReturn(Optional.of(entity))
-        whenever(modelMapper.map(eq(entity), eq(ResponseByIDInstitutionDTO::class.java))).thenReturn(dto)
 
         // When
-        val result = institutionService.getDTOById(7L)
+        val result = institutionService.getById(7L)
 
         // Then
         assertThat(result?.id).isEqualTo(7L)
@@ -218,12 +210,12 @@ class InstitutionServiceTest {
     }
 
     @Test
-    fun getDTOById_whenEntityMissing_returnsNull() {
+    fun getById_whenEntityMissing_returnsNull() {
         // Given
         whenever(institutionRepository.findById(7L)).thenReturn(Optional.empty())
 
         // When
-        val result = institutionService.getDTOById(7L)
+        val result = institutionService.getById(7L)
 
         // Then
         assertThat(result).isNull()

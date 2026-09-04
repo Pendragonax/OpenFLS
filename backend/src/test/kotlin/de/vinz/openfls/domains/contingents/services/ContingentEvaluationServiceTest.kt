@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.absence.AbsenceService
-import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDTO
-import de.vinz.openfls.domains.absence.dtos.YearAbsenceDTO
+import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDto
+import de.vinz.openfls.domains.absence.dtos.YearAbsenceDto
 import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
@@ -59,10 +59,10 @@ class ContingentEvaluationServiceTest {
             minutes = 60,
             employeeId = employee.id
         )
-        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val yearlyAbsences = YearAbsenceDto.of(year, emptyList())
         val contingentHours = listOf(2.0, 2.0) + List(11) { 0.0 }
 
-        whenever(serviceService.getContingentEvaluationServiceDTOsBy(institutionId, year)).thenReturn(listOf(service))
+        whenever(serviceService.getContingentEvaluationServiceDtosBy(institutionId, year)).thenReturn(listOf(service))
         whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(listOf(contingent))
         whenever(absenceService.getAllByYear(year)).thenReturn(yearlyAbsences)
         whenever(contingentService.calculateContingentHoursBy(year, contingent, yearlyAbsences))
@@ -111,7 +111,7 @@ class ContingentEvaluationServiceTest {
             minutes = 60,
             employeeId = employee.id
         )
-        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val yearlyAbsences = YearAbsenceDto.of(year, emptyList())
         val contingentHoursOne = listOf(1.0, 1.0) + List(11) { 0.0 }
         val contingentHoursTwo = listOf(2.0, 1.0, 1.0) + List(10) { 0.0 }
 
@@ -162,7 +162,7 @@ class ContingentEvaluationServiceTest {
             end = null,
             weeklyHours = 7.0
         )
-        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val yearlyAbsences = YearAbsenceDto.of(year, emptyList())
         val contingentHours = listOf(1.0, 1.0) + List(11) { 0.0 }
 
         whenever(contingentService.calculateContingentHoursBy(year, contingentA, yearlyAbsences))
@@ -199,10 +199,10 @@ class ContingentEvaluationServiceTest {
             end = null,
             weeklyHours = 7.0
         )
-        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val yearlyAbsences = YearAbsenceDto.of(year, emptyList())
         val contingentHours = listOf(2.0, 2.0) + List(11) { 0.0 }
 
-        whenever(serviceService.getContingentEvaluationServiceDTOsBy(institutionId, year)).thenReturn(emptyList())
+        whenever(serviceService.getContingentEvaluationServiceDtosBy(institutionId, year)).thenReturn(emptyList())
         whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(listOf(archivedContingent))
         whenever(absenceService.getAllByYear(year)).thenReturn(yearlyAbsences)
         whenever(contingentService.calculateContingentHoursBy(year, archivedContingent, yearlyAbsences))
@@ -246,10 +246,10 @@ class ContingentEvaluationServiceTest {
             minutes = 60,
             employeeId = activeEmployee.id
         )
-        val yearlyAbsences = YearAbsenceDTO.of(year, emptyList())
+        val yearlyAbsences = YearAbsenceDto.of(year, emptyList())
         val contingentHours = listOf(2.0, 2.0) + List(11) { 0.0 }
 
-        whenever(serviceService.getContingentEvaluationServiceDTOsBy(institutionId, year)).thenReturn(listOf(service))
+        whenever(serviceService.getContingentEvaluationServiceDtosBy(institutionId, year)).thenReturn(listOf(service))
         whenever(contingentService.getAllByInstitutionAndYear(institutionId, year)).thenReturn(listOf(activeContingent, archivedContingent))
         whenever(absenceService.getAllByYear(year)).thenReturn(yearlyAbsences)
         whenever(contingentService.calculateContingentHoursBy(year, activeContingent, yearlyAbsences))
@@ -280,10 +280,10 @@ class ContingentEvaluationServiceTest {
 
         val otherService = mock<ContingentEvaluationServiceProjection>()
         whenever(otherService.employeeId).thenReturn(otherEmployeeId)
-        val yearlyAbsences = YearAbsenceDTO.of(
+        val yearlyAbsences = YearAbsenceDto.of(
             year,
             listOf(
-                EmployeeAbsenceResponseDTO(
+                EmployeeAbsenceResponseDto(
                     employeeId = employeeId,
                     absenceDates = listOf(LocalDate.of(year, 1, 5))
                 )

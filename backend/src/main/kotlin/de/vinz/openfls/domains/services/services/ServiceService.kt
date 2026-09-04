@@ -98,7 +98,7 @@ class ServiceService(
     }
 
     @Transactional
-    fun getContingentEvaluationServiceDTOsBy(
+    fun getContingentEvaluationServiceDtosBy(
         institutionId: Long,
         year: Int
     ): List<ContingentEvaluationServiceProjection> {

@@ -10,8 +10,8 @@ import de.vinz.openfls.domains.services.dtos.ServiceProjectionDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
 import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
-import de.vinz.openfls.domains.services.dtos.ClientAndDateRequestDTO
-import de.vinz.openfls.domains.services.dtos.ClientAndDateResponseDTO
+import de.vinz.openfls.domains.services.dtos.ClientAndDateRequestDto
+import de.vinz.openfls.domains.services.dtos.ClientAndDateResponseDto
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
@@ -735,12 +735,12 @@ class ServiceController(
     }
 
     @PostMapping("client-and-date")
-    fun getByClientAndDate(@RequestBody request: ClientAndDateRequestDTO): ResponseEntity<Any> {
+    fun getByClientAndDate(@RequestBody request: ClientAndDateRequestDto): ResponseEntity<Any> {
         return try {
             val startMs = System.currentTimeMillis()
 
             val result = serviceService.getFromTillEmployeeNameProjectionByClientAndDate(request.clientId, request.date)
-            val response = ClientAndDateResponseDTO.of(request.clientId, result)
+            val response = ClientAndDateResponseDto.of(request.clientId, result)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByClientAndDate took %s ms and found %d entities",

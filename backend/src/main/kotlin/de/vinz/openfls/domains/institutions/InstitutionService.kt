@@ -4,27 +4,25 @@ import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.institutions.dtos.*
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionDto
-import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class InstitutionService(
     private val institutionRepository: InstitutionRepository,
-    private val employeeRepository: EmployeeRepository,
-    private val modelMapper: ModelMapper
+    private val employeeRepository: EmployeeRepository
 ) {
 
     @Transactional
-    fun create(dto: CreateInstitutionDTO): CreateInstitutionDTO {
+    fun create(dto: CreateInstitutionDto): InstitutionDto {
         val entityToCreate = Institution.of(dto)
         entityToCreate.permissions = createPermissions(dto, entityToCreate)
         val entity = institutionRepository.save(entityToCreate)
-        return CreateInstitutionDTO.of(entity)
+        return InstitutionDto.of(entity)
     }
 
     @Transactional
-    fun update(dto: UpdateInstitutionDTO): UpdateInstitutionDTO {
+    fun update(dto: UpdateInstitutionDto): InstitutionDto {
         val entity = getEntityById(dto.id) ?: throw IllegalArgumentException("Institution with id ${dto.id} not found")
 
         entity.permissions.removeIf { dto.permissions.none { p -> p.employeeId == it.id.employeeId && p.institutionId == it.id.institutionId } }
@@ -37,7 +35,7 @@ class InstitutionService(
 
         val savedEntity = institutionRepository.save(entity)
 
-        return UpdateInstitutionDTO.of(savedEntity)
+        return InstitutionDto.of(savedEntity)
     }
 
     @Transactional
@@ -46,15 +44,16 @@ class InstitutionService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllSoloDTOs(): List<ResponseAllReadableInstitutionDTO> {
-        val institutions = institutionRepository.findInstitutionSoloProjectionOrderedByName()
-        return institutions.map { ResponseAllReadableInstitutionDTO.of(it) }.sortedBy { it.name }
+    fun getAllSolo(): List<InstitutionSoloDto> {
+        return InstitutionSoloDto.ofSoloProjection(
+            institutionRepository.findInstitutionSoloProjectionOrderedByName()
+        ).sortedBy { it.name }
     }
 
     @Transactional(readOnly = true)
-    fun getAllDTOs(): List<ResponseAllInstitutionDTO> {
+    fun getAll(): List<InstitutionDto> {
         return getAllEntities()
-            .map { ResponseAllInstitutionDTO.of(it) }
+            .map { InstitutionDto.of(it) }
             .sortedBy { it.name }
     }
 
@@ -64,9 +63,8 @@ class InstitutionService(
     }
 
     @Transactional(readOnly = true)
-    fun getDTOById(id: Long): ResponseByIDInstitutionDTO? {
-        val entity = institutionRepository.findById(id).orElse(null)
-        return modelMapper.map(entity, ResponseByIDInstitutionDTO::class.java)
+    fun getById(id: Long): InstitutionDto? {
+        return institutionRepository.findById(id).orElse(null)?.let(InstitutionDto::of)
     }
 
     @Transactional(readOnly = true)
@@ -84,14 +82,14 @@ class InstitutionService(
         permissions: List<PermissionDto>
     ): List<Permission> {
         val newPermissions = mutableListOf<Permission>()
-        for (permissionDTO in permissions) {
+        for (permissionDto in permissions) {
             val permission =
-                entity.permissions.find { it.id.employeeId == permissionDTO.employeeId && it.id.institutionId == permissionDTO.institutionId }
+                entity.permissions.find { it.id.employeeId == permissionDto.employeeId && it.id.institutionId == permissionDto.institutionId }
             if (permission != null) {
                 continue
             }
 
-            newPermissions.add(Permission.of(permissionDTO))
+            newPermissions.add(Permission.of(permissionDto))
         }
 
         return newPermissions
@@ -99,23 +97,23 @@ class InstitutionService(
 
     private fun updatePermissions(entity: Institution, permissions: List<PermissionDto>): Institution {
         for (permission in entity.permissions) {
-            val permissionDTO =
+            val permissionDto =
                 permissions.find { it.employeeId == permission.id.employeeId && it.institutionId == permission.id.institutionId }
-            if (permissionDTO == null) {
+            if (permissionDto == null) {
                 continue
             }
 
-            permission.readEntries = permissionDTO.readEntries
-            permission.writeEntries = permissionDTO.writeEntries
-            permission.changeInstitution = permissionDTO.changeInstitution
-            permission.affiliated = permissionDTO.affiliated
+            permission.readEntries = permissionDto.readEntries
+            permission.writeEntries = permissionDto.writeEntries
+            permission.changeInstitution = permissionDto.changeInstitution
+            permission.affiliated = permissionDto.affiliated
         }
 
         return entity
     }
 
     private fun createPermissions(
-        dto: CreateInstitutionDTO,
+        dto: CreateInstitutionDto,
         entityToCreate: Institution
     ): MutableSet<Permission> = Permission.of(dto.permissions).map {
         it.institution = entityToCreate

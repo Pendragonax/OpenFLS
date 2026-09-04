@@ -2,8 +2,8 @@ package de.vinz.openfls.domains.assistancePlans.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDTO
-import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDTO.HourTypeEvaluationDTO
+import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDto
+import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDto.HourTypeEvaluationDto
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.services.services.ServiceService
@@ -21,7 +21,7 @@ class AssistancePlanEvaluationLeftService(
     private val serviceService: ServiceService
 ) {
 
-    fun createAssistancePlanHourTypeAnalysis(date: LocalDate, assistancePlanId: Long): ApprovedHoursLeftResponseDTO {
+    fun createAssistancePlanHourTypeAnalysis(date: LocalDate, assistancePlanId: Long): ApprovedHoursLeftResponseDto {
         val assistancePlan =
             assistancePlanService.getById(assistancePlanId) ?: throw IllegalArgumentException("No such assistance-plan")
         val hourTypes = getDistinctHourTypesIn(assistancePlan)
@@ -34,7 +34,7 @@ class AssistancePlanEvaluationLeftService(
             val approvedMinutesLeftInYear = getApprovedMinutesLeftIn(date.year, assistancePlan, hourType.id)
             val approvedMinutesLeftComplete = getApprovedMinutesLeftIn(assistancePlan, hourType.id)
 
-            HourTypeEvaluationDTO(
+            HourTypeEvaluationDto(
                 hourTypeName = hourType.title,
                 leftThisWeek = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInWeek / 60.0),
                 leftThisMonth = TimeDoubleService.convertDoubleToTimeDouble(approvedMinutesLeftInMonth / 60.0),
@@ -43,7 +43,7 @@ class AssistancePlanEvaluationLeftService(
             )
         }
 
-        return ApprovedHoursLeftResponseDTO(
+        return ApprovedHoursLeftResponseDto(
             assistancePlanId = assistancePlan.id,
             hourMode = assistancePlan.hourMode,
             approvedHoursFrom = TimeDoubleService.convertDoubleToTimeDouble(approvedRangeMinutes.first / 60.0),

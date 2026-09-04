@@ -210,7 +210,7 @@ class AccessService(
 
     fun getReadRightsInstitutionIds(): List<Long> {
         if (isAdmin()) {
-            return institutionService.getAllDTOs().map { it.id }
+            return institutionService.getAll().map { it.id }
         }
 
         return permissionService

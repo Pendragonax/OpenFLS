@@ -1,12 +1,12 @@
 package de.vinz.openfls.domains.absence.dtos
 
-data class YearAbsenceDTO(
+data class YearAbsenceDto(
     val year: Int,
-    val employeeAbsences: List<EmployeeAbsenceResponseDTO>
+    val employeeAbsences: List<EmployeeAbsenceResponseDto>
 ) {
     companion object {
-        fun of(year: Int, employeeAbsences: List<EmployeeAbsenceResponseDTO>): YearAbsenceDTO {
-            return YearAbsenceDTO(
+        fun of(year: Int, employeeAbsences: List<EmployeeAbsenceResponseDto>): YearAbsenceDto {
+            return YearAbsenceDto(
                 year = year,
                 employeeAbsences = employeeAbsences
             )

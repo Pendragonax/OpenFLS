@@ -93,7 +93,7 @@ class ClientController(
 
             if (!accessService.isAdmin())
                 throw IllegalArgumentException("no permission to delete this client")
-            if (!clientService.existById(id))
+            if (!clientService.existsById(id))
                 throw IllegalArgumentException("client not found")
 
             val dto = clientService.getDtoById(
@@ -153,7 +153,7 @@ class ClientController(
     }
 
     @GetMapping("solo")
-    fun getAllClientSoloDTOs(): Any {
+    fun getAllClientSoloDtos(): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -164,7 +164,7 @@ class ClientController(
             )
 
             if (logPerformance) {
-                logger.info(String.format("%s getAllClientSoloDTOs took %s ms",
+                logger.info(String.format("%s getAllClientSoloDtos took %s ms",
                         PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                         System.currentTimeMillis() - startMs))
             }

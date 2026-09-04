@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.absence
 
-import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDTO
-import de.vinz.openfls.domains.absence.dtos.YearAbsenceDTO
+import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDto
+import de.vinz.openfls.domains.absence.dtos.YearAbsenceDto
 import de.vinz.openfls.domains.permissions.AccessService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,11 +13,11 @@ class AbsenceService(private val absenceRepository: AbsenceRepository,
 ) {
 
     @Transactional
-    fun create(absenceDate: LocalDate): EmployeeAbsenceResponseDTO {
+    fun create(absenceDate: LocalDate): EmployeeAbsenceResponseDto {
         val employeeId = accessService.getId()
         val existing = absenceRepository.findByEmployeeIdAndAbsenceDate(employeeId, absenceDate)
         val entity = existing ?: absenceRepository.save(Absence(id = 0, absenceDate, employeeId))
-        return EmployeeAbsenceResponseDTO(
+        return EmployeeAbsenceResponseDto(
             employeeId = entity.employeeId,
             absenceDates = listOf(entity.absenceDate)
         )
@@ -30,31 +30,31 @@ class AbsenceService(private val absenceRepository: AbsenceRepository,
     }
 
     @Transactional
-    fun getAllByEmployeeId(employeeId: Long): EmployeeAbsenceResponseDTO {
+    fun getAllByEmployeeId(employeeId: Long): EmployeeAbsenceResponseDto {
         val entities = absenceRepository.findAllByEmployeeId(employeeId)
-        return EmployeeAbsenceResponseDTO(
+        return EmployeeAbsenceResponseDto(
             employeeId = employeeId,
             absenceDates = entities.map { it.absenceDate }
         )
     }
 
     @Transactional
-    fun getAllByYear(year: Int): YearAbsenceDTO {
+    fun getAllByYear(year: Int): YearAbsenceDto {
         val entities = absenceRepository.findAllByAbsenceDateBetween(
             LocalDate.of(year, 1, 1),
             LocalDate.of(year, 12, 31)
         )
         val employeeIds = entities.map { it.employeeId }.distinct()
 
-        val employeeAbsences = mutableListOf<EmployeeAbsenceResponseDTO>()
+        val employeeAbsences = mutableListOf<EmployeeAbsenceResponseDto>()
         for (employeeId in employeeIds) {
             val absenceDates = entities.filter { it.employeeId == employeeId }.map { it.absenceDate }
-            employeeAbsences.add(EmployeeAbsenceResponseDTO(
+            employeeAbsences.add(EmployeeAbsenceResponseDto(
                 employeeId = employeeId,
                 absenceDates = absenceDates
             ))
         }
-        return YearAbsenceDTO(
+        return YearAbsenceDto(
             year = year,
             employeeAbsences = employeeAbsences
         )

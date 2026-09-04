@@ -41,21 +41,21 @@ class Permission(
         }
 
         companion object {
-                fun of(permissionDTO: PermissionDto): Permission {
+                fun of(permissionDto: PermissionDto): Permission {
                         return Permission(
                                 id = EmployeeInstitutionRightsKey(
-                                        employeeId = permissionDTO.employeeId,
-                                        institutionId = permissionDTO.institutionId
+                                        employeeId = permissionDto.employeeId,
+                                        institutionId = permissionDto.institutionId
                                 ),
-                                readEntries = permissionDTO.readEntries,
-                                writeEntries = permissionDTO.writeEntries,
-                                changeInstitution = permissionDTO.changeInstitution,
-                                affiliated = permissionDTO.affiliated
+                                readEntries = permissionDto.readEntries,
+                                writeEntries = permissionDto.writeEntries,
+                                changeInstitution = permissionDto.changeInstitution,
+                                affiliated = permissionDto.affiliated
                         )
                 }
 
-                fun of(permissionDTOs: List<PermissionDto>): List<Permission> {
-                        return permissionDTOs.map { Permission(
+                fun of(permissionDtos: List<PermissionDto>): List<Permission> {
+                        return permissionDtos.map { Permission(
                                 id = EmployeeInstitutionRightsKey(
                                         employeeId = it.employeeId,
                                         institutionId = null

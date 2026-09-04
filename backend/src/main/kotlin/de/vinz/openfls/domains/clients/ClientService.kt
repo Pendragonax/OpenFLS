@@ -243,11 +243,6 @@ class ClientService(
         return clientRepository.existsById(id)
     }
 
-    @Transactional(readOnly = true)
-    fun existById(id: Long): Boolean {
-        return clientRepository.existsById(id)
-    }
-
     private fun changeArchiveState(
         clientId: Long,
         actionType: ClientArchiveActionType,

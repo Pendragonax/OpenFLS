@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.contingents.services
 
-import de.vinz.openfls.domains.absence.dtos.YearAbsenceDTO
+import de.vinz.openfls.domains.absence.dtos.YearAbsenceDto
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
@@ -144,7 +144,7 @@ class ContingentService(
     fun calculateContingentHoursBy(
         year: Int,
         contingent: ContingentProjection,
-        absences: YearAbsenceDTO
+        absences: YearAbsenceDto
     ): List<Double> {
         val workdayDailyHours = contingent.weeklyServiceHours / 5
         val workdays = DateService.calculateWorkdaysInHesseBetween(contingent.start, contingent.end, year)
@@ -167,7 +167,7 @@ class ContingentService(
         year: Int,
         month: Int,
         contingent: ContingentProjection,
-        absences: YearAbsenceDTO
+        absences: YearAbsenceDto
     ): Double {
         if (!isContingentInYearMonth(year, month, contingent)) {
             return 0.0
@@ -184,7 +184,7 @@ class ContingentService(
         year: Int,
         month: Int,
         contingent: ContingentProjection,
-        absences: YearAbsenceDTO
+        absences: YearAbsenceDto
     ): Int {
         val employeeAbsences = absences.employeeAbsences.filter { absence ->
             absence.employeeId == contingent.employee.id
@@ -198,7 +198,7 @@ class ContingentService(
     fun countAbsenceDaysInContingentForYear(
         year: Int,
         contingent: ContingentProjection,
-        absences: YearAbsenceDTO
+        absences: YearAbsenceDto
     ): Int {
         val employeeAbsences = absences.employeeAbsences.filter { absence ->
             absence.employeeId == contingent.employee.id

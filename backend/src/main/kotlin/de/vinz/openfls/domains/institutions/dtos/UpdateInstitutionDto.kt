@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.institutions.dtos
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.permissions.PermissionDto
 
-data class UpdateInstitutionDTO(
+data class UpdateInstitutionDto(
     val id: Long = 0,
     val name: String = "",
     val email: String = "",
@@ -11,8 +11,8 @@ data class UpdateInstitutionDTO(
     val permissions: List<PermissionDto> = emptyList()
 ) {
     companion object {
-        fun of(institution: Institution): UpdateInstitutionDTO {
-            return UpdateInstitutionDTO(
+        fun of(institution: Institution): UpdateInstitutionDto {
+            return UpdateInstitutionDto(
                 name = institution.name,
                 email = institution.email,
                 phonenumber = institution.phonenumber,

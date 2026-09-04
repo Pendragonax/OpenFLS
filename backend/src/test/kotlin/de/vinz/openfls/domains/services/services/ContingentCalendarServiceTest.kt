@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.services.services
 
 import de.vinz.openfls.domains.absence.AbsenceService
-import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDTO
+import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDto
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
 import de.vinz.openfls.domains.contingents.services.ContingentService
@@ -56,7 +56,7 @@ class ContingentCalendarServiceTest {
         whenever(contingentService.getByEmployeeId(employeeId)).thenReturn(listOf(contingent))
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllByEmployeeId(employeeId)).thenReturn(
-            EmployeeAbsenceResponseDTO(employeeId, emptyList())
+            EmployeeAbsenceResponseDto(employeeId, emptyList())
         )
         whenever(contingentService.calculateContingentMinutesForWorkdayBy(serviceDate, listOf(contingent)))
             .thenReturn(120.0)
@@ -116,7 +116,7 @@ class ContingentCalendarServiceTest {
         whenever(contingentService.getByEmployeeId(employeeId)).thenReturn(listOf(contingent))
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(emptyList())
         whenever(absenceService.getAllByEmployeeId(employeeId)).thenReturn(
-            EmployeeAbsenceResponseDTO(employeeId, absences)
+            EmployeeAbsenceResponseDto(employeeId, absences)
         )
         whenever(contingentService.calculateContingentMinutesForWorkdayBy(now, listOf(contingent)))
             .thenReturn(120.0)
@@ -173,7 +173,7 @@ class ContingentCalendarServiceTest {
         whenever(contingentService.getByEmployeeId(employeeId)).thenReturn(listOf(contingent))
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllByEmployeeId(employeeId)).thenReturn(
-            EmployeeAbsenceResponseDTO(employeeId, absences)
+            EmployeeAbsenceResponseDto(employeeId, absences)
         )
         whenever(contingentService.calculateContingentMinutesForWorkdayBy(serviceDate, listOf(contingent)))
             .thenReturn(120.0)
@@ -213,7 +213,7 @@ class ContingentCalendarServiceTest {
         whenever(contingentService.getByEmployeeId(employeeId)).thenReturn(emptyList())
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllByEmployeeId(employeeId)).thenReturn(
-            EmployeeAbsenceResponseDTO(employeeId, emptyList())
+            EmployeeAbsenceResponseDto(employeeId, emptyList())
         )
         whenever(contingentService.calculateContingentMinutesForWorkdayBy(now, emptyList()))
             .thenReturn(0.0)

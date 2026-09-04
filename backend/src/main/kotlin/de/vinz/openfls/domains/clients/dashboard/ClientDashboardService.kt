@@ -16,7 +16,7 @@ import java.time.LocalDate
 /**
  * Aggregates the client dashboard from the read models of the involved domains.
  * The service never queries foreign persistence directly; it only orchestrates
- * the DTOs the owning domains provide and decides which section the requesting
+ * the Dtos the owning domains provide and decides which section the requesting
  * employee may see.
  */
 @Service
