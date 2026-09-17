@@ -3,7 +3,6 @@ package de.vinz.openfls.domains.permissions
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
-import de.vinz.openfls.domains.goals.services.GoalService
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.services.UserService
@@ -15,14 +14,12 @@ import org.mockito.kotlin.whenever
 class AccessServiceTest {
 
     private val userService: UserService = mock()
-    private val goalService: GoalService = mock()
     private val assistancePlanService: AssistancePlanService = mock()
     private val permissionService: PermissionService = mock()
     private val institutionService: InstitutionService = mock()
     private val clientService: ClientService = mock()
     private val accessService = AccessService(
         userService,
-        goalService,
         assistancePlanService,
         permissionService,
         institutionService,

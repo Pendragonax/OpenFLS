@@ -1,9 +1,7 @@
-import {Base} from "./base.service";
-import {AssistancePlanHourSolo} from "../projections/assistance-plan-hour-solo.projection";
+import {AssistancePlanHourResponseDto} from "../dtos/assistance-plan-hour-response-dto.model";
 import {Injectable} from "@angular/core";
-import {Observable, tap} from "rxjs";
+import {Observable} from "rxjs";
 import {environment} from "../../../environments/environment";
-import {AssistancePlanHour} from "../projections/assistance-plan-hour.projection";
 import {HttpClient} from "@angular/common/http";
 import {AssistancePlanHourDto} from "../dtos/assistance-plan-hour-dto.model";
 
@@ -16,18 +14,18 @@ export class AssistancePlanHourService {
   constructor(private http: HttpClient) {
   }
 
-  create(value: AssistancePlanHourDto): Observable<AssistancePlanHour> {
+  create(value: AssistancePlanHourDto): Observable<AssistancePlanHourResponseDto> {
     return this.http
-      .post<AssistancePlanHour>(`${environment.api_url}${this.url}`, value)
+      .post<AssistancePlanHourResponseDto>(`${environment.api_url}${this.url}`, value)
   }
 
-  update(value: AssistancePlanHourDto): Observable<AssistancePlanHour> {
+  update(value: AssistancePlanHourDto): Observable<AssistancePlanHourResponseDto> {
     return this.http
-      .put<AssistancePlanHour>(`${environment.api_url}${this.url}`, value)
+      .put<AssistancePlanHourResponseDto>(`${environment.api_url}${this.url}`, value)
   }
 
-  delete(id: number): Observable<AssistancePlanHourSolo> {
+  delete(id: number): Observable<AssistancePlanHourResponseDto> {
     return this.http
-      .delete<AssistancePlanHourSolo>(`${environment.api_url}${this.url}/${id}`)
+      .delete<AssistancePlanHourResponseDto>(`${environment.api_url}${this.url}/${id}`)
   }
 }

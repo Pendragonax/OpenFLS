@@ -3,8 +3,8 @@ package de.vinz.openfls.domains.institutions
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
-import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDto
-import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateDto
 import de.vinz.openfls.domains.permissions.PermissionDto
 import de.vinz.openfls.domains.permissions.PermissionRepository
 import de.vinz.openfls.testsupport.TestBeans
@@ -36,7 +36,7 @@ class InstitutionServiceDataJpaTest {
         // Given
         val employee1 = employeeRepository.save(Employee(firstname = "Max", lastname = "One"))
         val employee2 = employeeRepository.save(Employee(firstname = "Max", lastname = "Two"))
-        val dto = CreateInstitutionDto(
+        val dto = InstitutionCreateDto(
             name = "Inst",
             email = "a@b.c",
             phonenumber = "123",
@@ -75,7 +75,7 @@ class InstitutionServiceDataJpaTest {
     @Test
     fun update_missingInstitution_throwsException() {
         // Given
-        val dto = UpdateInstitutionDto(
+        val dto = InstitutionUpdateDto(
             id = 9999,
             name = "Missing",
             email = "x@y.z",
@@ -111,7 +111,7 @@ class InstitutionServiceDataJpaTest {
             )
         )
 
-        val updatedDto = UpdateInstitutionDto(
+        val updatedDto = InstitutionUpdateDto(
             id = institution.id!!,
             name = "New",
             email = "n@n.de",

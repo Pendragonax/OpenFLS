@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.hourCorridors
 
-import de.vinz.openfls.domains.hourCorridors.dtos.CreateHourCorridorDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateDto
 import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorDto
-import de.vinz.openfls.domains.hourCorridors.dtos.UpdateHourCorridorDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateDto
 import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorAuditLogDto
 import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorAssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
@@ -24,7 +24,7 @@ class HourCorridorService(
 ) {
 
     @Transactional
-    fun create(hourCorridorDto: CreateHourCorridorDto): HourCorridorDto {
+    fun create(hourCorridorDto: HourCorridorCreateDto): HourCorridorDto {
         validateRange(hourCorridorDto.weeklyMinutesFrom, hourCorridorDto.weeklyMinutesTill)
 
         val hourType = hourTypeService.getEntityById(hourCorridorDto.hourTypeId)
@@ -43,7 +43,7 @@ class HourCorridorService(
     }
 
     @Transactional
-    fun update(hourCorridorDto: UpdateHourCorridorDto): HourCorridorDto {
+    fun update(hourCorridorDto: HourCorridorUpdateDto): HourCorridorDto {
         val before = hourCorridorRepository.findByIdOrNull(hourCorridorDto.id)
         if (before == null) {
             throw IllegalArgumentException("hour corridor not found")

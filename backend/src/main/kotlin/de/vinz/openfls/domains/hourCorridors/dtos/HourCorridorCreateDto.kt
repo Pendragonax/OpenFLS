@@ -4,10 +4,7 @@ import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.PositiveOrZero
 
-data class UpdateHourCorridorDto(
-    @field:PositiveOrZero
-    var id: Long = 0,
-
+data class HourCorridorCreateDto(
     @field:NotEmpty
     var title: String = "",
 

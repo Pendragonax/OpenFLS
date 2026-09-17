@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.hourCorridors
 
-import de.vinz.openfls.domains.hourCorridors.dtos.CreateHourCorridorDto
-import de.vinz.openfls.domains.hourCorridors.dtos.UpdateHourCorridorDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateDto
 import de.vinz.openfls.domains.hourCorridors.exceptions.InvalidHourCorridorDtoException
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
@@ -27,7 +27,7 @@ class HourCorridorController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: CreateHourCorridorDto): Any {
+    fun create(@Valid @RequestBody valueDto: HourCorridorCreateDto): Any {
         val startMs = System.currentTimeMillis()
 
         return try {
@@ -45,7 +45,7 @@ class HourCorridorController(
     }
 
     @PutMapping("{id}")
-    fun update(@PathVariable id: Long, @Valid @RequestBody valueDto: UpdateHourCorridorDto): Any {
+    fun update(@PathVariable id: Long, @Valid @RequestBody valueDto: HourCorridorUpdateDto): Any {
         val startMs = System.currentTimeMillis()
 
         return try {

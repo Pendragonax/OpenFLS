@@ -5,10 +5,7 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import java.time.LocalDate
 
-data class CreateClientTaskDto(
-    @field:NotNull
-    val clientId: Long = 0,
-
+data class ClientTaskUpdateDto(
     @field:NotBlank
     @field:Size(max = 128)
     val title: String = "",

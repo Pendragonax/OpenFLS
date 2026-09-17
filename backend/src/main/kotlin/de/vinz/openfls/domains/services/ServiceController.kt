@@ -142,7 +142,7 @@ class ServiceController(
             if (!accessService.isAdmin())
                 throw IllegalArgumentException("No permission to get all services")
 
-            val dtos = serviceService.getAllDtos()
+            val dtos = serviceService.getAll()
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms and found %d entities",

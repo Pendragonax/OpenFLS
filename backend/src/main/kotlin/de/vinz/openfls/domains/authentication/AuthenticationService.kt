@@ -97,7 +97,7 @@ class AuthenticationService(
         } ?: throw IllegalArgumentException("employee doesnt exists")
     }
 
-    fun getCurrentUserId(): Long {
+    private fun getCurrentUserId(): Long {
         val authentication = SecurityContextHolder.getContext().authentication
                 ?: throw IllegalStateException("No authentication present")
         val jwt: Jwt = authentication.principal as Jwt
@@ -105,8 +105,8 @@ class AuthenticationService(
     }
 
     @Transactional(readOnly = true)
-    fun getCurrentEmployeeDto(): Optional<EmployeeDto> {
-        val employeeOptional = getCurrentEmployee()
+    fun getCurrentEmployee(): Optional<EmployeeDto> {
+        val employeeOptional = getCurrentEmployeeEntity()
 
         if (employeeOptional.isPresent) {
             val employee = employeeOptional.get()
@@ -125,8 +125,7 @@ class AuthenticationService(
         return Optional.empty()
     }
 
-    @Transactional(readOnly = true)
-    fun getCurrentEmployee(): Optional<Employee> {
+    private fun getCurrentEmployeeEntity(): Optional<Employee> {
         val userId = getCurrentUserId()
 
         // initial admin from CustomUserDetailsService
@@ -137,7 +136,7 @@ class AuthenticationService(
         return employeeRepository.findById(getCurrentUserId())
     }
 
-    fun getInitialAdminEmployee(): Employee {
+    private fun getInitialAdminEmployee(): Employee {
         return Employee(
                 id = 0,
                 firstname = "Initial",

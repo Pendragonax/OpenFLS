@@ -74,7 +74,7 @@ class ContingentController(
         if (!accessService.isAdmin()) throw IllegalAccessException("no permission to delete this contingent")
 
         return try {
-            val dto = contingentService.getDtoById(id)
+            val dto = contingentService.getById(id)
             contingentService.delete(id)
 
             ResponseEntity.ok(dto)

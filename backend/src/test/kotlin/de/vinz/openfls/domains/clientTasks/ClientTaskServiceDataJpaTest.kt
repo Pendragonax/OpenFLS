@@ -3,8 +3,8 @@ package de.vinz.openfls.domains.clientTasks
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
 import de.vinz.openfls.domains.clientTasks.dtos.CompleteClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.CreateClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.UpdateClientTaskDto
+import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCreateDto
+import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskUpdateDto
 import de.vinz.openfls.domains.clientTasks.exceptions.InvalidClientTaskException
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
@@ -79,7 +79,7 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun create_validDto_persistsTaskAndAuditLog() {
         val dto = clientTaskService.create(
-            CreateClientTaskDto(
+            ClientTaskCreateDto(
                 clientId = clientId,
                 title = "Hilfeplangespräch vorbereiten",
                 description = "Unterlagen sammeln",
@@ -105,7 +105,7 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun getDtosByClientId_dueDateInThePast_marksTaskAsOverdue() {
         clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Überfällig", dueDate = LocalDate.of(2026, 3, 1)),
+            ClientTaskCreateDto(clientId = clientId, title = "Überfällig", dueDate = LocalDate.of(2026, 3, 1)),
             actorId = creatorId,
             actorName = "Anna Autorin"
         )
@@ -119,7 +119,7 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun complete_openTask_storesCommentDateAndActor() {
         val created = clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Bericht schreiben", dueDate = LocalDate.of(2026, 3, 20)),
+            ClientTaskCreateDto(clientId = clientId, title = "Bericht schreiben", dueDate = LocalDate.of(2026, 3, 20)),
             actorId = creatorId,
             actorName = "Anna Autorin"
         )
@@ -149,7 +149,7 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun complete_alreadyCompletedTask_isRejected() {
         val created = clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Nur einmal", dueDate = LocalDate.of(2026, 3, 20)),
+            ClientTaskCreateDto(clientId = clientId, title = "Nur einmal", dueDate = LocalDate.of(2026, 3, 20)),
             actorId = creatorId,
             actorName = "Anna Autorin"
         )
@@ -173,14 +173,14 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun update_changedTitleAndDueDate_isRecordedWithBeforeAndAfter() {
         val created = clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Alter Titel", dueDate = LocalDate.of(2026, 3, 20)),
+            ClientTaskCreateDto(clientId = clientId, title = "Alter Titel", dueDate = LocalDate.of(2026, 3, 20)),
             actorId = creatorId,
             actorName = "Anna Autorin"
         )
 
         clientTaskService.update(
             created.id,
-            UpdateClientTaskDto(
+            ClientTaskUpdateDto(
                 title = "Neuer Titel",
                 description = "",
                 dueDate = LocalDate.of(2026, 4, 1)
@@ -201,7 +201,7 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun update_completedTask_isRejected() {
         val created = clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Erledigt", dueDate = LocalDate.of(2026, 3, 20)),
+            ClientTaskCreateDto(clientId = clientId, title = "Erledigt", dueDate = LocalDate.of(2026, 3, 20)),
             creatorId, "Anna Autorin"
         )
         clientTaskService.complete(
@@ -212,7 +212,7 @@ class ClientTaskServiceDataJpaTest {
         assertThatThrownBy {
             clientTaskService.update(
                 created.id,
-                UpdateClientTaskDto(title = "Manipuliert", dueDate = LocalDate.of(2026, 4, 1)),
+                ClientTaskUpdateDto(title = "Manipuliert", dueDate = LocalDate.of(2026, 4, 1)),
                 creatorId,
                 "Anna Autorin"
             )
@@ -223,7 +223,7 @@ class ClientTaskServiceDataJpaTest {
     fun getCompletedDtosByClientId_returnsTenItemsPerPage() {
         repeat(11) { index ->
             val created = clientTaskService.create(
-                CreateClientTaskDto(clientId = clientId, title = "Aufgabe $index", dueDate = LocalDate.of(2026, 3, 20)),
+                ClientTaskCreateDto(clientId = clientId, title = "Aufgabe $index", dueDate = LocalDate.of(2026, 3, 20)),
                 creatorId, "Anna Autorin"
             )
             clientTaskService.complete(
@@ -244,12 +244,12 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun getAuditHistory_onlyReturnsChangeAndCompleteActions() {
         val created = clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Alt", description = "Vorher", dueDate = LocalDate.of(2026, 3, 20)),
+            ClientTaskCreateDto(clientId = clientId, title = "Alt", description = "Vorher", dueDate = LocalDate.of(2026, 3, 20)),
             creatorId, "Anna Autorin"
         )
         clientTaskService.update(
             created.id,
-            UpdateClientTaskDto(title = "Neu", description = "Nachher", dueDate = LocalDate.of(2026, 3, 21)),
+            ClientTaskUpdateDto(title = "Neu", description = "Nachher", dueDate = LocalDate.of(2026, 3, 21)),
             creatorId,
             "Anna Autorin"
         )
@@ -269,12 +269,12 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun deleteAllByClientId_removesTasksAndKeepsTheAuditTrail() {
         val first = clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Erste", dueDate = LocalDate.of(2026, 3, 20)),
+            ClientTaskCreateDto(clientId = clientId, title = "Erste", dueDate = LocalDate.of(2026, 3, 20)),
             creatorId,
             "Anna Autorin"
         )
         clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Zweite", dueDate = LocalDate.of(2026, 3, 21)),
+            ClientTaskCreateDto(clientId = clientId, title = "Zweite", dueDate = LocalDate.of(2026, 3, 21)),
             creatorId,
             "Anna Autorin"
         )
@@ -295,17 +295,17 @@ class ClientTaskServiceDataJpaTest {
     @Test
     fun getOpenTaskCountsByClientIds_countsOpenAndOverdueTasks() {
         clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Offen", dueDate = LocalDate.of(2026, 3, 20)),
+            ClientTaskCreateDto(clientId = clientId, title = "Offen", dueDate = LocalDate.of(2026, 3, 20)),
             creatorId,
             "Anna Autorin"
         )
         clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Überfällig", dueDate = LocalDate.of(2026, 3, 1)),
+            ClientTaskCreateDto(clientId = clientId, title = "Überfällig", dueDate = LocalDate.of(2026, 3, 1)),
             creatorId,
             "Anna Autorin"
         )
         val done = clientTaskService.create(
-            CreateClientTaskDto(clientId = clientId, title = "Erledigt", dueDate = LocalDate.of(2026, 3, 2)),
+            ClientTaskCreateDto(clientId = clientId, title = "Erledigt", dueDate = LocalDate.of(2026, 3, 2)),
             creatorId,
             "Anna Autorin"
         )

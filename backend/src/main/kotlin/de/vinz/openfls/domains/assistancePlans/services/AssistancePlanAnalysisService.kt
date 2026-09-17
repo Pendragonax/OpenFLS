@@ -67,7 +67,7 @@ class AssistancePlanAnalysisService(
         return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
     }
 
-    fun getAnalysisBySponsorAndHourTypeInMonth(year: Int,
+    private fun getAnalysisBySponsorAndHourTypeInMonth(year: Int,
                                                month: Int,
                                                sponsorId: Long,
                                                hourTypeId: Long): AssistancePlanAnalysisMonthCollectionDto {
@@ -89,7 +89,7 @@ class AssistancePlanAnalysisService(
         return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
     }
 
-    fun getAnalysisByHourTypeInMonth(year: Int,
+    private fun getAnalysisByHourTypeInMonth(year: Int,
                                      month: Int,
                                      hourTypeId: Long): AssistancePlanAnalysisMonthCollectionDto {
         validateAdmin()
@@ -105,7 +105,7 @@ class AssistancePlanAnalysisService(
         return createAssistancePlanAnalysisMonthCollectionDto(year, month, analysis)
     }
 
-    fun getAnalysisBySponsorInMonth(year: Int,
+    private fun getAnalysisBySponsorInMonth(year: Int,
                                     month: Int,
                                     sponsorId: Long): AssistancePlanAnalysisMonthCollectionDto {
         if (sponsorId <= 0) {
@@ -262,7 +262,7 @@ class AssistancePlanAnalysisService(
                 missingHours = missingHours)
     }
 
-    fun getApprovedAssistancePlanHoursInYear(year: Int, assistancePlans: List<AssistancePlanProjection>): List<Double> {
+    private fun getApprovedAssistancePlanHoursInYear(year: Int, assistancePlans: List<AssistancePlanProjection>): List<Double> {
         val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
 
         for (assistancePlan in assistancePlans) {
@@ -278,25 +278,7 @@ class AssistancePlanAnalysisService(
         return monthlyHours
     }
 
-    fun getApprovedAssistancePlanHoursByHourTypeInYear(year: Int,
-                                                       assistancePlans: List<AssistancePlanProjection>,
-                                                       hourTypeId: Long): List<Double> {
-        val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
-
-        for (assistancePlan in assistancePlans) {
-            for (month in 1..12) {
-                monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
-                        monthlyHours[month],
-                        getApprovedAssistancePlanHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId))
-            }
-        }
-
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
-
-        return monthlyHours
-    }
-
-    fun getApprovedAssistancePlanHoursInYear(year: Int, assistancePlan: AssistancePlanProjection): List<Double> {
+    private fun getApprovedAssistancePlanHoursInYear(year: Int, assistancePlan: AssistancePlanProjection): List<Double> {
         val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
 
         for (month in 1..12) {
@@ -307,21 +289,7 @@ class AssistancePlanAnalysisService(
         return monthlyHours
     }
 
-    fun getApprovedAssistancePlanHoursByHourTypeIdInYear(year: Int,
-                                                         assistancePlan: AssistancePlanProjection,
-                                                         hourTypeId: Long): List<Double> {
-        val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
-
-        for (month in 1..12) {
-            monthlyHours[month] =
-                    getApprovedAssistancePlanHoursByHourTypeIdInMonth(year, month, assistancePlan, hourTypeId)
-        }
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
-
-        return monthlyHours
-    }
-
-    fun getApprovedAssistancePlanHoursInMonth(year: Int,
+    private fun getApprovedAssistancePlanHoursInMonth(year: Int,
                                               month: Int,
                                               assistancePlan: AssistancePlanProjection): Double {
         if (isCorridor(assistancePlan)) {
@@ -333,7 +301,7 @@ class AssistancePlanAnalysisService(
                 (dailyMinutes * days) / 60.0)
     }
 
-    fun getApprovedAssistancePlanHoursByHourTypeIdInMonth(year: Int,
+    private fun getApprovedAssistancePlanHoursByHourTypeIdInMonth(year: Int,
                                                           month: Int,
                                                           assistancePlan: AssistancePlanProjection,
                                                           hourTypeId: Long): Double {
@@ -346,7 +314,7 @@ class AssistancePlanAnalysisService(
         return TimeDoubleService.convertDoubleToTimeDouble((dailyMinutes * days) / 60.0)
     }
 
-    fun getApprovedGoalHoursByHourTypeIdInMonth(year: Int,
+    private fun getApprovedGoalHoursByHourTypeIdInMonth(year: Int,
                                                 month: Int,
                                                 assistancePlan: AssistancePlanProjection,
                                                 hourTypeId: Long): Double {
@@ -359,7 +327,7 @@ class AssistancePlanAnalysisService(
         return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
     }
 
-    fun getApprovedGoalHoursInMonth(year: Int,
+    private fun getApprovedGoalHoursInMonth(year: Int,
                                     month: Int,
                                     assistancePlan: AssistancePlanProjection): Double {
         if (assistancePlan.goals.isEmpty()) {
@@ -371,7 +339,7 @@ class AssistancePlanAnalysisService(
         return TimeDoubleService.convertDoubleToTimeDouble(approvedHours)
     }
 
-    fun getExecutedHoursInMonth(year: Int,
+    private fun getExecutedHoursInMonth(year: Int,
                                 month: Int,
                                 assistancePlan: AssistancePlanProjection): Double {
         val services = serviceService.getAllByAssistancePlanIdAndYearAndMonth(
@@ -383,7 +351,7 @@ class AssistancePlanAnalysisService(
         return TimeDoubleService.convertDoubleToTimeDouble(hours)
     }
 
-    fun getExecutedHoursByHourTypeIdInMonth(year: Int,
+    private fun getExecutedHoursByHourTypeIdInMonth(year: Int,
                                             month: Int,
                                             assistancePlan: AssistancePlanProjection,
                                             hourTypeId: Long): Double {

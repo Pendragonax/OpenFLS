@@ -14,7 +14,7 @@ class InstitutionService(
 ) {
 
     @Transactional
-    fun create(dto: CreateInstitutionDto): InstitutionDto {
+    fun create(dto: InstitutionCreateDto): InstitutionDto {
         val entityToCreate = Institution.of(dto)
         entityToCreate.permissions = createPermissions(dto, entityToCreate)
         val entity = institutionRepository.save(entityToCreate)
@@ -22,7 +22,7 @@ class InstitutionService(
     }
 
     @Transactional
-    fun update(dto: UpdateInstitutionDto): InstitutionDto {
+    fun update(dto: InstitutionUpdateDto): InstitutionDto {
         val entity = getEntityById(dto.id) ?: throw IllegalArgumentException("Institution with id ${dto.id} not found")
 
         entity.permissions.removeIf { dto.permissions.none { p -> p.employeeId == it.id.employeeId && p.institutionId == it.id.institutionId } }
@@ -113,7 +113,7 @@ class InstitutionService(
     }
 
     private fun createPermissions(
-        dto: CreateInstitutionDto,
+        dto: InstitutionCreateDto,
         entityToCreate: Institution
     ): MutableSet<Permission> = Permission.of(dto.permissions).map {
         it.institution = entityToCreate

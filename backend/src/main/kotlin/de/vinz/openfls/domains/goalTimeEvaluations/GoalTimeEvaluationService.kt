@@ -328,7 +328,7 @@ class GoalTimeEvaluationService(
         }
     }
 
-    fun getMonthlyExecutedHoursInYear(assistancePlan: AssistancePlan,
+    private fun getMonthlyExecutedHoursInYear(assistancePlan: AssistancePlan,
                                       hourTypeId: Long,
                                       start: LocalDate,
                                       end: LocalDate,
@@ -339,7 +339,7 @@ class GoalTimeEvaluationService(
         return executedMinutes.map { DateService.convertMinutesToHour(it) }
     }
 
-    fun getMonthlyExecutedHoursInYear(goal: Goal,
+    private fun getMonthlyExecutedHoursInYear(goal: Goal,
                                       hourTypeId: Long,
                                       start: LocalDate,
                                       end: LocalDate,
@@ -350,7 +350,7 @@ class GoalTimeEvaluationService(
         return executedMinutes.map { DateService.convertMinutesToHour(it) }
     }
 
-    fun getExecutedMinutesMonthlyByYear(assistancePlan: AssistancePlan,
+    private fun getExecutedMinutesMonthlyByYear(assistancePlan: AssistancePlan,
                                         hourTypeId: Long,
                                         start: LocalDate,
                                         end: LocalDate,
@@ -361,7 +361,7 @@ class GoalTimeEvaluationService(
         return getExecutedMinutesMonthlyByYear(year, executedHours)
     }
 
-    fun getExecutedMinutesMonthlyByYear(goal: Goal,
+    private fun getExecutedMinutesMonthlyByYear(goal: Goal,
                                         hourTypeId: Long,
                                         start: LocalDate,
                                         end: LocalDate,
@@ -372,7 +372,7 @@ class GoalTimeEvaluationService(
         return getExecutedMinutesMonthlyByYear(year, executedHours)
     }
 
-    fun getExecutedMinutesMonthlyByYear(year: Int,
+    private fun getExecutedMinutesMonthlyByYear(year: Int,
                                         executedHours: List<YearMonthDoubleValue>): List<Double> {
         val executedHoursInYear = executedHours.filter { it.yearMonth.year == year }.sortedBy { it.yearMonth }
         val result = getYearMonthValuesByYear(executedHoursInYear, year)
@@ -380,7 +380,7 @@ class GoalTimeEvaluationService(
         return result.map { it.value }
     }
 
-    fun getExecutedMinutesMonthly(assistancePlan: AssistancePlan,
+    private fun getExecutedMinutesMonthly(assistancePlan: AssistancePlan,
                                   hourTypeId: Long,
                                   start: LocalDate,
                                   end: LocalDate,
@@ -402,7 +402,7 @@ class GoalTimeEvaluationService(
         )
     }
 
-    fun getExecutedMinutesMonthly(goal: Goal,
+    private fun getExecutedMinutesMonthly(goal: Goal,
                                   hourTypeId: Long,
                                   start: LocalDate,
                                   end: LocalDate,
@@ -424,7 +424,7 @@ class GoalTimeEvaluationService(
         )
     }
 
-    fun getExecutedMinutesMonthly(
+    private fun getExecutedMinutesMonthly(
             start: LocalDate,
             end: LocalDate,
             services: List<de.vinz.openfls.domains.services.Service>,
@@ -455,7 +455,7 @@ class GoalTimeEvaluationService(
         return if (sum) sumYearMonthDoubleValues(yearMonthDoubleValues) else yearMonthDoubleValues.sortedBy { it.yearMonth }
     }
 
-    fun getMonthlyApprovedHoursInYear(assistancePlan: AssistancePlan,
+    private fun getMonthlyApprovedHoursInYear(assistancePlan: AssistancePlan,
                                       hourTypeId: Long,
                                       start: LocalDate,
                                       end: LocalDate,
@@ -532,7 +532,7 @@ class GoalTimeEvaluationService(
         return resultList.sortedBy { it.yearMonth }
     }
 
-    fun getApprovedHoursLeft(approvedHours: List<Double>,
+    private fun getApprovedHoursLeft(approvedHours: List<Double>,
                              executedHours: List<Double>): List<Double> {
         val resultList = MutableList(approvedHours.size) { 0.0 }
 

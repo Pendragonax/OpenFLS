@@ -2,8 +2,8 @@ package de.vinz.openfls.domains.hourCorridors
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.hourCorridors.dtos.CreateHourCorridorDto
-import de.vinz.openfls.domains.hourCorridors.dtos.UpdateHourCorridorDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateDto
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.hourTypes.HourTypeRepository
 import de.vinz.openfls.domains.hourTypes.HourTypeService
@@ -44,7 +44,7 @@ class HourCorridorServiceDataJpaTest {
     fun create_validDto_persistsEntity() {
         // Given
         val hourType = hourTypeRepository.save(HourType(title = "Fachleistungsstunde", price = 12.5))
-        val dto = CreateHourCorridorDto(
+        val dto = HourCorridorCreateDto(
             title = "5 bis 10",
             weeklyMinutesFrom = 300,
             weeklyMinutesTill = 600,
@@ -71,7 +71,7 @@ class HourCorridorServiceDataJpaTest {
     fun create_invalidRange_throwsException() {
         // Given
         val hourType = hourTypeRepository.save(HourType(title = "Fachleistungsstunde", price = 12.5))
-        val dto = CreateHourCorridorDto(
+        val dto = HourCorridorCreateDto(
             title = "Ungültig",
             weeklyMinutesFrom = 600,
             weeklyMinutesTill = 300,
@@ -97,7 +97,7 @@ class HourCorridorServiceDataJpaTest {
                 hourType = firstHourType
             )
         )
-        val dto = UpdateHourCorridorDto(
+        val dto = HourCorridorUpdateDto(
             id = existing.id,
             title = "Neu",
             weeklyMinutesFrom = 360,

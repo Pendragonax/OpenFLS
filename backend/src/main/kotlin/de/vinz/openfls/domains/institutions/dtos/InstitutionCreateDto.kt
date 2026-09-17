@@ -3,15 +3,15 @@ package de.vinz.openfls.domains.institutions.dtos
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.permissions.PermissionDto
 
-data class CreateInstitutionDto(
+data class InstitutionCreateDto(
     var name: String = "",
     var email: String = "",
     var phonenumber: String = "",
     var permissions: List<PermissionDto> = listOf()
 ) {
     companion object {
-        fun of(institution: Institution): CreateInstitutionDto {
-            return CreateInstitutionDto(
+        fun of(institution: Institution): InstitutionCreateDto {
+            return InstitutionCreateDto(
                 name = institution.name,
                 email = institution.email,
                 phonenumber = institution.phonenumber,

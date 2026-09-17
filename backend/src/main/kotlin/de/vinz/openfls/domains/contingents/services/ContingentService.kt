@@ -95,12 +95,6 @@ class ContingentService(
     }
 
     @Transactional(readOnly = true)
-    fun getDtoById(id: Long): ContingentDto? {
-        val entity = contingentRepository.findByIdOrNull(id)
-        return if (entity == null) null else ContingentDto.from(entity)
-    }
-
-    @Transactional(readOnly = true)
     fun existsById(id: Long): Boolean {
         return contingentRepository.existsById(id)
     }

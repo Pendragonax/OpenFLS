@@ -33,15 +33,6 @@ interface ClientTaskRepository : CrudRepository<ClientTask, Long> {
 
     @Query(
         """
-        SELECT count(t)
-        FROM ClientTask t
-        WHERE t.client.id = :clientId AND t.done = false
-        """
-    )
-    fun countOpenByClientId(@Param("clientId") clientId: Long): Long
-
-    @Query(
-        """
         SELECT new de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCountDto(
             t.client.id,
             count(t),

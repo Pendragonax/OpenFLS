@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCountDto
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskDto
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskPageDto
 import de.vinz.openfls.domains.clientTasks.dtos.CompleteClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.CreateClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.UpdateClientTaskDto
+import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCreateDto
+import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskUpdateDto
 import de.vinz.openfls.domains.clientTasks.exceptions.ClientTaskNotFoundException
 import de.vinz.openfls.domains.clientTasks.exceptions.InvalidClientTaskException
 import de.vinz.openfls.domains.clients.Client
@@ -51,11 +51,6 @@ class ClientTaskService(
     }
 
     @Transactional(readOnly = true)
-    fun countOpenByClientId(clientId: Long): Long {
-        return clientTaskRepository.countOpenByClientId(clientId)
-    }
-
-    @Transactional(readOnly = true)
     fun getOpenTaskCountsByClientIds(clientIds: List<Long>): Map<Long, ClientTaskCountDto> {
         if (clientIds.isEmpty()) {
             return emptyMap()
@@ -80,7 +75,7 @@ class ClientTaskService(
     }
 
     @Transactional
-    fun create(valueDto: CreateClientTaskDto, actorId: Long, actorName: String): ClientTaskDto {
+    fun create(valueDto: ClientTaskCreateDto, actorId: Long, actorName: String): ClientTaskDto {
         if (valueDto.title.isBlank()) {
             throw InvalidClientTaskException("title must not be blank")
         }
@@ -115,7 +110,7 @@ class ClientTaskService(
     }
 
     @Transactional
-    fun update(id: Long, valueDto: UpdateClientTaskDto, actorId: Long, actorName: String): ClientTaskDto {
+    fun update(id: Long, valueDto: ClientTaskUpdateDto, actorId: Long, actorName: String): ClientTaskDto {
         val task = clientTaskRepository.findById(id)
             .orElseThrow { ClientTaskNotFoundException("client task not found") }
         if (valueDto.title.isBlank()) {
@@ -234,13 +229,6 @@ class ClientTaskService(
         clientTaskRepository.deleteAll(tasks)
 
         return tasks.size
-    }
-
-    @Transactional(readOnly = true)
-    fun getClientIdById(id: Long): Long {
-        val task = clientTaskRepository.findById(id)
-            .orElseThrow { ClientTaskNotFoundException("client task not found") }
-        return task.client?.id ?: 0
     }
 
     fun existsById(id: Long): Boolean = clientTaskRepository.existsById(id)

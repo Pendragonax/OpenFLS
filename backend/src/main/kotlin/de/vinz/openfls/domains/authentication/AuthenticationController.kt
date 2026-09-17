@@ -115,7 +115,7 @@ class AuthenticationController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val employee = authenticationService.getCurrentEmployeeDto()
+            val employee = authenticationService.getCurrentEmployee()
 
             if (logPerformance) {
                 logger.info(String.format("%s getUser took %s ms",

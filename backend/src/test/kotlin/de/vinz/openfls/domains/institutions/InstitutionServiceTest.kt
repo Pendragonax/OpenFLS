@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.institutions
 
 import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
-import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDto
-import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateDto
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionDto
@@ -43,7 +43,7 @@ class InstitutionServiceTest {
             permissionDto(1L, 10L, read = true, write = false, change = false, affiliated = true),
             permissionDto(2L, 10L, read = true, write = true, change = true, affiliated = false)
         )
-        val dto = CreateInstitutionDto(
+        val dto = InstitutionCreateDto(
             name = "Alpha",
             email = "alpha@example.com",
             phonenumber = "12345",
@@ -92,7 +92,7 @@ class InstitutionServiceTest {
             phonenumber = "111",
             permissions = existingPermissions
         )
-        val dto = UpdateInstitutionDto(
+        val dto = InstitutionUpdateDto(
             id = 10L,
             name = "New",
             email = "new@example.com",
@@ -124,7 +124,7 @@ class InstitutionServiceTest {
     @Test
     fun update_missingEntity_throwsIllegalArgumentException() {
         // Given
-        val dto = UpdateInstitutionDto(id = 999L)
+        val dto = InstitutionUpdateDto(id = 999L)
         whenever(institutionRepository.findById(999L)).thenReturn(Optional.empty())
 
         // When

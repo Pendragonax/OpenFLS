@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.institutions
 import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDto
-import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateDto
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
@@ -26,7 +26,7 @@ class InstitutionController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: CreateInstitutionDto): Any {
+    fun create(@Valid @RequestBody valueDto: InstitutionCreateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -51,7 +51,7 @@ class InstitutionController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: UpdateInstitutionDto): Any {
+               @Valid @RequestBody valueDto: InstitutionUpdateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()

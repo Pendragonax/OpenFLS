@@ -280,12 +280,12 @@ class ContingentServiceTest {
     }
 
     @Test
-    fun getDtoById_missingEntity_returnsNull() {
+    fun getById_missingEntity_returnsNull() {
         // Given
         whenever(contingentRepository.findById(99)).thenReturn(Optional.empty())
 
         // When
-        val result = contingentService.getDtoById(99)
+        val result = contingentService.getById(99)
 
         // Then
         assertThat(result).isNull()

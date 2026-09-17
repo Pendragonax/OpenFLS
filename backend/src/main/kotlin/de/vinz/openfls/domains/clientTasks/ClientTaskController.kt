@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.clientTasks
 
 import de.vinz.openfls.domains.clientTasks.dtos.CompleteClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.CreateClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.UpdateClientTaskDto
+import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCreateDto
+import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskUpdateDto
 import de.vinz.openfls.domains.clientTasks.exceptions.InvalidClientTaskException
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.services.EmployeeService
@@ -72,7 +72,7 @@ class ClientTaskController(
     }
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: CreateClientTaskDto): Any {
+    fun create(@Valid @RequestBody valueDto: ClientTaskCreateDto): Any {
         val startMs = System.currentTimeMillis()
 
         return try {
@@ -92,7 +92,7 @@ class ClientTaskController(
     }
 
     @PutMapping("{id}/change")
-    fun update(@PathVariable id: Long, @Valid @RequestBody valueDto: UpdateClientTaskDto): Any {
+    fun update(@PathVariable id: Long, @Valid @RequestBody valueDto: ClientTaskUpdateDto): Any {
         val startMs = System.currentTimeMillis()
 
         return try {

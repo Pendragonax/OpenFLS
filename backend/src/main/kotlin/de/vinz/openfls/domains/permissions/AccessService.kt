@@ -2,7 +2,6 @@ package de.vinz.openfls.domains.permissions
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.goals.services.GoalService
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.services.UserService
 import org.springframework.stereotype.Service
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service
 @Service
 class AccessService(
         private val userService: UserService,
-        private val goalService: GoalService,
         private val assistancePlanService: AssistancePlanService,
         private val permissionService: PermissionService,
         private val institutionService: InstitutionService,
@@ -89,22 +87,6 @@ class AccessService(
             val clientInstitutionId = clientService.getEntityById(clientId)?.institution?.id ?: 0
 
             isAffiliated(getId(), clientInstitutionId)
-        } catch (ex: Exception) {
-            false
-        }
-    }
-
-    fun canModifyGoal(goalId: Long): Boolean {
-        return try {
-            // ADMIN
-            if (isAdmin())
-                return true
-
-            val institutionId = assistancePlanService
-                .getEntityById(goalService.getEntityById(goalId)?.institution?.id ?: 0)
-                ?.institution?.id ?: 0
-
-            isAffiliated(getId(), institutionId)
         } catch (ex: Exception) {
             false
         }

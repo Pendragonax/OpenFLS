@@ -59,5 +59,43 @@ class AssistancePlanHourServiceDataJpaTest {
         val saved = assistancePlanHourRepository.findById(result.id)
         assertThat(saved).isPresent
         assertThat(saved.get().weeklyMinutes).isEqualTo(480)
+        assertThat(result.weeklyMinutes).isEqualTo(480)
+        assertThat(result.assistancePlanId).isEqualTo(assistancePlan.id)
+        assertThat(result.hourTypeId).isEqualTo(hourType.id)
+        assertThat(result.hourTypeTitle).isEqualTo("Standard")
+    }
+
+    @Test
+    fun getById_existingEntity_returnsResponseDto() {
+        // Given
+        val assistancePlan = assistancePlanRepository.save(AssistancePlan())
+        val hourType = hourTypeRepository.save(HourType(title = "Standard", price = 5.0))
+        val saved = assistancePlanHourRepository.save(
+            de.vinz.openfls.domains.assistancePlans.AssistancePlanHour(
+                weeklyMinutes = 90,
+                hourType = hourType,
+                assistancePlan = assistancePlan
+            )
+        )
+
+        // When
+        val result = assistancePlanHourService.getById(saved.id)
+
+        // Then
+        assertThat(result).isNotNull
+        assertThat(result!!.id).isEqualTo(saved.id)
+        assertThat(result.weeklyMinutes).isEqualTo(90)
+        assertThat(result.assistancePlanId).isEqualTo(assistancePlan.id)
+        assertThat(result.hourTypeId).isEqualTo(hourType.id)
+        assertThat(result.hourTypeTitle).isEqualTo("Standard")
+    }
+
+    @Test
+    fun getById_missingEntity_returnsNull() {
+        // When
+        val result = assistancePlanHourService.getById(999999L)
+
+        // Then
+        assertThat(result).isNull()
     }
 }

@@ -5,9 +5,9 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.institutions.Institution.Companion.of
-import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateDto
 import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
-import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateDto
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.services.Service
 import jakarta.persistence.*
@@ -77,7 +77,7 @@ class Institution(
         }
 
         companion object {
-                fun of(dto: CreateInstitutionDto): Institution {
+                fun of(dto: InstitutionCreateDto): Institution {
                         return Institution(
                                 id = null,
                                 name = dto.name,
@@ -86,11 +86,11 @@ class Institution(
                                 permissions = Permission.of(dto.permissions).toMutableSet())
                 }
 
-                fun of(dtos: List<CreateInstitutionDto>): List<Institution> {
+                fun of(dtos: List<InstitutionCreateDto>): List<Institution> {
                         return dtos.map { of(it) }
                 }
 
-                fun of(dto: UpdateInstitutionDto): Institution {
+                fun of(dto: InstitutionUpdateDto): Institution {
                         return Institution(
                                 id = null,
                                 name = dto.name,

@@ -72,8 +72,7 @@ class EvaluationService(
         return evaluationRepository.findByIdOrNull(id)?.let { convertEntityToDto(it) }
     }
 
-    @Transactional(readOnly = true)
-    fun getByGoalId(goalId: Long): List<EvaluationResponseDto> {
+    private fun getByGoalId(goalId: Long): List<EvaluationResponseDto> {
         val evaluations = evaluationRepository.findAllByGoalId(goalId)
 
         return evaluations.map { convertEntityToDto(it) }

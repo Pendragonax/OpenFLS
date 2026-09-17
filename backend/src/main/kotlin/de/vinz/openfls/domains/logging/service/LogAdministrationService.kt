@@ -33,7 +33,7 @@ class LogAdministrationService(
     private val zone = ZoneId.systemDefault()
 
     @PostConstruct
-    fun captureStartupLevels() {
+    private fun captureStartupLevels() {
         val context = LoggerFactory.getILoggerFactory() as LoggerContext
         startupRootLevel = context.getLogger(Logger.ROOT_LOGGER_NAME).level ?: Level.INFO
         startupClassLevels = context.loggerList.filter { it.name != Logger.ROOT_LOGGER_NAME }

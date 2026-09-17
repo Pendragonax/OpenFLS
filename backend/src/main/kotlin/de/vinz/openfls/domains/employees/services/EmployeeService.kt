@@ -224,14 +224,6 @@ class EmployeeService(
         }
     }
 
-    @Transactional(readOnly = true)
-    fun getClientFavoriteIds(employeeId: Long): List<Long> {
-        val employee = employeeRepository.findById(employeeId)
-                .orElseThrow { EntityNotFoundException() }
-
-        return employee.clientFavorites.map { it.id }
-    }
-
     @Transactional
     fun addClientAsFavorite(clientId: Long, employeeId: Long) {
         val employee = employeeRepository.findById(employeeId)

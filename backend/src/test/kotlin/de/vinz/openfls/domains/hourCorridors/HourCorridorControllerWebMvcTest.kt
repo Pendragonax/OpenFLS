@@ -2,9 +2,9 @@ package de.vinz.openfls.domains.hourCorridors
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.domains.hourCorridors.dtos.CreateHourCorridorDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateDto
 import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorDto
-import de.vinz.openfls.domains.hourCorridors.dtos.UpdateHourCorridorDto
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateDto
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -50,7 +50,7 @@ class HourCorridorControllerWebMvcTest {
         val result = mockMvc.post("/hour_corridors") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(
-                CreateHourCorridorDto(
+                HourCorridorCreateDto(
                     title = "5 bis 10",
                     weeklyMinutesFrom = 300,
                     weeklyMinutesTill = 600,
@@ -81,7 +81,7 @@ class HourCorridorControllerWebMvcTest {
         val result = mockMvc.post("/hour_corridors") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(
-                CreateHourCorridorDto(
+                HourCorridorCreateDto(
                     title = "5 bis 10",
                     weeklyMinutesFrom = 300,
                     weeklyMinutesTill = 600,
@@ -180,7 +180,7 @@ class HourCorridorControllerWebMvcTest {
         val result = mockMvc.put("/hour_corridors/7") {
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(
-                UpdateHourCorridorDto(
+                HourCorridorUpdateDto(
                     id = 7,
                     title = "6 bis 12",
                     weeklyMinutesFrom = 360,
