@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.absence
 import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.absence.dtos.CreateAbsenceDto
+import de.vinz.openfls.domains.absence.dtos.AbsenceCreateDto
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.services.ServiceController
 import de.vinz.openfls.logback.PerformanceLogbackFilter
@@ -27,7 +27,7 @@ class AbsenceController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody createAbsenceDto: CreateAbsenceDto): Any {
+    fun create(@Valid @RequestBody createAbsenceDto: AbsenceCreateDto): Any {
         return try {
             val startMs = System.currentTimeMillis()
 
