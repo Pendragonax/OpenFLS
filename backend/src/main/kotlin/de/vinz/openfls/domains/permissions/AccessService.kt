@@ -51,7 +51,7 @@ class AccessService(
 
     fun getLeadingInstitutionIds(): List<Long> {
         return permissionService
-            .getPermissionByEmployee(getId())
+            .getEntitiesByEmployeeId(getId())
             .filter { it.changeInstitution }
             .map { it.institution?.id ?: 0 }
     }
@@ -189,21 +189,21 @@ class AccessService(
 
     private fun getAffiliatedInstitutionIds(id: Long): List<Long> {
         return permissionService
-            .getPermissionByEmployee(id)
+            .getEntitiesByEmployeeId(id)
             .filter { it.affiliated }
             .map { it.institution?.id ?: 0 }
     }
 
     private fun getLeadingInstitutionIds(id: Long): List<Long> {
         return permissionService
-            .getPermissionByEmployee(id)
+            .getEntitiesByEmployeeId(id)
             .filter { it.changeInstitution }
             .map { it.institution?.id ?: 0 }
     }
 
     fun getWriteRightsInstitutionIds(id: Long): List<Long> {
         return permissionService
-            .getPermissionByEmployee(id)
+            .getEntitiesByEmployeeId(id)
             .filter { it.writeEntries }
             .map { it.institution?.id ?: 0 }
     }
@@ -214,14 +214,14 @@ class AccessService(
         }
 
         return permissionService
-                .getPermissionByEmployee(getId())
+                .getEntitiesByEmployeeId(getId())
                 .filter { it.readEntries }
                 .map { it.institution?.id ?: 0 }
     }
 
     private fun getReadRightsInstitutionIds(id: Long): List<Long> {
         return permissionService
-            .getPermissionByEmployee(id)
+            .getEntitiesByEmployeeId(id)
             .filter { it.readEntries }
             .map { it.institution?.id ?: 0 }
     }

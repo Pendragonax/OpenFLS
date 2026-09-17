@@ -142,7 +142,7 @@ class EmployeeService(
         // save employee
         val savedEntity = employeeRepository.save(employee).apply {
             permissions = savePermissions(this, tmpPermissions)
-            permissions = permissionService.getPermissionByEmployee(this.id ?: 0).toMutableSet()
+            permissions = permissionService.getEntitiesByEmployeeId(this.id ?: 0).toMutableSet()
             unprofessionals = saveUnprofessionals(this, tmpUnprofessionals)
         }
 
@@ -353,7 +353,7 @@ class EmployeeService(
             ?.map { it.apply {
                 this.employee = employee
                 this.id.employeeId = employee.id } }
-            ?.map { permissionService.savePermission(it) }
+            ?.map { permissionService.savePermissionEntity(it) }
             ?.toMutableSet() ?: mutableSetOf()
     }
 

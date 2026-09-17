@@ -55,7 +55,7 @@ class PermissionServiceDataJpaTest {
         val permission = Permission(id = EmployeeInstitutionRightsKey(employeeId = null, institutionId = null))
 
         // When / Then
-        assertThatThrownBy { permissionService.savePermission(permission) }
+        assertThatThrownBy { permissionService.savePermissionEntity(permission) }
             .isInstanceOf(IllegalArgumentException::class.java)
     }
 
@@ -66,34 +66,7 @@ class PermissionServiceDataJpaTest {
         val permission = Permission(id = EmployeeInstitutionRightsKey(employeeId = 9999, institutionId = institution.id))
 
         // When / Then
-        assertThatThrownBy { permissionService.savePermission(permission) }
+        assertThatThrownBy { permissionService.savePermissionEntity(permission) }
             .isInstanceOf(IllegalArgumentException::class.java)
-    }
-
-    @Test
-    fun savePermissionByInstitution_missingEmployeeId_throwsException() {
-        // Given
-        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
-        val permission = Permission(id = EmployeeInstitutionRightsKey(employeeId = null, institutionId = institution.id))
-
-        // When / Then
-        assertThatThrownBy { permissionService.savePermissionByInstitution(permission, institution) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-    }
-
-    @Test
-    fun savePermissionByInstitution_valid_persistsEntity() {
-        // Given
-        val employee = employeeRepository.save(Employee(firstname = "Max", lastname = "One"))
-        val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
-        val permission = Permission(id = EmployeeInstitutionRightsKey(employeeId = employee.id, institutionId = institution.id))
-
-        // When
-        val result = permissionService.savePermissionByInstitution(permission, institution)
-
-        // Then
-        val saved = permissionRepository.findByIds(employee.id!!, institution.id!!)
-        assertThat(saved).isNotNull
-        assertThat(result.id.employeeId).isEqualTo(employee.id)
     }
 }

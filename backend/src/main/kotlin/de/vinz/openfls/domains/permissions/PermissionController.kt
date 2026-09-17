@@ -28,7 +28,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = permissionService.savePermission(valueDto)
+            val dto = permissionService.savePermission(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s create took %s ms",
@@ -36,7 +36,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(PermissionDto.of(entity))
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -52,7 +52,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = permissionService.savePermission(valueDto)
+            val dto = permissionService.savePermission(valueDto)
 
             if (logPerformance) {
                 logger.info(String.format("%s update took %s ms",
@@ -60,7 +60,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(PermissionDto.of(entity))
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -100,7 +100,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entities = permissionService.getAll()
+            val dtos = permissionService.getAll()
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms",
@@ -108,7 +108,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entities.map(PermissionDto::of))
+            ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -125,7 +125,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = permissionService.getByEmployeeIdAndInstitutionId(employeeId, institutionId)
+            val dto = permissionService.getByEmployeeIdAndInstitutionId(employeeId, institutionId)
 
             if (logPerformance) {
                 logger.info(String.format("%s getById took %s ms",
@@ -133,7 +133,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity?.let(PermissionDto::of))
+            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -149,7 +149,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = permissionService.getByEmployeeId(employeeId)
+            val dtos = permissionService.getByEmployeeId(employeeId)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByEmployeeId took %s ms",
@@ -157,7 +157,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity.map(PermissionDto::of))
+            ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -173,7 +173,7 @@ class PermissionController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val entity = permissionService.getByInstitutionId(institutionId)
+            val dtos = permissionService.getByInstitutionId(institutionId)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByInstitutionId took %s ms",
@@ -181,7 +181,7 @@ class PermissionController(
                         System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(entity.map(PermissionDto::of))
+            ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 

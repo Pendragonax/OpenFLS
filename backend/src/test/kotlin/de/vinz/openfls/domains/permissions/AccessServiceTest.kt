@@ -33,7 +33,7 @@ class AccessServiceTest {
     fun getLeadingInstitutionIds_withLeadingPermissions_returnsInstitutionIds() {
         // Given
         whenever(userService.getUserId()).thenReturn(17L)
-        whenever(permissionService.getPermissionByEmployee(17L)).thenReturn(
+        whenever(permissionService.getEntitiesByEmployeeId(17L)).thenReturn(
             listOf(
                 Permission(
                     id = EmployeeInstitutionRightsKey(employeeId = 17L, institutionId = 31L),

@@ -3,11 +3,10 @@ package de.vinz.openfls.domains.permissions
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.institutions.Institution
-import de.vinz.openfls.domains.institutions.InstitutionRepository
 import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
+import de.vinz.openfls.domains.institutions.InstitutionRepository
 
 @Service
 class PermissionService(
@@ -17,45 +16,12 @@ class PermissionService(
         val permissionRepository: PermissionRepository,
         val modelMapper: ModelMapper
 ) {
-    @Transactional
-    fun savePermission(permissionDto: PermissionDto): Permission {
-        return permissionRepository.save(convertToEntity(permissionDto))
-    }
+
+    // ---- Controller-facing (DTO in / DTO out) ----------------------------------
 
     @Transactional
-    fun savePermission(permission: Permission): Permission {
-        if (permission.id.employeeId == null || permission.id.institutionId == null) {
-            throw IllegalArgumentException()
-        }
-
-        permission.employee = employeeRepository
-            .findById(permission.id.employeeId!!)
-            .orElseThrow { throw IllegalArgumentException("employee not found") }
-
-        permission.institution = institutionRepository
-            .findById(permission.id.institutionId!!)
-            .orElseThrow { throw IllegalArgumentException("institution not found") }
-
-        return permissionRepository.save(permission)
-    }
-
-    @Transactional
-    fun savePermissionByInstitution(permission: Permission, institution: Institution): Permission {
-        if (permission.id.employeeId == null) {
-            throw IllegalArgumentException()
-        }
-
-        permission.employee = employeeRepository
-            .findById(permission.id.employeeId!!)
-            .orElseThrow { throw IllegalArgumentException("employee not found") }
-        permission.institution = institution
-
-        return permissionRepository.save(permission)
-    }
-
-    @Transactional
-    fun savePermissionsByInstitution(permissions: MutableSet<Permission>, institution: Institution): MutableSet<Permission> {
-        return permissions.map { savePermissionByInstitution(it, institution) }.toMutableSet()
+    fun savePermission(permissionDto: PermissionDto): PermissionDto {
+        return PermissionDto.of(permissionRepository.save(convertToEntity(permissionDto)))
     }
 
     @Transactional
@@ -64,57 +30,46 @@ class PermissionService(
     }
 
     @Transactional(readOnly = true)
-    fun getPermissions(dtos: List<PermissionDto>): List<Permission> {
-        val existingPermissions = dtos.mapNotNull {
-            permissionRepository.findByIds(it.employeeId, it.institutionId)
+    fun getAll(): List<PermissionDto> {
+        return permissionRepository.findAll().map { PermissionDto.of(it) }
+    }
+
+    @Transactional(readOnly = true)
+    fun getByInstitutionId(institutionId: Long): List<PermissionDto> {
+        return permissionRepository.findByInstitutionId(institutionId).map { PermissionDto.of(it) }
+    }
+
+    @Transactional(readOnly = true)
+    fun getByEmployeeId(employeeId: Long): List<PermissionDto> {
+        return permissionRepository.findByEmployeeId(employeeId).map { PermissionDto.of(it) }
+    }
+
+    @Transactional(readOnly = true)
+    fun getByEmployeeIdAndInstitutionId(employeeId: Long, institutionId: Long): PermissionDto? {
+        return permissionRepository.findByIds(employeeId, institutionId)?.let { PermissionDto.of(it) }
+    }
+
+    // ---- Internal: entity composition for other services ----------------------
+
+    @Transactional
+    fun savePermissionEntity(permission: Permission): Permission {
+        if (permission.id.employeeId == null || permission.id.institutionId == null) {
+            throw IllegalArgumentException()
         }
 
-        for (permission in existingPermissions) {
-            val dto = dtos.first { d -> d.employeeId == permission.id.employeeId && d.institutionId == permission.id.institutionId }
-            permission.readEntries = dto.readEntries
-            permission.writeEntries = dto.writeEntries
-            permission.changeInstitution = dto.changeInstitution
-            permission.affiliated = dto.affiliated
-        }
+        permission.employee = employeeRepository
+            .findById(permission.id.employeeId!!)
+            .orElseThrow { IllegalArgumentException("employee not found") }
 
-        val newPermissions = dtos.filter { dto ->
-            existingPermissions.none { perm ->
-                perm.id.employeeId == dto.employeeId && perm.id.institutionId == dto.institutionId
-            }
-        }.map {
-            Permission.of(it)
-        }
+        permission.institution = institutionRepository
+            .findById(permission.id.institutionId!!)
+            .orElseThrow { IllegalArgumentException("institution not found") }
 
-        return listOf(existingPermissions, newPermissions).flatten()
+        return permissionRepository.save(permission)
     }
 
     @Transactional(readOnly = true)
-    fun getByInstitutionId(institutionId: Long): List<Permission> {
-        return permissionRepository.findByInstitutionId(institutionId).toList()
-    }
-
-    @Transactional(readOnly = true)
-    fun getByEmployeeId(employeeId: Long): List<Permission> {
-        return permissionRepository.findByEmployeeId(employeeId).toList()
-    }
-
-    @Transactional(readOnly = true)
-    fun getByEmployeeIdAndInstitutionId(employeeId: Long, institutionId: Long): Permission? {
-        return permissionRepository.findByIds(employeeId, institutionId)
-    }
-
-    @Transactional(readOnly = true)
-    fun getById(id: Long): Permission? {
-        return permissionRepository.findById(id).orElse(null)
-    }
-
-    @Transactional(readOnly = true)
-    fun getAll(): List<Permission> {
-        return permissionRepository.findAll().toList()
-    }
-
-    @Transactional(readOnly = true)
-    fun getPermissionByEmployee(employeeId: Long): List<Permission> {
+    fun getEntitiesByEmployeeId(employeeId: Long): List<Permission> {
         return permissionRepository.findByEmployeeId(employeeId).toList()
     }
 
