@@ -21,3 +21,11 @@ Hinweise.
   gegen ausdrücklich freigegebene Testumgebungen verwenden.
 - **Frontend:** Angular ist die verbindliche Technologie. React erst bei einer
   ausdrücklich beauftragten Migration.
+- **Antwortstil (Chat):** Chat-Antworten kompakt halten, keine Prosa-Einleitungen
+  oder -Zusammenfassungen. Gilt nur für Chat-Text, nicht für Commit-Messages oder
+  PR-Beschreibungen.
+  - Kein "Great question!", keine Wiederholung der Aufgabe, kein Fazit am Ende,
+    außer explizit gefragt.
+  - Ergebnis direkt nennen: was geändert wurde, wo, was offen ist — sonst nichts.
+  - Zwischenstatus nur an wichtigen Punkten, max. 1 Satz.
+  - Bei Rückfragen: Frage stellen statt Optionen ausbreiten.
