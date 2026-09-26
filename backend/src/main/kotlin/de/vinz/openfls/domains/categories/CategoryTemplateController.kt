@@ -1,13 +1,13 @@
 package de.vinz.openfls.domains.categories
 
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateDto
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateDto
-import de.vinz.openfls.domains.categories.exceptions.InvalidCategoryTemplateDtoException
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateRequest
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateRequest
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -21,12 +21,12 @@ class CategoryTemplateController(
     private val logger: Logger = LoggerFactory.getLogger(CategoryTemplateController::class.java)
 
     @PostMapping
-    fun create(@RequestBody valueDto: CategoryTemplateCreateDto): Any {
+    fun create(@Valid @RequestBody request: CategoryTemplateCreateRequest): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(categoryTemplateService.create(valueDto))
+            ResponseEntity.ok(categoryTemplateService.create(request))
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -36,17 +36,17 @@ class CategoryTemplateController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: CategoryTemplateUpdateDto): Any {
+               @Valid @RequestBody request: CategoryTemplateUpdateRequest): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (id != valueDto.id)
-            throw InvalidCategoryTemplateDtoException("path id and dto id are not the same")
+        if (id != request.id)
+            return ResponseEntity.badRequest().body("path id and request id are not the same")
         if (!categoryTemplateService.existsById(id))
-            throw InvalidCategoryTemplateDtoException("category template not found")
+            return categoryTemplateNotFound()
 
         return try {
-            ResponseEntity.ok(categoryTemplateService.update(valueDto))
+            ResponseEntity.ok(categoryTemplateService.update(request))
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -59,14 +59,12 @@ class CategoryTemplateController(
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (!categoryTemplateService.existsById(id))
-            throw InvalidCategoryTemplateDtoException("category template not found")
+        val categoryTemplate = categoryTemplateService.getById(id) ?: return categoryTemplateNotFound()
 
         return try {
-            val dto = categoryTemplateService.getById(id)
             categoryTemplateService.delete(id)
 
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(categoryTemplate)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -94,11 +92,15 @@ class CategoryTemplateController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(categoryTemplateService.getById(id))
+            val categoryTemplate = categoryTemplateService.getById(id) ?: return categoryTemplateNotFound()
+            ResponseEntity.ok(categoryTemplate)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("getById", startMs, logger)
         }
     }
+
+    private fun categoryTemplateNotFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("category template not found")
 }

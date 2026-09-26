@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.categories.entities
 
-import de.vinz.openfls.domains.categories.dtos.CategoryDto
 import de.vinz.openfls.domains.services.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
@@ -47,16 +46,4 @@ data class Category(
         return id.hashCode()
     }
 
-    companion object {
-        fun from(categoryDto: CategoryDto): Category {
-            return Category(
-                    id = categoryDto.id,
-                    title = categoryDto.title,
-                    shortcut = categoryDto.shortcut,
-                    description = categoryDto.description,
-                    faceToFace = categoryDto.faceToFace,
-                    categoryTemplate = CategoryTemplate(id = categoryDto.categoryTemplateId)
-            )
-        }
-    }
 }

@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.services.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import de.vinz.openfls.domains.categories.dtos.CategoryDto
+import de.vinz.openfls.domains.categories.dtos.CategoryResponse
 import de.vinz.openfls.domains.goals.dtos.GoalDto
 import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
@@ -47,5 +47,5 @@ class ServiceWithGoalsAndCategories {
     var goals: MutableSet<GoalDto> = mutableSetOf()
 
     @JsonIgnoreProperties(value = ["services", "categoryTemplate", "hibernateLazyInitializer"])
-    var categorys: MutableSet<CategoryDto> = mutableSetOf()
+    var categorys: MutableSet<CategoryResponse> = mutableSetOf()
 }
