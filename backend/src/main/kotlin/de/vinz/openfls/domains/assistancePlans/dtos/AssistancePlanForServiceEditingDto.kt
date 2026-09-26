@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.assistancePlans.dtos
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.goals.dtos.GoalWithHours
-import de.vinz.openfls.domains.hourTypes.HourTypeDto
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeResponse
 import java.time.LocalDate
 
 class AssistancePlanForServiceEditingDto {
@@ -17,5 +17,5 @@ class AssistancePlanForServiceEditingDto {
     var hourCorridorId: Long = 0
     var goals: MutableSet<GoalWithHours> = mutableSetOf()
     var hours: MutableSet<AssistancePlanHourDto> = mutableSetOf()
-    var possibleDocumentationHourTypes: Array<HourTypeDto> = emptyArray()
+    var possibleDocumentationHourTypes: Array<HourTypeResponse> = emptyArray()
 }

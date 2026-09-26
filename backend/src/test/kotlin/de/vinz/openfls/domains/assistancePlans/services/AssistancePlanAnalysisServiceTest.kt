@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorSoloProjection
 import de.vinz.openfls.domains.hourTypes.HourType
-import de.vinz.openfls.domains.hourTypes.projections.HourTypeSoloProjection
+import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorHourTypeProjection
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import de.vinz.openfls.domains.services.services.ServiceService
@@ -119,7 +119,7 @@ class AssistancePlanAnalysisServiceTest {
     }
 
     private fun corridorProjection(start: LocalDate, end: LocalDate, hourType: HourType): AssistancePlanProjection {
-        val corridorHourType = object : HourTypeSoloProjection {
+        val corridorHourType = object : HourCorridorHourTypeProjection {
             override val id: Long = hourType.id
             override val title: String = hourType.title
             override val price: Double = hourType.price
@@ -129,7 +129,7 @@ class AssistancePlanAnalysisServiceTest {
             override val title: String = "5 bis 10"
             override val weeklyMinutesFrom: Int = 300
             override val weeklyMinutesTill: Int = 600
-            override val hourType: HourTypeSoloProjection = corridorHourType
+            override val hourType: HourCorridorHourTypeProjection = corridorHourType
         }
 
         return object : AssistancePlanProjection {

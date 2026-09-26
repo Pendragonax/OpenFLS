@@ -1,7 +1,5 @@
 package de.vinz.openfls.domains.hourCorridors.projections
 
-import de.vinz.openfls.domains.hourTypes.projections.HourTypeSoloProjection
-
 /**
  * Schlanke Projection eines [de.vinz.openfls.domains.hourCorridors.HourCorridor] für die
  * Verwendung innerhalb anderer Projections. Ersetzt die frühere direkte Einbettung der
@@ -12,5 +10,5 @@ interface HourCorridorSoloProjection {
     val title: String
     val weeklyMinutesFrom: Int
     val weeklyMinutesTill: Int
-    val hourType: HourTypeSoloProjection?
+    val hourType: HourCorridorHourTypeProjection?
 }

@@ -3,9 +3,8 @@ package de.vinz.openfls.domains.assistancePlans.services
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
-import de.vinz.openfls.domains.hourTypes.HourTypeDto
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeResponse
 import de.vinz.openfls.domains.services.services.ServiceService
-import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -14,8 +13,7 @@ import java.time.temporal.ChronoUnit
 @Service
 class AssistancePlanEvaluationService(
     private val assistancePlanService: AssistancePlanService,
-    private val serviceService: ServiceService,
-    private val modelMapper: ModelMapper
+    private val serviceService: ServiceService
 ) {
 
     @Transactional(readOnly = true)
@@ -34,28 +32,28 @@ class AssistancePlanEvaluationService(
         eval.total = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
                 target = days * (it.weeklyMinutes / 7.0) / 60.0
-                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
+                hourType = it.hourType?.let { type -> HourTypeResponse.from(type) } ?: HourTypeResponse()
             }
         }
 
         eval.tillToday = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
                 target = daysTillToday * (it.weeklyMinutes / 7.0) / 60.0
-                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
+                hourType = it.hourType?.let { type -> HourTypeResponse.from(type) } ?: HourTypeResponse()
             }
         }
 
         eval.actualYear = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
                 target = actualYear.first * (it.weeklyMinutes / 7.0) / 60.0
-                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
+                hourType = it.hourType?.let { type -> HourTypeResponse.from(type) } ?: HourTypeResponse()
             }
         }
 
         eval.actualMonth = assistancePlan.hours.map {
             ActualTargetValueDto().apply {
                 target = actualMonth.first * (it.weeklyMinutes / 7.0) / 60.0
-                hourType = modelMapper.map(it.hourType, HourTypeDto::class.java)
+                hourType = it.hourType?.let { type -> HourTypeResponse.from(type) } ?: HourTypeResponse()
             }
         }
 

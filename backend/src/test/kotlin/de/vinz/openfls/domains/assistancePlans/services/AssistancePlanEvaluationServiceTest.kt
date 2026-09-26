@@ -9,7 +9,6 @@ import de.vinz.openfls.domains.services.Service
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import org.modelmapper.ModelMapper
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
@@ -22,8 +21,7 @@ class AssistancePlanEvaluationServiceTest {
     private val serviceService: de.vinz.openfls.domains.services.services.ServiceService = mock()
     private val evaluationService = AssistancePlanEvaluationService(
         assistancePlanService,
-        serviceService,
-        ModelMapper()
+        serviceService
     )
 
     @Test

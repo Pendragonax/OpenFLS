@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.hourTypes
 
-import de.vinz.openfls.domains.hourTypes.exceptions.InvalidHourTypeDtoException
+import de.vinz.openfls.domains.hourTypes.exceptions.InvalidHourTypeRequestException
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpHeaders
@@ -15,8 +15,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class HourTypeExceptionHandler : ResponseEntityExceptionHandler() {
 
-    @ExceptionHandler(InvalidHourTypeDtoException::class)
-    fun handleTypeMismatch(ex: InvalidHourTypeDtoException, request: WebRequest?): ResponseEntity<Any>? {
+    @ExceptionHandler(InvalidHourTypeRequestException::class)
+    fun handleTypeMismatch(ex: InvalidHourTypeRequestException, request: WebRequest?): ResponseEntity<Any>? {
         val message = ex.message
         return handleExceptionInternal(ex, message, HttpHeaders(), HttpStatus.BAD_REQUEST, request!!);
     }

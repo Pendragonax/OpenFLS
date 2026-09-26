@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
-import de.vinz.openfls.domains.hourTypes.HourTypeDto
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeResponse
 
 open class ActualTargetValueDto {
     var target: Double = 0.0
@@ -9,5 +9,5 @@ open class ActualTargetValueDto {
 
     var size: Long = 0
 
-    var hourType: HourTypeDto = HourTypeDto()
+    var hourType: HourTypeResponse = HourTypeResponse()
 }

@@ -14,7 +14,7 @@ import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
 import de.vinz.openfls.domains.clients.dtos.ClientUpdateDto
-import de.vinz.openfls.domains.hourTypes.HourTypeDto
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeResponse
 import de.vinz.openfls.domains.institutions.InstitutionService
 
 import org.modelmapper.ModelMapper
@@ -305,11 +305,11 @@ class ClientService(
         return planDto
     }
 
-    private fun extractPossibleDocumentationHourTypes(plan: AssistancePlan): Array<HourTypeDto> {
+    private fun extractPossibleDocumentationHourTypes(plan: AssistancePlan): Array<HourTypeResponse> {
         return (plan.hours.mapNotNull { it.hourType } + plan.goals.flatMap { it.hours.mapNotNull { hour -> hour.hourType } })
             .distinctBy { it.id }
             .sortedBy { it.title.lowercase() }
-            .map { HourTypeDto.from(it) }
+            .map { HourTypeResponse.from(it) }
             .toTypedArray()
     }
 

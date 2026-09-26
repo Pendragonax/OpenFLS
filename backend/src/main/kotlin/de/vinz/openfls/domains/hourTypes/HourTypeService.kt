@@ -1,21 +1,28 @@
 package de.vinz.openfls.domains.hourTypes
 
-import org.springframework.transaction.annotation.Transactional
+import de.vinz.openfls.architecture.InternalEntityApi
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeCreateRequest
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeResponse
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class HourTypeService(private val hourTypeRepository: HourTypeRepository) {
 
     @Transactional
-    fun create(hourTypeDto: HourTypeDto): HourTypeDto {
-        val entity = hourTypeRepository.save(HourType.from(hourTypeDto))
-        return HourTypeDto.from(entity)
+    fun create(request: HourTypeCreateRequest): HourTypeResponse {
+        val entity = hourTypeRepository.save(HourType(title = request.title, price = request.price))
+        return HourTypeResponse.from(entity)
     }
 
     @Transactional
-    fun update(hourTypeDto: HourTypeDto): HourTypeDto {
-        val entity = hourTypeRepository.save(HourType.from(hourTypeDto))
-        return HourTypeDto.from(entity)
+    fun update(request: HourTypeUpdateRequest): HourTypeResponse {
+        val entity = hourTypeRepository.findById(request.id)
+            .orElseThrow { IllegalArgumentException("hour type with id ${request.id} not found") }
+        entity.title = request.title
+        entity.price = request.price
+        return HourTypeResponse.from(hourTypeRepository.save(entity))
     }
 
     @Transactional
@@ -24,19 +31,18 @@ class HourTypeService(private val hourTypeRepository: HourTypeRepository) {
     }
 
     @Transactional(readOnly = true)
-    fun getAll(): List<HourTypeDto> {
-        val entities = hourTypeRepository.findAll()
-                .toList()
-                .sortedBy { it.title.lowercase() }
-        return entities.map { HourTypeDto.from(it) }
+    fun getAll(): List<HourTypeResponse> {
+        return hourTypeRepository.findAll()
+            .sortedBy { it.title.lowercase() }
+            .map { HourTypeResponse.from(it) }
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): HourTypeDto? {
-        val entity = hourTypeRepository.findById(id).orElse(null)
-        return entity?.let { HourTypeDto.from(it) }
+    fun getById(id: Long): HourTypeResponse? {
+        return hourTypeRepository.findById(id).orElse(null)?.let { HourTypeResponse.from(it) }
     }
 
+    @InternalEntityApi
     @Transactional(readOnly = true)
     fun getEntityById(id: Long): HourType? {
         return hourTypeRepository.findById(id).orElse(null)

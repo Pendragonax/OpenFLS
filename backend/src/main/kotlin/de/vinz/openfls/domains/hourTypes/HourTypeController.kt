@@ -1,6 +1,8 @@
 package de.vinz.openfls.domains.hourTypes
 
-import de.vinz.openfls.domains.hourTypes.exceptions.InvalidHourTypeDtoException
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeCreateRequest
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateRequest
+import de.vinz.openfls.domains.hourTypes.exceptions.InvalidHourTypeRequestException
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
@@ -17,15 +19,12 @@ class HourTypeController(private val hourTypeService: HourTypeService,
     private val logger: Logger = LoggerFactory.getLogger(HourTypeController::class.java)
 
     @PostMapping
-    fun create(@Valid @RequestBody value: HourTypeDto): Any {
+    fun create(@Valid @RequestBody request: HourTypeCreateRequest): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (value.id > 0)
-            throw InvalidHourTypeDtoException("id is not 0")
-
         return try {
-            ResponseEntity.ok(hourTypeService.create(value))
+            ResponseEntity.ok(hourTypeService.create(request))
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -35,17 +34,17 @@ class HourTypeController(private val hourTypeService: HourTypeService,
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: HourTypeDto): Any {
+               @Valid @RequestBody request: HourTypeUpdateRequest): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (id != valueDto.id)
-            throw InvalidHourTypeDtoException("path id and dto id are not the same")
+        if (id != request.id)
+            throw InvalidHourTypeRequestException("path id and request id are not the same")
         if (!hourTypeService.existsById(id))
-            throw InvalidHourTypeDtoException("Type of hour with id $id does not exists.")
+            throw InvalidHourTypeRequestException("Type of hour with id $id does not exists.")
 
         return try {
-            ResponseEntity.ok(hourTypeService.update(valueDto))
+            ResponseEntity.ok(hourTypeService.update(request))
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -59,7 +58,7 @@ class HourTypeController(private val hourTypeService: HourTypeService,
         val startMs = System.currentTimeMillis()
 
         if (!hourTypeService.existsById(id))
-            throw InvalidHourTypeDtoException("Type of hour with id $id does not exists.")
+            throw InvalidHourTypeRequestException("Type of hour with id $id does not exists.")
 
         return try {
             val dto = hourTypeService.getById(id)

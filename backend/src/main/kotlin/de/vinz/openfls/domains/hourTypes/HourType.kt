@@ -39,12 +39,4 @@ class HourType(
         return id.hashCode()
     }
 
-    companion object {
-        fun from(hourTypeDto: HourTypeDto): HourType {
-            return HourType(
-                    id = hourTypeDto.id,
-                    title = hourTypeDto.title,
-                    price = hourTypeDto.price)
-        }
-    }
 }
