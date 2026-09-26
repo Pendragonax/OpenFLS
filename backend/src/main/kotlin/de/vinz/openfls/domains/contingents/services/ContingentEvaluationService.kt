@@ -1,11 +1,12 @@
 package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.absence.AbsenceService
+import de.vinz.openfls.architecture.InternalEntityApi
 import de.vinz.openfls.domains.absence.Absence
-import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationDto
-import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
-import de.vinz.openfls.domains.contingents.projections.ContingentProjection
-import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
+import de.vinz.openfls.domains.contingents.Contingent
+import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationResponse
+import de.vinz.openfls.domains.contingents.dtos.ContingentServiceEntryDto
+import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationResponse
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.stereotype.Service
@@ -15,6 +16,7 @@ import java.time.LocalDateTime
 @Service
 class ContingentEvaluationService(
     private val contingentService: ContingentService,
+    private val contingentCalculationService: ContingentCalculationService,
     private val serviceService: ServiceService,
     private val absenceService: AbsenceService
 ) {
@@ -24,46 +26,50 @@ class ContingentEvaluationService(
         year: Int,
         institutionId: Long,
         includeArchivedEmployees: Boolean = false
-    ): ContingentEvaluationDto {
+    ): ContingentEvaluationResponse {
         val services = serviceService.getContingentEvaluationServiceDtosBy(institutionId, year)
-        val contingents = contingentService.getAllByInstitutionAndYear(institutionId, year)
-            .filter { includeArchivedEmployees || !it.employee.archived }
+            .map { ContingentServiceEntryDto(it.employeeId, it.start, it.minutes) }
+        val contingents = contingentService.getAllEntitiesByInstitutionAndYear(institutionId, year)
+            .filter { includeArchivedEmployees || it.employee?.archived != true }
         val yearlyAbsences = absenceService.getAllEntitiesByYear(year)
         val employeeContingentEvaluations =
             getEmployeeContingentEvaluations(year, contingents, services, yearlyAbsences)
 
-        return ContingentEvaluationDto(institutionId, employeeContingentEvaluations)
+        return ContingentEvaluationResponse(institutionId, employeeContingentEvaluations)
     }
 
+    @InternalEntityApi
     fun getEmployeeContingentEvaluations(
         year: Int,
-        contingents: List<ContingentProjection>,
-        services: List<ContingentEvaluationServiceProjection>,
+        contingents: List<Contingent>,
+        services: List<ContingentServiceEntryDto>,
         yearlyAbsences: List<Absence>
-    ): List<EmployeeContingentEvaluationDto> {
-        val employeeEvaluations = ArrayList<EmployeeContingentEvaluationDto>()
+    ): List<EmployeeContingentEvaluationResponse> {
+        val employeeEvaluations = ArrayList<EmployeeContingentEvaluationResponse>()
 
         for (contingent in contingents) {
-            val contingentHours = contingentService.calculateContingentHoursBy(year, contingent, yearlyAbsences)
+            val employee = contingent.employee ?: continue
+            val employeeId = employee.id ?: 0
+            val contingentHours = contingentCalculationService.calculateContingentHoursBy(year, contingent, yearlyAbsences)
 
             // employee got NO evaluation
-            if (employeeEvaluations.none { it.employeeId == contingent.employee.id }) {
-                val executedEmployeeHours = getExecutedHoursByYearAndEmployee(year, contingent.employee.id, services, yearlyAbsences)
+            if (employeeEvaluations.none { it.employeeId == employeeId }) {
+                val executedEmployeeHours = getExecutedHoursByYearAndEmployee(year, employeeId, services, yearlyAbsences)
                 val summedExecutedPercent = getSummedExecutedPercent(contingentHours, executedEmployeeHours)
                 val executedPercent = getExecutedPercent(contingentHours, executedEmployeeHours)
                 val missingHours = getMissingHours(contingentHours, executedEmployeeHours)
                 val absenceDays = getAbsenceDaysByYearAndEmployee(
                     year,
-                    contingent.employee.id,
+                    employeeId,
                     yearlyAbsences
                 )
 
                 employeeEvaluations.add(
-                    EmployeeContingentEvaluationDto(
-                        employeeId = contingent.employee.id,
-                        lastname = contingent.employee.lastname,
-                        firstname = contingent.employee.firstname,
-                        archived = contingent.employee.archived,
+                    EmployeeContingentEvaluationResponse(
+                        employeeId = employeeId,
+                        lastname = employee.lastname,
+                        firstname = employee.firstname,
+                        archived = employee.archived,
                         contingentHours = contingentHours,
                         executedHours = executedEmployeeHours,
                         executedPercent = executedPercent,
@@ -75,8 +81,8 @@ class ContingentEvaluationService(
             }
             // employee got an evaluation
             else {
-                val contingentEmployeeEvaluation: EmployeeContingentEvaluationDto =
-                    employeeEvaluations.first { it.employeeId == contingent.employee.id }
+                val contingentEmployeeEvaluation: EmployeeContingentEvaluationResponse =
+                    employeeEvaluations.first { it.employeeId == employeeId }
                 employeeEvaluations.remove(contingentEmployeeEvaluation)
 
                 val employeeContingentHours = contingentEmployeeEvaluation.contingentHours
@@ -92,11 +98,11 @@ class ContingentEvaluationService(
                 )
 
                 employeeEvaluations.add(
-                    EmployeeContingentEvaluationDto(
-                        employeeId = contingent.employee.id,
-                        lastname = contingent.employee.lastname,
-                        firstname = contingent.employee.firstname,
-                        archived = contingent.employee.archived,
+                    EmployeeContingentEvaluationResponse(
+                        employeeId = employeeId,
+                        lastname = employee.lastname,
+                        firstname = employee.firstname,
+                        archived = employee.archived,
                         contingentHours = employeeContingentHours,
                         executedHours = contingentEmployeeEvaluation.executedHours,
                         executedPercent = employeeExecutedPercent,
@@ -134,10 +140,11 @@ class ContingentEvaluationService(
         return monthlyAbsenceDays
     }
 
+    @InternalEntityApi
     fun getExecutedHoursByYearAndEmployee(
         year: Int,
         employeeId: Long,
-        services: List<ContingentEvaluationServiceProjection>,
+        services: List<ContingentServiceEntryDto>,
         yearlyAbsences: List<Absence>
     ): List<Double> {
         val employeeServices = services.filter { it.employeeId == employeeId }

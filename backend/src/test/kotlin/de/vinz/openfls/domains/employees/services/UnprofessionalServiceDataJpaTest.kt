@@ -52,30 +52,4 @@ class UnprofessionalServiceDataJpaTest {
         assertThat(saved.first().end).isEqualTo(LocalDate.of(2026, 2, 1))
     }
 
-    @Test
-    fun update_existingEntity_updatesEndDate() {
-        // Given
-        val employee = employeeRepository.save(Employee(firstname = "Max", lastname = "Mustermann"))
-        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
-        val existing = unprofessionalRepository.save(Unprofessional(
-            id = UnprofessionalKey(employeeId = employee.id, sponsorId = sponsor.id),
-            employee = employee,
-            sponsor = sponsor,
-            end = LocalDate.of(2026, 1, 1)
-        ))
-        val updated = Unprofessional(
-            id = existing.id,
-            employee = employee,
-            sponsor = sponsor,
-            end = LocalDate.of(2026, 3, 1)
-        )
-
-        // When
-        val result = unprofessionalService.updateEntity(updated)
-
-        // Then
-        val saved = unprofessionalRepository.findByEmployeeId(employee.id!!)
-        assertThat(saved).hasSize(1)
-        assertThat(saved.first().end).isEqualTo(LocalDate.of(2026, 3, 1))
-    }
 }

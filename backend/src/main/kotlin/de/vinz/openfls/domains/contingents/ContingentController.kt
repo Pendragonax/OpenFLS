@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.contingents
 
-import de.vinz.openfls.domains.contingents.dtos.ContingentDto
+import de.vinz.openfls.domains.contingents.dtos.ContingentCreateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateRequest
 import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
@@ -8,6 +9,7 @@ import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -22,18 +24,17 @@ class ContingentController(
     private val logger: Logger = LoggerFactory.getLogger(ContingentController::class.java)
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: ContingentDto): Any {
+    fun create(@Valid @RequestBody request: ContingentCreateRequest): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (!accessService.isLeader(valueDto.institutionId)) {
-            throw IllegalAccessException("no permission to add this contingent")
-        }
+        if (request.end != null && request.start >= request.end)
+            return ResponseEntity.badRequest().body("end before start")
+        if (!accessService.isLeader(request.institutionId))
+            return forbidden("no permission to add this contingent")
 
         return try {
-            ResponseEntity.ok(contingentService.create(valueDto))
-        } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
+            ResponseEntity.ok(contingentService.create(request))
         } catch (ex: IllegalArgumentException) {
             ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
         } catch (ex: Exception) {
@@ -45,18 +46,22 @@ class ContingentController(
 
     @PutMapping("{id}")
     fun update(
-        @PathVariable id: Long, @Valid @RequestBody valueDto: ContingentDto
+        @PathVariable id: Long, @Valid @RequestBody request: ContingentUpdateRequest
     ): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (id != valueDto.id) throw IllegalArgumentException("path id and dto id are not the same")
-        if (!contingentService.canModifyContingent(valueDto.id)) throw IllegalAccessException("no permission to update this contingent")
+        if (id != request.id)
+            return ResponseEntity.badRequest().body("path id and request id are not the same")
+        if (request.end != null && request.start >= request.end)
+            return ResponseEntity.badRequest().body("end before start")
+        if (!contingentService.existsById(id))
+            return contingentNotFound()
+        if (!contingentService.canModifyContingent(id))
+            return forbidden("no permission to update this contingent")
 
         return try {
-            ResponseEntity.ok(contingentService.update(valueDto))
-        } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
+            ResponseEntity.ok(contingentService.update(request))
         } catch (ex: IllegalArgumentException) {
             ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
         } catch (ex: Exception) {
@@ -71,17 +76,14 @@ class ContingentController(
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (!accessService.isAdmin()) throw IllegalAccessException("no permission to delete this contingent")
+        if (!accessService.isAdmin())
+            return forbidden("no permission to delete this contingent")
+        val contingent = contingentService.getById(id) ?: return contingentNotFound()
 
         return try {
-            val dto = contingentService.getById(id)
             contingentService.delete(id)
 
-            ResponseEntity.ok(dto)
-        } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
-        } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
+            ResponseEntity.ok(contingent)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -96,10 +98,6 @@ class ContingentController(
 
         return try {
             ResponseEntity.ok(contingentService.getAll())
-        } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
-        } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -113,11 +111,8 @@ class ContingentController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(contingentService.getById(id))
-        } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
-        } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
+            val contingent = contingentService.getById(id) ?: return contingentNotFound()
+            ResponseEntity.ok(contingent)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -140,10 +135,6 @@ class ContingentController(
                     accessService.isAdmin() && includeArchivedEmployees
                 )
             )
-        } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
-        } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -166,14 +157,16 @@ class ContingentController(
                     accessService.isAdmin() && includeArchivedEmployees
                 )
             )
-        } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
-        } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("getByInstitutionId", startMs, logger)
         }
     }
+
+    private fun contingentNotFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("contingent not found")
+
+    private fun forbidden(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.FORBIDDEN).body(message)
 }

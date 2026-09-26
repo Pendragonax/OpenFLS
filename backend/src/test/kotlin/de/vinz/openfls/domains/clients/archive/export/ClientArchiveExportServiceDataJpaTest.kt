@@ -131,7 +131,7 @@ class ClientArchiveExportServiceDataJpaTest {
         assertThat(status.ready).isTrue
         assertThat(status.downloadLink).isNotNull
 
-        val request = clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }
         assertThat(request).isNotNull
         assertThat(Files.exists(Path.of(request!!.filePath))).isTrue
 
@@ -193,7 +193,7 @@ class ClientArchiveExportServiceDataJpaTest {
         )
 
         // Then
-        val request = clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }
         assertThat(request).isNotNull
         val json = objectMapper.readTree(Files.readString(Path.of(request!!.filePath)))
         val serviceNode = json["services"][0]
@@ -233,7 +233,7 @@ class ClientArchiveExportServiceDataJpaTest {
         )
 
         // Then
-        val request = clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }
         assertThat(request).isNotNull
         assertThat(request!!.expiresAt).isEqualTo(request.requestedAt.plusMinutes(5))
     }
@@ -256,7 +256,7 @@ class ClientArchiveExportServiceDataJpaTest {
             actor = actor
         )
         val token = status.downloadLink!!.downloadLink.substringAfterLast("/")
-        val request = clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)!!
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }!!
 
         // When
         val download = clientArchiveExportService.downloadExport(graph.client.id, token)
@@ -285,7 +285,7 @@ class ClientArchiveExportServiceDataJpaTest {
             anonymize = false,
             actor = actor
         )
-        val request = clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)!!
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }!!
         request.expiresAt = LocalDateTime.now().minusMinutes(1)
         clientArchiveExportRequestRepository.save(request)
 
@@ -295,7 +295,7 @@ class ClientArchiveExportServiceDataJpaTest {
         // Then
         assertThat(status.ready).isFalse
         assertThat(status.downloadLink).isNull()
-        assertThat(clientArchiveExportRequestRepository.findTopByClientIdOrderByRequestedAtDesc(graph.client.id)).isNull()
+        assertThat(clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }).isNull()
     }
 
     private fun createExportGraph(): ExportGraph {

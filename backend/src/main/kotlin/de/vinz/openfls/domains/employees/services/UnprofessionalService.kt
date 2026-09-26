@@ -21,33 +21,8 @@ class UnprofessionalService(
     }
 
     @Transactional
-    fun updateEntity(value: Unprofessional): Unprofessional {
-        return unprofessionalRepository.save(value)
-    }
-
-    @Transactional
-    fun delete(id: Long) {
-        return unprofessionalRepository.deleteById(id)
-    }
-
-    @Transactional
     fun deleteByEmployeeIdSponsorId(employeeId: Long, sponsorId: Long) {
         return unprofessionalRepository.deleteByEmployeeIdSponsorId(employeeId, sponsorId)
-    }
-
-    @Transactional(readOnly = true)
-    fun getAllEntities(): List<Unprofessional> {
-        return unprofessionalRepository.findAll().toList()
-    }
-
-    @Transactional(readOnly = true)
-    fun getEntityById(id: Long): Unprofessional? {
-        return unprofessionalRepository.findById(id).orElse(null)
-    }
-
-    @Transactional(readOnly = true)
-    fun existsById(id: Long): Boolean {
-        return unprofessionalRepository.existsById(id)
     }
 
     @Transactional(readOnly = true)

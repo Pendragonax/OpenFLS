@@ -67,19 +67,18 @@ class ContingentEvaluationController(
     @GetMapping("employee/{id}/{end}")
     fun getTimes2ByEmployee(@PathVariable id: Long,
                             @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        val employee = employeeService.getEmployeeDtoById(id, true)
+        if (employee == null || employee.archived)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("employee not found")
+        if (accessService.getId() != id &&
+            !accessService.isAdmin() &&
+            !accessService.canReadEmployee(id))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No permission to get the times of this employee")
+
         return try {
             val startMs = System.currentTimeMillis()
-            val employee = employeeService.getEmployeeDtoById(id, true)
-                ?: throw IllegalArgumentException("employee not found")
-            if (employee.archived) {
-                throw IllegalArgumentException("employee not found")
-            }
-            if (accessService.getId() != id &&
-                !accessService.isAdmin() &&
-                !accessService.canReadEmployee(id))
-                throw IllegalArgumentException("No permission to get the times of this employee")
 
-            val calendarDto = contingentCalendarService.generateContingentCalendarInformationFor(id, end)
+            val calendar = contingentCalendarService.generateContingentCalendarFor(id, end)
 
             if (logPerformance) {
                 logger.info(String.format("%s getTimesByEmployee took %s ms",
@@ -87,7 +86,7 @@ class ContingentEvaluationController(
                     System.currentTimeMillis() - startMs))
             }
 
-            ResponseEntity.ok(calendarDto)
+            ResponseEntity.ok(calendar)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 

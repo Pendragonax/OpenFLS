@@ -1,10 +1,10 @@
 package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.absence.AbsenceService
-import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarInformationDto
-import de.vinz.openfls.domains.contingents.dtos.ContingentDto
-import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarDayInformation
-import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarInformation
+import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarPeriodResponse
+import de.vinz.openfls.domains.contingents.Contingent
+import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarDayResponse
+import de.vinz.openfls.domains.contingents.dtos.ContingentCalendarResponse
 import de.vinz.openfls.domains.services.ServiceRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,17 +19,18 @@ import kotlin.math.round
 class ContingentCalendarService(
     private val serviceRepository: ServiceRepository,
     private val contingentService: ContingentService,
+    private val contingentCalculationService: ContingentCalculationService,
     private val absenceService: AbsenceService
 ) {
 
     private val warningPercent = 95.0
 
-    fun generateContingentCalendarInformationFor(employeeId: Long, end: LocalDate): ContingentCalendarInformation {
+    fun generateContingentCalendarFor(employeeId: Long, end: LocalDate): ContingentCalendarResponse {
         val start = end.minusYears(1)
-        val contingents = contingentService.getByEmployeeId(employeeId)
+        val contingents = contingentService.getAllEntitiesByEmployeeId(employeeId)
         val absenceDates = absenceService.getAllEntitiesByEmployeeId(employeeId).map { it.absenceDate }.toMutableList()
         val calendarDayInformations =
-            generateContingentCalendarDayInformationFor(employeeId, start, end, contingents, absenceDates)
+            generateContingentCalendarDaysFor(employeeId, start, end, contingents, absenceDates)
         val absenceDays = absenceDates.map { date ->
             generate(date, 0, 0, true)
         }
@@ -41,7 +42,7 @@ class ContingentCalendarService(
             generateForThisMonth(end, calendarDayInformations, contingents, absenceDates)
 
         val allDays = (calendarDayInformations + absenceDays).sortedBy { it.date }
-        return ContingentCalendarInformation(
+        return ContingentCalendarResponse(
             employeeId,
             allDays,
             todayInformation,
@@ -51,29 +52,29 @@ class ContingentCalendarService(
     }
 
     private fun generateForToday(
-        calendarDayInformations: List<ContingentCalendarDayInformation>,
-        contingents: List<ContingentDto>,
+        calendarDayInformations: List<ContingentCalendarDayResponse>,
+        contingents: List<Contingent>,
         absenceDates: List<LocalDate>
-    ): ContingentCalendarInformationDto {
+    ): ContingentCalendarPeriodResponse {
         val contingentMinutes =
-            ceil(contingentService.calculateContingentMinutesForWorkdayBy(LocalDate.now(), contingents)).toInt()
+            ceil(contingentCalculationService.calculateContingentMinutesForWorkdayBy(LocalDate.now(), contingents)).toInt()
 
         if (absenceDates.contains(LocalDate.now())) {
-            return generateContingentInformationDto(0, 0)
+            return generateContingentPeriodResponse(0, 0)
         }
 
         val todayCalendarDay = calendarDayInformations.firstOrNull { it.date.isEqual(LocalDate.now()) }
         val executedMinutes = todayCalendarDay?.let { it.executedHours * 60 + it.executedMinutes } ?: 0
 
-        return generateContingentInformationDto(executedMinutes, contingentMinutes)
+        return generateContingentPeriodResponse(executedMinutes, contingentMinutes)
     }
 
     private fun generateForThisWeek(
         end: LocalDate,
-        calendarDayInformations: List<ContingentCalendarDayInformation>,
-        contingents: List<ContingentDto>,
+        calendarDayInformations: List<ContingentCalendarDayResponse>,
+        contingents: List<Contingent>,
         absenceDates: List<LocalDate>
-    ): ContingentCalendarInformationDto {
+    ): ContingentCalendarPeriodResponse {
         val thisWeekStart = end.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
 
         return generateFor(thisWeekStart, end, calendarDayInformations, contingents, absenceDates)
@@ -81,10 +82,10 @@ class ContingentCalendarService(
 
     private fun generateForThisMonth(
         end: LocalDate,
-        calendarDayInformations: List<ContingentCalendarDayInformation>,
-        contingents: List<ContingentDto>,
+        calendarDayInformations: List<ContingentCalendarDayResponse>,
+        contingents: List<Contingent>,
         absenceDates: List<LocalDate>
-    ): ContingentCalendarInformationDto {
+    ): ContingentCalendarPeriodResponse {
         val thisMonthStart = end.withDayOfMonth(1)
 
         return generateFor(thisMonthStart, end, calendarDayInformations, contingents, absenceDates)
@@ -93,32 +94,32 @@ class ContingentCalendarService(
     private fun generateFor(
         start: LocalDate,
         end: LocalDate,
-        calendarDayInformations: List<ContingentCalendarDayInformation>,
-        contingents: List<ContingentDto>,
+        calendarDayInformations: List<ContingentCalendarDayResponse>,
+        contingents: List<Contingent>,
         absenceDates: List<LocalDate>
-    ): ContingentCalendarInformationDto {
-        val contingentMinutes = contingentService.calculateContingentMinutesFor(start, end, contingents)
+    ): ContingentCalendarPeriodResponse {
+        val contingentMinutes = contingentCalculationService.calculateContingentMinutesFor(start, end, contingents)
         val executedMinutes = sumExecutedMinutesFor(start, end, calendarDayInformations)
         val absenceMinutes = absenceDates
             .filter { !it.isBefore(start) && !it.isAfter(end) }
-            .sumOf { contingentService.calculateContingentMinutesForWorkdayBy(it, contingents).toInt() }
+            .sumOf { contingentCalculationService.calculateContingentMinutesForWorkdayBy(it, contingents).toInt() }
 
-        return generateContingentInformationDto(executedMinutes, contingentMinutes - absenceMinutes)
+        return generateContingentPeriodResponse(executedMinutes, contingentMinutes - absenceMinutes)
     }
 
-    private fun generateContingentCalendarDayInformationFor(
+    private fun generateContingentCalendarDaysFor(
         employeeId: Long,
         start: LocalDate,
         end: LocalDate,
-        contingents: List<ContingentDto>,
+        contingents: List<Contingent>,
         absenceDates: MutableList<LocalDate>
-    ): List<ContingentCalendarDayInformation> {
+    ): List<ContingentCalendarDayResponse> {
         return serviceRepository.findServiceCalendarProjection(employeeId, start, end)
             .groupBy { it.start.toLocalDate() }
             .map {
                 val minutes = it.value.sumOf { service -> service.minutes }
                 val contingentMinutes =
-                    ceil(contingentService.calculateContingentMinutesForWorkdayBy(it.key, contingents)).toInt()
+                    ceil(contingentCalculationService.calculateContingentMinutesForWorkdayBy(it.key, contingents)).toInt()
                 val absentFound = absenceDates.contains(it.key)
                 if (absentFound) {
                     absenceDates.remove(it.key)
@@ -130,7 +131,7 @@ class ContingentCalendarService(
     private fun sumExecutedMinutesFor(
         start: LocalDate,
         end: LocalDate,
-        calendarDayInformations: List<ContingentCalendarDayInformation>
+        calendarDayInformations: List<ContingentCalendarDayResponse>
     ): Int {
         return calendarDayInformations.filter { !it.date.isBefore(start) && !it.date.isAfter(end) }
             .sumOf { it.executedHours * 60 + it.executedMinutes }
@@ -141,7 +142,7 @@ class ContingentCalendarService(
         executedMinutes: Int,
         contingentMinutes: Int,
         absent: Boolean
-    ): ContingentCalendarDayInformation {
+    ): ContingentCalendarDayResponse {
         val differenceMinutes = executedMinutes - contingentMinutes
         val executedPercentage = if (contingentMinutes == 0) {
             1.0
@@ -149,7 +150,7 @@ class ContingentCalendarService(
             executedMinutes.toDouble() / contingentMinutes.toDouble()
         }
 
-        return ContingentCalendarDayInformation(
+        return ContingentCalendarDayResponse(
             date = date,
             absence = absent,
             executedPercentage = round(executedPercentage * 10000) / 100,
@@ -163,10 +164,10 @@ class ContingentCalendarService(
         )
     }
 
-    private fun generateContingentInformationDto(
+    private fun generateContingentPeriodResponse(
         executedMinutes: Int,
         contingentMinutes: Int
-    ): ContingentCalendarInformationDto {
+    ): ContingentCalendarPeriodResponse {
         val differenceMinutes = executedMinutes - contingentMinutes
         val executedPercentage = if (contingentMinutes == 0) {
             1.0
@@ -174,7 +175,7 @@ class ContingentCalendarService(
             executedMinutes.toDouble() / contingentMinutes.toDouble()
         }
 
-        return ContingentCalendarInformationDto(
+        return ContingentCalendarPeriodResponse(
             executedPercentage = round(executedPercentage * 10000) / 100,
             warningPercent = warningPercent,
             executedHours = executedMinutes / 60,

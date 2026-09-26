@@ -124,12 +124,6 @@ class ServiceService(
         return serviceRepository.findProjectionsByInstitutionIdsAndStartAndEnd(institutionIds, start, end)
     }
 
-    fun getAllByInstitutionAndYear(institutionId: Long, year: Int): List<ServiceProjection> {
-        val start = LocalDate.of(year, 1, 1)
-        val end = LocalDate.of(year, 12, 31)
-        return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end)
-    }
-
     fun getById(id: Long): ServiceWithGoalsAndCategories? {
         return modelMapper.map(getEntityById(id), ServiceWithGoalsAndCategories::class.java)
     }
@@ -191,10 +185,6 @@ class ServiceService(
 
     private fun getByEmployeeAndDate(employeeId: Long, date: LocalDate): List<Service> {
         return serviceRepository.findByEmployeeAndDate(employeeId, date)
-    }
-
-    fun getByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<ServiceProjection> {
-        return serviceRepository.findByEmployeeAndStartAndEnd(employeeId, start, end)
     }
 
     fun getProjectionDtosByEmployeeAndStartAndEnd(employeeId: Long, start: LocalDate, end: LocalDate): List<ServiceProjectionDto> {

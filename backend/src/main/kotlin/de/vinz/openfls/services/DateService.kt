@@ -1,41 +1,10 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeException
 import java.time.*
 import java.time.temporal.ChronoUnit
 
 class DateService {
     companion object {
-        fun getStartAndEndInYear(year: Int, start: LocalDate, end: LocalDate): Pair<LocalDate, LocalDate> {
-            var resultStart = LocalDate.of(year, 1, 1)
-            var resultEnd = LocalDate.of(year, 12, 31)
-
-            if (start.year < year) {
-                resultEnd = if (end > resultStart) {
-                    if (end >= resultEnd) resultEnd else end
-                } else if (end == resultStart) {
-                    LocalDate.of(year, 1, 1)
-                } else {
-                    throw YearOutOfRangeException()
-                }
-                return Pair(resultStart, resultEnd)
-            }
-
-            if (start <= resultEnd) {
-                resultStart = start
-                resultEnd = if (end > resultEnd) {
-                    resultEnd
-                } else if (end < resultEnd) {
-                    end
-                } else {
-                    throw YearOutOfRangeException()
-                }
-                return Pair(resultStart, resultEnd)
-            }
-
-            throw YearOutOfRangeException()
-        }
-
         fun isDateInAssistancePlan(date: LocalDate, start: LocalDate, end: LocalDate): Boolean {
             return !date.isBefore(start) && !date.isAfter(end)
         }
@@ -77,10 +46,6 @@ class DateService {
             end = if (planEnd > end) end else planEnd
 
             return ChronoUnit.DAYS.between(start, end) + 1
-        }
-
-        fun countDaysOfYear(year: Int): Long {
-            return if (Year.of(year).isLeap) 366L else 365L
         }
 
         fun countDaysOfYearBetweenStartAndEnd(year: Int, start: LocalDate, end: LocalDate?): Int {
@@ -183,17 +148,6 @@ class DateService {
             val hoursPart = (minutes - minutesPart) / 60
 
             return hoursPart + (minutesPart / 100.0)
-        }
-
-        fun convertHourToMinutes(hour: Double): Int {
-            val hours = hour.toInt()
-            val minutesPart = ((hour - hours) * 100).toInt()
-
-            return hours * 60 + minutesPart
-        }
-
-        fun calculateWorkdaysInHesse(year: Int): Int {
-            return calculateWorkdaysInHesseBetween(LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31), year)
         }
 
         fun calculateWorkdaysInHesseBetween(startDate: LocalDate, endDate: LocalDate): Int {

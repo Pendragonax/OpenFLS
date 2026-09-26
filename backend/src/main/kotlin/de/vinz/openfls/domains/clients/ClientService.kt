@@ -147,11 +147,6 @@ class ClientService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllEntities(): List<Client> {
-        return clientRepository.findAll().toList()
-    }
-
-    @Transactional(readOnly = true)
     fun getAllClientSimpleDto(
         includeArchived: Boolean = false,
         leadingInstitutionIds: List<Long> = emptyList()

@@ -23,6 +23,8 @@ Hinweise.
   Erwartete Fälle (z. B. „nicht gefunden“) im Controller als Response
   zurückgeben, nicht per Exception; Projections gehören der Domäne, die sie
   abfragt (ungenutzte in der eigenen Domäne dort anlegen, wo sie gebraucht werden).
+  Kein toter Code: keine ungenutzten Methoden/Klassen/Properties und keine
+  Member, die nur wegen Tests existieren (bei Migration jeder Domäne prüfen).
   Arbeitsmodus pro Domäne: Inventur → Vorschlag → Freigabe → Umsetzung.
 - **Logging:** Für alle Änderungen am Logging gilt `docs/logging-guide.md`.
 - **Skills:** Projekt-Skills liegen unter `.claude/skills/` (portiert aus

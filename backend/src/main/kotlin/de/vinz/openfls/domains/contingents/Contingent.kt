@@ -1,7 +1,6 @@
 package de.vinz.openfls.domains.contingents
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.institutions.Institution
 import jakarta.persistence.*
@@ -13,7 +12,7 @@ import java.time.LocalDate
 class Contingent(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long,
+    var id: Long = 0,
 
     @field:NotNull(message = "Start is required.")
     var start: LocalDate = LocalDate.now(),
@@ -43,20 +42,4 @@ class Contingent(
         return id.hashCode()
     }
 
-    companion object {
-        fun of(contingent: ContingentDto): Contingent {
-            return Contingent(
-                id = contingent.id,
-                start = contingent.start,
-                end = contingent.end,
-                weeklyServiceHours = contingent.weeklyServiceHours
-            )
-        }
-
-        fun of(contingents: List<ContingentDto>): List<Contingent> {
-            return contingents.map {
-                of(it)
-            }
-        }
-    }
 }

@@ -1,25 +1,20 @@
 package de.vinz.openfls.domains.contingents.services
 
-import de.vinz.openfls.domains.absence.Absence
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
-import de.vinz.openfls.domains.contingents.dtos.ContingentDto
-import de.vinz.openfls.domains.contingents.projections.ContingentProjection
+import de.vinz.openfls.domains.contingents.dtos.ContingentCreateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateRequest
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -58,8 +53,7 @@ class ContingentServiceTest {
     @Test
     fun create_validDto_returnsSavedDto() {
         // Given
-        val dto = contingentDto(
-            id = 0,
+        val dto = createRequest(
             start = LocalDate.of(2024, 1, 1),
             end = LocalDate.of(2024, 12, 31),
             weeklyHours = 10.0,
@@ -92,8 +86,7 @@ class ContingentServiceTest {
     @Test
     fun create_archivedEmployee_throwsIllegalArgument() {
         // Given
-        val dto = contingentDto(
-            id = 0,
+        val dto = createRequest(
             start = LocalDate.of(2024, 1, 1),
             weeklyHours = 10.0,
             employeeId = 5,
@@ -111,8 +104,7 @@ class ContingentServiceTest {
     @Test
     fun create_endBeforeStart_throwsIllegalArgument() {
         // Given
-        val dto = contingentDto(
-            id = 0,
+        val dto = createRequest(
             start = LocalDate.of(2024, 2, 1),
             end = LocalDate.of(2024, 1, 1),
             weeklyHours = 10.0,
@@ -129,8 +121,8 @@ class ContingentServiceTest {
     @Test
     fun update_notExisting_throwsIllegalArgument() {
         // Given
-        val dto = contingentDto(id = 9)
-        whenever(contingentRepository.existsById(dto.id)).thenReturn(false)
+        val dto = updateRequest(id = 9)
+        whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.empty())
 
         // When / Then
         assertThatThrownBy { contingentService.update(dto) }
@@ -141,12 +133,12 @@ class ContingentServiceTest {
     @Test
     fun update_endBeforeStart_throwsIllegalArgument() {
         // Given
-        val dto = contingentDto(
+        val dto = updateRequest(
             id = 9,
             start = LocalDate.of(2024, 3, 1),
             end = LocalDate.of(2024, 2, 1)
         )
-        whenever(contingentRepository.existsById(dto.id)).thenReturn(true)
+        whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.of(Contingent(id = 9)))
 
         // When / Then
         assertThatThrownBy { contingentService.update(dto) }
@@ -157,7 +149,7 @@ class ContingentServiceTest {
     @Test
     fun update_validDto_returnsSavedDto() {
         // Given
-        val dto = contingentDto(
+        val dto = updateRequest(
             id = 9,
             start = LocalDate.of(2024, 1, 1),
             end = LocalDate.of(2024, 2, 1),
@@ -173,7 +165,7 @@ class ContingentServiceTest {
             employee = Employee(id = 2),
             institution = Institution(id = 3)
         )
-        whenever(contingentRepository.existsById(dto.id)).thenReturn(true)
+        whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.of(Contingent(id = 9)))
         whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId))
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(Institution(id = dto.institutionId))
         whenever(contingentRepository.save(any<Contingent>())).thenReturn(saved)
@@ -192,7 +184,7 @@ class ContingentServiceTest {
     @Test
     fun update_archivedEmployee_throwsIllegalArgument() {
         // Given
-        val dto = contingentDto(
+        val dto = updateRequest(
             id = 9,
             start = LocalDate.of(2024, 1, 1),
             end = LocalDate.of(2024, 2, 1),
@@ -200,7 +192,7 @@ class ContingentServiceTest {
             employeeId = 2,
             institutionId = 3
         )
-        whenever(contingentRepository.existsById(dto.id)).thenReturn(true)
+        whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.of(Contingent(id = 9)))
         whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId, archived = true))
 
         // When / Then
@@ -210,21 +202,7 @@ class ContingentServiceTest {
     }
 
     @Test
-    fun delete_missingContingent_throwsIllegalArgument() {
-        // Given
-        whenever(contingentRepository.existsById(10)).thenReturn(false)
-
-        // When / Then
-        assertThatThrownBy { contingentService.delete(10) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("contingent not found")
-    }
-
-    @Test
     fun delete_existingContingent_deletesById() {
-        // Given
-        whenever(contingentRepository.existsById(11)).thenReturn(true)
-
         // When
         contingentService.delete(11)
 
@@ -247,22 +225,22 @@ class ContingentServiceTest {
     }
 
     @Test
-    fun getAllByInstitutionAndYear_delegatesToRepository() {
+    fun getAllEntitiesByInstitutionAndYear_delegatesToRepository() {
         // Given
         val institutionId = 9L
         val year = 2024
-        val projection = mock(ContingentProjection::class.java)
+        val contingent = Contingent(id = 1)
         whenever(contingentRepository.findByInstitutionIdAndStartAndEnd(
             institutionId,
             LocalDate.of(year, 1, 1),
             LocalDate.of(year, 12, 31)
-        )).thenReturn(listOf(projection))
+        )).thenReturn(listOf(contingent))
 
         // When
-        val result = contingentService.getAllByInstitutionAndYear(institutionId, year)
+        val result = contingentService.getAllEntitiesByInstitutionAndYear(institutionId, year)
 
         // Then
-        assertThat(result).containsExactly(projection)
+        assertThat(result).containsExactly(contingent)
     }
 
     @Test
@@ -417,204 +395,61 @@ class ContingentServiceTest {
     }
 
     @Test
-    fun calculateContingentHoursBy_yearWithAbsences_returnsExpectedHours() {
+    fun create_missingInstitution_throwsIllegalArgument() {
         // Given
-        val year = 2024
-        val contingent = mockContingentProjectionForHours(
-            start = LocalDate.of(year, 1, 1),
-            end = LocalDate.of(year, 1, 10),
-            weeklyHours = 10.0
-        )
-        val absences = listOf(Absence(absenceDate = LocalDate.of(year, 1, 3), employeeId = contingent.employee.id))
-        val workdays = DateService.calculateWorkdaysInHesseBetween(contingent.start, contingent.end, year)
-        val dailyHours = contingent.weeklyServiceHours / 5
-        val expectedTotal = TimeDoubleService.convertDoubleToTimeDouble((workdays - 1) * dailyHours)
+        val dto = createRequest(employeeId = 5, institutionId = 7)
+        whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = 5))
+        whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(null)
 
-        // When
-        val result = contingentService.calculateContingentHoursBy(year, contingent, absences)
-
-        // Then
-        assertThat(result[0]).isEqualTo(expectedTotal)
-        assertThat(result[1]).isEqualTo(12.0)
+        // When / Then
+        assertThatThrownBy { contingentService.create(dto) }
+            .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessageContaining("institution not found")
     }
 
     @Test
-    fun calculateContingentHoursBy_monthOutsideContingent_returnsZero() {
+    fun getAllEntitiesByEmployeeId_activeEmployee_returnsEntities() {
         // Given
-        val year = 2024
-        val contingent = mockContingentProjectionForRange(start = LocalDate.of(year, 3, 1))
-        val absences = emptyList<Absence>()
+        val contingent = Contingent(id = 1, employee = Employee(id = 7))
+        whenever(employeeService.getById(7)).thenReturn(Employee(id = 7, archived = false))
+        whenever(contingentRepository.findAllByEmployeeId(7)).thenReturn(listOf(contingent))
 
         // When
-        val result = contingentService.calculateContingentHoursBy(year, 1, contingent, absences)
+        val result = contingentService.getAllEntitiesByEmployeeId(7)
 
         // Then
-        assertThat(result).isEqualTo(0.0)
+        assertThat(result).containsExactly(contingent)
     }
 
-    @Test
-    fun calculateContingentHoursBy_monthWithAbsences_reducesHours() {
-        // Given
-        val year = 2024
-        val contingent = mockContingentProjectionForHours(
-            start = LocalDate.of(year, 1, 1),
-            end = LocalDate.of(year, 1, 31),
-            weeklyHours = 10.0
-        )
-        val absences = listOf(Absence(absenceDate = LocalDate.of(year, 1, 3), employeeId = contingent.employee.id))
-        val workdays = DateService.countWorkDaysOfMonthAndYearBetweenStartAndEnd(
-            year,
-            1,
-            contingent.start,
-            contingent.end!!
-        )
-        val expected = TimeDoubleService.convertDoubleToTimeDouble((workdays - 1) * (contingent.weeklyServiceHours / 5))
+    private fun createRequest(
+        start: LocalDate = LocalDate.of(2024, 1, 1),
+        end: LocalDate? = null,
+        weeklyHours: Double = 7.0,
+        employeeId: Long = 1,
+        institutionId: Long = 1
+    ) = ContingentCreateRequest(
+        start = start,
+        end = end,
+        weeklyServiceHours = weeklyHours,
+        employeeId = employeeId,
+        institutionId = institutionId
+    )
 
-        // When
-        val result = contingentService.calculateContingentHoursBy(year, 1, contingent, absences)
-
-        // Then
-        assertThat(result).isEqualTo(expected)
-    }
-
-    @Test
-    fun countAbsenceDaysBy_filtersByEmployeeMonthAndContingent() {
-        // Given
-        val year = 2024
-        val contingent = mockContingentProjectionForAbsences(
-            start = LocalDate.of(year, 1, 1),
-            end = LocalDate.of(year, 1, 31)
-        )
-        val absences = listOf(
-            Absence(absenceDate = LocalDate.of(year, 1, 1), employeeId = contingent.employee.id),
-            Absence(absenceDate = LocalDate.of(year, 2, 5), employeeId = contingent.employee.id),
-            Absence(absenceDate = LocalDate.of(year, 1, 6), employeeId = contingent.employee.id + 1)
-        )
-
-        // When
-        val result = contingentService.countAbsenceDaysBy(year, 1, contingent, absences)
-
-        // Then
-        assertThat(result).isEqualTo(1)
-    }
-
-    @Test
-    fun countAbsenceDaysInContingentForYear_countsOnlyInsideRange() {
-        // Given
-        val year = 2024
-        val contingent = mockContingentProjectionForAbsences(
-            start = LocalDate.of(year, 1, 1),
-            end = LocalDate.of(year, 1, 10)
-        )
-        val absences = listOf(
-            Absence(absenceDate = LocalDate.of(year, 1, 2), employeeId = contingent.employee.id),
-            Absence(absenceDate = LocalDate.of(year, 1, 5), employeeId = contingent.employee.id),
-            Absence(absenceDate = LocalDate.of(year, 1, 11), employeeId = contingent.employee.id)
-        )
-
-        // When
-        val result = contingentService.countAbsenceDaysInContingentForYear(year, contingent, absences)
-
-        // Then
-        assertThat(result).isEqualTo(2)
-    }
-
-    @Test
-    fun isContingentInYearMonth_insideRange_returnsTrue() {
-        // Given
-        val contingent = mockContingentProjectionForRange(start = LocalDate.of(2024, 1, 1))
-        whenever(contingent.end).thenReturn(LocalDate.of(2024, 3, 1))
-
-        // When
-        val result = contingentService.isContingentInYearMonth(2024, 2, contingent)
-
-        // Then
-        assertThat(result).isTrue()
-    }
-
-    @Test
-    fun isContingentInYearMonth_outsideRange_returnsFalse() {
-        // Given
-        val contingent = mockContingentProjectionForRange(start = LocalDate.of(2024, 3, 1))
-
-        // When
-        val result = contingentService.isContingentInYearMonth(2024, 2, contingent)
-
-        // Then
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun calculateContingentMinutesForWorkdayBy_weekend_returnsZero() {
-        // Given
-        val date = LocalDate.of(2024, 1, 6)
-        val contingents = listOf(contingentDto(start = LocalDate.of(2024, 1, 1)))
-
-        // When
-        val result = contingentService.calculateContingentMinutesForWorkdayBy(date, contingents)
-
-        // Then
-        assertThat(result).isEqualTo(0.0)
-    }
-
-    @Test
-    fun calculateContingentMinutesForWorkdayBy_matchingContingent_returnsDailyMinutes() {
-        // Given
-        val date = LocalDate.of(2024, 1, 2)
-        val contingents = listOf(contingentDto(
-            start = LocalDate.of(2024, 1, 1),
-            end = LocalDate.of(2024, 1, 31),
-            weeklyHours = 10.0
-        ))
-
-        // When
-        val result = contingentService.calculateContingentMinutesForWorkdayBy(date, contingents)
-
-        // Then
-        assertThat(result).isEqualTo(120.0)
-    }
-
-    @Test
-    fun calculateContingentMinutesFor_rangeOfWorkdays_returnsCeiledMinutes() {
-        // Given
-        val start = LocalDate.of(2024, 1, 2)
-        val end = LocalDate.of(2024, 1, 3)
-        val contingents = listOf(contingentDto(
-            start = LocalDate.of(2024, 1, 1),
-            end = LocalDate.of(2024, 1, 31),
-            weeklyHours = 10.0
-        ))
-
-        // When
-        val result = contingentService.calculateContingentMinutesFor(start, end, contingents)
-
-        // Then
-        assertThat(result).isEqualTo(240)
-    }
-
-    private fun contingentDto(
+    private fun updateRequest(
         id: Long = 0,
         start: LocalDate = LocalDate.of(2024, 1, 1),
         end: LocalDate? = null,
         weeklyHours: Double = 7.0,
         employeeId: Long = 1,
         institutionId: Long = 1
-    ): ContingentDto {
-        val dto = ContingentDto()
-        dto.id = id
-        dto.start = start
-        dto.end = end
-        dto.weeklyServiceHours = weeklyHours
-        dto.employeeId = employeeId
-        dto.institutionId = institutionId
-        return dto
-    }
-
-    private fun mockContingentProjectionForRange(start: LocalDate): ContingentProjection {
-        val contingent = mock(ContingentProjection::class.java)
-        whenever(contingent.start).thenReturn(start)
-        return contingent
-    }
+    ) = ContingentUpdateRequest(
+        id = id,
+        start = start,
+        end = end,
+        weeklyServiceHours = weeklyHours,
+        employeeId = employeeId,
+        institutionId = institutionId
+    )
 
     private fun contingent(
         id: Long,
@@ -628,35 +463,5 @@ class ContingentServiceTest {
             employee = employee,
             institution = institution
         )
-    }
-
-    private fun mockContingentProjectionForAbsences(
-        start: LocalDate,
-        end: LocalDate?,
-        employeeId: Long = 1
-    ): ContingentProjection {
-        val employee = mock(EmployeeSoloProjection::class.java)
-        val contingent = mock(ContingentProjection::class.java)
-        whenever(employee.id).thenReturn(employeeId)
-        whenever(contingent.employee).thenReturn(employee)
-        whenever(contingent.start).thenReturn(start)
-        whenever(contingent.end).thenReturn(end)
-        return contingent
-    }
-
-    private fun mockContingentProjectionForHours(
-        start: LocalDate,
-        end: LocalDate?,
-        weeklyHours: Double,
-        employeeId: Long = 1
-    ): ContingentProjection {
-        val employee = mock(EmployeeSoloProjection::class.java)
-        val contingent = mock(ContingentProjection::class.java)
-        whenever(employee.id).thenReturn(employeeId)
-        whenever(contingent.employee).thenReturn(employee)
-        whenever(contingent.start).thenReturn(start)
-        whenever(contingent.end).thenReturn(end)
-        whenever(contingent.weeklyServiceHours).thenReturn(weeklyHours)
-        return contingent
     }
 }

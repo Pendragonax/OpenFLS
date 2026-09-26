@@ -98,11 +98,6 @@ class HourCorridorService(
     }
 
     @Transactional(readOnly = true)
-    fun getEntityById(id: Long): HourCorridor? {
-        return hourCorridorRepository.findByIdOrNull(id)
-    }
-
-    @Transactional(readOnly = true)
     fun existsById(id: Long): Boolean {
         return hourCorridorRepository.existsById(id)
     }

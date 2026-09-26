@@ -10,12 +10,6 @@ import java.io.PrintWriter
 
 class CsvService {
     companion object {
-        fun <T> getCsvString(header: Array<String>, data: Array<Array<T>>, separator: String = ";"): String {
-            val rows = data.map {row -> row.joinToString(separator = separator) { "\"${it}\"" } }.toMutableList()
-            rows.add(0, header.joinToString(separator = separator) { "\"${it}\"" })
-            return rows.joinToString(separator = System.lineSeparator())
-        }
-
         @Throws(CsvCreationFailedException::class)
         fun getCsvFileStream(overviewData: List<AssistancePlanOverviewDto>): ByteArrayInputStream {
             val headerList = mutableListOf("Nachname", "Vorname", "Hilfeplan-Start", "Hilfeplan-Ende", "Kostenträger-ID")

@@ -8,7 +8,6 @@ import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalsTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.AssistancePlanNotFoundException
-import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeException
 import de.vinz.openfls.domains.goalTimeEvaluations.models.YearMonthDoubleValue
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.services.DateService
@@ -64,25 +63,21 @@ class GoalTimeEvaluationService(
         val start = assistancePlan.start
         val end = assistancePlan.end
 
-        return try {
-            val services = serviceRepository.findServicesByAssistancePlanIdAndStartIsBetween(
-                    assistancePlanId,
-                    LocalDateTime.of(start, LocalTime.of(0, 0, 0)),
-                    LocalDateTime.of(end, LocalTime.of(23, 59, 59))
-            )
+        val services = serviceRepository.findServicesByAssistancePlanIdAndStartIsBetween(
+                assistancePlanId,
+                LocalDateTime.of(start, LocalTime.of(0, 0, 0)),
+                LocalDateTime.of(end, LocalTime.of(23, 59, 59))
+        )
 
-            createGoalsTimeEvaluationDto(
-                    assistancePlan,
-                    goalsWithHourType,
-                    year,
-                    services,
-                    hourTypeId,
-                    start,
-                    end
-            )
-        } catch (ex: YearOutOfRangeException) {
-            createEmptyGoalsTimeEvaluationDto(assistancePlanId, goalsWithHourType)
-        }
+        return createGoalsTimeEvaluationDto(
+                assistancePlan,
+                goalsWithHourType,
+                year,
+                services,
+                hourTypeId,
+                start,
+                end
+        )
     }
 
     /**
@@ -282,49 +277,6 @@ class GoalTimeEvaluationService(
             this.summedApprovedHours = summedApprovedHours
             this.approvedHoursLeft = getApprovedHoursLeft(approvedHours, executedHours).toMutableList()
             this.summedApprovedHoursLeft = getApprovedHoursLeft(summedApprovedHours, summedExecutedHours).toMutableList()
-        }
-    }
-
-    private fun createEmptyGoalsTimeEvaluationDto(
-            assistancePlanId: Long,
-            goalsWithHourType: List<Goal>
-    ): GoalsTimeEvaluationDto {
-        val emptyHoursList = List(12) { 0.0 }
-
-        val goalTimeEvaluations = if (goalsWithHourType.isNotEmpty()) {
-            goalsWithHourType.map { goal ->
-                createEmptyGoalTimeEvaluationDto(goal)
-            }.sortedBy { it.title }.toMutableList()
-        } else {
-            mutableListOf()
-        }
-
-        logger.info(goalTimeEvaluations.size.toString())
-        return GoalsTimeEvaluationDto().apply {
-            this.assistancePlanId = assistancePlanId
-            this.executedHours = emptyHoursList
-            this.summedExecutedHours = emptyHoursList
-            this.approvedHours = emptyHoursList
-            this.summedApprovedHours = emptyHoursList
-            this.approvedHoursLeft = emptyHoursList
-            this.summedApprovedHoursLeft = emptyHoursList
-            this.goalTimeEvaluations = goalTimeEvaluations
-        }
-    }
-
-    private fun createEmptyGoalTimeEvaluationDto(goal: Goal): GoalTimeEvaluationDto {
-        val emptyHoursList = List(12) { 0.0 }
-
-        return GoalTimeEvaluationDto().apply {
-            this.id = goal.id
-            this.title = goal.title
-            this.description = goal.description
-            this.executedHours = emptyHoursList
-            this.summedExecutedHours = emptyHoursList
-            this.approvedHours = emptyHoursList
-            this.summedApprovedHours = emptyHoursList
-            this.approvedHoursLeft = emptyHoursList
-            this.summedApprovedHoursLeft = emptyHoursList
         }
     }
 

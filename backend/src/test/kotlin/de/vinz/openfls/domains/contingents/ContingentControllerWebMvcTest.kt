@@ -6,13 +6,18 @@ import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
+import org.mockito.Mockito.never
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 
 @WebMvcTest(ContingentController::class, properties = ["logging.performance=false"])
 @AutoConfigureMockMvc(addFilters = false)
@@ -92,5 +97,100 @@ class ContingentControllerWebMvcTest {
         // Then
         assertThat(result.response.status).isEqualTo(200)
         verify(contingentService).getByEmployeeId(7L, false)
+    }
+    @Test
+    fun create_notLeaderOfInstitution_returnsForbidden() {
+        // Given
+        given(accessService.isLeader(5L)).willReturn(false)
+
+        // When
+        val result = mockMvc.post("/contingents") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"start":"2026-01-01","weeklyServiceHours":10.0,"employeeId":1,"institutionId":5}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(403)
+    }
+
+    @Test
+    fun create_endBeforeStart_returnsBadRequest() {
+        // When
+        val result = mockMvc.post("/contingents") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"start":"2026-02-01","end":"2026-01-01","weeklyServiceHours":10.0,"employeeId":1,"institutionId":5}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(400)
+    }
+
+    @Test
+    fun update_missingContingent_returnsNotFound() {
+        // Given
+        given(contingentService.existsById(7L)).willReturn(false)
+
+        // When
+        val result = mockMvc.put("/contingents/7") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"id":7,"start":"2026-01-01","weeklyServiceHours":10.0,"employeeId":1,"institutionId":5}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun update_pathIdDiffersFromRequestId_returnsBadRequest() {
+        // When
+        val result = mockMvc.put("/contingents/7") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"id":8,"start":"2026-01-01","weeklyServiceHours":10.0,"employeeId":1,"institutionId":5}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(400)
+    }
+
+    @Test
+    fun update_notAllowedToModify_returnsForbidden() {
+        // Given
+        given(contingentService.existsById(7L)).willReturn(true)
+        given(contingentService.canModifyContingent(7L)).willReturn(false)
+
+        // When
+        val result = mockMvc.put("/contingents/7") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"id":7,"start":"2026-01-01","weeklyServiceHours":10.0,"employeeId":1,"institutionId":5}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(403)
+    }
+
+    @Test
+    fun delete_missingContingent_returnsNotFoundWithoutDeleting() {
+        // Given
+        given(accessService.isAdmin()).willReturn(true)
+        given(contingentService.getById(7L)).willReturn(null)
+
+        // When
+        val result = mockMvc.delete("/contingents/7").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(404)
+        verify(contingentService, never()).delete(7L)
+    }
+
+    @Test
+    fun getById_missingContingent_returnsNotFound() {
+        // Given
+        given(contingentService.getById(7L)).willReturn(null)
+
+        // When
+        val result = mockMvc.get("/contingents/7").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(404)
     }
 }

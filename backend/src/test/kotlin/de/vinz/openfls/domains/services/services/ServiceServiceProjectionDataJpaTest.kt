@@ -103,7 +103,7 @@ class ServiceServiceProjectionDataJpaTest {
     }
 
     @Test
-    fun getByEmployeeAndStartAndEnd_returnsProjectionWithEnd() {
+    fun getProjectionDtosByEmployeeAndStartAndEnd_returnsProjectionWithEnd() {
         // Given
         val client = clientRepository.save(Client(firstName = "Anna", lastName = "Muster"))
         val employee = employeeRepository.save(Employee(firstname = "Max", lastname = "Mustermann"))
@@ -121,7 +121,7 @@ class ServiceServiceProjectionDataJpaTest {
         )
 
         // When
-        val result = serviceService.getByEmployeeAndStartAndEnd(
+        val result = serviceService.getProjectionDtosByEmployeeAndStartAndEnd(
             employee.id!!,
             LocalDate.of(2026, 2, 1),
             LocalDate.of(2026, 2, 28)
@@ -134,21 +134,23 @@ class ServiceServiceProjectionDataJpaTest {
     }
 
     @Test
-    fun getByEmployeeAndStartAndEnd_archivedClient_populatesArchivedServiceFlag() {
+    fun getProjectionDtosByEmployeeAndStartAndEnd_archivedClient_populatesArchivedServiceFlag() {
         // Given
         val client = clientRepository.save(Client(firstName = "Archiv", lastName = "iert", archived = true))
         val employee = employeeRepository.save(Employee(firstname = "Max", lastname = "Mustermann"))
+        val institution = institutionRepository.save(Institution(name = "Inst", email = "inst@test.de", phonenumber = "123"))
         serviceRepository.save(
             Service(
                 start = LocalDateTime.of(2026, 2, 8, 8, 0),
                 end = LocalDateTime.of(2026, 2, 8, 9, 30),
                 client = client,
-                employee = employee
+                employee = employee,
+                institution = institution
             )
         )
 
         // When
-        val result = serviceService.getByEmployeeAndStartAndEnd(
+        val result = serviceService.getProjectionDtosByEmployeeAndStartAndEnd(
             employee.id!!,
             LocalDate.of(2026, 2, 1),
             LocalDate.of(2026, 2, 28)

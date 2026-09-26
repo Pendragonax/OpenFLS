@@ -285,8 +285,8 @@ class ClientTaskServiceDataJpaTest {
         assertThat(clientTaskService.getDtosByClientId(clientId)).isEmpty()
 
         val deleteLogs = clientTaskAuditLogRepository
-            .findAllByClientIdOrderByChangedAtDesc(clientId)
-            .filter { it.action == ClientTaskAuditAction.DELETE }
+            .findAll()
+            .filter { it.clientId == clientId && it.action == ClientTaskAuditAction.DELETE }
         assertThat(deleteLogs).hasSize(2)
         assertThat(deleteLogs.map { it.actor }).containsOnly("Ben Bearbeiter")
         assertThat(deleteLogs.map { it.clientTaskId }).contains(first.id)

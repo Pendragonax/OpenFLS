@@ -105,11 +105,6 @@ class EvaluationService(
         }
     }
 
-    @Transactional(readOnly = true)
-    fun existsById(id: Long): Boolean {
-        return evaluationRepository.existsById(id)
-    }
-
     private fun saveEvaluation(entity: Evaluation, employee: Employee): EvaluationResponseDto {
         entity.updatedBy = employee
         entity.updatedAt = LocalDateTime.now()

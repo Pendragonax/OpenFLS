@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.contingents.ContingentRepository
-import de.vinz.openfls.domains.contingents.dtos.ContingentDto
+import de.vinz.openfls.domains.contingents.dtos.ContingentCreateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateRequest
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.services.EmployeeService
@@ -48,10 +49,10 @@ class ContingentServiceDataJpaTest {
     @Test
     fun create_endBeforeStart_throwsException() {
         // Given
-        val dto = ContingentDto().apply {
-            start = LocalDate.of(2026, 2, 10)
+        val dto = ContingentCreateRequest(
+            start = LocalDate.of(2026, 2, 10),
             end = LocalDate.of(2026, 2, 1)
-        }
+        )
 
         // When / Then
         assertThatThrownBy { contingentService.create(dto) }
@@ -63,13 +64,13 @@ class ContingentServiceDataJpaTest {
         // Given
         val employee = employeeRepository.save(Employee(firstname = "Max", lastname = "Mustermann"))
         val institution = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1"))
-        val dto = ContingentDto().apply {
-            start = LocalDate.of(2026, 1, 1)
-            end = LocalDate.of(2026, 12, 31)
-            weeklyServiceHours = 20.0
-            employeeId = employee.id!!
+        val dto = ContingentCreateRequest(
+            start = LocalDate.of(2026, 1, 1),
+            end = LocalDate.of(2026, 12, 31),
+            weeklyServiceHours = 20.0,
+            employeeId = employee.id!!,
             institutionId = institution.id!!
-        }
+        )
         whenever(employeeService.getById(dto.employeeId)).thenReturn(employee)
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
 
@@ -85,11 +86,11 @@ class ContingentServiceDataJpaTest {
     @Test
     fun update_missingContingent_throwsException() {
         // Given
-        val dto = ContingentDto().apply {
-            id = 9999
-            start = LocalDate.of(2026, 1, 1)
+        val dto = ContingentUpdateRequest(
+            id = 9999,
+            start = LocalDate.of(2026, 1, 1),
             weeklyServiceHours = 10.0
-        }
+        )
 
         // When / Then
         assertThatThrownBy { contingentService.update(dto) }
@@ -100,17 +101,16 @@ class ContingentServiceDataJpaTest {
     fun update_endBeforeStart_throwsException() {
         // Given
         val existing = contingentRepository.save(de.vinz.openfls.domains.contingents.Contingent(
-            id = 0,
             start = LocalDate.of(2026, 1, 1),
             end = LocalDate.of(2026, 1, 10),
             weeklyServiceHours = 10.0
         ))
-        val dto = ContingentDto().apply {
-            id = existing.id
-            start = LocalDate.of(2026, 2, 10)
-            end = LocalDate.of(2026, 2, 1)
+        val dto = ContingentUpdateRequest(
+            id = existing.id,
+            start = LocalDate.of(2026, 2, 10),
+            end = LocalDate.of(2026, 2, 1),
             weeklyServiceHours = 12.0
-        }
+        )
 
         // When / Then
         assertThatThrownBy { contingentService.update(dto) }
@@ -123,21 +123,20 @@ class ContingentServiceDataJpaTest {
         val employee = employeeRepository.save(Employee(firstname = "Erika", lastname = "Musterfrau"))
         val institution = institutionRepository.save(Institution(name = "UpdateInst", email = "u@b.c", phonenumber = "2"))
         val existing = contingentRepository.save(de.vinz.openfls.domains.contingents.Contingent(
-            id = 0,
             start = LocalDate.of(2026, 1, 1),
             end = LocalDate.of(2026, 1, 10),
             weeklyServiceHours = 10.0,
             employee = employee,
             institution = institution
         ))
-        val dto = ContingentDto().apply {
-            id = existing.id
-            start = LocalDate.of(2026, 1, 1)
-            end = LocalDate.of(2026, 1, 31)
-            weeklyServiceHours = 12.0
-            employeeId = employee.id!!
+        val dto = ContingentUpdateRequest(
+            id = existing.id,
+            start = LocalDate.of(2026, 1, 1),
+            end = LocalDate.of(2026, 1, 31),
+            weeklyServiceHours = 12.0,
+            employeeId = employee.id!!,
             institutionId = institution.id!!
-        }
+        )
         whenever(employeeService.getById(dto.employeeId)).thenReturn(employee)
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
 

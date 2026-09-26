@@ -95,6 +95,11 @@ aber diese Verantwortungsgrenzen erhalten.
   Pro Domäne: 1. Inventur (Entities, DTOs, Projections, Service-Methoden,
   Endpunkte), 2. Vorschlag mit Umbenennungen, 3. Freigabe, 4. Umsetzung
   einschließlich Angular-Anpassung und `./gradlew clean build`.
+- Kein toter Code: Es existieren keine Methoden, Klassen, Properties oder
+  Repository-Abfragen, die ungenutzt sind oder nur wegen Tests existieren.
+  Wird ein Member nur von Tests aufgerufen, wird er samt Test entfernt (oder der
+  Test prüft stattdessen den produktiven Aufrufer). Bei jeder Domänen-Migration
+  wird der Bestand darauf geprüft.
 
 ### Schichten und Abhängigkeiten
 
@@ -143,7 +148,9 @@ Services werden nach Zuständigkeit getrennt und bilden jeweils eigene Klassen.
   Der Test wird zusammen mit der Annotation eingeführt und für jede migrierte
   Domäne eingehalten.
 - Die Benennung entitätsbasierter Methoden bleibt einheitlich:
-  `getEntityById`, `getAllEntities`, `createEntity`, `updateEntity`.
+  `getEntityById`, `getAllEntities`, `createEntity`, `updateEntity`. Methoden,
+  die mehrere Entities liefern, heißen immer `getAllEntitiesBy<Kriterium>`
+  (z. B. `getAllEntitiesByEmployeeId`), nie `getEntitiesBy…`.
 
 ### Projections
 

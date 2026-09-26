@@ -104,12 +104,6 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.sponsor.id = :sponsorId" +
-            " AND u.start <= :date AND u.end >= :date")
-    fun findBySponsorIdAndDate(@Param("sponsorId") id: Long,
-                               @Param("date") date: LocalDate): List<AssistancePlan>
-
-    @Query("SELECT u FROM AssistancePlan u " +
-            "WHERE u.sponsor.id = :sponsorId" +
             " AND (YEAR(u.start) <= :year AND YEAR(u.end) >= :year)")
     fun findBySponsorIdAndYear(@Param("sponsorId") id: Long,
                                @Param("year") year: Int): List<AssistancePlan>
@@ -138,27 +132,9 @@ interface AssistancePlanRepository: CrudRepository<AssistancePlan, Long> {
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId" +
-            " AND u.start <= :date AND u.end >= :date")
-    fun findByInstitutionIdAndDate(@Param("institutionId") id: Long,
-                                   @Param("date") date: LocalDate): List<AssistancePlan>
-
-    @Query("SELECT u FROM AssistancePlan u " +
-            "WHERE u.institution.id = :institutionId" +
             " AND (YEAR(u.start) <= :year AND YEAR(u.end) >= :year)")
     fun findByInstitutionIdAndYear(@Param("institutionId") id: Long,
                                    @Param("year") year: Int): List<AssistancePlan>
-
-    @Query("SELECT u FROM AssistancePlan u " +
-            "WHERE u.institution.id = :institutionId AND u.sponsor.id = :sponsorId")
-    fun findByInstitutionIdAndSponsorId(@Param("institutionId") institutionId: Long,
-                                        @Param("sponsorId") sponsorId: Long): List<AssistancePlan>
-
-    @Query("SELECT u FROM AssistancePlan u " +
-            "WHERE u.institution.id = :institutionId AND u.sponsor.id = :sponsorId" +
-            " AND u.start <= :date AND u.end >= :date")
-    fun findByInstitutionIdAndSponsorIdAndDate(@Param("institutionId") institutionId: Long,
-                                               @Param("sponsorId") sponsorId: Long,
-                                               @Param("date") date: LocalDate): List<AssistancePlan>
 
     @Query("SELECT u FROM AssistancePlan u " +
             "WHERE u.institution.id = :institutionId AND u.sponsor.id = :sponsorId" +

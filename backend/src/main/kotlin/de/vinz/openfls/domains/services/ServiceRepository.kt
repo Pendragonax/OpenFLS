@@ -58,23 +58,6 @@ interface ServiceRepository : CrudRepository<Service, Long> {
 
     @Query(
         "SELECT u FROM Service u " +
-                "WHERE u.institution.id = :institutionId " +
-                "AND u.employee.id = :employeeId " +
-                "AND u.client.id = :clientId " +
-                "AND cast(u.start as LocalDate) >= :start " +
-                "AND cast(u.start as LocalDate) <= :end " +
-                "ORDER BY u.start"
-    )
-    fun findProjectionsByInstitutionIdAndEmployeeIdAndClientIdAndStartAndEnd(
-        institutionId: Long,
-        employeeId: Long,
-        clientId: Long,
-        start: LocalDate,
-        end: LocalDate
-    ): List<ServiceProjection>
-
-    @Query(
-        "SELECT u FROM Service u " +
                 "WHERE (:institutionId <= 0 OR u.institution.id = :institutionId) " +
                 "AND (:employeeId <= 0 OR u.employee.id = :employeeId) " +
                 "AND (:clientId <= 0 OR u.client.id = :clientId) " +
@@ -292,18 +275,6 @@ interface ServiceRepository : CrudRepository<Service, Long> {
     ): List<ClientLatestServiceDto>
 
     @Query(
-        "SELECT u FROM Service u WHERE u.client.id = :clientId " +
-                "AND cast(u.start as LocalDate) >= :start " +
-                "AND cast(u.start as LocalDate) <= :end " +
-                "ORDER BY u.start ASC"
-    )
-    fun findSoloProjectionByClientAndStartAndEnd(
-        @Param("clientId") clientId: Long,
-        @Param("start") start: LocalDate,
-        @Param("end") end: LocalDate
-    ): List<ServiceProjection>
-
-    @Query(
         "SELECT u FROM Service u WHERE u.employee.id = :employeeId " +
                 "AND cast(u.start as LocalDate) >= :start " +
                 "AND cast(u.start as LocalDate) <= :end " +
@@ -455,16 +426,6 @@ interface ServiceRepository : CrudRepository<Service, Long> {
         @Param("year") year: Int,
         @Param("hourTypeId") hourTypeId: Long
     ): List<Service>
-
-    @Query(
-        "SELECT u FROM Service u WHERE " +
-                "(extract(YEAR from u.start)) = :year " +
-                "ORDER BY u.start ASC"
-    )
-    fun findServiceByYear(@Param("year") year: Int): List<Service>
-
-    @Query("SELECT u FROM Service u WHERE u.employee.id = :employeeId")
-    fun findByEmployee(@Param("employeeId") employeeId: Long): List<Service>
 
     @Query("SELECT u FROM Service u WHERE u.assistancePlan.id = :assistancePlanId")
     fun findByAssistancePlan(@Param("assistancePlanId") assistancePlanId: Long): List<Service>

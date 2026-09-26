@@ -143,11 +143,6 @@ class GoalService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllEntities(): List<Goal> {
-        return goalRepository.findAll().toList()
-    }
-
-    @Transactional(readOnly = true)
     fun getById(id: Long): GoalDto? {
         return modelMapper.map(getEntityById(id), GoalDto::class.java)
     }

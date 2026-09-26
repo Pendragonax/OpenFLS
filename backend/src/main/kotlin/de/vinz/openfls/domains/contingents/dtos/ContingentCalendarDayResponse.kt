@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.contingents.dtos
 
 import java.time.LocalDate
 
-data class ContingentCalendarDayInformation(
+data class ContingentCalendarDayResponse(
     var date: LocalDate,
     var absence: Boolean,
     val executedPercentage: Double,

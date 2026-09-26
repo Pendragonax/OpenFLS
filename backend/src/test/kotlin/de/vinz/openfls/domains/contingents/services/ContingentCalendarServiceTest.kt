@@ -1,10 +1,8 @@
-package de.vinz.openfls.domains.services.services
+package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.absence.AbsenceService
 import de.vinz.openfls.domains.absence.Absence
-import de.vinz.openfls.domains.contingents.dtos.ContingentDto
-import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
-import de.vinz.openfls.domains.contingents.services.ContingentService
+import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.projections.ServiceCalendarProjection
 import org.assertj.core.api.Assertions.assertThat
@@ -19,18 +17,19 @@ import java.time.LocalDateTime
 class ContingentCalendarServiceTest {
     private val serviceRepository: ServiceRepository = mock()
     private val contingentService: ContingentService = mock()
+    private val contingentCalculationService: ContingentCalculationService = mock()
     private val absenceService: AbsenceService = mock()
-    private val contingentCalendarService = ContingentCalendarService(serviceRepository, contingentService, absenceService)
+    private val contingentCalendarService = ContingentCalendarService(serviceRepository, contingentService, contingentCalculationService, absenceService)
 
     @Test
-    fun generateContingentCalendarInformationFor_multipleServicesSameDay_aggregatesMinutesAndContingent() {
+    fun generateContingentCalendarFor_multipleServicesSameDay_aggregatesMinutesAndContingent() {
         // Given
         val employeeId = 7L
         val now = LocalDate.now()
         val start = now.minusYears(1)
         val serviceDate = now.minusDays(2)
         val otherDate = now.minusDays(1)
-        val contingent = ContingentDto().apply {
+        val contingent = Contingent().apply {
             this.start = now.minusMonths(1)
             this.end = null
             this.weeklyServiceHours = 10.0
@@ -53,20 +52,20 @@ class ContingentCalendarServiceTest {
             )
         )
 
-        whenever(contingentService.getByEmployeeId(employeeId)).thenReturn(listOf(contingent))
+        whenever(contingentService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(listOf(contingent))
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(emptyList())
-        whenever(contingentService.calculateContingentMinutesForWorkdayBy(serviceDate, listOf(contingent)))
+        whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(serviceDate, listOf(contingent)))
             .thenReturn(120.0)
-        whenever(contingentService.calculateContingentMinutesForWorkdayBy(otherDate, listOf(contingent)))
+        whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(otherDate, listOf(contingent)))
             .thenReturn(120.0)
-        whenever(contingentService.calculateContingentMinutesForWorkdayBy(now, listOf(contingent)))
+        whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(now, listOf(contingent)))
             .thenReturn(60.0)
-        whenever(contingentService.calculateContingentMinutesFor(any(), any(), eq(listOf(contingent))))
+        whenever(contingentCalculationService.calculateContingentMinutesFor(any(), any(), eq(listOf(contingent))))
             .thenReturn(300)
 
         // When
-        val result = contingentCalendarService.generateContingentCalendarInformationFor(employeeId, now)
+        val result = contingentCalendarService.generateContingentCalendarFor(employeeId, now)
 
         // Then
         assertThat(result.employeeId).isEqualTo(employeeId)
@@ -99,30 +98,30 @@ class ContingentCalendarServiceTest {
     }
 
     @Test
-    fun generateContingentCalendarInformationFor_absenceToday_createsAbsentDayAndZeroTodayTotals() {
+    fun generateContingentCalendarFor_absenceToday_createsAbsentDayAndZeroTodayTotals() {
         // Given
         val employeeId = 11L
         val now = LocalDate.now()
         val start = now.minusYears(1)
-        val contingent = ContingentDto().apply {
+        val contingent = Contingent().apply {
             this.start = now.minusMonths(2)
             this.end = null
             this.weeklyServiceHours = 20.0
         }
         val absences = listOf(now)
 
-        whenever(contingentService.getByEmployeeId(employeeId)).thenReturn(listOf(contingent))
+        whenever(contingentService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(listOf(contingent))
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(emptyList())
         whenever(absenceService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(
             absences.map { Absence(absenceDate = it, employeeId = employeeId) }
         )
-        whenever(contingentService.calculateContingentMinutesForWorkdayBy(now, listOf(contingent)))
+        whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(now, listOf(contingent)))
             .thenReturn(120.0)
-        whenever(contingentService.calculateContingentMinutesFor(any(), any(), eq(listOf(contingent))))
+        whenever(contingentCalculationService.calculateContingentMinutesFor(any(), any(), eq(listOf(contingent))))
             .thenReturn(300)
 
         // When
-        val result = contingentCalendarService.generateContingentCalendarInformationFor(employeeId, now)
+        val result = contingentCalendarService.generateContingentCalendarFor(employeeId, now)
 
         // Then
         assertThat(result.days).hasSize(1)
@@ -148,13 +147,13 @@ class ContingentCalendarServiceTest {
     }
 
     @Test
-    fun generateContingentCalendarInformationFor_absenceAndServiceSameDay_marksAbsentWithoutExtraDay() {
+    fun generateContingentCalendarFor_absenceAndServiceSameDay_marksAbsentWithoutExtraDay() {
         // Given
         val employeeId = 3L
         val now = LocalDate.now()
         val start = now.minusYears(1)
         val serviceDate = now.minusDays(1)
-        val contingent = ContingentDto().apply {
+        val contingent = Contingent().apply {
             this.start = now.minusMonths(3)
             this.end = null
             this.weeklyServiceHours = 35.0
@@ -168,18 +167,18 @@ class ContingentCalendarServiceTest {
         )
         val absences = listOf(serviceDate)
 
-        whenever(contingentService.getByEmployeeId(employeeId)).thenReturn(listOf(contingent))
+        whenever(contingentService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(listOf(contingent))
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(
             absences.map { Absence(absenceDate = it, employeeId = employeeId) }
         )
-        whenever(contingentService.calculateContingentMinutesForWorkdayBy(serviceDate, listOf(contingent)))
+        whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(serviceDate, listOf(contingent)))
             .thenReturn(120.0)
-        whenever(contingentService.calculateContingentMinutesForWorkdayBy(now, listOf(contingent)))
+        whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(now, listOf(contingent)))
             .thenReturn(120.0)
 
         // When
-        val result = contingentCalendarService.generateContingentCalendarInformationFor(employeeId, now)
+        val result = contingentCalendarService.generateContingentCalendarFor(employeeId, now)
 
         // Then
         assertThat(result.days).hasSize(1)
@@ -195,7 +194,7 @@ class ContingentCalendarServiceTest {
     }
 
     @Test
-    fun generateContingentCalendarInformationFor_noContingent_returnsZeroContingentTotals() {
+    fun generateContingentCalendarFor_noContingent_returnsZeroContingentTotals() {
         // Given
         val employeeId = 15L
         val now = LocalDate.now()
@@ -208,16 +207,16 @@ class ContingentCalendarServiceTest {
             )
         )
 
-        whenever(contingentService.getByEmployeeId(employeeId)).thenReturn(emptyList())
+        whenever(contingentService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(emptyList())
         whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(emptyList())
-        whenever(contingentService.calculateContingentMinutesForWorkdayBy(now, emptyList()))
+        whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(now, emptyList()))
             .thenReturn(0.0)
-        whenever(contingentService.calculateContingentMinutesFor(any(), any(), eq(emptyList())))
+        whenever(contingentCalculationService.calculateContingentMinutesFor(any(), any(), eq(emptyList())))
             .thenReturn(0)
 
         // When
-        val result = contingentCalendarService.generateContingentCalendarInformationFor(employeeId, now)
+        val result = contingentCalendarService.generateContingentCalendarFor(employeeId, now)
 
         // Then
         assertThat(result.days).hasSize(1)

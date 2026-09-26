@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.contingents.dtos
 
-data class EmployeeContingentEvaluationDto(
+data class EmployeeContingentEvaluationResponse(
     val employeeId: Long,
     val lastname: String,
     val firstname: String,
