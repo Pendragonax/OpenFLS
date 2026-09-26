@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.contingents.services
 
 import de.vinz.openfls.domains.absence.AbsenceService
-import de.vinz.openfls.domains.absence.dtos.YearAbsenceDto
+import de.vinz.openfls.domains.absence.Absence
 import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
@@ -28,7 +28,7 @@ class ContingentEvaluationService(
         val services = serviceService.getContingentEvaluationServiceDtosBy(institutionId, year)
         val contingents = contingentService.getAllByInstitutionAndYear(institutionId, year)
             .filter { includeArchivedEmployees || !it.employee.archived }
-        val yearlyAbsences = absenceService.getAllByYear(year)
+        val yearlyAbsences = absenceService.getAllEntitiesByYear(year)
         val employeeContingentEvaluations =
             getEmployeeContingentEvaluations(year, contingents, services, yearlyAbsences)
 
@@ -39,7 +39,7 @@ class ContingentEvaluationService(
         year: Int,
         contingents: List<ContingentProjection>,
         services: List<ContingentEvaluationServiceProjection>,
-        yearlyAbsences: YearAbsenceDto
+        yearlyAbsences: List<Absence>
     ): List<EmployeeContingentEvaluationDto> {
         val employeeEvaluations = ArrayList<EmployeeContingentEvaluationDto>()
 
@@ -114,18 +114,16 @@ class ContingentEvaluationService(
     private fun getAbsenceDaysByYearAndEmployee(
         year: Int,
         employeeId: Long,
-        yearlyAbsences: YearAbsenceDto
+        yearlyAbsences: List<Absence>
     ): List<Int> {
-        val absencesForEmployee = yearlyAbsences.employeeAbsences.filter { it.employeeId == employeeId }
+        val absenceDatesForEmployee = yearlyAbsences
+            .filter { it.employeeId == employeeId }
+            .map { it.absenceDate }
         val monthlyAbsenceDays = List(13) { 0 }.toMutableList()
 
         for (month in 1..12) {
-            val absenceDaysInMonth = absencesForEmployee
-                .flatMap { absence ->
-                    absence.absenceDates.filter {
-                        it.year == year && it.monthValue == month
-                    }
-                }
+            val absenceDaysInMonth = absenceDatesForEmployee
+                .filter { it.year == year && it.monthValue == month }
                 .distinct()
                 .count()
 
@@ -140,7 +138,7 @@ class ContingentEvaluationService(
         year: Int,
         employeeId: Long,
         services: List<ContingentEvaluationServiceProjection>,
-        yearlyAbsences: YearAbsenceDto
+        yearlyAbsences: List<Absence>
     ): List<Double> {
         val employeeServices = services.filter { it.employeeId == employeeId }
         val monthlyHours = List(13) { 0 }.toMutableList()
@@ -218,8 +216,7 @@ class ContingentEvaluationService(
                 TimeDoubleService.convertTimeDoubleToDouble(summedTimeDoublesOf)
     }
 
-    private fun isAbsent(employeeId: Long, date: LocalDateTime, yearlyAbsences: YearAbsenceDto): Boolean {
-        val absencesForEmployee = yearlyAbsences.employeeAbsences.filter { it.employeeId == employeeId }
-        return absencesForEmployee.any { it.absenceDates.contains(date.toLocalDate()) }
+    private fun isAbsent(employeeId: Long, date: LocalDateTime, yearlyAbsences: List<Absence>): Boolean {
+        return yearlyAbsences.any { it.employeeId == employeeId && it.absenceDate == date.toLocalDate() }
     }
 }

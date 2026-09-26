@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.absence
 import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.absence.dtos.AbsenceCreateDto
+import de.vinz.openfls.domains.absence.dtos.AbsenceCreateRequest
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.services.ServiceController
 import de.vinz.openfls.logback.PerformanceLogbackFilter
@@ -27,20 +27,20 @@ class AbsenceController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody createAbsenceDto: AbsenceCreateDto): Any {
+    fun create(@Valid @RequestBody request: AbsenceCreateRequest): Any {
         return try {
             val startMs = System.currentTimeMillis()
 
-            val dto = absenceService.create(createAbsenceDto.absenceDate)
+            val response = absenceService.create(request)
 
             if (logPerformance) {
                 logger.info(String.format("%s create took %s ms for employee %d",
                     PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                     System.currentTimeMillis() - startMs,
-                    dto.employeeId))
+                    response.employeeId))
             }
 
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -56,7 +56,7 @@ class AbsenceController(
         return try {
             val startMs = System.currentTimeMillis()
 
-            absenceService.remove(date)
+            absenceService.delete(date)
 
             if (logPerformance) {
                 logger.info(String.format("%s remove took %s ms for employee %d",
@@ -81,16 +81,16 @@ class AbsenceController(
         return try {
             val startMs = System.currentTimeMillis()
 
-            val dto = absenceService.getAllByEmployeeId(accessService.getId())
+            val response = absenceService.getAllByEmployeeId(accessService.getId())
 
             if (logPerformance) {
                 logger.info(String.format("%s getAll took %s ms and found %d absences",
                     PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
                     System.currentTimeMillis() - startMs,
-                    dto.absenceDates.size))
+                    response.absenceDates.size))
             }
 
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 

@@ -31,7 +31,6 @@ export class CalendarInformationDTO {
 }
 
 export class CreateAbsenceDTO {
-  employeeId: number = 0;
   absenceDate: string = "";
 }
 

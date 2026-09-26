@@ -12,6 +12,15 @@ Hinweise.
   gezielten Tests immer `./gradlew clean build` im Verzeichnis `backend/`
   ausführen. Die Arbeit gilt erst als geprüft, wenn dieser Clean-Build fehlerfrei
   durchläuft (siehe `AGENTS.md` → „Verbindliche Backend-Prüfung“).
+- **Backend-Architektur (Domänen-Migration):** Es gelten die AGENTS.md-Abschnitte
+  „Service-Arten“, „Entity-Weitergabe zwischen Services“, „Projections“ und
+  „DTO-Regeln“. Kurzform: CRUD-Services und Anwendungsfall-Services sind getrennte
+  Klassen; Entity-Methoden zwischen Services tragen `@InternalEntityApi` und
+  dürfen nie von RestControllern genutzt werden (ArchTest); Projections bleiben
+  zwischen Repository und Service; HTTP-Grenz-DTOs heißen `…Request`/`…Response`
+  (mit Anwendungsfall, z. B. `AbsenceCreateRequest`), service-interne DTOs nicht;
+  `Solo`/`Simple`/`XL` entfallen zugunsten von `XDto` und `XWithY`.
+  Arbeitsmodus pro Domäne: Inventur → Vorschlag → Freigabe → Umsetzung.
 - **Logging:** Für alle Änderungen am Logging gilt `docs/logging-guide.md`.
 - **Skills:** Projekt-Skills liegen unter `.claude/skills/` (portiert aus
   `.codex/skills/`): `build`, `mockup`, `local-fix-test-coverage`.

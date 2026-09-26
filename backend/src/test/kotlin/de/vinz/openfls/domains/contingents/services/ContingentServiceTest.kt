@@ -1,7 +1,6 @@
 package de.vinz.openfls.domains.contingents.services
 
-import de.vinz.openfls.domains.absence.dtos.EmployeeAbsenceResponseDto
-import de.vinz.openfls.domains.absence.dtos.YearAbsenceDto
+import de.vinz.openfls.domains.absence.Absence
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
 import de.vinz.openfls.domains.contingents.dtos.ContingentDto
@@ -426,13 +425,7 @@ class ContingentServiceTest {
             end = LocalDate.of(year, 1, 10),
             weeklyHours = 10.0
         )
-        val absences = YearAbsenceDto.of(
-            year,
-            listOf(EmployeeAbsenceResponseDto(
-                employeeId = contingent.employee.id,
-                absenceDates = listOf(LocalDate.of(year, 1, 3))
-            ))
-        )
+        val absences = listOf(Absence(absenceDate = LocalDate.of(year, 1, 3), employeeId = contingent.employee.id))
         val workdays = DateService.calculateWorkdaysInHesseBetween(contingent.start, contingent.end, year)
         val dailyHours = contingent.weeklyServiceHours / 5
         val expectedTotal = TimeDoubleService.convertDoubleToTimeDouble((workdays - 1) * dailyHours)
@@ -450,7 +443,7 @@ class ContingentServiceTest {
         // Given
         val year = 2024
         val contingent = mockContingentProjectionForRange(start = LocalDate.of(year, 3, 1))
-        val absences = YearAbsenceDto.of(year, emptyList())
+        val absences = emptyList<Absence>()
 
         // When
         val result = contingentService.calculateContingentHoursBy(year, 1, contingent, absences)
@@ -468,13 +461,7 @@ class ContingentServiceTest {
             end = LocalDate.of(year, 1, 31),
             weeklyHours = 10.0
         )
-        val absences = YearAbsenceDto.of(
-            year,
-            listOf(EmployeeAbsenceResponseDto(
-                employeeId = contingent.employee.id,
-                absenceDates = listOf(LocalDate.of(year, 1, 3))
-            ))
-        )
+        val absences = listOf(Absence(absenceDate = LocalDate.of(year, 1, 3), employeeId = contingent.employee.id))
         val workdays = DateService.countWorkDaysOfMonthAndYearBetweenStartAndEnd(
             year,
             1,
@@ -498,18 +485,10 @@ class ContingentServiceTest {
             start = LocalDate.of(year, 1, 1),
             end = LocalDate.of(year, 1, 31)
         )
-        val absences = YearAbsenceDto.of(
-            year,
-            listOf(
-                EmployeeAbsenceResponseDto(
-                    employeeId = contingent.employee.id,
-                    absenceDates = listOf(LocalDate.of(year, 1, 1), LocalDate.of(year, 2, 5))
-                ),
-                EmployeeAbsenceResponseDto(
-                    employeeId = contingent.employee.id + 1,
-                    absenceDates = listOf(LocalDate.of(year, 1, 6))
-                )
-            )
+        val absences = listOf(
+            Absence(absenceDate = LocalDate.of(year, 1, 1), employeeId = contingent.employee.id),
+            Absence(absenceDate = LocalDate.of(year, 2, 5), employeeId = contingent.employee.id),
+            Absence(absenceDate = LocalDate.of(year, 1, 6), employeeId = contingent.employee.id + 1)
         )
 
         // When
@@ -527,16 +506,10 @@ class ContingentServiceTest {
             start = LocalDate.of(year, 1, 1),
             end = LocalDate.of(year, 1, 10)
         )
-        val absences = YearAbsenceDto.of(
-            year,
-            listOf(EmployeeAbsenceResponseDto(
-                employeeId = contingent.employee.id,
-                absenceDates = listOf(
-                    LocalDate.of(year, 1, 2),
-                    LocalDate.of(year, 1, 5),
-                    LocalDate.of(year, 1, 11)
-                )
-            ))
+        val absences = listOf(
+            Absence(absenceDate = LocalDate.of(year, 1, 2), employeeId = contingent.employee.id),
+            Absence(absenceDate = LocalDate.of(year, 1, 5), employeeId = contingent.employee.id),
+            Absence(absenceDate = LocalDate.of(year, 1, 11), employeeId = contingent.employee.id)
         )
 
         // When

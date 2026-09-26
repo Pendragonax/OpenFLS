@@ -29,6 +29,7 @@ val modelMapperVersion = "3.2.6"
 val mysqlConnectorVersion = "26.7.0"
 val commonsCsvVersion = "1.14.1"
 val mockitoKotlinVersion = "6.3.0"
+val archUnitVersion = "1.4.1"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -54,6 +55,7 @@ dependencies {
     testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation("com.h2database:h2")
+    testImplementation("com.tngtech.archunit:archunit-junit5:$archUnitVersion")
 }
 
 tasks.withType<KotlinCompile>().configureEach {

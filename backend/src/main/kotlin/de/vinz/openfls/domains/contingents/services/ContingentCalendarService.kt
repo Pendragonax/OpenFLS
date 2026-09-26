@@ -27,7 +27,7 @@ class ContingentCalendarService(
     fun generateContingentCalendarInformationFor(employeeId: Long, end: LocalDate): ContingentCalendarInformation {
         val start = end.minusYears(1)
         val contingents = contingentService.getByEmployeeId(employeeId)
-        val absenceDates = absenceService.getAllByEmployeeId(employeeId).absenceDates.toMutableList()
+        val absenceDates = absenceService.getAllEntitiesByEmployeeId(employeeId).map { it.absenceDate }.toMutableList()
         val calendarDayInformations =
             generateContingentCalendarDayInformationFor(employeeId, start, end, contingents, absenceDates)
         val absenceDays = absenceDates.map { date ->
