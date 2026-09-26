@@ -20,6 +20,9 @@ Hinweise.
   zwischen Repository und Service; HTTP-Grenz-DTOs heißen `…Request`/`…Response`
   (mit Anwendungsfall, z. B. `AbsenceCreateRequest`), service-interne DTOs nicht;
   `Solo`/`Simple`/`XL` entfallen zugunsten von `XDto` und `XWithY`.
+  Erwartete Fälle (z. B. „nicht gefunden“) im Controller als Response
+  zurückgeben, nicht per Exception; Projections gehören der Domäne, die sie
+  abfragt (ungenutzte in der eigenen Domäne dort anlegen, wo sie gebraucht werden).
   Arbeitsmodus pro Domäne: Inventur → Vorschlag → Freigabe → Umsetzung.
 - **Logging:** Für alle Änderungen am Logging gilt `docs/logging-guide.md`.
 - **Skills:** Projekt-Skills liegen unter `.claude/skills/` (portiert aus

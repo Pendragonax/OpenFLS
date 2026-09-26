@@ -12,7 +12,7 @@ import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorHourTypePro
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import de.vinz.openfls.domains.services.services.ServiceService
-import de.vinz.openfls.domains.sponsors.projections.SponsorSoloProjection
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanSponsorProjection
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
@@ -137,7 +137,7 @@ class AssistancePlanAnalysisServiceTest {
             override val start: LocalDate = start
             override val end: LocalDate = end
             override val client: ClientSoloProjection = clientProjection()
-            override val sponsor: SponsorSoloProjection = sponsorProjection()
+            override val sponsor: AssistancePlanSponsorProjection = sponsorProjection()
             override val institution: InstitutionSoloProjection = institutionProjection()
             override val hourMode: AssistancePlanHourMode = AssistancePlanHourMode.CORRIDOR
             override val hourCorridor: HourCorridorSoloProjection? = corridor
@@ -157,8 +157,8 @@ class AssistancePlanAnalysisServiceTest {
         }
     }
 
-    private fun sponsorProjection(): SponsorSoloProjection {
-        return object : SponsorSoloProjection {
+    private fun sponsorProjection(): AssistancePlanSponsorProjection {
+        return object : AssistancePlanSponsorProjection {
             override val id: Long = 1
             override val name: String = "Sponsor"
             override val payOverhang: Boolean = true

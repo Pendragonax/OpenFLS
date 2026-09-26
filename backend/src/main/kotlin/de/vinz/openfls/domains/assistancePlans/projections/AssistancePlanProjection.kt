@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorSoloProjection
 import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
-import de.vinz.openfls.domains.sponsors.projections.SponsorSoloProjection
+
 import java.time.LocalDate
 
 interface AssistancePlanProjection {
@@ -13,7 +13,7 @@ interface AssistancePlanProjection {
     val start: LocalDate
     val end: LocalDate
     val client: ClientSoloProjection
-    val sponsor: SponsorSoloProjection
+    val sponsor: AssistancePlanSponsorProjection
     val institution: InstitutionSoloProjection
     val hourMode: AssistancePlanHourMode
     val hourCorridor: HourCorridorSoloProjection?

@@ -51,15 +51,4 @@ class Sponsor(
         return id.hashCode()
     }
 
-    companion object {
-        fun from(sponsorDto: SponsorDto): Sponsor {
-            return Sponsor(
-                    id = sponsorDto.id,
-                    name = sponsorDto.name,
-                    payExact = sponsorDto.payExact,
-                    payOverhang = sponsorDto.payOverhang,
-                    unprofessionals = sponsorDto.unprofessionals?.map { Unprofessional.from(it) }?.toMutableSet()
-            )
-        }
-    }
 }

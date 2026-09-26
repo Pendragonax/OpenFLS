@@ -153,6 +153,9 @@ Services werden nach Zuständigkeit getrennt und bilden jeweils eigene Klassen.
 - Sie bleiben intern: Sie werden nur zwischen Repository und Service verwendet.
   Sie werden nie zwischen Services ausgetauscht und nie an RestController
   gegeben. Nach außen gibt der Service DTOs zurück.
+- Eine Projection gehört der Domäne, deren Repository sie abfragt. Wird sie
+  in der Domäne der referenzierten Entity nicht selbst verwendet, liegt sie in
+  der Domäne, die sie braucht (auch verschachtelte Projections).
 - Als `*Projection` heißt nur, was tatsächlich von einem Repository als
   Spring-Data-Projection abgefragt wird. Von Hand aus Entities gebaute
   Lesemodelle sind DTOs und liegen in `dtos/`.
@@ -204,6 +207,10 @@ JPA-Entities sind ein internes Persistenzdetail und dürfen weder über eine
 - Mit Ausnahme der Anmeldung ist jeder REST-Endpunkt authentifiziert und mit
   einer fachlich eindeutig definierten rollenbasierten Berechtigung abgesichert.
   Ein Endpunkt wird nicht freigegeben, bevor diese Berechtigung geklärt ist.
+- Erwartete Fälle (z. B. Ressource nicht gefunden, Pfad-Id passt nicht zum
+  Request) werden nicht per Exception, sondern direkt als passende Response
+  zurückgegeben (z. B. `404`, `400`). Exceptions sind unerwarteten Fehlern
+  vorbehalten.
 - Fehlerantworten verwenden einen festgelegten HTTP-Status und einen stabilen,
   maschinenlesbaren Fehlercode. Das Frontend reagiert auf diesen Code gezielt;
   Fehlermeldungen ersetzen keine fachliche Fehlerbehandlung.

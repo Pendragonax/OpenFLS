@@ -2,12 +2,12 @@ package de.vinz.openfls.domains.hourTypes
 
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeCreateRequest
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateRequest
-import de.vinz.openfls.domains.hourTypes.exceptions.InvalidHourTypeRequestException
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -39,9 +39,9 @@ class HourTypeController(private val hourTypeService: HourTypeService,
         val startMs = System.currentTimeMillis()
 
         if (id != request.id)
-            throw InvalidHourTypeRequestException("path id and request id are not the same")
+            return ResponseEntity.badRequest().body("path id and request id are not the same")
         if (!hourTypeService.existsById(id))
-            throw InvalidHourTypeRequestException("Type of hour with id $id does not exists.")
+            return hourTypeNotFound(id)
 
         return try {
             ResponseEntity.ok(hourTypeService.update(request))
@@ -57,13 +57,11 @@ class HourTypeController(private val hourTypeService: HourTypeService,
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (!hourTypeService.existsById(id))
-            throw InvalidHourTypeRequestException("Type of hour with id $id does not exists.")
+        val hourType = hourTypeService.getById(id) ?: return hourTypeNotFound(id)
 
         return try {
-            val dto = hourTypeService.getById(id)
             hourTypeService.delete(id)
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(hourType)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -91,11 +89,15 @@ class HourTypeController(private val hourTypeService: HourTypeService,
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(hourTypeService.getById(id))
+            val hourType = hourTypeService.getById(id) ?: return hourTypeNotFound(id)
+            ResponseEntity.ok(hourType)
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("getById", startMs, logger)
         }
     }
+
+    private fun hourTypeNotFound(id: Long): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("Type of hour with id $id does not exists.")
 }
