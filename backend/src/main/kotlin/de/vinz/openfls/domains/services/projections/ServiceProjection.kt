@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.services.projections
 
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
-import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
+import de.vinz.openfls.domains.services.projections.ServiceInstitutionProjection
 import java.time.LocalDateTime
 
 interface ServiceProjection {
@@ -14,7 +14,7 @@ interface ServiceProjection {
     val content: String
     val groupService: Boolean
     val archivedService: Boolean
-    val institution: InstitutionSoloProjection
+    val institution: ServiceInstitutionProjection
     val employee: EmployeeSoloProjection
     val client: ClientSoloProjection
 }

@@ -1,10 +1,10 @@
 package de.vinz.openfls.domains.institutions
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateDto
-import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateRequest
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateRequest
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.logging.StructuredLog
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,20 +26,15 @@ class InstitutionController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: InstitutionCreateDto): Any {
+    fun create(@Valid @RequestBody request: InstitutionCreateRequest): Any {
         return try {
-            // performance
             val startMs = System.currentTimeMillis()
 
-            val dto = institutionService.create(valueDto)
+            val response = institutionService.create(request)
 
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logPerformance("create", startMs)
 
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -51,25 +46,20 @@ class InstitutionController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: InstitutionUpdateDto): Any {
+               @Valid @RequestBody request: InstitutionUpdateRequest): Any {
+        if (id != request.id)
+            return ResponseEntity.badRequest().body("path id and request id are not the same")
+        if (!institutionService.existsById(id))
+            return institutionNotFound()
+
         return try {
-            // performance
             val startMs = System.currentTimeMillis()
 
-            if (id != valueDto.id)
-                throw IllegalArgumentException("path id and dto id are not the same")
-            if (!institutionService.existsById(id))
-                throw IllegalArgumentException("institution not found")
+            val response = institutionService.update(request)
 
-            val dto = institutionService.update(valueDto)
+            logPerformance("update", startMs)
 
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -81,23 +71,16 @@ class InstitutionController(
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        val institution = institutionService.getWithPermissionsById(id) ?: return institutionNotFound()
+
         return try {
-            // performance
             val startMs = System.currentTimeMillis()
 
-            if (!institutionService.existsById(id))
-                throw IllegalArgumentException("institution not found")
-
-            val dto = institutionService.getById(id)
             institutionService.delete(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logPerformance("delete", startMs)
 
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(institution)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
@@ -110,23 +93,18 @@ class InstitutionController(
     @GetMapping("")
     fun getAll(): Any {
         return try {
-            // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = institutionService.getAll()
+            val response = institutionService.getAllWithPermissions()
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logPerformance("getAll", startMs)
 
-            ResponseEntity.ok(dtos)
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
-                emptyList(),
+                emptyList<Any>(),
                 HttpStatus.BAD_REQUEST)
         }
     }
@@ -134,49 +112,50 @@ class InstitutionController(
     @GetMapping("/readable")
     fun getAllReadable(): Any {
         return try {
-            // performance
             val startMs = System.currentTimeMillis()
 
-            val allDtos = institutionService.getAllSolo()
-            val dtos = allDtos.filter { accessService.canReadEntries(it.id) }
+            val response = institutionService.getAll().filter { accessService.canReadEntries(it.id) }
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logPerformance("getAllReadable", startMs)
 
-            ResponseEntity.ok(dtos)
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
-                    emptyList(),
-                    HttpStatus.BAD_REQUEST)
+                emptyList<Any>(),
+                HttpStatus.BAD_REQUEST)
         }
     }
 
     @GetMapping("{id}")
     fun getById(@PathVariable id: Long): Any {
         return try {
-            // performance
             val startMs = System.currentTimeMillis()
 
-            val dto = institutionService.getById(id)
+            val response = institutionService.getWithPermissionsById(id) ?: return institutionNotFound()
 
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logPerformance("getById", startMs)
 
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "application.request.failed", ex)
 
             ResponseEntity(
                 ex.message,
                 HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    private fun institutionNotFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("institution not found")
+
+    private fun logPerformance(operation: String, startMs: Long) {
+        if (logPerformance) {
+            logger.info(String.format("%s %s took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                operation,
+                System.currentTimeMillis() - startMs))
         }
     }
 }

@@ -1,41 +1,57 @@
 package de.vinz.openfls.domains.institutions
 
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.institutions.dtos.*
+import de.vinz.openfls.architecture.InternalEntityApi
+import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
+import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateRequest
+import de.vinz.openfls.domains.institutions.dtos.InstitutionPermissionRequest
+import de.vinz.openfls.domains.institutions.dtos.InstitutionResponse
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateRequest
+import de.vinz.openfls.domains.institutions.dtos.InstitutionWithPermissionsResponse
 import de.vinz.openfls.domains.permissions.Permission
-import de.vinz.openfls.domains.permissions.PermissionDto
+import de.vinz.openfls.domains.permissions.PermissionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class InstitutionService(
     private val institutionRepository: InstitutionRepository,
-    private val employeeRepository: EmployeeRepository
+    private val permissionService: PermissionService
 ) {
 
     @Transactional
-    fun create(dto: InstitutionCreateDto): InstitutionWithPermissions {
-        val entityToCreate = Institution.of(dto)
-        entityToCreate.permissions = createPermissions(dto, entityToCreate)
-        val entity = institutionRepository.save(entityToCreate)
-        return InstitutionWithPermissions.of(entity)
+    fun create(request: InstitutionCreateRequest): InstitutionWithPermissionsResponse {
+        val institution = institutionRepository.save(
+            Institution(name = request.name, email = request.email, phonenumber = request.phonenumber)
+        )
+
+        request.permissions
+            .distinctBy { it.employeeId }
+            .forEach { institution.permissions.add(savePermission(institution, it)) }
+
+        return InstitutionWithPermissionsResponse.from(institution)
     }
 
     @Transactional
-    fun update(dto: InstitutionUpdateDto): InstitutionWithPermissions {
-        val entity = getEntityById(dto.id) ?: throw IllegalArgumentException("Institution with id ${dto.id} not found")
+    fun update(request: InstitutionUpdateRequest): InstitutionWithPermissionsResponse {
+        val institution = institutionRepository.findById(request.id)
+            .orElseThrow { IllegalArgumentException("Institution with id ${request.id} not found") }
 
-        entity.permissions.removeIf { dto.permissions.none { p -> p.employeeId == it.id.employeeId && p.institutionId == it.id.institutionId } }
-        entity.permissions.addAll(getNewPermissions(entity, dto.permissions))
-        updatePermissions(entity, dto.permissions)
+        institution.name = request.name
+        institution.email = request.email
+        institution.phonenumber = request.phonenumber
 
-        entity.name = dto.name
-        entity.email = dto.email
-        entity.phonenumber = dto.phonenumber
+        val requestedPermissions = request.permissions.associateBy { it.employeeId }
+        institution.permissions.removeIf { it.id.employeeId !in requestedPermissions.keys }
+        institution.permissions.forEach { permission ->
+            requestedPermissions[permission.id.employeeId]?.let { applyFlags(permission, it) }
+        }
 
-        val savedEntity = institutionRepository.save(entity)
+        val existingEmployeeIds = institution.permissions.map { it.id.employeeId }.toSet()
+        requestedPermissions.values
+            .filter { it.employeeId !in existingEmployeeIds }
+            .forEach { institution.permissions.add(savePermission(institution, it)) }
 
-        return InstitutionWithPermissions.of(savedEntity)
+        return InstitutionWithPermissionsResponse.from(institutionRepository.save(institution))
     }
 
     @Transactional
@@ -44,29 +60,25 @@ class InstitutionService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllSolo(): List<InstitutionDto> {
-        return InstitutionDto.ofSoloProjection(
-            institutionRepository.findInstitutionSoloProjectionOrderedByName()
-        ).sortedBy { it.name }
-    }
-
-    @Transactional(readOnly = true)
-    fun getAll(): List<InstitutionWithPermissions> {
-        return getAllEntities()
-            .map { InstitutionWithPermissions.of(it) }
+    fun getAll(): List<InstitutionResponse> {
+        return institutionRepository.findAll()
+            .map { InstitutionResponse.from(it) }
             .sortedBy { it.name }
     }
 
     @Transactional(readOnly = true)
-    fun getAllEntities(): List<Institution> {
-        return institutionRepository.findAll().sortedBy { it.name }.toList()
+    fun getAllWithPermissions(): List<InstitutionWithPermissionsResponse> {
+        return institutionRepository.findAll()
+            .map { InstitutionWithPermissionsResponse.from(it) }
+            .sortedBy { it.name }
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): InstitutionWithPermissions? {
-        return institutionRepository.findById(id).orElse(null)?.let(InstitutionWithPermissions::of)
+    fun getWithPermissionsById(id: Long): InstitutionWithPermissionsResponse? {
+        return institutionRepository.findById(id).orElse(null)?.let { InstitutionWithPermissionsResponse.from(it) }
     }
 
+    @InternalEntityApi
     @Transactional(readOnly = true)
     fun getEntityById(id: Long): Institution? {
         return institutionRepository.findById(id).orElse(null)
@@ -77,47 +89,18 @@ class InstitutionService(
         return institutionRepository.existsById(id)
     }
 
-    private fun getNewPermissions(
-        entity: Institution,
-        permissions: List<PermissionDto>
-    ): List<Permission> {
-        val newPermissions = mutableListOf<Permission>()
-        for (permissionDto in permissions) {
-            val permission =
-                entity.permissions.find { it.id.employeeId == permissionDto.employeeId && it.id.institutionId == permissionDto.institutionId }
-            if (permission != null) {
-                continue
-            }
-
-            newPermissions.add(Permission.of(permissionDto))
-        }
-
-        return newPermissions
+    private fun savePermission(institution: Institution, request: InstitutionPermissionRequest): Permission {
+        val permission = Permission(
+            id = EmployeeInstitutionRightsKey(employeeId = request.employeeId, institutionId = institution.id)
+        )
+        applyFlags(permission, request)
+        return permissionService.savePermissionEntity(permission)
     }
 
-    private fun updatePermissions(entity: Institution, permissions: List<PermissionDto>): Institution {
-        for (permission in entity.permissions) {
-            val permissionDto =
-                permissions.find { it.employeeId == permission.id.employeeId && it.institutionId == permission.id.institutionId }
-            if (permissionDto == null) {
-                continue
-            }
-
-            permission.readEntries = permissionDto.readEntries
-            permission.writeEntries = permissionDto.writeEntries
-            permission.changeInstitution = permissionDto.changeInstitution
-            permission.affiliated = permissionDto.affiliated
-        }
-
-        return entity
+    private fun applyFlags(permission: Permission, request: InstitutionPermissionRequest) {
+        permission.readEntries = request.readEntries
+        permission.writeEntries = request.writeEntries
+        permission.changeInstitution = request.changeInstitution
+        permission.affiliated = request.affiliated
     }
-
-    private fun createPermissions(
-        dto: InstitutionCreateDto,
-        entityToCreate: Institution
-    ): MutableSet<Permission> = Permission.of(dto.permissions).map {
-        it.institution = entityToCreate
-        it.employee = employeeRepository.findById(it.id.employeeId ?: 0).orElse(null)
-        it
-    }.toMutableSet()
 }

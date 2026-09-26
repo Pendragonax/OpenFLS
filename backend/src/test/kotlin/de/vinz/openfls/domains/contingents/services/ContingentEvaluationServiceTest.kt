@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.contingents.dtos.ContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.dtos.EmployeeContingentEvaluationDto
 import de.vinz.openfls.domains.contingents.projections.ContingentProjection
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
-import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
+import de.vinz.openfls.domains.contingents.projections.ContingentInstitutionProjection
 import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.services.TimeDoubleService
@@ -334,7 +334,7 @@ class ContingentEvaluationServiceTest {
         assertThat(summedExecutedPercent).containsExactly(50.0, 50.0, 50.0)
     }
 
-    private fun mockInstitution(): InstitutionSoloProjection = mock()
+    private fun mockInstitution(): ContingentInstitutionProjection = mock()
 
     private fun mockEmployee(
         id: Long,
@@ -353,7 +353,7 @@ class ContingentEvaluationServiceTest {
     private fun mockContingent(
         id: Long,
         employee: EmployeeSoloProjection,
-        institution: InstitutionSoloProjection,
+        institution: ContingentInstitutionProjection,
         start: LocalDate,
         end: LocalDate?,
         weeklyHours: Double

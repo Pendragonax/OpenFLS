@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.services.dtos
 import de.vinz.openfls.domains.services.projections.ServiceProjection
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
-import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
+import de.vinz.openfls.domains.services.projections.ServiceInstitutionProjection
 import java.time.LocalDateTime
 
 data class ServiceProjectionDto(
@@ -27,7 +27,7 @@ data class ServiceProjectionDto(
         fun from(source: ServiceProjection) = ServiceProjectionDto(
             source.id, source.start, source.end, source.minutes, source.title, source.content,
             source.groupService, source.archivedService,
-            (source.institution as InstitutionSoloProjection?)?.let { InstitutionDto(it.id, it.name, it.email, it.phonenumber) }
+            (source.institution as ServiceInstitutionProjection?)?.let { InstitutionDto(it.id, it.name, it.email, it.phonenumber) }
                 ?: InstitutionDto(0, "", "", ""),
             (source.employee as EmployeeSoloProjection?)?.let { EmployeeDto(it.id, it.firstname, it.lastname, it.email, it.phonenumber, it.description, it.archived) }
                 ?: EmployeeDto(0, "", "", "", "", "", false),

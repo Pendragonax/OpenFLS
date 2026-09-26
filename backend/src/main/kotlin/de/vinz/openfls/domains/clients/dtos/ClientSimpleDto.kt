@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionResponse
 
 class ClientSimpleDto {
     var id: Long = 0
@@ -17,5 +17,5 @@ class ClientSimpleDto {
     var archived: Boolean = false
 
     @JsonIgnoreProperties(value = ["contingents", "permissions", "assistancePlans", "goals", "hibernateLazyInitializer"])
-    var institution: InstitutionDto = InstitutionDto()
+    var institution: InstitutionResponse = InstitutionResponse()
 }

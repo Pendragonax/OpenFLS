@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.contingents.projections
 
 import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
-import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
+import de.vinz.openfls.domains.contingents.projections.ContingentInstitutionProjection
 import java.time.LocalDate
 
 interface ContingentProjection {
@@ -10,5 +10,5 @@ interface ContingentProjection {
     val end: LocalDate?
     val weeklyServiceHours: Double
     val employee: EmployeeSoloProjection
-    val institution: InstitutionSoloProjection
+    val institution: ContingentInstitutionProjection
 }

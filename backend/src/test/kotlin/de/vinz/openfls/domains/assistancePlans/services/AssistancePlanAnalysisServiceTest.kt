@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.goals.projections.GoalProjection
 import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorSoloProjection
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorHourTypeProjection
-import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanInstitutionProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanSponsorProjection
@@ -138,7 +138,7 @@ class AssistancePlanAnalysisServiceTest {
             override val end: LocalDate = end
             override val client: ClientSoloProjection = clientProjection()
             override val sponsor: AssistancePlanSponsorProjection = sponsorProjection()
-            override val institution: InstitutionSoloProjection = institutionProjection()
+            override val institution: AssistancePlanInstitutionProjection = institutionProjection()
             override val hourMode: AssistancePlanHourMode = AssistancePlanHourMode.CORRIDOR
             override val hourCorridor: HourCorridorSoloProjection? = corridor
             override val hours: List<de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourProjection> = emptyList()
@@ -166,8 +166,8 @@ class AssistancePlanAnalysisServiceTest {
         }
     }
 
-    private fun institutionProjection(): InstitutionSoloProjection {
-        return object : InstitutionSoloProjection {
+    private fun institutionProjection(): AssistancePlanInstitutionProjection {
+        return object : AssistancePlanInstitutionProjection {
             override val id: Long = 1
             override val name: String = "Institution"
             override val email: String = ""

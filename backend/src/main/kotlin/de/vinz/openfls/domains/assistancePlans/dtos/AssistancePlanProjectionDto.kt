@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.hourCorridors.HourCorridor
 import de.vinz.openfls.domains.hourTypes.HourType
-import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
+import de.vinz.openfls.domains.institutions.dtos.InstitutionResponse
 import java.time.LocalDate
 
 /**
@@ -25,7 +25,7 @@ data class AssistancePlanProjectionDto(
     val end: LocalDate,
     val client: ClientSoloDto,
     val sponsor: AssistancePlanSponsorSoloDto,
-    val institution: InstitutionDto,
+    val institution: InstitutionResponse,
     val hourMode: AssistancePlanHourMode,
     val hourCorridor: AssistancePlanHourCorridorSoloDto?,
     val hours: List<AssistancePlanHourSoloDto>,
@@ -58,7 +58,7 @@ data class AssistancePlanProjectionDto(
                     payOverhang = sponsor.payOverhang,
                     payExact = sponsor.payExact
                 ),
-                institution = InstitutionDto(
+                institution = InstitutionResponse(
                     id = institution.id ?: 0,
                     name = institution.name,
                     email = institution.email,
