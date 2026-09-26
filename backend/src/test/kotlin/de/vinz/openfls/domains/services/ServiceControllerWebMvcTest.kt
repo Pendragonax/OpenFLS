@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.PermissionService
-import de.vinz.openfls.domains.services.dtos.ServiceDto
+import de.vinz.openfls.domains.services.dtos.ServiceWithGoalsAndCategories
 import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
 import de.vinz.openfls.domains.services.services.ServiceService
 import org.assertj.core.api.Assertions.assertThat
@@ -117,7 +117,7 @@ class ServiceControllerWebMvcTest {
 
         given(serviceService.existsById(serviceId)).willReturn(true)
         given(serviceService.getEntityById(serviceId)).willReturn(service)
-        given(serviceService.getById(serviceId)).willReturn(ServiceDto().apply { id = serviceId })
+        given(serviceService.getById(serviceId)).willReturn(ServiceWithGoalsAndCategories().apply { id = serviceId })
         given(accessService.isAdmin()).willReturn(false)
         given(accessService.getId()).willReturn(employeeId)
 

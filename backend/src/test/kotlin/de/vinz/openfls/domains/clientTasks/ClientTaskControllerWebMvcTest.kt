@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskDto
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskPageDto
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dtos.ClientDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.PerformanceLoggingService
@@ -54,7 +54,7 @@ class ClientTaskControllerWebMvcTest {
     @BeforeEach
     fun setUp() {
         given(accessService.getId()).willReturn(7L)
-        given(employeeService.getEmployeeDtoById(eq(7L), any())).willReturn(EmployeeDto().apply {
+        given(employeeService.getEmployeeDtoById(eq(7L), any())).willReturn(EmployeeWithAccess().apply {
             id = 7
             firstName = "Anna"
             lastName = "Autorin"

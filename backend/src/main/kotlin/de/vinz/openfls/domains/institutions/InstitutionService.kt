@@ -14,15 +14,15 @@ class InstitutionService(
 ) {
 
     @Transactional
-    fun create(dto: InstitutionCreateDto): InstitutionDto {
+    fun create(dto: InstitutionCreateDto): InstitutionWithPermissions {
         val entityToCreate = Institution.of(dto)
         entityToCreate.permissions = createPermissions(dto, entityToCreate)
         val entity = institutionRepository.save(entityToCreate)
-        return InstitutionDto.of(entity)
+        return InstitutionWithPermissions.of(entity)
     }
 
     @Transactional
-    fun update(dto: InstitutionUpdateDto): InstitutionDto {
+    fun update(dto: InstitutionUpdateDto): InstitutionWithPermissions {
         val entity = getEntityById(dto.id) ?: throw IllegalArgumentException("Institution with id ${dto.id} not found")
 
         entity.permissions.removeIf { dto.permissions.none { p -> p.employeeId == it.id.employeeId && p.institutionId == it.id.institutionId } }
@@ -35,7 +35,7 @@ class InstitutionService(
 
         val savedEntity = institutionRepository.save(entity)
 
-        return InstitutionDto.of(savedEntity)
+        return InstitutionWithPermissions.of(savedEntity)
     }
 
     @Transactional
@@ -44,16 +44,16 @@ class InstitutionService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllSolo(): List<InstitutionSoloDto> {
-        return InstitutionSoloDto.ofSoloProjection(
+    fun getAllSolo(): List<InstitutionDto> {
+        return InstitutionDto.ofSoloProjection(
             institutionRepository.findInstitutionSoloProjectionOrderedByName()
         ).sortedBy { it.name }
     }
 
     @Transactional(readOnly = true)
-    fun getAll(): List<InstitutionDto> {
+    fun getAll(): List<InstitutionWithPermissions> {
         return getAllEntities()
-            .map { InstitutionDto.of(it) }
+            .map { InstitutionWithPermissions.of(it) }
             .sortedBy { it.name }
     }
 
@@ -63,8 +63,8 @@ class InstitutionService(
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): InstitutionDto? {
-        return institutionRepository.findById(id).orElse(null)?.let(InstitutionDto::of)
+    fun getById(id: Long): InstitutionWithPermissions? {
+        return institutionRepository.findById(id).orElse(null)?.let(InstitutionWithPermissions::of)
     }
 
     @Transactional(readOnly = true)

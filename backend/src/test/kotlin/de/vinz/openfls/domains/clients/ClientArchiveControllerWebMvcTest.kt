@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportRe
 import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportStatusDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import org.assertj.core.api.Assertions.assertThat
@@ -95,7 +95,7 @@ class ClientArchiveControllerWebMvcTest {
         val clientId = 17L
         val archiveDate = LocalDate.of(2026, 5, 23)
         val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = employeeId
             firstName = "Anna"
             lastName = "Lead"
@@ -148,7 +148,7 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = employeeId
             firstName = "Anna"
             lastName = "Employee"
@@ -188,7 +188,7 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = employeeId
             firstName = "Anna"
             lastName = "Lead"
@@ -228,7 +228,7 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = employeeId
             firstName = "Anna"
             lastName = "Lead"
@@ -273,7 +273,7 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = employeeId
             firstName = "Anna"
             lastName = "Lead"
@@ -312,7 +312,7 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = employeeId
             firstName = "Anna"
             lastName = "Lead"

@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEditDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanProjectionDto
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
@@ -302,6 +303,17 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
+    fun getEditById(
+        id: Long,
+        includeArchived: Boolean = false,
+        leadingInstitutionIds: List<Long> = emptyList()
+    ): AssistancePlanEditDto? {
+        val entity = assistancePlanRepository.findByIdOrNull(id)
+        return entity?.takeIf { isVisible(it.client?.archived == true, it.client?.institution?.id, includeArchived, leadingInstitutionIds) }
+            ?.let(::mapToEditDto)
+    }
+
+    @Transactional(readOnly = true)
     fun getProjectionById(id: Long): AssistancePlanProjectionDto? {
         return assistancePlanRepository.findDetailedById(id)?.let(AssistancePlanProjectionDto::of)
     }
@@ -433,6 +445,15 @@ class AssistancePlanService(
 
     private fun mapToDto(entity: AssistancePlan): AssistancePlanDto {
         val dto = modelMapper.map(entity, AssistancePlanDto::class.java)
+        dto.institutionName = entity.institution?.name ?: ""
+        dto.clientArchived = entity.client?.archived ?: false
+        dto.hourMode = entity.hourMode
+        dto.hourCorridorId = entity.hourCorridor?.id ?: 0
+        return dto
+    }
+
+    private fun mapToEditDto(entity: AssistancePlan): AssistancePlanEditDto {
+        val dto = modelMapper.map(entity, AssistancePlanEditDto::class.java)
         dto.institutionName = entity.institution?.name ?: ""
         dto.clientArchived = entity.client?.archived ?: false
         dto.hourMode = entity.hourMode

@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.employees
 
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.UserService
@@ -34,12 +34,12 @@ class EmployeeControllerWebMvcTest {
     @Test
     fun getAll_adminWithIncludeArchived_returnsArchivedEmployees() {
         // Given
-        val active = EmployeeDto().apply {
+        val active = EmployeeWithAccess().apply {
             id = 1L
             firstName = "Active"
             lastName = "Alpha"
         }
-        val archived = EmployeeDto().apply {
+        val archived = EmployeeWithAccess().apply {
             id = 2L
             firstName = "Archived"
             lastName = "Zulu"

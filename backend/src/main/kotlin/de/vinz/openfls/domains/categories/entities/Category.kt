@@ -37,6 +37,9 @@ data class Category(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is Category) return false
+        // Unsaved entities (id == 0) must never be considered equal to one another,
+        // otherwise a Set built from several new Category instances collapses to one.
+        if (id == 0L || other.id == 0L) return false
         return id == other.id
     }
 

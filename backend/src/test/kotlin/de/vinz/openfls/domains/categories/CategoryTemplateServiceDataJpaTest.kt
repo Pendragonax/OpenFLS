@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.categories
 
 import de.vinz.openfls.domains.categories.dtos.CategoryDto
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateDto
 import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.exceptions.InvalidCategoryTemplateDtoException
@@ -28,7 +29,7 @@ class CategoryTemplateServiceDataJpaTest {
     @Test
     fun create_withCategories_persistsTemplateAndCategories() {
         // Given
-        val dto = CategoryTemplateDto(
+        val dto = CategoryTemplateCreateDto(
             title = "Template A",
             description = "Desc",
             withoutClient = false,
@@ -46,12 +47,13 @@ class CategoryTemplateServiceDataJpaTest {
         assertThat(saved).isPresent
         assertThat(saved.get().categories).isNotEmpty
         assertThat(saved.get().categories.map { it.title }).contains("Cat 1")
+        assertThat(result.categories.map { it.title }).contains("Cat 1", "Cat 2")
     }
 
     @Test
     fun update_unknownTemplate_throwsException() {
         // Given
-        val dto = CategoryTemplateDto(
+        val dto = CategoryTemplateUpdateDto(
             id = 9999,
             title = "Missing",
             description = "Desc",
@@ -73,12 +75,11 @@ class CategoryTemplateServiceDataJpaTest {
         val category1 = categoryRepository.save(
             Category(title = "Cat 1", shortcut = "C1", description = "D1", faceToFace = true, categoryTemplate = template)
         )
-        val category2 = categoryRepository.save(
+        categoryRepository.save(
             Category(title = "Cat 2", shortcut = "C2", description = "D2", faceToFace = true, categoryTemplate = template)
         )
-        val removedCategoryId = category2.id
 
-        val dto = CategoryTemplateDto(
+        val dto = CategoryTemplateUpdateDto(
             id = template.id,
             title = "Template B",
             description = "Desc",
@@ -101,5 +102,8 @@ class CategoryTemplateServiceDataJpaTest {
         // Then
         val remaining = categoryRepository.findAll().toList()
         assertThat(remaining.map { it.id }).contains(category1.id)
+        // NOTE: deletion of the removed category ("Cat 2") is not verified here —
+        // see task chip: update() does not actually remove it from the DB, a
+        // pre-existing bug unrelated to this DTO refactor.
     }
 }

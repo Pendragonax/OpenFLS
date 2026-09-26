@@ -1,6 +1,7 @@
 package de.vinz.openfls.domains.categories
 
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateDto
 import de.vinz.openfls.domains.categories.exceptions.InvalidCategoryTemplateDtoException
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
@@ -20,7 +21,7 @@ class CategoryTemplateController(
     private val logger: Logger = LoggerFactory.getLogger(CategoryTemplateController::class.java)
 
     @PostMapping
-    fun create(@RequestBody valueDto: CategoryTemplateDto): Any {
+    fun create(@RequestBody valueDto: CategoryTemplateCreateDto): Any {
         // performance
         val startMs = System.currentTimeMillis()
 
@@ -35,7 +36,7 @@ class CategoryTemplateController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: CategoryTemplateDto): Any {
+               @Valid @RequestBody valueDto: CategoryTemplateUpdateDto): Any {
         // performance
         val startMs = System.currentTimeMillis()
 

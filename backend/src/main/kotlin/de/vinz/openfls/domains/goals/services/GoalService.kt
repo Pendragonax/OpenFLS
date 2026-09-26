@@ -2,8 +2,10 @@ package de.vinz.openfls.domains.goals.services
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
+import de.vinz.openfls.domains.goals.dtos.GoalCreateDto
 import de.vinz.openfls.domains.goals.dtos.GoalDto
-import de.vinz.openfls.domains.goals.dtos.GoalHourDto
+import de.vinz.openfls.domains.goals.dtos.GoalUpdateDto
+import de.vinz.openfls.domains.goals.dtos.GoalWithHours
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.goals.repositories.GoalHourRepository
@@ -27,8 +29,8 @@ class GoalService(
 ) {
 
     @Transactional
-    fun create(valueDto: GoalDto): GoalDto {
-        val entity = modelMapper.map(valueDto, Goal::class.java)
+    fun create(valueDto: GoalCreateDto): GoalWithHours {
+        val entity = Goal(title = valueDto.title, description = valueDto.description)
 
         entity.assistancePlan = assistancePlanService.getEntityById(valueDto.assistancePlanId)
                 ?: throw IllegalArgumentException("assistance plan [id = ${valueDto.assistancePlanId}] not found")
@@ -48,14 +50,7 @@ class GoalService(
 
         val savedEntity = createEntity(entity)
 
-        valueDto.apply {
-            id = savedEntity.id
-            hours = savedEntity.hours
-                    .map { modelMapper.map(it, GoalHourDto::class.java) }
-                    .toMutableSet()
-        }
-
-        return valueDto
+        return toGoalWithHours(savedEntity)
     }
 
     @Transactional
@@ -83,7 +78,7 @@ class GoalService(
     }
 
     @Transactional
-    fun update(valueDto: GoalDto): GoalDto {
+    fun update(valueDto: GoalUpdateDto): GoalWithHours {
         val entity = modelMapper.map(valueDto, Goal::class.java)
 
         entity.assistancePlan = assistancePlanService.getEntityById(valueDto.assistancePlanId)
@@ -104,14 +99,7 @@ class GoalService(
 
         val savedEntity = updateEntity(entity)
 
-        valueDto.apply {
-            this.id = savedEntity.id
-            hours = savedEntity.hours
-                    .map { modelMapper.map(it, GoalHourDto::class.java) }
-                    .toMutableSet()
-        }
-
-        return valueDto
+        return toGoalWithHours(savedEntity)
     }
 
     @Transactional
@@ -175,12 +163,14 @@ class GoalService(
     }
 
     @Transactional(readOnly = true)
-    fun getByAssistancePlanId(id: Long): List<GoalDto> {
+    fun getByAssistancePlanId(id: Long): List<GoalWithHours> {
         val entities = goalRepository.findByAssistancePlanId(id)
 
-        return entities.map {
-            modelMapper.map(it, GoalDto::class.java)
-        }
+        return entities.map { toGoalWithHours(it) }
+    }
+
+    private fun toGoalWithHours(entity: Goal): GoalWithHours {
+        return modelMapper.map(entity, GoalWithHours::class.java)
     }
 
     private fun validateGoalHoursForAssistancePlan(assistancePlan: de.vinz.openfls.domains.assistancePlans.AssistancePlan, hasGoalHours: Boolean) {

@@ -7,11 +7,13 @@ import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
 import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
+import de.vinz.openfls.domains.clients.dtos.ClientCreateDto
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.clients.dtos.ClientFavoriteRowDto
 import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
+import de.vinz.openfls.domains.clients.dtos.ClientUpdateDto
 import de.vinz.openfls.domains.hourTypes.HourTypeDto
 import de.vinz.openfls.domains.institutions.InstitutionService
 
@@ -30,52 +32,44 @@ class ClientService(
 ) {
 
     @Transactional
-    fun create(value: ClientDto): ClientDto {
-        val clientEntity = modelMapper.map(value, Client::class.java)
-        val resultClientEntity = createEntity(clientEntity)
-        val clientDto = modelMapper.map(resultClientEntity, ClientDto::class.java)
-        return sortClientDto(clientDto, resultClientEntity)
-    }
-
-    @Transactional
-    fun createEntity(value: Client): Client {
-        value.institution = institutionService.getEntityById(value.institution?.id ?: 0)
+    fun create(valueDto: ClientCreateDto): ClientDto {
+        val entity = Client(
+                firstName = valueDto.firstName,
+                lastName = valueDto.lastName,
+                phoneNumber = valueDto.phoneNumber,
+                email = valueDto.email,
+                archived = false
+        )
+        entity.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution not found")
-        value.categoryTemplate = categoryTemplateService.getEntityById(value.categoryTemplate?.id ?: 0)
+        entity.categoryTemplate = categoryTemplateService.getEntityById(valueDto.categoryTemplateId)
                 ?: throw IllegalArgumentException("category template not found")
-        value.archived = false
 
-        return clientRepository.save(value)
-    }
-
-    @Transactional
-    fun update(value: ClientDto): ClientDto {
-        val clientEntity = modelMapper.map(value, Client::class.java)
-        val resultClientEntity = updateEntity(clientEntity)
-        val clientDto = modelMapper.map(resultClientEntity, ClientDto::class.java)
-        return sortClientDto(clientDto, resultClientEntity)
+        val savedEntity = clientRepository.save(entity)
+        return toClientDto(savedEntity)
     }
 
     @Transactional
     @Throws(ClientArchiveStateException::class)
-    fun updateEntity(value: Client): Client {
-        val existingClient = clientRepository.findById(value.id)
+    fun update(valueDto: ClientUpdateDto): ClientDto {
+        val existingClient = clientRepository.findById(valueDto.id)
                 .orElseThrow { IllegalArgumentException("client not found") }
 
         if (existingClient.archived) {
             throw ClientArchiveStateException("client is archived")
         }
 
-        existingClient.firstName = value.firstName
-        existingClient.lastName = value.lastName
-        existingClient.phoneNumber = value.phoneNumber
-        existingClient.email = value.email
-        existingClient.institution = institutionService.getEntityById(value.institution?.id ?: 0)
+        existingClient.firstName = valueDto.firstName
+        existingClient.lastName = valueDto.lastName
+        existingClient.phoneNumber = valueDto.phoneNumber
+        existingClient.email = valueDto.email
+        existingClient.institution = institutionService.getEntityById(valueDto.institutionId)
                 ?: throw IllegalArgumentException("institution not found")
-        existingClient.categoryTemplate = categoryTemplateService.getEntityById(value.categoryTemplate?.id ?: 0)
+        existingClient.categoryTemplate = categoryTemplateService.getEntityById(valueDto.categoryTemplateId)
                 ?: throw IllegalArgumentException("category template not found")
 
-        return clientRepository.save(existingClient)
+        val savedEntity = clientRepository.save(existingClient)
+        return toClientDto(savedEntity)
     }
 
     @Transactional
@@ -203,8 +197,7 @@ class ClientService(
         val entity = getEntityById(id)
 
         if (entity != null && isVisible(entity.archived, entity.institution?.id, includeArchived, leadingInstitutionIds)) {
-            val clientDto = modelMapper.map(entity, ClientDto::class.java)
-            return sortClientDto(clientDto, entity)
+            return toClientDto(entity)
         }
 
         return null
@@ -290,16 +283,11 @@ class ClientService(
         return historyEntry
     }
 
-    private fun sortClientDto(clientDto: ClientDto, entity: Client): ClientDto {
-        val institutionNamesByAssistancePlanId = entity.assistancePlans.associate { it.id to (it.institution?.name ?: "") }
-        clientDto.assistancePlans.forEach { plan ->
-            plan.institutionName = institutionNamesByAssistancePlanId[plan.id] ?: ""
-        }
-        clientDto.assistancePlans =
-                clientDto.assistancePlans.sortedBy { it.start }.toTypedArray()
-        clientDto.categoryTemplate.categories =
-                clientDto.categoryTemplate.categories.sortedBy { it.shortcut }
-        return clientDto
+    private fun toClientDto(entity: Client): ClientDto {
+        val dto = modelMapper.map(entity, ClientDto::class.java)
+        dto.categoryTemplateId = entity.categoryTemplate?.id ?: 0
+        dto.categoryTemplateTitle = entity.categoryTemplate?.title ?: ""
+        return dto
     }
 
     private fun mapToServiceEditingAssistancePlanDto(

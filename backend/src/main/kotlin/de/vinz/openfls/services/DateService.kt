@@ -1,6 +1,5 @@
 package de.vinz.openfls.services
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.YearOutOfRangeException
 import java.time.*
 import java.time.temporal.ChronoUnit
@@ -37,8 +36,8 @@ class DateService {
             throw YearOutOfRangeException()
         }
 
-        fun isDateInAssistancePlan(date: LocalDate, assistancePlanDto: AssistancePlanDto): Boolean {
-            return !date.isBefore(assistancePlanDto.start) && !date.isAfter(assistancePlanDto.end)
+        fun isDateInAssistancePlan(date: LocalDate, start: LocalDate, end: LocalDate): Boolean {
+            return !date.isBefore(start) && !date.isAfter(end)
         }
 
         fun isYearMonthInBetweenInclusive(yearMonth: YearMonth, start: LocalDate, end: LocalDate): Boolean {
@@ -59,7 +58,7 @@ class DateService {
             return startYearMonth <= yearMonth && endYearMonth >= yearMonth
         }
 
-        fun countDaysOfAssistancePlan(year: Int, month: Int?, assistancePlanDto: AssistancePlanDto): Long {
+        fun countDaysOfAssistancePlan(year: Int, month: Int?, planStart: LocalDate, planEnd: LocalDate): Long {
             var start: LocalDate
             var end: LocalDate
 
@@ -72,10 +71,10 @@ class DateService {
             }
 
             // not in this month
-            if (isAssistancePlanBetweenStartAndEnd(assistancePlanDto, end, start)) return 0
+            if (isAssistancePlanBetweenStartAndEnd(planStart, planEnd, end, start)) return 0
 
-            start = if (assistancePlanDto.start < start) start else assistancePlanDto.start
-            end = if (assistancePlanDto.end > end) end else assistancePlanDto.end
+            start = if (planStart < start) start else planStart
+            end = if (planEnd > end) end else planEnd
 
             return ChronoUnit.DAYS.between(start, end) + 1
         }
@@ -166,16 +165,17 @@ class DateService {
             return 0
         }
 
-        fun countDaysOfAssistancePlan(year: Int, assistancePlanDto: AssistancePlanDto): Long {
-            return countDaysOfAssistancePlan(year, null, assistancePlanDto)
+        fun countDaysOfAssistancePlan(year: Int, planStart: LocalDate, planEnd: LocalDate): Long {
+            return countDaysOfAssistancePlan(year, null, planStart, planEnd)
         }
 
         private fun isAssistancePlanBetweenStartAndEnd(
-            assistancePlanDto: AssistancePlanDto,
+            planStart: LocalDate,
+            planEnd: LocalDate,
             start: LocalDate,
             end: LocalDate
         ): Boolean {
-            return assistancePlanDto.start > start || assistancePlanDto.end < end
+            return planStart > start || planEnd < end
         }
 
         fun convertMinutesToHour(minutes: Double): Double {

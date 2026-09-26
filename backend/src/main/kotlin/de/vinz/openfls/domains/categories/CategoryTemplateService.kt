@@ -1,6 +1,8 @@
 package de.vinz.openfls.domains.categories
 
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateWithCategories
 import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.exceptions.InvalidCategoryTemplateDtoException
@@ -15,7 +17,7 @@ class CategoryTemplateService(private val categoryTemplateRepository: CategoryTe
                               private val categoryRepository: CategoryRepository) {
 
     @Transactional
-    fun create(valueDto: CategoryTemplateDto): CategoryTemplateDto {
+    fun create(valueDto: CategoryTemplateCreateDto): CategoryTemplateWithCategories {
         val entity = categoryTemplateRepository.save(CategoryTemplate.soloFrom(valueDto))
 
         val categoriesWithCorrectTemplate = valueDto.categories
@@ -25,11 +27,11 @@ class CategoryTemplateService(private val categoryTemplateRepository: CategoryTe
 
         categoryTemplateRepository.save(entity)
 
-        return CategoryTemplateDto.from(entity)
+        return CategoryTemplateWithCategories.from(entity)
     }
 
     @Transactional
-    fun update(valueDto: CategoryTemplateDto): CategoryTemplateDto {
+    fun update(valueDto: CategoryTemplateUpdateDto): CategoryTemplateWithCategories {
         val existingTemplate = categoryTemplateRepository.findById(valueDto.id)
 
         if (existingTemplate.isEmpty) {
@@ -42,7 +44,7 @@ class CategoryTemplateService(private val categoryTemplateRepository: CategoryTe
         categoriesToDelete.forEach { categoryRepository.deleteById(it.id) }
 
         val newTemplate = categoryTemplateRepository.save(CategoryTemplate.from(valueDto))
-        return CategoryTemplateDto.from(newTemplate)
+        return CategoryTemplateWithCategories.from(newTemplate)
     }
 
     @Transactional
@@ -51,15 +53,15 @@ class CategoryTemplateService(private val categoryTemplateRepository: CategoryTe
     }
 
     @Transactional(readOnly = true)
-    fun getAll(): List<CategoryTemplateDto> {
+    fun getAll(): List<CategoryTemplateWithCategories> {
         val entities = categoryTemplateRepository.findAll()
-        return entities.map { CategoryTemplateDto.from(it) }.sortedBy { it.title }
+        return entities.map { CategoryTemplateWithCategories.from(it) }.sortedBy { it.title }
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): CategoryTemplateDto? {
+    fun getById(id: Long): CategoryTemplateWithCategories? {
         val entity = categoryTemplateRepository.findById(id).orElse(null)
-        return entity?.let { CategoryTemplateDto.from(it) }
+        return entity?.let { CategoryTemplateWithCategories.from(it) }
     }
 
     @Transactional(readOnly = true)

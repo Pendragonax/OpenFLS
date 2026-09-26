@@ -1,10 +1,6 @@
 package de.vinz.openfls.domains.goals.dtos
 
-/**
- * Schlanke Standard-Variante ohne die Zielstunden-Relation. Für den Anwendungsfall
- * „Zielstunden mitlesen" siehe [GoalWithHours].
- */
-class GoalDto {
+class GoalWithHours {
     var id: Long = 0
 
     var title: String = ""
@@ -14,4 +10,6 @@ class GoalDto {
     var assistancePlanId: Long = 0
 
     var institutionId: Long? = null
+
+    var hours: MutableSet<GoalHourDto> = mutableSetOf()
 }

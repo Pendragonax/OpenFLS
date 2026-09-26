@@ -347,7 +347,7 @@ export class AssistancePlanEditComponent extends NewPageComponent<AssistancePlan
     }
 
     this.isLoading = true;
-    this.assistancePlanService.getById(this.planId).subscribe({
+    this.assistancePlanService.getEditById(this.planId).subscribe({
       next: (plan) => {
         this.value = plan;
         this.updateValue = mapAssistancePlanDtoToUpdateDto(plan);

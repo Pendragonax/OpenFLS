@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients.dtos
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanForServiceEditingDto
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateWithCategories
 import de.vinz.openfls.domains.institutions.dtos.InstitutionDto
 
 class ClientForServiceEditingDto {
@@ -11,7 +11,7 @@ class ClientForServiceEditingDto {
     var phoneNumber: String = ""
     var email: String = ""
     var archived: Boolean = false
-    var categoryTemplate: CategoryTemplateDto = CategoryTemplateDto()
+    var categoryTemplate: CategoryTemplateWithCategories = CategoryTemplateWithCategories()
     var institution: InstitutionDto = InstitutionDto()
     var assistancePlans: Array<AssistancePlanForServiceEditingDto> = emptyArray()
 }

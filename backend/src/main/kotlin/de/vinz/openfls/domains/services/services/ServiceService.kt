@@ -2,13 +2,12 @@ package de.vinz.openfls.domains.services.services
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.goals.dtos.GoalDto
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.dtos.ClientLatestServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
-import de.vinz.openfls.domains.services.dtos.ServiceXLDto
+import de.vinz.openfls.domains.services.dtos.ServiceWithGoalsAndCategories
 import de.vinz.openfls.domains.services.dtos.ServiceProjectionDto
 import de.vinz.openfls.domains.services.projections.ContingentEvaluationServiceProjection
 import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
@@ -30,14 +29,14 @@ class ServiceService(
 ) {
 
     @Transactional
-    fun create(serviceDto: ServiceDto): ServiceDto {
+    fun create(serviceDto: ServiceWithGoalsAndCategories): ServiceWithGoalsAndCategories {
         ensureClientIsMutable(serviceDto.clientId)
         ensureAssistancePlanClientIsMutable(serviceDto.assistancePlanId)
 
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
         entity.employee?.unprofessionals = null
-        return modelMapper.map(createEntity(entity), ServiceDto::class.java)
+        return modelMapper.map(createEntity(entity), ServiceWithGoalsAndCategories::class.java)
     }
 
     @Transactional
@@ -56,7 +55,7 @@ class ServiceService(
     }
 
     @Transactional
-    fun update(serviceDto: ServiceDto): ServiceDto {
+    fun update(serviceDto: ServiceWithGoalsAndCategories): ServiceWithGoalsAndCategories {
         ensureClientIsMutable(serviceDto.clientId)
         ensureAssistancePlanClientIsMutable(serviceDto.assistancePlanId)
 
@@ -64,7 +63,7 @@ class ServiceService(
 
         val savedEntity = updateEntity(entity)
 
-        return modelMapper.map(savedEntity, ServiceDto::class.java)
+        return modelMapper.map(savedEntity, ServiceWithGoalsAndCategories::class.java)
     }
 
     @Transactional
@@ -131,8 +130,8 @@ class ServiceService(
         return serviceRepository.findByInstitutionIdAndStartAndEnd(institutionId, start, end)
     }
 
-    fun getById(id: Long): ServiceDto? {
-        return modelMapper.map(getEntityById(id), ServiceDto::class.java)
+    fun getById(id: Long): ServiceWithGoalsAndCategories? {
+        return modelMapper.map(getEntityById(id), ServiceWithGoalsAndCategories::class.java)
     }
 
     fun getEntityById(id: Long): Service? {
@@ -143,9 +142,9 @@ class ServiceService(
         return serviceRepository.existsById(id)
     }
 
-    fun getXLDtosByAssistancePlan(id: Long): List<ServiceXLDto> {
+    fun getWithGoalsAndCategoriesByAssistancePlan(id: Long): List<ServiceWithGoalsAndCategories> {
         return getByAssistancePlan(id).map {
-            modelMapper.map(it, ServiceXLDto::class.java)
+            modelMapper.map(it, ServiceWithGoalsAndCategories::class.java)
         }
     }
 
@@ -184,7 +183,6 @@ class ServiceService(
         institutionId = service.institution?.id ?: 0
         assistancePlanId = service.assistancePlan?.id ?: 0
         hourTypeId = service.hourType?.id ?: 0
-        goals = service.goals.map { GoalDto().apply { id = it.id; title = it.title } }.toMutableSet()
     }
 
     fun getIllegalByEmployee(employeeId: Long): List<ServiceProjectionDto> {

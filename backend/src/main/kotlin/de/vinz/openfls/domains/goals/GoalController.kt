@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.goals
 import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.goals.dtos.GoalDto
+import de.vinz.openfls.domains.goals.dtos.GoalCreateDto
+import de.vinz.openfls.domains.goals.dtos.GoalUpdateDto
 import de.vinz.openfls.domains.goals.services.GoalService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.domains.permissions.AccessService
@@ -27,7 +28,7 @@ class GoalController(
     private val logPerformance: Boolean = false
 
     @PostMapping("")
-    fun create(@Valid @RequestBody valueDto: GoalDto
+    fun create(@Valid @RequestBody valueDto: GoalCreateDto
     ): Any {
         return try {
             // performance
@@ -57,7 +58,7 @@ class GoalController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: GoalDto
+               @Valid @RequestBody valueDto: GoalUpdateDto
     ): Any {
         return try {
             // performance

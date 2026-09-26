@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull
 import java.time.LocalDateTime
 import jakarta.validation.constraints.Size
 
-class ServiceXLDto {
+class ServiceWithGoalsAndCategories {
     var id: Long = 0
 
     var start: LocalDateTime = LocalDateTime.now()
@@ -23,6 +23,8 @@ class ServiceXLDto {
     var unfinished: Boolean = false
 
     var groupService: Boolean = false
+
+    var archivedService: Boolean = false
 
     var minutes: Int = 0
 
@@ -44,5 +46,6 @@ class ServiceXLDto {
     @JsonIgnoreProperties(value = ["services", "hours", "hibernateLazyInitializer"])
     var goals: MutableSet<GoalDto> = mutableSetOf()
 
+    @JsonIgnoreProperties(value = ["services", "categoryTemplate", "hibernateLazyInitializer"])
     var categorys: MutableSet<CategoryDto> = mutableSetOf()
 }

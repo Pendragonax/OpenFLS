@@ -4,8 +4,9 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
-import de.vinz.openfls.domains.goals.dtos.GoalDto
+import de.vinz.openfls.domains.goals.dtos.GoalCreateDto
 import de.vinz.openfls.domains.goals.dtos.GoalHourDto
+import de.vinz.openfls.domains.goals.dtos.GoalUpdateDto
 import de.vinz.openfls.domains.goals.repositories.GoalHourRepository
 import de.vinz.openfls.domains.goals.repositories.GoalRepository
 import de.vinz.openfls.domains.hourTypes.HourType
@@ -70,7 +71,7 @@ class GoalServiceDataJpaTest {
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
         whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
-        val dto = GoalDto().apply {
+        val dto = GoalCreateDto().apply {
             title = "Goal"
             description = "Desc"
             assistancePlanId = assistancePlan.id
@@ -95,7 +96,7 @@ class GoalServiceDataJpaTest {
     fun create_missingAssistancePlan_throwsException() {
         // Given
         whenever(assistancePlanService.getEntityById(9999)).thenReturn(null)
-        val dto = GoalDto().apply {
+        val dto = GoalCreateDto().apply {
             title = "Goal"
             description = "Desc"
             assistancePlanId = 9999
@@ -111,7 +112,7 @@ class GoalServiceDataJpaTest {
         // Given
         val assistancePlan = assistancePlanRepository.save(AssistancePlan())
         whenever(assistancePlanService.getEntityById(assistancePlan.id)).thenReturn(assistancePlan)
-        val dto = GoalDto().apply {
+        val dto = GoalUpdateDto().apply {
             id = 9999
             title = "Goal"
             description = "Desc"
@@ -138,7 +139,7 @@ class GoalServiceDataJpaTest {
         ))
         goalHourRepository.save(de.vinz.openfls.domains.goals.entities.GoalHour(weeklyMinutes = 60, goal = existing, hourType = hourType))
 
-        val dto = GoalDto().apply {
+        val dto = GoalUpdateDto().apply {
             id = existing.id
             title = "New"
             description = "New"
@@ -176,7 +177,7 @@ class GoalServiceDataJpaTest {
         whenever(assistancePlanService.getEntityById(assistancePlan.id)).thenReturn(assistancePlan)
         whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
-        val dto = GoalDto().apply {
+        val dto = GoalCreateDto().apply {
             title = "Goal"
             description = "Desc"
             assistancePlanId = assistancePlan.id

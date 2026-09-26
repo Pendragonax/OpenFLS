@@ -183,6 +183,35 @@ class AssistancePlanController(
         }
     }
 
+    @GetMapping("{id}/edit")
+    fun getEditById(@PathVariable id: Long): Any {
+        return try {
+            // performance
+            val startMs = System.currentTimeMillis()
+
+            val dto = assistancePlanService.getEditById(
+                id,
+                includeArchived = accessService.isAdmin(),
+                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
+            ) ?: throw IllegalArgumentException("assistance plan not found")
+
+            if (logPerformance) {
+                logger.info(String.format("%s getEditById took %s ms",
+                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                        System.currentTimeMillis() - startMs))
+            }
+
+            ResponseEntity.ok(dto)
+        } catch(ex: Exception) {
+            StructuredLog.error(logger, "application.request.failed", ex)
+
+            ResponseEntity(
+                ex.message,
+                HttpStatus.BAD_REQUEST
+            )
+        }
+    }
+
     @GetMapping("projection/{id}")
     fun getProjectionById(@PathVariable id: Long): Any {
         return try {

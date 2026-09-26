@@ -4,7 +4,8 @@ import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.UnprofessionalRepository
 import de.vinz.openfls.domains.employees.dtos.EmployeeAccessDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeCreateDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeUpdateDto
 import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
@@ -64,7 +65,7 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
     @Test
     fun create_dto_persistsEmployeeAndAccess() {
         // Given
-        val dto = EmployeeDto().apply {
+        val dto = EmployeeCreateDto().apply {
             firstName = "Max"
             lastName = "Mustermann"
             email = "m@m.de"
@@ -88,7 +89,7 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
     @Test
     fun create_dto_withUmlautsAndDigitsUsername_persistsEmployeeAndAccess() {
         // Given
-        val dto = EmployeeDto().apply {
+        val dto = EmployeeCreateDto().apply {
             firstName = "Max"
             lastName = "Mustermann"
             email = "m@m.de"
@@ -110,7 +111,7 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
     @Test
     fun create_dto_withWhitespaceInUsername_throwsException() {
         // Given
-        val dto = EmployeeDto().apply {
+        val dto = EmployeeCreateDto().apply {
             firstName = "Max"
             lastName = "Mustermann"
             access = EmployeeAccessDto().apply {
@@ -128,7 +129,7 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
     @Test
     fun create_dto_withSpecialCharacterInUsername_throwsException() {
         // Given
-        val dto = EmployeeDto().apply {
+        val dto = EmployeeCreateDto().apply {
             firstName = "Max"
             lastName = "Mustermann"
             access = EmployeeAccessDto().apply {
@@ -144,31 +145,9 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
     }
 
     @Test
-    fun create_entityWithoutAccess_throwsException() {
+    fun create_dto_withDuplicateUsername_throwsException() {
         // Given
-        val employee = Employee(firstname = "Max", lastname = "Mustermann")
-
-        // When / Then
-        assertThatThrownBy { employeeService.create(employee) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-    }
-
-    @Test
-    fun create_entityWithEmptyPassword_throwsException() {
-        // Given
-        val employee = Employee(firstname = "Max", lastname = "Mustermann").apply {
-            access = EmployeeAccess(username = "maxuser", password = "", role = 2, employee = this)
-        }
-
-        // When / Then
-        assertThatThrownBy { employeeService.create(employee) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-    }
-
-    @Test
-    fun create_entityWithDuplicateUsername_throwsException() {
-        // Given
-        val existingDto = EmployeeDto().apply {
+        val existingDto = EmployeeCreateDto().apply {
             firstName = "Max"
             lastName = "One"
             access = EmployeeAccessDto().apply {
@@ -177,13 +156,19 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
             }
         }
         employeeService.create(existingDto)
-        val employee = Employee(firstname = "Max", lastname = "Two").apply {
-            access = EmployeeAccess(username = "dupuser", password = "secret", role = 2, employee = this)
+        val dto = EmployeeCreateDto().apply {
+            firstName = "Max"
+            lastName = "Two"
+            access = EmployeeAccessDto().apply {
+                username = "dupuser"
+                role = 2
+            }
         }
 
         // When / Then
-        assertThatThrownBy { employeeService.create(employee) }
+        assertThatThrownBy { employeeService.create(dto) }
             .isInstanceOf(IllegalArgumentException::class.java)
+            .hasMessage("username already exists")
     }
 
     @Test
@@ -191,7 +176,7 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
         // Given
         whenever(accessService.isAdmin()).thenReturn(false)
         val existing = employeeRepository.save(Employee(firstname = "Old", lastname = "Name", email = "old@x.de"))
-        val dto = EmployeeDto().apply {
+        val dto = EmployeeUpdateDto().apply {
             firstName = "New"
             lastName = "Name"
             email = "new@x.de"
@@ -240,17 +225,11 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
         }
         unprofessionalRepository.save(unprofessional)
 
-        val dto = EmployeeDto().apply {
+        val dto = EmployeeUpdateDto().apply {
             firstName = "New"
             lastName = "Name"
             email = "new@x.de"
             phonenumber = "123"
-            access = EmployeeAccessDto().apply {
-                id = existing.id!!
-                username = "updatedUsername"
-                role = 2
-                password = "updatedPassword"
-            }
             permissions = listOf(
                 PermissionDto().apply {
                     employeeId = existing.id!!
@@ -295,7 +274,7 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
     fun update_missingEmployee_throwsException() {
         // Given
         whenever(accessService.isAdmin()).thenReturn(false)
-        val dto = EmployeeDto().apply {
+        val dto = EmployeeUpdateDto().apply {
             firstName = "New"
             lastName = "Name"
         }
@@ -346,13 +325,13 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
     }
 
     @Test
-    fun getAllProjections_defaultHidesArchivedEmployees() {
+    fun getAllSoloDtos_defaultHidesArchivedEmployees() {
         // Given
         val active = employeeRepository.save(Employee(firstname = "Active", lastname = "Alpha"))
         employeeRepository.save(Employee(firstname = "Archived", lastname = "Zulu", archived = true))
 
         // When
-        val result = employeeService.getAllProjections()
+        val result = employeeService.getAllSoloDtos()
 
         // Then
         assertThat(result).hasSize(1)

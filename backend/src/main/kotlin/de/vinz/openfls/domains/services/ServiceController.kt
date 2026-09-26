@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.PermissionService
-import de.vinz.openfls.domains.services.dtos.ServiceDto
+import de.vinz.openfls.domains.services.dtos.ServiceWithGoalsAndCategories
 import de.vinz.openfls.domains.services.dtos.ServiceProjectionDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
@@ -42,7 +42,7 @@ class ServiceController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: ServiceDto): Any {
+    fun create(@Valid @RequestBody valueDto: ServiceWithGoalsAndCategories): Any {
         return try {
             val startMs = System.currentTimeMillis()
 
@@ -72,7 +72,7 @@ class ServiceController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: ServiceDto): Any {
+               @Valid @RequestBody valueDto: ServiceWithGoalsAndCategories): Any {
         return try {
             val startMs = System.currentTimeMillis()
 
@@ -206,7 +206,7 @@ class ServiceController(
             if (!accessService.canModifyAssistancePlan(id))
                 throw IllegalArgumentException("no permission to load the services of this assistance plan")
 
-            val dtos = serviceService.getXLDtosByAssistancePlan(id)
+            val dtos = serviceService.getWithGoalsAndCategoriesByAssistancePlan(id)
 
             if (logPerformance) {
                 logger.info(String.format("%s getByAssistancePlan took %s ms and found %d entities",

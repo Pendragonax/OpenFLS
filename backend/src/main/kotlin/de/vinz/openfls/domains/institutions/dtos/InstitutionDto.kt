@@ -1,50 +1,39 @@
 package de.vinz.openfls.domains.institutions.dtos
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.domains.contingents.dtos.ContingentDto
 import de.vinz.openfls.domains.institutions.Institution
-import de.vinz.openfls.domains.permissions.PermissionDto
-import jakarta.validation.constraints.NotEmpty
+import de.vinz.openfls.domains.institutions.projections.InstitutionSoloProjection
 
-/**
- * Kanonisches Lese-Dto einer Institution. Rückgabetyp von create/update sowie
- * von getAll/getById im [de.vinz.openfls.domains.institutions.InstitutionService].
- */
-class InstitutionDto {
-    var id: Long = 0
+data class InstitutionDto(
+        var id: Long = 0,
+        var name: String = "",
+        var email: String = "",
+        var phonenumber: String = ""
+) {
+        companion object {
+                fun of(institution: Institution): InstitutionDto {
+                        return InstitutionDto(
+                                id = institution.id ?: 0,
+                                name = institution.name,
+                                email = institution.email,
+                                phonenumber = institution.phonenumber
+                        )
+                }
 
-    @field:NotEmpty
-    var name: String = ""
+                fun of(institutions: List<Institution>): List<InstitutionDto> {
+                        return institutions.map { of(it) }
+                }
 
-    var email: String = ""
+                fun ofSoloProjection(institutionSoloProjection: InstitutionSoloProjection): InstitutionDto {
+                        return InstitutionDto(
+                                id = institutionSoloProjection.id,
+                                name = institutionSoloProjection.name,
+                                email = institutionSoloProjection.email,
+                                phonenumber = institutionSoloProjection.phonenumber
+                        )
+                }
 
-    var phonenumber: String = ""
-
-    var permissions: List<PermissionDto> = emptyList()
-
-    var contingents: List<ContingentDto>? = emptyList()
-
-    var assistancePlans: List<AssistancePlanDto>? = emptyList()
-
-    constructor(id: Long, name: String, email: String, phonenumber: String) {
-        this.id = id
-        this.name = name
-        this.email = email
-        this.phonenumber = phonenumber
-    }
-
-    constructor()
-
-    companion object {
-        fun of(entity: Institution): InstitutionDto {
-            return InstitutionDto(
-                id = entity.id ?: 0,
-                name = entity.name,
-                email = entity.email,
-                phonenumber = entity.phonenumber
-            ).apply {
-                permissions = entity.permissions.map { PermissionDto.of(it) }
-            }
+                fun ofSoloProjection(institutionSoloProjections: List<InstitutionSoloProjection>): List<InstitutionDto> {
+                        return institutionSoloProjections.map { ofSoloProjection(it) }
+                }
         }
-    }
 }

@@ -55,6 +55,10 @@ export class AssistancePlanService {
     return this.http.get<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}`);
   }
 
+  getEditById(id: number): Observable<AssistancePlanDto> {
+    return this.http.get<AssistancePlanDto>(`${environment.api_url}${this.url}/${id}/edit`);
+  }
+
   getProjectionById(id: number): Observable<AssistancePlan> {
     return this.http.get<AssistancePlan>(`${environment.api_url}${this.url}/projection/${id}`);
   }

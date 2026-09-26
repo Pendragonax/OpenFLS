@@ -1,6 +1,9 @@
 package de.vinz.openfls.domains.employees.dtos
 
-class EmployeeDto {
+import de.vinz.openfls.domains.permissions.PermissionDto
+import jakarta.validation.Valid
+
+class EmployeeWithAccess {
     var id: Long = 0
 
     var firstName: String = ""
@@ -18,4 +21,11 @@ class EmployeeDto {
     var inactive: Boolean = false
 
     var institutionId: Long? = null
+
+    @Valid
+    var access: EmployeeAccessDto? = null
+
+    var permissions: List<PermissionDto>? = null
+
+    var unprofessionals: List<UnprofessionalDto>? = null
 }

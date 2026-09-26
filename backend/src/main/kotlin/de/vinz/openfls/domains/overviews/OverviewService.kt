@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.overviews
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEditDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
@@ -167,7 +167,7 @@ class OverviewService(
     }
 
     internal fun getApprovedHoursMonthly(
-        assistancePlanDtos: List<AssistancePlanDto>,
+        assistancePlanDtos: List<AssistancePlanEditDto>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
         year: Int,
@@ -194,7 +194,7 @@ class OverviewService(
 
             (1..daysInMonth).forEach { day ->
                 val date = LocalDate.of(year, month, day)
-                if (DateService.isDateInAssistancePlan(date, planDto)) {
+                if (DateService.isDateInAssistancePlan(date, planDto.start, planDto.end)) {
                     overviewDto.values[0] += hoursPerDay
                     overviewDto.values[day] = hoursPerDay
                     allAssistancePlanOverviewDto.values[0] += hoursPerDay
@@ -212,7 +212,7 @@ class OverviewService(
     }
 
     internal fun getApprovedHoursYearly(
-        assistancePlanDtos: List<AssistancePlanDto>,
+        assistancePlanDtos: List<AssistancePlanEditDto>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
         year: Int,
@@ -230,7 +230,7 @@ class OverviewService(
 
             if (assistancePlanOverviewDto != null) {
                 for (i in 1..monthCount) {
-                    val daysInMonth = DateService.countDaysOfAssistancePlan(year, i, assistancePlanDto)
+                    val daysInMonth = DateService.countDaysOfAssistancePlan(year, i, assistancePlanDto.start, assistancePlanDto.end)
                     val hoursPerMonth = hoursPerDay * daysInMonth
                     assistancePlanOverviewDto.values[0] += hoursPerMonth
                     assistancePlanOverviewDto.values[i] = hoursPerMonth
@@ -249,7 +249,7 @@ class OverviewService(
 
     internal fun getExecutedHoursYearly(
         services: List<de.vinz.openfls.domains.services.Service>,
-        assistancePlanDtos: List<AssistancePlanDto>,
+        assistancePlanDtos: List<AssistancePlanEditDto>,
         clientDtos: List<ClientSimpleDto>,
         year: Int,
         toTimeDouble: Boolean = true
@@ -281,7 +281,7 @@ class OverviewService(
 
     internal fun getExecutedHoursMonthly(
         services: List<de.vinz.openfls.domains.services.Service>,
-        assistancePlanDtos: List<AssistancePlanDto>,
+        assistancePlanDtos: List<AssistancePlanEditDto>,
         clientDtos: List<ClientSimpleDto>,
         year: Int,
         month: Int,
@@ -313,7 +313,7 @@ class OverviewService(
 
     internal fun getDifferenceHoursYearly(
         services: List<de.vinz.openfls.domains.services.Service>,
-        assistancePlanDtos: List<AssistancePlanDto>,
+        assistancePlanDtos: List<AssistancePlanEditDto>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
         year: Int,
@@ -338,7 +338,7 @@ class OverviewService(
 
     internal fun getDifferenceHoursMonthly(
         services: List<de.vinz.openfls.domains.services.Service>,
-        assistancePlanDtos: List<AssistancePlanDto>,
+        assistancePlanDtos: List<AssistancePlanEditDto>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
         year: Int,
@@ -383,7 +383,7 @@ class OverviewService(
                             val daysInPeriod = if (month != null) {
                                 1
                             } else {
-                                DateService.countDaysOfAssistancePlan(year, i, executedOverviewDto.assistancePlanDto).toInt()
+                                DateService.countDaysOfAssistancePlan(year, i, executedOverviewDto.assistancePlanDto.start, executedOverviewDto.assistancePlanDto.end).toInt()
                             }
                             val approvedHoursFrom =
                                 corridorApprovedHoursForDays(daysInPeriod, corridor.weeklyMinutesFrom)
@@ -445,7 +445,7 @@ class OverviewService(
         month: Int?,
         institutionId: Long?,
         sponsorId: Long?
-    ): List<AssistancePlanDto> {
+    ): List<AssistancePlanEditDto> {
         val plans = when {
             institutionId != null && sponsorId != null ->
                 assistancePlanRepository.findByInstitutionIdAndSponsorIdAndYear(institutionId, sponsorId, year)
@@ -460,7 +460,7 @@ class OverviewService(
                 assistancePlanRepository.findAllByYear(year).toList()
         }
 
-        val mappedPlans = plans.map { modelMapper.map(it, AssistancePlanDto::class.java) }
+        val mappedPlans = plans.map { modelMapper.map(it, AssistancePlanEditDto::class.java) }
 
         return if (month != null) {
             mappedPlans.filter {
@@ -554,7 +554,7 @@ class OverviewService(
     }
 
     internal fun getAssistancePlanOverviewDtosWithoutValues(
-        assistancePlanDtos: List<AssistancePlanDto>,
+        assistancePlanDtos: List<AssistancePlanEditDto>,
         clientDtos: List<ClientSimpleDto>,
         valuesCount: Int
     ): MutableList<AssistancePlanOverviewDto> {
@@ -570,13 +570,13 @@ class OverviewService(
         }.sortedBy { it.clientDto.lastName }
             .toMutableList()
 
-        result.add(0, AssistancePlanOverviewDto(AssistancePlanDto(), allClient, defaultValuesArray))
+        result.add(0, AssistancePlanOverviewDto(AssistancePlanEditDto(), allClient, defaultValuesArray))
 
         return result
     }
 
     internal fun getDailyHoursOfAssistancePlanByHourType(
-        assistancePlanDto: AssistancePlanDto,
+        assistancePlanDto: AssistancePlanEditDto,
         hourTypeId: Long?,
         hourCorridors: Map<Long, HourCorridor> = loadHourCorridors(listOf(assistancePlanDto))
     ): Double =
@@ -601,7 +601,7 @@ class OverviewService(
                 .sumOf { it.weeklyMinutes / 7.0 / 60.0 }
         }
 
-    private fun loadHourCorridors(assistancePlanDtos: List<AssistancePlanDto>): Map<Long, HourCorridor> {
+    private fun loadHourCorridors(assistancePlanDtos: List<AssistancePlanEditDto>): Map<Long, HourCorridor> {
         val ids = assistancePlanDtos.asSequence()
             .filter(::isCorridor)
             .map { it.hourCorridorId }
@@ -612,7 +612,7 @@ class OverviewService(
         return hourCorridorRepository.findAllById(ids).associateBy { it.id }
     }
 
-    private fun isCorridor(assistancePlanDto: AssistancePlanDto): Boolean {
+    private fun isCorridor(assistancePlanDto: AssistancePlanEditDto): Boolean {
         return assistancePlanDto.hourMode == de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode.CORRIDOR
     }
 

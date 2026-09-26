@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.employees
 import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeCreateDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeUpdateDto
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
@@ -29,7 +30,7 @@ class EmployeeController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: EmployeeDto): Any {
+    fun create(@Valid @RequestBody valueDto: EmployeeCreateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -112,7 +113,7 @@ class EmployeeController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: EmployeeDto): Any {
+               @Valid @RequestBody valueDto: EmployeeUpdateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()
@@ -283,7 +284,7 @@ class EmployeeController(
             // performance
             val startMs = System.currentTimeMillis()
 
-            val dtos = employeeService.getAllProjections()
+            val dtos = employeeService.getAllSoloDtos()
 
             if (logPerformance) {
                 logger.info(String.format("%s getAllProjections took %s ms",

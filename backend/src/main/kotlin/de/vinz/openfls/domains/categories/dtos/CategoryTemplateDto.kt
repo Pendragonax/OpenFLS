@@ -2,12 +2,15 @@ package de.vinz.openfls.domains.categories.dtos
 
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 
+/**
+ * Schlanke Standard-Variante ohne die Kategorien-Relation. Für den Anwendungsfall
+ * „Kategorien mitlesen" siehe [CategoryTemplateWithCategories].
+ */
 data class CategoryTemplateDto(
         var id: Long = 0,
         var title: String = "",
         var description: String = "",
-        var withoutClient: Boolean = false,
-        var categories: List<CategoryDto> = emptyList()
+        var withoutClient: Boolean = false
 ) {
     companion object {
         fun from(categoryTemplate: CategoryTemplate): CategoryTemplateDto {
@@ -15,8 +18,7 @@ data class CategoryTemplateDto(
                     id = categoryTemplate.id,
                     title = categoryTemplate.title,
                     description = categoryTemplate.description,
-                    withoutClient = categoryTemplate.withoutClient,
-                    categories = categoryTemplate.categories.map { CategoryDto.from(it) }.sortedBy { it.title }
+                    withoutClient = categoryTemplate.withoutClient
             )
         }
     }

@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.categories.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateDto
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateDto
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
@@ -39,7 +40,7 @@ class CategoryTemplate(
     }
 
     companion object {
-        fun from(categoryTemplateDto: CategoryTemplateDto): CategoryTemplate {
+        fun from(categoryTemplateDto: CategoryTemplateUpdateDto): CategoryTemplate {
             return CategoryTemplate(
                     id = categoryTemplateDto.id,
                     title = categoryTemplateDto.title,
@@ -49,9 +50,8 @@ class CategoryTemplate(
             )
         }
 
-        fun soloFrom(categoryTemplateDto: CategoryTemplateDto): CategoryTemplate {
+        fun soloFrom(categoryTemplateDto: CategoryTemplateCreateDto): CategoryTemplate {
             return CategoryTemplate(
-                    id = categoryTemplateDto.id,
                     title = categoryTemplateDto.title,
                     description = categoryTemplateDto.description,
                     withoutClient = categoryTemplateDto.withoutClient

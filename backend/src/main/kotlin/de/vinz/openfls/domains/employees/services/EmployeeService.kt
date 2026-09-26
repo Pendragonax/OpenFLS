@@ -5,15 +5,15 @@ import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanReposi
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
-import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeCreateDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeSoloDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeUpdateDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import de.vinz.openfls.domains.employees.entities.Unprofessional
-import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.Permission
-import de.vinz.openfls.domains.permissions.PermissionDto
 import de.vinz.openfls.domains.permissions.PermissionService
 import jakarta.persistence.EntityManager
 import jakarta.persistence.EntityNotFoundException
@@ -39,23 +39,25 @@ class EmployeeService(
     }
 
     @Transactional
-    fun create(valueDto: EmployeeDto): EmployeeDto {
-        val username = valueDto.access?.username ?: throw IllegalArgumentException("employee access is null")
+    fun create(valueDto: EmployeeCreateDto): EmployeeWithAccess {
+        val username = valueDto.access.username
         validateUsername(username)
         if (employeeAccessRepository.getEmployeeByUsername(username) != null)
             throw IllegalArgumentException("username already exists")
 
-        val employee = modelMapper.map(valueDto, Employee::class.java).apply {
-            id = null
-            permissions = null
-            unprofessionals = null
-            contingents = null
+        val employee = Employee(
+            firstname = valueDto.firstName,
+            lastname = valueDto.lastName,
+            phonenumber = valueDto.phonenumber,
+            email = valueDto.email,
+            description = valueDto.description,
             archived = false
+        ).apply {
             access = EmployeeAccess(
                 id = null,
                 username = username,
                 password = passwordEncoder.encode(username),
-                role = valueDto.access?.role ?: 3,
+                role = valueDto.access.role,
                 employee = this
             )
         }
@@ -65,59 +67,11 @@ class EmployeeService(
         savedEmployee.unprofessionals = unprofessionalService.convertToUnprofessionals(valueDto.unprofessionals, savedEmployee)
         savedEmployee = employeeRepository.save(savedEmployee)
 
-        // set id to dto
-        valueDto.id = savedEmployee.id!!
-        valueDto.access?.id = savedEmployee.id!!
-        valueDto.permissions = valueDto.permissions
-                ?.filter { savedEmployee.permissions
-                        ?.any { permission -> permission.id.institutionId == it.institutionId } ?: false }
-                ?.map { it.apply { employeeId = savedEmployee.id!! } }
-                ?.toList()
-        valueDto.unprofessionals = valueDto.unprofessionals
-                ?.map { it.apply { employeeId = savedEmployee.id!! } }
-                ?.toList()
-
-        return valueDto
+        return toEmployeeWithAccess(savedEmployee)
     }
 
     @Transactional
-    fun create(value: Employee): Employee {
-        if (value.access == null)
-            throw IllegalArgumentException("employee access is null")
-        validateUsername(value.access!!.username)
-        if (value.access!!.password.isEmpty())
-            throw IllegalArgumentException("password is empty")
-        if (employeeAccessRepository.getEmployeeByUsername(value.access!!.username) != null)
-            throw IllegalArgumentException("username already exists")
-
-        val tmpPermissions = value.permissions
-        val tmpAccess = value.access
-        val tmpUnprofessionals = value.unprofessionals
-
-        value.permissions = null
-        value.access = null
-        value.contingents = null
-        value.unprofessionals = null
-        value.archived = false
-
-        // employee
-        val employeeEntity = employeeRepository.save(value).apply {
-            access = employeeAccessRepository.save(
-                EmployeeAccess(
-                    this.id,
-                    tmpAccess?.username ?: "",
-                    tmpAccess?.password ?: "",
-                    tmpAccess?.role ?: 3,
-                    this))
-            permissions = savePermissions(this, tmpPermissions)
-            unprofessionals = saveUnprofessionals(this, tmpUnprofessionals)
-        }
-
-        return employeeEntity
-    }
-
-    @Transactional
-    fun update(id: Long, valueDto: EmployeeDto): EmployeeDto {
+    fun update(id: Long, valueDto: EmployeeUpdateDto): EmployeeWithAccess {
         val employee = getById(id) ?: throw EntityNotFoundException()
 
         employee.apply {
@@ -146,33 +100,21 @@ class EmployeeService(
             unprofessionals = saveUnprofessionals(this, tmpUnprofessionals)
         }
 
-        // permissions
-        valueDto.permissions = savedEntity.permissions
-                ?.map { modelMapper.map(it, PermissionDto::class.java) }
-                ?.toList()
-        // unprofessionals
-        valueDto.unprofessionals = savedEntity.unprofessionals
-                ?.map { modelMapper.map(it, UnprofessionalDto::class.java) }
-                ?.toList()
-        valueDto.access = null
-
-        return valueDto
+        return toEmployeeWithAccess(savedEntity)
     }
 
     @Transactional
-    fun updateRole(id: Long, role: Int): EmployeeDto {
+    fun updateRole(id: Long, role: Int): EmployeeWithAccess {
         // load employee
         val employee = employeeRepository.findById(id).get()
         employee.access?.password = "password"
         employeeAccessRepository.changeRole(id, role)
 
-        return modelMapper.map(
-                employee,
-                EmployeeDto::class.java)
+        return toEmployeeWithAccess(employee)
     }
 
     @Transactional
-    fun resetPassword(id: Long): EmployeeDto {
+    fun resetPassword(id: Long): EmployeeWithAccess {
         // load employee
         val tmpEmployee = employeeRepository.findById(id).get()
 
@@ -182,7 +124,7 @@ class EmployeeService(
 
         val entity = employeeRepository.save(tmpEmployee)
 
-        return modelMapper.map(entity, EmployeeDto::class.java)
+        return toEmployeeWithAccess(entity)
     }
 
     @Transactional
@@ -288,13 +230,11 @@ class EmployeeService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllEmployeeDtos(includeArchived: Boolean = false): List<EmployeeDto> {
+    fun getAllEmployeeDtos(includeArchived: Boolean = false): List<EmployeeWithAccess> {
         return getAll()
                 .filter { includeArchived || !it.archived }
                 .sortedBy { it.lastname.lowercase() }
-                .map { employee -> modelMapper.map(employee, EmployeeDto::class.java).apply {
-                    access?.password = ""
-                } }
+                .map { employee -> toEmployeeWithAccess(employee) }
     }
 
     @Transactional(readOnly = true)
@@ -307,10 +247,11 @@ class EmployeeService(
     }
 
     @Transactional(readOnly = true)
-    fun getAllProjections(): List<EmployeeSoloProjection> {
+    fun getAllSoloDtos(): List<EmployeeSoloDto> {
         return employeeRepository.findAllProjectionsBy()
             .filter { !it.archived }
             .sortedBy { it.lastname }
+            .map { EmployeeSoloDto.of(it) }
     }
 
     @Transactional(readOnly = true)
@@ -324,11 +265,11 @@ class EmployeeService(
     }
 
     @Transactional(readOnly = true)
-    fun getEmployeeDtoById(id: Long, adminMode: Boolean): EmployeeDto? {
+    fun getEmployeeDtoById(id: Long, adminMode: Boolean): EmployeeWithAccess? {
         val entity = getById(id)
 
         if (entity != null && (!entity.archived || adminMode)) {
-            return modelMapper.map(entity, EmployeeDto::class.java)
+            return toEmployeeWithAccess(entity)
         }
 
         return null
@@ -337,6 +278,12 @@ class EmployeeService(
     @Transactional(readOnly = true)
     fun getById(id: Long, adminMode: Boolean): Employee? {
         return employeeRepository.findById(id).orElse(null)
+    }
+
+    private fun toEmployeeWithAccess(entity: Employee): EmployeeWithAccess {
+        return modelMapper.map(entity, EmployeeWithAccess::class.java).apply {
+            access?.password = ""
+        }
     }
 
     private fun savePermissions(employee: Employee,

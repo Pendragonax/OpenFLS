@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.clients
 import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.clients.dtos.ClientDto
+import de.vinz.openfls.domains.clients.dtos.ClientCreateDto
+import de.vinz.openfls.domains.clients.dtos.ClientUpdateDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
@@ -27,12 +28,12 @@ class ClientController(
     private val logPerformance: Boolean = false
 
     @PostMapping
-    fun create(@Valid @RequestBody value: ClientDto): Any {
+    fun create(@Valid @RequestBody value: ClientCreateDto): Any {
         return try {
             // performance
             var startMs = System.currentTimeMillis()
 
-            if (!accessService.isLeader(value.institution.id))
+            if (!accessService.isLeader(value.institutionId))
                 throw IllegalArgumentException("no permission to add clients")
 
             val dto = clientService.create(value)
@@ -56,7 +57,7 @@ class ClientController(
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: ClientDto): Any {
+               @Valid @RequestBody valueDto: ClientUpdateDto): Any {
         return try {
             // performance
             val startMs = System.currentTimeMillis()

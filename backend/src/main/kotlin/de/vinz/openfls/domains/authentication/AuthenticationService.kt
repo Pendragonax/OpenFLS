@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.authentication
 import de.vinz.openfls.domains.authentication.dtos.AuthenticationResponseDto
 import de.vinz.openfls.domains.authentication.models.EUserRoles
 import de.vinz.openfls.domains.employees.dtos.EmployeeAccessDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.authentication.dtos.PasswordDto
 import de.vinz.openfls.domains.permissions.PermissionDto
 import de.vinz.openfls.security.CustomUserDetails
@@ -105,12 +105,12 @@ class AuthenticationService(
     }
 
     @Transactional(readOnly = true)
-    fun getCurrentEmployee(): Optional<EmployeeDto> {
+    fun getCurrentEmployee(): Optional<EmployeeWithAccess> {
         val employeeOptional = getCurrentEmployeeEntity()
 
         if (employeeOptional.isPresent) {
             val employee = employeeOptional.get()
-            return Optional.of(modelMapper.map(employee, EmployeeDto::class.java).apply {
+            return Optional.of(modelMapper.map(employee, EmployeeWithAccess::class.java).apply {
                 access = employee.access?.let {
                     modelMapper.map(it, EmployeeAccessDto::class.java).apply {
                         password = ""

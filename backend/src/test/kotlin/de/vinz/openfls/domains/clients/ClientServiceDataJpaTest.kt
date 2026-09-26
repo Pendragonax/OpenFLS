@@ -7,7 +7,8 @@ import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
-import de.vinz.openfls.domains.clients.dtos.ClientDto
+import de.vinz.openfls.domains.clients.dtos.ClientCreateDto
+import de.vinz.openfls.domains.clients.dtos.ClientUpdateDto
 import de.vinz.openfls.domains.goals.entities.Goal
 import de.vinz.openfls.domains.goals.entities.GoalHour
 import de.vinz.openfls.domains.hourCorridors.HourCorridor
@@ -72,11 +73,11 @@ class ClientServiceDataJpaTest {
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
         whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
 
-        val dto = ClientDto().apply {
+        val dto = ClientCreateDto().apply {
             firstName = "Max"
             lastName = "Mustermann"
-            institution.id = institution.id!!
-            categoryTemplate.id = categoryTemplate.id
+            institutionId = institution.id!!
+            categoryTemplateId = categoryTemplate.id
         }
 
         // When
@@ -92,10 +93,10 @@ class ClientServiceDataJpaTest {
     fun create_missingInstitution_throwsException() {
         // Given
         whenever(institutionService.getEntityById(any())).thenReturn(null)
-        val dto = ClientDto().apply {
+        val dto = ClientCreateDto().apply {
             firstName = "Max"
             lastName = "Mustermann"
-            institution.id = 9999
+            institutionId = 9999
         }
 
         // When / Then
@@ -106,7 +107,7 @@ class ClientServiceDataJpaTest {
     @Test
     fun update_missingClient_throwsException() {
         // Given
-        val dto = ClientDto().apply {
+        val dto = ClientUpdateDto().apply {
             id = 9999
             firstName = "Max"
             lastName = "Mustermann"
@@ -127,12 +128,12 @@ class ClientServiceDataJpaTest {
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
         whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
 
-        val dto = ClientDto().apply {
+        val dto = ClientUpdateDto().apply {
             id = existing.id
             firstName = "New"
             lastName = "Name"
-            institution.id = institution.id!!
-            categoryTemplate.id = categoryTemplate.id
+            institutionId = institution.id!!
+            categoryTemplateId = categoryTemplate.id
         }
 
         // When
@@ -155,12 +156,12 @@ class ClientServiceDataJpaTest {
         whenever(institutionService.getEntityById(any())).thenReturn(institution)
         whenever(categoryTemplateService.getEntityById(any())).thenReturn(categoryTemplate)
 
-        val dto = ClientDto().apply {
+        val dto = ClientUpdateDto().apply {
             id = existing.id
             firstName = "New"
             lastName = "Name"
-            institution.id = institution.id!!
-            categoryTemplate.id = categoryTemplate.id
+            institutionId = institution.id!!
+            categoryTemplateId = categoryTemplate.id
         }
 
         // When / Then
@@ -170,33 +171,21 @@ class ClientServiceDataJpaTest {
     }
 
     @Test
-    fun getById_setsInstitutionNameForAssistancePlans() {
+    fun getById_mapsCategoryTemplateIdAndTitle() {
         // Given
         val institution = institutionRepository.save(Institution(name = "Inst A", email = "a@b.c", phonenumber = "1"))
         val categoryTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
-        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false))
         val client = clientRepository.save(
             Client(firstName = "Max", lastName = "Mustermann", institution = institution, categoryTemplate = categoryTemplate)
         )
-
-        client.assistancePlans.add(
-            AssistancePlan(
-                start = LocalDate.of(2026, 1, 1),
-                end = LocalDate.of(2026, 12, 31),
-                client = client,
-                sponsor = sponsor,
-                institution = institution
-            )
-        )
-        clientRepository.save(client)
 
         // When
         val result = clientService.getById(client.id)
 
         // Then
         assertThat(result).isNotNull
-        assertThat(result!!.assistancePlans).hasSize(1)
-        assertThat(result.assistancePlans.first().institutionName).isEqualTo("Inst A")
+        assertThat(result!!.categoryTemplateId).isEqualTo(categoryTemplate.id)
+        assertThat(result.categoryTemplateTitle).isEqualTo("Template")
     }
 
     @Test

@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.employees.archive.EmployeeArchiveService
 import de.vinz.openfls.domains.employees.archive.EmployeeArchiveStateException
 import de.vinz.openfls.domains.employees.archive.dtos.EmployeeArchiveHistoryEntryDto
 import de.vinz.openfls.domains.employees.archive.dtos.EmployeeArchiveHistoryEntryReadDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
+import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.exceptions.UserNotAllowedException
@@ -87,7 +87,7 @@ class EmployeeArchiveControllerWebMvcTest {
         // Given
         val employeeId = 17L
         val requestEmployeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = requestEmployeeId
             firstName = "Anna"
             lastName = "Lead"
@@ -139,7 +139,7 @@ class EmployeeArchiveControllerWebMvcTest {
         // Given
         val employeeId = 17L
         val requestEmployeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = requestEmployeeId
             firstName = "Anna"
             lastName = "Employee"
@@ -178,7 +178,7 @@ class EmployeeArchiveControllerWebMvcTest {
         // Given
         val employeeId = 17L
         val requestEmployeeId = 8L
-        val employeeDto = EmployeeDto().apply {
+        val employeeDto = EmployeeWithAccess().apply {
             id = requestEmployeeId
             firstName = "Anna"
             lastName = "Lead"

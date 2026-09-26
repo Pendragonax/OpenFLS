@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.overviews
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
+import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEditDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
@@ -215,8 +215,8 @@ class OverviewServiceTest {
         month: Int?,
         hourTypeId: Long,
         corridor: Boolean = false
-    ): AssistancePlanDto {
-        val plan = AssistancePlanDto().apply {
+    ): AssistancePlanEditDto {
+        val plan = AssistancePlanEditDto().apply {
             this.id = id
             this.clientId = clientId
             this.start = if (month != null) LocalDate.of(year, month, 1) else LocalDate.of(year, 1, 1)
