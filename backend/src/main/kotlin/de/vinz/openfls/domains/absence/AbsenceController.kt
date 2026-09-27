@@ -3,7 +3,7 @@ import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.absence.dto.AbsenceCreateRequest
 import de.vinz.openfls.domains.absence.service.AbsenceService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.services.ServiceController
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid

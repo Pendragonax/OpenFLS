@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.authentication.models.EUserRoles
 import de.vinz.openfls.domains.employees.dtos.EmployeeAccessDto
 import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.authentication.dtos.PasswordDto
-import de.vinz.openfls.domains.permissions.PermissionDto
+import de.vinz.openfls.domains.permissions.dto.PermissionResponse
 import de.vinz.openfls.security.CustomUserDetails
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
@@ -117,7 +117,7 @@ class AuthenticationService(
                     }
                 }
                 permissions = employee.permissions
-                        ?.map { modelMapper.map(it, PermissionDto::class.java) }
+                        ?.map { PermissionResponse.from(it) }
                         ?.toList()
             })
         }

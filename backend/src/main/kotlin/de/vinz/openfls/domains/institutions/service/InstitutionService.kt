@@ -11,8 +11,8 @@ import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateRequest
 import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateResult
 import de.vinz.openfls.domains.institutions.dto.InstitutionWithPermissionsResponse
 import de.vinz.openfls.domains.institutions.entity.Institution
-import de.vinz.openfls.domains.permissions.Permission
-import de.vinz.openfls.domains.permissions.PermissionService
+import de.vinz.openfls.domains.permissions.entity.Permission
+import de.vinz.openfls.domains.permissions.service.PermissionService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

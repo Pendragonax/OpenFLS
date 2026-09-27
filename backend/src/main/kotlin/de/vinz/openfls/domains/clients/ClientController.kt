@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.clients.dtos.ClientCreateDto
 import de.vinz.openfls.domains.clients.dtos.ClientUpdateDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

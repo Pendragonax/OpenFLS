@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
 import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDto
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException

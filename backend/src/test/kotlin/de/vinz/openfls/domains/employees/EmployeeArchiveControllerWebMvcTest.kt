@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.employees.archive.dtos.EmployeeArchiveHistoryEntr
 import de.vinz.openfls.domains.employees.archive.dtos.EmployeeArchiveHistoryEntryReadDto
 import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

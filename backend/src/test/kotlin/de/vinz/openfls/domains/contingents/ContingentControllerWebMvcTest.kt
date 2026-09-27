@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.contingents.dto.ContingentDeleteResult
 import de.vinz.openfls.domains.contingents.dto.ContingentResponse
 import de.vinz.openfls.domains.contingents.dto.ContingentUpdateResult
 import de.vinz.openfls.domains.contingents.service.ContingentService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

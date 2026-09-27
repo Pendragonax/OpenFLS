@@ -10,9 +10,9 @@ import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateResult
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
-import de.vinz.openfls.domains.permissions.Permission
-import de.vinz.openfls.domains.permissions.PermissionRepository
-import de.vinz.openfls.domains.permissions.PermissionService
+import de.vinz.openfls.domains.permissions.entity.Permission
+import de.vinz.openfls.domains.permissions.repository.PermissionRepository
+import de.vinz.openfls.domains.permissions.service.PermissionService
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -64,7 +64,7 @@ class InstitutionServiceDataJpaTest {
         entityManager.clear()
         val saved = institutionRepository.findAll().toList()
         assertThat(saved).hasSize(1)
-        val permissions = permissionRepository.findByInstitutionId(saved.first().id!!).toList()
+        val permissions = saved.first().permissions.toList()
         assertThat(permissions).hasSize(2)
         assertThat(permissions.first { it.id.employeeId == employee1.id }.readEntries).isTrue
         assertThat(permissions.first { it.id.employeeId == employee2.id }.writeEntries).isTrue
@@ -129,7 +129,7 @@ class InstitutionServiceDataJpaTest {
         val saved = institutionRepository.findById(institution.id!!).get()
         assertThat(saved.name).isEqualTo("New")
         assertThat(saved.phonenumber).isEqualTo("2")
-        val permissions = permissionRepository.findByInstitutionId(institution.id!!).toList()
+        val permissions = saved.permissions.toList()
         assertThat(permissions.map { it.id.employeeId }).containsExactlyInAnyOrder(kept.id, added.id)
         assertThat(permissions.first { it.id.employeeId == kept.id }.readEntries).isFalse
         assertThat(permissions.first { it.id.employeeId == kept.id }.changeInstitution).isTrue

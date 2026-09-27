@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.contingents.dto.ContingentUpdateRequest
 import de.vinz.openfls.domains.contingents.dto.ContingentUpdateResult
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.institutions.service.InstitutionService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

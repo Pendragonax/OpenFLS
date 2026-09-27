@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.employees.dtos
 
-import de.vinz.openfls.domains.permissions.PermissionDto
+import de.vinz.openfls.domains.permissions.dto.PermissionResponse
 import jakarta.validation.Valid
 
 class EmployeeWithAccess {
@@ -25,7 +25,7 @@ class EmployeeWithAccess {
     @Valid
     var access: EmployeeAccessDto? = null
 
-    var permissions: List<PermissionDto>? = null
+    var permissions: List<PermissionResponse>? = null
 
     var unprofessionals: List<UnprofessionalDto>? = null
 }

@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.goals.dto.GoalDeleteResult
 import de.vinz.openfls.domains.goals.dto.GoalUpdateRequest
 import de.vinz.openfls.domains.goals.dto.GoalUpdateResult
 import de.vinz.openfls.domains.goals.service.GoalService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid

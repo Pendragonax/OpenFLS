@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskUpdateDto
 import de.vinz.openfls.domains.clientTasks.exceptions.InvalidClientTaskException
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid

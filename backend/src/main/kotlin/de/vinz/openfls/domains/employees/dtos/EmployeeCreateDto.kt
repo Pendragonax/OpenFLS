@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.employees.dtos
 
-import de.vinz.openfls.domains.permissions.PermissionDto
+import de.vinz.openfls.domains.permissions.dto.PermissionRequest
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
@@ -24,7 +24,7 @@ class EmployeeCreateDto {
     @field:Valid
     var access: EmployeeAccessDto = EmployeeAccessDto()
 
-    var permissions: List<PermissionDto> = listOf()
+    var permissions: List<PermissionRequest> = listOf()
 
     var unprofessionals: List<UnprofessionalDto> = listOf()
 }

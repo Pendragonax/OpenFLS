@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.employees.dtos
 
-import de.vinz.openfls.domains.permissions.PermissionDto
+import de.vinz.openfls.domains.permissions.dto.PermissionRequest
 import jakarta.validation.constraints.NotEmpty
 
 class EmployeeUpdateDto {
@@ -18,7 +18,7 @@ class EmployeeUpdateDto {
 
     var description: String = ""
 
-    var permissions: List<PermissionDto> = listOf()
+    var permissions: List<PermissionRequest> = listOf()
 
     var unprofessionals: List<UnprofessionalDto> = listOf()
 }

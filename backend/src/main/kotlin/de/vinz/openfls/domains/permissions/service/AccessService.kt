@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.permissions
+package de.vinz.openfls.domains.permissions.service
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
@@ -48,10 +48,7 @@ class AccessService(
     }
 
     fun getLeadingInstitutionIds(): List<Long> {
-        return permissionService
-            .getEntitiesByEmployeeId(getId())
-            .filter { it.changeInstitution }
-            .map { it.institution?.id ?: 0 }
+        return permissionService.getLeadingInstitutionIdsByEmployee(getId())
     }
 
     fun canWriteEntries(institutionId: Long): Boolean {
@@ -120,8 +117,8 @@ class AccessService(
             if (isAdmin())
                 return true
 
-            val leadingInstitutions = this.getLeadingInstitutionIds(getId())
-            val affiliatedInstitutions = this.getAffiliatedInstitutionIds(employeeId)
+            val leadingInstitutions = permissionService.getLeadingInstitutionIdsByEmployee(getId())
+            val affiliatedInstitutions = permissionService.getAffiliatedInstitutionIdsByEmployee(employeeId)
 
             leadingInstitutions.any { affiliatedInstitutions.contains(it) }
         } catch (ex: Exception) {
@@ -131,9 +128,7 @@ class AccessService(
 
     private fun isAffiliated(userId: Long, institutionId: Long): Boolean {
         return try {
-            val institutions = this.getAffiliatedInstitutionIds(userId)
-
-            institutions.contains(institutionId)
+            permissionService.getAffiliatedInstitutionIdsByEmployee(userId).contains(institutionId)
         } catch (ex: Exception) {
             false
         }
@@ -141,9 +136,7 @@ class AccessService(
 
     fun isLeader(userId: Long, institutionId: Long): Boolean {
         return try {
-            val institutions = this.getLeadingInstitutionIds(userId)
-
-            institutions.contains(institutionId)
+            permissionService.getLeadingInstitutionIdsByEmployee(userId).contains(institutionId)
         } catch (ex: Exception) {
             false
         }
@@ -151,9 +144,7 @@ class AccessService(
 
     private fun canWriteEntries(userId: Long, institutionId: Long): Boolean {
         return try {
-            val institutions = this.getWriteRightsInstitutionIds(userId)
-
-            institutions.contains(institutionId)
+            permissionService.getWritableInstitutionIdsByEmployee(userId).contains(institutionId)
         } catch (ex: Exception) {
             false
         }
@@ -161,33 +152,14 @@ class AccessService(
 
     private fun canReadEntries(userId: Long, institutionId: Long): Boolean {
         return try {
-            val institutions = this.getReadRightsInstitutionIds(userId)
-
-            institutions.contains(institutionId)
+            permissionService.getReadableInstitutionIdsByEmployee(userId).contains(institutionId)
         } catch (ex: Exception) {
             false
         }
     }
 
-    private fun getAffiliatedInstitutionIds(id: Long): List<Long> {
-        return permissionService
-            .getEntitiesByEmployeeId(id)
-            .filter { it.affiliated }
-            .map { it.institution?.id ?: 0 }
-    }
-
-    private fun getLeadingInstitutionIds(id: Long): List<Long> {
-        return permissionService
-            .getEntitiesByEmployeeId(id)
-            .filter { it.changeInstitution }
-            .map { it.institution?.id ?: 0 }
-    }
-
     fun getWriteRightsInstitutionIds(id: Long): List<Long> {
-        return permissionService
-            .getEntitiesByEmployeeId(id)
-            .filter { it.writeEntries }
-            .map { it.institution?.id ?: 0 }
+        return permissionService.getWritableInstitutionIdsByEmployee(id)
     }
 
     fun getReadRightsInstitutionIds(): List<Long> {
@@ -195,16 +167,6 @@ class AccessService(
             return institutionService.getAll().map { it.id }
         }
 
-        return permissionService
-                .getEntitiesByEmployeeId(getId())
-                .filter { it.readEntries }
-                .map { it.institution?.id ?: 0 }
-    }
-
-    private fun getReadRightsInstitutionIds(id: Long): List<Long> {
-        return permissionService
-            .getEntitiesByEmployeeId(id)
-            .filter { it.readEntries }
-            .map { it.institution?.id ?: 0 }
+        return permissionService.getReadableInstitutionIdsByEmployee(getId())
     }
 }

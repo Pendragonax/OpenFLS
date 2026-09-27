@@ -1,7 +1,9 @@
 package de.vinz.openfls.domains.services.services
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.categories.dto.CategoryResponse
 import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.goals.dto.GoalResponse
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.services.dtos.ClientLatestServiceDto
@@ -36,7 +38,7 @@ class ServiceService(
         val entity = modelMapper.map(serviceDto, Service::class.java)
 
         entity.employee?.unprofessionals = null
-        return modelMapper.map(createEntity(entity), ServiceWithGoalsAndCategories::class.java)
+        return toServiceWithGoalsAndCategories(createEntity(entity))
     }
 
     @Transactional
@@ -63,7 +65,7 @@ class ServiceService(
 
         val savedEntity = updateEntity(entity)
 
-        return modelMapper.map(savedEntity, ServiceWithGoalsAndCategories::class.java)
+        return toServiceWithGoalsAndCategories(savedEntity)
     }
 
     @Transactional
@@ -125,7 +127,7 @@ class ServiceService(
     }
 
     fun getById(id: Long): ServiceWithGoalsAndCategories? {
-        return modelMapper.map(getEntityById(id), ServiceWithGoalsAndCategories::class.java)
+        return getEntityById(id)?.let { toServiceWithGoalsAndCategories(it) }
     }
 
     fun getEntityById(id: Long): Service? {
@@ -137,8 +139,13 @@ class ServiceService(
     }
 
     fun getWithGoalsAndCategoriesByAssistancePlan(id: Long): List<ServiceWithGoalsAndCategories> {
-        return getByAssistancePlan(id).map {
-            modelMapper.map(it, ServiceWithGoalsAndCategories::class.java)
+        return getByAssistancePlan(id).map { toServiceWithGoalsAndCategories(it) }
+    }
+
+    private fun toServiceWithGoalsAndCategories(entity: Service): ServiceWithGoalsAndCategories {
+        return modelMapper.map(entity, ServiceWithGoalsAndCategories::class.java).apply {
+            goals = entity.goals.map { GoalResponse.from(it) }.toMutableSet()
+            categorys = entity.categorys.map { CategoryResponse.from(it) }.toMutableSet()
         }
     }
 

@@ -8,7 +8,7 @@ import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanGoalProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourCorridorProjection
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
 import de.vinz.openfls.domains.services.services.ServiceService

@@ -4,7 +4,7 @@ import de.vinz.openfls.logging.StructuredLog
 import de.vinz.openfls.domains.employees.dtos.EmployeeCreateDto
 import de.vinz.openfls.domains.employees.dtos.EmployeeUpdateDto
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.UserService
 import jakarta.validation.Valid

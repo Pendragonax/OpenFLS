@@ -13,10 +13,10 @@ import de.vinz.openfls.domains.employees.entities.Unprofessional
 import de.vinz.openfls.domains.employees.entities.UnprofessionalKey
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
-import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.domains.permissions.Permission
-import de.vinz.openfls.domains.permissions.PermissionDto
-import de.vinz.openfls.domains.permissions.PermissionRepository
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.domains.permissions.entity.Permission
+import de.vinz.openfls.domains.permissions.dto.PermissionRequest
+import de.vinz.openfls.domains.permissions.repository.PermissionRepository
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
 import de.vinz.openfls.testsupport.TestBeans
@@ -36,7 +36,7 @@ import java.time.LocalDateTime
 @Import(
     EmployeeService::class,
     UnprofessionalService::class,
-    de.vinz.openfls.domains.permissions.PermissionService::class,
+    de.vinz.openfls.domains.permissions.service.PermissionService::class,
     TestBeans::class
 )
 class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepository: UnprofessionalRepository) {
@@ -231,12 +231,12 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
             email = "new@x.de"
             phonenumber = "123"
             permissions = listOf(
-                PermissionDto().apply {
-                    employeeId = existing.id!!
-                    institutionId = existingInstitution.id!!
-                    readEntries = true
+                PermissionRequest(
+                    employeeId = existing.id!!,
+                    institutionId = existingInstitution.id!!,
+                    readEntries = true,
                     changeInstitution = false
-                },
+                ),
             )
             unprofessionals = listOf(
                 UnprofessionalDto().apply {
@@ -248,7 +248,7 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
         }
 
         // When
-        employeeService.update(existing.id!!, dto)
+        val result = employeeService.update(existing.id!!, dto)
 
         // Then
         val saved = employeeRepository.findById(existing.id!!)
@@ -262,6 +262,12 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
         val savedPermission = saved.get().permissions!!.first { it.id.institutionId == existingInstitution.id }
         assertThat(savedPermission.readEntries).isTrue
         assertThat(savedPermission.changeInstitution).isFalse
+
+        // the returned response DTO must reflect the same values, not ModelMapper defaults
+        assertThat(result.permissions).isNotNull().hasSize(1)
+        val returnedPermission = result.permissions!!.first { it.institutionId == existingInstitution.id }
+        assertThat(returnedPermission.readEntries).isTrue
+        assertThat(returnedPermission.changeInstitution).isFalse
 
         assertThat(saved.get().unprofessionals).isNotEmpty()
         val savedUnprofessional = saved.get().unprofessionals!!.first { it.id?.sponsorId == existingSponsor.id }

@@ -12,9 +12,10 @@ import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import de.vinz.openfls.domains.employees.entities.Unprofessional
-import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.domains.permissions.Permission
-import de.vinz.openfls.domains.permissions.PermissionService
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.domains.permissions.dto.PermissionResponse
+import de.vinz.openfls.domains.permissions.entity.Permission
+import de.vinz.openfls.domains.permissions.service.PermissionService
 import jakarta.persistence.EntityManager
 import jakarta.persistence.EntityNotFoundException
 import org.modelmapper.ModelMapper
@@ -96,7 +97,7 @@ class EmployeeService(
         // save employee
         val savedEntity = employeeRepository.save(employee).apply {
             permissions = savePermissions(this, tmpPermissions)
-            permissions = permissionService.getEntitiesByEmployeeId(this.id ?: 0).toMutableSet()
+            permissions = permissionService.getAllEntitiesByEmployeeId(this.id ?: 0).toMutableSet()
             unprofessionals = saveUnprofessionals(this, tmpUnprofessionals)
         }
 
@@ -283,6 +284,7 @@ class EmployeeService(
     private fun toEmployeeWithAccess(entity: Employee): EmployeeWithAccess {
         return modelMapper.map(entity, EmployeeWithAccess::class.java).apply {
             access?.password = ""
+            permissions = entity.permissions?.map { PermissionResponse.from(it) }
         }
     }
 

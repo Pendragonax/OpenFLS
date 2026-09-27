@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.absence.repository.AbsenceRepository
 import de.vinz.openfls.domains.absence.dto.AbsenceCreateRequest
 import de.vinz.openfls.domains.absence.dto.EmployeeAbsenceResponse
 import de.vinz.openfls.domains.absence.entity.Absence
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate

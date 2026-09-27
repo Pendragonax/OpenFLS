@@ -26,7 +26,7 @@ class AssistancePlanAnalysisServiceTest {
 
     private val assistancePlanService: AssistancePlanService = mock()
     private val serviceService: ServiceService = mock()
-    private val accessService: de.vinz.openfls.domains.permissions.AccessService = mock()
+    private val accessService: de.vinz.openfls.domains.permissions.service.AccessService = mock()
     private val analysisService = AssistancePlanAnalysisService(
         assistancePlanService,
         serviceService,

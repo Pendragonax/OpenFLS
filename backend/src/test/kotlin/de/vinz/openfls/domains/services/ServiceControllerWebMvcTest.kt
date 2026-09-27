@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.contingents.service.ContingentCalendarService
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.domains.permissions.PermissionService
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.domains.permissions.service.PermissionService
 import de.vinz.openfls.domains.services.dtos.ServiceWithGoalsAndCategories
 import de.vinz.openfls.domains.services.projections.FromTillEmployeeServiceProjection
 import de.vinz.openfls.domains.services.services.ServiceService

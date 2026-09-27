@@ -12,7 +12,7 @@ import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportRe
 import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportStatusDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import jakarta.validation.Valid
 import org.slf4j.Logger

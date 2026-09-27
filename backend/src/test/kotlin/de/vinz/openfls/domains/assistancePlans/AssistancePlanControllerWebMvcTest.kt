@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluation
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.UserService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

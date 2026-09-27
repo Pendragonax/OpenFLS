@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.employees.archive.EmployeeArchiveService
 import de.vinz.openfls.domains.employees.archive.EmployeeArchiveStateException
 import de.vinz.openfls.domains.employees.archive.dtos.EmployeeArchiveHistoryEntryReadDto
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import jakarta.validation.Valid
 import org.slf4j.Logger

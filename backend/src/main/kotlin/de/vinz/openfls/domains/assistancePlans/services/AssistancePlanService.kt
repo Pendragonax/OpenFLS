@@ -8,6 +8,7 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEditDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanProjectionDto
+import de.vinz.openfls.domains.goals.dto.GoalWithHoursResponse
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour
 import de.vinz.openfls.domains.goals.repository.GoalHourRepository
@@ -458,6 +459,7 @@ class AssistancePlanService(
         dto.clientArchived = entity.client?.archived ?: false
         dto.hourMode = entity.hourMode
         dto.hourCorridorId = entity.hourCorridor?.id ?: 0
+        dto.goals = entity.goals.map { GoalWithHoursResponse.from(it) }.toMutableSet()
         return dto
     }
 

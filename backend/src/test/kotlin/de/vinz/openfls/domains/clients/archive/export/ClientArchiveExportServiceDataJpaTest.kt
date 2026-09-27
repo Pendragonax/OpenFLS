@@ -26,8 +26,8 @@ import de.vinz.openfls.domains.hourTypes.repository.HourTypeRepository
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.institutions.service.InstitutionService
-import de.vinz.openfls.domains.permissions.PermissionService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.PermissionService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
 import de.vinz.openfls.domains.services.Service

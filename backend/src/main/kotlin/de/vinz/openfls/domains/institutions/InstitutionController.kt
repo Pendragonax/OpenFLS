@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.institutions.dto.InstitutionDeleteResult
 import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateRequest
 import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateResult
 import de.vinz.openfls.domains.institutions.service.InstitutionService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.logging.StructuredLog
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid

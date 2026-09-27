@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.clients.dashboard
 
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.slf4j.Logger
