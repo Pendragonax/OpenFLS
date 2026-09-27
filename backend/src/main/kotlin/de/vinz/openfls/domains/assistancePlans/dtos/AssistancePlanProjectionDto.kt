@@ -4,11 +4,11 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
-import de.vinz.openfls.domains.goals.entities.Goal
-import de.vinz.openfls.domains.goals.entities.GoalHour
-import de.vinz.openfls.domains.hourCorridors.HourCorridor
-import de.vinz.openfls.domains.hourTypes.HourType
-import de.vinz.openfls.domains.institutions.dtos.InstitutionResponse
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.goals.entity.GoalHour
+import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
+import de.vinz.openfls.domains.hourTypes.entity.HourType
+import de.vinz.openfls.domains.institutions.dto.InstitutionResponse
 import java.time.LocalDate
 
 /**

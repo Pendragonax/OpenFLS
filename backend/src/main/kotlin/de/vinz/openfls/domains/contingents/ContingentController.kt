@@ -1,11 +1,11 @@
 package de.vinz.openfls.domains.contingents
 
-import de.vinz.openfls.domains.contingents.dtos.ContingentCreateRequest
-import de.vinz.openfls.domains.contingents.dtos.ContingentCreateResult
-import de.vinz.openfls.domains.contingents.dtos.ContingentDeleteResult
-import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateRequest
-import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateResult
-import de.vinz.openfls.domains.contingents.services.ContingentService
+import de.vinz.openfls.domains.contingents.dto.ContingentCreateRequest
+import de.vinz.openfls.domains.contingents.dto.ContingentCreateResult
+import de.vinz.openfls.domains.contingents.dto.ContingentDeleteResult
+import de.vinz.openfls.domains.contingents.dto.ContingentUpdateRequest
+import de.vinz.openfls.domains.contingents.dto.ContingentUpdateResult
+import de.vinz.openfls.domains.contingents.service.ContingentService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService

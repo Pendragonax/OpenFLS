@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.services.dtos.ServiceWithGoalsAndCategories
 import de.vinz.openfls.domains.services.dtos.ServiceProjectionDto
 import de.vinz.openfls.domains.services.dtos.ServiceFilterDto
 import de.vinz.openfls.domains.services.exceptions.ServicePermissionDeniedException
-import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
+import de.vinz.openfls.domains.contingents.service.ContingentCalendarService
 import de.vinz.openfls.domains.services.dtos.ClientAndDateRequestDto
 import de.vinz.openfls.domains.services.dtos.ClientAndDateResponseDto
 import de.vinz.openfls.domains.services.services.ServiceService

@@ -4,9 +4,9 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.hourTypes.HourType
-import de.vinz.openfls.domains.hourTypes.HourTypeRepository
-import de.vinz.openfls.domains.hourTypes.HourTypeService
+import de.vinz.openfls.domains.hourTypes.entity.HourType
+import de.vinz.openfls.domains.hourTypes.repository.HourTypeRepository
+import de.vinz.openfls.domains.hourTypes.service.HourTypeService
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

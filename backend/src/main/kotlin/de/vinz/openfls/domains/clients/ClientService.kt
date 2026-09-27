@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanForServiceEditingDto
-import de.vinz.openfls.domains.categories.CategoryTemplateService
+import de.vinz.openfls.domains.categories.service.CategoryTemplateService
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
 import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
@@ -14,8 +14,8 @@ import de.vinz.openfls.domains.clients.dtos.ClientForServiceEditingDto
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
 import de.vinz.openfls.domains.clients.dtos.ClientUpdateDto
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeResponse
-import de.vinz.openfls.domains.institutions.InstitutionService
+import de.vinz.openfls.domains.hourTypes.dto.HourTypeResponse
+import de.vinz.openfls.domains.institutions.service.InstitutionService
 
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service

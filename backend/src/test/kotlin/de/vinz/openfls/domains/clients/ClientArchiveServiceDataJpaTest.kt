@@ -2,9 +2,9 @@ package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.categories.CategoryTemplateService
-import de.vinz.openfls.domains.categories.entities.CategoryTemplate
-import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
+import de.vinz.openfls.domains.categories.service.CategoryTemplateService
+import de.vinz.openfls.domains.categories.entity.CategoryTemplate
+import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActor
 import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
@@ -13,14 +13,14 @@ import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportFormat
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
-import de.vinz.openfls.domains.institutions.Institution
-import de.vinz.openfls.domains.institutions.InstitutionRepository
-import de.vinz.openfls.domains.institutions.InstitutionService
+import de.vinz.openfls.domains.institutions.entity.Institution
+import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
+import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.permissions.PermissionService
 import de.vinz.openfls.domains.employees.services.UnprofessionalService
-import de.vinz.openfls.domains.sponsors.Sponsor
-import de.vinz.openfls.domains.sponsors.SponsorRepository
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
+import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat

@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.clients.dtos
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanForServiceEditingDto
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateWithCategoriesResponse
-import de.vinz.openfls.domains.institutions.dtos.InstitutionResponse
+import de.vinz.openfls.domains.categories.dto.CategoryTemplateWithCategoriesResponse
+import de.vinz.openfls.domains.institutions.dto.InstitutionResponse
 
 class ClientForServiceEditingDto {
     var id: Long = 0

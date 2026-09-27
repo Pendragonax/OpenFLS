@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.employees.UnprofessionalRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.Unprofessional
 import de.vinz.openfls.domains.employees.entities.UnprofessionalKey
-import de.vinz.openfls.domains.sponsors.Sponsor
-import de.vinz.openfls.domains.sponsors.SponsorRepository
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
+import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.services
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
-import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
+import de.vinz.openfls.domains.contingents.service.ContingentCalendarService
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.permissions.AccessService

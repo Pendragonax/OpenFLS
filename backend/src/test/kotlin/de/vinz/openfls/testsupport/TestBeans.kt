@@ -3,7 +3,7 @@ package de.vinz.openfls.testsupport
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
-import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.hourTypes.entity.HourType
 import org.modelmapper.AbstractConverter
 import org.modelmapper.ModelMapper
 import org.springframework.boot.test.context.TestConfiguration

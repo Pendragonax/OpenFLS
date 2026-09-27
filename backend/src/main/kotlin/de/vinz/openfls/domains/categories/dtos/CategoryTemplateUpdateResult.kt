@@ -1,7 +1,0 @@
-package de.vinz.openfls.domains.categories.dtos
-
-sealed class CategoryTemplateUpdateResult {
-    data class Success(val response: CategoryTemplateWithCategoriesResponse) : CategoryTemplateUpdateResult()
-    data object NotFound : CategoryTemplateUpdateResult()
-    data class CategoryNotInTemplate(val message: String) : CategoryTemplateUpdateResult()
-}

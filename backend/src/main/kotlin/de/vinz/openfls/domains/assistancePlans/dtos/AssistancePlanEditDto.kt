@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.goals.dtos.GoalWithHours
+import de.vinz.openfls.domains.goals.dto.GoalWithHoursResponse
 import java.time.LocalDate
 
 class AssistancePlanEditDto {
@@ -25,7 +25,7 @@ class AssistancePlanEditDto {
 
     var clientArchived: Boolean = false
 
-    var goals: MutableSet<GoalWithHours> = mutableSetOf()
+    var goals: MutableSet<GoalWithHoursResponse> = mutableSetOf()
 
     var hours: MutableSet<AssistancePlanHourDto> = mutableSetOf()
 }

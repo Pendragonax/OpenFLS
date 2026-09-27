@@ -1,9 +1,10 @@
 package de.vinz.openfls.domains.hourTypes
 
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeCreateRequest
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDeleteResult
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateRequest
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateResult
+import de.vinz.openfls.domains.hourTypes.dto.HourTypeCreateRequest
+import de.vinz.openfls.domains.hourTypes.dto.HourTypeDeleteResult
+import de.vinz.openfls.domains.hourTypes.dto.HourTypeUpdateRequest
+import de.vinz.openfls.domains.hourTypes.dto.HourTypeUpdateResult
+import de.vinz.openfls.domains.hourTypes.service.HourTypeService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid

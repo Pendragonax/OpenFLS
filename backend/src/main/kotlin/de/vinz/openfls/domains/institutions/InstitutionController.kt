@@ -1,9 +1,10 @@
 package de.vinz.openfls.domains.institutions
 
-import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateRequest
-import de.vinz.openfls.domains.institutions.dtos.InstitutionDeleteResult
-import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateRequest
-import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateResult
+import de.vinz.openfls.domains.institutions.dto.InstitutionCreateRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionDeleteResult
+import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateResult
+import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.logging.StructuredLog
 import de.vinz.openfls.services.PerformanceLoggingService

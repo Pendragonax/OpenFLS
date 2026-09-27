@@ -4,9 +4,9 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
-import de.vinz.openfls.domains.goals.entities.Goal
-import de.vinz.openfls.domains.hourCorridors.HourCorridor
-import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
+import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.services.ServiceRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

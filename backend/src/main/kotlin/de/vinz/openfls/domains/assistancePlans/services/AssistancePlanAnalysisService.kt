@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthD
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
-import de.vinz.openfls.domains.goals.projections.GoalProjection
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanGoalProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourCorridorProjection
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
@@ -486,15 +486,15 @@ class AssistancePlanAnalysisService(
                 assistancePlan.end)
     }
 
-    private fun sumGoalsHours(goals: List<GoalProjection>, days: Int): Double {
+    private fun sumGoalsHours(goals: List<AssistancePlanGoalProjection>, days: Int): Double {
         return goals.sumOf { sumGoalHours(it, days) }
     }
 
-    private fun sumGoalsHoursByHourTypeId(goals: List<GoalProjection>, days: Int, hourTypeId: Long): Double {
+    private fun sumGoalsHoursByHourTypeId(goals: List<AssistancePlanGoalProjection>, days: Int, hourTypeId: Long): Double {
         return goals.sumOf { sumGoalHoursByHourTypeId(it, days, hourTypeId) }
     }
 
-    private fun sumGoalHours(goal: GoalProjection, days: Int): Double {
+    private fun sumGoalHours(goal: AssistancePlanGoalProjection, days: Int): Double {
         if (goal.hours.isEmpty()) {
             return 0.0
         }
@@ -502,7 +502,7 @@ class AssistancePlanAnalysisService(
         return goal.hours.sumOf { hour -> (hour.weeklyMinutes / 7.0) * days / 60.0 }
     }
 
-    private fun sumGoalHoursByHourTypeId(goal: GoalProjection, days: Int, hourTypeId: Long): Double {
+    private fun sumGoalHoursByHourTypeId(goal: AssistancePlanGoalProjection, days: Int, hourTypeId: Long): Double {
         if (goal.hours.isEmpty()) {
             return 0.0
         }

@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.assistancePlans.dtos
 
-import de.vinz.openfls.domains.goals.dtos.GoalResponseDto
+import de.vinz.openfls.domains.goals.dto.GoalWithHoursResponse
 import java.time.LocalDate
 
 class AssistancePlanResponseDto {
@@ -24,7 +24,7 @@ class AssistancePlanResponseDto {
 
     var sponsorName: String = ""
 
-    var goals: MutableSet<GoalResponseDto> = mutableSetOf()
+    var goals: MutableSet<GoalWithHoursResponse> = mutableSetOf()
 
     var hours: MutableSet<AssistancePlanHourResponseDto> = mutableSetOf()
 }

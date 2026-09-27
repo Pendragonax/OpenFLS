@@ -5,9 +5,9 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthC
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
-import de.vinz.openfls.domains.goals.projections.GoalProjection
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanGoalProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourCorridorProjection
-import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourTypeProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanInstitutionProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
@@ -142,7 +142,7 @@ class AssistancePlanAnalysisServiceTest {
             override val hourMode: AssistancePlanHourMode = AssistancePlanHourMode.CORRIDOR
             override val hourCorridor: AssistancePlanHourCorridorProjection? = corridor
             override val hours: List<de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourProjection> = emptyList()
-            override val goals: List<GoalProjection> = emptyList()
+            override val goals: List<AssistancePlanGoalProjection> = emptyList()
         }
     }
 

@@ -3,12 +3,12 @@ package de.vinz.openfls.domains.services
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.categories.entities.Category
+import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.goals.entities.Goal
-import de.vinz.openfls.domains.hourTypes.HourType
-import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.hourTypes.entity.HourType
+import de.vinz.openfls.domains.institutions.entity.Institution
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime

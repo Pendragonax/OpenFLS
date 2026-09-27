@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanReposi
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.dtos.GoalsTimeEvaluationDto
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
-import de.vinz.openfls.domains.goals.entities.Goal
+import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.AssistancePlanNotFoundException
 import de.vinz.openfls.domains.goalTimeEvaluations.models.YearMonthDoubleValue
 import de.vinz.openfls.domains.services.ServiceRepository

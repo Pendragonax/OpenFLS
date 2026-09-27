@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourResponseDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
-import de.vinz.openfls.domains.hourTypes.HourTypeService
+import de.vinz.openfls.domains.hourTypes.service.HourTypeService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper

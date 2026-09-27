@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.institutions.Institution
-import de.vinz.openfls.domains.institutions.InstitutionRepository
+import de.vinz.openfls.domains.institutions.entity.Institution
+import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService

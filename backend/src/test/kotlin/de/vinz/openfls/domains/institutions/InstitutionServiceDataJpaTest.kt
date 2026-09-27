@@ -3,10 +3,13 @@ package de.vinz.openfls.domains.institutions
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
-import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateRequest
-import de.vinz.openfls.domains.institutions.dtos.InstitutionPermissionRequest
-import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateRequest
-import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateResult
+import de.vinz.openfls.domains.institutions.dto.InstitutionCreateRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionPermissionRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateResult
+import de.vinz.openfls.domains.institutions.entity.Institution
+import de.vinz.openfls.domains.institutions.service.InstitutionService
+import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionRepository
 import de.vinz.openfls.domains.permissions.PermissionService

@@ -1,9 +1,10 @@
 package de.vinz.openfls.domains.categories
 
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateRequest
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDeleteResult
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateRequest
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateResult
+import de.vinz.openfls.domains.categories.dto.CategoryTemplateCreateRequest
+import de.vinz.openfls.domains.categories.dto.CategoryTemplateDeleteResult
+import de.vinz.openfls.domains.categories.dto.CategoryTemplateUpdateRequest
+import de.vinz.openfls.domains.categories.dto.CategoryTemplateUpdateResult
+import de.vinz.openfls.domains.categories.service.CategoryTemplateService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid

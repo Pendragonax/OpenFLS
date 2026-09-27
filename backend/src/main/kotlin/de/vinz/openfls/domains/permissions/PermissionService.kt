@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.employees.entities.Employee
 import org.springframework.transaction.annotation.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
-import de.vinz.openfls.domains.institutions.InstitutionRepository
+import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 
 @Service
 class PermissionService(

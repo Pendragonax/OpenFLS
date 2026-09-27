@@ -4,8 +4,8 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDto
 import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDto.HourTypeEvaluationDto
-import de.vinz.openfls.domains.goals.entities.Goal
-import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.services.services.ServiceService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
@@ -451,13 +451,13 @@ class AssistancePlanEvaluationLeftService(
         return from to till
     }
 
-    private fun corridorApprovedMinutes(corridor: de.vinz.openfls.domains.hourCorridors.HourCorridor, days: Int): Double {
+    private fun corridorApprovedMinutes(corridor: de.vinz.openfls.domains.hourCorridors.entity.HourCorridor, days: Int): Double {
         val weeklyMinutesMean = (corridor.weeklyMinutesFrom + corridor.weeklyMinutesTill) / 2.0
         return weeklyMinutesMean / 7.0 * days
     }
 
     private fun corridorApprovedMinutesForDays(
-        corridor: de.vinz.openfls.domains.hourCorridors.HourCorridor,
+        corridor: de.vinz.openfls.domains.hourCorridors.entity.HourCorridor,
         days: Int,
         weeklyMinutes: Int
     ): Double {

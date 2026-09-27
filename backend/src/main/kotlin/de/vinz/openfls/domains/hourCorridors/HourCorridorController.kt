@@ -1,10 +1,11 @@
 package de.vinz.openfls.domains.hourCorridors
 
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateRequest
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateResult
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorDeleteResult
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateRequest
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateResult
+import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorCreateRequest
+import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorCreateResult
+import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorDeleteResult
+import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorUpdateRequest
+import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorUpdateResult
+import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService

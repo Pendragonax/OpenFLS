@@ -1,16 +1,16 @@
 package de.vinz.openfls.domains.clients.archive.export.dtos
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.categories.entities.Category
+import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.evaluations.Evaluation
-import de.vinz.openfls.domains.goals.entities.Goal
-import de.vinz.openfls.domains.goals.entities.GoalHour
-import de.vinz.openfls.domains.hourTypes.HourType
-import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.goals.entity.GoalHour
+import de.vinz.openfls.domains.hourTypes.entity.HourType
+import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.services.Service
-import de.vinz.openfls.domains.sponsors.Sponsor
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import java.time.LocalDate
 import java.time.LocalDateTime
 

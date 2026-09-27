@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.employees.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.employees.dtos.UnprofessionalDto
-import de.vinz.openfls.domains.sponsors.Sponsor
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import java.time.LocalDate
 import jakarta.persistence.*
 

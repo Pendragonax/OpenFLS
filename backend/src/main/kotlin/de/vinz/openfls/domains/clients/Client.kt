@@ -3,9 +3,9 @@ package de.vinz.openfls.domains.clients
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.categories.entities.Category
-import de.vinz.openfls.domains.categories.entities.CategoryTemplate
-import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.categories.entity.Category
+import de.vinz.openfls.domains.categories.entity.CategoryTemplate
+import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.services.Service
 import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
 import jakarta.persistence.*

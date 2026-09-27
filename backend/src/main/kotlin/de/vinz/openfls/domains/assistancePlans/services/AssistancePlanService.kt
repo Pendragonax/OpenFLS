@@ -8,18 +8,18 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEditDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanProjectionDto
-import de.vinz.openfls.domains.goals.entities.Goal
-import de.vinz.openfls.domains.goals.entities.GoalHour
-import de.vinz.openfls.domains.goals.repositories.GoalHourRepository
-import de.vinz.openfls.domains.goals.repositories.GoalRepository
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.goals.entity.GoalHour
+import de.vinz.openfls.domains.goals.repository.GoalHourRepository
+import de.vinz.openfls.domains.goals.repository.GoalRepository
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.hourCorridors.HourCorridorService
-import de.vinz.openfls.domains.hourTypes.HourTypeService
-import de.vinz.openfls.domains.institutions.InstitutionService
-import de.vinz.openfls.domains.sponsors.SponsorService
+import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
+import de.vinz.openfls.domains.hourTypes.service.HourTypeService
+import de.vinz.openfls.domains.institutions.service.InstitutionService
+import de.vinz.openfls.domains.sponsors.service.SponsorService
 import org.modelmapper.ModelMapper
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -461,7 +461,7 @@ class AssistancePlanService(
         return dto
     }
 
-    private fun resolveHourCorridor(valueDto: AssistancePlanCreateDto): de.vinz.openfls.domains.hourCorridors.HourCorridor? {
+    private fun resolveHourCorridor(valueDto: AssistancePlanCreateDto): de.vinz.openfls.domains.hourCorridors.entity.HourCorridor? {
         if (valueDto.hourMode != AssistancePlanHourMode.CORRIDOR) {
             return null
         }
@@ -470,7 +470,7 @@ class AssistancePlanService(
             ?: throw IllegalArgumentException("hour corridor with id ${valueDto.hourCorridorId} not found")
     }
 
-    private fun resolveHourCorridor(valueDto: AssistancePlanUpdateDto): de.vinz.openfls.domains.hourCorridors.HourCorridor? {
+    private fun resolveHourCorridor(valueDto: AssistancePlanUpdateDto): de.vinz.openfls.domains.hourCorridors.entity.HourCorridor? {
         if (valueDto.hourMode != AssistancePlanHourMode.CORRIDOR) {
             return null
         }

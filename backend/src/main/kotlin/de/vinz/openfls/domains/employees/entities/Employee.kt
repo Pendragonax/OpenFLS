@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.contingents.Contingent
+import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.evaluations.Evaluation
 import de.vinz.openfls.domains.employees.archive.EmployeeArchiveHistoryEntry
 import de.vinz.openfls.domains.permissions.Permission

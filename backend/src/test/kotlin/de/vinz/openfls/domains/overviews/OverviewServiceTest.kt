@@ -7,9 +7,9 @@ import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanReposi
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.hourCorridors.HourCorridor
-import de.vinz.openfls.domains.hourCorridors.HourCorridorService
-import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
+import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
+import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.services.ServiceRepository
 import de.vinz.openfls.exceptions.IllegalTimeException

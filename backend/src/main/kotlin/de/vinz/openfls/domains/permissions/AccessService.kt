@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.permissions
 
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.institutions.InstitutionService
+import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.services.UserService
 import org.springframework.stereotype.Service
 

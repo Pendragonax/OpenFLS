@@ -5,9 +5,12 @@ import de.vinz.openfls.domains.employees.entities.Unprofessional
 import de.vinz.openfls.domains.employees.entities.UnprofessionalKey
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.UnprofessionalRepository
-import de.vinz.openfls.domains.sponsors.dtos.SponsorCreateRequest
-import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateRequest
-import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateResult
+import de.vinz.openfls.domains.sponsors.dto.SponsorCreateRequest
+import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateRequest
+import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateResult
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
+import de.vinz.openfls.domains.sponsors.service.SponsorService
+import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,9 +1,10 @@
 package de.vinz.openfls.domains.sponsors
 
-import de.vinz.openfls.domains.sponsors.dtos.SponsorCreateRequest
-import de.vinz.openfls.domains.sponsors.dtos.SponsorDeleteResult
-import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateRequest
-import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateResult
+import de.vinz.openfls.domains.sponsors.dto.SponsorCreateRequest
+import de.vinz.openfls.domains.sponsors.dto.SponsorDeleteResult
+import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateRequest
+import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateResult
+import de.vinz.openfls.domains.sponsors.service.SponsorService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid

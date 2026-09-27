@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.assistancePlans.services
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
-import de.vinz.openfls.domains.hourTypes.dtos.HourTypeResponse
+import de.vinz.openfls.domains.hourTypes.dto.HourTypeResponse
 import de.vinz.openfls.domains.services.services.ServiceService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

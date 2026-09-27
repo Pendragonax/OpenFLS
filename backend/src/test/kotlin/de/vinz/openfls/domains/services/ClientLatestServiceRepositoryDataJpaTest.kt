@@ -2,18 +2,18 @@ package de.vinz.openfls.domains.services
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.categories.entities.CategoryTemplate
-import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
+import de.vinz.openfls.domains.categories.entity.CategoryTemplate
+import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.hourTypes.HourType
-import de.vinz.openfls.domains.hourTypes.HourTypeRepository
-import de.vinz.openfls.domains.institutions.Institution
-import de.vinz.openfls.domains.institutions.InstitutionRepository
-import de.vinz.openfls.domains.sponsors.Sponsor
-import de.vinz.openfls.domains.sponsors.SponsorRepository
+import de.vinz.openfls.domains.hourTypes.entity.HourType
+import de.vinz.openfls.domains.hourTypes.repository.HourTypeRepository
+import de.vinz.openfls.domains.institutions.entity.Institution
+import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
+import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

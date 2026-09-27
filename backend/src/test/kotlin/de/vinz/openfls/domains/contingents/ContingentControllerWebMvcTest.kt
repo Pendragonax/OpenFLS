@@ -1,10 +1,10 @@
 package de.vinz.openfls.domains.contingents
 
-import de.vinz.openfls.domains.contingents.dtos.ContingentCreateResult
-import de.vinz.openfls.domains.contingents.dtos.ContingentDeleteResult
-import de.vinz.openfls.domains.contingents.dtos.ContingentResponse
-import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateResult
-import de.vinz.openfls.domains.contingents.services.ContingentService
+import de.vinz.openfls.domains.contingents.dto.ContingentCreateResult
+import de.vinz.openfls.domains.contingents.dto.ContingentDeleteResult
+import de.vinz.openfls.domains.contingents.dto.ContingentResponse
+import de.vinz.openfls.domains.contingents.dto.ContingentUpdateResult
+import de.vinz.openfls.domains.contingents.service.ContingentService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat

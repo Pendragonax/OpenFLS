@@ -2,8 +2,6 @@ package de.vinz.openfls.domains.assistancePlans.projections
 
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.goals.projections.GoalProjection
-import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanInstitutionProjection
 
 import java.time.LocalDate
 
@@ -17,5 +15,5 @@ interface AssistancePlanProjection {
     val hourMode: AssistancePlanHourMode
     val hourCorridor: AssistancePlanHourCorridorProjection?
     val hours: List<AssistancePlanHourProjection>
-    val goals: List<GoalProjection>
+    val goals: List<AssistancePlanGoalProjection>
 }

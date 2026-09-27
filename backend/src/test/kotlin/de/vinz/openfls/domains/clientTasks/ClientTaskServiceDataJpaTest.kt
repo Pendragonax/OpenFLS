@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clientTasks
 
-import de.vinz.openfls.domains.categories.entities.CategoryTemplate
-import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
+import de.vinz.openfls.domains.categories.entity.CategoryTemplate
+import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
 import de.vinz.openfls.domains.clientTasks.dtos.CompleteClientTaskDto
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCreateDto
 import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskUpdateDto
@@ -10,8 +10,8 @@ import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.institutions.Institution
-import de.vinz.openfls.domains.institutions.InstitutionRepository
+import de.vinz.openfls.domains.institutions.entity.Institution
+import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach

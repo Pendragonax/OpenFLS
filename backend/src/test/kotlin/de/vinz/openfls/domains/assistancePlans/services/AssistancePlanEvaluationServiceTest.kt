@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.hourTypes.HourType
+import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.services.Service
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

@@ -4,8 +4,8 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEditDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
-import de.vinz.openfls.domains.hourCorridors.HourCorridor
-import de.vinz.openfls.domains.hourCorridors.HourCorridorService
+import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
+import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
 import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDto
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.services.ServiceRepository

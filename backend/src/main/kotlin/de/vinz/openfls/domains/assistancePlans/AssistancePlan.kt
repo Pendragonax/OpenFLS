@@ -5,11 +5,11 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode.EXACT
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.hourCorridors.HourCorridor
-import de.vinz.openfls.domains.goals.entities.Goal
-import de.vinz.openfls.domains.institutions.Institution
+import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.services.Service
-import de.vinz.openfls.domains.sponsors.Sponsor
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import java.time.LocalDate
 import jakarta.persistence.*
 

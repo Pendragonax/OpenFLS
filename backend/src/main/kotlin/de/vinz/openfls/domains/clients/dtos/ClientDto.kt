@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients.dtos
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import de.vinz.openfls.domains.institutions.dtos.InstitutionResponse
+import de.vinz.openfls.domains.institutions.dto.InstitutionResponse
 import jakarta.validation.constraints.NotBlank
 
 class ClientDto {

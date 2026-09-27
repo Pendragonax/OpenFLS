@@ -1,14 +1,15 @@
 package de.vinz.openfls.domains.categories
 
-import de.vinz.openfls.domains.categories.dtos.CategoryCreateRequest
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateRequest
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateRequest
-import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateResult
-import de.vinz.openfls.domains.categories.dtos.CategoryUpdateRequest
-import de.vinz.openfls.domains.categories.entities.Category
-import de.vinz.openfls.domains.categories.entities.CategoryTemplate
-import de.vinz.openfls.domains.categories.repositories.CategoryRepository
-import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
+import de.vinz.openfls.domains.categories.dto.CategoryCreateRequest
+import de.vinz.openfls.domains.categories.dto.CategoryTemplateCreateRequest
+import de.vinz.openfls.domains.categories.dto.CategoryTemplateUpdateRequest
+import de.vinz.openfls.domains.categories.dto.CategoryTemplateUpdateResult
+import de.vinz.openfls.domains.categories.dto.CategoryUpdateRequest
+import de.vinz.openfls.domains.categories.entity.Category
+import de.vinz.openfls.domains.categories.entity.CategoryTemplate
+import de.vinz.openfls.domains.categories.repository.CategoryRepository
+import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
+import de.vinz.openfls.domains.categories.service.CategoryTemplateService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
