@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanReposi
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.hourCorridors.HourCorridor
-import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
+import de.vinz.openfls.domains.hourCorridors.HourCorridorService
 import de.vinz.openfls.domains.overviews.dtos.AssistancePlanOverviewDto
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.services.ServiceRepository
@@ -25,7 +25,7 @@ class OverviewService(
     private val accessService: AccessService,
     private val serviceRepository: ServiceRepository,
     private val assistancePlanRepository: AssistancePlanRepository,
-    private val hourCorridorRepository: HourCorridorRepository,
+    private val hourCorridorService: HourCorridorService,
     private val clientRepository: ClientRepository,
     private val modelMapper: ModelMapper
 ) {
@@ -609,7 +609,7 @@ class OverviewService(
             .distinct()
             .toList()
         if (ids.isEmpty()) return emptyMap()
-        return hourCorridorRepository.findAllById(ids).associateBy { it.id }
+        return hourCorridorService.getAllEntitiesByIds(ids).associateBy { it.id }
     }
 
     private fun isCorridor(assistancePlanDto: AssistancePlanEditDto): Boolean {

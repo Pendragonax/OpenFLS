@@ -6,9 +6,9 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanAnalysisMonthD
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProjection
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.goals.projections.GoalProjection
-import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorSoloProjection
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourCorridorProjection
 import de.vinz.openfls.domains.hourTypes.HourType
-import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorHourTypeProjection
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourTypeProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanInstitutionProjection
 import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
 import de.vinz.openfls.domains.services.services.ServiceService
@@ -119,17 +119,17 @@ class AssistancePlanAnalysisServiceTest {
     }
 
     private fun corridorProjection(start: LocalDate, end: LocalDate, hourType: HourType): AssistancePlanProjection {
-        val corridorHourType = object : HourCorridorHourTypeProjection {
+        val corridorHourType = object : AssistancePlanHourTypeProjection {
             override val id: Long = hourType.id
             override val title: String = hourType.title
             override val price: Double = hourType.price
         }
-        val corridor = object : HourCorridorSoloProjection {
+        val corridor = object : AssistancePlanHourCorridorProjection {
             override val id: Long = 5
             override val title: String = "5 bis 10"
             override val weeklyMinutesFrom: Int = 300
             override val weeklyMinutesTill: Int = 600
-            override val hourType: HourCorridorHourTypeProjection = corridorHourType
+            override val hourType: AssistancePlanHourTypeProjection = corridorHourType
         }
 
         return object : AssistancePlanProjection {
@@ -140,7 +140,7 @@ class AssistancePlanAnalysisServiceTest {
             override val sponsor: AssistancePlanSponsorProjection = sponsorProjection()
             override val institution: AssistancePlanInstitutionProjection = institutionProjection()
             override val hourMode: AssistancePlanHourMode = AssistancePlanHourMode.CORRIDOR
-            override val hourCorridor: HourCorridorSoloProjection? = corridor
+            override val hourCorridor: AssistancePlanHourCorridorProjection? = corridor
             override val hours: List<de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourProjection> = emptyList()
             override val goals: List<GoalProjection> = emptyList()
         }

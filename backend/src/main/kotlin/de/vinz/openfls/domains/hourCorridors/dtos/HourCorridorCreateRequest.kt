@@ -4,16 +4,16 @@ import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Positive
 import jakarta.validation.constraints.PositiveOrZero
 
-data class HourCorridorCreateDto(
+data class HourCorridorCreateRequest(
     @field:NotEmpty
-    var title: String = "",
+    val title: String = "",
 
     @field:PositiveOrZero
-    var weeklyMinutesFrom: Int = 0,
+    val weeklyMinutesFrom: Int = 0,
 
     @field:PositiveOrZero
-    var weeklyMinutesTill: Int = 0,
+    val weeklyMinutesTill: Int = 0,
 
     @field:Positive
-    var hourTypeId: Long = 0
+    val hourTypeId: Long = 0
 )

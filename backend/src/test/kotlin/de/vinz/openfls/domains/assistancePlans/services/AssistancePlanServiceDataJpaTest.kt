@@ -19,6 +19,7 @@ import de.vinz.openfls.domains.hourTypes.HourTypeRepository
 import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.hourCorridors.HourCorridor
 import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
+import de.vinz.openfls.domains.hourCorridors.HourCorridorService
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionRepository
 import de.vinz.openfls.domains.institutions.InstitutionService
@@ -84,6 +85,9 @@ class AssistancePlanServiceDataJpaTest {
 
     @MockitoBean
     lateinit var hourTypeService: HourTypeService
+
+    @MockitoBean
+    lateinit var hourCorridorService: HourCorridorService
 
     @Autowired
     lateinit var testEntityManager: TestEntityManager
@@ -757,6 +761,7 @@ class AssistancePlanServiceDataJpaTest {
         whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
         whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourCorridorService.getEntityById(corridor.id)).thenReturn(corridor)
 
         val createDto = AssistancePlanCreateDto().apply {
             start = LocalDate.of(2026, 1, 1)
@@ -807,6 +812,7 @@ class AssistancePlanServiceDataJpaTest {
         whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
         whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourCorridorService.getEntityById(corridor.id)).thenReturn(corridor)
 
         val createDto = AssistancePlanCreateDto().apply {
             start = LocalDate.of(2026, 1, 1)
@@ -857,6 +863,7 @@ class AssistancePlanServiceDataJpaTest {
         whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(institutionService.getEntityById(institution.id!!)).thenReturn(institution)
         whenever(sponsorService.getEntityById(sponsor.id)).thenReturn(sponsor)
+        whenever(hourCorridorService.getEntityById(corridor.id)).thenReturn(corridor)
         whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)
 
         val created = assistancePlanService.create(AssistancePlanCreateDto().apply {

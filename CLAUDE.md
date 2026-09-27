@@ -25,6 +25,10 @@ Hinweise.
   abfragt (ungenutzte in der eigenen Domäne dort anlegen, wo sie gebraucht werden).
   Kein toter Code: keine ungenutzten Methoden/Klassen/Properties und keine
   Member, die nur wegen Tests existieren (bei Migration jeder Domäne prüfen).
+  Fachliche Prüfungen (Existenz, Wertebereiche, Konflikte) gehören in den
+  Service, nicht in den Controller; bei mehreren erwarteten Ausgängen gibt
+  die Service-Methode eine eigene `sealed class` zurück (z. B.
+  `HourCorridorUpdateResult`), der Controller übersetzt sie per `when`.
   Arbeitsmodus pro Domäne: Inventur → Vorschlag → Freigabe → Umsetzung.
 - **Logging:** Für alle Änderungen am Logging gilt `docs/logging-guide.md`.
 - **Skills:** Projekt-Skills liegen unter `.claude/skills/` (portiert aus

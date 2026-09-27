@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.hourCorridors.HourCorridor
-import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
+import de.vinz.openfls.domains.hourCorridors.HourCorridorService
 import de.vinz.openfls.domains.hourTypes.HourType
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.domains.services.ServiceRepository
@@ -33,7 +33,7 @@ class OverviewServiceTest {
     private lateinit var accessService: AccessService
     private lateinit var serviceRepository: ServiceRepository
     private lateinit var assistancePlanRepository: AssistancePlanRepository
-    private lateinit var hourCorridorRepository: HourCorridorRepository
+    private lateinit var hourCorridorService: HourCorridorService
     private lateinit var clientRepository: ClientRepository
     private lateinit var modelMapper: ModelMapper
 
@@ -42,12 +42,12 @@ class OverviewServiceTest {
         accessService = mock()
         serviceRepository = mock()
         assistancePlanRepository = mock()
-        hourCorridorRepository = mock()
+        hourCorridorService = mock()
         clientRepository = mock()
         modelMapper = mock()
 
         overviewService = OverviewService(
-            accessService, serviceRepository, assistancePlanRepository, hourCorridorRepository, clientRepository, modelMapper
+            accessService, serviceRepository, assistancePlanRepository, hourCorridorService, clientRepository, modelMapper
         )
     }
 
@@ -157,7 +157,7 @@ class OverviewServiceTest {
         val client = clientDto(1L, "Max", "Muster", archived = false)
         val corridorPlan = planDto(11L, client.id, year, null, hourTypeId, corridor = true)
         val corridor = corridorEntity(5L, hourTypeId, 300, 600)
-        `when`(hourCorridorRepository.findAllById(listOf(5L))).thenReturn(listOf(corridor))
+        `when`(hourCorridorService.getAllEntitiesByIds(listOf(5L))).thenReturn(listOf(corridor))
 
         val result = overviewService.getApprovedHoursYearly(
             listOf(corridorPlan),
@@ -181,7 +181,7 @@ class OverviewServiceTest {
         val client = clientDto(1L, "Max", "Muster", archived = false)
         val corridorPlan = planDto(11L, client.id, year, null, hourTypeId, corridor = true)
         val corridor = corridorEntity(5L, hourTypeId, 300, 600)
-        `when`(hourCorridorRepository.findAllById(listOf(5L))).thenReturn(listOf(corridor))
+        `when`(hourCorridorService.getAllEntitiesByIds(listOf(5L))).thenReturn(listOf(corridor))
 
         val services = listOf(service(11L, LocalDate.of(2024, 2, 10), 60))
         val result = overviewService.getDifferenceHoursYearly(

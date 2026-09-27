@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.hourCorridors.HourCorridorAuditAction
 import de.vinz.openfls.domains.hourCorridors.HourCorridorAuditLog
 import java.time.LocalDateTime
 
-data class HourCorridorAuditLogDto(
+data class HourCorridorAuditLogResponse(
     val id: Long,
     val hourCorridorId: Long,
     val action: HourCorridorAuditAction,
@@ -20,7 +20,7 @@ data class HourCorridorAuditLogDto(
     val afterHourTypeId: Long?
 ) {
     companion object {
-        fun from(log: HourCorridorAuditLog) = HourCorridorAuditLogDto(
+        fun from(log: HourCorridorAuditLog) = HourCorridorAuditLogResponse(
             log.id, log.hourCorridorId, log.action, log.changedAt, log.actor,
             log.beforeTitle, log.afterTitle,
             log.beforeWeeklyMinutesFrom, log.afterWeeklyMinutesFrom,

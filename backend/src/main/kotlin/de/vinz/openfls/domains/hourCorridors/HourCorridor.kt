@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.hourCorridors
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.hourTypes.HourType
 import jakarta.persistence.Column
@@ -32,12 +31,10 @@ class HourCorridor(
     var weeklyMinutesTill: Int = 0,
 
     @field:NotNull(message = "Hour type is required.")
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hour_type_id")
     var hourType: HourType? = null,
 
-    @JsonIgnore
     @OneToMany(mappedBy = "hourCorridor", fetch = FetchType.LAZY)
     var assistancePlans: MutableSet<AssistancePlan> = mutableSetOf()
 ) {

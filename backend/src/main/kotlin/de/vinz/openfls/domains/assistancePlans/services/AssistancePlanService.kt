@@ -16,7 +16,7 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProject
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanHourRepository
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.hourCorridors.HourCorridorRepository
+import de.vinz.openfls.domains.hourCorridors.HourCorridorService
 import de.vinz.openfls.domains.hourTypes.HourTypeService
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.sponsors.SponsorService
@@ -31,7 +31,7 @@ import java.time.temporal.ChronoUnit
 class AssistancePlanService(
         private val assistancePlanRepository: AssistancePlanRepository,
         private val assistancePlanHourRepository: AssistancePlanHourRepository,
-        private val hourCorridorRepository: HourCorridorRepository,
+        private val hourCorridorService: HourCorridorService,
         private val goalRepository: GoalRepository,
         private val goalHourRepository: GoalHourRepository,
         private val clientService: ClientService,
@@ -466,7 +466,7 @@ class AssistancePlanService(
             return null
         }
 
-        return hourCorridorRepository.findByIdOrNull(valueDto.hourCorridorId)
+        return hourCorridorService.getEntityById(valueDto.hourCorridorId)
             ?: throw IllegalArgumentException("hour corridor with id ${valueDto.hourCorridorId} not found")
     }
 
@@ -475,7 +475,7 @@ class AssistancePlanService(
             return null
         }
 
-        return hourCorridorRepository.findByIdOrNull(valueDto.hourCorridorId)
+        return hourCorridorService.getEntityById(valueDto.hourCorridorId)
             ?: throw IllegalArgumentException("hour corridor with id ${valueDto.hourCorridorId} not found")
     }
 

@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanProject
 import de.vinz.openfls.exceptions.IllegalTimeException
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import de.vinz.openfls.domains.goals.projections.GoalProjection
-import de.vinz.openfls.domains.hourCorridors.projections.HourCorridorSoloProjection
+import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourCorridorProjection
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
@@ -461,7 +461,7 @@ class AssistancePlanAnalysisService(
         }
     }
 
-    private fun corridorApprovedHours(corridor: HourCorridorSoloProjection, days: Int): Double {
+    private fun corridorApprovedHours(corridor: AssistancePlanHourCorridorProjection, days: Int): Double {
         val weeklyMinutesMean = (corridor.weeklyMinutesFrom + corridor.weeklyMinutesTill) / 2.0
         return TimeDoubleService.convertDoubleToTimeDouble((weeklyMinutesMean / 7.0) * days / 60.0)
     }

@@ -1,119 +1,131 @@
 package de.vinz.openfls.domains.hourCorridors
 
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateDto
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorDto
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateDto
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorAuditLogDto
-import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorAssistancePlanDto
-import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
+import de.vinz.openfls.architecture.InternalEntityApi
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorAssistancePlanResponse
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorAuditLogResponse
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateRequest
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorCreateResult
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorDeleteResult
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorResponse
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateRequest
+import de.vinz.openfls.domains.hourCorridors.dtos.HourCorridorUpdateResult
 import de.vinz.openfls.domains.hourTypes.HourTypeService
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.security.core.context.SecurityContextHolder
 import java.time.Clock
 import java.time.LocalDateTime
 
 @Service
 class HourCorridorService(
     private val hourCorridorRepository: HourCorridorRepository,
-    private val assistancePlanRepository: AssistancePlanRepository,
     private val hourTypeService: HourTypeService,
     private val auditLogRepository: HourCorridorAuditLogRepository,
     private val clock: Clock
 ) {
 
     @Transactional
-    fun create(hourCorridorDto: HourCorridorCreateDto): HourCorridorDto {
-        validateRange(hourCorridorDto.weeklyMinutesFrom, hourCorridorDto.weeklyMinutesTill)
+    fun create(request: HourCorridorCreateRequest): HourCorridorCreateResult {
+        if (request.weeklyMinutesTill < request.weeklyMinutesFrom) {
+            return HourCorridorCreateResult.InvalidRange("till before from")
+        }
 
-        val hourType = hourTypeService.getEntityById(hourCorridorDto.hourTypeId)
-            ?: throw IllegalArgumentException("hour type with id ${hourCorridorDto.hourTypeId} not found")
+        val hourType = hourTypeService.getEntityById(request.hourTypeId)
+            ?: return HourCorridorCreateResult.HourTypeNotFound("hour type with id ${request.hourTypeId} not found")
 
         val entity = hourCorridorRepository.save(
             HourCorridor(
-                title = hourCorridorDto.title,
-                weeklyMinutesFrom = hourCorridorDto.weeklyMinutesFrom,
-                weeklyMinutesTill = hourCorridorDto.weeklyMinutesTill,
+                title = request.title,
+                weeklyMinutesFrom = request.weeklyMinutesFrom,
+                weeklyMinutesTill = request.weeklyMinutesTill,
                 hourType = hourType
             )
         )
         writeAudit(entity.id, HourCorridorAuditAction.CREATE, null, AuditSnapshot.from(entity))
-        return HourCorridorDto.from(entity, countByAssistancePlan(entity.id))
-    }
-
-    @Transactional
-    fun update(hourCorridorDto: HourCorridorUpdateDto): HourCorridorDto {
-        val before = hourCorridorRepository.findByIdOrNull(hourCorridorDto.id)
-        if (before == null) {
-            throw IllegalArgumentException("hour corridor not found")
-        }
-        val beforeSnapshot = AuditSnapshot.from(before)
-
-        validateRange(hourCorridorDto.weeklyMinutesFrom, hourCorridorDto.weeklyMinutesTill)
-
-        val hourType = hourTypeService.getEntityById(hourCorridorDto.hourTypeId)
-            ?: throw IllegalArgumentException("hour type with id ${hourCorridorDto.hourTypeId} not found")
-
-        val entity = hourCorridorRepository.save(
-            HourCorridor(
-                id = hourCorridorDto.id,
-                title = hourCorridorDto.title,
-                weeklyMinutesFrom = hourCorridorDto.weeklyMinutesFrom,
-                weeklyMinutesTill = hourCorridorDto.weeklyMinutesTill,
-                hourType = hourType
-            )
+        return HourCorridorCreateResult.Success(
+            HourCorridorResponse.from(entity, countAssistancePlansByHourCorridorId(entity.id))
         )
-        writeAudit(entity.id, HourCorridorAuditAction.UPDATE, beforeSnapshot, AuditSnapshot.from(entity))
-        return HourCorridorDto.from(entity, countByAssistancePlan(entity.id))
     }
 
     @Transactional
-    fun delete(id: Long) {
-        val before = hourCorridorRepository.findByIdOrNull(id)
-            ?: throw IllegalArgumentException("hour corridor not found")
-        val beforeSnapshot = AuditSnapshot.from(before)
-        val usageCount = countByAssistancePlan(id)
-        if (usageCount > 0) {
-            throw IllegalArgumentException("hour corridor is used by $usageCount assistance plans")
+    fun update(request: HourCorridorUpdateRequest): HourCorridorUpdateResult {
+        if (request.weeklyMinutesTill < request.weeklyMinutesFrom) {
+            return HourCorridorUpdateResult.InvalidRange("till before from")
         }
 
+        val entity = hourCorridorRepository.findByIdOrNull(request.id)
+            ?: return HourCorridorUpdateResult.NotFound
+        val hourType = hourTypeService.getEntityById(request.hourTypeId)
+            ?: return HourCorridorUpdateResult.HourTypeNotFound("hour type with id ${request.hourTypeId} not found")
+        val beforeSnapshot = AuditSnapshot.from(entity)
+
+        entity.title = request.title
+        entity.weeklyMinutesFrom = request.weeklyMinutesFrom
+        entity.weeklyMinutesTill = request.weeklyMinutesTill
+        entity.hourType = hourType
+
+        val saved = hourCorridorRepository.save(entity)
+        writeAudit(saved.id, HourCorridorAuditAction.UPDATE, beforeSnapshot, AuditSnapshot.from(saved))
+        return HourCorridorUpdateResult.Success(
+            HourCorridorResponse.from(saved, countAssistancePlansByHourCorridorId(saved.id))
+        )
+    }
+
+    @Transactional
+    fun delete(id: Long): HourCorridorDeleteResult {
+        val before = hourCorridorRepository.findByIdOrNull(id)
+            ?: return HourCorridorDeleteResult.NotFound
+        val usageCount = countAssistancePlansByHourCorridorId(id)
+        if (usageCount > 0) {
+            return HourCorridorDeleteResult.Conflict(usageCount)
+        }
+
+        val beforeSnapshot = AuditSnapshot.from(before)
         hourCorridorRepository.deleteById(id)
         writeAudit(id, HourCorridorAuditAction.DELETE, beforeSnapshot, null)
+        return HourCorridorDeleteResult.Success(HourCorridorResponse.from(before, 0))
     }
 
     @Transactional(readOnly = true)
-    fun getAll(): List<HourCorridorDto> {
+    fun getAll(): List<HourCorridorResponse> {
         val entities = hourCorridorRepository.findAll()
             .toList()
             .sortedBy { it.title.lowercase() }
-        val assistancePlanCounts = countByAssistancePlanIds(entities.map { it.id })
-        return entities.map { HourCorridorDto.from(it, assistancePlanCounts[it.id] ?: 0L) }
+        val assistancePlanCounts = countAssistancePlansByHourCorridorIds(entities.map { it.id })
+        return entities.map { HourCorridorResponse.from(it, assistancePlanCounts[it.id] ?: 0L) }
     }
 
     @Transactional(readOnly = true)
-    fun getById(id: Long): HourCorridorDto? {
-        val entity = hourCorridorRepository.findById(id).orElse(null)
-        return entity?.let { HourCorridorDto.from(it, countByAssistancePlan(it.id)) }
+    fun getById(id: Long): HourCorridorResponse? {
+        val entity = hourCorridorRepository.findByIdOrNull(id) ?: return null
+        return HourCorridorResponse.from(entity, countAssistancePlansByHourCorridorId(entity.id))
+    }
+
+    @InternalEntityApi
+    @Transactional(readOnly = true)
+    fun getEntityById(id: Long): HourCorridor? {
+        return hourCorridorRepository.findByIdOrNull(id)
+    }
+
+    @InternalEntityApi
+    @Transactional(readOnly = true)
+    fun getAllEntitiesByIds(ids: List<Long>): List<HourCorridor> {
+        return hourCorridorRepository.findAllById(ids).toList()
     }
 
     @Transactional(readOnly = true)
-    fun existsById(id: Long): Boolean {
-        return hourCorridorRepository.existsById(id)
+    fun countAssistancePlansByHourCorridorId(id: Long): Long {
+        return hourCorridorRepository.countAssistancePlansByHourCorridorId(id)
     }
 
     @Transactional(readOnly = true)
-    fun countByAssistancePlan(id: Long): Long {
-        return assistancePlanRepository.countByHourCorridorId(id)
-    }
+    fun getAssistancePlansByHourCorridorId(id: Long): List<HourCorridorAssistancePlanResponse> =
+        hourCorridorRepository.findAssistancePlansByHourCorridorId(id).map(HourCorridorAssistancePlanResponse::from)
 
     @Transactional(readOnly = true)
-    fun getAssistancePlans(id: Long): List<HourCorridorAssistancePlanDto> =
-        assistancePlanRepository.findHourCorridorAssistancePlans(id).map(HourCorridorAssistancePlanDto::from)
-
-    @Transactional(readOnly = true)
-    fun getAuditHistory(id: Long): List<HourCorridorAuditLogDto> =
-        auditLogRepository.findAllByHourCorridorIdOrderByChangedAtDescIdDesc(id).map(HourCorridorAuditLogDto::from)
+    fun getAuditHistoryByHourCorridorId(id: Long): List<HourCorridorAuditLogResponse> =
+        auditLogRepository.findAllByHourCorridorIdOrderByChangedAtDescIdDesc(id).map(HourCorridorAuditLogResponse::from)
 
     private fun writeAudit(id: Long, action: HourCorridorAuditAction, before: AuditSnapshot?, after: AuditSnapshot?) {
         val authentication = SecurityContextHolder.getContext().authentication
@@ -147,17 +159,11 @@ class HourCorridorService(
         }
     }
 
-    private fun countByAssistancePlanIds(ids: List<Long>): Map<Long, Long> {
+    private fun countAssistancePlansByHourCorridorIds(ids: List<Long>): Map<Long, Long> {
         if (ids.isEmpty()) {
             return emptyMap()
         }
-        return assistancePlanRepository.countByHourCorridorIds(ids)
+        return hourCorridorRepository.countAssistancePlansByHourCorridorIds(ids)
             .associate { it.hourCorridorId to it.assistancePlanCount }
-    }
-
-    private fun validateRange(weeklyMinutesFrom: Int, weeklyMinutesTill: Int) {
-        if (weeklyMinutesTill < weeklyMinutesFrom) {
-            throw IllegalArgumentException("till before from")
-        }
     }
 }

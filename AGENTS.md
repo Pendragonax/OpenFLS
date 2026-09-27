@@ -151,6 +151,12 @@ Services werden nach Zuständigkeit getrennt und bilden jeweils eigene Klassen.
   `getEntityById`, `getAllEntities`, `createEntity`, `updateEntity`. Methoden,
   die mehrere Entities liefern, heißen immer `getAllEntitiesBy<Kriterium>`
   (z. B. `getAllEntitiesByEmployeeId`), nie `getEntitiesBy…`.
+- Für DTO-/Response-liefernde Methoden gilt dieselbe Konsistenz: eine Liste
+  nach einem Kriterium heißt `get<Was>By<Kriterium>` (z. B.
+  `getAssistancePlansByHourCorridorId`, `getAuditHistoryByHourCorridorId`),
+  eine Zählung `count<Was>By<Kriterium>` (z. B.
+  `countAssistancePlansByHourCorridorId`). Der Name nennt immer, was
+  zurückkommt, nicht nur das Kriterium.
 
 ### Projections
 
@@ -218,6 +224,21 @@ JPA-Entities sind ein internes Persistenzdetail und dürfen weder über eine
   Request) werden nicht per Exception, sondern direkt als passende Response
   zurückgegeben (z. B. `404`, `400`). Exceptions sind unerwarteten Fehlern
   vorbehalten.
+- Fachliche Prüfungen für einen Anwendungsfall (Existenz, Wertebereiche,
+  Konflikte durch Nutzung an anderer Stelle) gehören in den Service, nicht in
+  den Controller. Der Controller prüft nur eingabeseitige, technische Dinge,
+  die keine Fachlogik brauchen (z. B. Pfad-Id gegen Request-Id, rollenbasierte
+  Berechtigung über den injizierten Berechtigungs-Service). Damit entfällt ein
+  vorgelagerter `existsById`-Aufruf im Controller vor einer Schreiboperation.
+- Muss ein Service-Aufruf zwischen mehreren erwarteten Ausgängen
+  unterscheiden (z. B. erfolgreich, nicht gefunden, Wertebereich ungültig,
+  Konflikt durch Nutzung), gibt die Methode dafür eine eigene, nach dem
+  Anwendungsfall benannte `sealed class` zurück (z. B.
+  `HourCorridorUpdateResult` mit `Success`, `NotFound`, `InvalidRange`,
+  `HourTypeNotFound`), statt eine Exception zu werfen. Der Controller
+  übersetzt sie per `when` erschöpfend in die passende HTTP-Antwort. Bei nur
+  einem erwarteten Ausgang neben dem Erfolg reicht ein nullable Rückgabewert
+  (wie bei `getById`).
 - Fehlerantworten verwenden einen festgelegten HTTP-Status und einen stabilen,
   maschinenlesbaren Fehlercode. Das Frontend reagiert auf diesen Code gezielt;
   Fehlermeldungen ersetzen keine fachliche Fehlerbehandlung.
