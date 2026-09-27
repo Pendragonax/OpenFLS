@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
 import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateRequest
 import de.vinz.openfls.domains.institutions.dtos.InstitutionPermissionRequest
 import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateRequest
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateResult
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionRepository
 import de.vinz.openfls.domains.permissions.PermissionService
@@ -82,13 +83,15 @@ class InstitutionServiceDataJpaTest {
     }
 
     @Test
-    fun update_missingInstitution_throwsException() {
+    fun update_missingInstitution_returnsNotFound() {
         // Given
         val request = InstitutionUpdateRequest(id = 9999, name = "Missing")
 
-        // When / Then
-        assertThatThrownBy { institutionService.update(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // When
+        val result = institutionService.update(request)
+
+        // Then
+        assertThat(result).isEqualTo(InstitutionUpdateResult.NotFound)
     }
 
     @Test
@@ -115,7 +118,7 @@ class InstitutionServiceDataJpaTest {
         )
 
         // When
-        val result = institutionService.update(request)
+        val result = institutionService.update(request) as InstitutionUpdateResult.Success
 
         // Then
         entityManager.flush()
@@ -128,7 +131,7 @@ class InstitutionServiceDataJpaTest {
         assertThat(permissions.first { it.id.employeeId == kept.id }.readEntries).isFalse
         assertThat(permissions.first { it.id.employeeId == kept.id }.changeInstitution).isTrue
         assertThat(permissions.first { it.id.employeeId == added.id }.affiliated).isTrue
-        assertThat(result.permissions.map { it.employeeId }).containsExactlyInAnyOrder(kept.id, added.id)
+        assertThat(result.response.permissions.map { it.employeeId }).containsExactlyInAnyOrder(kept.id, added.id)
     }
 
     @Test
@@ -172,7 +175,6 @@ class InstitutionServiceDataJpaTest {
 
         // When / Then
         assertThat(institutionService.getEntityById(institution.id!!)).isEqualTo(institution)
-        assertThat(institutionService.existsById(institution.id!!)).isTrue()
     }
 
     private fun savePermission(

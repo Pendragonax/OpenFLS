@@ -2,12 +2,15 @@ package de.vinz.openfls.domains.categories
 
 import de.vinz.openfls.architecture.InternalEntityApi
 import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateRequest
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDeleteResult
 import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateRequest
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateResult
 import de.vinz.openfls.domains.categories.dtos.CategoryTemplateWithCategoriesResponse
 import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.repositories.CategoryRepository
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -40,9 +43,17 @@ class CategoryTemplateService(
     }
 
     @Transactional
-    fun update(request: CategoryTemplateUpdateRequest): CategoryTemplateWithCategoriesResponse {
-        val template = categoryTemplateRepository.findById(request.id)
-            .orElseThrow { IllegalArgumentException("category template with id ${request.id} not found") }
+    fun update(request: CategoryTemplateUpdateRequest): CategoryTemplateUpdateResult {
+        val template = categoryTemplateRepository.findByIdOrNull(request.id)
+            ?: return CategoryTemplateUpdateResult.NotFound
+
+        val existingIds = template.categories.map { it.id }.toSet()
+        val foreignCategoryId = request.categories.firstOrNull { it.id > 0 && it.id !in existingIds }?.id
+        if (foreignCategoryId != null) {
+            return CategoryTemplateUpdateResult.CategoryNotInTemplate(
+                "category with id $foreignCategoryId does not belong to category template ${template.id}"
+            )
+        }
 
         template.title = request.title
         template.description = request.description
@@ -55,10 +66,7 @@ class CategoryTemplateService(
 
         request.categories.forEach { categoryRequest ->
             if (categoryRequest.id > 0) {
-                val category = template.categories.firstOrNull { it.id == categoryRequest.id }
-                    ?: throw IllegalArgumentException(
-                        "category with id ${categoryRequest.id} does not belong to category template ${template.id}"
-                    )
+                val category = template.categories.first { it.id == categoryRequest.id }
                 category.title = categoryRequest.title
                 category.shortcut = categoryRequest.shortcut
                 category.description = categoryRequest.description
@@ -76,12 +84,18 @@ class CategoryTemplateService(
             }
         }
 
-        return CategoryTemplateWithCategoriesResponse.from(categoryTemplateRepository.save(template))
+        return CategoryTemplateUpdateResult.Success(
+            CategoryTemplateWithCategoriesResponse.from(categoryTemplateRepository.save(template))
+        )
     }
 
     @Transactional
-    fun delete(id: Long) {
+    fun delete(id: Long): CategoryTemplateDeleteResult {
+        val entity = categoryTemplateRepository.findByIdOrNull(id)
+            ?: return CategoryTemplateDeleteResult.NotFound
+        val response = CategoryTemplateWithCategoriesResponse.from(entity)
         categoryTemplateRepository.deleteById(id)
+        return CategoryTemplateDeleteResult.Success(response)
     }
 
     @Transactional(readOnly = true)
@@ -93,18 +107,13 @@ class CategoryTemplateService(
 
     @Transactional(readOnly = true)
     fun getById(id: Long): CategoryTemplateWithCategoriesResponse? {
-        return categoryTemplateRepository.findById(id).orElse(null)
+        return categoryTemplateRepository.findByIdOrNull(id)
             ?.let { CategoryTemplateWithCategoriesResponse.from(it) }
     }
 
     @InternalEntityApi
     @Transactional(readOnly = true)
     fun getEntityById(id: Long): CategoryTemplate? {
-        return categoryTemplateRepository.findById(id).orElse(null)
-    }
-
-    @Transactional(readOnly = true)
-    fun existsById(id: Long): Boolean {
-        return categoryTemplateRepository.existsById(id)
+        return categoryTemplateRepository.findByIdOrNull(id)
     }
 }

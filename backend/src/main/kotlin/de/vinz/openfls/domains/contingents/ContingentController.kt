@@ -1,7 +1,10 @@
 package de.vinz.openfls.domains.contingents
 
 import de.vinz.openfls.domains.contingents.dtos.ContingentCreateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentCreateResult
+import de.vinz.openfls.domains.contingents.dtos.ContingentDeleteResult
 import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateResult
 import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
@@ -28,15 +31,17 @@ class ContingentController(
         // performance
         val startMs = System.currentTimeMillis()
 
-        if (request.end != null && request.start >= request.end)
-            return ResponseEntity.badRequest().body("end before start")
         if (!accessService.isLeader(request.institutionId))
             return forbidden("no permission to add this contingent")
 
         return try {
-            ResponseEntity.ok(contingentService.create(request))
-        } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
+            when (val result = contingentService.create(request)) {
+                is ContingentCreateResult.Success -> ResponseEntity.ok(result.response)
+                is ContingentCreateResult.InvalidRange -> ResponseEntity.badRequest().body(result.message)
+                is ContingentCreateResult.EmployeeNotFound -> ResponseEntity.badRequest().body(result.message)
+                is ContingentCreateResult.EmployeeArchived -> ResponseEntity.badRequest().body(result.message)
+                is ContingentCreateResult.InstitutionNotFound -> ResponseEntity.badRequest().body(result.message)
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -53,17 +58,20 @@ class ContingentController(
 
         if (id != request.id)
             return ResponseEntity.badRequest().body("path id and request id are not the same")
-        if (request.end != null && request.start >= request.end)
-            return ResponseEntity.badRequest().body("end before start")
-        if (!contingentService.existsById(id))
+        if (contingentService.getById(id) == null)
             return contingentNotFound()
         if (!contingentService.canModifyContingent(id))
             return forbidden("no permission to update this contingent")
 
         return try {
-            ResponseEntity.ok(contingentService.update(request))
-        } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
+            when (val result = contingentService.update(request)) {
+                is ContingentUpdateResult.Success -> ResponseEntity.ok(result.response)
+                ContingentUpdateResult.NotFound -> contingentNotFound()
+                is ContingentUpdateResult.InvalidRange -> ResponseEntity.badRequest().body(result.message)
+                is ContingentUpdateResult.EmployeeNotFound -> ResponseEntity.badRequest().body(result.message)
+                is ContingentUpdateResult.EmployeeArchived -> ResponseEntity.badRequest().body(result.message)
+                is ContingentUpdateResult.InstitutionNotFound -> ResponseEntity.badRequest().body(result.message)
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -78,12 +86,12 @@ class ContingentController(
 
         if (!accessService.isAdmin())
             return forbidden("no permission to delete this contingent")
-        val contingent = contingentService.getById(id) ?: return contingentNotFound()
 
         return try {
-            contingentService.delete(id)
-
-            ResponseEntity.ok(contingent)
+            when (val result = contingentService.delete(id)) {
+                is ContingentDeleteResult.Success -> ResponseEntity.ok(result.response)
+                ContingentDeleteResult.NotFound -> contingentNotFound()
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {

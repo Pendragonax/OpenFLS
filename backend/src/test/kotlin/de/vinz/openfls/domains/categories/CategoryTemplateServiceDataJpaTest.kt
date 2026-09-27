@@ -3,13 +3,13 @@ package de.vinz.openfls.domains.categories
 import de.vinz.openfls.domains.categories.dtos.CategoryCreateRequest
 import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateRequest
 import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateRequest
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateResult
 import de.vinz.openfls.domains.categories.dtos.CategoryUpdateRequest
 import de.vinz.openfls.domains.categories.entities.Category
 import de.vinz.openfls.domains.categories.entities.CategoryTemplate
 import de.vinz.openfls.domains.categories.repositories.CategoryRepository
 import de.vinz.openfls.domains.categories.repositories.CategoryTemplateRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -58,13 +58,15 @@ class CategoryTemplateServiceDataJpaTest {
     }
 
     @Test
-    fun update_unknownTemplate_throwsException() {
+    fun update_unknownTemplate_returnsNotFound() {
         // Given
         val request = CategoryTemplateUpdateRequest(id = 9999, title = "Missing")
 
-        // When / Then
-        assertThatThrownBy { categoryTemplateService.update(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // When
+        val result = categoryTemplateService.update(request)
+
+        // Then
+        assertThat(result).isEqualTo(CategoryTemplateUpdateResult.NotFound)
     }
 
     @Test
@@ -94,7 +96,7 @@ class CategoryTemplateServiceDataJpaTest {
         )
 
         // When
-        val result = categoryTemplateService.update(request)
+        val result = categoryTemplateService.update(request) as CategoryTemplateUpdateResult.Success
 
         // Then
         entityManager.flush()
@@ -105,12 +107,12 @@ class CategoryTemplateServiceDataJpaTest {
         assertThat(saved.withoutClient).isTrue()
         assertThat(saved.categories.map { it.title }).containsExactlyInAnyOrder("Keep renamed", "Added")
         assertThat(saved.categories.first { it.id == keep.id }.faceToFace).isFalse()
-        assertThat(result.categories.map { it.title }).containsExactly("Added", "Keep renamed")
-        assertThat(result.categories).allMatch { it.id > 0 }
+        assertThat(result.response.categories.map { it.title }).containsExactly("Added", "Keep renamed")
+        assertThat(result.response.categories).allMatch { it.id > 0 }
     }
 
     @Test
-    fun update_categoryOfAnotherTemplate_throwsException() {
+    fun update_categoryOfAnotherTemplate_returnsCategoryNotInTemplateWithoutMutating() {
         // Given
         val template = categoryTemplateRepository.save(CategoryTemplate(title = "Template C"))
         val otherTemplate = categoryTemplateRepository.save(CategoryTemplate(title = "Template D"))
@@ -126,9 +128,15 @@ class CategoryTemplateServiceDataJpaTest {
             categories = listOf(CategoryUpdateRequest(id = foreign.id, title = "Foreign", shortcut = "F"))
         )
 
-        // When / Then
-        assertThatThrownBy { categoryTemplateService.update(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // When
+        val result = categoryTemplateService.update(request)
+
+        // Then
+        assertThat(result).isInstanceOf(CategoryTemplateUpdateResult.CategoryNotInTemplate::class.java)
+        entityManager.flush()
+        entityManager.clear()
+        assertThat(categoryRepository.existsById(foreign.id)).isTrue()
+        assertThat(categoryRepository.findById(foreign.id).get().categoryTemplate?.id).isEqualTo(otherTemplate.id)
     }
 
     @Test

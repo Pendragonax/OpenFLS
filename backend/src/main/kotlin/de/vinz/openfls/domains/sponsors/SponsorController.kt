@@ -1,7 +1,9 @@
 package de.vinz.openfls.domains.sponsors
 
 import de.vinz.openfls.domains.sponsors.dtos.SponsorCreateRequest
+import de.vinz.openfls.domains.sponsors.dtos.SponsorDeleteResult
 import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateRequest
+import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateResult
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
@@ -40,11 +42,12 @@ class SponsorController(val sponsorService: SponsorService,
 
         if (id != request.id)
             return ResponseEntity.badRequest().body("path id and request id are not the same")
-        if (!sponsorService.existsById(id))
-            return sponsorNotFound()
 
         return try {
-            ResponseEntity.ok(sponsorService.update(request))
+            when (val result = sponsorService.update(request)) {
+                is SponsorUpdateResult.Success -> ResponseEntity.ok(result.response)
+                SponsorUpdateResult.NotFound -> sponsorNotFound()
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -57,12 +60,11 @@ class SponsorController(val sponsorService: SponsorService,
         // performance
         val startMs = System.currentTimeMillis()
 
-        val sponsor = sponsorService.getById(id) ?: return sponsorNotFound()
-
         return try {
-            sponsorService.delete(id)
-
-            ResponseEntity.ok(sponsor)
+            when (val result = sponsorService.delete(id)) {
+                is SponsorDeleteResult.Success -> ResponseEntity.ok(result.response)
+                SponsorDeleteResult.NotFound -> sponsorNotFound()
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {

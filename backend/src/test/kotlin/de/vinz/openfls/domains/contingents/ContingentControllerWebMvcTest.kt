@@ -1,5 +1,9 @@
 package de.vinz.openfls.domains.contingents
 
+import de.vinz.openfls.domains.contingents.dtos.ContingentCreateResult
+import de.vinz.openfls.domains.contingents.dtos.ContingentDeleteResult
+import de.vinz.openfls.domains.contingents.dtos.ContingentResponse
+import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateResult
 import de.vinz.openfls.domains.contingents.services.ContingentService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.services.PerformanceLoggingService
@@ -7,6 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito.never
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -98,6 +103,7 @@ class ContingentControllerWebMvcTest {
         assertThat(result.response.status).isEqualTo(200)
         verify(contingentService).getByEmployeeId(7L, false)
     }
+
     @Test
     fun create_notLeaderOfInstitution_returnsForbidden() {
         // Given
@@ -111,10 +117,15 @@ class ContingentControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(403)
+        verify(contingentService, never()).create(any())
     }
 
     @Test
     fun create_endBeforeStart_returnsBadRequest() {
+        // Given
+        given(accessService.isLeader(5L)).willReturn(true)
+        given(contingentService.create(any())).willReturn(ContingentCreateResult.InvalidRange("end before start"))
+
         // When
         val result = mockMvc.post("/contingents") {
             contentType = MediaType.APPLICATION_JSON
@@ -123,12 +134,32 @@ class ContingentControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(400)
+        assertThat(result.response.contentAsString).contains("end before start")
+    }
+
+    @Test
+    fun create_admin_returnsCreatedDto() {
+        // Given
+        given(accessService.isLeader(5L)).willReturn(true)
+        given(contingentService.create(any())).willReturn(
+            ContingentCreateResult.Success(ContingentResponse(id = 3, employeeId = 1, institutionId = 5))
+        )
+
+        // When
+        val result = mockMvc.post("/contingents") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"start":"2026-01-01","weeklyServiceHours":10.0,"employeeId":1,"institutionId":5}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":3")
     }
 
     @Test
     fun update_missingContingent_returnsNotFound() {
         // Given
-        given(contingentService.existsById(7L)).willReturn(false)
+        given(contingentService.getById(7L)).willReturn(null)
 
         // When
         val result = mockMvc.put("/contingents/7") {
@@ -138,6 +169,7 @@ class ContingentControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(404)
+        verify(contingentService, never()).update(any())
     }
 
     @Test
@@ -155,7 +187,7 @@ class ContingentControllerWebMvcTest {
     @Test
     fun update_notAllowedToModify_returnsForbidden() {
         // Given
-        given(contingentService.existsById(7L)).willReturn(true)
+        given(contingentService.getById(7L)).willReturn(ContingentResponse(id = 7, employeeId = 1, institutionId = 5))
         given(contingentService.canModifyContingent(7L)).willReturn(false)
 
         // When
@@ -166,20 +198,73 @@ class ContingentControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(403)
+        verify(contingentService, never()).update(any())
     }
 
     @Test
-    fun delete_missingContingent_returnsNotFoundWithoutDeleting() {
+    fun update_admin_returnsUpdatedDto() {
+        // Given
+        given(contingentService.getById(7L)).willReturn(ContingentResponse(id = 7, employeeId = 1, institutionId = 5))
+        given(contingentService.canModifyContingent(7L)).willReturn(true)
+        given(contingentService.update(any())).willReturn(
+            ContingentUpdateResult.Success(ContingentResponse(id = 7, employeeId = 2, institutionId = 5))
+        )
+
+        // When
+        val result = mockMvc.put("/contingents/7") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"id":7,"start":"2026-01-01","weeklyServiceHours":10.0,"employeeId":2,"institutionId":5}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"employeeId\":2")
+    }
+
+    @Test
+    fun update_serviceReportsNotFound_returnsNotFound() {
+        // Given
+        given(contingentService.getById(7L)).willReturn(ContingentResponse(id = 7, employeeId = 1, institutionId = 5))
+        given(contingentService.canModifyContingent(7L)).willReturn(true)
+        given(contingentService.update(any())).willReturn(ContingentUpdateResult.NotFound)
+
+        // When
+        val result = mockMvc.put("/contingents/7") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"id":7,"start":"2026-01-01","weeklyServiceHours":10.0,"employeeId":1,"institutionId":5}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun delete_missingContingent_returnsNotFound() {
         // Given
         given(accessService.isAdmin()).willReturn(true)
-        given(contingentService.getById(7L)).willReturn(null)
+        given(contingentService.delete(7L)).willReturn(ContingentDeleteResult.NotFound)
 
         // When
         val result = mockMvc.delete("/contingents/7").andReturn()
 
         // Then
         assertThat(result.response.status).isEqualTo(404)
-        verify(contingentService, never()).delete(7L)
+    }
+
+    @Test
+    fun delete_existingContingent_returnsDeletedDto() {
+        // Given
+        given(accessService.isAdmin()).willReturn(true)
+        given(contingentService.delete(7L)).willReturn(
+            ContingentDeleteResult.Success(ContingentResponse(id = 7, employeeId = 1, institutionId = 5))
+        )
+
+        // When
+        val result = mockMvc.delete("/contingents/7").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":7")
     }
 
     @Test

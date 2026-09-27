@@ -1,12 +1,13 @@
 package de.vinz.openfls.domains.hourTypes
 
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDeleteResult
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeResponse
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateResult
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -46,7 +47,7 @@ class HourTypeControllerWebMvcTest {
     @Test
     fun update_missingSponsor_returnsNotFound() {
         // Given
-        given(hourTypeService.existsById(7L)).willReturn(false)
+        given(hourTypeService.update(any())).willReturn(HourTypeUpdateResult.NotFound)
 
         // When
         val result = mockMvc.put("/hour_types/7") {
@@ -56,6 +57,24 @@ class HourTypeControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun update_admin_returnsUpdatedDto() {
+        // Given
+        given(hourTypeService.update(any())).willReturn(
+            HourTypeUpdateResult.Success(HourTypeResponse(id = 7, title = "Standard", price = 3.0))
+        )
+
+        // When
+        val result = mockMvc.put("/hour_types/7") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"id":7,"title":"Standard","price":3.0}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":7")
     }
 
     @Test
@@ -71,16 +90,30 @@ class HourTypeControllerWebMvcTest {
     }
 
     @Test
-    fun delete_missingSponsor_returnsNotFoundWithoutDeleting() {
+    fun delete_missingHourType_returnsNotFound() {
         // Given
-        given(hourTypeService.getById(7L)).willReturn(null)
+        given(hourTypeService.delete(7L)).willReturn(HourTypeDeleteResult.NotFound)
 
         // When
         val result = mockMvc.delete("/hour_types/7").andReturn()
 
         // Then
         assertThat(result.response.status).isEqualTo(404)
-        verify(hourTypeService, never()).delete(7L)
+    }
+
+    @Test
+    fun delete_existingHourType_returnsDeletedDto() {
+        // Given
+        given(hourTypeService.delete(7L)).willReturn(
+            HourTypeDeleteResult.Success(HourTypeResponse(id = 7, title = "Standard", price = 3.0))
+        )
+
+        // When
+        val result = mockMvc.delete("/hour_types/7").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":7")
     }
 
     @Test

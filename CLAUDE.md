@@ -28,7 +28,10 @@ Hinweise.
   Fachliche Prüfungen (Existenz, Wertebereiche, Konflikte) gehören in den
   Service, nicht in den Controller; bei mehreren erwarteten Ausgängen gibt
   die Service-Methode eine eigene `sealed class` zurück (z. B.
-  `HourCorridorUpdateResult`), der Controller übersetzt sie per `when`.
+  `HourCorridorUpdateResult`), der Controller übersetzt sie per `when`. Gilt
+  auch für `delete(id)` (`XDeleteResult`) statt Vorab-`getById`/`existsById`
+  im Controller. Performance-Logging: `startMs` immer als erste Zeile, vor
+  jeder Prüfung und außerhalb `try`/`catch`; Logging im `finally`.
   Arbeitsmodus pro Domäne: Inventur → Vorschlag → Freigabe → Umsetzung.
 - **Logging:** Für alle Änderungen am Logging gilt `docs/logging-guide.md`.
 - **Skills:** Projekt-Skills liegen unter `.claude/skills/` (portiert aus

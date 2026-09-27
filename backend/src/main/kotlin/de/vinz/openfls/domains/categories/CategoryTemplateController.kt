@@ -1,7 +1,9 @@
 package de.vinz.openfls.domains.categories
 
 import de.vinz.openfls.domains.categories.dtos.CategoryTemplateCreateRequest
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateDeleteResult
 import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateRequest
+import de.vinz.openfls.domains.categories.dtos.CategoryTemplateUpdateResult
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
@@ -42,11 +44,13 @@ class CategoryTemplateController(
 
         if (id != request.id)
             return ResponseEntity.badRequest().body("path id and request id are not the same")
-        if (!categoryTemplateService.existsById(id))
-            return categoryTemplateNotFound()
 
         return try {
-            ResponseEntity.ok(categoryTemplateService.update(request))
+            when (val result = categoryTemplateService.update(request)) {
+                is CategoryTemplateUpdateResult.Success -> ResponseEntity.ok(result.response)
+                CategoryTemplateUpdateResult.NotFound -> categoryTemplateNotFound()
+                is CategoryTemplateUpdateResult.CategoryNotInTemplate -> ResponseEntity.badRequest().body(result.message)
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -59,12 +63,11 @@ class CategoryTemplateController(
         // performance
         val startMs = System.currentTimeMillis()
 
-        val categoryTemplate = categoryTemplateService.getById(id) ?: return categoryTemplateNotFound()
-
         return try {
-            categoryTemplateService.delete(id)
-
-            ResponseEntity.ok(categoryTemplate)
+            when (val result = categoryTemplateService.delete(id)) {
+                is CategoryTemplateDeleteResult.Success -> ResponseEntity.ok(result.response)
+                CategoryTemplateDeleteResult.NotFound -> categoryTemplateNotFound()
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {

@@ -1,12 +1,14 @@
 package de.vinz.openfls.domains.sponsors
 
+import de.vinz.openfls.domains.sponsors.dtos.SponsorDeleteResult
 import de.vinz.openfls.domains.sponsors.dtos.SponsorResponse
+import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateResult
+import de.vinz.openfls.domains.sponsors.dtos.SponsorWithUnprofessionalsResponse
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -46,7 +48,7 @@ class SponsorControllerWebMvcTest {
     @Test
     fun update_missingSponsor_returnsNotFound() {
         // Given
-        given(sponsorService.existsById(7L)).willReturn(false)
+        given(sponsorService.update(any())).willReturn(SponsorUpdateResult.NotFound)
 
         // When
         val result = mockMvc.put("/sponsors/7") {
@@ -56,6 +58,24 @@ class SponsorControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun update_admin_returnsUpdatedDto() {
+        // Given
+        given(sponsorService.update(any())).willReturn(
+            SponsorUpdateResult.Success(SponsorResponse(id = 7, name = "Sponsor"))
+        )
+
+        // When
+        val result = mockMvc.put("/sponsors/7") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"id":7,"name":"Sponsor"}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":7")
     }
 
     @Test
@@ -71,16 +91,30 @@ class SponsorControllerWebMvcTest {
     }
 
     @Test
-    fun delete_missingSponsor_returnsNotFoundWithoutDeleting() {
+    fun delete_missingSponsor_returnsNotFound() {
         // Given
-        given(sponsorService.getById(7L)).willReturn(null)
+        given(sponsorService.delete(7L)).willReturn(SponsorDeleteResult.NotFound)
 
         // When
         val result = mockMvc.delete("/sponsors/7").andReturn()
 
         // Then
         assertThat(result.response.status).isEqualTo(404)
-        verify(sponsorService, never()).delete(7L)
+    }
+
+    @Test
+    fun delete_existingSponsor_returnsDeletedDto() {
+        // Given
+        given(sponsorService.delete(7L)).willReturn(
+            SponsorDeleteResult.Success(SponsorWithUnprofessionalsResponse(id = 7, name = "Sponsor"))
+        )
+
+        // When
+        val result = mockMvc.delete("/sponsors/7").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":7")
     }
 
     @Test

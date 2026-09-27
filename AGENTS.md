@@ -239,6 +239,18 @@ JPA-Entities sind ein internes Persistenzdetail und dürfen weder über eine
   übersetzt sie per `when` erschöpfend in die passende HTTP-Antwort. Bei nur
   einem erwarteten Ausgang neben dem Erfolg reicht ein nullable Rückgabewert
   (wie bei `getById`).
+- Das gilt auch für Löschen: `delete(id)` prüft selbst, ob die Ressource
+  existiert, und gibt ein `XDeleteResult` (`Success` mit der gelöschten
+  Response, `NotFound`, ggf. `Conflict`) zurück, statt dass der Controller
+  vorab per `getById`/`existsById` nachschaut, nur um die Antwort für den
+  Löschfall zu bauen.
+- Performance-Logging ist in jeder Controller-Methode gleich aufgebaut:
+  `val startMs = System.currentTimeMillis()` steht als erste Zeile der
+  Methode, vor jeder Prüfung und außerhalb von `try`/`catch`. Der eigentliche
+  Aufruf steht im `try`, das Logging (`performanceLoggingService.logPerformance`)
+  im `finally`. Frühe Guard-Return (Berechtigung, Pfad-/Body-Id-Abgleich) vor
+  dem `try` bricht damit ab, ohne dass Performance geloggt wird – das ist so
+  gewollt, da dort keine eigentliche Verarbeitung stattfand.
 - Fehlerantworten verwenden einen festgelegten HTTP-Status und einen stabilen,
   maschinenlesbaren Fehlercode. Das Frontend reagiert auf diesen Code gezielt;
   Fehlermeldungen ersetzen keine fachliche Fehlerbehandlung.

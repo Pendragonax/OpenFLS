@@ -2,9 +2,12 @@ package de.vinz.openfls.domains.sponsors
 
 import de.vinz.openfls.architecture.InternalEntityApi
 import de.vinz.openfls.domains.sponsors.dtos.SponsorCreateRequest
+import de.vinz.openfls.domains.sponsors.dtos.SponsorDeleteResult
 import de.vinz.openfls.domains.sponsors.dtos.SponsorResponse
 import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateRequest
+import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateResult
 import de.vinz.openfls.domains.sponsors.dtos.SponsorWithUnprofessionalsResponse
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,18 +23,21 @@ class SponsorService(private val sponsorRepository: SponsorRepository) {
     }
 
     @Transactional
-    fun update(request: SponsorUpdateRequest): SponsorResponse {
-        val entity = sponsorRepository.findById(request.id)
-            .orElseThrow { IllegalArgumentException("sponsor with id ${request.id} not found") }
+    fun update(request: SponsorUpdateRequest): SponsorUpdateResult {
+        val entity = sponsorRepository.findByIdOrNull(request.id)
+            ?: return SponsorUpdateResult.NotFound
         entity.name = request.name
         entity.payOverhang = request.payOverhang
         entity.payExact = request.payExact
-        return SponsorResponse.from(sponsorRepository.save(entity))
+        return SponsorUpdateResult.Success(SponsorResponse.from(sponsorRepository.save(entity)))
     }
 
     @Transactional
-    fun delete(id: Long) {
+    fun delete(id: Long): SponsorDeleteResult {
+        val entity = sponsorRepository.findByIdOrNull(id)
+            ?: return SponsorDeleteResult.NotFound
         sponsorRepository.deleteById(id)
+        return SponsorDeleteResult.Success(SponsorWithUnprofessionalsResponse.from(entity))
     }
 
     @Transactional(readOnly = true)
@@ -43,17 +49,12 @@ class SponsorService(private val sponsorRepository: SponsorRepository) {
 
     @Transactional(readOnly = true)
     fun getById(id: Long): SponsorWithUnprofessionalsResponse? {
-        return sponsorRepository.findById(id).orElse(null)?.let { SponsorWithUnprofessionalsResponse.from(it) }
+        return sponsorRepository.findByIdOrNull(id)?.let { SponsorWithUnprofessionalsResponse.from(it) }
     }
 
     @InternalEntityApi
     @Transactional(readOnly = true)
     fun getEntityById(id: Long): Sponsor? {
-        return sponsorRepository.findById(id).orElse(null)
-    }
-
-    @Transactional(readOnly = true)
-    fun existsById(id: Long): Boolean {
-        return sponsorRepository.existsById(id)
+        return sponsorRepository.findByIdOrNull(id)
     }
 }

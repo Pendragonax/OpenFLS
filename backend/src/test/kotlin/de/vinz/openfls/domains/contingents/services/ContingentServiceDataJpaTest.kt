@@ -1,8 +1,11 @@
 package de.vinz.openfls.domains.contingents.services
 
+import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
 import de.vinz.openfls.domains.contingents.dtos.ContingentCreateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentCreateResult
 import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateResult
 import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.services.EmployeeService
@@ -12,7 +15,6 @@ import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,16 +49,18 @@ class ContingentServiceDataJpaTest {
     lateinit var accessService: AccessService
 
     @Test
-    fun create_endBeforeStart_throwsException() {
+    fun create_endBeforeStart_returnsInvalidRange() {
         // Given
         val dto = ContingentCreateRequest(
             start = LocalDate.of(2026, 2, 10),
             end = LocalDate.of(2026, 2, 1)
         )
 
-        // When / Then
-        assertThatThrownBy { contingentService.create(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // When
+        val result = contingentService.create(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentCreateResult.InvalidRange("end before start"))
     }
 
     @Test
@@ -75,16 +79,16 @@ class ContingentServiceDataJpaTest {
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
 
         // When
-        val result = contingentService.create(dto)
+        val result = contingentService.create(dto) as ContingentCreateResult.Success
 
         // Then
-        val saved = contingentRepository.findById(result.id)
+        val saved = contingentRepository.findById(result.response.id)
         assertThat(saved).isPresent
         assertThat(saved.get().weeklyServiceHours).isEqualTo(20.0)
     }
 
     @Test
-    fun update_missingContingent_throwsException() {
+    fun update_missingContingent_returnsNotFound() {
         // Given
         val dto = ContingentUpdateRequest(
             id = 9999,
@@ -92,15 +96,17 @@ class ContingentServiceDataJpaTest {
             weeklyServiceHours = 10.0
         )
 
-        // When / Then
-        assertThatThrownBy { contingentService.update(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // When
+        val result = contingentService.update(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentUpdateResult.NotFound)
     }
 
     @Test
-    fun update_endBeforeStart_throwsException() {
+    fun update_endBeforeStart_returnsInvalidRange() {
         // Given
-        val existing = contingentRepository.save(de.vinz.openfls.domains.contingents.Contingent(
+        val existing = contingentRepository.save(Contingent(
             start = LocalDate.of(2026, 1, 1),
             end = LocalDate.of(2026, 1, 10),
             weeklyServiceHours = 10.0
@@ -112,9 +118,11 @@ class ContingentServiceDataJpaTest {
             weeklyServiceHours = 12.0
         )
 
-        // When / Then
-        assertThatThrownBy { contingentService.update(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // When
+        val result = contingentService.update(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentUpdateResult.InvalidRange("end before start"))
     }
 
     @Test
@@ -122,7 +130,7 @@ class ContingentServiceDataJpaTest {
         // Given
         val employee = employeeRepository.save(Employee(firstname = "Erika", lastname = "Musterfrau"))
         val institution = institutionRepository.save(Institution(name = "UpdateInst", email = "u@b.c", phonenumber = "2"))
-        val existing = contingentRepository.save(de.vinz.openfls.domains.contingents.Contingent(
+        val existing = contingentRepository.save(Contingent(
             start = LocalDate.of(2026, 1, 1),
             end = LocalDate.of(2026, 1, 10),
             weeklyServiceHours = 10.0,
@@ -141,10 +149,10 @@ class ContingentServiceDataJpaTest {
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
 
         // When
-        val result = contingentService.update(dto)
+        val result = contingentService.update(dto) as ContingentUpdateResult.Success
 
         // Then
-        val saved = contingentRepository.findById(result.id)
+        val saved = contingentRepository.findById(result.response.id)
         assertThat(saved).isPresent
         assertThat(saved.get().weeklyServiceHours).isEqualTo(12.0)
         assertThat(saved.get().employee?.id).isEqualTo(employee.id)

@@ -7,8 +7,8 @@ import de.vinz.openfls.domains.employees.EmployeeRepository
 import de.vinz.openfls.domains.employees.UnprofessionalRepository
 import de.vinz.openfls.domains.sponsors.dtos.SponsorCreateRequest
 import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateRequest
+import de.vinz.openfls.domains.sponsors.dtos.SponsorUpdateResult
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -57,20 +57,22 @@ class SponsorServiceDataJpaTest {
         val request = SponsorUpdateRequest(id = existing.id, name = "New", payOverhang = true, payExact = true)
 
         // When
-        val result = sponsorService.update(request)
+        val result = sponsorService.update(request) as SponsorUpdateResult.Success
 
         // Then
-        val saved = sponsorRepository.findById(result.id)
+        val saved = sponsorRepository.findById(result.response.id)
         assertThat(saved).isPresent
         assertThat(saved.get().name).isEqualTo("New")
         assertThat(saved.get().payExact).isTrue()
     }
 
     @Test
-    fun update_missingSponsor_throwsException() {
-        // When / Then
-        assertThatThrownBy { sponsorService.update(SponsorUpdateRequest(id = 9999, name = "New")) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+    fun update_missingSponsor_returnsNotFound() {
+        // When
+        val result = sponsorService.update(SponsorUpdateRequest(id = 9999, name = "New"))
+
+        // Then
+        assertThat(result).isEqualTo(SponsorUpdateResult.NotFound)
     }
 
     @Test

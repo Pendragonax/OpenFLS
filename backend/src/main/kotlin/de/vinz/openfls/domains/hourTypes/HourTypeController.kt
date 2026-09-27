@@ -1,7 +1,9 @@
 package de.vinz.openfls.domains.hourTypes
 
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeCreateRequest
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeDeleteResult
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateRequest
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateResult
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
@@ -40,11 +42,12 @@ class HourTypeController(private val hourTypeService: HourTypeService,
 
         if (id != request.id)
             return ResponseEntity.badRequest().body("path id and request id are not the same")
-        if (!hourTypeService.existsById(id))
-            return hourTypeNotFound(id)
 
         return try {
-            ResponseEntity.ok(hourTypeService.update(request))
+            when (val result = hourTypeService.update(request)) {
+                is HourTypeUpdateResult.Success -> ResponseEntity.ok(result.response)
+                HourTypeUpdateResult.NotFound -> hourTypeNotFound(id)
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -57,11 +60,11 @@ class HourTypeController(private val hourTypeService: HourTypeService,
         // performance
         val startMs = System.currentTimeMillis()
 
-        val hourType = hourTypeService.getById(id) ?: return hourTypeNotFound(id)
-
         return try {
-            hourTypeService.delete(id)
-            ResponseEntity.ok(hourType)
+            when (val result = hourTypeService.delete(id)) {
+                is HourTypeDeleteResult.Success -> ResponseEntity.ok(result.response)
+                HourTypeDeleteResult.NotFound -> hourTypeNotFound(id)
+            }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {

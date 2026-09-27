@@ -2,8 +2,8 @@ package de.vinz.openfls.domains.hourTypes
 
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeCreateRequest
 import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateRequest
+import de.vinz.openfls.domains.hourTypes.dtos.HourTypeUpdateResult
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -41,23 +41,25 @@ class HourTypeServiceDataJpaTest {
         val request = HourTypeUpdateRequest(id = existing.id, title = "New", price = 2.5)
 
         // When
-        val result = hourTypeService.update(request)
+        val result = hourTypeService.update(request) as HourTypeUpdateResult.Success
 
         // Then
-        val saved = hourTypeRepository.findById(result.id)
+        val saved = hourTypeRepository.findById(result.response.id)
         assertThat(saved).isPresent
         assertThat(saved.get().title).isEqualTo("New")
         assertThat(saved.get().price).isEqualTo(2.5)
     }
 
     @Test
-    fun update_missingHourType_throwsException() {
+    fun update_missingHourType_returnsNotFound() {
         // Given
         val request = HourTypeUpdateRequest(id = 9999, title = "New", price = 2.5)
 
-        // When / Then
-        assertThatThrownBy { hourTypeService.update(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // When
+        val result = hourTypeService.update(request)
+
+        // Then
+        assertThat(result).isEqualTo(HourTypeUpdateResult.NotFound)
     }
 
     @Test

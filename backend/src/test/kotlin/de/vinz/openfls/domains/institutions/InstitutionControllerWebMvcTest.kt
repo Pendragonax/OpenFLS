@@ -1,12 +1,15 @@
 package de.vinz.openfls.domains.institutions
 
 import de.vinz.openfls.domains.institutions.dtos.InstitutionResponse
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateResult
+import de.vinz.openfls.domains.institutions.dtos.InstitutionDeleteResult
+import de.vinz.openfls.domains.institutions.dtos.InstitutionWithPermissionsResponse
 import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -30,6 +33,9 @@ class InstitutionControllerWebMvcTest {
     @MockitoBean
     lateinit var accessService: AccessService
 
+    @MockitoBean
+    lateinit var performanceLoggingService: PerformanceLoggingService
+
     @Test
     fun getById_missingInstitution_returnsNotFound() {
         // Given
@@ -45,7 +51,7 @@ class InstitutionControllerWebMvcTest {
     @Test
     fun update_missingInstitution_returnsNotFound() {
         // Given
-        given(institutionService.existsById(7L)).willReturn(false)
+        given(institutionService.update(any())).willReturn(InstitutionUpdateResult.NotFound)
 
         // When
         val result = mockMvc.put("/institutions/7") {
@@ -55,6 +61,24 @@ class InstitutionControllerWebMvcTest {
 
         // Then
         assertThat(result.response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun update_admin_returnsUpdatedDto() {
+        // Given
+        given(institutionService.update(any())).willReturn(
+            InstitutionUpdateResult.Success(InstitutionWithPermissionsResponse(id = 7, name = "Inst"))
+        )
+
+        // When
+        val result = mockMvc.put("/institutions/7") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"id":7,"name":"Inst"}"""
+        }.andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":7")
     }
 
     @Test
@@ -70,16 +94,30 @@ class InstitutionControllerWebMvcTest {
     }
 
     @Test
-    fun delete_missingInstitution_returnsNotFoundWithoutDeleting() {
+    fun delete_missingInstitution_returnsNotFound() {
         // Given
-        given(institutionService.getWithPermissionsById(7L)).willReturn(null)
+        given(institutionService.delete(7L)).willReturn(InstitutionDeleteResult.NotFound)
 
         // When
         val result = mockMvc.delete("/institutions/7").andReturn()
 
         // Then
         assertThat(result.response.status).isEqualTo(404)
-        verify(institutionService, never()).delete(7L)
+    }
+
+    @Test
+    fun delete_existingInstitution_returnsDeletedDto() {
+        // Given
+        given(institutionService.delete(7L)).willReturn(
+            InstitutionDeleteResult.Success(InstitutionWithPermissionsResponse(id = 7, name = "Inst"))
+        )
+
+        // When
+        val result = mockMvc.delete("/institutions/7").andReturn()
+
+        // Then
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":7")
     }
 
     @Test

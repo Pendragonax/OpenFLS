@@ -4,13 +4,15 @@ import de.vinz.openfls.architecture.InternalEntityApi
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
 import de.vinz.openfls.domains.contingents.dtos.ContingentCreateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentCreateResult
+import de.vinz.openfls.domains.contingents.dtos.ContingentDeleteResult
 import de.vinz.openfls.domains.contingents.dtos.ContingentResponse
 import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateRequest
-import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateResult
 import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -24,10 +26,17 @@ class ContingentService(
 ) {
 
     @Transactional
-    fun create(request: ContingentCreateRequest): ContingentResponse {
-        validateRange(request.start, request.end)
-        val employee = getActiveEmployee(request.employeeId)
-        val institution = getInstitution(request.institutionId)
+    fun create(request: ContingentCreateRequest): ContingentCreateResult {
+        if (request.end != null && request.start >= request.end) {
+            return ContingentCreateResult.InvalidRange("end before start")
+        }
+        val employee = employeeService.getById(request.employeeId)
+            ?: return ContingentCreateResult.EmployeeNotFound("employee not found")
+        if (employee.archived) {
+            return ContingentCreateResult.EmployeeArchived("employee is archived")
+        }
+        val institution = institutionService.getEntityById(request.institutionId)
+            ?: return ContingentCreateResult.InstitutionNotFound("institution not found")
 
         val entity = Contingent(
             start = request.start,
@@ -37,16 +46,23 @@ class ContingentService(
             institution = institution
         )
 
-        return ContingentResponse.from(contingentRepository.save(entity))
+        return ContingentCreateResult.Success(ContingentResponse.from(contingentRepository.save(entity)))
     }
 
     @Transactional
-    fun update(request: ContingentUpdateRequest): ContingentResponse {
-        val entity = contingentRepository.findById(request.id)
-            .orElseThrow { IllegalArgumentException("contingent not found") }
-        validateRange(request.start, request.end)
-        val employee = getActiveEmployee(request.employeeId)
-        val institution = getInstitution(request.institutionId)
+    fun update(request: ContingentUpdateRequest): ContingentUpdateResult {
+        val entity = contingentRepository.findByIdOrNull(request.id)
+            ?: return ContingentUpdateResult.NotFound
+        if (request.end != null && request.start >= request.end) {
+            return ContingentUpdateResult.InvalidRange("end before start")
+        }
+        val employee = employeeService.getById(request.employeeId)
+            ?: return ContingentUpdateResult.EmployeeNotFound("employee not found")
+        if (employee.archived) {
+            return ContingentUpdateResult.EmployeeArchived("employee is archived")
+        }
+        val institution = institutionService.getEntityById(request.institutionId)
+            ?: return ContingentUpdateResult.InstitutionNotFound("institution not found")
 
         entity.start = request.start
         entity.end = request.end
@@ -54,12 +70,15 @@ class ContingentService(
         entity.employee = employee
         entity.institution = institution
 
-        return ContingentResponse.from(contingentRepository.save(entity))
+        return ContingentUpdateResult.Success(ContingentResponse.from(contingentRepository.save(entity)))
     }
 
     @Transactional
-    fun delete(id: Long) {
+    fun delete(id: Long): ContingentDeleteResult {
+        val entity = contingentRepository.findByIdOrNull(id)
+            ?: return ContingentDeleteResult.NotFound
         contingentRepository.deleteById(id)
+        return ContingentDeleteResult.Success(ContingentResponse.from(entity))
     }
 
     @Transactional(readOnly = true)
@@ -71,12 +90,7 @@ class ContingentService(
 
     @Transactional(readOnly = true)
     fun getById(id: Long): ContingentResponse? {
-        return contingentRepository.findById(id).orElse(null)?.let { ContingentResponse.from(it) }
-    }
-
-    @Transactional(readOnly = true)
-    fun existsById(id: Long): Boolean {
-        return contingentRepository.existsById(id)
+        return contingentRepository.findByIdOrNull(id)?.let { ContingentResponse.from(it) }
     }
 
     @Transactional(readOnly = true)
@@ -101,7 +115,7 @@ class ContingentService(
             if (accessService.isAdmin())
                 return true
 
-            val institutionId = contingentRepository.findById(contingentId).orElse(null)?.institution?.id ?: 0
+            val institutionId = contingentRepository.findByIdOrNull(contingentId)?.institution?.id ?: 0
 
             accessService.isLeader(accessService.getId(), institutionId)
         } catch (_: Exception) {
@@ -128,26 +142,5 @@ class ContingentService(
             LocalDate.of(year, 1, 1),
             LocalDate.of(year, 12, 31)
         )
-    }
-
-    private fun validateRange(start: LocalDate, end: LocalDate?) {
-        if (end != null && start >= end) {
-            throw IllegalArgumentException("end before start")
-        }
-    }
-
-    private fun getActiveEmployee(employeeId: Long): Employee {
-        val employee = employeeService.getById(employeeId)
-            ?: throw IllegalArgumentException("employee not found")
-        if (employee.archived) {
-            throw IllegalArgumentException("employee is archived")
-        }
-
-        return employee
-    }
-
-    private fun getInstitution(institutionId: Long): Institution {
-        return institutionService.getEntityById(institutionId)
-            ?: throw IllegalArgumentException("institution not found")
     }
 }

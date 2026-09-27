@@ -3,12 +3,15 @@ package de.vinz.openfls.domains.institutions
 import de.vinz.openfls.architecture.InternalEntityApi
 import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
 import de.vinz.openfls.domains.institutions.dtos.InstitutionCreateRequest
+import de.vinz.openfls.domains.institutions.dtos.InstitutionDeleteResult
 import de.vinz.openfls.domains.institutions.dtos.InstitutionPermissionRequest
 import de.vinz.openfls.domains.institutions.dtos.InstitutionResponse
 import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateRequest
+import de.vinz.openfls.domains.institutions.dtos.InstitutionUpdateResult
 import de.vinz.openfls.domains.institutions.dtos.InstitutionWithPermissionsResponse
 import de.vinz.openfls.domains.permissions.Permission
 import de.vinz.openfls.domains.permissions.PermissionService
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -32,9 +35,9 @@ class InstitutionService(
     }
 
     @Transactional
-    fun update(request: InstitutionUpdateRequest): InstitutionWithPermissionsResponse {
-        val institution = institutionRepository.findById(request.id)
-            .orElseThrow { IllegalArgumentException("Institution with id ${request.id} not found") }
+    fun update(request: InstitutionUpdateRequest): InstitutionUpdateResult {
+        val institution = institutionRepository.findByIdOrNull(request.id)
+            ?: return InstitutionUpdateResult.NotFound
 
         institution.name = request.name
         institution.email = request.email
@@ -51,12 +54,18 @@ class InstitutionService(
             .filter { it.employeeId !in existingEmployeeIds }
             .forEach { institution.permissions.add(savePermission(institution, it)) }
 
-        return InstitutionWithPermissionsResponse.from(institutionRepository.save(institution))
+        return InstitutionUpdateResult.Success(
+            InstitutionWithPermissionsResponse.from(institutionRepository.save(institution))
+        )
     }
 
     @Transactional
-    fun delete(id: Long) {
+    fun delete(id: Long): InstitutionDeleteResult {
+        val entity = institutionRepository.findByIdOrNull(id)
+            ?: return InstitutionDeleteResult.NotFound
+        val response = InstitutionWithPermissionsResponse.from(entity)
         institutionRepository.deleteById(id)
+        return InstitutionDeleteResult.Success(response)
     }
 
     @Transactional(readOnly = true)
@@ -75,18 +84,13 @@ class InstitutionService(
 
     @Transactional(readOnly = true)
     fun getWithPermissionsById(id: Long): InstitutionWithPermissionsResponse? {
-        return institutionRepository.findById(id).orElse(null)?.let { InstitutionWithPermissionsResponse.from(it) }
+        return institutionRepository.findByIdOrNull(id)?.let { InstitutionWithPermissionsResponse.from(it) }
     }
 
     @InternalEntityApi
     @Transactional(readOnly = true)
     fun getEntityById(id: Long): Institution? {
-        return institutionRepository.findById(id).orElse(null)
-    }
-
-    @Transactional(readOnly = true)
-    fun existsById(id: Long): Boolean {
-        return institutionRepository.existsById(id)
+        return institutionRepository.findByIdOrNull(id)
     }
 
     private fun savePermission(institution: Institution, request: InstitutionPermissionRequest): Permission {

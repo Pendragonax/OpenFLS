@@ -3,14 +3,16 @@ package de.vinz.openfls.domains.contingents.services
 import de.vinz.openfls.domains.contingents.Contingent
 import de.vinz.openfls.domains.contingents.ContingentRepository
 import de.vinz.openfls.domains.contingents.dtos.ContingentCreateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentCreateResult
+import de.vinz.openfls.domains.contingents.dtos.ContingentDeleteResult
 import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateRequest
+import de.vinz.openfls.domains.contingents.dtos.ContingentUpdateResult
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.domains.institutions.Institution
 import de.vinz.openfls.domains.institutions.InstitutionService
 import de.vinz.openfls.domains.permissions.AccessService
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -75,16 +77,16 @@ class ContingentServiceTest {
         whenever(contingentRepository.save(any<Contingent>())).thenReturn(saved)
 
         // When
-        val result = contingentService.create(dto)
+        val result = contingentService.create(dto) as ContingentCreateResult.Success
 
         // Then
-        assertThat(result.id).isEqualTo(12)
-        assertThat(result.employeeId).isEqualTo(5)
-        assertThat(result.institutionId).isEqualTo(7)
+        assertThat(result.response.id).isEqualTo(12)
+        assertThat(result.response.employeeId).isEqualTo(5)
+        assertThat(result.response.institutionId).isEqualTo(7)
     }
 
     @Test
-    fun create_archivedEmployee_throwsIllegalArgument() {
+    fun create_archivedEmployee_returnsEmployeeArchived() {
         // Given
         val dto = createRequest(
             start = LocalDate.of(2024, 1, 1),
@@ -95,14 +97,15 @@ class ContingentServiceTest {
         val archivedEmployee = Employee(id = 5, archived = true)
         whenever(employeeService.getById(dto.employeeId)).thenReturn(archivedEmployee)
 
-        // When / Then
-        assertThatThrownBy { contingentService.create(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("employee is archived")
+        // When
+        val result = contingentService.create(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentCreateResult.EmployeeArchived("employee is archived"))
     }
 
     @Test
-    fun create_endBeforeStart_throwsIllegalArgument() {
+    fun create_endBeforeStart_returnsInvalidRange() {
         // Given
         val dto = createRequest(
             start = LocalDate.of(2024, 2, 1),
@@ -112,26 +115,28 @@ class ContingentServiceTest {
             institutionId = 7
         )
 
-        // When / Then
-        assertThatThrownBy { contingentService.create(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("end before start")
+        // When
+        val result = contingentService.create(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentCreateResult.InvalidRange("end before start"))
     }
 
     @Test
-    fun update_notExisting_throwsIllegalArgument() {
+    fun update_notExisting_returnsNotFound() {
         // Given
         val dto = updateRequest(id = 9)
         whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.empty())
 
-        // When / Then
-        assertThatThrownBy { contingentService.update(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("contingent not found")
+        // When
+        val result = contingentService.update(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentUpdateResult.NotFound)
     }
 
     @Test
-    fun update_endBeforeStart_throwsIllegalArgument() {
+    fun update_endBeforeStart_returnsInvalidRange() {
         // Given
         val dto = updateRequest(
             id = 9,
@@ -140,10 +145,11 @@ class ContingentServiceTest {
         )
         whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.of(Contingent(id = 9)))
 
-        // When / Then
-        assertThatThrownBy { contingentService.update(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("end before start")
+        // When
+        val result = contingentService.update(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentUpdateResult.InvalidRange("end before start"))
     }
 
     @Test
@@ -171,18 +177,18 @@ class ContingentServiceTest {
         whenever(contingentRepository.save(any<Contingent>())).thenReturn(saved)
 
         // When
-        val result = contingentService.update(dto)
+        val result = contingentService.update(dto) as ContingentUpdateResult.Success
 
         // Then
-        assertThat(result.id).isEqualTo(9)
-        assertThat(result.employeeId).isEqualTo(2)
-        assertThat(result.institutionId).isEqualTo(3)
+        assertThat(result.response.id).isEqualTo(9)
+        assertThat(result.response.employeeId).isEqualTo(2)
+        assertThat(result.response.institutionId).isEqualTo(3)
         verify(employeeService).getById(dto.employeeId)
         verify(institutionService).getEntityById(dto.institutionId)
     }
 
     @Test
-    fun update_archivedEmployee_throwsIllegalArgument() {
+    fun update_archivedEmployee_returnsEmployeeArchived() {
         // Given
         val dto = updateRequest(
             id = 9,
@@ -195,19 +201,36 @@ class ContingentServiceTest {
         whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.of(Contingent(id = 9)))
         whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId, archived = true))
 
-        // When / Then
-        assertThatThrownBy { contingentService.update(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("employee is archived")
+        // When
+        val result = contingentService.update(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentUpdateResult.EmployeeArchived("employee is archived"))
     }
 
     @Test
     fun delete_existingContingent_deletesById() {
+        // Given
+        whenever(contingentRepository.findById(11)).thenReturn(Optional.of(Contingent(id = 11)))
+
         // When
-        contingentService.delete(11)
+        val result = contingentService.delete(11)
 
         // Then
+        assertThat(result).isInstanceOf(ContingentDeleteResult.Success::class.java)
         verify(contingentRepository).deleteById(11)
+    }
+
+    @Test
+    fun delete_missingContingent_returnsNotFound() {
+        // Given
+        whenever(contingentRepository.findById(11)).thenReturn(Optional.empty())
+
+        // When
+        val result = contingentService.delete(11)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentDeleteResult.NotFound)
     }
 
     @Test
@@ -266,18 +289,6 @@ class ContingentServiceTest {
 
         // Then
         assertThat(result).isNull()
-    }
-
-    @Test
-    fun existsById_existingId_returnsTrue() {
-        // Given
-        whenever(contingentRepository.existsById(5)).thenReturn(true)
-
-        // When
-        val result = contingentService.existsById(5)
-
-        // Then
-        assertThat(result).isTrue()
     }
 
     @Test
@@ -395,16 +406,30 @@ class ContingentServiceTest {
     }
 
     @Test
-    fun create_missingInstitution_throwsIllegalArgument() {
+    fun create_missingInstitution_returnsInstitutionNotFound() {
         // Given
         val dto = createRequest(employeeId = 5, institutionId = 7)
         whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = 5))
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(null)
 
-        // When / Then
-        assertThatThrownBy { contingentService.create(dto) }
-            .isInstanceOf(IllegalArgumentException::class.java)
-            .hasMessageContaining("institution not found")
+        // When
+        val result = contingentService.create(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentCreateResult.InstitutionNotFound("institution not found"))
+    }
+
+    @Test
+    fun create_missingEmployee_returnsEmployeeNotFound() {
+        // Given
+        val dto = createRequest(employeeId = 5, institutionId = 7)
+        whenever(employeeService.getById(dto.employeeId)).thenReturn(null)
+
+        // When
+        val result = contingentService.create(dto)
+
+        // Then
+        assertThat(result).isEqualTo(ContingentCreateResult.EmployeeNotFound("employee not found"))
     }
 
     @Test
