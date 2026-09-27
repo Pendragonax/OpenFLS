@@ -9,7 +9,6 @@ import de.vinz.openfls.domains.permissions.service.AccessService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -24,9 +23,6 @@ class ClientController(
 
     private val logger: Logger = LoggerFactory.getLogger(ClientController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping
     fun create(@Valid @RequestBody value: ClientCreateDto): Any {
         return try {
@@ -38,11 +34,9 @@ class ClientController(
 
             val dto = clientService.create(value)
 
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s create took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -69,11 +63,9 @@ class ClientController(
 
             val dto = clientService.update(valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s update took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -108,11 +100,9 @@ class ClientController(
                 actorName = actorName()
             )
 
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s delete took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -136,11 +126,9 @@ class ClientController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getAll took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -164,11 +152,9 @@ class ClientController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAllClientSoloDtos took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getAllClientSoloDtos took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -193,11 +179,9 @@ class ClientController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             ) ?: throw IllegalArgumentException("client not found")
 
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -226,11 +210,9 @@ class ClientController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
 
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getById took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {

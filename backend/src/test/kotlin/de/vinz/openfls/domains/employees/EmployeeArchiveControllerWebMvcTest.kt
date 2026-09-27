@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.post
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@WebMvcTest(EmployeeArchiveController::class, properties = ["logging.performance=false"])
+@WebMvcTest(EmployeeArchiveController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class EmployeeArchiveControllerWebMvcTest {
 

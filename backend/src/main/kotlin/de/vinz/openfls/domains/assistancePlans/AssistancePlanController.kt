@@ -15,7 +15,6 @@ import de.vinz.openfls.services.UserService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -34,9 +33,6 @@ class AssistancePlanController(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping("")
     fun create(@Valid @RequestBody valueDto: AssistancePlanCreateDto): Any {
         return try {
@@ -45,11 +41,9 @@ class AssistancePlanController(
 
             val dto = assistancePlanService.create(valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s create took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -74,11 +68,9 @@ class AssistancePlanController(
 
             val dto = assistancePlanService.update(id, valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s update took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -109,11 +101,9 @@ class AssistancePlanController(
             )
             assistancePlanService.delete(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s delete took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -137,11 +127,9 @@ class AssistancePlanController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getAll took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
@@ -166,11 +154,9 @@ class AssistancePlanController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             ) ?: throw IllegalArgumentException("assistance plan not found")
 
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
@@ -195,11 +181,9 @@ class AssistancePlanController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             ) ?: throw IllegalArgumentException("assistance plan not found")
 
-            if (logPerformance) {
-                logger.info(String.format("%s getEditById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getEditById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
@@ -220,11 +204,9 @@ class AssistancePlanController(
 
             val dto = assistancePlanService.getProjectionById(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
@@ -249,11 +231,9 @@ class AssistancePlanController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByClientId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getByClientId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
@@ -274,11 +254,9 @@ class AssistancePlanController(
 
             val dtos = assistancePlanService.getIllegalByClientId(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalByClientId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getIllegalByClientId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
@@ -303,11 +281,9 @@ class AssistancePlanController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
 
-            if (logPerformance) {
-                logger.info(String.format("%s getBySponsorId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getBySponsorId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
@@ -328,11 +304,9 @@ class AssistancePlanController(
 
             val dtos = assistancePlanService.getIllegalBySponsorId(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalBySponsorId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getIllegalBySponsorId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
@@ -357,11 +331,9 @@ class AssistancePlanController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByInstitutionId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getByInstitutionId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
@@ -382,11 +354,9 @@ class AssistancePlanController(
 
             val dtos = assistancePlanService.getIllegalByInstitutionId(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalByInstitutionId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getIllegalByInstitutionId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch(ex: Exception) {
@@ -407,11 +377,9 @@ class AssistancePlanController(
 
             val dto = assistancePlanEvaluationService.getEvaluationById(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getEvalById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getEvalById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch(ex: Exception) {
@@ -432,15 +400,13 @@ class AssistancePlanController(
 
             val response = assistancePlanEvaluationLeftService.createAssistancePlanHourTypeAnalysis(LocalDate.now(), id)
 
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getEvaluationLeftById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
+            logger.debug(
+                String.format(
+                    "%s getEvaluationLeftById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs
                 )
-            }
+            )
 
             ResponseEntity.ok(response)
         } catch (ex: Exception) {
@@ -464,15 +430,13 @@ class AssistancePlanController(
                 includeArchived = accessService.isAdmin() || accessService.isLeader(clientService.getEntityById(id)?.institution?.id ?: 0)
             )
 
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getPreviewByClientId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
+            logger.debug(
+                String.format(
+                    "%s getPreviewByClientId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs
                 )
-            }
+            )
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -493,15 +457,13 @@ class AssistancePlanController(
                 includeArchived = accessService.isAdmin() || accessService.isLeader(clientService.getEntityById(id)?.institution?.id ?: 0)
             )
 
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getExistingByClientId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
+            logger.debug(
+                String.format(
+                    "%s getExistingByClientId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs
                 )
-            }
+            )
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -524,15 +486,13 @@ class AssistancePlanController(
                 includeArchived = accessService.isAdmin() || accessService.isLeader(id)
             )
 
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getPreviewByInstitutionId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
+            logger.debug(
+                String.format(
+                    "%s getPreviewByInstitutionId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs
                 )
-            }
+            )
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -555,15 +515,13 @@ class AssistancePlanController(
                 includeArchived = accessService.isAdmin()
             )
 
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getPreviewBySponsorId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
+            logger.debug(
+                String.format(
+                    "%s getPreviewBySponsorId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs
                 )
-            }
+            )
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -586,15 +544,13 @@ class AssistancePlanController(
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
             )
 
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getFavoritePreviewsByLoggedInUser took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
+            logger.debug(
+                String.format(
+                    "%s getFavoritePreviewsByLoggedInUser took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs
                 )
-            }
+            )
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {

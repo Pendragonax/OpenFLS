@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import java.time.LocalDate
 
-@WebMvcTest(AssistancePlanController::class, properties = ["logging.performance=false"])
+@WebMvcTest(AssistancePlanController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class AssistancePlanControllerWebMvcTest {
 

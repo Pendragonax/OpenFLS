@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
-@WebMvcTest(ClientDashboardController::class, properties = ["logging.performance=false"])
+@WebMvcTest(ClientDashboardController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class ClientDashboardControllerWebMvcTest {
 

@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.put
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@WebMvcTest(ClientTaskController::class, properties = ["logging.performance=false"])
+@WebMvcTest(ClientTaskController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class ClientTaskControllerWebMvcTest {
 

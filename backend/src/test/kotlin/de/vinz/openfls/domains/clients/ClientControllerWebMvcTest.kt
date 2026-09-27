@@ -15,7 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 
-@WebMvcTest(ClientController::class, properties = ["logging.performance=false"])
+@WebMvcTest(ClientController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class ClientControllerWebMvcTest {
 

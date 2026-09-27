@@ -16,7 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 
-@WebMvcTest(BackupStatusController::class, properties = ["logging.performance=false"])
+@WebMvcTest(BackupStatusController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class BackupStatusControllerWebMvcTest {
 

@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
 
-@WebMvcTest(HourCorridorController::class, properties = ["logging.performance=false"])
+@WebMvcTest(HourCorridorController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class HourCorridorControllerWebMvcTest {
 

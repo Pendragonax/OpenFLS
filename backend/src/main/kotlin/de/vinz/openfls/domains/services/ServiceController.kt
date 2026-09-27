@@ -18,7 +18,6 @@ import jakarta.validation.Valid
 import org.apache.coyote.Response
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -38,9 +37,6 @@ class ServiceController(
 
     private val logger: Logger = LoggerFactory.getLogger(ServiceController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping
     fun create(@Valid @RequestBody valueDto: ServiceWithGoalsAndCategories): Any {
         return try {
@@ -51,11 +47,9 @@ class ServiceController(
 
             val dto = serviceService.create(valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s create took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -86,11 +80,9 @@ class ServiceController(
 
             val dto = serviceService.update(valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s update took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -118,11 +110,9 @@ class ServiceController(
             val dto = serviceService.getById(id)
             serviceService.delete(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s delete took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -144,12 +134,10 @@ class ServiceController(
 
             val dtos = serviceService.getAll()
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getAll took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -177,12 +165,9 @@ class ServiceController(
                     !accessService.canReadEntries(dto.institutionId))
                 throw IllegalArgumentException("Your not the allowed to read this entry")
 
-
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %d ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getById took %d ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -208,12 +193,10 @@ class ServiceController(
 
             val dtos = serviceService.getWithGoalsAndCategoriesByAssistancePlan(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByAssistancePlan took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByAssistancePlan took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -239,12 +222,10 @@ class ServiceController(
 
             val dtos = serviceService.getIllegalByAssistancePlan(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalByAssistancePlan took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getIllegalByAssistancePlan took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -272,12 +253,10 @@ class ServiceController(
 
             val dtos = serviceService.getByAssistancePlanAndNotBetweenStartAndEnd(id, start, end)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByAssistancePlanAndStartAndEnd took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByAssistancePlanAndStartAndEnd took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -301,12 +280,10 @@ class ServiceController(
 
             val dtos = serviceService.getIllegalByEmployee(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalByEmployee took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getIllegalByEmployee took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -333,12 +310,10 @@ class ServiceController(
                     .filter { isAdmin || it.employeeId == userId || leadingInstitutionIds.contains(it.institutionId) }
                     .sortedBy { it.start }
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByEmployeeAndDate took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByEmployeeAndDate took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -366,12 +341,10 @@ class ServiceController(
                     .filter { isAdmin || it.employee.id == userId || leadingInstitutionIds.contains(it.institution.id) }
                     .sortedBy { it.start }
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByEmployeeAndStartAndEnd took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByEmployeeAndStartAndEnd took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -397,12 +370,10 @@ class ServiceController(
 
             val dtos = serviceService.getDtosByInstitutionIdAndStartAndEnd(id, start, end)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByInstitutionIdAndStartAndEnd took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByInstitutionIdAndStartAndEnd took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -427,12 +398,10 @@ class ServiceController(
 
             val dtos = serviceService.getDtosByInstitutionIdAndDate(id, date)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByInstitutionIdAndDate took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByInstitutionIdAndDate took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -456,12 +425,10 @@ class ServiceController(
 
             val dtos = serviceService.getIllegalByInstitutionId(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalByInstitutionId took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getIllegalByInstitutionId took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -487,12 +454,10 @@ class ServiceController(
             val dtos = serviceService.getDtosByClientAndDate(id, date)
                     .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByClientAndDate took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByClientAndDate took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -519,12 +484,10 @@ class ServiceController(
             val dtos = serviceService.getDtosByClientAndStartAndEnd(id, start, end)
                     .filter { isAdmin || it.employeeId == userId || affiliatedInstitutionIds.contains(it.institutionId) }
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByClientAndStartAndEnd took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByClientAndStartAndEnd took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -552,12 +515,10 @@ class ServiceController(
             val readableInstitutions = accessService.getReadRightsInstitutionIds();
             val dtos = serviceService.getProjections(institutionId, clientId, start, end, readableInstitutions)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByInstitutionIdAndClientIdAndStartAndEnd took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByInstitutionIdAndClientIdAndStartAndEnd took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -592,12 +553,10 @@ class ServiceController(
             val readableInstitutions = accessService.getReadRightsInstitutionIds();
             val dtos = serviceService.getProjections(institutionId, employeeId, clientId, start, end, readableInstitutions)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByInstitutionIdAndEmployeeIdAndClientIdAndStartAndEnd took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByInstitutionIdAndEmployeeIdAndClientIdAndStartAndEnd took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: ServicePermissionDeniedException) {
@@ -627,12 +586,10 @@ class ServiceController(
 
             val dtos = serviceService.getDtosByEmployeeAndFilter(id, valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByEmployeeAndFilter took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                        dtos.size))
-            }
+            logger.debug(String.format("%s getByEmployeeAndFilter took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                    dtos.size))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -661,11 +618,9 @@ class ServiceController(
                 periodDays = start.until(end).days + 1
             }
 
-            if (logPerformance) {
-                logger.info(String.format("%s getTimesByEmployee took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getTimesByEmployee took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -742,12 +697,10 @@ class ServiceController(
             val result = serviceService.getFromTillEmployeeNameProjectionByClientAndDate(request.clientId, request.date)
             val response = ClientAndDateResponseDto.of(request.clientId, result)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByClientAndDate took %s ms and found %d entities",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs,
-                    result.size))
-            }
+            logger.debug(String.format("%s getByClientAndDate took %s ms and found %d entities",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs,
+                result.size))
 
             ResponseEntity.ok(response)
         } catch (ex: Exception) {

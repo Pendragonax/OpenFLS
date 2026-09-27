@@ -4,7 +4,6 @@ import de.vinz.openfls.logback.PerformanceLogbackFilter
 import de.vinz.openfls.services.CsvService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -23,9 +22,6 @@ class OverviewController(
 
     private val logger: Logger = LoggerFactory.getLogger(OverviewController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @GetMapping("year/{year}/{hourTypeId}/{areaId}/{sponsorId}/$VALUE_TYPE_EXECUTED_HOURS")
     fun getExecutedHoursOverview(
             @PathVariable year: Int,
@@ -42,11 +38,9 @@ class OverviewController(
                 areaId = if (areaId.toInt() == 0) null else areaId,
                 sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getExecutedHoursOverview took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getExecutedHoursOverview took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(result);
     }
@@ -69,11 +63,9 @@ class OverviewController(
         val filename = "${LocalDate.now()}-executed-$year-overview.csv"
         val file = InputStreamResource(CsvService.getCsvFileStream(result))
 
-        if (logPerformance) {
-            logger.info(String.format("%s getExecutedHoursOverviewAsCsv took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getExecutedHoursOverviewAsCsv took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")
@@ -98,11 +90,9 @@ class OverviewController(
                 areaId = if (areaId.toInt() == 0) null else areaId,
                 sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getExecutedHoursOverview took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getExecutedHoursOverview took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(result);
     }
@@ -126,11 +116,9 @@ class OverviewController(
         val filename = "${LocalDate.now()}-executed-$year-$month-overview.csv"
         val file = InputStreamResource(CsvService.getCsvFileStream(result))
 
-        if (logPerformance) {
-            logger.info(String.format("%s getExecutedHoursOverviewAsCsv took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getExecutedHoursOverviewAsCsv took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")
@@ -154,11 +142,9 @@ class OverviewController(
             areaId = if (areaId.toInt() == 0) null else areaId,
             sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getExecutedHoursGroupServiceOverview took %s ms",
-                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getExecutedHoursGroupServiceOverview took %s ms",
+            PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+            System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(result);
     }
@@ -182,11 +168,9 @@ class OverviewController(
         val filename = "${LocalDate.now()}-executed-group-service-$year-$month-overview.csv"
         val file = InputStreamResource(CsvService.getCsvFileStream(result))
 
-        if (logPerformance) {
-            logger.info(String.format("%s getApprovedHoursGroupServiceAsCsv took %s ms",
-                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getApprovedHoursGroupServiceAsCsv took %s ms",
+            PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+            System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")
@@ -210,11 +194,9 @@ class OverviewController(
                 areaId = if (areaId.toInt() == 0) null else areaId,
                 sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getApprovedHours took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getApprovedHours took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(result);
     }
@@ -237,11 +219,9 @@ class OverviewController(
         val filename = "${LocalDate.now()}-approved-$year-overview.csv"
         val file = InputStreamResource(CsvService.getCsvFileStream(result))
 
-        if (logPerformance) {
-            logger.info(String.format("%s getApprovedHoursAsCsv took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getApprovedHoursAsCsv took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")
@@ -266,11 +246,9 @@ class OverviewController(
                 areaId = if (areaId.toInt() == 0) null else areaId,
                 sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getApprovedHours took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getApprovedHours took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(result);
     }
@@ -294,11 +272,9 @@ class OverviewController(
         val filename = "${LocalDate.now()}-approved-$year-$month-overview.csv"
         val file = InputStreamResource(CsvService.getCsvFileStream(result))
 
-        if (logPerformance) {
-            logger.info(String.format("%s getApprovedHoursAsCsv took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getApprovedHoursAsCsv took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")
@@ -322,11 +298,9 @@ class OverviewController(
                 areaId = if (areaId.toInt() == 0) null else areaId,
                 sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getDifferenceHours took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getDifferenceHours took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(result);
     }
@@ -349,11 +323,9 @@ class OverviewController(
         val filename = "${LocalDate.now()}-difference-$year-overview.csv"
         val file = InputStreamResource(CsvService.getCsvFileStream(result))
 
-        if (logPerformance) {
-            logger.info(String.format("%s getDifferenceHoursAsCsv took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getDifferenceHoursAsCsv took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")
@@ -378,11 +350,9 @@ class OverviewController(
                 areaId = if (areaId.toInt() == 0) null else areaId,
                 sponsorId = if (sponsorId.toInt() == 0) null else sponsorId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getDifferenceHours took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getDifferenceHours took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(result);
     }
@@ -406,11 +376,9 @@ class OverviewController(
         val filename = "${LocalDate.now()}-difference-$year-$month-overview.csv"
         val file = InputStreamResource(CsvService.getCsvFileStream(result))
 
-        if (logPerformance) {
-            logger.info(String.format("%s getDifferenceHoursAsCsv took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getDifferenceHoursAsCsv took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=${filename}")

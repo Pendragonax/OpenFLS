@@ -4,7 +4,6 @@ import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanAnalysisSe
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -20,9 +19,6 @@ class AssistancePlanAnalysisController(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanAnalysisController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @GetMapping("/institution/sponsor/hour_type/{year}/{month}/{institutionId}/{sponsorId}/{hourTypeId}")
     fun getByYearAndMonthAndInstitutionIdAndHourTypeId(@PathVariable year: Int,
                                                        @PathVariable month: Int,
@@ -36,11 +32,9 @@ class AssistancePlanAnalysisController(
         val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionAndSponsorAndHourTypeInMonth(
                 year, month, institutionId, sponsorId, hourTypeId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getByYearAndMonthAndInstitutionIdAndHourTypeId took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getByYearAndMonthAndInstitutionIdAndHourTypeId took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(analysis)
     }
@@ -56,11 +50,9 @@ class AssistancePlanAnalysisController(
         val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionAndHourTypeInMonth(
                 year, month, institutionId, hourTypeId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getByYearAndMonthAndInstitutionIdAndHourTypeId took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getByYearAndMonthAndInstitutionIdAndHourTypeId took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(analysis)
     }
@@ -74,11 +66,9 @@ class AssistancePlanAnalysisController(
 
         val analysis = assistancePlanAnalysisService.getAnalysisByInstitutionInMonth(year, month, institutionId)
 
-        if (logPerformance) {
-            logger.info(String.format("%s getByYearAndMonthAndInstitutionId took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-        }
+        logger.debug(String.format("%s getByYearAndMonthAndInstitutionId took %s ms",
+                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                System.currentTimeMillis() - startMs))
 
         return ResponseEntity.ok(analysis)
     }

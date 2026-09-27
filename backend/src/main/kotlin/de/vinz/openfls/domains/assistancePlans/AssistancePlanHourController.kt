@@ -7,7 +7,6 @@ import de.vinz.openfls.logback.PerformanceLogbackFilter
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -19,10 +18,6 @@ class AssistancePlanHourController(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
-
     @PostMapping
     fun create(@Valid @RequestBody valueDto: AssistancePlanHourDto): Any {
         return try {
@@ -31,11 +26,9 @@ class AssistancePlanHourController(
 
             val dto = assistancePlanHourService.save(valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s save took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s save took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -48,12 +41,10 @@ class AssistancePlanHourController(
         }
     }
 
-
     @PutMapping
     fun update(@Valid @RequestBody valueDto: AssistancePlanHourDto): Any {
         return create(valueDto)
     }
-
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
@@ -64,11 +55,9 @@ class AssistancePlanHourController(
             val dto = assistancePlanHourService.getById(id)
             assistancePlanHourService.delete(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s delete took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {

@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
 
-@WebMvcTest(ContingentController::class, properties = ["logging.performance=false"])
+@WebMvcTest(ContingentController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class ContingentControllerWebMvcTest {
 

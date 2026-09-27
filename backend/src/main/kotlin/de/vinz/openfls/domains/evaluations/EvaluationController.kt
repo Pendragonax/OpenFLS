@@ -7,7 +7,6 @@ import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.logback.PerformanceLogbackFilter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -26,9 +25,6 @@ class EvaluationController(
 
     private val logger: Logger = LoggerFactory.getLogger(EvaluationController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping
     fun create(@Valid @RequestBody valueDto: EvaluationRequestDto): Any {
         return try {
@@ -40,11 +36,9 @@ class EvaluationController(
                     ?: throw IllegalArgumentException("User not found")
             val dto = evaluationService.create(valueDto, user)
 
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s create took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -67,11 +61,9 @@ class EvaluationController(
                     ?: throw IllegalArgumentException("User not found")
             val dto = evaluationService.update(valueDto, user)
 
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s update took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -91,11 +83,9 @@ class EvaluationController(
 
             val dto = evaluationService.delete(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s delete took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -115,11 +105,9 @@ class EvaluationController(
 
             val dto = evaluationService.getAll()
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getAll took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -139,11 +127,9 @@ class EvaluationController(
 
             val dto = evaluationService.getById(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -164,11 +150,9 @@ class EvaluationController(
 
             val dto = evaluationService.getByAssistancePlanId(assistancePlanId)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByAssistancePlanId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getByAssistancePlanId took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -190,11 +174,9 @@ class EvaluationController(
 
             val dto = evaluationService.getByAssistancePlanIdAndYear(assistancePlanId, year)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getByAssistancePlanIdAndYear took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getByAssistancePlanIdAndYear took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {

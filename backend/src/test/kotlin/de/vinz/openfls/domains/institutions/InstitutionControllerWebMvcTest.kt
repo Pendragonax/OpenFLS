@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.put
 
-@WebMvcTest(InstitutionController::class, properties = ["logging.performance=false"])
+@WebMvcTest(InstitutionController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class InstitutionControllerWebMvcTest {
 

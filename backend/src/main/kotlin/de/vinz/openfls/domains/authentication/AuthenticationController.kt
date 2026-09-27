@@ -8,7 +8,6 @@ import de.vinz.openfls.logging.StructuredLog
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,9 +20,6 @@ class AuthenticationController(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AuthenticationController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping("/login")
     fun login(@RequestBody request: AuthenticationRequestDto): ResponseEntity<Map<String, String>> {
         try {
@@ -33,11 +29,9 @@ class AuthenticationController(
             val authentication = authenticationService.login(request.username, request.password)
             StructuredLog.audit("authentication.login", "success", "user", authentication.userId.toString())
 
-            if (logPerformance) {
-                logger.info(String.format("%s login took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s login took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.AUTHORIZATION, authentication.token)
@@ -62,11 +56,9 @@ class AuthenticationController(
             authenticationService.changePassword(passwordDto)
             StructuredLog.audit("authentication.password.change", "success")
 
-            if (logPerformance) {
-                logger.info(String.format("%s changePassword took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s changePassword took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity(HttpStatus.OK)
         } catch (ex: Exception) {
@@ -88,11 +80,9 @@ class AuthenticationController(
             authenticationService.changeRole(id, EUserRoles.fromId(role))
             StructuredLog.audit("authorization.role.change", "success", "user", id.toString())
 
-            if (logPerformance) {
-                logger.info(String.format("%s changeRole took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s changeRole took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity(HttpStatus.OK)
         } catch (ex: Exception) {
@@ -117,11 +107,9 @@ class AuthenticationController(
 
             val employee = authenticationService.getCurrentEmployee()
 
-            if (logPerformance) {
-                logger.info(String.format("%s getUser took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getUser took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             employee.orElseThrow { IllegalArgumentException() }
 

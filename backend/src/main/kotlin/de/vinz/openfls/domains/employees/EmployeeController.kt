@@ -10,7 +10,6 @@ import de.vinz.openfls.services.UserService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -26,9 +25,6 @@ class EmployeeController(
 
     private val logger: Logger = LoggerFactory.getLogger(EmployeeController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping
     fun create(@Valid @RequestBody valueDto: EmployeeCreateDto): Any {
         return try {
@@ -37,11 +33,9 @@ class EmployeeController(
 
             val dto = employeeService.create(valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s create took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -66,11 +60,9 @@ class EmployeeController(
             // update role
             val dto = employeeService.updateRole(id, role)
 
-            if (logPerformance) {
-                logger.info(String.format("%s updateRole took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s updateRole took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -95,11 +87,9 @@ class EmployeeController(
 
             val dto = employeeService.resetPassword(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s resetPassword took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s resetPassword took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             return ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -127,11 +117,9 @@ class EmployeeController(
 
             val dto = employeeService.update(id, valueDto)
 
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s update took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -152,11 +140,9 @@ class EmployeeController(
             val userId = userService.getUserId()
             val dto = employeeService.getAssistancePlanAsFavorites(userId)
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAssistancePlanFavorites took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getAssistancePlanFavorites took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -177,11 +163,9 @@ class EmployeeController(
             val userId = userService.getUserId()
             employeeService.addAssistancePlanAsFavorite(id, userId)
 
-            if (logPerformance) {
-                logger.info(String.format("%s addAssistancePlanFavorite took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s addAssistancePlanFavorite took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok()
         } catch (ex: Exception) {
@@ -202,11 +186,9 @@ class EmployeeController(
             val userId = userService.getUserId()
             employeeService.deleteAssistancePlanAsFavorite(id, userId)
 
-            if (logPerformance) {
-                logger.info(String.format("%s deleteAssistancePlanFavorite took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s deleteAssistancePlanFavorite took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok()
         } catch (ex: Exception) {
@@ -232,11 +214,9 @@ class EmployeeController(
             val dto = employeeService.getEmployeeDtoById(id, true)
             employeeService.delete(id)
 
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s delete took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {
@@ -262,11 +242,9 @@ class EmployeeController(
                 employeeService.getAllEmployeeDtos()
             }
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getAll took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -286,11 +264,9 @@ class EmployeeController(
 
             val dtos = employeeService.getAllSoloDtos()
 
-            if (logPerformance) {
-                logger.info(String.format("%s getAllProjections took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getAllProjections took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
@@ -311,11 +287,9 @@ class EmployeeController(
             val dto = employeeService.getEmployeeDtoById(id, accessService.isAdmin())
                 ?: throw IllegalArgumentException("employee not found")
 
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
+            logger.debug(String.format("%s getById took %s ms",
+                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
+                    System.currentTimeMillis() - startMs))
 
             ResponseEntity.ok(dto)
         } catch (ex: Exception) {

@@ -11,7 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 
-@WebMvcTest(AuthenticationController::class, properties = ["logging.performance=false"])
+@WebMvcTest(AuthenticationController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class AuthenticationControllerWebMvcTest {
 
