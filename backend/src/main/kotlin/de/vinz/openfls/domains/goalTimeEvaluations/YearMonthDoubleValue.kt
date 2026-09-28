@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.goalTimeEvaluations.models
+package de.vinz.openfls.domains.goalTimeEvaluations
 
 import java.time.LocalDate
 import java.time.YearMonth

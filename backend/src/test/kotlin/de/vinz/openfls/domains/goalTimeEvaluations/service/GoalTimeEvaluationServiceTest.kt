@@ -1,28 +1,26 @@
-package de.vinz.openfls.domains.goalTimeEvaluations
+package de.vinz.openfls.domains.goalTimeEvaluations.service
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.goalTimeEvaluations.exceptions.NoGoalFoundWithHourTypeException
+import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationResult
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourTypes.entity.HourType
-import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.services.services.ServiceService
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.util.Optional
 import java.time.LocalDate
 
 class GoalTimeEvaluationServiceTest {
 
-    private val serviceRepository: ServiceRepository = mock()
-    private val assistancePlanRepository: AssistancePlanRepository = mock()
+    private val serviceService: ServiceService = mock()
+    private val assistancePlanService: AssistancePlanService = mock()
     private lateinit var service: GoalTimeEvaluationService
 
     private val corridorHourType = HourType(id = 7, title = "FL", price = 5.0)
@@ -30,8 +28,8 @@ class GoalTimeEvaluationServiceTest {
 
     @BeforeEach
     fun setUp() {
-        service = GoalTimeEvaluationService(serviceRepository, assistancePlanRepository)
-        whenever(serviceRepository.findServicesByAssistancePlanIdAndStartIsBetween(any(), any(), any()))
+        service = GoalTimeEvaluationService(serviceService, assistancePlanService)
+        whenever(serviceService.getAllEntitiesByAssistancePlanIdAndStartBetween(any(), any(), any()))
             .thenReturn(emptyList())
     }
 
@@ -57,9 +55,9 @@ class GoalTimeEvaluationServiceTest {
 
     @Test
     fun corridorPlan_matchingHourType_producesThreeAssistancePlanRowsFromTillAverage() {
-        whenever(assistancePlanRepository.findById(1L)).thenReturn(Optional.of(corridorPlan()))
+        whenever(assistancePlanService.getEntityById(1L)).thenReturn(corridorPlan())
 
-        val result = service.getByAssistancePlanIdAndHourTypeIdAndYear(1L, corridorHourType.id, year)
+        val result = getSuccess(1L, corridorHourType.id, year)
 
         assertThat(result.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
         assertThat(result.corridorAssistancePlanEvaluations.map { it.title })
@@ -90,9 +88,9 @@ class GoalTimeEvaluationServiceTest {
 
     @Test
     fun corridorPlan_goalsCarryOnlyExecutedHoursEverythingElseZero() {
-        whenever(assistancePlanRepository.findById(1L)).thenReturn(Optional.of(corridorPlan()))
+        whenever(assistancePlanService.getEntityById(1L)).thenReturn(corridorPlan())
 
-        val result = service.getByAssistancePlanIdAndHourTypeIdAndYear(1L, corridorHourType.id, year)
+        val result = getSuccess(1L, corridorHourType.id, year)
 
         assertThat(result.goalTimeEvaluations.map { it.title }).containsExactly("Ziel A", "Ziel B")
         result.goalTimeEvaluations.forEach { goal ->
@@ -114,9 +112,9 @@ class GoalTimeEvaluationServiceTest {
 
     @Test
     fun corridorPlan_summedApprovedHoursAreMonotonicallyIncreasing() {
-        whenever(assistancePlanRepository.findById(1L)).thenReturn(Optional.of(corridorPlan()))
+        whenever(assistancePlanService.getEntityById(1L)).thenReturn(corridorPlan())
 
-        val result = service.getByAssistancePlanIdAndHourTypeIdAndYear(1L, corridorHourType.id, year)
+        val result = getSuccess(1L, corridorHourType.id, year)
         val avgSummed = result.corridorAssistancePlanEvaluations[2].summedApprovedHours
 
         for (i in 1 until 12) {
@@ -127,9 +125,9 @@ class GoalTimeEvaluationServiceTest {
 
     @Test
     fun corridorPlan_foreignHourType_returnsEmptyResultWithoutError() {
-        whenever(assistancePlanRepository.findById(1L)).thenReturn(Optional.of(corridorPlan()))
+        whenever(assistancePlanService.getEntityById(1L)).thenReturn(corridorPlan())
 
-        val result = service.getByAssistancePlanIdAndHourTypeIdAndYear(1L, 999L, year)
+        val result = getSuccess(1L, 999L, year)
 
         assertThat(result.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
         assertThat(result.corridorAssistancePlanEvaluations.map { it.title })
@@ -145,9 +143,9 @@ class GoalTimeEvaluationServiceTest {
 
     @Test
     fun corridorPlan_yearOutsidePlanPeriod_returnsZeroedApprovedHours() {
-        whenever(assistancePlanRepository.findById(1L)).thenReturn(Optional.of(corridorPlan()))
+        whenever(assistancePlanService.getEntityById(1L)).thenReturn(corridorPlan())
 
-        val result = service.getByAssistancePlanIdAndHourTypeIdAndYear(1L, corridorHourType.id, 2020)
+        val result = getSuccess(1L, corridorHourType.id, 2020)
 
         result.corridorAssistancePlanEvaluations.forEach { row ->
             assertThat(row.approvedHours).hasSize(12).containsOnly(0.0)
@@ -156,16 +154,30 @@ class GoalTimeEvaluationServiceTest {
     }
 
     @Test
-    fun exactPlan_withoutMatchingGoalOrPlanHours_stillThrows() {
+    fun exactPlan_withoutMatchingGoalOrPlanHours_returnsNoGoalFoundForHourType() {
         val plan = AssistancePlan(
             id = 2L,
             start = LocalDate.of(2026, 1, 1),
             end = LocalDate.of(2026, 12, 31),
             hourMode = AssistancePlanHourMode.EXACT
         )
-        whenever(assistancePlanRepository.findById(2L)).thenReturn(Optional.of(plan))
+        whenever(assistancePlanService.getEntityById(2L)).thenReturn(plan)
 
-        assertThatThrownBy { service.getByAssistancePlanIdAndHourTypeIdAndYear(2L, 1L, year) }
-            .isInstanceOf(NoGoalFoundWithHourTypeException::class.java)
+        val result = service.getByAssistancePlanIdAndHourTypeIdAndYear(2L, 1L, year)
+
+        assertThat(result).isEqualTo(GoalTimeEvaluationResult.NoGoalFoundForHourType)
     }
+
+    @Test
+    fun unknownAssistancePlan_returnsAssistancePlanNotFound() {
+        whenever(assistancePlanService.getEntityById(99L)).thenReturn(null)
+
+        val result = service.getByAssistancePlanIdAndHourTypeIdAndYear(99L, 1L, year)
+
+        assertThat(result).isEqualTo(GoalTimeEvaluationResult.AssistancePlanNotFound)
+    }
+
+    private fun getSuccess(assistancePlanId: Long, hourTypeId: Long, year: Int) =
+        (service.getByAssistancePlanIdAndHourTypeIdAndYear(assistancePlanId, hourTypeId, year)
+                as GoalTimeEvaluationResult.Success).response
 }

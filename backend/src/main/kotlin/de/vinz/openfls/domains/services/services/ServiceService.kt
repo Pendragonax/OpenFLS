@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @org.springframework.stereotype.Service
 @Transactional
@@ -151,6 +152,14 @@ class ServiceService(
 
     fun getByAssistancePlan(id: Long): List<Service> {
         return serviceRepository.findByAssistancePlan(id)
+    }
+
+    fun getAllEntitiesByAssistancePlanIdAndStartBetween(
+        id: Long,
+        start: LocalDateTime,
+        end: LocalDateTime
+    ): List<Service> {
+        return serviceRepository.findServicesByAssistancePlanIdAndStartIsBetween(id, start, end)
     }
 
     fun getIllegalByAssistancePlan(id: Long): List<ServiceProjectionDto> {
