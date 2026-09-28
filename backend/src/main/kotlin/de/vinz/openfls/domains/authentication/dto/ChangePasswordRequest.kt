@@ -1,14 +1,14 @@
-package de.vinz.openfls.domains.authentication.dtos
+package de.vinz.openfls.domains.authentication.dto
 
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 
-class PasswordDto(
+data class ChangePasswordRequest(
     @field:NotEmpty
     @field:Size(min = 6)
-    var oldPassword: String,
+    val oldPassword: String = "",
 
     @field:NotEmpty
     @field:Size(min = 6)
-    var newPassword: String
+    val newPassword: String = ""
 )

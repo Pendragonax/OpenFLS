@@ -1,6 +1,6 @@
 package de.vinz.openfls.security
 
-import de.vinz.openfls.domains.authentication.models.EUserRoles
+import de.vinz.openfls.domains.authentication.UserRole
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.employees.entities.EmployeeAccess
 import de.vinz.openfls.domains.employees.EmployeeAccessRepository
@@ -37,7 +37,7 @@ class CustomUserDetailsService(
                 id = 0,
                 username = "admin",
                 password = passwordEncoder.encode("admin").orEmpty(),
-                role = EUserRoles.ADMIN.id,
+                role = UserRole.ADMIN.id,
                 employee = Employee(
                         id = 0,
                         firstname = "Initial",
