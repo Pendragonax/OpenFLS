@@ -2,12 +2,12 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ReplaySubject} from "rxjs";
 
 @Component({
-    selector: 'app-overview-value-type-info-modal',
-    templateUrl: './overview-value-type-info-modal.component.html',
-    styleUrls: ['./overview-value-type-info-modal.component.css'],
+    selector: 'app-hour-report-value-type-info-modal',
+    templateUrl: './hour-report-value-type-info-modal.component.html',
+    styleUrls: ['./hour-report-value-type-info-modal.component.css'],
     standalone: false
 })
-export class OverviewValueTypeInfoModalComponent implements OnInit {
+export class HourReportValueTypeInfoModalComponent implements OnInit {
   readonly TITLE: string = "Wertermittlung"
   readonly CLOSE_BUTTON_DESCRIPTION: string = "Schließen"
   readonly EXECUTED_TITLE: string = "geleistete Stunden"

@@ -2,11 +2,11 @@ import '@testbed';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Subject, BehaviorSubject, of } from 'rxjs';
-import { ServiceEvaluationOverviewComponent } from './service-evaluation-overview.component';
+import { HourReportComponent } from './hour-report.component';
 import { HourTypeService } from '../../shared/services/hour-type.service';
 import { InstitutionService } from '../../shared/services/institution.service';
 import { SponsorService } from '../../shared/services/sponsor.service';
-import { OverviewService } from '../../shared/services/overview.service';
+import { HourReportService } from '../../shared/services/hour-report.service';
 import { DateService } from '../../shared/services/date.service';
 import { AssistancePlanAnalysisService } from './services/assistance-plan-analysis.service';
 import { Converter } from '../../shared/services/converter.helper';
@@ -18,9 +18,9 @@ import { InstitutionDto } from '../../shared/dtos/institution-dto.model';
 import { SponsorDto } from '../../shared/dtos/sponsor-dto.model';
 import { vi } from 'vitest';
 
-describe('ServiceEvaluationOverviewComponent', () => {
-  let component: ServiceEvaluationOverviewComponent;
-  let fixture: ComponentFixture<ServiceEvaluationOverviewComponent>;
+describe('HourReportComponent', () => {
+  let component: HourReportComponent;
+  let fixture: ComponentFixture<HourReportComponent>;
   let params$: Subject<any>;
   let hourTypes$: BehaviorSubject<HourTypeDto[]>;
   let institutions$: BehaviorSubject<InstitutionDto[]>;
@@ -36,13 +36,13 @@ describe('ServiceEvaluationOverviewComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],
-      declarations: [ ServiceEvaluationOverviewComponent ],
+      declarations: [ HourReportComponent ],
       providers: [
         { provide: ActivatedRoute, useValue: { params: params$ } },
         { provide: HourTypeService, useValue: { allValues$: hourTypes$ } },
         { provide: InstitutionService, useValue: { allValues$: institutions$ } },
         { provide: SponsorService, useValue: { allValues$: sponsors$ } },
-        { provide: OverviewService, useValue: { getOverviewFromAssistancePlanByYear: () => of([]) } },
+        { provide: HourReportService, useValue: { getHourReportByYear: () => of([]) } },
         { provide: AssistancePlanAnalysisService, useValue: { getByYearAndMonthAndInstitutionIdAndSponsorIdAndHourTypeId: () => of({}), convertToArray: () => [[]] } },
         { provide: DateService, useValue: { getMonths: () => [] } },
         { provide: Converter, useValue: { getLocalDateString: (value: string | null) => value ?? '' } },
@@ -50,12 +50,12 @@ describe('ServiceEvaluationOverviewComponent', () => {
         { provide: MatDialog, useValue: { open: () => ({}) } },
       ],
     })
-    .overrideComponent(ServiceEvaluationOverviewComponent, { set: { template: '' } })
+    .overrideComponent(HourReportComponent, { set: { template: '' } })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ServiceEvaluationOverviewComponent);
+    fixture = TestBed.createComponent(HourReportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

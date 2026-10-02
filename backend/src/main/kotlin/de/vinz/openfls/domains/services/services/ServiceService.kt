@@ -162,6 +162,54 @@ class ServiceService(
         return serviceRepository.findServicesByAssistancePlanIdAndStartIsBetween(id, start, end)
     }
 
+    fun getAllEntitiesByYearAndHourTypeIdAndAreaIdAndSponsorId(
+        year: Int,
+        month: Int?,
+        hourTypeId: Long,
+        areaId: Long?,
+        sponsorId: Long?
+    ): List<Service> {
+        return when {
+            areaId != null && sponsorId != null && month != null ->
+                serviceRepository.findServiceByYearAndMonthAndHourTypeIdAndAreaIdAndSponsorId(
+                    year = year, month = month, hourTypeId = hourTypeId, areaId = areaId, sponsorId = sponsorId
+                )
+
+            areaId != null && sponsorId != null ->
+                serviceRepository.findServiceByYearByHourTypeIdAndAreaIdAndSponsorId(
+                    year = year, hourTypeId = hourTypeId, areaId = areaId, sponsorId = sponsorId
+                )
+
+            areaId != null && month != null ->
+                serviceRepository.findServiceByYearAndMonthAndHourTypeIdAndAreaId(
+                    year = year, month = month, hourTypeId = hourTypeId, areaId = areaId
+                )
+
+            sponsorId != null && month != null ->
+                serviceRepository.findServiceByYearAndMonthAndHourTypeIdAndSponsorId(
+                    year = year, month = month, hourTypeId = hourTypeId, sponsorId = sponsorId
+                )
+
+            areaId != null ->
+                serviceRepository.findServiceByYearByHourTypeIdAndAreaId(
+                    year = year, hourTypeId = hourTypeId, areaId = areaId
+                )
+
+            sponsorId != null ->
+                serviceRepository.findServiceByYearByHourTypeIdAndSponsorId(
+                    year = year, hourTypeId = hourTypeId, sponsorId = sponsorId
+                )
+
+            month != null ->
+                serviceRepository.findServiceByYearAndMonthAndHourTypeId(
+                    year = year, month = month, hourTypeId = hourTypeId
+                )
+
+            else ->
+                serviceRepository.findServiceByYearByHourTypeId(year = year, hourTypeId = hourTypeId)
+        }
+    }
+
     fun getIllegalByAssistancePlan(id: Long): List<ServiceProjectionDto> {
         return serviceRepository.findIllegalByAssistancePlan(id).map(ServiceProjectionDto::from)
     }

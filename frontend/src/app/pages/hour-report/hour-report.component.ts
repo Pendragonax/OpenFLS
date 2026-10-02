@@ -2,8 +2,8 @@ import {Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {combineLatest, Observable, ReplaySubject} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
-import {OverviewService} from "../../shared/services/overview.service";
-import {OverviewAssistancePlan} from "../../shared/dtos/overview-assistance-plan.dto";
+import {HourReportService} from "../../shared/services/hour-report.service";
+import {HourReportRow} from "../../shared/dtos/hour-report-row.dto";
 import {Location} from '@angular/common';
 import {HourTypeDto} from "../../shared/dtos/hour-type-dto.model";
 import {HourTypeService} from "../../shared/services/hour-type.service";
@@ -12,16 +12,16 @@ import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
 import {SponsorService} from "../../shared/services/sponsor.service";
 import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
 import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
-import {EOverviewType} from "./enums/EOverviewType";
+import {EHourReportType} from "./enums/EHourReportType";
 import {Converter} from "../../shared/services/converter.helper";
 import {
-  OverviewValueTypeInfoModalComponent
-} from "./modals/overview-valuetype-info-modal/overview-value-type-info-modal.component";
+  HourReportValueTypeInfoModalComponent
+} from "./modals/hour-report-valuetype-info-modal/hour-report-value-type-info-modal.component";
 import {MatDialog} from "@angular/material/dialog";
 import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
 import {
-  OverviewPermissionInfoModalComponent
-} from "./modals/overview-permission-info-modal/overview-permission-info-modal.component";
+  HourReportPermissionInfoModalComponent
+} from "./modals/hour-report-permission-info-modal/hour-report-permission-info-modal.component";
 import {DateService} from "../../shared/services/date.service";
 import {
   AssistancePlanAnalysisService
@@ -34,9 +34,9 @@ import {ObjectTableRowColors} from '../../shared/components/object-table/object-
 import {AssistancePlanHourMode} from '../../shared/dtos/assistance-plan-hour-mode.model';
 
 @Component({
-    selector: 'app-service-evaluation-overview',
-    templateUrl: './service-evaluation-overview.component.html',
-    styleUrls: ['./service-evaluation-overview.component.css'],
+    selector: 'app-hour-report',
+    templateUrl: './hour-report.component.html',
+    styleUrls: ['./hour-report.component.css'],
     providers: [
         { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
         {
@@ -48,7 +48,7 @@ import {AssistancePlanHourMode} from '../../shared/dtos/assistance-plan-hour-mod
     ],
     standalone: false
 })
-export class ServiceEvaluationOverviewComponent implements OnInit {
+export class HourReportComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   readonly FIXED_COLUMN_FROM_INDEX: number = 2
   readonly COMBINATION_COLUMN_NAME: string = "Gesamt"
@@ -80,8 +80,8 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   sponsorAll = new SponsorDto({name:"alle"})
   sponsors: SponsorDto[] = [this.sponsorAll]
   selectedSponsor: SponsorDto | null = null;
-  valueTypes: string[] = Object.values(EOverviewType);
-  selectedValueType: EOverviewType | null = null;
+  valueTypes: string[] = Object.values(EHourReportType);
+  selectedValueType: EHourReportType | null = null;
   year: number = new Date().getFullYear() + 1;
   month: number = 0;
   outputString: string = "";
@@ -91,7 +91,6 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   isGenerating: boolean = false;
   forbiddenRequest: boolean = false;
   errorOccurred: boolean = false;
-  csvGenerated: boolean = false;
 
   selectionForm: UntypedFormGroup = new UntypedFormGroup({
     periodModeControl: new UntypedFormControl({value: '2', disabled: this.isGenerating}),
@@ -102,7 +101,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
   });
 
   constructor(private route: ActivatedRoute,
-              private overviewService: OverviewService,
+              private hourReportService: HourReportService,
               private hourTypeService: HourTypeService,
               private institutionService: InstitutionService,
               private sponsorService: SponsorService,
@@ -140,7 +139,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.areas.push(...institutions);
       this.sponsors = [this.sponsorAll]
       this.sponsors.push(...sponsors);
-      this.valueTypes = Object.values(EOverviewType);
+      this.valueTypes = Object.values(EHourReportType);
       this.columnFixedWidthFromIndex$.next(this.FIXED_COLUMN_FROM_INDEX);
       this.loadURLParams();
     })
@@ -185,7 +184,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     this.valueTypeControl.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(value => {
-      this.selectedValueType = this.getEnumByValue(EOverviewType, value) ?? null;
+      this.selectedValueType = this.getEnumByValue(EHourReportType, value) ?? null;
       this.updateUrl();
       this.validateGenerationStatus();
     });
@@ -278,12 +277,12 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   openPermissionInfoModal(event) {
     event.stopPropagation()
-    this.dialog.open(OverviewPermissionInfoModalComponent)
+    this.dialog.open(HourReportPermissionInfoModalComponent)
   }
 
   openValueTypeInfoModal(event) {
     event.stopPropagation();
-    this.dialog.open(OverviewValueTypeInfoModalComponent)
+    this.dialog.open(HourReportValueTypeInfoModalComponent)
   }
 
   private updateFixedAndBoldTableColumns() {
@@ -299,8 +298,8 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
     this.boldColumnIndices$.next(this.boldColumnIndices)
   }
 
-  private loadYearlyData(): Observable<OverviewAssistancePlan[]> {
-    return this.overviewService.getOverviewFromAssistancePlanByYear(
+  private loadYearlyData(): Observable<HourReportRow[]> {
+    return this.hourReportService.getHourReportByYear(
       this.year,
       this.selectedHourType?.id ?? null,
       this.selectedArea?.id ?? null,
@@ -317,7 +316,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
       this.selectedHourType?.id ?? 0)
   }
 
-  private generateTableData(source: OverviewAssistancePlan[]) {
+  private generateTableData(source: HourReportRow[]) {
     this.rowColors = new Map()
     this.rowDescriptions = new Map()
     const data = source.map((value, rowIndex) => {
@@ -365,7 +364,7 @@ export class ServiceEvaluationOverviewComponent implements OnInit {
 
   private updateUrl() {
     let monthParam = this.selectedPeriodMode == 1 ? 0 : this.month
-    this.location.go(`overview/${this.year}/${monthParam}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
+    this.location.go(`hour_reports/${this.year}/${monthParam}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
   }
 
   private validateGenerationStatus() {

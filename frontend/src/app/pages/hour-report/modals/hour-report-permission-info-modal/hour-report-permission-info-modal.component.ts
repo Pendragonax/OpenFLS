@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-    selector: 'app-overview-permission-info-modal',
-    templateUrl: './overview-permission-info-modal.component.html',
-    styleUrls: ['./overview-permission-info-modal.component.css'],
+    selector: 'app-hour-report-permission-info-modal',
+    templateUrl: './hour-report-permission-info-modal.component.html',
+    styleUrls: ['./hour-report-permission-info-modal.component.css'],
     standalone: false
 })
-export class OverviewPermissionInfoModalComponent implements OnInit {
+export class HourReportPermissionInfoModalComponent implements OnInit {
   readonly TITLE: string = "Berechtigungen"
   readonly CLOSE_BUTTON_DESCRIPTION: string = "Schließen"
   readonly TITLE_ADMIN: string = "Administrator"

@@ -315,6 +315,29 @@ class AssistancePlanService(
     }
 
     @Transactional(readOnly = true)
+    fun getAllEditDtosByYearAndInstitutionIdAndSponsorId(
+        year: Int,
+        institutionId: Long?,
+        sponsorId: Long?
+    ): List<AssistancePlanEditDto> {
+        val entities = when {
+            institutionId != null && sponsorId != null ->
+                assistancePlanRepository.findByInstitutionIdAndSponsorIdAndYear(institutionId, sponsorId, year)
+
+            institutionId != null ->
+                assistancePlanRepository.findByInstitutionIdAndYear(institutionId, year)
+
+            sponsorId != null ->
+                assistancePlanRepository.findBySponsorIdAndYear(sponsorId, year)
+
+            else ->
+                assistancePlanRepository.findAllByYear(year)
+        }
+
+        return entities.map(::mapToEditDto)
+    }
+
+    @Transactional(readOnly = true)
     fun getProjectionById(id: Long): AssistancePlanProjectionDto? {
         return assistancePlanRepository.findDetailedById(id)?.let(AssistancePlanProjectionDto::of)
     }

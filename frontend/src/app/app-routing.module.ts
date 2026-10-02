@@ -23,8 +23,8 @@ import {HourCorridorsComponent} from "./pages/hour-corridors/hour-corridors.comp
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
-  ServiceEvaluationOverviewComponent
-} from "./pages/service-evaluation-overview/service-evaluation-overview.component";
+  HourReportComponent
+} from "./pages/hour-report/hour-report.component";
 import {AssistancePlanAnalysisComponent} from "./pages/assistance-plan-analysis/assistance-plan-analysis.component";
 import {MyServicesComponent} from "./pages/my-services/my-services.component";
 import {AllServicesComponent} from "./pages/all-services/all-services.component";
@@ -68,8 +68,8 @@ const routes: Routes = [
   { path: 'services/new', component: ServiceNewComponent, canActivate: [AuthGuard] },
   { path: 'services/new/:date', component: ServiceNewComponent, canActivate: [AuthGuard] },
   { path: 'services/edit/:id', component: ServiceEditComponent, canActivate: [AuthGuard] },
-  { path: 'overview', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] },
-  { path: 'overview/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] }
+  { path: 'hour_reports', component: HourReportComponent, canActivate: [AuthGuard] },
+  { path: 'hour_reports/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: HourReportComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({

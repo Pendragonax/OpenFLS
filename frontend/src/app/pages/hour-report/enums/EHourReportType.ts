@@ -1,4 +1,4 @@
-export enum EOverviewType {
+export enum EHourReportType {
   EXECUTED_HOURS = "geleistet",
   EXECUTED_HOURS_GROUP_OFFER = "geleistet im Gruppenangebot",
   APPROVED_HOURS = "genehmigt",

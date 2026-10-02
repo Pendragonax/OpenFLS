@@ -121,15 +121,15 @@ import {
 import {MatRadioModule} from "@angular/material/radio";
 import {OverviewTableComponent} from './shared/components/overview-table/overview-table.component';
 import {
-  ServiceEvaluationOverviewComponent
-} from './pages/service-evaluation-overview/service-evaluation-overview.component';
+  HourReportComponent
+} from './pages/hour-report/hour-report.component';
 import {
-  OverviewValueTypeInfoModalComponent
-} from './pages/service-evaluation-overview/modals/overview-valuetype-info-modal/overview-value-type-info-modal.component';
+  HourReportValueTypeInfoModalComponent
+} from './pages/hour-report/modals/hour-report-valuetype-info-modal/hour-report-value-type-info-modal.component';
 import {MatDialogModule} from "@angular/material/dialog";
 import {
-  OverviewPermissionInfoModalComponent
-} from './pages/service-evaluation-overview/modals/overview-permission-info-modal/overview-permission-info-modal.component';
+  HourReportPermissionInfoModalComponent
+} from './pages/hour-report/modals/hour-report-permission-info-modal/hour-report-permission-info-modal.component';
 import {AssistancePlanAnalysisComponent} from './pages/assistance-plan-analysis/assistance-plan-analysis.component';
 import {GoalSingleComponent} from './shared/components/goal-single/goal-single.component';
 import {MatChipsModule} from "@angular/material/chips";
@@ -239,9 +239,9 @@ import {MarkdownModule} from "ngx-markdown";
         WorkTimeCardComponent,
         AssistancePlanEvaluationComponent,
         OverviewTableComponent,
-        ServiceEvaluationOverviewComponent,
-        OverviewValueTypeInfoModalComponent,
-        OverviewPermissionInfoModalComponent,
+        HourReportComponent,
+        HourReportValueTypeInfoModalComponent,
+        HourReportPermissionInfoModalComponent,
         AssistancePlanAnalysisComponent,
         GoalSingleComponent,
         YearMonthSelectionComponent,
