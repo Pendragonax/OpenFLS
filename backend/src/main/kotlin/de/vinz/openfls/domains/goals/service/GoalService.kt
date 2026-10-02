@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.goals.service
 
+import de.vinz.openfls.architecture.InternalEntityApi
 import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.goals.dto.GoalCreateRequest
@@ -125,6 +126,12 @@ class GoalService(
     @Transactional(readOnly = true)
     fun getByAssistancePlanId(id: Long): List<GoalWithHoursResponse> {
         return goalRepository.findByAssistancePlanId(id).map { GoalWithHoursResponse.from(it) }
+    }
+
+    @InternalEntityApi
+    @Transactional(readOnly = true)
+    fun getEntityById(id: Long): Goal? {
+        return goalRepository.findByIdOrNull(id)
     }
 
     private fun buildGoalHour(hourRequest: GoalHourRequest, hourTypesById: Map<Long, HourType>, goal: Goal): GoalHour {

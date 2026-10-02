@@ -1,191 +1,107 @@
 package de.vinz.openfls.domains.evaluations
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.evaluations.dtos.EvaluationRequestDto
-import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateRequest
+import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateResult
+import de.vinz.openfls.domains.evaluations.dto.EvaluationDeleteResult
+import de.vinz.openfls.domains.evaluations.dto.EvaluationUpdateRequest
+import de.vinz.openfls.domains.evaluations.dto.EvaluationUpdateResult
+import de.vinz.openfls.domains.evaluations.dto.EvaluationYearResult
+import de.vinz.openfls.domains.evaluations.service.EvaluationService
+import de.vinz.openfls.services.ExceptionResponseService
+import de.vinz.openfls.services.PerformanceLoggingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import java.lang.Exception
-import jakarta.validation.Valid
 
-@Controller
+@RestController
 @RequestMapping("/evaluations")
 class EvaluationController(
         private val evaluationService: EvaluationService,
-        private val employeeService: EmployeeService,
-        private val accessService: AccessService
+        private val performanceLoggingService: PerformanceLoggingService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(EvaluationController::class.java)
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: EvaluationRequestDto): Any {
+    fun create(@RequestBody request: EvaluationCreateRequest): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            // find user
-            val user = employeeService.getById(accessService.getId(), true)
-                    ?: throw IllegalArgumentException("User not found")
-            val dto = evaluationService.create(valueDto, user)
-
-            logger.debug(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = evaluationService.create(request)) {
+                is EvaluationCreateResult.Success -> ResponseEntity.ok(result.response)
+                EvaluationCreateResult.GoalNotFound -> notFound("goal not found")
+                EvaluationCreateResult.Forbidden -> forbidden("no permission to create evaluations for this goal")
+                EvaluationCreateResult.ClientArchived -> clientArchived()
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.localizedMessage,
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
     @PutMapping
-    fun update(@Valid @RequestBody valueDto: EvaluationRequestDto): Any {
+    fun update(@RequestBody request: EvaluationUpdateRequest): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            // find user
-            val user = employeeService.getById(accessService.getId(), true)
-                    ?: throw IllegalArgumentException("User not found")
-            val dto = evaluationService.update(valueDto, user)
-
-            logger.debug(String.format("%s update took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = evaluationService.update(request)) {
+                is EvaluationUpdateResult.Success -> ResponseEntity.ok(result.response)
+                EvaluationUpdateResult.NotFound -> notFound("evaluation not found")
+                EvaluationUpdateResult.Forbidden -> forbidden("no permission to update this evaluation")
+                EvaluationUpdateResult.ClientArchived -> clientArchived()
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.localizedMessage,
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("update", startMs, logger)
         }
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = evaluationService.delete(id)
-
-            logger.debug(String.format("%s delete took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = evaluationService.delete(id)) {
+                is EvaluationDeleteResult.Success -> ResponseEntity.ok(result.response)
+                EvaluationDeleteResult.NotFound -> notFound("evaluation not found")
+                EvaluationDeleteResult.Forbidden -> forbidden("no permission to delete this evaluation")
+                EvaluationDeleteResult.ClientArchived -> clientArchived()
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.localizedMessage,
-                    HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @GetMapping
-    fun getAll(): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = evaluationService.getAll()
-
-            logger.debug(String.format("%s getAll took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @GetMapping("{id}")
-    fun getById(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = evaluationService.getById(id)
-
-            logger.debug(String.format("%s getById took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("assistance_plan/{assistancePlanId}")
-    fun getByAssistancePlanId(@PathVariable assistancePlanId: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = evaluationService.getByAssistancePlanId(assistancePlanId)
-
-            logger.debug(String.format("%s getByAssistancePlanId took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("delete", startMs, logger)
         }
     }
 
     @GetMapping("assistance_plan/{assistancePlanId}/{year}")
-    fun getByAssistancePlanIdAndYear(@PathVariable assistancePlanId: Long,
-                                     @PathVariable year: Int): Any {
+    fun getYearEvaluationsByAssistancePlanIdAndYear(@PathVariable assistancePlanId: Long,
+                                                    @PathVariable year: Int): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = evaluationService.getByAssistancePlanIdAndYear(assistancePlanId, year)
-
-            logger.debug(String.format("%s getByAssistancePlanIdAndYear took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = evaluationService.getYearEvaluationsByAssistancePlanIdAndYear(assistancePlanId, year)) {
+                is EvaluationYearResult.Success -> ResponseEntity.ok(result.response)
+                EvaluationYearResult.AssistancePlanNotFound -> notFound("assistance plan not found")
+                EvaluationYearResult.Forbidden -> forbidden("no permission to read the evaluations of this assistance plan")
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getYearEvaluationsByAssistancePlanIdAndYear", startMs, logger)
         }
     }
+
+    private fun notFound(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body(message)
+
+    private fun forbidden(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.FORBIDDEN).body(message)
+
+    private fun clientArchived(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.CONFLICT).body("client is archived")
 }

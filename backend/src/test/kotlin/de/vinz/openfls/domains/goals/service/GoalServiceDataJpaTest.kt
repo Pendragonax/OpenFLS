@@ -272,4 +272,25 @@ class GoalServiceDataJpaTest {
         assertThat(result.first().hours).hasSize(1)
         assertThat(result.first().hours.first().hourTypeTitle).isEqualTo("Standard")
     }
+
+    @Test
+    fun getEntityById_existingGoal_returnsEntity() {
+        // Given
+        val goal = goalRepository.save(Goal(title = "Goal"))
+
+        // When
+        val result = goalService.getEntityById(goal.id)
+
+        // Then
+        assertThat(result?.id).isEqualTo(goal.id)
+    }
+
+    @Test
+    fun getEntityById_missingGoal_returnsNull() {
+        // When
+        val result = goalService.getEntityById(9999)
+
+        // Then
+        assertThat(result).isNull()
+    }
 }

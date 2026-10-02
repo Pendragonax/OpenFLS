@@ -391,7 +391,7 @@ class ClientArchiveExportServiceDataJpaTest {
         )
 
         goal.evaluations.add(
-            de.vinz.openfls.domains.evaluations.Evaluation(
+            de.vinz.openfls.domains.evaluations.entity.Evaluation(
                 date = LocalDate.of(2026, 6, 13),
                 content = "Evaluation content",
                 approved = true,

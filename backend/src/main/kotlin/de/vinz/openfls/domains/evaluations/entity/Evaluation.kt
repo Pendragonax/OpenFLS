@@ -1,7 +1,6 @@
-package de.vinz.openfls.domains.evaluations
+package de.vinz.openfls.domains.evaluations.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.goals.entity.Goal
 import jakarta.persistence.*
