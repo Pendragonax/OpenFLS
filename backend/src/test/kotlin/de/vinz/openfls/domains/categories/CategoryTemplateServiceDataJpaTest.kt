@@ -1,5 +1,7 @@
 package de.vinz.openfls.domains.categories
 
+import jakarta.persistence.EntityManagerFactory
+import de.vinz.openfls.testsupport.QueryCounter
 import de.vinz.openfls.domains.categories.dto.CategoryCreateRequest
 import de.vinz.openfls.domains.categories.dto.CategoryTemplateCreateRequest
 import de.vinz.openfls.domains.categories.dto.CategoryTemplateUpdateRequest
@@ -32,6 +34,9 @@ class CategoryTemplateServiceDataJpaTest {
 
     @Autowired
     lateinit var entityManager: TestEntityManager
+
+    @Autowired
+    lateinit var entityManagerFactory: EntityManagerFactory
 
     @Test
     fun create_withCategories_persistsTemplateAndCategories() {
@@ -191,5 +196,39 @@ class CategoryTemplateServiceDataJpaTest {
 
         // When / Then
         assertThat(categoryTemplateService.getEntityById(template.id)).isEqualTo(template)
+    }
+
+    @Test
+    fun getAll_loadsTheCategoriesWithAConstantNumberOfQueries() {
+        // Given
+        repeat(3) { createTemplate(it) }
+        entityManager.flush()
+        entityManager.clear()
+        val queryCounter = QueryCounter(entityManagerFactory)
+        val queriesForFewTemplates = queryCounter.count { categoryTemplateService.getAll() }
+
+        repeat(17) { createTemplate(it + 3) }
+        entityManager.flush()
+        entityManager.clear()
+
+        // When
+        val queriesForManyTemplates = queryCounter.count { categoryTemplateService.getAll() }
+
+        // Then
+        assertThat(queriesForManyTemplates).isEqualTo(queriesForFewTemplates)
+    }
+
+    private fun createTemplate(index: Int) {
+        categoryTemplateService.create(
+            CategoryTemplateCreateRequest(
+                title = "Template $index",
+                description = "Desc",
+                withoutClient = false,
+                categories = listOf(
+                    CategoryCreateRequest(title = "Cat A", shortcut = "A", description = "", faceToFace = true),
+                    CategoryCreateRequest(title = "Cat B", shortcut = "B", description = "", faceToFace = false)
+                )
+            )
+        )
     }
 }

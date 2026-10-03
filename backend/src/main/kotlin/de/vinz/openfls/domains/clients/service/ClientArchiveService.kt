@@ -31,12 +31,12 @@ class ClientArchiveService(
 
     @Transactional
     fun archive(clientId: Long, actionDate: LocalDate, reason: String, remark: String): ClientArchiveResult {
-        return changeArchiveState(clientId, ClientArchiveActionType.ARCHIVE, actionDate, reason, remark)
+        return changeArchiveState(clientId, archive = true, actionDate, reason, remark)
     }
 
     @Transactional
     fun reactivate(clientId: Long, actionDate: LocalDate, reason: String, remark: String): ClientArchiveResult {
-        return changeArchiveState(clientId, ClientArchiveActionType.REACTIVATE, actionDate, reason, remark)
+        return changeArchiveState(clientId, archive = false, actionDate, reason, remark)
     }
 
     @Transactional(readOnly = true)
@@ -87,7 +87,7 @@ class ClientArchiveService(
 
     private fun changeArchiveState(
         clientId: Long,
-        actionType: ClientArchiveActionType,
+        archive: Boolean,
         actionDate: LocalDate,
         reason: String,
         remark: String
@@ -99,14 +99,11 @@ class ClientArchiveService(
         val actor = employeeService.getEmployeeNameById(accessService.getId(), includeArchived = accessService.isAdmin())
             ?: return ClientArchiveResult.ActorNotFound
 
-        when (actionType) {
-            ClientArchiveActionType.ARCHIVE -> if (client.archived) return ClientArchiveResult.AlreadyArchived
-            ClientArchiveActionType.REACTIVATE -> if (!client.archived) return ClientArchiveResult.NotArchived
-            ClientArchiveActionType.EXPORT -> throw IllegalArgumentException("unsupported client archive action")
-        }
+        if (archive && client.archived) return ClientArchiveResult.AlreadyArchived
+        if (!archive && !client.archived) return ClientArchiveResult.NotArchived
 
         val historyEntry = ClientArchiveHistoryEntry(
-            actionType = actionType,
+            actionType = if (archive) ClientArchiveActionType.ARCHIVE else ClientArchiveActionType.REACTIVATE,
             actionDate = actionDate,
             actionTimestamp = LocalDateTime.now(),
             reason = reason,
@@ -117,11 +114,11 @@ class ClientArchiveService(
             client = client
         )
 
-        client.archived = actionType == ClientArchiveActionType.ARCHIVE
+        client.archived = archive
         client.archiveHistoryEntries.add(historyEntry)
         clientService.saveEntity(client)
 
-        if (actionType == ClientArchiveActionType.ARCHIVE) {
+        if (archive) {
             employeeFavoriteService.deleteAssistancePlanFavoritesByClientId(clientId)
             employeeFavoriteService.deleteClientFavoritesByClientId(clientId)
         }

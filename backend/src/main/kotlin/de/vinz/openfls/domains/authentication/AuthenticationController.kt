@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.authentication.dto.ChangePasswordResult
 import de.vinz.openfls.domains.authentication.dto.LoginRequest
 import de.vinz.openfls.domains.authentication.service.AuthenticationService
 import de.vinz.openfls.logging.StructuredLog
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -52,7 +52,7 @@ class AuthenticationController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            when (val result = authenticationService.changePassword(request)) {
+            when (authenticationService.changePassword(request)) {
                 ChangePasswordResult.Success -> {
                     StructuredLog.audit("authentication.password.change", "success")
                     ResponseEntity(HttpStatus.OK)

@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.hourTypes.dto.HourTypeDeleteResult
 import de.vinz.openfls.domains.hourTypes.dto.HourTypeUpdateRequest
 import de.vinz.openfls.domains.hourTypes.dto.HourTypeUpdateResult
 import de.vinz.openfls.domains.hourTypes.service.HourTypeService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

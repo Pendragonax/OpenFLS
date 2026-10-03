@@ -1,9 +1,6 @@
 package de.vinz.openfls.domains.sponsors.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
-import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.employees.entity.Unprofessional
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
@@ -26,14 +23,12 @@ class Sponsor(
         @field:NotNull
         var payExact: Boolean = false,
 
-        @JsonIgnoreProperties(value = ["employee", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "sponsor",
                 cascade = [CascadeType.REMOVE],
                 fetch = FetchType.LAZY)
         var unprofessionals: MutableSet<Unprofessional>? = null,
 
-        @JsonIgnore
         @OneToMany(
                 mappedBy = "sponsor",
                 cascade = [CascadeType.REMOVE],

@@ -70,7 +70,7 @@ class StructuredLogTest {
     @Test
     fun error_projectInternalException_logsAtWarn() {
         // Given
-        val exception = de.vinz.openfls.exceptions.IllegalTimeException("end before start")
+        val exception = ProjectException("end before start")
 
         // When
         StructuredLog.error(slf4jLogger, "application.request.failed", exception)
@@ -133,4 +133,6 @@ class StructuredLogTest {
             .contains("http.method=POST")
             .contains("http.path=/api/employees")
     }
+
+    private class ProjectException(message: String) : Exception(message)
 }

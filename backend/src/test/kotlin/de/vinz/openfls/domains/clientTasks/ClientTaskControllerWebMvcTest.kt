@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.clientTasks.dto.ClientTaskResponse
 import de.vinz.openfls.domains.clientTasks.dto.ClientTaskUpdateRequest
 import de.vinz.openfls.domains.clientTasks.dto.ClientTaskUpdateResult
 import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

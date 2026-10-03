@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.permissions.service
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.institutions.service.InstitutionService
-import de.vinz.openfls.services.UserService
+import de.vinz.openfls.security.UserService
 import org.springframework.stereotype.Service
 
 @Service
@@ -103,7 +103,7 @@ class AccessService(
         }
     }
 
-    fun canModifyEmployee(employeeId: Long): Boolean {
+    fun canModifyEmployee(): Boolean {
         return try {
             isAdmin()
         } catch (ex: Exception) {

@@ -3,11 +3,12 @@ package de.vinz.openfls.domains.institutions
 import de.vinz.openfls.domains.institutions.dto.InstitutionCreateRequest
 import de.vinz.openfls.domains.institutions.dto.InstitutionDeleteResult
 import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionCreateResult
 import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateResult
 import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.logging.StructuredLog
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,13 +32,12 @@ class InstitutionController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            ResponseEntity.ok(institutionService.create(request))
+            when (val result = institutionService.create(request)) {
+                is InstitutionCreateResult.Success -> ResponseEntity.ok(result.response)
+                InstitutionCreateResult.EmployeeNotFound -> employeeNotFound()
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.localizedMessage,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("create", startMs, logger)
         }
@@ -56,13 +56,10 @@ class InstitutionController(
             when (val result = institutionService.update(request)) {
                 is InstitutionUpdateResult.Success -> ResponseEntity.ok(result.response)
                 InstitutionUpdateResult.NotFound -> institutionNotFound()
+                InstitutionUpdateResult.EmployeeNotFound -> employeeNotFound()
             }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("update", startMs, logger)
         }
@@ -79,11 +76,7 @@ class InstitutionController(
                 InstitutionDeleteResult.NotFound -> institutionNotFound()
             }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("delete", startMs, logger)
         }
@@ -97,11 +90,7 @@ class InstitutionController(
         return try {
             ResponseEntity.ok(institutionService.getAllWithPermissions())
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                emptyList<Any>(),
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("getAll", startMs, logger)
         }
@@ -115,11 +104,7 @@ class InstitutionController(
         return try {
             ResponseEntity.ok(institutionService.getAll().filter { accessService.canReadEntries(it.id) })
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                emptyList<Any>(),
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("getAllReadable", startMs, logger)
         }
@@ -134,15 +119,14 @@ class InstitutionController(
             val response = institutionService.getWithPermissionsById(id) ?: return institutionNotFound()
             ResponseEntity.ok(response)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("getById", startMs, logger)
         }
     }
+
+    private fun employeeNotFound(): ResponseEntity<String> =
+        ResponseEntity.badRequest().body("employee not found")
 
     private fun institutionNotFound(): ResponseEntity<String> =
         ResponseEntity.status(HttpStatus.NOT_FOUND).body("institution not found")

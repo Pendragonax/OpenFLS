@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.categories.dto.CategoryTemplateDeleteResult
 import de.vinz.openfls.domains.categories.dto.CategoryTemplateUpdateResult
 import de.vinz.openfls.domains.categories.dto.CategoryTemplateWithCategoriesResponse
 import de.vinz.openfls.domains.categories.service.CategoryTemplateService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

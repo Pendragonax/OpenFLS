@@ -3,8 +3,8 @@ package de.vinz.openfls.domains.contingents.service
 import de.vinz.openfls.architecture.InternalEntityApi
 import de.vinz.openfls.domains.absence.entity.Absence
 import de.vinz.openfls.domains.contingents.entity.Contingent
-import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.DateService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import kotlin.math.ceil

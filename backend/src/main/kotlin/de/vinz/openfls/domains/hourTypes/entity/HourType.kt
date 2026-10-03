@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.hourTypes.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
 import de.vinz.openfls.domains.services.entity.Service
 import jakarta.persistence.*
@@ -21,11 +20,9 @@ class HourType(
         @field:NotNull
         var price: Double = 0.0,
 
-        @JsonIgnore
         @OneToMany(mappedBy = "hourType", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf(),
 
-        @JsonIgnore
         @OneToMany(mappedBy = "hourType", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         var assistancePlanHours: MutableSet<AssistancePlanHour> = mutableSetOf()
 ) {

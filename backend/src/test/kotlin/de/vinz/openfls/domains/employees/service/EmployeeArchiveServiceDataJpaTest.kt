@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.employees.service
 
+import de.vinz.openfls.domains.institutions.service.InstitutionLookupService
 import de.vinz.openfls.domains.employees.dto.EmployeeArchiveResult
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.employees.entity.EmployeeArchiveActionType.ARCHIVE
@@ -27,6 +28,7 @@ import java.time.LocalDate
     UnprofessionalService::class,
     SponsorService::class,
     PermissionService::class,
+    InstitutionLookupService::class,
     TestBeans::class
 )
 class EmployeeArchiveServiceDataJpaTest {

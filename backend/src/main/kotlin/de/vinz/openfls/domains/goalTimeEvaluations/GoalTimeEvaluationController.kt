@@ -3,8 +3,8 @@ package de.vinz.openfls.domains.goalTimeEvaluations
 import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationResult
 import de.vinz.openfls.domains.goalTimeEvaluations.service.GoalTimeEvaluationService
 import de.vinz.openfls.logging.StructuredLog
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

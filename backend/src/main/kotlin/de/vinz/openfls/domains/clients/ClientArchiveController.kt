@@ -4,8 +4,8 @@ import de.vinz.openfls.domains.clients.dto.ClientArchiveActionRequest
 import de.vinz.openfls.domains.clients.dto.ClientArchiveHistoryResult
 import de.vinz.openfls.domains.clients.dto.ClientArchiveResult
 import de.vinz.openfls.domains.clients.service.ClientArchiveService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

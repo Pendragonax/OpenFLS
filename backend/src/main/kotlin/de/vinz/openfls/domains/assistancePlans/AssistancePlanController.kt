@@ -7,8 +7,8 @@ import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanUpdateRequest
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanUpdateResult
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

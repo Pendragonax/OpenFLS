@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.assistancePlans.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode.EXACT
 import de.vinz.openfls.domains.clients.entity.Client
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
@@ -26,17 +25,14 @@ class AssistancePlan(
         @Column(name = "hour_mode", nullable = false)
         var hourMode: AssistancePlanHourMode = EXACT,
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
         @JoinColumn(name = "client_id")
         var client: Client? = null,
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
         @JoinColumn(name = "sponsor_id")
         var sponsor: Sponsor? = null,
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
         @JoinColumn(name = "institution_id")
         var institution: Institution? = null,
@@ -50,7 +46,6 @@ class AssistancePlan(
         @OneToMany(mappedBy = "assistancePlan", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf(),
 
-        @JsonIgnore
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "hour_corridor_id")
         var hourCorridor: HourCorridor? = null

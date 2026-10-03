@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.institutions.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.goals.entity.Goal
@@ -28,7 +27,6 @@ class Institution(
         @Column(length = 64)
         var email: String = "",
 
-        @JsonIgnore
         @OneToMany(
                 mappedBy = "institution",
                 cascade = [CascadeType.ALL],
@@ -56,7 +54,6 @@ class Institution(
         )
         var goals: MutableSet<Goal> = mutableSetOf(),
 
-        @JsonIgnore
         @OneToMany(
                 mappedBy = "institution",
                 cascade = [CascadeType.ALL],

@@ -1,11 +1,15 @@
 package de.vinz.openfls.domains.institutions
 
+import jakarta.persistence.EntityManagerFactory
+import de.vinz.openfls.testsupport.QueryCounter
+import de.vinz.openfls.domains.institutions.service.InstitutionLookupService
 import de.vinz.openfls.domains.employees.repository.EmployeeRepository
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.permissions.entity.PermissionKey
 import de.vinz.openfls.domains.institutions.dto.InstitutionCreateRequest
 import de.vinz.openfls.domains.institutions.dto.InstitutionPermissionRequest
 import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionCreateResult
 import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateResult
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.service.InstitutionService
@@ -19,7 +23,6 @@ import de.vinz.openfls.domains.employees.service.UnprofessionalService
 import de.vinz.openfls.domains.sponsors.service.SponsorService
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -29,6 +32,7 @@ import org.springframework.context.annotation.Import
 @DataJpaTest
 @Import(
     InstitutionService::class,
+    InstitutionLookupService::class,
     PermissionService::class,
     EmployeeService::class,
     EmployeeAccessService::class,
@@ -53,6 +57,9 @@ class InstitutionServiceDataJpaTest {
     @Autowired
     lateinit var entityManager: TestEntityManager
 
+    @Autowired
+    lateinit var entityManagerFactory: EntityManagerFactory
+
     @Test
     fun create_validRequest_persistsInstitutionAndPermissions() {
         // Given
@@ -69,7 +76,7 @@ class InstitutionServiceDataJpaTest {
         )
 
         // When
-        val result = institutionService.create(request)
+        val result = (institutionService.create(request) as InstitutionCreateResult.Success).response
 
         // Then
         entityManager.flush()
@@ -85,16 +92,39 @@ class InstitutionServiceDataJpaTest {
     }
 
     @Test
-    fun create_unknownEmployee_throwsException() {
+    fun create_unknownEmployee_returnsEmployeeNotFoundAndPersistsNothing() {
         // Given
         val request = InstitutionCreateRequest(
             name = "Inst",
             permissions = listOf(InstitutionPermissionRequest(employeeId = 9999, readEntries = true))
         )
 
-        // When / Then
-        assertThatThrownBy { institutionService.create(request) }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        // When
+        val result = institutionService.create(request)
+
+        // Then
+        assertThat(result).isEqualTo(InstitutionCreateResult.EmployeeNotFound)
+        assertThat(institutionRepository.count()).isZero()
+    }
+
+    @Test
+    fun update_unknownEmployee_returnsEmployeeNotFoundAndKeepsTheInstitution() {
+        // Given
+        val institution = institutionRepository.save(Institution(name = "Old", email = "a@b.c", phonenumber = "1"))
+        val request = InstitutionUpdateRequest(
+            id = institution.id!!,
+            name = "New",
+            permissions = listOf(InstitutionPermissionRequest(employeeId = 9999, readEntries = true))
+        )
+
+        // When
+        val result = institutionService.update(request)
+
+        // Then
+        assertThat(result).isEqualTo(InstitutionUpdateResult.EmployeeNotFound)
+        entityManager.flush()
+        entityManager.clear()
+        assertThat(institutionRepository.findById(institution.id!!).get().name).isEqualTo("Old")
     }
 
     @Test
@@ -205,6 +235,38 @@ class InstitutionServiceDataJpaTest {
                 institution = institution,
                 readEntries = read,
                 writeEntries = write
+            )
+        )
+    }
+
+    @Test
+    fun getAllWithPermissions_loadsPermissionsWithAConstantNumberOfQueries() {
+        // Given
+        val employeeIds = (1..2).map { employeeRepository.save(Employee(firstname = "Max", lastname = "E$it")).id!! }
+        repeat(3) { createInstitution(it, employeeIds) }
+        entityManager.flush()
+        entityManager.clear()
+        val queryCounter = QueryCounter(entityManagerFactory)
+        val queriesForFewInstitutions = queryCounter.count { institutionService.getAllWithPermissions() }
+
+        repeat(17) { createInstitution(it + 3, employeeIds) }
+        entityManager.flush()
+        entityManager.clear()
+
+        // When
+        val queriesForManyInstitutions = queryCounter.count { institutionService.getAllWithPermissions() }
+
+        // Then
+        assertThat(queriesForManyInstitutions).isEqualTo(queriesForFewInstitutions)
+    }
+
+    private fun createInstitution(index: Int, employeeIds: List<Long>) {
+        institutionService.create(
+            InstitutionCreateRequest(
+                name = "Inst $index",
+                email = "a@b.c",
+                phonenumber = "1",
+                permissions = employeeIds.map { InstitutionPermissionRequest(employeeId = it, readEntries = true) }
             )
         )
     }

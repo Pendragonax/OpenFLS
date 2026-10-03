@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.categories.dto.CategoryTemplateDeleteResult
 import de.vinz.openfls.domains.categories.dto.CategoryTemplateUpdateRequest
 import de.vinz.openfls.domains.categories.dto.CategoryTemplateUpdateResult
 import de.vinz.openfls.domains.categories.service.CategoryTemplateService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

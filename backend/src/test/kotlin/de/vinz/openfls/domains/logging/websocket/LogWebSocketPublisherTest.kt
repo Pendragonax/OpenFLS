@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.classic.spi.LoggingEvent
-import de.vinz.openfls.domains.logging.dto.LogEntryDto
+import de.vinz.openfls.domains.logging.dto.LogEntryResponse
 import de.vinz.openfls.logback.LiveLogAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -39,7 +39,7 @@ class LogWebSocketPublisherTest {
         consumer.accept(event("demo failed", RuntimeException("boom", IllegalStateException("root cause"))))
 
         // Then
-        val captor = argumentCaptor<LogEntryDto>()
+        val captor = argumentCaptor<LogEntryResponse>()
         verify(template).convertAndSend(eq(LogWebSocketTopic.LIVE_ENTRIES), captor.capture())
         val published = captor.firstValue
         assertThat(published.message).isEqualTo("demo failed")
@@ -58,7 +58,7 @@ class LogWebSocketPublisherTest {
         consumer.accept(event("just an info", null))
 
         // Then
-        val captor = argumentCaptor<LogEntryDto>()
+        val captor = argumentCaptor<LogEntryResponse>()
         verify(template).convertAndSend(eq(LogWebSocketTopic.LIVE_ENTRIES), captor.capture())
         assertThat(captor.firstValue.stacktrace).isNull()
     }

@@ -13,12 +13,15 @@ import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.testsupport.TestBeans
+import de.vinz.openfls.testsupport.QueryCounter
+import jakarta.persistence.EntityManagerFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
@@ -37,6 +40,12 @@ class ClientServiceDataJpaTest {
 
     @Autowired
     lateinit var categoryTemplateRepository: CategoryTemplateRepository
+
+    @Autowired
+    lateinit var entityManager: TestEntityManager
+
+    @Autowired
+    lateinit var entityManagerFactory: EntityManagerFactory
 
     @MockitoBean
     lateinit var institutionService: InstitutionService
@@ -199,6 +208,26 @@ class ClientServiceDataJpaTest {
     }
 
     @Test
+    fun getAllClientsWithInstitution_loadsTheInstitutionsWithAConstantNumberOfQueries() {
+        // Given
+        repeat(3) { saveClientOfNewInstitution(it) }
+        entityManager.flush()
+        entityManager.clear()
+        val queryCounter = QueryCounter(entityManagerFactory)
+        val queriesForFewClients = queryCounter.count { clientService.getAllClientsWithInstitution(true, emptyList()) }
+
+        repeat(17) { saveClientOfNewInstitution(it + 3) }
+        entityManager.flush()
+        entityManager.clear()
+
+        // When
+        val queriesForManyClients = queryCounter.count { clientService.getAllClientsWithInstitution(true, emptyList()) }
+
+        // Then
+        assertThat(queriesForManyClients).isEqualTo(queriesForFewClients)
+    }
+
+    @Test
     fun getAllClientNames_includesArchivedClients() {
         // Given
         saveClient("Max", "Mustermann")
@@ -245,5 +274,14 @@ class ClientServiceDataJpaTest {
         lastName = "Mustermann"
         institutionId = institution.id!!
         categoryTemplateId = categoryTemplate.id
+    }
+
+    private fun saveClientOfNewInstitution(index: Int): Client {
+        val ownInstitution = institutionRepository.save(
+            Institution(name = "Inst $index", email = "a@b.c", phonenumber = "1")
+        )
+        return clientRepository.save(
+            Client(firstName = "Max", lastName = "Client $index", institution = ownInstitution, categoryTemplate = categoryTemplateRepository.findById(categoryTemplate.id).get())
+        )
     }
 }

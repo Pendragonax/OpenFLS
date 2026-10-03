@@ -13,14 +13,13 @@ import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummaryIn
 import de.vinz.openfls.domains.services.dto.ServiceDto
 import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummarySponsorProjection
-import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.DateService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class HourReportMonthlySummaryServiceTest {
 
@@ -36,7 +35,7 @@ class HourReportMonthlySummaryServiceTest {
     @Test
     fun getMonthlySummary_corridorPlan_marksKorAndUsesAverageApprovedHours() {
         // Given
-        val today = LocalDate.now()
+        val today = FIXED_DAY
         val planStart = today.withDayOfMonth(1)
         val planEnd = today.withDayOfMonth(today.lengthOfMonth())
         val monthDays = DateService.countDaysOfMonthAndYearBetweenStartAndEnd(
@@ -55,7 +54,7 @@ class HourReportMonthlySummaryServiceTest {
                 year = today.year,
                 month = today.monthValue
             )
-        ).thenReturn(listOf(serviceProjection(projection.id, executedMinutes)))
+        ).thenReturn(listOf(serviceProjection(executedMinutes)))
         whenever(accessService.canReadEntries(0)).thenReturn(true)
         whenever(hourReportMonthlySummaryRepository.findSummaryProjectionsByPeriod(planStart, planEnd))
             .thenReturn(listOf(projection))
@@ -82,7 +81,7 @@ class HourReportMonthlySummaryServiceTest {
     @Test
     fun getMonthlySummary_corridorPlanWithHourType_usesMonthlyUpperBoundForUtilization() {
         // Given
-        val today = LocalDate.now()
+        val today = FIXED_DAY
         val planStart = today.withDayOfMonth(1)
         val planEnd = today.withDayOfMonth(today.lengthOfMonth())
         val hourType = HourType(id = 2, title = "Korridor")
@@ -96,7 +95,7 @@ class HourReportMonthlySummaryServiceTest {
                 year = today.year,
                 month = today.monthValue
             )
-        ).thenReturn(listOf(serviceProjection(projection.id, executedMinutes)))
+        ).thenReturn(listOf(serviceProjection(executedMinutes)))
 
         whenever(accessService.canReadEntries(0)).thenReturn(true)
         whenever(accessService.isAdmin()).thenReturn(true)
@@ -115,7 +114,6 @@ class HourReportMonthlySummaryServiceTest {
             planEnd
         )
         val expectedApprovedHours = TimeDoubleService.convertDoubleToTimeDouble((monthDays * 7.5) / 7.0)
-        val expectedMonthlyFrom = TimeDoubleService.convertDoubleToTimeDouble((monthDays * 5.0) / 7.0)
         val expectedMonthlyTo = TimeDoubleService.convertDoubleToTimeDouble((monthDays * 10.0) / 7.0)
 
         assertThat(result.approvedHours).isEqualTo(expectedApprovedHours)
@@ -218,8 +216,8 @@ class HourReportMonthlySummaryServiceTest {
         }
     }
 
-    private fun serviceProjection(assistancePlanId: Long, minutes: Int): ServiceDto {
-        val start = LocalDate.now().atStartOfDay()
+    private fun serviceProjection(minutes: Int): ServiceDto {
+        val start = FIXED_DAY.atStartOfDay()
         return ServiceDto(
             id = 1,
             start = start,
@@ -230,5 +228,9 @@ class HourReportMonthlySummaryServiceTest {
             unfinished = false,
             groupService = false
         )
+    }
+
+    private companion object {
+        val FIXED_DAY: LocalDate = LocalDate.of(2026, 5, 15)
     }
 }

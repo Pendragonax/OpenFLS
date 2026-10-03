@@ -1,9 +1,6 @@
 package de.vinz.openfls.domains.clients.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
-import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.services.entity.Service
@@ -33,7 +30,6 @@ class Client(
         @Column(nullable = false)
         var archived: Boolean = false,
 
-        @JsonIgnoreProperties(value = ["hibernateLazyInitializer"])
         @ManyToOne(
                 cascade = [CascadeType.PERSIST],
                 fetch = FetchType.LAZY
@@ -41,7 +37,6 @@ class Client(
         @JoinColumn(name = "category_template_id")
         var categoryTemplate: CategoryTemplate? = null,
 
-        @JsonIgnoreProperties(value = ["client", "services", "hibernateLazyInitializer"])
         @OneToMany(
                 cascade = [CascadeType.ALL],
                 mappedBy = "client",
@@ -49,7 +44,6 @@ class Client(
         )
         var assistancePlans: MutableSet<AssistancePlan> = mutableSetOf(),
 
-        @JsonIgnoreProperties(value = ["contingents", "assistancePlans", "goals", "hibernateLazyInitializer"])
         @ManyToOne(
                 cascade = [CascadeType.PERSIST],
                 fetch = FetchType.LAZY
@@ -57,14 +51,12 @@ class Client(
         @JoinColumn(name = "institution_id")
         var institution: Institution? = null,
 
-        @JsonIgnore
         @OneToMany(
                 mappedBy = "client",
                 cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf(),
 
-        @JsonIgnoreProperties(value = ["client", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "client",
                 cascade = [CascadeType.ALL],

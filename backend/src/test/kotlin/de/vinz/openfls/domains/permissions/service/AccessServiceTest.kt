@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.institutions.dto.InstitutionResponse
 import de.vinz.openfls.domains.institutions.service.InstitutionService
-import de.vinz.openfls.services.UserService
+import de.vinz.openfls.security.UserService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

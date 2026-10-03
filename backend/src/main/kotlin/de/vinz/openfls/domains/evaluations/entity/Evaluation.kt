@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.evaluations.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.goals.entity.Goal
 import jakarta.persistence.*
@@ -25,7 +24,6 @@ class Evaluation(
         @Column(nullable = false)
         var createdAt: LocalDateTime = LocalDateTime.now(),
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
         @JoinColumn(name = "createdEvaluationsId")
         var createdBy: Employee? = null,
@@ -33,12 +31,10 @@ class Evaluation(
         @Column(nullable = false)
         var updatedAt: LocalDateTime = LocalDateTime.now(),
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
         @JoinColumn(name = "updatedEvaluationsId")
         var updatedBy: Employee? = null,
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.REFRESH], fetch = FetchType.LAZY)
         @JoinColumn(name = "goal_id")
         var goal: Goal? = null

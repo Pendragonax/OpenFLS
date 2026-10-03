@@ -1,5 +1,6 @@
 package de.vinz.openfls.domains.clients.service
 
+import de.vinz.openfls.domains.institutions.service.InstitutionLookupService
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
@@ -51,6 +52,7 @@ import java.time.LocalDateTime
     SponsorService::class,
     UnprofessionalService::class,
     PermissionService::class,
+    InstitutionLookupService::class,
     TestBeans::class
 )
 class ClientArchiveServiceDataJpaTest {

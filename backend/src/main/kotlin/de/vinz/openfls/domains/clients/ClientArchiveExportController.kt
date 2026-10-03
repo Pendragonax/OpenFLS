@@ -6,8 +6,8 @@ import de.vinz.openfls.domains.clients.dto.ClientArchiveExportRequestResult
 import de.vinz.openfls.domains.clients.dto.ClientArchiveExportStatusResult
 import de.vinz.openfls.domains.clients.entity.ClientArchiveExportFormat
 import de.vinz.openfls.domains.clients.service.ClientArchiveExportService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -2,8 +2,8 @@ package de.vinz.openfls.domains.assistancePlans
 
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanPreviewListResult
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanPreviewService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

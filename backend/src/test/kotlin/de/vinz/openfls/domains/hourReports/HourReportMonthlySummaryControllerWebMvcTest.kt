@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.hourReports
 import de.vinz.openfls.domains.hourReports.dto.HourReportMonthlySummaryResponse
 import de.vinz.openfls.domains.hourReports.dto.HourReportMonthlySummaryResult
 import de.vinz.openfls.domains.hourReports.service.HourReportMonthlySummaryService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

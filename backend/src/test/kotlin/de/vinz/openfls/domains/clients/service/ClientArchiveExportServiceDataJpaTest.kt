@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.clients.service
 
+import de.vinz.openfls.domains.institutions.service.InstitutionLookupService
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.vinz.openfls.TimeConfiguration
+import de.vinz.openfls.common.config.TimeConfiguration
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
@@ -70,6 +71,7 @@ import java.time.LocalDateTime
     InstitutionService::class,
     CategoryTemplateService::class,
     PermissionService::class,
+    InstitutionLookupService::class,
     de.vinz.openfls.domains.services.service.ServiceService::class,
     TestBeans::class
 )
@@ -394,7 +396,7 @@ class ClientArchiveExportServiceDataJpaTest {
         )
         goalRepository.save(goal)
 
-        val service = serviceRepository.save(
+        serviceRepository.save(
             Service(
                 start = LocalDateTime.of(2026, 6, 13, 11, 0),
                 end = LocalDateTime.of(2026, 6, 13, 12, 0),

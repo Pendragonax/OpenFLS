@@ -10,8 +10,8 @@ import de.vinz.openfls.domains.hourReports.dto.HourReportRowResponse
 import de.vinz.openfls.domains.hourReports.dto.HourReportResult
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.DateService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -433,7 +433,7 @@ class HourReportService(
 
         val result = assistancePlanDtos.map { plan ->
             val client = clientDtos.find { it.id == plan.clientId }
-                ?: throw IllegalArgumentException("Client with ID ${plan.clientId} not found")
+                ?: error("client [id = ${plan.clientId}] of assistance plan [id = ${plan.id}] does not exist")
 
             HourReportRowResponse(plan, client, defaultValuesArray.copyOf())
         }.sortedBy { it.clientDto.lastName }

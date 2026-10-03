@@ -9,8 +9,8 @@ import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummaryPr
 import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummaryGoalProjection
 import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummaryHourCorridorProjection
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.DateService
+import de.vinz.openfls.common.time.TimeDoubleService
 import de.vinz.openfls.domains.services.service.ServiceService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -190,33 +190,6 @@ class HourReportMonthlySummaryService(
                 executedHours = executedHours,
                 executedPercent = executedPercent,
                 missingHours = missingHours)
-    }
-
-    private fun getApprovedAssistancePlanHoursInYear(year: Int, assistancePlans: List<HourReportMonthlySummaryProjection>): List<Double> {
-        val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
-
-        for (assistancePlan in assistancePlans) {
-            for (month in 1..12) {
-                monthlyHours[month] = TimeDoubleService.sumTimeDoubles(
-                        monthlyHours[month],
-                        getApprovedAssistancePlanHoursInMonth(year, month, assistancePlan))
-            }
-        }
-
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
-
-        return monthlyHours
-    }
-
-    private fun getApprovedAssistancePlanHoursInYear(year: Int, assistancePlan: HourReportMonthlySummaryProjection): List<Double> {
-        val monthlyHours = ArrayList<Double>(List(13) { 0.0 })
-
-        for (month in 1..12) {
-            monthlyHours[month] = getApprovedAssistancePlanHoursInMonth(year, month, assistancePlan)
-        }
-        monthlyHours[0] = monthlyHours.reduce { acc, d -> TimeDoubleService.sumTimeDoubles(acc, d) }
-
-        return monthlyHours
     }
 
     private fun getApprovedAssistancePlanHoursInMonth(year: Int,

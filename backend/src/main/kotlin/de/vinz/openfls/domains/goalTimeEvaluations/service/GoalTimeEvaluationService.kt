@@ -9,8 +9,8 @@ import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationResult
 import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalsTimeEvaluationResponse
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.DateService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.stereotype.Service
 import java.time.LocalDate

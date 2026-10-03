@@ -11,21 +11,25 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.ZoneId
 
 class ContingentCalendarServiceTest {
+    private val today: LocalDate = LocalDate.of(2026, 3, 11)
+    private val clock: Clock = Clock.fixed(Instant.parse("2026-03-11T09:00:00Z"), ZoneId.of("UTC"))
     private val serviceService: ServiceService = mock()
     private val contingentService: ContingentService = mock()
     private val contingentCalculationService: ContingentCalculationService = mock()
     private val absenceService: AbsenceService = mock()
-    private val contingentCalendarService = ContingentCalendarService(serviceService, contingentService, contingentCalculationService, absenceService)
+    private val contingentCalendarService = ContingentCalendarService(serviceService, contingentService, contingentCalculationService, absenceService, clock)
 
     @Test
     fun generateContingentCalendarFor_multipleServicesSameDay_aggregatesMinutesAndContingent() {
         // Given
         val employeeId = 7L
-        val now = LocalDate.now()
+        val now = today
         val start = now.minusYears(1)
         val serviceDate = now.minusDays(2)
         val otherDate = now.minusDays(1)
@@ -101,7 +105,7 @@ class ContingentCalendarServiceTest {
     fun generateContingentCalendarFor_absenceToday_createsAbsentDayAndZeroTodayTotals() {
         // Given
         val employeeId = 11L
-        val now = LocalDate.now()
+        val now = today
         val start = now.minusYears(1)
         val contingent = Contingent().apply {
             this.start = now.minusMonths(2)
@@ -150,7 +154,7 @@ class ContingentCalendarServiceTest {
     fun generateContingentCalendarFor_absenceAndServiceSameDay_marksAbsentWithoutExtraDay() {
         // Given
         val employeeId = 3L
-        val now = LocalDate.now()
+        val now = today
         val start = now.minusYears(1)
         val serviceDate = now.minusDays(1)
         val contingent = Contingent().apply {
@@ -197,7 +201,7 @@ class ContingentCalendarServiceTest {
     fun generateContingentCalendarFor_noContingent_returnsZeroContingentTotals() {
         // Given
         val employeeId = 15L
-        val now = LocalDate.now()
+        val now = today
         val start = now.minusYears(1)
         val projections = listOf(
             ServiceCalendarDto(

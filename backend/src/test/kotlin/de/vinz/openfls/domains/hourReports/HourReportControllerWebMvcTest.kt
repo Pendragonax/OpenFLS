@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.clients.dto.ClientNameDto
 import de.vinz.openfls.domains.hourReports.dto.HourReportRowResponse
 import de.vinz.openfls.domains.hourReports.dto.HourReportResult
 import de.vinz.openfls.domains.hourReports.service.HourReportService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

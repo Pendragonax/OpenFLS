@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.employees.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import java.time.LocalDate
 import jakarta.persistence.*
@@ -11,13 +10,11 @@ class Unprofessional(
         @EmbeddedId
         var id: UnprofessionalKey? = null,
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
         @MapsId("employeeId")
         @JoinColumn(name = "employee_Id", referencedColumnName = "id")
         var employee: Employee? = null,
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
         @MapsId("sponsorId")
         @JoinColumn(name = "sponsor_Id", referencedColumnName = "id")

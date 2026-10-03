@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.contingents.dto.ContingentEvaluationResponse
 import de.vinz.openfls.domains.contingents.dto.ContingentServiceEntryDto
 import de.vinz.openfls.domains.contingents.dto.EmployeeContingentEvaluationResponse
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime

@@ -3,20 +3,20 @@ package de.vinz.openfls.domains.permissions.service
 import de.vinz.openfls.architecture.InternalEntityApi
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.employees.service.EmployeeAccessService
-import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
+import de.vinz.openfls.domains.institutions.entity.Institution
+import de.vinz.openfls.domains.institutions.service.InstitutionLookupService
 import de.vinz.openfls.domains.permissions.dto.PermissionRequest
 import de.vinz.openfls.domains.permissions.entity.Permission
+import de.vinz.openfls.domains.permissions.entity.PermissionKey
 import de.vinz.openfls.domains.permissions.repository.PermissionRepository
-import org.modelmapper.ModelMapper
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PermissionService(
         private val employeeAccessService: EmployeeAccessService,
-        private val institutionRepository: InstitutionRepository,
-        private val permissionRepository: PermissionRepository,
-        private val modelMapper: ModelMapper
+        private val institutionLookupService: InstitutionLookupService,
+        private val permissionRepository: PermissionRepository
 ) {
 
     @InternalEntityApi
@@ -66,18 +66,33 @@ class PermissionService(
             .toList()
     }
 
+    /** The institutions the requests refer to by id, or `null` if one of them does not exist. */
     @InternalEntityApi
-    fun convertToPermissions(permissionRequests: List<PermissionRequest>?, employee: Employee): MutableSet<Permission> {
-        val entities = permissionRequests
-                ?.map { modelMapper.map(it, Permission::class.java) }
-                ?.toMutableSet() ?: mutableSetOf()
+    @Transactional(readOnly = true)
+    fun getInstitutionsForRequests(permissionRequests: List<PermissionRequest>): Map<Long, Institution>? {
+        return permissionRequests.map { it.institutionId }.distinct()
+            .associateWith { institutionLookupService.getEntityById(it) ?: return null }
+    }
 
-        for (permission in entities) {
-            permission.employee = employee
-            permission.institution = institutionRepository.findById(permission.id.institutionId!!).get()
-        }
-
-        return entities
+    @InternalEntityApi
+    fun convertToPermissions(
+        permissionRequests: List<PermissionRequest>,
+        employee: Employee,
+        institutions: Map<Long, Institution>
+    ): MutableSet<Permission> {
+        return permissionRequests
+            .map { request ->
+                Permission(
+                    id = PermissionKey(employeeId = employee.id, institutionId = request.institutionId),
+                    employee = employee,
+                    institution = institutions.getValue(request.institutionId),
+                    readEntries = request.readEntries,
+                    writeEntries = request.writeEntries,
+                    changeInstitution = request.changeInstitution,
+                    affiliated = request.affiliated
+                )
+            }
+            .toMutableSet()
     }
 
     @Transactional(readOnly = true)

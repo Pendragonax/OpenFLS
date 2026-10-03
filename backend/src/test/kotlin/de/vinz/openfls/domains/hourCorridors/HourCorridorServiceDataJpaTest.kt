@@ -26,7 +26,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
-import de.vinz.openfls.TimeConfiguration
+import de.vinz.openfls.common.config.TimeConfiguration
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.LocalDate
 

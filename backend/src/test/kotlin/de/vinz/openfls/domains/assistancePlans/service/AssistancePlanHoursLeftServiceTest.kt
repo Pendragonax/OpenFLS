@@ -9,8 +9,8 @@ import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.services.dto.ServiceDto
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.DateService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -355,19 +355,5 @@ class AssistancePlanHoursLeftServiceTest {
             .thenReturn(services)
         whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
             .thenReturn(services)
-    }
-
-    @Suppress("unused")
-    private fun serviceProjection(minutes: Int): ServiceDto {
-        return ServiceDto(
-            id = 1,
-            start = LocalDateTime.of(2024, 2, 1, 8, 0),
-            end = LocalDateTime.of(2024, 2, 1, 9, 0),
-            minutes = minutes,
-            title = "",
-            content = "",
-            unfinished = false,
-            groupService = false
-        )
     }
 }

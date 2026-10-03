@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.clients.service.ClientDashboardService
 import de.vinz.openfls.domains.employees.dto.EmployeeFavoriteResult
 import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

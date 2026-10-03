@@ -9,7 +9,6 @@ import com.tngtech.archunit.core.domain.JavaModifier
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.core.importer.ImportOption
 import com.tngtech.archunit.lang.ArchCondition
-import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.ConditionEvents
 import com.tngtech.archunit.lang.SimpleConditionEvent
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes

@@ -14,7 +14,7 @@ import de.vinz.openfls.domains.hourReports.dto.HourReportRowResponse
 import de.vinz.openfls.domains.hourReports.dto.HourReportResult
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeEach

@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.sponsors.dto.SponsorResponse
 import de.vinz.openfls.domains.sponsors.service.SponsorService
 import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateResult
 import de.vinz.openfls.domains.sponsors.dto.SponsorWithUnprofessionalsResponse
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

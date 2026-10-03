@@ -1,9 +1,6 @@
 package de.vinz.openfls.domains.categories.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
-import jakarta.validation.constraints.NotEmpty
-import jakarta.validation.constraints.Size
 
 @Entity
 @Table(name = "category_templates")
@@ -20,7 +17,6 @@ class CategoryTemplate(
 
         var withoutClient: Boolean = false,
 
-        @JsonIgnoreProperties(value = ["services", "categoryTemplate", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "categoryTemplate",
                 cascade = [CascadeType.ALL],

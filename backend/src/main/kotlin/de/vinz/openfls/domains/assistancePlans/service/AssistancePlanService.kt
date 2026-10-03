@@ -17,7 +17,6 @@ import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanReposito
 import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour
-import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.hourTypes.service.HourTypeService

@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.assistancePlans.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
@@ -16,7 +15,6 @@ class AssistancePlanHour(
         @Column(name = "weekly_minutes")
         var weeklyMinutes: Int = 0,
 
-        @JsonIgnoreProperties(value = ["assistancePlanHours", "hibernateLazyInitializer"])
         @ManyToOne(
                 cascade = [CascadeType.PERSIST],
                 fetch = FetchType.LAZY

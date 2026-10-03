@@ -1,0 +1,29 @@
+# Bewusst schmale Konfiguration: Sie sucht nur nach totem Code und offensichtlichen Fehlern.
+# Formatierungs- und Stilregeln sind absichtlich nicht aktiv, damit der Build nicht an
+# Geschmacksfragen scheitert. Neue Regeln werden hier gezielt ergänzt.
+style:
+  UnusedImport:
+    active: true
+  UnusedParameter:
+    active: true
+  UnusedPrivateClass:
+    active: true
+  UnusedPrivateFunction:
+    active: true
+  UnusedPrivateProperty:
+    active: true
+  UnusedVariable:
+    active: true
+
+potential-bugs:
+  UnreachableCode:
+    active: true
+  UnreachableCatchBlock:
+    active: true
+  UnusedUnaryOperator:
+    active: true
+
+empty-blocks:
+  EmptyCatchBlock:
+    active: true
+    allowedExceptionNameRegex: '_|(ignore|expected).*'

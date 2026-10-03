@@ -21,7 +21,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.TimeDoubleService
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate

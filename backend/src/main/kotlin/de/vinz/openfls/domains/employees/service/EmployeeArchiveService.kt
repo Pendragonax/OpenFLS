@@ -5,6 +5,7 @@ import de.vinz.openfls.domains.employees.dto.EmployeeArchiveResult
 import de.vinz.openfls.domains.employees.entity.EmployeeArchiveActionType
 import de.vinz.openfls.domains.employees.entity.EmployeeArchiveHistoryEntry
 import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.logging.StructuredLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -68,6 +69,12 @@ class EmployeeArchiveService(
         employee.archived = actionType == EmployeeArchiveActionType.ARCHIVE
         employee.archiveHistoryEntries.add(historyEntry)
         employeeService.saveEntity(employee)
+        StructuredLog.audit(
+            if (actionType == EmployeeArchiveActionType.ARCHIVE) "employee.archived" else "employee.reactivated",
+            "success",
+            "employee",
+            employeeId.toString()
+        )
 
         return EmployeeArchiveResult.Success(EmployeeArchiveHistoryEntryResponse.from(historyEntry))
     }

@@ -393,12 +393,6 @@ class ServiceService(
 
     @InternalEntityApi
     @Transactional(readOnly = true)
-    fun getAllEntitiesByAssistancePlanId(assistancePlanId: Long): List<Service> {
-        return serviceRepository.findAllByAssistancePlanId(assistancePlanId)
-    }
-
-    @InternalEntityApi
-    @Transactional(readOnly = true)
     fun getAllEntitiesByClientId(clientId: Long): List<Service> {
         return serviceRepository.findByClientIdOrderByStartAsc(clientId)
     }

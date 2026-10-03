@@ -2,6 +2,7 @@ package de.vinz.openfls.domains.employees.service
 
 import de.vinz.openfls.domains.employees.dto.EmployeeDeleteResult
 import de.vinz.openfls.domains.services.service.ServiceService
+import de.vinz.openfls.logging.StructuredLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,6 +24,7 @@ class EmployeeDeletionService(
             return EmployeeDeleteResult.HasServices
 
         employeeService.deleteById(id)
+        StructuredLog.audit("employee.deleted", "success", "employee", id.toString())
 
         return EmployeeDeleteResult.Success(employee)
     }

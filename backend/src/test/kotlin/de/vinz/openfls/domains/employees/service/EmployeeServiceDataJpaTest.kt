@@ -1,5 +1,8 @@
 package de.vinz.openfls.domains.employees.service
 
+import jakarta.persistence.EntityManagerFactory
+import de.vinz.openfls.testsupport.QueryCounter
+import de.vinz.openfls.domains.institutions.service.InstitutionLookupService
 import de.vinz.openfls.domains.employees.dto.EmployeeCreateAccessRequest
 import de.vinz.openfls.domains.employees.dto.EmployeeCreateRequest
 import de.vinz.openfls.domains.employees.dto.EmployeeCreateResult
@@ -19,6 +22,7 @@ import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.permissions.dto.PermissionRequest
 import de.vinz.openfls.domains.permissions.entity.Permission
+import de.vinz.openfls.domains.permissions.entity.PermissionKey
 import de.vinz.openfls.domains.permissions.repository.PermissionRepository
 import de.vinz.openfls.domains.permissions.service.PermissionService
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
@@ -41,6 +45,7 @@ import java.time.LocalDate
     UnprofessionalService::class,
     SponsorService::class,
     PermissionService::class,
+    InstitutionLookupService::class,
     TestBeans::class
 )
 class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepository: UnprofessionalRepository) {
@@ -68,6 +73,9 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
 
     @Autowired
     lateinit var entityManager: TestEntityManager
+
+    @Autowired
+    lateinit var entityManagerFactory: EntityManagerFactory
 
     @Test
     fun create_validRequest_persistsEmployeeAndAccess() {
@@ -487,5 +495,48 @@ class EmployeeServiceDataJpaTest(@param:Autowired private val unprofessionalRepo
         val employee = Employee(firstname = "Old", lastname = "Name")
         employee.access = EmployeeAccess(username = username, password = password, role = role, employee = employee)
         return employeeRepository.save(employee)
+    }
+
+    @Test
+    fun getAllEmployeeDetails_loadsAccessPermissionsAndUnprofessionalsWithAConstantNumberOfQueries() {
+        // Given
+        val institutionId = institutionRepository.save(Institution(name = "Inst", email = "a@b.c", phonenumber = "1")).id!!
+        val sponsorId = sponsorRepository.save(Sponsor(name = "Sponsor", payOverhang = true, payExact = false)).id
+        repeat(3) { createDetailedEmployee(it, institutionId, sponsorId) }
+        entityManager.flush()
+        entityManager.clear()
+        val queryCounter = QueryCounter(entityManagerFactory)
+        val queriesForFewEmployees = queryCounter.count { employeeService.getAllEmployeeDetails(includeArchived = true) }
+
+        repeat(17) { createDetailedEmployee(it + 3, institutionId, sponsorId) }
+        entityManager.flush()
+        entityManager.clear()
+
+        // When
+        val queriesForManyEmployees = queryCounter.count { employeeService.getAllEmployeeDetails(includeArchived = true) }
+
+        // Then
+        assertThat(queriesForManyEmployees).isEqualTo(queriesForFewEmployees)
+    }
+
+    private fun createDetailedEmployee(index: Int, institutionId: Long, sponsorId: Long) {
+        val employee = Employee(firstname = "Max", lastname = "Employee $index")
+        employee.access = EmployeeAccess(username = "employee$index", password = "secret", role = 3, employee = employee)
+        val saved = employeeRepository.save(employee)
+        permissionRepository.save(
+            Permission(
+                id = PermissionKey(employeeId = saved.id, institutionId = institutionId),
+                employee = saved,
+                institution = institutionRepository.findById(institutionId).get(),
+                readEntries = true
+            )
+        )
+        unprofessionalRepository.save(
+            Unprofessional(
+                id = UnprofessionalKey(employeeId = saved.id, sponsorId = sponsorId),
+                employee = saved,
+                sponsor = sponsorRepository.findById(sponsorId).get()
+            )
+        )
     }
 }

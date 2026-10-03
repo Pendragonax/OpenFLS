@@ -9,8 +9,8 @@ import de.vinz.openfls.domains.clientTasks.dto.ClientTaskDeleteResult
 import de.vinz.openfls.domains.clientTasks.dto.ClientTaskUpdateRequest
 import de.vinz.openfls.domains.clientTasks.dto.ClientTaskUpdateResult
 import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

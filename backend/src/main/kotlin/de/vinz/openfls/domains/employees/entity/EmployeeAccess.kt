@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.employees.entity
 
-import de.vinz.openfls.domains.permissions.entity.Permission
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import jakarta.persistence.*

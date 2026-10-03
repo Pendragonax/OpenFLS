@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.clients.dto.ClientArchiveExportStatusResponse
 import de.vinz.openfls.domains.clients.dto.ClientArchiveExportStatusResult
 import de.vinz.openfls.domains.clients.entity.ClientArchiveExportFormat
 import de.vinz.openfls.domains.clients.service.ClientArchiveExportService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

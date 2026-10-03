@@ -7,7 +7,6 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import de.vinz.openfls.logging.StructuredLog
-import org.modelmapper.ModelMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -54,9 +53,6 @@ class SecurityConfiguration {
 
     @Value("\${openfls.cors.enabled:true}")
     private val corsEnabled: Boolean = true
-
-    @Bean
-    fun modelMapper(): ModelMapper? = ModelMapper()
 
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()

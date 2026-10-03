@@ -7,8 +7,8 @@ import de.vinz.openfls.domains.assistancePlans.dto.ApprovedHoursLeftHourTypeResp
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.DateService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.DateService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
@@ -426,8 +426,8 @@ class AssistancePlanHoursLeftService(
             return 0.0 to 0.0
         }
         val days = countMatchingDaysIn(start, end, assistancePlan)
-        val from = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesFrom)
-        val till = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesTill)
+        val from = corridorApprovedMinutesForDays(days, corridor.weeklyMinutesFrom)
+        val till = corridorApprovedMinutesForDays(days, corridor.weeklyMinutesTill)
         return from to till
     }
 
@@ -441,8 +441,8 @@ class AssistancePlanHoursLeftService(
             return 0.0 to 0.0
         }
         val days = countMatchingDaysIn(year, assistancePlan)
-        val from = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesFrom)
-        val till = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesTill)
+        val from = corridorApprovedMinutesForDays(days, corridor.weeklyMinutesFrom)
+        val till = corridorApprovedMinutesForDays(days, corridor.weeklyMinutesTill)
         return from to till
     }
 
@@ -457,8 +457,8 @@ class AssistancePlanHoursLeftService(
             return 0.0 to 0.0
         }
         val days = countMatchingDaysIn(year, month, assistancePlan)
-        val from = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesFrom)
-        val till = corridorApprovedMinutesForDays(corridor, days, corridor.weeklyMinutesTill)
+        val from = corridorApprovedMinutesForDays(days, corridor.weeklyMinutesFrom)
+        val till = corridorApprovedMinutesForDays(days, corridor.weeklyMinutesTill)
         return from to till
     }
 
@@ -467,11 +467,7 @@ class AssistancePlanHoursLeftService(
         return weeklyMinutesMean / 7.0 * days
     }
 
-    private fun corridorApprovedMinutesForDays(
-        corridor: de.vinz.openfls.domains.hourCorridors.entity.HourCorridor,
-        days: Int,
-        weeklyMinutes: Int
-    ): Double {
+    private fun corridorApprovedMinutesForDays(days: Int, weeklyMinutes: Int): Double {
         return weeklyMinutes / 7.0 * days
     }
 

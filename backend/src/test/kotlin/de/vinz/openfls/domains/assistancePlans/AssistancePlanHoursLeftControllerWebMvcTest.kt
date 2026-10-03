@@ -4,7 +4,8 @@ import de.vinz.openfls.domains.assistancePlans.dto.ApprovedHoursLeftHourTypeResp
 import de.vinz.openfls.domains.assistancePlans.dto.ApprovedHoursLeftResponse
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanHoursLeftService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
+import de.vinz.openfls.common.config.TimeConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
@@ -12,11 +13,13 @@ import org.mockito.kotlin.any
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 
 @WebMvcTest(AssistancePlanHoursLeftController::class)
+@Import(TimeConfiguration::class)
 @AutoConfigureMockMvc(addFilters = false)
 class AssistancePlanHoursLeftControllerWebMvcTest {
 

@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.employees.dto.EmployeeArchiveResult
 import de.vinz.openfls.domains.employees.entity.EmployeeArchiveActionType
 import de.vinz.openfls.domains.employees.service.EmployeeArchiveService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

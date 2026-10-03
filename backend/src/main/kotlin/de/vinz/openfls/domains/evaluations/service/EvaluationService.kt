@@ -19,7 +19,7 @@ import de.vinz.openfls.domains.evaluations.repository.EvaluationRepository
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.service.GoalService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.DateService
+import de.vinz.openfls.common.time.DateService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

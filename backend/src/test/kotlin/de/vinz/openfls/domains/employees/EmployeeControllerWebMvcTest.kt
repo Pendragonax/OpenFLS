@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.employees.service.EmployeeDeletionService
 import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
 import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -218,7 +218,7 @@ class EmployeeControllerWebMvcTest {
     @Test
     fun update_differentPathAndRequestId_returnsBadRequest() {
         // Given
-        given(accessService.canModifyEmployee(4L)).willReturn(true)
+        given(accessService.canModifyEmployee()).willReturn(true)
 
         // When
         val result = mockMvc.put("/employees/3") {
@@ -233,7 +233,7 @@ class EmployeeControllerWebMvcTest {
     @Test
     fun update_withoutPermission_returnsForbidden() {
         // Given
-        given(accessService.canModifyEmployee(3L)).willReturn(false)
+        given(accessService.canModifyEmployee()).willReturn(false)
 
         // When
         val result = mockMvc.put("/employees/3") {
@@ -248,7 +248,7 @@ class EmployeeControllerWebMvcTest {
     @Test
     fun update_unknownEmployee_returnsNotFound() {
         // Given
-        given(accessService.canModifyEmployee(3L)).willReturn(true)
+        given(accessService.canModifyEmployee()).willReturn(true)
         given(employeeService.update(any(), any())).willReturn(EmployeeUpdateResult.NotFound)
 
         // When

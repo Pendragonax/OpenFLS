@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.hourTypes.dto.HourTypeDeleteResult
 import de.vinz.openfls.domains.hourTypes.dto.HourTypeResponse
 import de.vinz.openfls.domains.hourTypes.dto.HourTypeUpdateResult
 import de.vinz.openfls.domains.hourTypes.service.HourTypeService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

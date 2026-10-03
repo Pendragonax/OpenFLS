@@ -1,8 +1,6 @@
 package de.vinz.openfls.domains.goals.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
-import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.evaluations.entity.Evaluation
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.services.entity.Service
@@ -23,7 +21,6 @@ class Goal(
         @Column(length = 1024)
         var description: String = "",
 
-        @JsonIgnore
         @ManyToOne(
                 cascade = [CascadeType.PERSIST],
                 fetch = FetchType.LAZY
@@ -31,7 +28,6 @@ class Goal(
         @JoinColumn(name = "institution_id")
         var institution: Institution? = null,
 
-        @JsonIgnore
         @ManyToOne(
                 cascade = [CascadeType.PERSIST],
                 fetch = FetchType.LAZY

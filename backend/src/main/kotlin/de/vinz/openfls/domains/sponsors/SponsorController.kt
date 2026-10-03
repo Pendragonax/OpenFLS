@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.sponsors.dto.SponsorDeleteResult
 import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateRequest
 import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateResult
 import de.vinz.openfls.domains.sponsors.service.SponsorService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.employees.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
 import java.time.LocalDate
@@ -44,7 +43,6 @@ class EmployeeArchiveHistoryEntry(
     @Column(name = "executing_employee_lastname", length = 64, nullable = false)
     var executingEmployeeLastname: String = "",
 
-    @JsonIgnoreProperties(value = ["archiveHistoryEntries", "assistancePlanFavorites", "services", "hibernateLazyInitializer"])
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
     var employee: Employee? = null

@@ -107,7 +107,7 @@ Die Admin-Ansicht darf technische Diagnose-Logs filtern und exportieren. Lösche
 - Der globale Log-Level ist standardmäßig ausreichend für Betrieb und Security. `DEBUG`/`TRACE` sind gezielte Diagnoseoptionen.
 - Frontend-Logs enthalten keine Klient:innendaten, Tokens oder vollständigen API-Payloads. Erwartete Benutzerfehler gehören in die UI und nicht automatisch in `ERROR`.
 - WebSocket-, Export- und Admin-Aktionen werden mit Correlation-ID und Ergebnis protokolliert.
-- In der Admin-Log-Ansicht trägt jeder Eintrag den Stacktrace als eigenes Feld (`LogEntryDto.stacktrace`); die Oberfläche blendet ihn hinter einem Ausklapp-Button pro Zeile ein. Datei-Einträge und Live-Einträge (`ThrowableProxyUtil`) füllen dasselbe Feld, der ZIP-Export hängt den Stacktrace unverändert wieder an seinen Eintrag an.
+- In der Admin-Log-Ansicht trägt jeder Eintrag den Stacktrace als eigenes Feld (`LogEntryResponse.stacktrace`); die Oberfläche blendet ihn hinter einem Ausklapp-Button pro Zeile ein. Datei-Einträge und Live-Einträge (`ThrowableProxyUtil`) füllen dasselbe Feld, der ZIP-Export hängt den Stacktrace unverändert wieder an seinen Eintrag an.
 - Neue Logging-Verträge werden als DTOs bzw. strukturierte Ereignisse dokumentiert; JPA-Entities werden nicht in Lognachrichten serialisiert.
 
 ## Review-Checkliste

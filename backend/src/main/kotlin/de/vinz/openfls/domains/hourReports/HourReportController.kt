@@ -3,8 +3,8 @@ package de.vinz.openfls.domains.hourReports
 import de.vinz.openfls.domains.hourReports.dto.HourReportResult
 import de.vinz.openfls.domains.hourReports.service.HourReportService
 import de.vinz.openfls.logging.StructuredLog
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

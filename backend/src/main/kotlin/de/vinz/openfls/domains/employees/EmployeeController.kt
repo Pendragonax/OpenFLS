@@ -12,8 +12,8 @@ import de.vinz.openfls.domains.employees.service.EmployeeDeletionService
 import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
 import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -44,6 +44,7 @@ class EmployeeController(
                 EmployeeCreateResult.UsernameTaken -> conflict("username already exists")
                 EmployeeCreateResult.InvalidRole -> badRequest("role is invalid")
                 EmployeeCreateResult.SponsorNotFound -> badRequest("sponsor not found")
+                EmployeeCreateResult.InstitutionNotFound -> badRequest("institution not found")
             }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
@@ -95,7 +96,7 @@ class EmployeeController(
     fun update(@PathVariable id: Long, @Valid @RequestBody request: EmployeeUpdateRequest): Any {
         val startMs = System.currentTimeMillis()
 
-        if (!accessService.canModifyEmployee(request.id))
+        if (!accessService.canModifyEmployee())
             return forbidden("no permission to update this employee")
         if (id != request.id)
             return badRequest("path id and request id are not the same")
@@ -105,6 +106,7 @@ class EmployeeController(
                 is EmployeeUpdateResult.Success -> ResponseEntity.ok(result.response)
                 EmployeeUpdateResult.NotFound -> notFound()
                 EmployeeUpdateResult.SponsorNotFound -> badRequest("sponsor not found")
+                EmployeeUpdateResult.InstitutionNotFound -> badRequest("institution not found")
             }
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)

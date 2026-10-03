@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.evaluations.dto.EvaluationUpdateResult
 import de.vinz.openfls.domains.evaluations.dto.EvaluationYearResponse
 import de.vinz.openfls.domains.evaluations.dto.EvaluationYearResult
 import de.vinz.openfls.domains.evaluations.service.EvaluationService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

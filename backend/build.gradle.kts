@@ -8,6 +8,7 @@ plugins {
     kotlin("jvm") version "2.3.21"
     kotlin("plugin.spring") version "2.3.21"
     kotlin("plugin.jpa") version "2.3.21"
+    id("dev.detekt") version "2.0.0-alpha.3"
 }
 
 group = "de.vinz"
@@ -25,7 +26,6 @@ repositories {
 }
 
 val flywayVersion = "13.4.0"
-val modelMapperVersion = "3.2.6"
 val mysqlConnectorVersion = "26.7.0"
 val commonsCsvVersion = "1.14.1"
 val mockitoKotlinVersion = "6.3.0"
@@ -43,7 +43,6 @@ dependencies {
 
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-mysql:$flywayVersion")
-    implementation("org.modelmapper:modelmapper:$modelMapperVersion")
     runtimeOnly("com.mysql:mysql-connector-j:$mysqlConnectorVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -83,4 +82,10 @@ tasks.register("coverage") {
     group = "verification"
     description = "Runs the backend tests and creates the JaCoCo coverage report."
     dependsOn(tasks.jacocoTestReport)
+}
+
+detekt {
+    buildUponDefaultConfig = false
+    config.setFrom(files("config/detekt/detekt.yml"))
+    source.setFrom(files("src/main/kotlin", "src/test/kotlin"))
 }

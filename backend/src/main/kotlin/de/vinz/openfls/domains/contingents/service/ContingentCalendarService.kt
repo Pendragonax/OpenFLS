@@ -8,6 +8,7 @@ import de.vinz.openfls.domains.contingents.dto.ContingentCalendarResponse
 import de.vinz.openfls.domains.services.service.ServiceService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Clock
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
@@ -20,7 +21,8 @@ class ContingentCalendarService(
     private val serviceService: ServiceService,
     private val contingentService: ContingentService,
     private val contingentCalculationService: ContingentCalculationService,
-    private val absenceService: AbsenceService
+    private val absenceService: AbsenceService,
+    private val clock: Clock
 ) {
 
     private val warningPercent = 95.0
@@ -57,13 +59,13 @@ class ContingentCalendarService(
         absenceDates: List<LocalDate>
     ): ContingentCalendarPeriodResponse {
         val contingentMinutes =
-            ceil(contingentCalculationService.calculateContingentMinutesForWorkdayBy(LocalDate.now(), contingents)).toInt()
+            ceil(contingentCalculationService.calculateContingentMinutesForWorkdayBy(LocalDate.now(clock), contingents)).toInt()
 
-        if (absenceDates.contains(LocalDate.now())) {
+        if (absenceDates.contains(LocalDate.now(clock))) {
             return generateContingentPeriodResponse(0, 0)
         }
 
-        val todayCalendarDay = calendarDayInformations.firstOrNull { it.date.isEqual(LocalDate.now()) }
+        val todayCalendarDay = calendarDayInformations.firstOrNull { it.date.isEqual(LocalDate.now(clock)) }
         val executedMinutes = todayCalendarDay?.let { it.executedHours * 60 + it.executedMinutes } ?: 0
 
         return generateContingentPeriodResponse(executedMinutes, contingentMinutes)

@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.clients.dto.ClientArchiveHistoryResult
 import de.vinz.openfls.domains.clients.dto.ClientArchiveResult
 import de.vinz.openfls.domains.clients.entity.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.service.ClientArchiveService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

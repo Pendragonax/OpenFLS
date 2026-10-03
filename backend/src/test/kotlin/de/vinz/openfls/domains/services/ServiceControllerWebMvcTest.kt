@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.services.dto.ServiceUpdateRequest
 import de.vinz.openfls.domains.services.dto.ServiceUpdateResult
 import de.vinz.openfls.domains.services.dto.ServiceWithGoalsAndCategoriesResponse
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

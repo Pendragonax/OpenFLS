@@ -1,5 +1,8 @@
 package de.vinz.openfls.domains.services.service
 
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import jakarta.persistence.EntityManagerFactory
+import de.vinz.openfls.testsupport.QueryCounter
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
@@ -54,6 +57,12 @@ class ServiceServiceDataJpaTest {
 
     @Autowired
     lateinit var serviceRepository: ServiceRepository
+
+    @Autowired
+    lateinit var testEntityManager: TestEntityManager
+
+    @Autowired
+    lateinit var entityManagerFactory: EntityManagerFactory
 
     @Autowired
     lateinit var clientRepository: ClientRepository
@@ -166,6 +175,24 @@ class ServiceServiceDataJpaTest {
             clientId = client.id, institutionId = institutionId, assistancePlanId = assistancePlan.id,
             hourTypeId = hourType.id, goals = emptyList(), categorys = emptyList()
         )
+
+    private fun saveDetailedService(index: Int) {
+        val ownClient = clientRepository.save(Client(firstName = "Max", lastName = "Client $index"))
+        val ownEmployee = employeeRepository.save(Employee(firstname = "Anna", lastname = "Employee $index"))
+        val ownGoal = goalRepository.save(
+            Goal(title = "Goal $index", assistancePlan = assistancePlanRepository.findById(assistancePlan.id).get())
+        )
+        serviceRepository.save(
+            Service(
+                start = start, end = end, minutes = 90, client = ownClient, employee = ownEmployee,
+                institution = institutionRepository.findById(institution.id!!).get(),
+                hourType = hourTypeRepository.findById(hourType.id).get(),
+                assistancePlan = assistancePlanRepository.findById(assistancePlan.id).get(),
+                goals = mutableSetOf(ownGoal),
+                categorys = mutableSetOf(categoryRepository.findById(category.id).get())
+            )
+        )
+    }
 
     private fun existingService(owner: Employee = employee, clientOfService: Client = client): Service =
         serviceRepository.save(
@@ -376,6 +403,27 @@ class ServiceServiceDataJpaTest {
 
         assertThat(serviceService.getServicesByAssistancePlanId(9999)).isNull()
         assertThat(serviceService.getServicesByAssistancePlanId(0)).isNull()
+    }
+
+    @Test
+    fun getServicesByAssistancePlanId_loadsRelationsWithAConstantNumberOfQueries() {
+        // Given
+        whenever(assistancePlanService.existsById(assistancePlan.id)).thenReturn(true)
+        repeat(3) { saveDetailedService(it) }
+        testEntityManager.flush()
+        testEntityManager.clear()
+        val queryCounter = QueryCounter(entityManagerFactory)
+        val queriesForFewServices = queryCounter.count { serviceService.getServicesByAssistancePlanId(assistancePlan.id) }
+
+        repeat(17) { saveDetailedService(it + 3) }
+        testEntityManager.flush()
+        testEntityManager.clear()
+
+        // When
+        val queriesForManyServices = queryCounter.count { serviceService.getServicesByAssistancePlanId(assistancePlan.id) }
+
+        // Then
+        assertThat(queriesForManyServices).isEqualTo(queriesForFewServices)
     }
 
     @Test

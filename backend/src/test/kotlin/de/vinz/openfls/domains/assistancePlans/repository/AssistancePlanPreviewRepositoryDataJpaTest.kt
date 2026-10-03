@@ -119,7 +119,7 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
     @Test
     fun findMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd_returnsOnlyMatchingYearWindowRows() {
         val base = createBaseData()
-        val now = LocalDate.now()
+        val now = LocalDate.of(2026, 3, 10)
         val yearStart = LocalDate.of(now.year, 1, 1)
         val yearEnd = LocalDate.of(now.year, 12, 31)
 
@@ -184,7 +184,7 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
     @Test
     fun findMinutesInPlanPeriodByAssistancePlanIdsUntil_returnsRowsFromEachPlanStart() {
         val base = createBaseData()
-        val now = LocalDate.now()
+        val now = LocalDate.of(2026, 3, 10)
         val assistancePlan = assistancePlanRepository.save(
             AssistancePlan(
                 start = now.minusDays(10),

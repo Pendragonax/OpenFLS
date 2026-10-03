@@ -7,8 +7,8 @@ import de.vinz.openfls.domains.evaluations.dto.EvaluationUpdateRequest
 import de.vinz.openfls.domains.evaluations.dto.EvaluationUpdateResult
 import de.vinz.openfls.domains.evaluations.dto.EvaluationYearResult
 import de.vinz.openfls.domains.evaluations.service.EvaluationService
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

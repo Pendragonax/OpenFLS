@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.contingents.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.institutions.entity.Institution
 import jakarta.persistence.*
@@ -22,12 +21,10 @@ class Contingent(
     @field:NotNull(message = "Weekly service hours are required.")
     var weeklyServiceHours: Double = 0.0,
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
     var employee: Employee? = null,
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id")
     var institution: Institution? = null

@@ -4,6 +4,7 @@ import de.vinz.openfls.domains.employees.repository.EmployeeRepository
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.permissions.entity.PermissionKey
 import de.vinz.openfls.domains.employees.service.EmployeeAccessService
+import de.vinz.openfls.domains.institutions.service.InstitutionLookupService
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.permissions.dto.PermissionRequest
@@ -18,7 +19,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 
 @DataJpaTest
-@Import(PermissionService::class, EmployeeAccessService::class, TestBeans::class)
+@Import(PermissionService::class, EmployeeAccessService::class, InstitutionLookupService::class, TestBeans::class)
 class PermissionServiceDataJpaTest {
 
     @Autowired
@@ -144,12 +145,40 @@ class PermissionServiceDataJpaTest {
         )
 
         // When
-        val result = permissionService.convertToPermissions(requests, employee)
+        val institutions = permissionService.getInstitutionsForRequests(requests)!!
+        val result = permissionService.convertToPermissions(requests, employee, institutions)
 
         // Then
         assertThat(result).hasSize(1)
         assertThat(result.first().employee).isEqualTo(employee)
         assertThat(result.first().institution).isEqualTo(institution)
         assertThat(result.first().readEntries).isTrue()
+    }
+
+    @Test
+    fun getInstitutionsForRequests_unknownInstitution_returnsNull() {
+        // Given
+        val requests = listOf(PermissionRequest(institutionId = 9999, readEntries = true))
+
+        // When / Then
+        assertThat(permissionService.getInstitutionsForRequests(requests)).isNull()
+    }
+
+    @Test
+    fun getInstitutionsForRequests_knownInstitutions_returnsThemById() {
+        // Given
+        val first = institutionRepository.save(Institution(name = "A", email = "a@b.c", phonenumber = "1"))
+        val second = institutionRepository.save(Institution(name = "B", email = "a@b.c", phonenumber = "2"))
+        val requests = listOf(
+            PermissionRequest(institutionId = first.id!!),
+            PermissionRequest(institutionId = second.id!!),
+            PermissionRequest(institutionId = first.id!!)
+        )
+
+        // When
+        val result = permissionService.getInstitutionsForRequests(requests)!!
+
+        // Then
+        assertThat(result.keys).containsExactlyInAnyOrder(first.id, second.id)
     }
 }

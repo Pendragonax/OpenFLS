@@ -5,11 +5,10 @@ import de.vinz.openfls.domains.clients.service.ClientDashboardService
 import de.vinz.openfls.domains.clients.dto.ClientFavoriteResponse
 import de.vinz.openfls.domains.clients.dto.ClientDashboardAccess
 import de.vinz.openfls.domains.clients.dto.ClientDashboardResponse
-import de.vinz.openfls.domains.clients.dto.ClientDetailResponse
 import de.vinz.openfls.domains.employees.dto.EmployeeFavoriteResult
 import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

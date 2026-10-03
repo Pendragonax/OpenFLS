@@ -2,14 +2,13 @@ package de.vinz.openfls.domains.assistancePlans
 
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanCreateResult
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanDeleteResult
-import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanDetailResponse
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanEditResponse
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanResponse
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanUpdateResult
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

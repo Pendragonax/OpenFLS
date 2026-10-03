@@ -16,6 +16,7 @@ import de.vinz.openfls.domains.employees.entity.Unprofessional
 import de.vinz.openfls.domains.employees.repository.EmployeeRepository
 import de.vinz.openfls.domains.permissions.entity.Permission
 import de.vinz.openfls.domains.permissions.service.PermissionService
+import de.vinz.openfls.logging.StructuredLog
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -60,10 +61,12 @@ class EmployeeService(
         }
         val unprofessionals = unprofessionalService.buildEntitiesFromRequests(request.unprofessionals, employee)
             ?: return EmployeeCreateResult.SponsorNotFound
+        val institutions = permissionService.getInstitutionsForRequests(request.permissions)
+            ?: return EmployeeCreateResult.InstitutionNotFound
 
         var savedEmployee = employeeRepository.save(employee)
 
-        savedEmployee.permissions = permissionService.convertToPermissions(request.permissions, savedEmployee)
+        savedEmployee.permissions = permissionService.convertToPermissions(request.permissions, savedEmployee, institutions)
         unprofessionals.forEach { it.id?.employeeId = savedEmployee.id }
         savedEmployee.unprofessionals = unprofessionals
         savedEmployee = employeeRepository.save(savedEmployee)
@@ -76,6 +79,8 @@ class EmployeeService(
         val employee = employeeRepository.findByIdOrNull(id) ?: return EmployeeUpdateResult.NotFound
         val newUnprofessionals = unprofessionalService.buildEntitiesFromRequests(request.unprofessionals, employee)
             ?: return EmployeeUpdateResult.SponsorNotFound
+        val institutions = permissionService.getInstitutionsForRequests(request.permissions)
+            ?: return EmployeeUpdateResult.InstitutionNotFound
 
         employee.apply {
             firstname = request.firstName
@@ -85,7 +90,7 @@ class EmployeeService(
             description = request.description
         }
 
-        val newPermissions = permissionService.convertToPermissions(request.permissions, employee)
+        val newPermissions = permissionService.convertToPermissions(request.permissions, employee, institutions)
 
         // permissions and unprofessionals are persisted on their own, so the employee is saved without them
         employee.permissions = null
@@ -108,6 +113,7 @@ class EmployeeService(
             return EmployeeUpdateRoleResult.InvalidRole
 
         employee.access?.role = role
+        StructuredLog.audit("employee.role.changed", "success", "employee", id.toString())
 
         return EmployeeUpdateRoleResult.Success(EmployeeDetailResponse.from(employee))
     }
@@ -117,6 +123,7 @@ class EmployeeService(
         val employee = employeeRepository.findByIdOrNull(id) ?: return EmployeePasswordResetResult.NotFound
 
         employee.access?.let { it.password = passwordEncoder.encode(it.username).orEmpty() }
+        StructuredLog.audit("employee.password.reset", "success", "employee", id.toString())
 
         return EmployeePasswordResetResult.Success(EmployeeDetailResponse.from(employee))
     }

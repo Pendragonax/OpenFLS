@@ -1,7 +1,5 @@
 package de.vinz.openfls.domains.goals.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotNull
@@ -17,12 +15,10 @@ class GoalHour(
         @Column(name = "weekly_minutes")
         var weeklyMinutes: Int = 0,
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
         @JoinColumn(name = "hour_type_id")
         var hourType: HourType? = null,
 
-        @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
         @JoinColumn(name = "goal_id")
         var goal: Goal? = null

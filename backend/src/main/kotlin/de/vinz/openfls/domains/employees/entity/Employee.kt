@@ -1,7 +1,5 @@
 package de.vinz.openfls.domains.employees.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.clients.entity.Client
 import de.vinz.openfls.domains.contingents.entity.Contingent
@@ -46,7 +44,6 @@ class Employee(
                 cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         @PrimaryKeyJoinColumn
-        @JsonIgnore
         var access: EmployeeAccess? = null,
 
         @OneToMany(
@@ -55,7 +52,6 @@ class Employee(
                 fetch = FetchType.LAZY)
         var permissions: MutableSet<Permission>? = null,
 
-        @JsonIgnoreProperties(value = ["sponsor", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "employee",
                 cascade = [CascadeType.ALL],
@@ -68,28 +64,24 @@ class Employee(
                 fetch = FetchType.LAZY)
         var contingents: MutableSet<Contingent>? = null,
 
-        @JsonIgnore
         @OneToMany(
                 mappedBy = "createdBy",
                 cascade = [CascadeType.REFRESH],
                 fetch = FetchType.LAZY)
         var createdEvaluations: MutableSet<Evaluation> = mutableSetOf(),
 
-        @JsonIgnore
         @OneToMany(
                 mappedBy = "updatedBy",
                 cascade = [CascadeType.REFRESH],
                 fetch = FetchType.LAZY)
         var updatedEvaluations: MutableSet<Evaluation> = mutableSetOf(),
 
-        @JsonIgnore
         @OneToMany(
                 mappedBy = "employee",
                 cascade = [CascadeType.ALL],
                 fetch = FetchType.LAZY)
         var services: MutableSet<Service> = mutableSetOf(),
 
-        @JsonIgnoreProperties(value = ["employee", "hibernateLazyInitializer"])
         @OneToMany(
                 mappedBy = "employee",
                 cascade = [CascadeType.ALL],
@@ -105,7 +97,6 @@ class Employee(
                 name = "assistance_plan_favorites",
                 joinColumns = [JoinColumn(name = "employee_id")],
                 inverseJoinColumns = [JoinColumn(name = "assistance_plan_id")])
-        @JsonIgnoreProperties(value = ["employees", "hibernateLazyInitializer"])
         var assistancePlanFavorites: MutableSet<AssistancePlan> = mutableSetOf(),
 
         @ManyToMany(
@@ -115,7 +106,6 @@ class Employee(
                 name = "client_favorites",
                 joinColumns = [JoinColumn(name = "employee_id")],
                 inverseJoinColumns = [JoinColumn(name = "client_id")])
-        @JsonIgnore
         var clientFavorites: MutableSet<Client> = mutableSetOf(),
 ) {
         override fun equals(other: Any?): Boolean {

@@ -10,15 +10,13 @@ import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.services.dto.ContingentEvaluationServiceDto
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.Mockito.lenient
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
 import java.time.LocalDateTime

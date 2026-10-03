@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanPreviewR
 import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.services.service.ServiceService
-import de.vinz.openfls.services.TimeDoubleService
+import de.vinz.openfls.common.time.TimeDoubleService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Clock

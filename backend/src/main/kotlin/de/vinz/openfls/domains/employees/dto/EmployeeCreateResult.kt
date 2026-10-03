@@ -6,4 +6,5 @@ sealed class EmployeeCreateResult {
     data object UsernameTaken : EmployeeCreateResult()
     data object InvalidRole : EmployeeCreateResult()
     data object SponsorNotFound : EmployeeCreateResult()
+    data object InstitutionNotFound : EmployeeCreateResult()
 }

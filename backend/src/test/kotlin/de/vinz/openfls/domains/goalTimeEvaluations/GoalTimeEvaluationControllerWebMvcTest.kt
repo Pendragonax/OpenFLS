@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationResult
 import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalsTimeEvaluationResponse
 import de.vinz.openfls.domains.goalTimeEvaluations.service.GoalTimeEvaluationService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

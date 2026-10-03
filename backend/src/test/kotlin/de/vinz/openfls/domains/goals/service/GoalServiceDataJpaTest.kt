@@ -1,5 +1,7 @@
 package de.vinz.openfls.domains.goals.service
 
+import jakarta.persistence.EntityManagerFactory
+import de.vinz.openfls.testsupport.QueryCounter
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
@@ -59,6 +61,9 @@ class GoalServiceDataJpaTest {
 
     @Autowired
     lateinit var entityManager: TestEntityManager
+
+    @Autowired
+    lateinit var entityManagerFactory: EntityManagerFactory
 
     @MockitoBean
     lateinit var assistancePlanService: AssistancePlanService
@@ -292,5 +297,36 @@ class GoalServiceDataJpaTest {
 
         // Then
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun getByAssistancePlanId_loadsHoursAndInstitutionsWithAConstantNumberOfQueries() {
+        // Given
+        val assistancePlan = assistancePlanRepository.save(AssistancePlan())
+        repeat(3) { saveGoal(assistancePlan.id, it) }
+        entityManager.flush()
+        entityManager.clear()
+        val queryCounter = QueryCounter(entityManagerFactory)
+        val queriesForFewGoals = queryCounter.count { goalService.getByAssistancePlanId(assistancePlan.id) }
+
+        repeat(17) { saveGoal(assistancePlan.id, it + 3) }
+        entityManager.flush()
+        entityManager.clear()
+
+        // When
+        val queriesForManyGoals = queryCounter.count { goalService.getByAssistancePlanId(assistancePlan.id) }
+
+        // Then
+        assertThat(queriesForManyGoals).isEqualTo(queriesForFewGoals)
+    }
+
+    private fun saveGoal(assistancePlanId: Long, index: Int) {
+        val plan = assistancePlanRepository.findById(assistancePlanId).get()
+        val hourType = hourTypeRepository.save(HourType(title = "Type $index", price = 5.0))
+        val institution = institutionRepository.save(Institution(name = "Inst $index", email = "a@b.c", phonenumber = "1"))
+        val goal = goalRepository.save(
+            Goal(title = "Goal $index", description = "Desc", assistancePlan = plan, institution = institution)
+        )
+        goalHourRepository.save(GoalHour(weeklyMinutes = 60, goal = goal, hourType = hourType))
     }
 }

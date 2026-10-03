@@ -1,5 +1,7 @@
 package de.vinz.openfls.domains.assistancePlans.service
 
+import jakarta.persistence.EntityManagerFactory
+import de.vinz.openfls.testsupport.QueryCounter
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanCreateGoalRequest
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanCreateHourRequest
@@ -92,6 +94,9 @@ class AssistancePlanServiceDataJpaTest {
 
     @Autowired
     lateinit var testEntityManager: TestEntityManager
+
+    @Autowired
+    lateinit var entityManagerFactory: EntityManagerFactory
 
     private lateinit var institution: Institution
     private lateinit var client: Client
@@ -631,6 +636,30 @@ class AssistancePlanServiceDataJpaTest {
     }
 
     @Test
+    fun getAllEditResponsesByYear_loadsRelationsWithAConstantNumberOfQueries() {
+        // Given
+        repeat(3) { saveDetailedPlan(it) }
+        testEntityManager.flush()
+        testEntityManager.clear()
+        val queryCounter = QueryCounter(entityManagerFactory)
+        val queriesForFewPlans = queryCounter.count {
+            assistancePlanService.getAllEditResponsesByYearAndInstitutionIdAndSponsorId(2026, null, null)
+        }
+
+        repeat(17) { saveDetailedPlan(it + 3) }
+        testEntityManager.flush()
+        testEntityManager.clear()
+
+        // When
+        val queriesForManyPlans = queryCounter.count {
+            assistancePlanService.getAllEditResponsesByYearAndInstitutionIdAndSponsorId(2026, null, null)
+        }
+
+        // Then
+        assertThat(queriesForManyPlans).isEqualTo(queriesForFewPlans)
+    }
+
+    @Test
     fun getAllEntitiesByClientId_sortsByStartDesc() {
         // Given
         savePlan(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31))
@@ -726,6 +755,30 @@ class AssistancePlanServiceDataJpaTest {
 
     private fun categoryTemplate(): CategoryTemplate =
         categoryTemplateRepository.save(CategoryTemplate(title = "Template", description = "", withoutClient = false))
+
+    private fun saveDetailedPlan(index: Int) {
+        val ownClient = clientRepository.save(
+            Client(
+                firstName = "Max",
+                lastName = "Client $index",
+                categoryTemplate = categoryTemplateRepository.findAll().first(),
+                institution = institutionRepository.findById(institution.id!!).get()
+            )
+        )
+        val plan = AssistancePlan(
+            start = LocalDate.of(2026, 1, 1),
+            end = LocalDate.of(2026, 12, 31),
+            client = ownClient,
+            sponsor = sponsorRepository.findById(sponsor.id).get(),
+            institution = institutionRepository.findById(institution.id!!).get()
+        )
+        val reloadedHourType = hourTypeRepository.findById(hourType.id).get()
+        plan.hours.add(AssistancePlanHour(weeklyMinutes = 60, hourType = reloadedHourType, assistancePlan = plan))
+        val goal = Goal(title = "Goal $index", description = "", institution = plan.institution, assistancePlan = plan)
+        goal.hours.add(GoalHour(weeklyMinutes = 30, hourType = reloadedHourType, goal = goal))
+        plan.goals.add(goal)
+        assistancePlanRepository.save(plan)
+    }
 
     private fun savePlan(start: LocalDate, end: LocalDate): AssistancePlan =
         assistancePlanRepository.save(

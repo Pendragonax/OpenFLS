@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanPreviewListResu
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanPreviewResponse
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanPreviewService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
