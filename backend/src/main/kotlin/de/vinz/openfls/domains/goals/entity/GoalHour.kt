@@ -30,7 +30,7 @@ class GoalHour(
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (other !is GoalHour) return false
-                return id == other.id
+                return id != 0L && id == other.id
         }
 
         override fun hashCode(): Int {

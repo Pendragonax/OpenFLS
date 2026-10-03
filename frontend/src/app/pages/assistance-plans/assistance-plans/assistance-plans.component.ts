@@ -382,6 +382,8 @@ export class AssistancePlansComponent
   }
 
   override handleDeleteModalOpen(value: AssistancePlanPreviewDto) {
+    this.editValue = value;
+    this.deleteServiceCount = 0;
     this.serviceService.getCountByAssistancePlanId(value.id).subscribe({
       next: (count) => this.deleteServiceCount = count
     });

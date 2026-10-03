@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.services.repository
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
 import de.vinz.openfls.domains.clients.Client

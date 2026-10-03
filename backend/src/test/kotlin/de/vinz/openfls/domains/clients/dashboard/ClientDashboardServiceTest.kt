@@ -1,9 +1,9 @@
 package de.vinz.openfls.domains.clients.dashboard
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPeriodDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanPeriodDto
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanPreviewResponse
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanPreviewService
 import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
 import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCountDto
 import de.vinz.openfls.domains.clientTasks.dto.ClientTaskResponse
@@ -49,7 +49,7 @@ class ClientDashboardServiceTest {
     fun getDashboard_withReadPermission_returnsRunningPlanAndEntries() {
         whenever(clientService.getById(any(), any(), any())).thenReturn(clientDto())
         whenever(clientService.isFavoriteOfEmployee(any(), any())).thenReturn(true)
-        whenever(assistancePlanPreviewService.getPreviewDtosByClientId(any(), any(), any()))
+        whenever(assistancePlanPreviewService.getPreviewsByClientIdAndEmployeeId(any(), any(), any()))
             .thenReturn(listOf(endedPlan(), runningPlan(), futurePlan()))
         whenever(serviceService.getLatestServicesByClientId(any(), any(), any(), any(), any()))
             .thenReturn(listOf(latestService()))
@@ -101,7 +101,7 @@ class ClientDashboardServiceTest {
         assertThat(dashboard.latestServices).isEmpty()
         assertThat(dashboard.tasks).hasSize(1)
 
-        verify(assistancePlanPreviewService, never()).getPreviewDtosByClientId(any(), any(), any())
+        verify(assistancePlanPreviewService, never()).getPreviewsByClientIdAndEmployeeId(any(), any(), any())
         verify(serviceService, never()).getLatestServicesByClientId(any(), any(), any(), any(), any())
     }
 
@@ -109,7 +109,7 @@ class ClientDashboardServiceTest {
     fun getDashboard_withoutRunningPlan_fallsBackToPlanThatEndedLast() {
         whenever(clientService.getById(any(), any(), any())).thenReturn(clientDto())
         whenever(clientService.isFavoriteOfEmployee(any(), any())).thenReturn(false)
-        whenever(assistancePlanPreviewService.getPreviewDtosByClientId(any(), any(), any()))
+        whenever(assistancePlanPreviewService.getPreviewsByClientIdAndEmployeeId(any(), any(), any()))
             .thenReturn(listOf(endedPlan(), endedPlan().copy(id = 42, end = today.minusDays(1))))
         whenever(serviceService.getLatestServicesByClientId(any(), any(), any(), any(), any())).thenReturn(emptyList())
         whenever(clientTaskService.getOpenTasksByClientId(any())).thenReturn(emptyList())
@@ -154,7 +154,7 @@ class ClientDashboardServiceTest {
                 ClientFavoriteRowDto(2, "Mia", "Musterfrau", false, 5, "Inst")
             )
         )
-        whenever(assistancePlanPreviewService.getPeriodDtosByClientIds(any())).thenReturn(
+        whenever(assistancePlanPreviewService.getPeriodsByClientIds(any())).thenReturn(
             listOf(
                 AssistancePlanPeriodDto(10, 1, today.minusDays(30), today.plusDays(30)),
                 AssistancePlanPeriodDto(11, 2, today.minusDays(90), today.minusDays(10))
@@ -199,7 +199,7 @@ class ClientDashboardServiceTest {
         whenever(clientService.getFavoriteRowDtosByEmployeeId(eq(7L))).thenReturn(
             listOf(ClientFavoriteRowDto(1, "Max", "Mustermann", true, 5, "Inst"))
         )
-        whenever(assistancePlanPreviewService.getPeriodDtosByClientIds(any())).thenReturn(emptyList())
+        whenever(assistancePlanPreviewService.getPeriodsByClientIds(any())).thenReturn(emptyList())
         whenever(clientTaskService.getOpenTaskCountsByClientIds(any())).thenReturn(emptyMap())
 
         val favorites = clientDashboardService.getFavorites(
@@ -227,7 +227,7 @@ class ClientDashboardServiceTest {
 
     private fun futurePlan() = previewDto(id = 3, start = today.plusDays(30), end = today.plusDays(200))
 
-    private fun previewDto(id: Long, start: LocalDate, end: LocalDate) = AssistancePlanPreviewDto(
+    private fun previewDto(id: Long, start: LocalDate, end: LocalDate) = AssistancePlanPreviewResponse(
         id = id,
         clientId = 1,
         institutionId = 5,

@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanForServiceEditingDto
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanForServiceEditingDto
 import de.vinz.openfls.domains.categories.service.CategoryTemplateService
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActionType
 import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry

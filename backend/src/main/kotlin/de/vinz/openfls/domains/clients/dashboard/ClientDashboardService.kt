@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients.dashboard
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanPreviewResponse
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanPreviewService
 import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardAccess
@@ -57,7 +57,7 @@ class ClientDashboardService(
 
         val today = LocalDate.now(clock)
         val assistancePlans = if (canReadDocumentation) {
-            assistancePlanPreviewService.getPreviewDtosByClientId(
+            assistancePlanPreviewService.getPreviewsByClientIdAndEmployeeId(
                 clientId = clientId,
                 employeeId = employeeId,
                 includeArchived = includeArchived
@@ -119,7 +119,7 @@ class ClientDashboardService(
 
         val clientIds = rows.map { it.id }
         val today = LocalDate.now(clock)
-        val periodsByClientId = assistancePlanPreviewService.getPeriodDtosByClientIds(clientIds)
+        val periodsByClientId = assistancePlanPreviewService.getPeriodsByClientIds(clientIds)
             .groupBy { it.clientId }
         val taskCountsByClientId = clientTaskService.getOpenTaskCountsByClientIds(clientIds)
 
@@ -147,9 +147,9 @@ class ClientDashboardService(
      * so the dashboard never looks empty for a client with a documented history.
      */
     private fun selectCurrentAssistancePlan(
-        previews: List<AssistancePlanPreviewDto>,
+        previews: List<AssistancePlanPreviewResponse>,
         today: LocalDate
-    ): AssistancePlanPreviewDto? {
+    ): AssistancePlanPreviewResponse? {
         return previews
             .filter { !it.start.isAfter(today) && !it.end.isBefore(today) }
             .maxByOrNull { it.end }

@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.goalTimeEvaluations.dto
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 
 data class GoalsTimeEvaluationResponse(
     val assistancePlanId: Long,

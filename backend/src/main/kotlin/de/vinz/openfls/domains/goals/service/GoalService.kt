@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.goals.service
 
 import de.vinz.openfls.architecture.InternalEntityApi
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.goals.dto.GoalCreateRequest
 import de.vinz.openfls.domains.goals.dto.GoalCreateResult
 import de.vinz.openfls.domains.goals.dto.GoalDeleteResult
@@ -60,9 +60,11 @@ class GoalService(
             institution = institution
         )
         val saved = goalRepository.save(entity)
-        saved.hours = request.hours
+        val savedHours = request.hours
             .map { hourRequest -> goalHourRepository.save(buildGoalHour(hourRequest, hourTypesById, saved)) }
-            .toMutableSet()
+        // the collection is orphan-removing, so it must be changed in place instead of being replaced
+        saved.hours.clear()
+        saved.hours.addAll(savedHours)
 
         return GoalCreateResult.Success(GoalWithHoursResponse.from(saved))
     }
@@ -107,9 +109,11 @@ class GoalService(
             .filter { it.id !in requestedHourIds }
             .forEach { goalHourRepository.deleteById(it.id) }
 
-        saved.hours = request.hours
+        val savedHours = request.hours
             .map { hourRequest -> goalHourRepository.save(buildGoalHour(hourRequest, hourTypesById, saved)) }
-            .toMutableSet()
+        // the collection is orphan-removing, so it must be changed in place instead of being replaced
+        saved.hours.clear()
+        saved.hours.addAll(savedHours)
 
         return GoalUpdateResult.Success(GoalWithHoursResponse.from(saved))
     }

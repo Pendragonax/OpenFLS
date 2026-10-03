@@ -1,9 +1,9 @@
 package de.vinz.openfls.domains.goals.service
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
+import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.goals.dto.GoalCreateRequest
 import de.vinz.openfls.domains.goals.dto.GoalCreateResult
 import de.vinz.openfls.domains.goals.dto.GoalDeleteResult

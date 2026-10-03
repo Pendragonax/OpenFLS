@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.hourCorridors
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
 import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorCreateRequest
 import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorCreateResult
 import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorDeleteResult

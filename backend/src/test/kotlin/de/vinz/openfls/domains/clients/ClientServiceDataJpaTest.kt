@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
 import de.vinz.openfls.domains.categories.service.CategoryTemplateService
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
@@ -13,7 +13,7 @@ import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourCorridors.repository.HourCorridorRepository
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.hourTypes.repository.HourTypeRepository
 import de.vinz.openfls.domains.institutions.entity.Institution

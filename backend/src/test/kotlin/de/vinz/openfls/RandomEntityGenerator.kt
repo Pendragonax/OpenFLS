@@ -1,7 +1,7 @@
 package de.vinz.openfls
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.clients.Client
@@ -41,7 +41,6 @@ class RandomEntityGenerator {
             // Create an empty set for goals, hours, services, and employees
             val hours = mutableSetOf<AssistancePlanHour>()
             val services = mutableSetOf<Service>()
-            val employees = mutableSetOf<Employee>()
 
             // Return the generated AssistancePlan instance
             val assistancePlan = AssistancePlan(
@@ -52,8 +51,7 @@ class RandomEntityGenerator {
                     sponsor = sponsor,
                     institution = institution,
                     hours = hours,
-                    services = services,
-                    employees = employees
+                    services = services
             )
 
             assistancePlan.goals = mutableSetOf()

@@ -25,9 +25,9 @@ import {ClientAndDateServiceDto} from "../../../shared/dtos/client-and-date-resp
 import {catchError, combineLatest, finalize, map, of, startWith, switchMap} from "rxjs";
 import {AssistancePlanService} from "../../../shared/services/assistance-plan.service";
 import {
-  AssistancePlanEvaluationLeftDto,
-  AssistancePlanHourTypeEvaluationLeftDto
-} from "../../../shared/dtos/assistance-plan-evaluation-left.dto";
+  AssistancePlanHoursLeftDto,
+  AssistancePlanHourTypeHoursLeftDto
+} from "../../../shared/dtos/assistance-plan-hours-left.dto";
 
 @Component({
   selector: 'app-service-new',
@@ -53,8 +53,8 @@ export class ServiceNewComponent extends ServiceFormBase {
   useDuration = false;
   clientEntries: ClientAndDateServiceDto[] = [];
   clientEntriesLoading = false;
-  assistanceInfoEvaluation: AssistancePlanEvaluationLeftDto | null = null;
-  assistanceInfo: AssistancePlanHourTypeEvaluationLeftDto[] = [];
+  assistanceInfoEvaluation: AssistancePlanHoursLeftDto | null = null;
+  assistanceInfo: AssistancePlanHourTypeHoursLeftDto[] = [];
   assistanceInfoLoading = false;
   constructor(
     userService: UserService,
@@ -412,7 +412,7 @@ export class ServiceNewComponent extends ServiceFormBase {
           }
 
           this.assistanceInfoLoading = true;
-          return this.assistancePlanService.getEvaluationLeftById(Number(assistancePlanId)).pipe(
+          return this.assistancePlanService.getHoursLeftById(Number(assistancePlanId)).pipe(
             map(response => {
               this.assistanceInfoEvaluation = response;
               return response.hourTypeEvaluation ?? [];

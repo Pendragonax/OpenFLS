@@ -27,7 +27,7 @@ describe('GoalEvaluationComponent', () => {
       declarations: [AssistancePlanAnalysisComponent],
       providers: [
         {provide: ActivatedRoute, useValue: {params: params$}},
-        {provide: AssistancePlanService, useValue: {getProjectionById: () => of(new AssistancePlan())}},
+        {provide: AssistancePlanService, useValue: {getDetailById: () => of(new AssistancePlan())}},
         {provide: ClientsService, useValue: {allValues$: of([{id: 1, archived: false}])}},
         {provide: DateService, useValue: {getMonths: () => []}},
         {provide: EvaluationsService, useValue: {getByAssistancePlanIdAndYear: () => of({values: []})}},

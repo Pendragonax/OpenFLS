@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.hourTypes.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
 import de.vinz.openfls.domains.services.entity.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty

@@ -8,7 +8,7 @@ import { InstitutionService } from '../../shared/services/institution.service';
 import { SponsorService } from '../../shared/services/sponsor.service';
 import { HourReportService } from '../../shared/services/hour-report.service';
 import { DateService } from '../../shared/services/date.service';
-import { AssistancePlanAnalysisService } from './services/assistance-plan-analysis.service';
+import { HourReportMonthlySummaryService } from './services/hour-report-monthly-summary.service';
 import { Converter } from '../../shared/services/converter.helper';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
@@ -43,7 +43,7 @@ describe('HourReportComponent', () => {
         { provide: InstitutionService, useValue: { allValues$: institutions$ } },
         { provide: SponsorService, useValue: { allValues$: sponsors$ } },
         { provide: HourReportService, useValue: { getHourReportByYear: () => of([]) } },
-        { provide: AssistancePlanAnalysisService, useValue: { getByYearAndMonthAndInstitutionIdAndSponsorIdAndHourTypeId: () => of({}), convertToArray: () => [[]] } },
+        { provide: HourReportMonthlySummaryService, useValue: { getMonthlySummary: () => of({}), convertToArray: () => [[]] } },
         { provide: DateService, useValue: { getMonths: () => [] } },
         { provide: Converter, useValue: { getLocalDateString: (value: string | null) => value ?? '' } },
         { provide: Location, useValue: { go: locationGo } },

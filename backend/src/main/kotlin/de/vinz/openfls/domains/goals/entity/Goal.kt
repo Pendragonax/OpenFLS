@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.goals.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.evaluations.entity.Evaluation
 import de.vinz.openfls.domains.institutions.entity.Institution
@@ -42,7 +42,8 @@ class Goal(
         @OneToMany(
                 mappedBy = "goal",
                 cascade = [CascadeType.ALL],
-                fetch = FetchType.LAZY)
+                fetch = FetchType.LAZY,
+                orphanRemoval = true)
         var hours: MutableSet<GoalHour> = mutableSetOf(),
 
         @OneToMany(
@@ -57,7 +58,7 @@ class Goal(
         override fun equals(other: Any?): Boolean {
                 if (this === other) return true
                 if (other !is Goal) return false
-                return id == other.id
+                return id != 0L && id == other.id
         }
 
         override fun hashCode(): Int {

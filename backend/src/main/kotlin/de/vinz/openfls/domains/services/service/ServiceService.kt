@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.services.service
 
 import de.vinz.openfls.architecture.InternalEntityApi
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.categories.service.CategoryTemplateService
 import de.vinz.openfls.domains.clients.Client

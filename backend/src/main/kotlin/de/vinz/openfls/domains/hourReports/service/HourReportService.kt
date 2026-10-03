@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.hourReports.service
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEditDto
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanEditResponse
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
@@ -121,7 +121,7 @@ class HourReportService(
     }
 
     private fun buildApprovedHoursMonthly(
-        assistancePlanDtos: List<AssistancePlanEditDto>,
+        assistancePlanDtos: List<AssistancePlanEditResponse>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
         year: Int,
@@ -166,7 +166,7 @@ class HourReportService(
     }
 
     private fun buildApprovedHoursYearly(
-        assistancePlanDtos: List<AssistancePlanEditDto>,
+        assistancePlanDtos: List<AssistancePlanEditResponse>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
         year: Int,
@@ -203,7 +203,7 @@ class HourReportService(
 
     private fun buildExecutedHoursYearly(
         services: List<de.vinz.openfls.domains.services.entity.Service>,
-        assistancePlanDtos: List<AssistancePlanEditDto>,
+        assistancePlanDtos: List<AssistancePlanEditResponse>,
         clientDtos: List<ClientSimpleDto>,
         year: Int,
         toTimeDouble: Boolean = true
@@ -235,7 +235,7 @@ class HourReportService(
 
     private fun buildExecutedHoursMonthly(
         services: List<de.vinz.openfls.domains.services.entity.Service>,
-        assistancePlanDtos: List<AssistancePlanEditDto>,
+        assistancePlanDtos: List<AssistancePlanEditResponse>,
         clientDtos: List<ClientSimpleDto>,
         year: Int,
         month: Int,
@@ -267,7 +267,7 @@ class HourReportService(
 
     private fun buildDifferenceHoursYearly(
         services: List<de.vinz.openfls.domains.services.entity.Service>,
-        assistancePlanDtos: List<AssistancePlanEditDto>,
+        assistancePlanDtos: List<AssistancePlanEditResponse>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
         year: Int,
@@ -292,7 +292,7 @@ class HourReportService(
 
     private fun buildDifferenceHoursMonthly(
         services: List<de.vinz.openfls.domains.services.entity.Service>,
-        assistancePlanDtos: List<AssistancePlanEditDto>,
+        assistancePlanDtos: List<AssistancePlanEditResponse>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
         year: Int,
@@ -395,7 +395,7 @@ class HourReportService(
     }
 
     private data class HourReportContext(
-        val assistancePlanDtos: List<AssistancePlanEditDto>,
+        val assistancePlanDtos: List<AssistancePlanEditResponse>,
         val clientDtos: List<ClientSimpleDto>
     )
 
@@ -410,8 +410,8 @@ class HourReportService(
         month: Int?,
         institutionId: Long?,
         sponsorId: Long?
-    ): List<AssistancePlanEditDto> {
-        val plans = assistancePlanService.getAllEditDtosByYearAndInstitutionIdAndSponsorId(year, institutionId, sponsorId)
+    ): List<AssistancePlanEditResponse> {
+        val plans = assistancePlanService.getAllEditResponsesByYearAndInstitutionIdAndSponsorId(year, institutionId, sponsorId)
 
         return if (month != null) {
             plans.filter {
@@ -423,7 +423,7 @@ class HourReportService(
     }
 
     private fun buildEmptyReportRows(
-        assistancePlanDtos: List<AssistancePlanEditDto>,
+        assistancePlanDtos: List<AssistancePlanEditResponse>,
         clientDtos: List<ClientSimpleDto>,
         valuesCount: Int
     ): MutableList<HourReportRowResponse> {
@@ -439,13 +439,13 @@ class HourReportService(
         }.sortedBy { it.clientDto.lastName }
             .toMutableList()
 
-        result.add(0, HourReportRowResponse(AssistancePlanEditDto(), allClient, defaultValuesArray))
+        result.add(0, HourReportRowResponse(AssistancePlanEditResponse(), allClient, defaultValuesArray))
 
         return result
     }
 
     private fun getDailyHoursOfAssistancePlanByHourType(
-        assistancePlanDto: AssistancePlanEditDto,
+        assistancePlanDto: AssistancePlanEditResponse,
         hourTypeId: Long?,
         hourCorridors: Map<Long, HourCorridor>
     ): Double =
@@ -470,7 +470,7 @@ class HourReportService(
                 .sumOf { it.weeklyMinutes / 7.0 / 60.0 }
         }
 
-    private fun loadHourCorridors(assistancePlanDtos: List<AssistancePlanEditDto>): Map<Long, HourCorridor> {
+    private fun loadHourCorridors(assistancePlanDtos: List<AssistancePlanEditResponse>): Map<Long, HourCorridor> {
         val ids = assistancePlanDtos.asSequence()
             .filter(::isCorridor)
             .map { it.hourCorridorId }
@@ -481,8 +481,8 @@ class HourReportService(
         return hourCorridorService.getAllEntitiesByIds(ids).associateBy { it.id }
     }
 
-    private fun isCorridor(assistancePlanDto: AssistancePlanEditDto): Boolean {
-        return assistancePlanDto.hourMode == de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode.CORRIDOR
+    private fun isCorridor(assistancePlanDto: AssistancePlanEditResponse): Boolean {
+        return assistancePlanDto.hourMode == de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode.CORRIDOR
     }
 
     private fun corridorApprovedHoursForDays(days: Int, weeklyMinutes: Int): Double {

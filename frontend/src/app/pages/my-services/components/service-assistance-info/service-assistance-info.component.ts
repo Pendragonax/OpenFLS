@@ -1,8 +1,8 @@
 import {Component, Input} from '@angular/core';
 import {
-  AssistancePlanEvaluationLeftDto,
-  AssistancePlanHourTypeEvaluationLeftDto
-} from "../../../../shared/dtos/assistance-plan-evaluation-left.dto";
+  AssistancePlanHoursLeftDto,
+  AssistancePlanHourTypeHoursLeftDto
+} from "../../../../shared/dtos/assistance-plan-hours-left.dto";
 import {AssistancePlanHourMode} from "../../../../shared/dtos/assistance-plan-hour-mode.model";
 
 @Component({
@@ -15,8 +15,8 @@ export class ServiceAssistanceInfoComponent {
   readonly AssistancePlanHourMode = AssistancePlanHourMode;
   @Input() assistancePlanSelected = false;
   @Input() loading = false;
-  @Input() evaluation: AssistancePlanEvaluationLeftDto | null = null;
-  @Input() info: AssistancePlanHourTypeEvaluationLeftDto[] = [];
+  @Input() evaluation: AssistancePlanHoursLeftDto | null = null;
+  @Input() info: AssistancePlanHourTypeHoursLeftDto[] = [];
 
   // Tooltip texts can be adjusted freely.
   tooltipLeftThisWeek = 'Es wird nur die aktuelle komplette Woche betrachtet von Montag - Sonntag.';

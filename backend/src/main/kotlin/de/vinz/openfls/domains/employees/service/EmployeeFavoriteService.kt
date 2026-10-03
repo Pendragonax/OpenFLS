@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.employees.service
 
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.dto.EmployeeFavoriteResult
 import org.springframework.stereotype.Service

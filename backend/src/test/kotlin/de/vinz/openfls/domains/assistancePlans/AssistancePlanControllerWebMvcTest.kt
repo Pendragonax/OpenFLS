@@ -1,26 +1,31 @@
 package de.vinz.openfls.domains.assistancePlans
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanExistingDto
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationService
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
-import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanCreateResult
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanDeleteResult
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanDetailResponse
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanEditResponse
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanResponse
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanUpdateResult
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.services.UserService
+import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
-import org.mockito.Mockito.doThrow
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 import java.time.LocalDate
 
 @WebMvcTest(AssistancePlanController::class)
@@ -34,66 +39,138 @@ class AssistancePlanControllerWebMvcTest {
     lateinit var assistancePlanService: AssistancePlanService
 
     @MockitoBean
-    lateinit var assistancePlanEvaluationService: AssistancePlanEvaluationService
-
-    @MockitoBean
-    lateinit var assistancePlanEvaluationLeftService: AssistancePlanEvaluationLeftService
-
-    @MockitoBean
-    lateinit var assistancePlanPreviewService: AssistancePlanPreviewService
-
-    @MockitoBean
     lateinit var accessService: AccessService
 
     @MockitoBean
-    lateinit var userService: UserService
-
-    @MockitoBean
-    lateinit var clientService: ClientService
+    lateinit var performanceLoggingService: PerformanceLoggingService
 
     @Test
-    fun getPreviewByClientId_returnsPreviewDtos() {
-        given(userService.getUserId()).willReturn(44L)
-        given(assistancePlanPreviewService.getPreviewDtosByClientId(3L, 44L, false))
-            .willReturn(listOf(previewDto(id = 1L, isFavorite = true)))
+    fun create_validRequest_returnsAssistancePlan() {
+        given(assistancePlanService.create(any())).willReturn(AssistancePlanCreateResult.Success(planResponse(5L)))
 
-        val result = mockMvc.get("/assistance_plans/client/3/preview").andReturn()
+        val result = postCreate()
 
         assertThat(result.response.status).isEqualTo(200)
-        assertThat(result.response.contentAsString).contains("\"id\":1")
-        assertThat(result.response.contentAsString).contains("\"isFavorite\":true")
+        assertThat(result.response.contentAsString).contains("\"id\":5")
     }
 
     @Test
-    fun getPreviewByInstitutionId_returnsPreviewDtos() {
-        given(userService.getUserId()).willReturn(44L)
-        given(assistancePlanPreviewService.getPreviewDtosByInstitutionId(9L, 44L, false))
-            .willReturn(listOf(previewDto(id = 2L, isFavorite = false)))
+    fun create_archivedClient_returnsConflict() {
+        given(assistancePlanService.create(any())).willReturn(AssistancePlanCreateResult.ClientArchived)
 
-        val result = mockMvc.get("/assistance_plans/institution/9/preview").andReturn()
-
-        assertThat(result.response.status).isEqualTo(200)
-        assertThat(result.response.contentAsString).contains("\"id\":2")
-        assertThat(result.response.contentAsString).contains("\"isFavorite\":false")
+        assertThat(postCreate().response.status).isEqualTo(409)
     }
 
     @Test
-    fun getById_admin_returnsAssistancePlanDto() {
-        val planId = 12L
+    fun create_invalidHours_returnsBadRequestWithReason() {
+        given(assistancePlanService.create(any())).willReturn(AssistancePlanCreateResult.InvalidHours("not both"))
+
+        val result = postCreate()
+
+        assertThat(result.response.status).isEqualTo(400)
+        assertThat(result.response.contentAsString).isEqualTo("not both")
+    }
+
+    @Test
+    fun create_unknownSponsor_returnsBadRequest() {
+        given(assistancePlanService.create(any())).willReturn(AssistancePlanCreateResult.SponsorNotFound)
+
+        assertThat(postCreate().response.status).isEqualTo(400)
+    }
+
+    @Test
+    fun update_withoutPermission_returnsForbidden() {
+        given(accessService.canModifyAssistancePlan(12L)).willReturn(false)
+
+        val result = putUpdate(pathId = 12L, bodyId = 12L)
+
+        assertThat(result.response.status).isEqualTo(403)
+        verify(assistancePlanService, never()).update(any(), any())
+    }
+
+    @Test
+    fun update_differentPathAndBodyId_returnsBadRequest() {
+        given(accessService.canModifyAssistancePlan(12L)).willReturn(true)
+
+        assertThat(putUpdate(pathId = 12L, bodyId = 13L).response.status).isEqualTo(400)
+    }
+
+    @Test
+    fun update_unknownAssistancePlan_returnsNotFound() {
+        given(accessService.canModifyAssistancePlan(12L)).willReturn(true)
+        given(assistancePlanService.update(any(), any())).willReturn(AssistancePlanUpdateResult.NotFound)
+
+        assertThat(putUpdate(pathId = 12L, bodyId = 12L).response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun update_hourModeChanged_returnsConflict() {
+        given(accessService.canModifyAssistancePlan(12L)).willReturn(true)
+        given(assistancePlanService.update(any(), any())).willReturn(AssistancePlanUpdateResult.HourModeChanged)
+
+        assertThat(putUpdate(pathId = 12L, bodyId = 12L).response.status).isEqualTo(409)
+    }
+
+    @Test
+    fun update_validRequest_returnsAssistancePlan() {
+        given(accessService.canModifyAssistancePlan(12L)).willReturn(true)
+        given(assistancePlanService.update(any(), any())).willReturn(AssistancePlanUpdateResult.Success(planResponse(12L)))
+
+        val result = putUpdate(pathId = 12L, bodyId = 12L)
+
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":12")
+    }
+
+    @Test
+    fun delete_nonAdmin_returnsForbidden() {
+        given(accessService.isAdmin()).willReturn(false)
+
+        val result = mockMvc.delete("/assistance_plans/12").andReturn()
+
+        assertThat(result.response.status).isEqualTo(403)
+        verify(assistancePlanService, never()).delete(any())
+    }
+
+    @Test
+    fun delete_admin_returnsDeletedAssistancePlan() {
+        given(accessService.isAdmin()).willReturn(true)
+        given(assistancePlanService.delete(12L)).willReturn(AssistancePlanDeleteResult.Success(planResponse(12L)))
+
+        val result = mockMvc.delete("/assistance_plans/12").andReturn()
+
+        assertThat(result.response.status).isEqualTo(200)
+        assertThat(result.response.contentAsString).contains("\"id\":12")
+    }
+
+    @Test
+    fun delete_unknownAssistancePlan_returnsNotFound() {
+        given(accessService.isAdmin()).willReturn(true)
+        given(assistancePlanService.delete(12L)).willReturn(AssistancePlanDeleteResult.NotFound)
+
+        assertThat(mockMvc.delete("/assistance_plans/12").andReturn().response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun getEditById_unknownOrHiddenAssistancePlan_returnsNotFound() {
+        given(accessService.isAdmin()).willReturn(false)
+        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
+        given(assistancePlanService.getEditById(12L, false, emptyList())).willReturn(null)
+
+        assertThat(mockMvc.get("/assistance_plans/12/edit").andReturn().response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun getEditById_admin_returnsEditResponse() {
         given(accessService.isAdmin()).willReturn(true)
         given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(assistancePlanService.getById(planId, true, emptyList()))
-            .willReturn(
-                AssistancePlanDto().apply {
-                    id = planId
-                    clientId = 33
-                    institutionId = 44
-                    sponsorId = 55
-                    clientArchived = true
-                }
-            )
+        given(assistancePlanService.getEditById(12L, true, emptyList()))
+            .willReturn(AssistancePlanEditResponse().apply {
+                id = 12L
+                clientArchived = true
+            })
 
-        val result = mockMvc.get("/assistance_plans/$planId").andReturn()
+        val result = mockMvc.get("/assistance_plans/12/edit").andReturn()
 
         assertThat(result.response.status).isEqualTo(200)
         assertThat(result.response.contentAsString).contains("\"id\":12")
@@ -101,84 +178,32 @@ class AssistancePlanControllerWebMvcTest {
     }
 
     @Test
-    fun getFavoritePreviewsByLoggedInUser_returnsPreviewDtos() {
-        given(userService.getUserId()).willReturn(44L)
-        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(assistancePlanPreviewService.getFavoritePreviewDtosByEmployeeId(44L, false, emptyList()))
-            .willReturn(listOf(previewDto(id = 4L, isFavorite = true)))
+    fun getDetailById_unknownAssistancePlan_returnsNotFound() {
+        given(assistancePlanService.getDetailById(12L)).willReturn(null)
 
-        val result = mockMvc.get("/assistance_plans/favorites/preview").andReturn()
-
-        assertThat(result.response.status).isEqualTo(200)
-        assertThat(result.response.contentAsString).contains("\"id\":4")
-        assertThat(result.response.contentAsString).contains("\"isFavorite\":true")
+        assertThat(mockMvc.get("/assistance_plans/12/detail").andReturn().response.status).isEqualTo(404)
     }
 
-    @Test
-    fun getFavoritePreviewsByLoggedInUser_serviceThrows_returnsBadRequest() {
-        given(userService.getUserId()).willReturn(44L)
-        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        doThrow(IllegalArgumentException("boom"))
-            .`when`(assistancePlanPreviewService)
-            .getFavoritePreviewDtosByEmployeeId(44L, false, emptyList())
+    private fun postCreate() = mockMvc.post("/assistance_plans") {
+        contentType = MediaType.APPLICATION_JSON
+        content = """{"start":"2026-01-01","end":"2026-12-31","clientId":1,"institutionId":2,"sponsorId":3}"""
+    }.andReturn()
 
-        val result = mockMvc.get("/assistance_plans/favorites/preview").andReturn()
+    private fun putUpdate(pathId: Long, bodyId: Long) = mockMvc.put("/assistance_plans/$pathId") {
+        contentType = MediaType.APPLICATION_JSON
+        content = """{"id":$bodyId,"start":"2026-01-01","end":"2026-12-31","clientId":1,"institutionId":2,"sponsorId":3}"""
+    }.andReturn()
 
-        assertThat(result.response.status).isEqualTo(400)
-    }
-
-    @Test
-    fun getExistingByClientId_returnsExistingDtos() {
-        given(assistancePlanPreviewService.getExistingDtosByClientId(3L, false))
-            .willReturn(
-                listOf(
-                    AssistancePlanExistingDto(
-                        id = 99L,
-                        start = LocalDate.of(2026, 1, 1),
-                        end = LocalDate.of(2026, 3, 31),
-                        sponsorName = "LWV",
-                        clientArchived = false
-                    )
-                )
-            )
-
-        val result = mockMvc.get("/assistance_plans/client/3/existing").andReturn()
-
-        assertThat(result.response.status).isEqualTo(200)
-        assertThat(result.response.contentAsString).contains("\"id\":99")
-        assertThat(result.response.contentAsString).contains("\"sponsorName\":\"LWV\"")
-    }
-
-    private fun previewDto(id: Long, isFavorite: Boolean): AssistancePlanPreviewDto {
-        return AssistancePlanPreviewDto(
-            id = id,
-            clientId = 11,
-            institutionId = 12,
-            sponsorId = 13,
-            clientFirstname = "Max",
-            clientLastname = "Mustermann",
-            institutionName = "Schule",
-            sponsorName = "Kostentraeger",
-            clientArchived = false,
-            start = LocalDate.of(2026, 1, 1),
-            end = LocalDate.of(2026, 12, 31),
-            isActive = true,
-            isFavorite = isFavorite,
-            hasIllegalHours = false,
-            hourMode = AssistancePlanHourMode.EXACT,
-            approvedHoursFrom = 7.0,
-            approvedHoursTo = 7.0,
-            approvedHoursPerWeek = 7.0,
-            approvedHoursThisYearFrom = 366.0,
-            approvedHoursThisYearTill = 366.0,
-            approvedHoursThisYear = 366.0,
-            executedHoursThisYear = 100.0,
-            approvedHoursLeftThisYear = 266.0,
-            approvedHoursThisAssistancePlanFrom = 366.0,
-            approvedHoursThisAssistancePlanTill = 366.0,
-            approvedHoursThisAssistancePlan = 366.0,
-            executedHoursThisAssistancePlan = 100.0,
-            approvedHoursLeftThisAssistancePlan = 266.0
-        )
-    }
+    private fun planResponse(id: Long) = AssistancePlanResponse(
+        id = id,
+        start = LocalDate.of(2026, 1, 1),
+        end = LocalDate.of(2026, 12, 31),
+        clientId = 1,
+        institutionId = 2,
+        institutionName = "Schule",
+        sponsorId = 3,
+        hourMode = AssistancePlanHourMode.EXACT,
+        hourCorridorId = 0,
+        clientArchived = false
+    )
 }

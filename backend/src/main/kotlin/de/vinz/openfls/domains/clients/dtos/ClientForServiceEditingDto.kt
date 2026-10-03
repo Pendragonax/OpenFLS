@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.clients.dtos
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanForServiceEditingDto
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanForServiceEditingDto
 import de.vinz.openfls.domains.categories.dto.CategoryTemplateWithCategoriesResponse
 import de.vinz.openfls.domains.institutions.dto.InstitutionResponse
 

@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.hourCorridors.entity
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

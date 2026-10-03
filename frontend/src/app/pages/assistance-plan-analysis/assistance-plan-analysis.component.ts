@@ -71,7 +71,7 @@ export class AssistancePlanAnalysisComponent implements OnInit {
   ngOnInit(): void {
     this.executeURLParams();
     combineLatest([
-      this.assistancePlanService.getProjectionById(this.assistancePlanId),
+      this.assistancePlanService.getDetailById(this.assistancePlanId),
       this.clientService.allValues$
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))

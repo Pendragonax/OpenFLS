@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.institutions.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.permissions.entity.Permission

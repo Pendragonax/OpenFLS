@@ -1,10 +1,10 @@
-package de.vinz.openfls.domains.hourReports
+package de.vinz.openfls.domains.hourReports.service
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEditDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanHourDto
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanEditResponse
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanHourResponse
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
@@ -49,10 +49,10 @@ class HourReportServiceTest {
         year: Int,
         institutionId: Long?,
         sponsorId: Long?,
-        plans: List<AssistancePlanEditDto>,
+        plans: List<AssistancePlanEditResponse>,
         clients: List<ClientSimpleDto>
     ) {
-        whenever(assistancePlanService.getAllEditDtosByYearAndInstitutionIdAndSponsorId(year, institutionId, sponsorId))
+        whenever(assistancePlanService.getAllEditResponsesByYearAndInstitutionIdAndSponsorId(year, institutionId, sponsorId))
             .thenReturn(plans)
         whenever(clientService.getAllClientSimpleDto(includeArchived = true)).thenReturn(clients)
     }
@@ -222,8 +222,8 @@ class HourReportServiceTest {
         month: Int?,
         hourTypeId: Long,
         corridor: Boolean = false
-    ): AssistancePlanEditDto {
-        val plan = AssistancePlanEditDto().apply {
+    ): AssistancePlanEditResponse {
+        val plan = AssistancePlanEditResponse().apply {
             this.id = id
             this.clientId = clientId
             this.start = if (month != null) LocalDate.of(year, month, 1) else LocalDate.of(year, 1, 1)
@@ -234,8 +234,8 @@ class HourReportServiceTest {
             }
         }
 
-        plan.hours.add(
-            AssistancePlanHourDto().apply {
+        plan.hours = listOf(
+            AssistancePlanHourResponse().apply {
                 this.assistancePlanId = id
                 this.hourTypeId = hourTypeId
                 this.weeklyMinutes = 420

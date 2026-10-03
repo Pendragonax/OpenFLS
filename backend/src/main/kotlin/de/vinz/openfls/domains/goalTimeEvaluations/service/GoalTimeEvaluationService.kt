@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.goalTimeEvaluations.service
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.goalTimeEvaluations.YearMonthDoubleValue
 import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationResponse
 import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationResult

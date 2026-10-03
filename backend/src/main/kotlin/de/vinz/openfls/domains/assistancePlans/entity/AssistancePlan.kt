@@ -1,0 +1,67 @@
+package de.vinz.openfls.domains.assistancePlans.entity
+
+import com.fasterxml.jackson.annotation.JsonIgnore
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode.EXACT
+import de.vinz.openfls.domains.clients.Client
+import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.institutions.entity.Institution
+import de.vinz.openfls.domains.services.entity.Service
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
+import java.time.LocalDate
+import jakarta.persistence.*
+
+@Entity
+@Table(name = "assistance_plans")
+class AssistancePlan(
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Long = 0,  // Defaultwert, wird von Hibernate überschrieben
+
+        var start: LocalDate = LocalDate.now(),
+
+        var end: LocalDate = LocalDate.now(),
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "hour_mode", nullable = false)
+        var hourMode: AssistancePlanHourMode = EXACT,
+
+        @JsonIgnore
+        @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+        @JoinColumn(name = "client_id")
+        var client: Client? = null,
+
+        @JsonIgnore
+        @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+        @JoinColumn(name = "sponsor_id")
+        var sponsor: Sponsor? = null,
+
+        @JsonIgnore
+        @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+        @JoinColumn(name = "institution_id")
+        var institution: Institution? = null,
+
+        @OneToMany(cascade = [CascadeType.ALL], mappedBy = "assistancePlan", fetch = FetchType.LAZY, orphanRemoval = true)
+        var goals: MutableSet<Goal> = mutableSetOf(),
+
+        @OneToMany(cascade = [CascadeType.ALL], mappedBy = "assistancePlan", fetch = FetchType.LAZY, orphanRemoval = true)
+        var hours: MutableSet<AssistancePlanHour> = mutableSetOf(),
+
+        @OneToMany(mappedBy = "assistancePlan", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        var services: MutableSet<Service> = mutableSetOf(),
+
+        @JsonIgnore
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "hour_corridor_id")
+        var hourCorridor: HourCorridor? = null
+) {
+        override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (other !is AssistancePlan) return false
+                return id == other.id
+        }
+
+        override fun hashCode(): Int {
+                return id.hashCode()
+        }
+}

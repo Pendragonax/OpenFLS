@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.clients.archive.export.dtos
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.employees.entity.Employee
@@ -173,7 +173,7 @@ data class ClientArchiveExportAssistancePlanHourDto(
     var hourType: ClientArchiveExportHourTypeDto = ClientArchiveExportHourTypeDto()
 ) {
     companion object {
-        fun from(hour: de.vinz.openfls.domains.assistancePlans.AssistancePlanHour): ClientArchiveExportAssistancePlanHourDto {
+        fun from(hour: de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour): ClientArchiveExportAssistancePlanHourDto {
             return ClientArchiveExportAssistancePlanHourDto(
                 id = hour.id,
                 weeklyMinutes = hour.weeklyMinutes,

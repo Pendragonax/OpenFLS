@@ -24,11 +24,11 @@ import {
 } from "./modals/hour-report-permission-info-modal/hour-report-permission-info-modal.component";
 import {DateService} from "../../shared/services/date.service";
 import {
-  AssistancePlanAnalysisService
-} from "./services/assistance-plan-analysis.service";
+  HourReportMonthlySummaryService
+} from "./services/hour-report-monthly-summary.service";
 import {
-  AssistancePlansAnalysisMonthDto
-} from "./dtos/assistance-plans-analysis-month-dto";
+  HourReportMonthlySummaryDto
+} from "./dtos/hour-report-monthly-summary-dto";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ObjectTableRowColors} from '../../shared/components/object-table/object-table.component';
 import {AssistancePlanHourMode} from '../../shared/dtos/assistance-plan-hour-mode.model';
@@ -106,7 +106,7 @@ export class HourReportComponent implements OnInit {
               private institutionService: InstitutionService,
               private sponsorService: SponsorService,
               private dateService: DateService,
-              private assistancePlanAnalysisService: AssistancePlanAnalysisService,
+              private hourReportMonthlySummaryService: HourReportMonthlySummaryService,
               private converter: Converter,
               private dialog: MatDialog,
               private location: Location) {
@@ -307,8 +307,8 @@ export class HourReportComponent implements OnInit {
       this.selectedValueType!!)
   }
 
-  private loadMonthlyData(): Observable<AssistancePlansAnalysisMonthDto> {
-    return this.assistancePlanAnalysisService.getByYearAndMonthAndInstitutionIdAndSponsorIdAndHourTypeId(
+  private loadMonthlyData(): Observable<HourReportMonthlySummaryDto> {
+    return this.hourReportMonthlySummaryService.getMonthlySummary(
       this.year,
       this.month,
       this.selectedArea?.id ?? 0,
@@ -384,10 +384,10 @@ export class HourReportComponent implements OnInit {
 
   private getDataObserverWithoutSeparateHeader() {
     return {
-      next: (value: AssistancePlansAnalysisMonthDto) => {
+      next: (value: HourReportMonthlySummaryDto) => {
         this.rowColors = new Map();
         this.rowDescriptions = new Map();
-        value.assistancePlanAnalysis.forEach((plan, index) => {
+        value.rows.forEach((plan, index) => {
           const rowIndex = index + 1;
           if (plan.hourMode === AssistancePlanHourMode.CORRIDOR) {
             this.rowColors.set(rowIndex, {fontColor: '#000000', backgroundColor: '#eef6ff'});
@@ -396,7 +396,7 @@ export class HourReportComponent implements OnInit {
             this.rowDescriptions.set(rowIndex, 'Exakter Hilfeplan');
           }
         });
-        let fullData = this.assistancePlanAnalysisService.convertToArray(value)
+        let fullData = this.hourReportMonthlySummaryService.convertToArray(value)
         let header = fullData[0]
         let data = fullData.slice(1)
         this.columns = header;

@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.employees.service
 
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.dto.EmployeeFavoriteResult

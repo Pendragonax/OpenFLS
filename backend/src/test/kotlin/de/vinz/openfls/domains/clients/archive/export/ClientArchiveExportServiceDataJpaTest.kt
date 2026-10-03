@@ -2,9 +2,9 @@ package de.vinz.openfls.domains.clients.archive.export
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import de.vinz.openfls.TimeConfiguration
-import de.vinz.openfls.domains.assistancePlans.AssistancePlan
-import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
-import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.categories.repository.CategoryRepository
@@ -35,6 +35,7 @@ import de.vinz.openfls.domains.services.repository.ServiceRepository
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
@@ -112,7 +113,7 @@ class ClientArchiveExportServiceDataJpaTest {
     lateinit var accessService: AccessService
 
     @MockitoBean
-    lateinit var assistancePlanService: de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+    lateinit var assistancePlanService: de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 
     @MockitoBean
     lateinit var hourTypeService: de.vinz.openfls.domains.hourTypes.service.HourTypeService
@@ -435,6 +436,9 @@ class ClientArchiveExportServiceDataJpaTest {
                 categorys = mutableSetOf(category)
             )
         )
+
+        whenever(assistancePlanService.getAllEntitiesByClientId(client.id))
+            .thenAnswer { assistancePlanRepository.findByClientId(client.id) }
 
         return ExportGraph(client = client, employee = savedEmployee)
     }
