@@ -1,6 +1,7 @@
-package de.vinz.openfls.domains.clientTasks
+package de.vinz.openfls.domains.clientTasks.repository
 
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCountDto
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCountDto
+import de.vinz.openfls.domains.clientTasks.entity.ClientTask
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -33,7 +34,7 @@ interface ClientTaskRepository : CrudRepository<ClientTask, Long> {
 
     @Query(
         """
-        SELECT new de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCountDto(
+        SELECT new de.vinz.openfls.domains.clientTasks.dto.ClientTaskCountDto(
             t.client.id,
             count(t),
             sum(case when t.dueDate < :today then 1L else 0L end))

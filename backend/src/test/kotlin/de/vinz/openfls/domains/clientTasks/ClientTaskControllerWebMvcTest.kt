@@ -1,21 +1,20 @@
 package de.vinz.openfls.domains.clientTasks
 
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskPageDto
-import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.clients.dtos.ClientDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
-import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCompleteRequest
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCompleteResult
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCompletedPageResult
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCreateRequest
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCreateResult
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskDeleteResult
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskPageResponse
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskResponse
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskUpdateRequest
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskUpdateResult
+import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -40,36 +39,27 @@ class ClientTaskControllerWebMvcTest {
     lateinit var clientTaskService: ClientTaskService
 
     @MockitoBean
-    lateinit var clientService: ClientService
-
-    @MockitoBean
-    lateinit var employeeService: EmployeeService
-
-    @MockitoBean
-    lateinit var accessService: AccessService
-
-    @MockitoBean
     lateinit var performanceLoggingService: PerformanceLoggingService
 
-    @BeforeEach
-    fun setUp() {
-        given(accessService.getId()).willReturn(7L)
-        given(employeeService.getEmployeeDtoById(eq(7L), any())).willReturn(EmployeeWithAccess().apply {
-            id = 7
-            firstName = "Anna"
-            lastName = "Autorin"
-        })
-    }
+    private val createRequest = ClientTaskCreateRequest(3, "Bericht", "", LocalDate.of(2026, 3, 20))
+    private val createJson = """{"clientId":3,"title":"Bericht","description":"","dueDate":"2026-03-20"}"""
+    private val updateRequest = ClientTaskUpdateRequest("Bericht", "Neu", LocalDate.of(2026, 3, 20))
+    private val updateJson = """{"title":"Bericht","description":"Neu","dueDate":"2026-03-20"}"""
+    private val completeRequest = ClientTaskCompleteRequest("erledigt", LocalDate.of(2026, 3, 10))
+    private val completeJson = """{"comment":"erledigt","completedOn":"2026-03-10"}"""
+
+    private fun status(path: String, json: String): Int = mockMvc.post(path) {
+        contentType = MediaType.APPLICATION_JSON
+        content = json
+    }.andReturn().response.status
 
     @Test
-    fun create_everyEmployeeMayCreateATask() {
-        given(clientService.existsById(3L)).willReturn(true)
-        given(accessService.isAdmin()).willReturn(false)
-        given(clientTaskService.create(any(), eq(7L), eq("Anna Autorin"))).willReturn(taskDto())
+    fun create_success_returnsOk() {
+        given(clientTaskService.create(createRequest)).willReturn(ClientTaskCreateResult.Success(taskResponse()))
 
         val result = mockMvc.post("/client_tasks") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"clientId":3,"title":"Bericht","description":"","dueDate":"2026-03-20"}"""
+            content = createJson
         }.andReturn()
 
         assertThat(result.response.status).isEqualTo(200)
@@ -77,23 +67,22 @@ class ClientTaskControllerWebMvcTest {
     }
 
     @Test
-    fun create_unknownClient_returnsBadRequest() {
-        given(clientService.existsById(3L)).willReturn(false)
+    fun create_unknownClient_returnsNotFound() {
+        given(clientTaskService.create(createRequest)).willReturn(ClientTaskCreateResult.ClientNotFound)
 
-        val result = mockMvc.post("/client_tasks") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """{"clientId":3,"title":"Bericht","description":"","dueDate":"2026-03-20"}"""
-        }.andReturn()
-
-        assertThat(result.response.status).isEqualTo(400)
-        verify(clientTaskService, never()).create(any(), any(), any())
+        assertThat(status("/client_tasks", createJson)).isEqualTo(404)
     }
 
     @Test
-    fun getByClientId_everyEmployeeMaySeeTheTasks() {
-        given(clientService.existsById(3L)).willReturn(true)
-        given(accessService.isAdmin()).willReturn(false)
-        given(clientTaskService.getDtosByClientId(3L)).willReturn(listOf(taskDto()))
+    fun create_blankTitle_returnsBadRequestWithoutCallingTheService() {
+        val json = """{"clientId":3,"title":" ","description":"","dueDate":"2026-03-20"}"""
+
+        assertThat(status("/client_tasks", json)).isEqualTo(400)
+    }
+
+    @Test
+    fun getOpenTasksByClientId_returnsTheTasks() {
+        given(clientTaskService.getOpenTasksByClientId(3L)).willReturn(listOf(taskResponse()))
 
         val result = mockMvc.get("/client_tasks/client/3").andReturn()
 
@@ -102,13 +91,20 @@ class ClientTaskControllerWebMvcTest {
     }
 
     @Test
-    fun complete_everyEmployeeMayTickOffATask() {
-        given(clientTaskService.complete(eq(1L), any(), eq(7L), eq("Anna Autorin")))
-            .willReturn(taskDto().copy(done = true, completionComment = "erledigt"))
+    fun getOpenTasksByClientId_unknownClient_returnsNotFound() {
+        given(clientTaskService.getOpenTasksByClientId(3L)).willReturn(null)
+
+        assertThat(mockMvc.get("/client_tasks/client/3").andReturn().response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun complete_success_returnsOk() {
+        given(clientTaskService.complete(1L, completeRequest))
+            .willReturn(ClientTaskCompleteResult.Success(taskResponse().copy(done = true, completionComment = "erledigt")))
 
         val result = mockMvc.post("/client_tasks/1/complete") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"comment":"erledigt","completedOn":"2026-03-10"}"""
+            content = completeJson
         }.andReturn()
 
         assertThat(result.response.status).isEqualTo(200)
@@ -116,23 +112,62 @@ class ClientTaskControllerWebMvcTest {
     }
 
     @Test
+    fun complete_unknownTask_returnsNotFound() {
+        given(clientTaskService.complete(1L, completeRequest)).willReturn(ClientTaskCompleteResult.NotFound)
+
+        assertThat(status("/client_tasks/1/complete", completeJson)).isEqualTo(404)
+    }
+
+    @Test
+    fun complete_alreadyCompleted_returnsConflict() {
+        given(clientTaskService.complete(1L, completeRequest)).willReturn(ClientTaskCompleteResult.AlreadyCompleted)
+
+        assertThat(status("/client_tasks/1/complete", completeJson)).isEqualTo(409)
+    }
+
+    @Test
     fun change_usesPathIdAndDedicatedActionEndpoint() {
-        given(clientTaskService.update(eq(1L), any(), eq(7L), eq("Anna Autorin"))).willReturn(taskDto())
+        given(clientTaskService.update(1L, updateRequest)).willReturn(ClientTaskUpdateResult.Success(taskResponse()))
 
         val result = mockMvc.put("/client_tasks/1/change") {
             contentType = MediaType.APPLICATION_JSON
-            content = """{"title":"Bericht","description":"Neu","dueDate":"2026-03-20"}"""
+            content = updateJson
         }.andReturn()
 
         assertThat(result.response.status).isEqualTo(200)
-        verify(clientTaskService).update(eq(1L), any(), eq(7L), eq("Anna Autorin"))
+    }
+
+    @Test
+    fun change_unknownTask_returnsNotFound() {
+        given(clientTaskService.update(1L, updateRequest)).willReturn(ClientTaskUpdateResult.NotFound)
+
+        val result = mockMvc.put("/client_tasks/1/change") {
+            contentType = MediaType.APPLICATION_JSON
+            content = updateJson
+        }.andReturn()
+
+        assertThat(result.response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun change_completedTask_returnsConflict() {
+        given(clientTaskService.update(1L, updateRequest)).willReturn(ClientTaskUpdateResult.AlreadyCompleted)
+
+        val result = mockMvc.put("/client_tasks/1/change") {
+            contentType = MediaType.APPLICATION_JSON
+            content = updateJson
+        }.andReturn()
+
+        assertThat(result.response.status).isEqualTo(409)
     }
 
     @Test
     fun completed_returnsRequestedPage() {
-        given(clientService.existsById(3L)).willReturn(true)
-        given(clientTaskService.getCompletedDtosByClientId(3L, 1, 10))
-            .willReturn(ClientTaskPageDto(listOf(taskDto().copy(done = true)), 1, 10, 11, 2))
+        given(clientTaskService.getCompletedTasksByClientId(3L, 1, 10)).willReturn(
+            ClientTaskCompletedPageResult.Success(
+                ClientTaskPageResponse(listOf(taskResponse().copy(done = true)), 1, 10, 11, 2)
+            )
+        )
 
         val result = mockMvc.get("/client_tasks/client/3/completed?page=1&size=10").andReturn()
 
@@ -141,37 +176,58 @@ class ClientTaskControllerWebMvcTest {
     }
 
     @Test
+    fun completed_unknownClient_returnsNotFound() {
+        given(clientTaskService.getCompletedTasksByClientId(3L, 0, 10))
+            .willReturn(ClientTaskCompletedPageResult.ClientNotFound)
+
+        assertThat(mockMvc.get("/client_tasks/client/3/completed").andReturn().response.status).isEqualTo(404)
+    }
+
+    @Test
+    fun completed_invalidPagination_returnsBadRequest() {
+        given(clientTaskService.getCompletedTasksByClientId(3L, 0, 500))
+            .willReturn(ClientTaskCompletedPageResult.InvalidPagination)
+
+        val result = mockMvc.get("/client_tasks/client/3/completed?size=500").andReturn()
+
+        assertThat(result.response.status).isEqualTo(400)
+    }
+
+    @Test
     fun delete_removesTheTask() {
-        given(clientTaskService.getDtoById(1L)).willReturn(taskDto())
+        given(clientTaskService.delete(1L)).willReturn(ClientTaskDeleteResult.Success(taskResponse()))
 
         val result = mockMvc.delete("/client_tasks/1").andReturn()
 
         assertThat(result.response.status).isEqualTo(200)
-        verify(clientTaskService).delete(eq(1L), eq(7L), eq("Anna Autorin"))
+        assertThat(result.response.contentAsString).contains("\"id\":1")
     }
 
     @Test
-    fun getHistory_unknownTask_returnsBadRequest() {
-        given(clientTaskService.existsById(1L)).willReturn(false)
+    fun delete_unknownTask_returnsNotFound() {
+        given(clientTaskService.delete(1L)).willReturn(ClientTaskDeleteResult.NotFound)
 
-        val result = mockMvc.get("/client_tasks/1/history").andReturn()
+        assertThat(mockMvc.delete("/client_tasks/1").andReturn().response.status).isEqualTo(404)
+    }
 
-        assertThat(result.response.status).isEqualTo(400)
-        verify(clientTaskService, never()).getAuditHistory(any())
+    @Test
+    fun getHistory_unknownTask_returnsNotFound() {
+        given(clientTaskService.getAuditHistoryByTaskId(1L)).willReturn(null)
+
+        assertThat(mockMvc.get("/client_tasks/1/history").andReturn().response.status).isEqualTo(404)
     }
 
     @Test
     fun getHistory_existingTask_returnsTheAuditTrail() {
-        given(clientTaskService.existsById(1L)).willReturn(true)
-        given(clientTaskService.getAuditHistory(1L)).willReturn(emptyList())
+        given(clientTaskService.getAuditHistoryByTaskId(1L)).willReturn(emptyList())
 
         val result = mockMvc.get("/client_tasks/1/history").andReturn()
 
         assertThat(result.response.status).isEqualTo(200)
-        verify(clientTaskService).getAuditHistory(1L)
+        assertThat(result.response.contentAsString).isEqualTo("[]")
     }
 
-    private fun taskDto() = ClientTaskDto(
+    private fun taskResponse() = ClientTaskResponse(
         id = 1,
         clientId = 3,
         title = "Bericht",
@@ -188,11 +244,4 @@ class ClientTaskControllerWebMvcTest {
         completedAt = null,
         completionComment = null
     )
-
-    private fun clientDto() = ClientDto().apply {
-        id = 3
-        firstName = "Max"
-        lastName = "Mustermann"
-        institution.id = 5
-    }
 }

@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients.dashboard.dtos
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskDto
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskResponse
 import de.vinz.openfls.domains.services.dtos.ClientLatestServiceDto
 
 /**
@@ -27,6 +27,6 @@ data class ClientDashboardDto(
     val servicesAccess: ClientDashboardAccess,
     val latestServices: List<ClientLatestServiceDto>,
 
-    val tasks: List<ClientTaskDto>,
+    val tasks: List<ClientTaskResponse>,
     val openTaskCount: Int
 )

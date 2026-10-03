@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.clientTasks.dtos
+package de.vinz.openfls.domains.clientTasks.dto
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -7,7 +7,7 @@ import java.time.LocalDateTime
  * Read model of a client task. Employees are reduced to id and name so that no
  * further personal data leaves the service boundary.
  */
-data class ClientTaskDto(
+data class ClientTaskResponse(
     val id: Long,
     val clientId: Long,
     val title: String,

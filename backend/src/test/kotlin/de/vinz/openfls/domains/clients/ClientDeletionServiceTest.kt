@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.clients
 
-import de.vinz.openfls.domains.clientTasks.ClientTaskService
+import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.eq

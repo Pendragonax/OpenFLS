@@ -1,19 +1,29 @@
-package de.vinz.openfls.domains.clientTasks
+package de.vinz.openfls.domains.clientTasks.service
 
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskAuditLogDto
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCountDto
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskPageDto
-import de.vinz.openfls.domains.clientTasks.dtos.CompleteClientTaskDto
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCreateDto
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskUpdateDto
-import de.vinz.openfls.domains.clientTasks.exceptions.ClientTaskNotFoundException
-import de.vinz.openfls.domains.clientTasks.exceptions.InvalidClientTaskException
-import de.vinz.openfls.domains.clients.Client
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskAuditLogResponse
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCompleteRequest
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCompleteResult
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCompletedPageResult
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCountDto
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCreateRequest
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCreateResult
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskDeleteResult
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskPageResponse
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskResponse
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskUpdateRequest
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskUpdateResult
+import de.vinz.openfls.domains.clientTasks.entity.ClientTask
+import de.vinz.openfls.domains.clientTasks.entity.ClientTaskAuditAction
+import de.vinz.openfls.domains.clientTasks.entity.ClientTaskAuditLog
+import de.vinz.openfls.domains.clientTasks.repository.ClientTaskAuditLogRepository
+import de.vinz.openfls.domains.clientTasks.repository.ClientTaskRepository
+import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.logging.StructuredLog
-import jakarta.persistence.EntityManager
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Clock
@@ -28,26 +38,47 @@ import java.time.LocalDateTime
 class ClientTaskService(
     private val clientTaskRepository: ClientTaskRepository,
     private val clientTaskAuditLogRepository: ClientTaskAuditLogRepository,
-    private val entityManager: EntityManager,
+    private val clientService: ClientService,
+    private val employeeService: EmployeeService,
+    private val accessService: AccessService,
     private val clock: Clock
 ) {
 
+    private data class Actor(val employee: Employee, val name: String)
+
     @Transactional(readOnly = true)
-    fun getDtosByClientId(clientId: Long): List<ClientTaskDto> {
+    fun getOpenTasksByClientId(clientId: Long): List<ClientTaskResponse>? {
+        if (!clientService.existsById(clientId)) {
+            return null
+        }
+
         val today = LocalDate.now(clock)
         return clientTaskRepository.findAllByClientIdAndDoneOrderByDueDateAscIdAsc(clientId, false)
-            .map { toDto(it, today) }
+            .map { toResponse(it, today) }
     }
 
     @Transactional(readOnly = true)
-    fun getCompletedDtosByClientId(clientId: Long, page: Int, size: Int = 10): ClientTaskPageDto {
-        if (page < 0 || size !in 1..100) throw InvalidClientTaskException("invalid pagination")
+    fun getCompletedTasksByClientId(clientId: Long, page: Int, size: Int): ClientTaskCompletedPageResult {
+        if (!clientService.existsById(clientId)) {
+            return ClientTaskCompletedPageResult.ClientNotFound
+        }
+        if (page < 0 || size !in 1..100) {
+            return ClientTaskCompletedPageResult.InvalidPagination
+        }
+
         val result = clientTaskRepository.findAllByClientIdAndDoneOrderByCompletedAtDescIdDesc(
             clientId, true, PageRequest.of(page, size)
         )
         val today = LocalDate.now(clock)
-        return ClientTaskPageDto(result.content.map { toDto(it, today) }, result.number, result.size,
-            result.totalElements, result.totalPages)
+        return ClientTaskCompletedPageResult.Success(
+            ClientTaskPageResponse(
+                result.content.map { toResponse(it, today) },
+                result.number,
+                result.size,
+                result.totalElements,
+                result.totalPages
+            )
+        )
     }
 
     @Transactional(readOnly = true)
@@ -61,43 +92,40 @@ class ClientTaskService(
     }
 
     @Transactional(readOnly = true)
-    fun getDtoById(id: Long): ClientTaskDto {
-        val task = clientTaskRepository.findById(id)
-            .orElseThrow { ClientTaskNotFoundException("client task not found") }
-        return toDto(task, LocalDate.now(clock))
-    }
+    fun getAuditHistoryByTaskId(taskId: Long): List<ClientTaskAuditLogResponse>? {
+        if (!clientTaskRepository.existsById(taskId)) {
+            return null
+        }
 
-    @Transactional(readOnly = true)
-    fun getAuditHistory(taskId: Long): List<ClientTaskAuditLogDto> {
         return clientTaskAuditLogRepository.findAllByClientTaskIdOrderByChangedAtDesc(taskId)
             .filter { it.action == ClientTaskAuditAction.UPDATE || it.action == ClientTaskAuditAction.COMPLETE }
-            .map { toDto(it) }
+            .map { toResponse(it) }
     }
 
     @Transactional
-    fun create(valueDto: ClientTaskCreateDto, actorId: Long, actorName: String): ClientTaskDto {
-        if (valueDto.title.isBlank()) {
-            throw InvalidClientTaskException("title must not be blank")
-        }
+    fun create(request: ClientTaskCreateRequest): ClientTaskCreateResult {
+        val client = clientService.getEntityById(request.clientId)
+            ?: return ClientTaskCreateResult.ClientNotFound
+        val actor = currentActor()
 
         val now = LocalDateTime.now(clock)
-        val task = ClientTask(
-            client = entityManager.getReference(Client::class.java, valueDto.clientId),
-            title = valueDto.title.trim(),
-            description = valueDto.description.trim(),
-            dueDate = valueDto.dueDate,
-            createdBy = entityManager.getReference(Employee::class.java, actorId),
-            createdAt = now,
-            done = false
+        val saved = clientTaskRepository.save(
+            ClientTask(
+                client = client,
+                title = request.title.trim(),
+                description = request.description.trim(),
+                dueDate = request.dueDate,
+                createdBy = actor.employee,
+                createdAt = now,
+                done = false
+            )
         )
-
-        val saved = clientTaskRepository.save(task)
 
         writeAuditLog(
             task = saved,
             action = ClientTaskAuditAction.CREATE,
-            actorId = actorId,
-            actorName = actorName,
+            actorId = actor.employee.id,
+            actorName = actor.name,
             changedAt = now,
             afterTitle = saved.title,
             afterDescription = saved.description,
@@ -106,35 +134,34 @@ class ClientTaskService(
         )
         StructuredLog.audit("client.task.created", "success", "client.task", saved.id.toString())
 
-        return toDto(saved, LocalDate.now(clock))
+        return ClientTaskCreateResult.Success(toResponse(saved, LocalDate.now(clock)))
     }
 
     @Transactional
-    fun update(id: Long, valueDto: ClientTaskUpdateDto, actorId: Long, actorName: String): ClientTaskDto {
-        val task = clientTaskRepository.findById(id)
-            .orElseThrow { ClientTaskNotFoundException("client task not found") }
-        if (valueDto.title.isBlank()) {
-            throw InvalidClientTaskException("title must not be blank")
+    fun update(id: Long, request: ClientTaskUpdateRequest): ClientTaskUpdateResult {
+        val task = clientTaskRepository.findByIdOrNull(id)
+            ?: return ClientTaskUpdateResult.NotFound
+        if (task.done) {
+            return ClientTaskUpdateResult.AlreadyCompleted
         }
-        if (task.done) throw InvalidClientTaskException("completed tasks cannot be changed")
+        val actor = currentActor()
 
         val beforeTitle = task.title
         val beforeDescription = task.description
         val beforeDueDate = task.dueDate
 
-        task.title = valueDto.title.trim()
-        task.description = valueDto.description.trim()
-        task.dueDate = valueDto.dueDate
+        task.title = request.title.trim()
+        task.description = request.description.trim()
+        task.dueDate = request.dueDate
 
         val saved = clientTaskRepository.save(task)
-        val now = LocalDateTime.now(clock)
 
         writeAuditLog(
             task = saved,
             action = ClientTaskAuditAction.UPDATE,
-            actorId = actorId,
-            actorName = actorName,
-            changedAt = now,
+            actorId = actor.employee.id,
+            actorName = actor.name,
+            changedAt = LocalDateTime.now(clock),
             beforeTitle = beforeTitle,
             afterTitle = saved.title,
             beforeDescription = beforeDescription,
@@ -144,31 +171,32 @@ class ClientTaskService(
         )
         StructuredLog.audit("client.task.updated", "success", "client.task", saved.id.toString())
 
-        return toDto(saved, LocalDate.now(clock))
+        return ClientTaskUpdateResult.Success(toResponse(saved, LocalDate.now(clock)))
     }
 
     @Transactional
-    fun complete(id: Long, valueDto: CompleteClientTaskDto, actorId: Long, actorName: String): ClientTaskDto {
-        val task = clientTaskRepository.findById(id)
-            .orElseThrow { ClientTaskNotFoundException("client task not found") }
+    fun complete(id: Long, request: ClientTaskCompleteRequest): ClientTaskCompleteResult {
+        val task = clientTaskRepository.findByIdOrNull(id)
+            ?: return ClientTaskCompleteResult.NotFound
         if (task.done) {
-            throw InvalidClientTaskException("client task is already done")
+            return ClientTaskCompleteResult.AlreadyCompleted
         }
+        val actor = currentActor()
 
         val now = LocalDateTime.now(clock)
         task.done = true
-        task.completedBy = entityManager.getReference(Employee::class.java, actorId)
+        task.completedBy = actor.employee
         task.completedAt = now
-        task.completedOn = valueDto.completedOn
-        task.completionComment = valueDto.comment.trim()
+        task.completedOn = request.completedOn
+        task.completionComment = request.comment.trim()
 
         val saved = clientTaskRepository.save(task)
 
         writeAuditLog(
             task = saved,
             action = ClientTaskAuditAction.COMPLETE,
-            actorId = actorId,
-            actorName = actorName,
+            actorId = actor.employee.id,
+            actorName = actor.name,
             changedAt = now,
             beforeDone = false,
             afterDone = true,
@@ -176,19 +204,21 @@ class ClientTaskService(
         )
         StructuredLog.audit("client.task.completed", "success", "client.task", saved.id.toString())
 
-        return toDto(saved, LocalDate.now(clock))
+        return ClientTaskCompleteResult.Success(toResponse(saved, LocalDate.now(clock)))
     }
 
     @Transactional
-    fun delete(id: Long, actorId: Long, actorName: String) {
-        val task = clientTaskRepository.findById(id)
-            .orElseThrow { ClientTaskNotFoundException("client task not found") }
+    fun delete(id: Long): ClientTaskDeleteResult {
+        val task = clientTaskRepository.findByIdOrNull(id)
+            ?: return ClientTaskDeleteResult.NotFound
+        val actor = currentActor()
+        val response = toResponse(task, LocalDate.now(clock))
 
         writeAuditLog(
             task = task,
             action = ClientTaskAuditAction.DELETE,
-            actorId = actorId,
-            actorName = actorName,
+            actorId = actor.employee.id,
+            actorName = actor.name,
             changedAt = LocalDateTime.now(clock),
             beforeTitle = task.title,
             beforeDescription = task.description,
@@ -198,6 +228,8 @@ class ClientTaskService(
         StructuredLog.audit("client.task.deleted", "success", "client.task", task.id.toString())
 
         clientTaskRepository.delete(task)
+
+        return ClientTaskDeleteResult.Success(response)
     }
 
     /**
@@ -205,10 +237,10 @@ class ClientTaskService(
      * removal is recorded so the audit trail stays complete.
      */
     @Transactional
-    fun deleteAllByClientId(clientId: Long, actorId: Long, actorName: String): Int {
+    fun deleteAllByClientId(clientId: Long, actorId: Long, actorName: String) {
         val tasks = clientTaskRepository.findAllByClientId(clientId)
         if (tasks.isEmpty()) {
-            return 0
+            return
         }
 
         val now = LocalDateTime.now(clock)
@@ -227,16 +259,18 @@ class ClientTaskService(
         }
         StructuredLog.audit("client.task.deleted.bulk", "success", "client", clientId.toString())
         clientTaskRepository.deleteAll(tasks)
-
-        return tasks.size
     }
 
-    fun existsById(id: Long): Boolean = clientTaskRepository.existsById(id)
+    private fun currentActor(): Actor {
+        val employee = employeeService.getById(accessService.getId())
+            ?: throw IllegalStateException("current user not found")
+        return Actor(employee, employee.displayName())
+    }
 
     private fun writeAuditLog(
         task: ClientTask,
         action: ClientTaskAuditAction,
-        actorId: Long,
+        actorId: Long?,
         actorName: String,
         changedAt: LocalDateTime,
         beforeTitle: String? = null,
@@ -270,8 +304,8 @@ class ClientTaskService(
         )
     }
 
-    private fun toDto(task: ClientTask, today: LocalDate): ClientTaskDto {
-        return ClientTaskDto(
+    private fun toResponse(task: ClientTask, today: LocalDate): ClientTaskResponse {
+        return ClientTaskResponse(
             id = task.id,
             clientId = task.client?.id ?: 0,
             title = task.title,
@@ -290,8 +324,8 @@ class ClientTaskService(
         )
     }
 
-    private fun toDto(log: ClientTaskAuditLog): ClientTaskAuditLogDto {
-        return ClientTaskAuditLogDto(
+    private fun toResponse(log: ClientTaskAuditLog): ClientTaskAuditLogResponse {
+        return ClientTaskAuditLogResponse(
             id = log.id,
             clientTaskId = log.clientTaskId,
             action = log.action,

@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.clientTasks
+package de.vinz.openfls.domains.clientTasks.entity
 
 enum class ClientTaskAuditAction {
     CREATE,

@@ -4,9 +4,9 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPeriodDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
-import de.vinz.openfls.domains.clientTasks.ClientTaskService
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskCountDto
-import de.vinz.openfls.domains.clientTasks.dtos.ClientTaskDto
+import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskCountDto
+import de.vinz.openfls.domains.clientTasks.dto.ClientTaskResponse
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardAccess
 import de.vinz.openfls.domains.clients.dtos.ClientDto
@@ -53,7 +53,7 @@ class ClientDashboardServiceTest {
             .thenReturn(listOf(endedPlan(), runningPlan(), futurePlan()))
         whenever(serviceService.getLatestDtosByClientId(any(), any(), any(), any(), any()))
             .thenReturn(listOf(latestService()))
-        whenever(clientTaskService.getDtosByClientId(any())).thenReturn(listOf(openTask(), doneTask()))
+        whenever(clientTaskService.getOpenTasksByClientId(any())).thenReturn(listOf(openTask(), doneTask()))
 
         val dashboard = clientDashboardService.getDashboard(
             clientId = 1,
@@ -80,7 +80,7 @@ class ClientDashboardServiceTest {
     fun getDashboard_withoutReadPermission_deniesPlanAndEntriesButKeepsTasks() {
         whenever(clientService.getById(any(), any(), any())).thenReturn(clientDto())
         whenever(clientService.isFavoriteOfEmployee(any(), any())).thenReturn(false)
-        whenever(clientTaskService.getDtosByClientId(any())).thenReturn(listOf(openTask()))
+        whenever(clientTaskService.getOpenTasksByClientId(any())).thenReturn(listOf(openTask()))
 
         val dashboard = clientDashboardService.getDashboard(
             clientId = 1,
@@ -112,7 +112,7 @@ class ClientDashboardServiceTest {
         whenever(assistancePlanPreviewService.getPreviewDtosByClientId(any(), any(), any()))
             .thenReturn(listOf(endedPlan(), endedPlan().copy(id = 42, end = today.minusDays(1))))
         whenever(serviceService.getLatestDtosByClientId(any(), any(), any(), any(), any())).thenReturn(emptyList())
-        whenever(clientTaskService.getDtosByClientId(any())).thenReturn(emptyList())
+        whenever(clientTaskService.getOpenTasksByClientId(any())).thenReturn(emptyList())
 
         val dashboard = clientDashboardService.getDashboard(
             clientId = 1,
@@ -273,7 +273,7 @@ class ClientDashboardServiceTest {
         assistancePlanId = 1
     )
 
-    private fun openTask() = ClientTaskDto(
+    private fun openTask() = ClientTaskResponse(
         id = 1,
         clientId = 1,
         title = "Offen",

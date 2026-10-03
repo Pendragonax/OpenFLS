@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.clientTasks.dtos
+package de.vinz.openfls.domains.clientTasks.dto
 
 /**
  * Number of open and already overdue tasks of one client.

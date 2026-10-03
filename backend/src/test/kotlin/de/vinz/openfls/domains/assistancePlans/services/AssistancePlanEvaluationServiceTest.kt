@@ -7,6 +7,7 @@ import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.services.Service
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -67,8 +68,8 @@ class AssistancePlanEvaluationServiceTest {
         assertThat(result.total.first().actual).isEqualTo(1.0)
         assertThat(result.total.first().size).isEqualTo(1)
         assertThat(result.tillToday.first().actual).isEqualTo(1.0)
-        assertThat(result.actualMonth.first().target).isEqualTo(expectedActualWindow / 7.0)
-        assertThat(result.actualYear.first().target).isEqualTo(expectedActualWindow / 7.0)
+        assertThat(result.actualMonth.first().target).isCloseTo(expectedActualWindow / 7.0, within(1e-9))
+        assertThat(result.actualYear.first().target).isCloseTo(expectedActualWindow / 7.0, within(1e-9))
         assertThat(result.notMatchingServices).isZero()
         assertThat(result.notMatchingServicesIds).isEmpty()
     }

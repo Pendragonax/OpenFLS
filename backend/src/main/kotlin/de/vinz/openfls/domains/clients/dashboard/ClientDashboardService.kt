@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.clients.dashboard
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
-import de.vinz.openfls.domains.clientTasks.ClientTaskService
+import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
 import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardAccess
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardDto
@@ -78,7 +78,7 @@ class ClientDashboardService(
             emptyList()
         }
 
-        val tasks = clientTaskService.getDtosByClientId(clientId)
+        val tasks = clientTaskService.getOpenTasksByClientId(clientId).orEmpty()
 
         return ClientDashboardDto(
             clientId = client.id,

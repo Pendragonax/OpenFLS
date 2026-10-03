@@ -1,10 +1,10 @@
-package de.vinz.openfls.domains.clientTasks.dtos
+package de.vinz.openfls.domains.clientTasks.dto
 
-import de.vinz.openfls.domains.clientTasks.ClientTaskAuditAction
+import de.vinz.openfls.domains.clientTasks.entity.ClientTaskAuditAction
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-data class ClientTaskAuditLogDto(
+data class ClientTaskAuditLogResponse(
     val id: Long,
     val clientTaskId: Long,
     val action: ClientTaskAuditAction,

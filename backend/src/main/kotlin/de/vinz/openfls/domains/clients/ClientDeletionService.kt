@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.clients
 
-import de.vinz.openfls.domains.clientTasks.ClientTaskService
+import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
 import de.vinz.openfls.domains.employees.services.EmployeeService
 import de.vinz.openfls.logging.StructuredLog
 import org.springframework.stereotype.Service

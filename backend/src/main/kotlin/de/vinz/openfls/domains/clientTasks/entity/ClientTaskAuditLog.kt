@@ -1,4 +1,4 @@
-package de.vinz.openfls.domains.clientTasks
+package de.vinz.openfls.domains.clientTasks.entity
 
 import jakarta.persistence.*
 import java.time.LocalDate
