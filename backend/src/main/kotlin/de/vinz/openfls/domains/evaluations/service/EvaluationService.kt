@@ -2,8 +2,8 @@ package de.vinz.openfls.domains.evaluations.service
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateRequest
 import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateResult
 import de.vinz.openfls.domains.evaluations.dto.EvaluationDeleteResult
@@ -144,7 +144,7 @@ class EvaluationService(
     }
 
     private fun getCurrentEmployee(): Employee {
-        return employeeService.getById(accessService.getId())
+        return employeeService.getEntityById(accessService.getId())
             ?: throw IllegalStateException("current user not found")
     }
 

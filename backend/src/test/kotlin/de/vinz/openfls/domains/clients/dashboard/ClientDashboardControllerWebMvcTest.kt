@@ -4,7 +4,8 @@ import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardAccess
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardDto
 import de.vinz.openfls.domains.clients.dtos.ClientDto
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.dto.EmployeeFavoriteResult
+import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
@@ -36,7 +37,7 @@ class ClientDashboardControllerWebMvcTest {
     lateinit var clientService: ClientService
 
     @MockitoBean
-    lateinit var employeeService: EmployeeService
+    lateinit var employeeFavoriteService: EmployeeFavoriteService
 
     @MockitoBean
     lateinit var accessService: AccessService
@@ -117,22 +118,22 @@ class ClientDashboardControllerWebMvcTest {
     }
 
     @Test
-    fun addFavorite_unknownClient_returnsBadRequest() {
-        given(clientService.existsById(404L)).willReturn(false)
+    fun addFavorite_unknownClient_returnsNotFound() {
+        given(employeeFavoriteService.addClientFavorite(7L, 404L)).willReturn(EmployeeFavoriteResult.ClientNotFound)
 
         val result = mockMvc.post("/client_dashboards/favorites/client/404").andReturn()
 
-        assertThat(result.response.status).isEqualTo(400)
+        assertThat(result.response.status).isEqualTo(404)
     }
 
     @Test
     fun addFavorite_knownClient_storesTheFavoriteForTheSignedInEmployee() {
-        given(clientService.existsById(3L)).willReturn(true)
+        given(employeeFavoriteService.addClientFavorite(7L, 3L)).willReturn(EmployeeFavoriteResult.Success)
 
         val result = mockMvc.post("/client_dashboards/favorites/client/3").andReturn()
 
         assertThat(result.response.status).isEqualTo(200)
-        verify(employeeService).addClientAsFavorite(3L, 7L)
+        verify(employeeFavoriteService).addClientFavorite(7L, 3L)
     }
 
     private fun dashboardDto(access: ClientDashboardAccess) = ClientDashboardDto(

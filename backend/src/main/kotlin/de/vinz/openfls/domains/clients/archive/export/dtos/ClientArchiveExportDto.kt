@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.clients.archive.export.dtos
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.evaluations.entity.Evaluation
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour

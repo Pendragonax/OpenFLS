@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.clients.dashboard
 
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.dto.EmployeeFavoriteResult
+import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*
 class ClientDashboardController(
     private val clientDashboardService: ClientDashboardService,
     private val clientService: ClientService,
-    private val employeeService: EmployeeService,
+    private val employeeFavoriteService: EmployeeFavoriteService,
     private val accessService: AccessService,
     private val performanceLoggingService: PerformanceLoggingService
 ) {
@@ -95,11 +96,7 @@ class ClientDashboardController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            if (!clientService.existsById(clientId))
-                throw IllegalArgumentException("client not found")
-
-            employeeService.addClientAsFavorite(clientId, accessService.getId())
-            ResponseEntity.ok().build<Void>()
+            favoriteResponse(employeeFavoriteService.addClientFavorite(accessService.getId(), clientId))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
         } catch (ex: IllegalArgumentException) {
@@ -116,8 +113,7 @@ class ClientDashboardController(
         val startMs = System.currentTimeMillis()
 
         return try {
-            employeeService.deleteClientAsFavorite(clientId, accessService.getId())
-            ResponseEntity.ok().build<Void>()
+            favoriteResponse(employeeFavoriteService.deleteClientFavorite(accessService.getId(), clientId))
         } catch (ex: IllegalAccessException) {
             ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
         } catch (ex: IllegalArgumentException) {
@@ -126,6 +122,15 @@ class ClientDashboardController(
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("deleteFavorite", startMs, logger)
+        }
+    }
+
+    private fun favoriteResponse(result: EmployeeFavoriteResult): ResponseEntity<out Any> {
+        return when (result) {
+            EmployeeFavoriteResult.Success -> ResponseEntity.ok().build<Void>()
+            EmployeeFavoriteResult.EmployeeNotFound -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("employee not found")
+            EmployeeFavoriteResult.ClientNotFound -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("client not found")
+            EmployeeFavoriteResult.AssistancePlanNotFound -> ResponseEntity.badRequest().body("assistance plan not found")
         }
     }
 }

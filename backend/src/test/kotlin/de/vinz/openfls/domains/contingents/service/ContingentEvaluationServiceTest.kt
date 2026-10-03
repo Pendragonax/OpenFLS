@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.contingents.dto.ContingentEvaluationResponse
 import de.vinz.openfls.domains.contingents.dto.ContingentServiceEntryDto
 import de.vinz.openfls.domains.contingents.dto.EmployeeContingentEvaluationResponse
-import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.services.dto.ContingentEvaluationServiceDto
 import de.vinz.openfls.domains.services.service.ServiceService

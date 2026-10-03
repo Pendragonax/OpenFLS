@@ -113,7 +113,6 @@ function createEmployee(archived: boolean): EmployeeDto {
   employee.permissions = [];
   employee.unprofessionals = [];
   employee.inactive = false;
-  employee.institutionId = 1;
   employee.access!.role = 1;
   return employee;
 }

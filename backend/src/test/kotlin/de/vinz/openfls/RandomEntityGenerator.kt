@@ -6,9 +6,9 @@ import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.contingents.entity.Contingent
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.Unprofessional
-import de.vinz.openfls.domains.employees.entities.UnprofessionalKey
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.entity.Unprofessional
+import de.vinz.openfls.domains.employees.entity.UnprofessionalKey
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour
 import de.vinz.openfls.domains.hourTypes.entity.HourType

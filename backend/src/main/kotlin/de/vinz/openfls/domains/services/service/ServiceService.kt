@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.categories.service.CategoryTemplateService
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.service.GoalService
 import de.vinz.openfls.domains.hourTypes.entity.HourType
@@ -101,7 +101,7 @@ class ServiceService(
                 groupService = request.groupService,
                 unfinished = request.unfinished,
                 client = references.client,
-                employee = employeeService.getById(accessService.getId())
+                employee = employeeService.getEntityById(accessService.getId())
                     ?: throw IllegalStateException("current user not found"),
                 institution = references.institution,
                 hourType = references.hourType,

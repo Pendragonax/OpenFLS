@@ -53,7 +53,6 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
   archiveExportStatus: ClientArchiveExportStatusDto | null = null;
 
   // STATEs
-  editMode = false;
   canManageArchive = false;
   selectedTabIndex = 0;
   isArchiveExportRequesting = false;
@@ -97,7 +96,6 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
           this.editValue = <ClientViewModel> {...this.value};
           this.institutions = institutions;
           this.categoryTemplates = categories;
-          this.editMode = user.institutionId == this.value.dto.institution.id;
 
           this.refreshForm();
           this.loadArchiveState(id);

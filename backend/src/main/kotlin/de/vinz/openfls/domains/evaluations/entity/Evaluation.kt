@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.evaluations.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.goals.entity.Goal
 import jakarta.persistence.*
 import java.time.LocalDate

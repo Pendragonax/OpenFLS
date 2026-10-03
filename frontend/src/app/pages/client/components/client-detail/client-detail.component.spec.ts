@@ -58,7 +58,6 @@ function createUser(isAdmin: boolean, canLeadInstitution: boolean): EmployeeDto 
   user.id = 10;
   user.firstName = 'Lea';
   user.lastName = 'Ding';
-  user.institutionId = 1;
   user.access!.role = isAdmin ? 1 : 3;
   user.permissions = [{
     employeeId: 10,

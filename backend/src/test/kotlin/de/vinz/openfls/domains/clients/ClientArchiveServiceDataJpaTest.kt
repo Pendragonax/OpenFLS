@@ -10,15 +10,15 @@ import de.vinz.openfls.domains.clients.archive.ClientArchiveActor
 import de.vinz.openfls.domains.clients.archive.ClientArchiveHistoryEntry
 import de.vinz.openfls.domains.clients.archive.ClientArchiveService
 import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportFormat
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.EmployeeAccess
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.entity.EmployeeAccess
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.permissions.service.PermissionService
-import de.vinz.openfls.domains.employees.services.UnprofessionalService
+import de.vinz.openfls.domains.employees.service.UnprofessionalService
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
 import de.vinz.openfls.exceptions.UserNotAllowedException
@@ -39,7 +39,10 @@ import java.time.LocalDateTime
 @Import(
     ClientArchiveService::class,
     ClientService::class,
-    de.vinz.openfls.domains.employees.services.EmployeeService::class,
+    de.vinz.openfls.domains.employees.service.EmployeeService::class,
+    de.vinz.openfls.domains.employees.service.EmployeeFavoriteService::class,
+    de.vinz.openfls.domains.employees.service.EmployeeAccessService::class,
+    de.vinz.openfls.domains.sponsors.service.SponsorService::class,
     UnprofessionalService::class,
     PermissionService::class,
     TestBeans::class
@@ -69,6 +72,9 @@ class ClientArchiveServiceDataJpaTest {
 
     @MockitoBean
     lateinit var institutionService: InstitutionService
+
+    @MockitoBean
+    lateinit var assistancePlanService: de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 
     @MockitoBean
     lateinit var categoryTemplateService: CategoryTemplateService

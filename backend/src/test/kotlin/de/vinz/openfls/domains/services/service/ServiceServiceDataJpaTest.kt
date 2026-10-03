@@ -11,9 +11,9 @@ import de.vinz.openfls.domains.categories.service.CategoryTemplateService
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.repository.GoalRepository
 import de.vinz.openfls.domains.goals.service.GoalService
@@ -136,7 +136,7 @@ class ServiceServiceDataJpaTest {
         whenever(accessService.isAdmin()).thenReturn(false)
         whenever(accessService.canWriteEntries(institution.id!!)).thenReturn(true)
         whenever(accessService.canReadEntries(institution.id!!)).thenReturn(true)
-        whenever(employeeService.getById(employee.id!!)).thenReturn(employee)
+        whenever(employeeService.getEntityById(employee.id!!)).thenReturn(employee)
         whenever(clientService.getEntityById(client.id)).thenReturn(client)
         whenever(assistancePlanService.getEntityById(assistancePlan.id)).thenReturn(assistancePlan)
         whenever(hourTypeService.getEntityById(hourType.id)).thenReturn(hourType)

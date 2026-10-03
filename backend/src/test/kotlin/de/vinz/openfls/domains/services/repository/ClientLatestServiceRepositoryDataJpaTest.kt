@@ -6,8 +6,8 @@ import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.hourTypes.repository.HourTypeRepository
 import de.vinz.openfls.domains.institutions.entity.Institution

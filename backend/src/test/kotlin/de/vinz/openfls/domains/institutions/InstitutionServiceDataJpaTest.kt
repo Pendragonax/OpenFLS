@@ -1,8 +1,8 @@
 package de.vinz.openfls.domains.institutions
 
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.permissions.entity.PermissionKey
 import de.vinz.openfls.domains.institutions.dto.InstitutionCreateRequest
 import de.vinz.openfls.domains.institutions.dto.InstitutionPermissionRequest
 import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateRequest
@@ -13,6 +13,10 @@ import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.permissions.entity.Permission
 import de.vinz.openfls.domains.permissions.repository.PermissionRepository
 import de.vinz.openfls.domains.permissions.service.PermissionService
+import de.vinz.openfls.domains.employees.service.EmployeeAccessService
+import de.vinz.openfls.domains.employees.service.EmployeeService
+import de.vinz.openfls.domains.employees.service.UnprofessionalService
+import de.vinz.openfls.domains.sponsors.service.SponsorService
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -23,7 +27,15 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
 
 @DataJpaTest
-@Import(InstitutionService::class, PermissionService::class, TestBeans::class)
+@Import(
+    InstitutionService::class,
+    PermissionService::class,
+    EmployeeService::class,
+    EmployeeAccessService::class,
+    UnprofessionalService::class,
+    SponsorService::class,
+    TestBeans::class
+)
 class InstitutionServiceDataJpaTest {
 
     @Autowired
@@ -188,7 +200,7 @@ class InstitutionServiceDataJpaTest {
     ) {
         permissionRepository.save(
             Permission(
-                id = EmployeeInstitutionRightsKey(employeeId = employee.id, institutionId = institution.id),
+                id = PermissionKey(employeeId = employee.id, institutionId = institution.id),
                 employee = employee,
                 institution = institution,
                 readEntries = read,

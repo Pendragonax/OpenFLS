@@ -18,8 +18,8 @@ import de.vinz.openfls.domains.clientTasks.entity.ClientTaskAuditLog
 import de.vinz.openfls.domains.clientTasks.repository.ClientTaskAuditLogRepository
 import de.vinz.openfls.domains.clientTasks.repository.ClientTaskRepository
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.logging.StructuredLog
 import org.springframework.data.domain.PageRequest
@@ -262,7 +262,7 @@ class ClientTaskService(
     }
 
     private fun currentActor(): Actor {
-        val employee = employeeService.getById(accessService.getId())
+        val employee = employeeService.getEntityById(accessService.getId())
             ?: throw IllegalStateException("current user not found")
         return Actor(employee, employee.displayName())
     }

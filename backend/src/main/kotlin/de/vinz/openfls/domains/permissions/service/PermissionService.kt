@@ -1,9 +1,8 @@
 package de.vinz.openfls.domains.permissions.service
 
 import de.vinz.openfls.architecture.InternalEntityApi
-import de.vinz.openfls.domains.employees.EmployeeAccessRepository
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeAccessService
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.permissions.dto.PermissionRequest
 import de.vinz.openfls.domains.permissions.entity.Permission
@@ -14,8 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PermissionService(
-        private val employeeRepository: EmployeeRepository,
-        private val employeeAccessRepository: EmployeeAccessRepository,
+        private val employeeAccessService: EmployeeAccessService,
         private val institutionRepository: InstitutionRepository,
         private val permissionRepository: PermissionRepository,
         private val modelMapper: ModelMapper
@@ -24,18 +22,8 @@ class PermissionService(
     @InternalEntityApi
     @Transactional
     fun savePermissionEntity(permission: Permission): Permission {
-        val employeeId = permission.id.employeeId
-            ?: throw IllegalArgumentException("employee id is required")
-        val institutionId = permission.id.institutionId
-            ?: throw IllegalArgumentException("institution id is required")
-
-        permission.employee = employeeRepository
-            .findById(employeeId)
-            .orElseThrow { IllegalArgumentException("employee not found") }
-
-        permission.institution = institutionRepository
-            .findById(institutionId)
-            .orElseThrow { IllegalArgumentException("institution not found") }
+        requireNotNull(permission.employee) { "employee is required" }
+        requireNotNull(permission.institution) { "institution is required" }
 
         return permissionRepository.save(permission)
     }
@@ -94,12 +82,6 @@ class PermissionService(
 
     @Transactional(readOnly = true)
     fun isAdminByUserId(userId: Long): Boolean {
-        val employeeAccess = employeeAccessRepository.findById(userId)
-
-        if (employeeAccess.isPresent) {
-            return employeeAccess.get().role == 1
-        }
-
-        return false
+        return employeeAccessService.isAdminById(userId)
     }
 }

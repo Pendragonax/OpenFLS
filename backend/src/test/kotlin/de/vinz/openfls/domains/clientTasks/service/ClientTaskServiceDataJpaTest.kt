@@ -16,9 +16,9 @@ import de.vinz.openfls.domains.clientTasks.repository.ClientTaskAuditLogReposito
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.permissions.service.AccessService
@@ -97,8 +97,8 @@ class ClientTaskServiceDataJpaTest {
 
         whenever(clientService.existsById(client.id)).thenReturn(true)
         whenever(clientService.getEntityById(client.id)).thenReturn(client)
-        whenever(employeeService.getById(creator.id!!)).thenReturn(creator)
-        whenever(employeeService.getById(completer.id!!)).thenReturn(completer)
+        whenever(employeeService.getEntityById(creator.id!!)).thenReturn(creator)
+        whenever(employeeService.getEntityById(completer.id!!)).thenReturn(completer)
         actAs(creator)
     }
 

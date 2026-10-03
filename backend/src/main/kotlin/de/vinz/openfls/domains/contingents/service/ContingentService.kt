@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.contingents.dto.ContingentDeleteResult
 import de.vinz.openfls.domains.contingents.dto.ContingentResponse
 import de.vinz.openfls.domains.contingents.dto.ContingentUpdateRequest
 import de.vinz.openfls.domains.contingents.dto.ContingentUpdateResult
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import org.springframework.data.repository.findByIdOrNull
@@ -30,7 +30,7 @@ class ContingentService(
         if (request.end != null && request.start >= request.end) {
             return ContingentCreateResult.InvalidRange("end before start")
         }
-        val employee = employeeService.getById(request.employeeId)
+        val employee = employeeService.getEntityById(request.employeeId)
             ?: return ContingentCreateResult.EmployeeNotFound("employee not found")
         if (employee.archived) {
             return ContingentCreateResult.EmployeeArchived("employee is archived")
@@ -56,7 +56,7 @@ class ContingentService(
         if (request.end != null && request.start >= request.end) {
             return ContingentUpdateResult.InvalidRange("end before start")
         }
-        val employee = employeeService.getById(request.employeeId)
+        val employee = employeeService.getEntityById(request.employeeId)
             ?: return ContingentUpdateResult.EmployeeNotFound("employee not found")
         if (employee.archived) {
             return ContingentUpdateResult.EmployeeArchived("employee is archived")
@@ -126,7 +126,7 @@ class ContingentService(
     @InternalEntityApi
     @Transactional(readOnly = true)
     fun getAllEntitiesByEmployeeId(id: Long, includeArchivedEmployees: Boolean = false): List<Contingent> {
-        val employee = employeeService.getById(id) ?: return emptyList()
+        val employee = employeeService.getEntityById(id) ?: return emptyList()
         if (employee.archived && !includeArchivedEmployees) {
             return emptyList()
         }

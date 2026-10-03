@@ -1,16 +1,22 @@
 package de.vinz.openfls.domains.employees
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.employees.dtos.EmployeeCreateDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeUpdateDto
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.dto.EmployeeCreateRequest
+import de.vinz.openfls.domains.employees.dto.EmployeeCreateResult
+import de.vinz.openfls.domains.employees.dto.EmployeeDeleteResult
+import de.vinz.openfls.domains.employees.dto.EmployeeFavoriteResult
+import de.vinz.openfls.domains.employees.dto.EmployeePasswordResetResult
+import de.vinz.openfls.domains.employees.dto.EmployeeUpdateRoleResult
+import de.vinz.openfls.domains.employees.dto.EmployeeUpdateRequest
+import de.vinz.openfls.domains.employees.dto.EmployeeUpdateResult
+import de.vinz.openfls.domains.employees.service.EmployeeDeletionService
+import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.UserService
+import de.vinz.openfls.services.ExceptionResponseService
+import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -18,286 +24,187 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/employees")
 class EmployeeController(
-        private val employeeService: EmployeeService,
-        private val accessService: AccessService,
-        private val userService: UserService
+    private val employeeService: EmployeeService,
+    private val employeeDeletionService: EmployeeDeletionService,
+    private val employeeFavoriteService: EmployeeFavoriteService,
+    private val accessService: AccessService,
+    private val performanceLoggingService: PerformanceLoggingService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(EmployeeController::class.java)
 
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: EmployeeCreateDto): Any {
+    fun create(@Valid @RequestBody request: EmployeeCreateRequest): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = employeeService.create(valueDto)
-
-            logger.debug(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = employeeService.create(request)) {
+                is EmployeeCreateResult.Success -> ResponseEntity.ok(result.response)
+                is EmployeeCreateResult.InvalidUsername -> badRequest(result.reason)
+                EmployeeCreateResult.UsernameTaken -> conflict("username already exists")
+                EmployeeCreateResult.InvalidRole -> badRequest("role is invalid")
+                EmployeeCreateResult.SponsorNotFound -> badRequest("sponsor not found")
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.localizedMessage,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
     @PutMapping("{id}/{role}")
-    fun updateRole(@PathVariable id: Long,
-                   @PathVariable role: Int): Any {
+    fun updateRole(@PathVariable id: Long, @PathVariable role: Int): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.isAdmin())
+            return forbidden("no permission to change the role")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.isAdmin())
-                throw IllegalArgumentException("no permission to change the role")
-
-            // update role
-            val dto = employeeService.updateRole(id, role)
-
-            logger.debug(String.format("%s updateRole took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = employeeService.updateRole(id, role)) {
+                is EmployeeUpdateRoleResult.Success -> ResponseEntity.ok(result.response)
+                EmployeeUpdateRoleResult.NotFound -> notFound()
+                EmployeeUpdateRoleResult.InvalidRole -> badRequest("role is invalid")
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("updateRole", startMs, logger)
         }
     }
 
     @PutMapping("reset_password/{id}")
     fun resetPassword(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.isAdmin())
+            return forbidden("no permission to reset passwords")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.isAdmin())
-                throw IllegalArgumentException("no permission to reset passwords")
-            if (!employeeService.existsById(id))
-                throw IllegalArgumentException("employee not found")
-
-            val dto = employeeService.resetPassword(id)
-
-            logger.debug(String.format("%s resetPassword took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            return ResponseEntity.ok(dto)
+            when (val result = employeeService.resetPassword(id)) {
+                is EmployeePasswordResetResult.Success -> ResponseEntity.ok(result.response)
+                EmployeePasswordResetResult.NotFound -> notFound()
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("resetPassword", startMs, logger)
         }
     }
 
     @PutMapping("{id}")
-    fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: EmployeeUpdateDto): Any {
+    fun update(@PathVariable id: Long, @Valid @RequestBody request: EmployeeUpdateRequest): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.canModifyEmployee(request.id))
+            return forbidden("no permission to update this employee")
+        if (id != request.id)
+            return badRequest("path id and request id are not the same")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.canModifyEmployee(valueDto.id))
-                throw IllegalArgumentException("no permission to update this employee")
-            if (id != valueDto.id)
-                throw IllegalArgumentException("path id and dto id are not the same")
-            if (!employeeService.existsById(id))
-                throw IllegalArgumentException("employee not found")
-
-            val dto = employeeService.update(id, valueDto)
-
-            logger.debug(String.format("%s update took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = employeeService.update(id, request)) {
+                is EmployeeUpdateResult.Success -> ResponseEntity.ok(result.response)
+                EmployeeUpdateResult.NotFound -> notFound()
+                EmployeeUpdateResult.SponsorNotFound -> badRequest("sponsor not found")
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @GetMapping("assistance_plan/favorite")
-    fun getAssistancePlanFavorites(): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val userId = userService.getUserId()
-            val dto = employeeService.getAssistancePlanAsFavorites(userId)
-
-            logger.debug(String.format("%s getAssistancePlanFavorites took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("update", startMs, logger)
         }
     }
 
     @PostMapping("assistance_plan/favorite/{id}")
     fun addAssistancePlanFavorite(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val userId = userService.getUserId()
-            employeeService.addAssistancePlanAsFavorite(id, userId)
-
-            logger.debug(String.format("%s addAssistancePlanFavorite took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok()
+            favoriteResponse(employeeFavoriteService.addAssistancePlanFavorite(accessService.getId(), id))
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("addAssistancePlanFavorite", startMs, logger)
         }
     }
 
     @DeleteMapping("assistance_plan/favorite/{id}")
     fun deleteAssistancePlanFavorite(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val userId = userService.getUserId()
-            employeeService.deleteAssistancePlanAsFavorite(id, userId)
-
-            logger.debug(String.format("%s deleteAssistancePlanFavorite took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok()
+            favoriteResponse(employeeFavoriteService.deleteAssistancePlanFavorite(accessService.getId(), id))
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("deleteAssistancePlanFavorite", startMs, logger)
         }
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.isAdmin())
+            return forbidden("no permission to delete this employee")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.isAdmin())
-                throw IllegalArgumentException("no permission to delete this employee")
-            if (!employeeService.existsById(id))
-                throw IllegalArgumentException("employee not found")
-
-            val dto = employeeService.getEmployeeDtoById(id, true)
-            employeeService.delete(id)
-
-            logger.debug(String.format("%s delete took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = employeeDeletionService.delete(id)) {
+                is EmployeeDeleteResult.Success -> ResponseEntity.ok(result.response)
+                EmployeeDeleteResult.NotFound -> notFound()
+                EmployeeDeleteResult.HasServices -> conflict("employee has service entries")
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("delete", startMs, logger)
         }
     }
 
     @GetMapping("")
-    fun getAll(
-        @RequestParam(defaultValue = "false") includeArchived: Boolean
-    ): Any {
+    fun getAll(@RequestParam(defaultValue = "false") includeArchived: Boolean): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = if (accessService.isAdmin() && includeArchived) {
-                employeeService.getAllEmployeeDtos(includeArchived = true)
-            } else {
-                employeeService.getAllEmployeeDtos()
-            }
-
-            logger.debug(String.format("%s getAll took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dtos)
+            ResponseEntity.ok(employeeService.getAllEmployeeDetails(includeArchived && accessService.isAdmin()))
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @GetMapping("projections")
-    fun getAllProjections(): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = employeeService.getAllSoloDtos()
-
-            logger.debug(String.format("%s getAllProjections took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dtos)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getAll", startMs, logger)
         }
     }
 
     @GetMapping("{id}")
-    fun getById(@PathVariable id: Long): Any  {
+    fun getById(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = employeeService.getEmployeeDtoById(id, accessService.isAdmin())
-                ?: throw IllegalArgumentException("employee not found")
-
-            logger.debug(String.format("%s getById took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            val employee = employeeService.getEmployeeDetailById(id, accessService.isAdmin())
+                ?: return notFound()
+            ResponseEntity.ok(employee)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getById", startMs, logger)
         }
     }
+
+    private fun favoriteResponse(result: EmployeeFavoriteResult): ResponseEntity<out Any> {
+        return when (result) {
+            EmployeeFavoriteResult.Success -> ResponseEntity.ok().build<Void>()
+            EmployeeFavoriteResult.EmployeeNotFound -> notFound()
+            EmployeeFavoriteResult.AssistancePlanNotFound -> badRequest("assistance plan not found")
+            EmployeeFavoriteResult.ClientNotFound -> badRequest("client not found")
+        }
+    }
+
+    private fun notFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("employee not found")
+
+    private fun forbidden(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.FORBIDDEN).body(message)
+
+    private fun badRequest(message: String): ResponseEntity<String> =
+        ResponseEntity.badRequest().body(message)
+
+    private fun conflict(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.CONFLICT).body(message)
 }

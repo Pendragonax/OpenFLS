@@ -6,9 +6,9 @@ import de.vinz.openfls.domains.contingents.dto.ContingentCreateRequest
 import de.vinz.openfls.domains.contingents.dto.ContingentCreateResult
 import de.vinz.openfls.domains.contingents.dto.ContingentUpdateRequest
 import de.vinz.openfls.domains.contingents.dto.ContingentUpdateResult
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.institutions.service.InstitutionService
@@ -75,7 +75,7 @@ class ContingentServiceDataJpaTest {
             employeeId = employee.id!!,
             institutionId = institution.id!!
         )
-        whenever(employeeService.getById(dto.employeeId)).thenReturn(employee)
+        whenever(employeeService.getEntityById(dto.employeeId)).thenReturn(employee)
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
 
         // When
@@ -145,7 +145,7 @@ class ContingentServiceDataJpaTest {
             employeeId = employee.id!!,
             institutionId = institution.id!!
         )
-        whenever(employeeService.getById(dto.employeeId)).thenReturn(employee)
+        whenever(employeeService.getEntityById(dto.employeeId)).thenReturn(employee)
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
 
         // When

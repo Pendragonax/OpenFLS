@@ -4,17 +4,13 @@ import de.vinz.openfls.domains.authentication.UserRole
 import de.vinz.openfls.domains.authentication.dto.ChangePasswordRequest
 import de.vinz.openfls.domains.authentication.dto.ChangePasswordResult
 import de.vinz.openfls.domains.authentication.dto.LoginResponse
-import de.vinz.openfls.domains.employees.EmployeeAccessRepository
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.dtos.EmployeeAccessDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.EmployeeAccess
-import de.vinz.openfls.domains.permissions.dto.PermissionResponse
+import de.vinz.openfls.domains.employees.dto.EmployeeDetailResponse
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.entity.EmployeeAccess
+import de.vinz.openfls.domains.employees.service.EmployeeAccessService
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.security.CustomUserDetails
-import org.modelmapper.ModelMapper
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -32,12 +28,11 @@ import java.util.stream.Collectors
 
 @Service
 class AuthenticationService(
-        private val employeeAccessRepository: EmployeeAccessRepository,
-        private val employeeRepository: EmployeeRepository,
+        private val employeeAccessService: EmployeeAccessService,
+        private val employeeService: EmployeeService,
         private val authenticationManager: AuthenticationManager,
         private val jwtEncoder: JwtEncoder,
         private val passwordEncoder: PasswordEncoder,
-        private val modelMapper: ModelMapper,
         @param:Value("\${server.servlet.session.timeout}") private val sessionTimeout: Duration
 ) {
     @Transactional(readOnly = true)
@@ -75,53 +70,28 @@ class AuthenticationService(
     @Transactional
     fun changePassword(request: ChangePasswordRequest): ChangePasswordResult {
         val userId = getCurrentUserId()
-        val access = employeeAccessRepository.findByIdOrNull(userId)
+        val encodedPassword = employeeAccessService.getPasswordHashById(userId)
             ?: return ChangePasswordResult.EmployeeNotFound
 
-        if (!passwordEncoder.matches(request.oldPassword, access.password)) {
+        if (!passwordEncoder.matches(request.oldPassword, encodedPassword)) {
             return ChangePasswordResult.WrongOldPassword
         }
 
         val newEncryptedPassword = passwordEncoder.encode(request.newPassword).orEmpty()
-        employeeAccessRepository.changePassword(userId, newEncryptedPassword)
+        employeeAccessService.changePassword(userId, newEncryptedPassword)
         return ChangePasswordResult.Success
     }
 
-    @Transactional
-    fun changeRole(userId: Long, role: UserRole): Boolean {
-        if (!employeeAccessRepository.existsById(userId)) {
-            return false
-        }
-
-        employeeAccessRepository.changeRole(userId, role.id)
-        return true
-    }
-
     @Transactional(readOnly = true)
-    fun getCurrentEmployee(): EmployeeWithAccess? {
-        val employee = getCurrentEmployeeEntity() ?: return null
-
-        return modelMapper.map(employee, EmployeeWithAccess::class.java).apply {
-            access = employee.access?.let {
-                modelMapper.map(it, EmployeeAccessDto::class.java).apply {
-                    password = ""
-                }
-            }
-            permissions = employee.permissions
-                    ?.map { PermissionResponse.from(it) }
-                    ?.toList()
-        }
-    }
-
-    private fun getCurrentEmployeeEntity(): Employee? {
+    fun getCurrentEmployee(): EmployeeDetailResponse? {
         val userId = getCurrentUserId()
 
         // initial admin from CustomUserDetailsService
         if (userId == 0L) {
-            return getInitialAdminEmployee()
+            return EmployeeDetailResponse.from(getInitialAdminEmployee())
         }
 
-        return employeeRepository.findByIdOrNull(userId)
+        return employeeService.getEmployeeDetailById(userId, includeArchived = true)
     }
 
     private fun getCurrentUserId(): Long {

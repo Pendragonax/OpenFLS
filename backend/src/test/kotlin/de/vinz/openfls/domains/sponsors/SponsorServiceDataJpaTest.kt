@@ -1,10 +1,10 @@
 package de.vinz.openfls.domains.sponsors
 
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.Unprofessional
-import de.vinz.openfls.domains.employees.entities.UnprofessionalKey
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.UnprofessionalRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.entity.Unprofessional
+import de.vinz.openfls.domains.employees.entity.UnprofessionalKey
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.repository.UnprofessionalRepository
 import de.vinz.openfls.domains.sponsors.dto.SponsorCreateRequest
 import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateRequest
 import de.vinz.openfls.domains.sponsors.dto.SponsorUpdateResult

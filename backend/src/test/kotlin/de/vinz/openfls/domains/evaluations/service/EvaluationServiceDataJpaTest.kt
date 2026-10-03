@@ -2,9 +2,9 @@ package de.vinz.openfls.domains.evaluations.service
 
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateRequest
 import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateResult
 import de.vinz.openfls.domains.evaluations.dto.EvaluationUpdateRequest
@@ -63,7 +63,7 @@ class EvaluationServiceDataJpaTest {
         employee = employeeRepository.save(Employee(firstname = "Max", lastname = "Mustermann"))
         goal = goalRepository.save(Goal(title = "Ziel"))
         whenever(accessService.getId()).thenReturn(employee.id!!)
-        whenever(employeeService.getById(employee.id!!)).thenReturn(employee)
+        whenever(employeeService.getEntityById(employee.id!!)).thenReturn(employee)
         whenever(accessService.canWriteEntries(0)).thenReturn(true)
         whenever(accessService.canReadEntries(0)).thenReturn(true)
         whenever(goalService.getEntityById(goal.id)).thenReturn(goal)

@@ -1,7 +1,8 @@
 package de.vinz.openfls.domains.institutions.service
 
 import de.vinz.openfls.architecture.InternalEntityApi
-import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
+import de.vinz.openfls.domains.permissions.entity.PermissionKey
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
 import de.vinz.openfls.domains.institutions.dto.InstitutionCreateRequest
 import de.vinz.openfls.domains.institutions.dto.InstitutionDeleteResult
@@ -20,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class InstitutionService(
     private val institutionRepository: InstitutionRepository,
-    private val permissionService: PermissionService
+    private val permissionService: PermissionService,
+    private val employeeService: EmployeeService
 ) {
 
     @Transactional
@@ -96,8 +98,12 @@ class InstitutionService(
     }
 
     private fun savePermission(institution: Institution, request: InstitutionPermissionRequest): Permission {
+        val employee = employeeService.getEntityById(request.employeeId)
+            ?: throw IllegalArgumentException("employee not found")
         val permission = Permission(
-            id = EmployeeInstitutionRightsKey(employeeId = request.employeeId, institutionId = institution.id)
+            id = PermissionKey(employeeId = request.employeeId, institutionId = institution.id),
+            employee = employee,
+            institution = institution
         )
         applyFlags(permission, request)
         return permissionService.savePermissionEntity(permission)

@@ -11,8 +11,8 @@ import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportRe
 import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportStatusDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.dto.EmployeeNameDto
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -95,11 +95,7 @@ class ClientArchiveControllerWebMvcTest {
         val clientId = 17L
         val archiveDate = LocalDate.of(2026, 5, 23)
         val employeeId = 8L
-        val employeeDto = EmployeeWithAccess().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
+        val employeeDto = EmployeeNameDto(id = employeeId, firstName = "Anna", lastName = "Lead")
         val entry = ClientArchiveHistoryEntryDto().apply {
             id = 19L
             actionType = de.vinz.openfls.domains.clients.archive.ClientArchiveActionType.ARCHIVE
@@ -114,7 +110,7 @@ class ClientArchiveControllerWebMvcTest {
         given(accessService.getId()).willReturn(employeeId)
         given(accessService.isAdmin()).willReturn(false)
         given(accessService.getLeadingInstitutionIds()).willReturn(listOf(3L))
-        given(employeeService.getEmployeeDtoById(employeeId, false)).willReturn(employeeDto)
+        given(employeeService.getEmployeeNameById(employeeId, false)).willReturn(employeeDto)
         given(
             clientArchiveService.archive(
                 eq(clientId),
@@ -148,15 +144,11 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeWithAccess().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Employee"
-        }
+        val employeeDto = EmployeeNameDto(id = employeeId, firstName = "Anna", lastName = "Employee")
         given(accessService.getId()).willReturn(employeeId)
         given(accessService.isAdmin()).willReturn(false)
         given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, false)).willReturn(employeeDto)
+        given(employeeService.getEmployeeNameById(employeeId, false)).willReturn(employeeDto)
         given(
             clientArchiveService.archive(
                 eq(clientId),
@@ -188,15 +180,11 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeWithAccess().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
+        val employeeDto = EmployeeNameDto(id = employeeId, firstName = "Anna", lastName = "Lead")
         given(accessService.getId()).willReturn(employeeId)
         given(accessService.isAdmin()).willReturn(true)
         given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
+        given(employeeService.getEmployeeNameById(employeeId, true)).willReturn(employeeDto)
         given(
             clientArchiveService.reactivate(
                 eq(clientId),
@@ -228,11 +216,7 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeWithAccess().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
+        val employeeDto = EmployeeNameDto(id = employeeId, firstName = "Anna", lastName = "Lead")
         val downloadLink = ClientArchiveExportDownloadLinkDto().apply {
             this.downloadLink = "/clients/$clientId/archive/export/token-1"
             downloadLinkExpiresAt = LocalDateTime.of(2026, 6, 13, 12, 0)
@@ -247,7 +231,7 @@ class ClientArchiveControllerWebMvcTest {
         given(accessService.getId()).willReturn(employeeId)
         given(accessService.isAdmin()).willReturn(true)
         given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
+        given(employeeService.getEmployeeNameById(employeeId, true)).willReturn(employeeDto)
         given(
             clientArchiveExportService.requestExport(
                 eq(clientId),
@@ -273,11 +257,7 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeWithAccess().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
+        val employeeDto = EmployeeNameDto(id = employeeId, firstName = "Anna", lastName = "Lead")
         val status = ClientArchiveExportStatusDto().apply {
             ready = true
             format = ClientArchiveExportFormat.JSON
@@ -287,7 +267,7 @@ class ClientArchiveControllerWebMvcTest {
         given(accessService.getId()).willReturn(employeeId)
         given(accessService.isAdmin()).willReturn(true)
         given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
+        given(employeeService.getEmployeeNameById(employeeId, true)).willReturn(employeeDto)
         given(
             clientArchiveExportService.requestExport(
                 eq(clientId),
@@ -312,11 +292,7 @@ class ClientArchiveControllerWebMvcTest {
         // Given
         val clientId = 17L
         val employeeId = 8L
-        val employeeDto = EmployeeWithAccess().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
+        val employeeDto = EmployeeNameDto(id = employeeId, firstName = "Anna", lastName = "Lead")
         val downloadLink = ClientArchiveExportDownloadLinkDto().apply {
             this.downloadLink = "/clients/$clientId/archive/export/token-1"
             downloadLinkExpiresAt = LocalDateTime.of(2026, 6, 13, 12, 0)
@@ -331,7 +307,7 @@ class ClientArchiveControllerWebMvcTest {
         given(accessService.getId()).willReturn(employeeId)
         given(accessService.isAdmin()).willReturn(true)
         given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
+        given(employeeService.getEmployeeNameById(employeeId, true)).willReturn(employeeDto)
         given(clientArchiveExportService.getExportStatus(eq(clientId), any())).willReturn(status)
 
         // When

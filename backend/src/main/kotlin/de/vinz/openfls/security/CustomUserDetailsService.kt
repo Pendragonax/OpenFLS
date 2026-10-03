@@ -1,9 +1,9 @@
 package de.vinz.openfls.security
 
 import de.vinz.openfls.domains.authentication.UserRole
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.EmployeeAccess
-import de.vinz.openfls.domains.employees.EmployeeAccessRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.entity.EmployeeAccess
+import de.vinz.openfls.domains.employees.service.EmployeeAccessService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class CustomUserDetailsService(
-        private val employeeAccessRepository: EmployeeAccessRepository,
+        private val employeeAccessService: EmployeeAccessService,
         private val passwordEncoder: PasswordEncoder
 ): UserDetailsService {
 
     override fun loadUserByUsername(username: String): UserDetails {
-        val user = employeeAccessRepository.getEmployeeByUsername(username)
+        val user = employeeAccessService.getEntityByUsername(username)
 
         // user found
         if (user != null) {
@@ -25,7 +25,7 @@ class CustomUserDetailsService(
         }
 
         // no users in db it will return default admin for initial progress
-        if (employeeAccessRepository.count() == 0L) {
+        if (!employeeAccessService.existsAnyAccess()) {
             return CustomUserDetails(getInitialAdminEmployeeAccess())
         }
 

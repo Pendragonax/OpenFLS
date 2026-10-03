@@ -3,7 +3,7 @@ package de.vinz.openfls.domains.authentication
 import de.vinz.openfls.domains.authentication.dto.ChangePasswordResult
 import de.vinz.openfls.domains.authentication.dto.LoginResponse
 import de.vinz.openfls.domains.authentication.service.AuthenticationService
-import de.vinz.openfls.domains.employees.dtos.EmployeeWithAccess
+import de.vinz.openfls.domains.employees.dto.EmployeeDetailResponse
 import de.vinz.openfls.services.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -131,36 +131,6 @@ class AuthenticationControllerWebMvcTest {
     }
 
     @Test
-    fun changeRole_unknownEmployee_returnsNotFound() {
-        // Given
-        given(authenticationService.changeRole(7L, UserRole.ADMIN)).willReturn(false)
-
-        // When
-        val result = mockMvc.post("/change_role/7") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """{"role":1}"""
-        }.andReturn()
-
-        // Then
-        assertThat(result.response.status).isEqualTo(404)
-    }
-
-    @Test
-    fun changeRole_existingEmployee_returnsOk() {
-        // Given
-        given(authenticationService.changeRole(7L, UserRole.ADMIN)).willReturn(true)
-
-        // When
-        val result = mockMvc.post("/change_role/7") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """{"role":1}"""
-        }.andReturn()
-
-        // Then
-        assertThat(result.response.status).isEqualTo(200)
-    }
-
-    @Test
     fun getUser_noCurrentEmployee_returnsNotFound() {
         // Given
         given(authenticationService.getCurrentEmployee()).willReturn(null)
@@ -175,7 +145,7 @@ class AuthenticationControllerWebMvcTest {
     @Test
     fun getUser_currentEmployee_returnsEmployee() {
         // Given
-        given(authenticationService.getCurrentEmployee()).willReturn(EmployeeWithAccess().apply { id = 7 })
+        given(authenticationService.getCurrentEmployee()).willReturn(EmployeeDetailResponse(id = 7))
 
         // When
         val result = mockMvc.get("/user").andReturn()

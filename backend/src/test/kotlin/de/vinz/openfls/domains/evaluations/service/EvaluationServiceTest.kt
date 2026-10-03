@@ -3,8 +3,8 @@ package de.vinz.openfls.domains.evaluations.service
 import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
 import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateRequest
 import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateResult
 import de.vinz.openfls.domains.evaluations.dto.EvaluationDeleteResult
@@ -45,7 +45,7 @@ class EvaluationServiceTest {
     fun setUp() {
         service = EvaluationService(evaluationRepository, goalService, assistancePlanService, employeeService, accessService)
         whenever(accessService.getId()).thenReturn(employee.id!!)
-        whenever(employeeService.getById(employee.id!!)).thenReturn(employee)
+        whenever(employeeService.getEntityById(employee.id!!)).thenReturn(employee)
         whenever(accessService.canWriteEntries(institutionId)).thenReturn(true)
         whenever(accessService.canReadEntries(institutionId)).thenReturn(true)
         whenever(evaluationRepository.save(any<Evaluation>())).thenAnswer { it.arguments[0] }

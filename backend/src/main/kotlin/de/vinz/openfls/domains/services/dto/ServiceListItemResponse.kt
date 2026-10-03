@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.services.dto
 
 import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
-import de.vinz.openfls.domains.employees.projections.EmployeeSoloProjection
+import de.vinz.openfls.domains.services.projection.ServiceEmployeeProjection
 import de.vinz.openfls.domains.services.projection.ServiceInstitutionProjection
 import de.vinz.openfls.domains.services.projection.ServiceWithRelationsProjection
 import java.time.LocalDateTime
@@ -29,7 +29,7 @@ data class ServiceListItemResponse(
             source.groupService, source.archivedService,
             (source.institution as ServiceInstitutionProjection?)?.let { InstitutionSummary(it.id, it.name, it.email, it.phonenumber) }
                 ?: InstitutionSummary(0, "", "", ""),
-            (source.employee as EmployeeSoloProjection?)?.let { EmployeeSummary(it.id, it.firstname, it.lastname, it.email, it.phonenumber, it.description, it.archived) }
+            (source.employee as ServiceEmployeeProjection?)?.let { EmployeeSummary(it.id, it.firstname, it.lastname, it.email, it.phonenumber, it.description, it.archived) }
                 ?: EmployeeSummary(0, "", "", "", "", "", false),
             (source.client as ClientSoloProjection?)?.let { ClientSummary(it.id, it.firstName, it.lastName, it.phoneNumber, it.email, it.archived) }
                 ?: ClientSummary(0, "", "", "", "", false)

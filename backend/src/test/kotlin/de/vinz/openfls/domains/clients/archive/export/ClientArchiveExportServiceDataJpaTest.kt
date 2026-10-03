@@ -14,10 +14,10 @@ import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.clients.ClientRepository
 import de.vinz.openfls.domains.clients.archive.ClientArchiveActor
 import de.vinz.openfls.domains.clients.archive.ClientArchiveService
-import de.vinz.openfls.domains.employees.EmployeeRepository
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.EmployeeAccess
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.entity.EmployeeAccess
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour
 import de.vinz.openfls.domains.goals.repository.GoalRepository
@@ -57,7 +57,10 @@ import java.time.LocalDateTime
     ClientArchiveService::class,
     de.vinz.openfls.domains.clients.ClientService::class,
     EmployeeService::class,
-    de.vinz.openfls.domains.employees.services.UnprofessionalService::class,
+    de.vinz.openfls.domains.employees.service.EmployeeFavoriteService::class,
+    de.vinz.openfls.domains.employees.service.EmployeeAccessService::class,
+    de.vinz.openfls.domains.sponsors.service.SponsorService::class,
+    de.vinz.openfls.domains.employees.service.UnprofessionalService::class,
     InstitutionService::class,
     CategoryTemplateService::class,
     PermissionService::class,

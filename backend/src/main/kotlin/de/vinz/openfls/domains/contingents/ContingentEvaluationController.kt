@@ -3,7 +3,7 @@ import de.vinz.openfls.logging.StructuredLog
 
 import de.vinz.openfls.domains.contingents.service.ContingentCalendarService
 import de.vinz.openfls.domains.contingents.service.ContingentEvaluationService
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.ExceptionResponseService
 import de.vinz.openfls.services.PerformanceLoggingService
@@ -62,7 +62,7 @@ class ContingentEvaluationController(
     @GetMapping("employee/{id}/{end}")
     fun getTimes2ByEmployee(@PathVariable id: Long,
                             @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
-        val employee = employeeService.getEmployeeDtoById(id, true)
+        val employee = employeeService.getEmployeeNameById(id, includeArchived = true)
         if (employee == null || employee.archived)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("employee not found")
         if (accessService.getId() != id &&

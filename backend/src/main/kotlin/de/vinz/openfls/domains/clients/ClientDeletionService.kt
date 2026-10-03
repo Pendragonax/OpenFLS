@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
 import de.vinz.openfls.logging.StructuredLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,14 +14,14 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ClientDeletionService(
     private val clientService: ClientService,
-    private val employeeService: EmployeeService,
+    private val employeeFavoriteService: EmployeeFavoriteService,
     private val clientTaskService: ClientTaskService
 ) {
 
     @Transactional
     fun delete(clientId: Long, actorId: Long, actorName: String) {
-        employeeService.deleteAssistancePlanFavoritesByClientId(clientId)
-        employeeService.deleteClientFavoritesByClientId(clientId)
+        employeeFavoriteService.deleteAssistancePlanFavoritesByClientId(clientId)
+        employeeFavoriteService.deleteClientFavoritesByClientId(clientId)
         clientTaskService.deleteAllByClientId(clientId, actorId, actorName)
 
         clientService.delete(clientId)

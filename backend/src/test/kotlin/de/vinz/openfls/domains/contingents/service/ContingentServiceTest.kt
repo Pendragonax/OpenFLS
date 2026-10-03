@@ -7,8 +7,8 @@ import de.vinz.openfls.domains.contingents.dto.ContingentCreateResult
 import de.vinz.openfls.domains.contingents.dto.ContingentDeleteResult
 import de.vinz.openfls.domains.contingents.dto.ContingentUpdateRequest
 import de.vinz.openfls.domains.contingents.dto.ContingentUpdateResult
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.service.InstitutionService
 import de.vinz.openfls.domains.permissions.service.AccessService
@@ -72,7 +72,7 @@ class ContingentServiceTest {
             employee = employee,
             institution = institution
         )
-        whenever(employeeService.getById(dto.employeeId)).thenReturn(employee)
+        whenever(employeeService.getEntityById(dto.employeeId)).thenReturn(employee)
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(institution)
         whenever(contingentRepository.save(any<Contingent>())).thenReturn(saved)
 
@@ -95,7 +95,7 @@ class ContingentServiceTest {
             institutionId = 7
         )
         val archivedEmployee = Employee(id = 5, archived = true)
-        whenever(employeeService.getById(dto.employeeId)).thenReturn(archivedEmployee)
+        whenever(employeeService.getEntityById(dto.employeeId)).thenReturn(archivedEmployee)
 
         // When
         val result = contingentService.create(dto)
@@ -172,7 +172,7 @@ class ContingentServiceTest {
             institution = Institution(id = 3)
         )
         whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.of(Contingent(id = 9)))
-        whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId))
+        whenever(employeeService.getEntityById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId))
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(Institution(id = dto.institutionId))
         whenever(contingentRepository.save(any<Contingent>())).thenReturn(saved)
 
@@ -183,7 +183,7 @@ class ContingentServiceTest {
         assertThat(result.response.id).isEqualTo(9)
         assertThat(result.response.employeeId).isEqualTo(2)
         assertThat(result.response.institutionId).isEqualTo(3)
-        verify(employeeService).getById(dto.employeeId)
+        verify(employeeService).getEntityById(dto.employeeId)
         verify(institutionService).getEntityById(dto.institutionId)
     }
 
@@ -199,7 +199,7 @@ class ContingentServiceTest {
             institutionId = 3
         )
         whenever(contingentRepository.findById(dto.id)).thenReturn(Optional.of(Contingent(id = 9)))
-        whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId, archived = true))
+        whenever(employeeService.getEntityById(dto.employeeId)).thenReturn(Employee(id = dto.employeeId, archived = true))
 
         // When
         val result = contingentService.update(dto)
@@ -296,7 +296,7 @@ class ContingentServiceTest {
         // Given
         val contingent1 = Contingent(id = 1, employee = Employee(id = 2, archived = false))
         val contingent2 = Contingent(id = 2, employee = Employee(id = 1, archived = false))
-        whenever(employeeService.getById(7)).thenReturn(Employee(id = 7, archived = false))
+        whenever(employeeService.getEntityById(7)).thenReturn(Employee(id = 7, archived = false))
         whenever(contingentRepository.findAllByEmployeeId(7)).thenReturn(listOf(contingent1, contingent2))
 
         // When
@@ -340,7 +340,7 @@ class ContingentServiceTest {
     @Test
     fun getByEmployeeId_archivedEmployee_returnsEmptyList() {
         // Given
-        whenever(employeeService.getById(7)).thenReturn(Employee(id = 7, archived = true))
+        whenever(employeeService.getEntityById(7)).thenReturn(Employee(id = 7, archived = true))
 
         // When
         val result = contingentService.getByEmployeeId(7)
@@ -354,7 +354,7 @@ class ContingentServiceTest {
         // Given
         val contingent1 = Contingent(id = 1, employee = Employee(id = 2, archived = true), institution = Institution(id = 2))
         val contingent2 = Contingent(id = 2, employee = Employee(id = 1, archived = true), institution = Institution(id = 1))
-        whenever(employeeService.getById(7)).thenReturn(Employee(id = 7, archived = true))
+        whenever(employeeService.getEntityById(7)).thenReturn(Employee(id = 7, archived = true))
         whenever(contingentRepository.findAllByEmployeeId(7)).thenReturn(listOf(contingent1, contingent2))
 
         // When
@@ -409,7 +409,7 @@ class ContingentServiceTest {
     fun create_missingInstitution_returnsInstitutionNotFound() {
         // Given
         val dto = createRequest(employeeId = 5, institutionId = 7)
-        whenever(employeeService.getById(dto.employeeId)).thenReturn(Employee(id = 5))
+        whenever(employeeService.getEntityById(dto.employeeId)).thenReturn(Employee(id = 5))
         whenever(institutionService.getEntityById(dto.institutionId)).thenReturn(null)
 
         // When
@@ -423,7 +423,7 @@ class ContingentServiceTest {
     fun create_missingEmployee_returnsEmployeeNotFound() {
         // Given
         val dto = createRequest(employeeId = 5, institutionId = 7)
-        whenever(employeeService.getById(dto.employeeId)).thenReturn(null)
+        whenever(employeeService.getEntityById(dto.employeeId)).thenReturn(null)
 
         // When
         val result = contingentService.create(dto)
@@ -436,7 +436,7 @@ class ContingentServiceTest {
     fun getAllEntitiesByEmployeeId_activeEmployee_returnsEntities() {
         // Given
         val contingent = Contingent(id = 1, employee = Employee(id = 7))
-        whenever(employeeService.getById(7)).thenReturn(Employee(id = 7, archived = false))
+        whenever(employeeService.getEntityById(7)).thenReturn(Employee(id = 7, archived = false))
         whenever(contingentRepository.findAllByEmployeeId(7)).thenReturn(listOf(contingent))
 
         // When

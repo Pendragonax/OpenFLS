@@ -4,7 +4,7 @@ import de.vinz.openfls.logging.StructuredLog
 import de.vinz.openfls.domains.clients.dtos.ClientCreateDto
 import de.vinz.openfls.domains.clients.dtos.ClientUpdateDto
 import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import jakarta.validation.Valid
 import org.slf4j.Logger
@@ -226,7 +226,7 @@ class ClientController(
     }
 
     private fun actorName(): String {
-        val employee = employeeService.getEmployeeDtoById(accessService.getId(), false)
+        val employee = employeeService.getEmployeeNameById(accessService.getId(), includeArchived = false)
             ?: return "Unbekannt"
         return "${employee.firstName} ${employee.lastName}".trim().ifBlank { "Unbekannt" }
     }

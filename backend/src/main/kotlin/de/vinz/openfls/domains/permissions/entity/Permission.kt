@@ -1,8 +1,7 @@
 package de.vinz.openfls.domains.permissions.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.EmployeeInstitutionRightsKey
+import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.institutions.entity.Institution
 import jakarta.persistence.*
 
@@ -10,7 +9,7 @@ import jakarta.persistence.*
 @Table(name = "permissions")
 class Permission(
         @EmbeddedId
-        var id: EmployeeInstitutionRightsKey = EmployeeInstitutionRightsKey(),
+        var id: PermissionKey = PermissionKey(),
 
         @JsonIgnore
         @ManyToOne(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)

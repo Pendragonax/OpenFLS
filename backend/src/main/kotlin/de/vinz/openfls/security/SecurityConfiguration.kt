@@ -96,7 +96,6 @@ class SecurityConfiguration {
             run {
                 auth.requestMatchers(HttpMethod.POST, "/login/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/changelog/**").permitAll()
-                        .requestMatchers("/change_role/**").hasAuthority("ADMIN")
                         .requestMatchers("/admin/logs/**").hasAuthority("ADMIN")
                         .requestMatchers("/admin/backup/**").hasAuthority("ADMIN")
                         .requestMatchers("/ws", "/ws/**").permitAll()

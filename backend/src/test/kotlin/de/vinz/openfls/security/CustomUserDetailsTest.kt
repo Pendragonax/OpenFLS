@@ -1,7 +1,7 @@
 package de.vinz.openfls.security
 
-import de.vinz.openfls.domains.employees.entities.Employee
-import de.vinz.openfls.domains.employees.entities.EmployeeAccess
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.entity.EmployeeAccess
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

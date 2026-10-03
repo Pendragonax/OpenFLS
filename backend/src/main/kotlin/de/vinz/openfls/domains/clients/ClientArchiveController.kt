@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportStateEx
 import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportRequestDto
 import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportStatusDto
 import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import jakarta.validation.Valid
@@ -160,7 +160,7 @@ class ClientArchiveController(
 
     private fun loadActor(): ClientArchiveActor {
         val employeeId = accessService.getId()
-        val employee = employeeService.getEmployeeDtoById(employeeId, accessService.isAdmin())
+        val employee = employeeService.getEmployeeNameById(employeeId, includeArchived = accessService.isAdmin())
             ?: throw IllegalArgumentException("employee not found")
 
         return ClientArchiveActor(

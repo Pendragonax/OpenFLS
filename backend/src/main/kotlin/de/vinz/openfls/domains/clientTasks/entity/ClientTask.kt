@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clientTasks.entity
 
 import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.employees.entities.Employee
+import de.vinz.openfls.domains.employees.entity.Employee
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -2,7 +2,6 @@ package de.vinz.openfls.domains.authentication
 
 import de.vinz.openfls.domains.authentication.dto.ChangePasswordRequest
 import de.vinz.openfls.domains.authentication.dto.ChangePasswordResult
-import de.vinz.openfls.domains.authentication.dto.ChangeRoleRequest
 import de.vinz.openfls.domains.authentication.dto.LoginRequest
 import de.vinz.openfls.domains.authentication.service.AuthenticationService
 import de.vinz.openfls.logging.StructuredLog
@@ -66,26 +65,6 @@ class AuthenticationController(
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
             performanceLoggingService.logPerformance("changePassword", startMs, logger)
-        }
-    }
-
-    @PostMapping("/change_role/{id}")
-    fun changeRole(@PathVariable id: Long, @RequestBody request: ChangeRoleRequest): Any {
-        val startMs = System.currentTimeMillis()
-
-        return try {
-            val changed = authenticationService.changeRole(id, UserRole.fromId(request.role))
-            if (!changed) {
-                return employeeNotFound()
-            }
-
-            StructuredLog.audit("authorization.role.change", "success", "user", id.toString())
-            ResponseEntity(HttpStatus.OK)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "authorization.role.change.failed", ex)
-            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
-        } finally {
-            performanceLoggingService.logPerformance("changeRole", startMs, logger)
         }
     }
 

@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.clients
 
 import de.vinz.openfls.domains.clientTasks.service.ClientTaskService
-import de.vinz.openfls.domains.employees.services.EmployeeService
+import de.vinz.openfls.domains.employees.service.EmployeeFavoriteService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
@@ -15,18 +15,18 @@ import org.mockito.kotlin.verify
 class ClientDeletionServiceTest {
 
     private val clientService: ClientService = mock()
-    private val employeeService: EmployeeService = mock()
+    private val employeeFavoriteService: EmployeeFavoriteService = mock()
     private val clientTaskService: ClientTaskService = mock()
 
-    private val clientDeletionService = ClientDeletionService(clientService, employeeService, clientTaskService)
+    private val clientDeletionService = ClientDeletionService(clientService, employeeFavoriteService, clientTaskService)
 
     @Test
     fun delete_removesFavoritesAndTasksBeforeTheClient() {
         clientDeletionService.delete(clientId = 3, actorId = 7, actorName = "Anna Autorin")
 
-        inOrder(employeeService, clientTaskService, clientService) {
-            verify(employeeService).deleteAssistancePlanFavoritesByClientId(3)
-            verify(employeeService).deleteClientFavoritesByClientId(3)
+        inOrder(employeeFavoriteService, clientTaskService, clientService) {
+            verify(employeeFavoriteService).deleteAssistancePlanFavoritesByClientId(3)
+            verify(employeeFavoriteService).deleteClientFavoritesByClientId(3)
             verify(clientTaskService).deleteAllByClientId(eq(3L), eq(7L), eq("Anna Autorin"))
             verify(clientService).delete(3)
         }
