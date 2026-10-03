@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.assistancePlans.entity
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode.EXACT
-import de.vinz.openfls.domains.clients.Client
+import de.vinz.openfls.domains.clients.entity.Client
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.institutions.entity.Institution

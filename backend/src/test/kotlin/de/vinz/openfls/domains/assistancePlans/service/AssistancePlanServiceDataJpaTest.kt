@@ -17,9 +17,9 @@ import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
-import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.clients.ClientRepository
-import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.clients.entity.Client
+import de.vinz.openfls.domains.clients.repository.ClientRepository
+import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
@@ -646,6 +646,72 @@ class AssistancePlanServiceDataJpaTest {
             LocalDate.of(2025, 1, 1),
             LocalDate.of(2024, 1, 1)
         )
+    }
+
+    @Test
+    fun getAllForServiceEditingByClientId_filtersByInstitutionAndListsDocumentationHourTypes() {
+        // Given
+        val otherInstitution = institutionRepository.save(Institution(name = "Inst B", email = "b@b.c", phonenumber = "2"))
+        val hourTypeB = hourTypeRepository.save(HourType(title = "Indirekt", price = 20.0))
+        val hourTypeC = hourTypeRepository.save(HourType(title = "Beratung", price = 30.0))
+        val corridor = hourCorridorRepository.save(
+            HourCorridor(title = "5 bis 10", weeklyMinutesFrom = 300, weeklyMinutesTill = 600, hourType = hourType)
+        )
+        val included = AssistancePlan(
+            start = LocalDate.of(2026, 1, 1),
+            end = LocalDate.of(2026, 6, 30),
+            client = client,
+            sponsor = sponsor,
+            institution = institution,
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        included.hours.add(AssistancePlanHour(weeklyMinutes = 60, hourType = hourType, assistancePlan = included))
+        included.hours.add(AssistancePlanHour(weeklyMinutes = 30, hourType = hourTypeB, assistancePlan = included))
+        included.hours.add(AssistancePlanHour(weeklyMinutes = 20, hourType = hourTypeC, assistancePlan = included))
+        val goal = Goal(title = "Ziel", description = "Beschreibung", institution = institution, assistancePlan = included)
+        goal.hours.add(GoalHour(weeklyMinutes = 15, hourType = hourTypeB, goal = goal))
+        included.goals.add(goal)
+        assistancePlanRepository.save(included)
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 7, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = otherInstitution
+            )
+        )
+        testEntityManager.flush()
+        testEntityManager.clear()
+
+        // When
+        val result = assistancePlanService.getAllForServiceEditingByClientId(client.id, listOf(institution.id!!))
+
+        // Then
+        val plan = result.single()
+        assertThat(plan.institutionId).isEqualTo(institution.id)
+        assertThat(plan.institutionName).isEqualTo("Inst")
+        assertThat(plan.clientId).isEqualTo(client.id)
+        assertThat(plan.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
+        assertThat(plan.hourCorridorId).isEqualTo(corridor.id)
+        assertThat(plan.goals.single().hours).hasSize(1)
+        assertThat(plan.hours).hasSize(3)
+        assertThat(plan.possibleDocumentationHourTypes.map { it.title })
+            .containsExactly("Beratung", "Indirekt", "Standard")
+    }
+
+    @Test
+    fun getAllForServiceEditingByClientId_sortsByStartAscending() {
+        // Given
+        savePlan(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31))
+        savePlan(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31))
+
+        // When
+        val result = assistancePlanService.getAllForServiceEditingByClientId(client.id, listOf(institution.id!!))
+
+        // Then
+        assertThat(result.map { it.start }).containsExactly(LocalDate.of(2024, 1, 1), LocalDate.of(2026, 1, 1))
     }
 
     @Test

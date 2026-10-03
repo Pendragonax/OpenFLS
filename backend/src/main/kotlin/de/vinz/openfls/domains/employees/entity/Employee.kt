@@ -3,10 +3,9 @@ package de.vinz.openfls.domains.employees.entity
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
-import de.vinz.openfls.domains.clients.Client
+import de.vinz.openfls.domains.clients.entity.Client
 import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.evaluations.entity.Evaluation
-import de.vinz.openfls.domains.employees.entity.EmployeeArchiveHistoryEntry
 import de.vinz.openfls.domains.permissions.entity.Permission
 import de.vinz.openfls.domains.services.entity.Service
 import jakarta.persistence.*

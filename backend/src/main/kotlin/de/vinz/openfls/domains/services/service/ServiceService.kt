@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.categories.service.CategoryTemplateService
-import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.clients.entity.Client
+import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.service.GoalService

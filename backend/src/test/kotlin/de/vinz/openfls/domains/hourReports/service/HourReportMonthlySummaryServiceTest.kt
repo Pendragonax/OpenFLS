@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.hourReports.dto.HourReportMonthlySummaryResult
 import de.vinz.openfls.domains.hourReports.repository.HourReportMonthlySummaryRepository
 import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummaryProjection
-import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
+import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummaryClientProjection
 import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummaryGoalProjection
 import de.vinz.openfls.domains.hourReports.projection.HourReportMonthlySummaryHourCorridorProjection
 import de.vinz.openfls.domains.hourTypes.entity.HourType
@@ -179,7 +179,7 @@ class HourReportMonthlySummaryServiceTest {
             override val id: Long = 5
             override val start: LocalDate = start
             override val end: LocalDate = end
-            override val client: ClientSoloProjection = clientProjection()
+            override val client: HourReportMonthlySummaryClientProjection = clientProjection()
             override val sponsor: HourReportMonthlySummarySponsorProjection = sponsorProjection()
             override val institution: HourReportMonthlySummaryInstitutionProjection = institutionProjection()
             override val hourMode: AssistancePlanHourMode = AssistancePlanHourMode.CORRIDOR
@@ -189,8 +189,8 @@ class HourReportMonthlySummaryServiceTest {
         }
     }
 
-    private fun clientProjection(): ClientSoloProjection {
-        return object : ClientSoloProjection {
+    private fun clientProjection(): HourReportMonthlySummaryClientProjection {
+        return object : HourReportMonthlySummaryClientProjection {
             override val id: Long = 1
             override val firstName: String = "Max"
             override val lastName: String = "Muster"

@@ -2,7 +2,6 @@ package de.vinz.openfls.domains.assistancePlans.dto
 
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
-import de.vinz.openfls.domains.clients.dtos.ClientSoloDto
 import de.vinz.openfls.domains.institutions.dto.InstitutionResponse
 import java.time.LocalDate
 
@@ -14,7 +13,7 @@ data class AssistancePlanDetailResponse(
     val id: Long,
     val start: LocalDate,
     val end: LocalDate,
-    val client: ClientSoloDto,
+    val client: AssistancePlanDetailClientResponse,
     val sponsor: AssistancePlanDetailSponsorResponse,
     val institution: InstitutionResponse,
     val hourMode: AssistancePlanHourMode,
@@ -35,14 +34,7 @@ data class AssistancePlanDetailResponse(
                 id = entity.id,
                 start = entity.start,
                 end = entity.end,
-                client = ClientSoloDto(
-                    id = client.id,
-                    firstName = client.firstName,
-                    lastName = client.lastName,
-                    phoneNumber = client.phoneNumber,
-                    email = client.email,
-                    archived = client.archived
-                ),
+                client = AssistancePlanDetailClientResponse.from(client),
                 sponsor = AssistancePlanDetailSponsorResponse.from(sponsor),
                 institution = InstitutionResponse(
                     id = institution.id ?: 0,

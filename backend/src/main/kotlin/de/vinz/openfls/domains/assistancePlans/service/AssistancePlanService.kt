@@ -6,6 +6,7 @@ import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanCreateResult
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanDeleteResult
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanDetailResponse
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanEditResponse
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanForServiceEditingResponse
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanResponse
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanUpdateRequest
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanUpdateResult
@@ -13,7 +14,7 @@ import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
-import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
@@ -196,6 +197,18 @@ class AssistancePlanService(
         }
 
         return assistancePlans.map { AssistancePlanEditResponse.from(it) }
+    }
+
+    /** The plans of a client in the given institutions, oldest first, with what documenting a service needs. */
+    @Transactional(readOnly = true)
+    fun getAllForServiceEditingByClientId(
+        clientId: Long,
+        institutionIds: List<Long>
+    ): List<AssistancePlanForServiceEditingResponse> {
+        return assistancePlanRepository.findByClientId(clientId)
+            .filter { it.institution?.id in institutionIds }
+            .sortedBy { it.start }
+            .map { AssistancePlanForServiceEditingResponse.from(it) }
     }
 
     @InternalEntityApi

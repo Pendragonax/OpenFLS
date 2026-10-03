@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanPreviewResponse
 import de.vinz.openfls.domains.assistancePlans.projection.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projection.AssistancePlanWeeklyMinutesProjection
 import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanPreviewRepository
-import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.TimeDoubleService

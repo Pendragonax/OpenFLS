@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.evaluations.service
 
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
-import de.vinz.openfls.domains.clients.Client
+import de.vinz.openfls.domains.clients.entity.Client
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.evaluations.dto.EvaluationCreateRequest

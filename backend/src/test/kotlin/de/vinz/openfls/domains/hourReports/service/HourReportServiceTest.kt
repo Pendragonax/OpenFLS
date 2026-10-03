@@ -5,14 +5,13 @@ import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanEditResponse
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanHourResponse
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
-import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
+import de.vinz.openfls.domains.clients.service.ClientService
+import de.vinz.openfls.domains.clients.dto.ClientNameDto
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.hourReports.dto.HourReportRowResponse
 import de.vinz.openfls.domains.hourReports.dto.HourReportResult
-import de.vinz.openfls.domains.hourReports.service.HourReportService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.TimeDoubleService
@@ -50,11 +49,11 @@ class HourReportServiceTest {
         institutionId: Long?,
         sponsorId: Long?,
         plans: List<AssistancePlanEditResponse>,
-        clients: List<ClientSimpleDto>
+        clients: List<ClientNameDto>
     ) {
         whenever(assistancePlanService.getAllEditResponsesByYearAndInstitutionIdAndSponsorId(year, institutionId, sponsorId))
             .thenReturn(plans)
-        whenever(clientService.getAllClientSimpleDto(includeArchived = true)).thenReturn(clients)
+        whenever(clientService.getAllClientNameDtos()).thenReturn(clients)
     }
 
     private fun success(result: HourReportResult): List<HourReportRowResponse> {
@@ -101,8 +100,8 @@ class HourReportServiceTest {
         val month = 2
         val hourTypeId = 7L
 
-        val activeClient = clientDto(1L, "Aktiv", "Alpha", archived = false)
-        val archivedClient = clientDto(2L, "Archiv", "Beta", archived = true)
+        val activeClient = clientDto(1L, "Aktiv", "Alpha")
+        val archivedClient = clientDto(2L, "Archiv", "Beta")
         val activePlan = planDto(11L, activeClient.id, year, month, hourTypeId)
         val archivedPlan = planDto(22L, archivedClient.id, year, month, hourTypeId)
         stubContext(year, null, null, listOf(activePlan, archivedPlan), listOf(activeClient, archivedClient))
@@ -112,7 +111,7 @@ class HourReportServiceTest {
         val archivedRow = result.first { it.clientDto.id == archivedClient.id }
         val allRow = result.first { it.clientDto.id == 0L }
 
-        assertThat(archivedRow.clientDto.archived).isTrue()
+        assertThat(archivedRow.clientDto.lastName).isEqualTo("Beta")
         assertThat(archivedRow.values[0]).isEqualTo(29.0)
         assertThat(allRow.values[0]).isEqualTo(58.0)
     }
@@ -122,8 +121,8 @@ class HourReportServiceTest {
         val year = 2024
         val hourTypeId = 7L
 
-        val activeClient = clientDto(1L, "Aktiv", "Alpha", archived = false)
-        val archivedClient = clientDto(2L, "Archiv", "Beta", archived = true)
+        val activeClient = clientDto(1L, "Aktiv", "Alpha")
+        val archivedClient = clientDto(2L, "Archiv", "Beta")
         val activePlan = planDto(11L, activeClient.id, year, null, hourTypeId)
         val archivedPlan = planDto(22L, archivedClient.id, year, null, hourTypeId)
         stubContext(year, null, null, listOf(activePlan, archivedPlan), listOf(activeClient, archivedClient))
@@ -133,7 +132,7 @@ class HourReportServiceTest {
         val archivedRow = result.first { it.clientDto.id == archivedClient.id }
         val allRow = result.first { it.clientDto.id == 0L }
 
-        assertThat(archivedRow.clientDto.archived).isTrue()
+        assertThat(archivedRow.clientDto.lastName).isEqualTo("Beta")
         assertThat(archivedRow.values[0]).isEqualTo(366.0)
         assertThat(allRow.values[0]).isEqualTo(732.0)
     }
@@ -143,7 +142,7 @@ class HourReportServiceTest {
         val year = 2024
         val hourTypeId = 7L
 
-        val client = clientDto(1L, "Max", "Muster", archived = false)
+        val client = clientDto(1L, "Max", "Muster")
         val corridorPlan = planDto(11L, client.id, year, null, hourTypeId, corridor = true)
         val corridor = corridorEntity(5L, hourTypeId, 300, 600)
         whenever(hourCorridorService.getAllEntitiesByIds(listOf(5L))).thenReturn(listOf(corridor))
@@ -171,7 +170,7 @@ class HourReportServiceTest {
         val weeklyMinutesFrom = 300
         val weeklyMinutesTill = 600
 
-        val client = clientDto(1L, "Max", "Muster", archived = false)
+        val client = clientDto(1L, "Max", "Muster")
         val corridorPlan = planDto(11L, client.id, year, null, hourTypeId, corridor = true)
         val corridor = corridorEntity(5L, hourTypeId, weeklyMinutesFrom, weeklyMinutesTill)
         whenever(hourCorridorService.getAllEntitiesByIds(listOf(5L))).thenReturn(listOf(corridor))
@@ -206,13 +205,8 @@ class HourReportServiceTest {
         assertThat(row.values[0]).isCloseTo(expectedTotal, within(0.0001))
     }
 
-    private fun clientDto(id: Long, firstName: String, lastName: String, archived: Boolean): ClientSimpleDto {
-        return ClientSimpleDto().apply {
-            this.id = id
-            this.firstName = firstName
-            this.lastName = lastName
-            this.archived = archived
-        }
+    private fun clientDto(id: Long, firstName: String, lastName: String): ClientNameDto {
+        return ClientNameDto(id = id, firstName = firstName, lastName = lastName)
     }
 
     private fun planDto(
@@ -235,11 +229,7 @@ class HourReportServiceTest {
         }
 
         plan.hours = listOf(
-            AssistancePlanHourResponse().apply {
-                this.assistancePlanId = id
-                this.hourTypeId = hourTypeId
-                this.weeklyMinutes = 420
-            }
+            AssistancePlanHourResponse(assistancePlanId = id, hourTypeId = hourTypeId, weeklyMinutes = 420)
         )
 
         return plan

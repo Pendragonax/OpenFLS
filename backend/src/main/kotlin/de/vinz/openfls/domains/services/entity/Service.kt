@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.categories.entity.Category
-import de.vinz.openfls.domains.clients.Client
+import de.vinz.openfls.domains.clients.entity.Client
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.hourTypes.entity.HourType

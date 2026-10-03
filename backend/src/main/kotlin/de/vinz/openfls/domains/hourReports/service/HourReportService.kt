@@ -2,8 +2,8 @@ package de.vinz.openfls.domains.hourReports.service
 
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanEditResponse
 import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
-import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
+import de.vinz.openfls.domains.clients.service.ClientService
+import de.vinz.openfls.domains.clients.dto.ClientNameDto
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
 import de.vinz.openfls.domains.hourReports.dto.HourReportRowResponse
@@ -122,7 +122,7 @@ class HourReportService(
 
     private fun buildApprovedHoursMonthly(
         assistancePlanDtos: List<AssistancePlanEditResponse>,
-        clientSimpleDtos: List<ClientSimpleDto>,
+        clientNameDtos: List<ClientNameDto>,
         hourTypeId: Long?,
         year: Int,
         month: Int,
@@ -131,7 +131,7 @@ class HourReportService(
 
         val daysInMonth = YearMonth.of(year, month).lengthOfMonth()
         val rows =
-            buildEmptyReportRows(assistancePlanDtos, clientSimpleDtos, daysInMonth)
+            buildEmptyReportRows(assistancePlanDtos, clientNameDtos, daysInMonth)
 
         // Set date range for the aggregated "all" DTO at the beginning of the list
         val totalRow = rows.first().apply {
@@ -167,13 +167,13 @@ class HourReportService(
 
     private fun buildApprovedHoursYearly(
         assistancePlanDtos: List<AssistancePlanEditResponse>,
-        clientSimpleDtos: List<ClientSimpleDto>,
+        clientNameDtos: List<ClientNameDto>,
         hourTypeId: Long?,
         year: Int,
         toTimeDouble: Boolean = true
     ): List<HourReportRowResponse> {
         val rows =
-            buildEmptyReportRows(assistancePlanDtos, clientSimpleDtos, monthCount)
+            buildEmptyReportRows(assistancePlanDtos, clientNameDtos, monthCount)
         val totalRow = rows[0]
 
         val hourCorridors = loadHourCorridors(assistancePlanDtos)
@@ -204,7 +204,7 @@ class HourReportService(
     private fun buildExecutedHoursYearly(
         services: List<de.vinz.openfls.domains.services.entity.Service>,
         assistancePlanDtos: List<AssistancePlanEditResponse>,
-        clientDtos: List<ClientSimpleDto>,
+        clientDtos: List<ClientNameDto>,
         year: Int,
         toTimeDouble: Boolean = true
     ): List<HourReportRowResponse> {
@@ -236,7 +236,7 @@ class HourReportService(
     private fun buildExecutedHoursMonthly(
         services: List<de.vinz.openfls.domains.services.entity.Service>,
         assistancePlanDtos: List<AssistancePlanEditResponse>,
-        clientDtos: List<ClientSimpleDto>,
+        clientDtos: List<ClientNameDto>,
         year: Int,
         month: Int,
         toTimeDouble: Boolean = true
@@ -268,16 +268,16 @@ class HourReportService(
     private fun buildDifferenceHoursYearly(
         services: List<de.vinz.openfls.domains.services.entity.Service>,
         assistancePlanDtos: List<AssistancePlanEditResponse>,
-        clientSimpleDtos: List<ClientSimpleDto>,
+        clientNameDtos: List<ClientNameDto>,
         hourTypeId: Long?,
         year: Int,
         toTimeDouble: Boolean = true
     ): List<HourReportRowResponse> {
         val approvedRows = buildApprovedHoursYearly(
-            assistancePlanDtos, clientSimpleDtos, hourTypeId, year, false
+            assistancePlanDtos, clientNameDtos, hourTypeId, year, false
         )
         val executedRows = buildExecutedHoursYearly(
-            services, assistancePlanDtos, clientSimpleDtos, year, false
+            services, assistancePlanDtos, clientNameDtos, year, false
         )
 
         return subtractApprovedFromExecutedReport(
@@ -293,17 +293,17 @@ class HourReportService(
     private fun buildDifferenceHoursMonthly(
         services: List<de.vinz.openfls.domains.services.entity.Service>,
         assistancePlanDtos: List<AssistancePlanEditResponse>,
-        clientSimpleDtos: List<ClientSimpleDto>,
+        clientNameDtos: List<ClientNameDto>,
         hourTypeId: Long?,
         year: Int,
         month: Int,
         toTimeDouble: Boolean = true
     ): List<HourReportRowResponse> {
         val approvedRows = buildApprovedHoursMonthly(
-            assistancePlanDtos, clientSimpleDtos, hourTypeId, year, month, false
+            assistancePlanDtos, clientNameDtos, hourTypeId, year, month, false
         )
         val executedRows = buildExecutedHoursMonthly(
-            services, assistancePlanDtos, clientSimpleDtos, year, month, false
+            services, assistancePlanDtos, clientNameDtos, year, month, false
         )
 
         return subtractApprovedFromExecutedReport(
@@ -396,11 +396,11 @@ class HourReportService(
 
     private data class HourReportContext(
         val assistancePlanDtos: List<AssistancePlanEditResponse>,
-        val clientDtos: List<ClientSimpleDto>
+        val clientDtos: List<ClientNameDto>
     )
 
     private fun loadReportContext(year: Int, month: Int?, institutionId: Long?, sponsorId: Long?): HourReportContext {
-        val clientDtos = clientService.getAllClientSimpleDto(includeArchived = true)
+        val clientDtos = clientService.getAllClientNameDtos()
         val assistancePlanDtos = getAssistancePlansForYearMonth(year, month, institutionId, sponsorId)
         return HourReportContext(assistancePlanDtos, clientDtos)
     }
@@ -424,18 +424,18 @@ class HourReportService(
 
     private fun buildEmptyReportRows(
         assistancePlanDtos: List<AssistancePlanEditResponse>,
-        clientDtos: List<ClientSimpleDto>,
+        clientDtos: List<ClientNameDto>,
         valuesCount: Int
     ): MutableList<HourReportRowResponse> {
 
-        val allClient = ClientSimpleDto().apply { lastName = "Gesamt" }
+        val allClient = ClientNameDto(lastName = "Gesamt")
         val defaultValuesArray = DoubleArray(valuesCount + 1) { 0.0 }
 
         val result = assistancePlanDtos.map { plan ->
             val client = clientDtos.find { it.id == plan.clientId }
                 ?: throw IllegalArgumentException("Client with ID ${plan.clientId} not found")
 
-            HourReportRowResponse(plan, copyClient(client), defaultValuesArray.copyOf())
+            HourReportRowResponse(plan, client, defaultValuesArray.copyOf())
         }.sortedBy { it.clientDto.lastName }
             .toMutableList()
 
@@ -494,18 +494,6 @@ class HourReportService(
             executedHours < approvedHoursFrom -> executedHours - approvedHoursFrom
             executedHours > approvedHoursTo -> executedHours - approvedHoursTo
             else -> 0.0
-        }
-    }
-
-    private fun copyClient(client: ClientSimpleDto): ClientSimpleDto {
-        return ClientSimpleDto().apply {
-            id = client.id
-            firstName = client.firstName
-            lastName = client.lastName
-            phoneNumber = client.phoneNumber
-            email = client.email
-            archived = client.archived
-            institution = client.institution
         }
     }
 

@@ -1,6 +1,5 @@
 package de.vinz.openfls.domains.hourReports.projection
 
-import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
 
 import java.time.LocalDate
@@ -9,7 +8,7 @@ interface HourReportMonthlySummaryProjection {
     val id: Long
     val start: LocalDate
     val end: LocalDate
-    val client: ClientSoloProjection
+    val client: HourReportMonthlySummaryClientProjection
     val sponsor: HourReportMonthlySummarySponsorProjection
     val institution: HourReportMonthlySummaryInstitutionProjection
     val hourMode: AssistancePlanHourMode

@@ -4,8 +4,8 @@ import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
-import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.clients.ClientRepository
+import de.vinz.openfls.domains.clients.entity.Client
+import de.vinz.openfls.domains.clients.repository.ClientRepository
 import de.vinz.openfls.domains.employees.repository.EmployeeRepository
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.goals.entity.Goal

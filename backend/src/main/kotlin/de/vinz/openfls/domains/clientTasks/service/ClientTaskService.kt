@@ -17,7 +17,7 @@ import de.vinz.openfls.domains.clientTasks.entity.ClientTaskAuditAction
 import de.vinz.openfls.domains.clientTasks.entity.ClientTaskAuditLog
 import de.vinz.openfls.domains.clientTasks.repository.ClientTaskAuditLogRepository
 import de.vinz.openfls.domains.clientTasks.repository.ClientTaskRepository
-import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.employees.service.EmployeeService
 import de.vinz.openfls.domains.permissions.service.AccessService

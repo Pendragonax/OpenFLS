@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.services.dto
 
-import de.vinz.openfls.domains.clients.projections.ClientSoloProjection
+import de.vinz.openfls.domains.services.projection.ServiceClientProjection
 import de.vinz.openfls.domains.services.projection.ServiceEmployeeProjection
 import de.vinz.openfls.domains.services.projection.ServiceInstitutionProjection
 import de.vinz.openfls.domains.services.projection.ServiceWithRelationsProjection
@@ -31,7 +31,7 @@ data class ServiceListItemResponse(
                 ?: InstitutionSummary(0, "", "", ""),
             (source.employee as ServiceEmployeeProjection?)?.let { EmployeeSummary(it.id, it.firstname, it.lastname, it.email, it.phonenumber, it.description, it.archived) }
                 ?: EmployeeSummary(0, "", "", "", "", "", false),
-            (source.client as ClientSoloProjection?)?.let { ClientSummary(it.id, it.firstName, it.lastName, it.phoneNumber, it.email, it.archived) }
+            (source.client as ServiceClientProjection?)?.let { ClientSummary(it.id, it.firstName, it.lastName, it.phoneNumber, it.email, it.archived) }
                 ?: ClientSummary(0, "", "", "", "", false)
         )
     }

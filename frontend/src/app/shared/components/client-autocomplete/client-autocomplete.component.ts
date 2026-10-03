@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output, SimpleChanges} from '@an
 import {Observable} from "rxjs";
 import {map, startWith} from 'rxjs/operators';
 import {FormControl} from "@angular/forms";
-import {ClientSoloDto} from "../../dtos/client-solo-dto.model";
+import {ClientSelectionDto} from "../../dtos/client-selection-dto.model";
 
 @Component({
     selector: 'app-client-autocomplete',
@@ -12,15 +12,15 @@ import {ClientSoloDto} from "../../dtos/client-solo-dto.model";
 })
 export class ClientAutocompleteComponent implements OnInit {
 
-  @Input() clients: ClientSoloDto[] = [];
+  @Input() clients: ClientSelectionDto[] = [];
   @Input() clientId: number | null = null;
   @Input() disabled: boolean = false;
 
-  @Output() clientChanged: EventEmitter<ClientSoloDto | null> = new EventEmitter<ClientSoloDto | null>();
+  @Output() clientChanged: EventEmitter<ClientSelectionDto | null> = new EventEmitter<ClientSelectionDto | null>();
 
-  client: ClientSoloDto | null = null;
+  client: ClientSelectionDto | null = null;
   clientControl: FormControl;
-  filteredClients$!: Observable<ClientSoloDto[]>;
+  filteredClients$!: Observable<ClientSelectionDto[]>;
 
   constructor() {
     this.clientControl = new FormControl({value: this.client, disabled: this.disabled})
@@ -33,7 +33,7 @@ export class ClientAutocompleteComponent implements OnInit {
     );
 
     this.clientControl.valueChanges.subscribe(value => {
-      if (isClientSoloDto(value)) {
+      if (isClientSelectionDto(value)) {
         this.client = value;
         this.clientChanged.emit(value);
       } else if (value == null) {
@@ -66,14 +66,14 @@ export class ClientAutocompleteComponent implements OnInit {
   }
 
   displayFn(client: any): string {
-    if (isClientSoloDto(client)) {
+    if (isClientSelectionDto(client)) {
       return client ? getFullName(client) : '';
     }
 
     return '';
   }
 
-  private _filter(value: any): ClientSoloDto[] {
+  private _filter(value: any): ClientSelectionDto[] {
     if (typeof value !== 'string') {
       return [];
     }
@@ -87,10 +87,10 @@ export class ClientAutocompleteComponent implements OnInit {
   protected readonly getFullName = getFullName;
 }
 
-function isClientSoloDto(client: any): client is ClientSoloDto {
+function isClientSelectionDto(client: any): client is ClientSelectionDto {
   return client && typeof client === 'object' && 'firstName' in client && 'lastName' in client;
 }
 
-function getFullName(client: ClientSoloDto): string {
+function getFullName(client: ClientSelectionDto): string {
   return client.lastName + " " + client.firstName;
 }

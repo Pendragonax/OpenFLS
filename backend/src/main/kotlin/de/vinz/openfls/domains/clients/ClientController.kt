@@ -1,11 +1,16 @@
 package de.vinz.openfls.domains.clients
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.clients.dtos.ClientCreateDto
-import de.vinz.openfls.domains.clients.dtos.ClientUpdateDto
-import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.domains.employees.service.EmployeeService
+import de.vinz.openfls.domains.clients.dto.ClientCreateRequest
+import de.vinz.openfls.domains.clients.dto.ClientCreateResult
+import de.vinz.openfls.domains.clients.dto.ClientDeleteResult
+import de.vinz.openfls.domains.clients.dto.ClientUpdateRequest
+import de.vinz.openfls.domains.clients.dto.ClientUpdateResult
+import de.vinz.openfls.domains.clients.service.ClientDeletionService
+import de.vinz.openfls.domains.clients.service.ClientForServiceEditingService
+import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.services.ExceptionResponseService
+import de.vinz.openfls.services.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,218 +21,138 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/clients")
 class ClientController(
-        private val clientService: ClientService,
-        private val clientDeletionService: ClientDeletionService,
-        private val employeeService: EmployeeService,
-        private val accessService: AccessService) {
+    private val clientService: ClientService,
+    private val clientDeletionService: ClientDeletionService,
+    private val clientForServiceEditingService: ClientForServiceEditingService,
+    private val accessService: AccessService,
+    private val performanceLoggingService: PerformanceLoggingService
+) {
 
     private val logger: Logger = LoggerFactory.getLogger(ClientController::class.java)
 
     @PostMapping
-    fun create(@Valid @RequestBody value: ClientCreateDto): Any {
+    fun create(@Valid @RequestBody request: ClientCreateRequest): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.isLeader(request.institutionId))
+            return forbidden("no permission to add clients")
+
         return try {
-            // performance
-            var startMs = System.currentTimeMillis()
-
-            if (!accessService.isLeader(value.institutionId))
-                throw IllegalArgumentException("no permission to add clients")
-
-            val dto = clientService.create(value)
-
-            logger.debug(String.format("%s create took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = clientService.create(request)) {
+                is ClientCreateResult.Success -> ResponseEntity.ok(result.response)
+                ClientCreateResult.InstitutionNotFound -> badRequest("institution not found")
+                ClientCreateResult.CategoryTemplateNotFound -> badRequest("category template not found")
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
     @PutMapping("{id}")
-    fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: ClientUpdateDto): Any {
+    fun update(@PathVariable id: Long, @Valid @RequestBody request: ClientUpdateRequest): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (id != request.id)
+            return badRequest("path id and request id are not the same")
+        if (!accessService.canModifyClient(request.id))
+            return forbidden("no permission to update this client")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (id != valueDto.id)
-                throw java.lang.IllegalArgumentException("path id and dto id are not the same")
-            if (!accessService.canModifyClient(valueDto.id))
-                throw IllegalArgumentException("no permission to update this client")
-
-            val dto = clientService.update(valueDto)
-
-            logger.debug(String.format("%s update took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = clientService.update(request)) {
+                is ClientUpdateResult.Success -> ResponseEntity.ok(result.response)
+                ClientUpdateResult.NotFound -> notFound()
+                ClientUpdateResult.Archived -> conflict("client is archived")
+                ClientUpdateResult.InstitutionNotFound -> badRequest("institution not found")
+                ClientUpdateResult.CategoryTemplateNotFound -> badRequest("category template not found")
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("update", startMs, logger)
         }
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.isAdmin())
+            return forbidden("no permission to delete this client")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.isAdmin())
-                throw IllegalArgumentException("no permission to delete this client")
-            if (!clientService.existsById(id))
-                throw IllegalArgumentException("client not found")
-
-            val dto = clientService.getById(
-                id,
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-            clientDeletionService.delete(
-                clientId = id,
-                actorId = accessService.getId(),
-                actorName = actorName()
-            )
-
-            logger.debug(String.format("%s delete took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            when (val result = clientDeletionService.delete(id)) {
+                is ClientDeleteResult.Success -> ResponseEntity.ok(result.response)
+                ClientDeleteResult.NotFound -> notFound()
+                ClientDeleteResult.Archived -> conflict("client is archived")
+            }
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("delete", startMs, logger)
         }
     }
 
     @GetMapping
     fun getAll(): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = clientService.getAllClientSimpleDto(
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
+            ResponseEntity.ok(
+                clientService.getAllClientsWithInstitution(
+                    includeArchived = accessService.isAdmin(),
+                    leadingInstitutionIds = accessService.getLeadingInstitutionIds()
+                )
             )
-
-            logger.debug(String.format("%s getAll took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dtos)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("solo")
-    fun getAllClientSoloDtos(): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = clientService.getAllClientSoloDto(
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-
-            logger.debug(String.format("%s getAllClientSoloDtos took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dtos)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getAll", startMs, logger)
         }
     }
 
     @GetMapping("{id}")
     fun getById(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
+        val startMs = System.currentTimeMillis()
 
-            val dto = clientService.getById(
+        return try {
+            val client = clientService.getById(
                 id,
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            ) ?: throw IllegalArgumentException("client not found")
-
-            logger.debug(String.format("%s getById took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            ) ?: return notFound()
+            ResponseEntity.ok(client)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getById", startMs, logger)
         }
     }
 
     @GetMapping("/for-service-editing/{id}")
     fun getForServiceEditingById(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val userId = accessService.getId()
-            val writePermittedInstitutions = accessService.getWriteRightsInstitutionIds(userId)
-
-            val dto = clientService.getForServiceEditingById(
-                id,
-                writePermittedInstitutions,
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-
-            logger.debug(String.format("%s getById took %s ms",
-                PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                System.currentTimeMillis() - startMs))
-
-            ResponseEntity.ok(dto)
+            val client = clientForServiceEditingService.getForServiceEditingById(id) ?: return notFound()
+            ResponseEntity.ok(client)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getForServiceEditingById", startMs, logger)
         }
     }
 
-    private fun actorName(): String {
-        val employee = employeeService.getEmployeeNameById(accessService.getId(), includeArchived = false)
-            ?: return "Unbekannt"
-        return "${employee.firstName} ${employee.lastName}".trim().ifBlank { "Unbekannt" }
-    }
+    private fun notFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("client not found")
+
+    private fun forbidden(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.FORBIDDEN).body(message)
+
+    private fun badRequest(message: String): ResponseEntity<String> =
+        ResponseEntity.badRequest().body(message)
+
+    private fun conflict(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.CONFLICT).body(message)
 }

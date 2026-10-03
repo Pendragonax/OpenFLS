@@ -9,8 +9,8 @@ import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorUpdateRequest
 import de.vinz.openfls.domains.hourCorridors.dto.HourCorridorUpdateResult
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
-import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.clients.ClientRepository
+import de.vinz.openfls.domains.clients.entity.Client
+import de.vinz.openfls.domains.clients.repository.ClientRepository
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository

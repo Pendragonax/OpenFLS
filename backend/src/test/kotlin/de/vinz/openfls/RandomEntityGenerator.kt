@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.categories.entity.CategoryTemplate
-import de.vinz.openfls.domains.clients.Client
+import de.vinz.openfls.domains.clients.entity.Client
 import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.employees.entity.Unprofessional

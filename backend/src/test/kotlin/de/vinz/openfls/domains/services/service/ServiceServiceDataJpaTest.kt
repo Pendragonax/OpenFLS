@@ -8,9 +8,9 @@ import de.vinz.openfls.domains.categories.entity.CategoryTemplate
 import de.vinz.openfls.domains.categories.repository.CategoryRepository
 import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
 import de.vinz.openfls.domains.categories.service.CategoryTemplateService
-import de.vinz.openfls.domains.clients.Client
-import de.vinz.openfls.domains.clients.ClientRepository
-import de.vinz.openfls.domains.clients.ClientService
+import de.vinz.openfls.domains.clients.entity.Client
+import de.vinz.openfls.domains.clients.repository.ClientRepository
+import de.vinz.openfls.domains.clients.service.ClientService
 import de.vinz.openfls.domains.employees.repository.EmployeeRepository
 import de.vinz.openfls.domains.employees.entity.Employee
 import de.vinz.openfls.domains.employees.service.EmployeeService

@@ -1,7 +1,7 @@
 package de.vinz.openfls.domains.hourReports
 
 import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanEditResponse
-import de.vinz.openfls.domains.clients.dtos.ClientSimpleDto
+import de.vinz.openfls.domains.clients.dto.ClientNameDto
 import de.vinz.openfls.domains.hourReports.dto.HourReportRowResponse
 import de.vinz.openfls.domains.hourReports.dto.HourReportResult
 import de.vinz.openfls.domains.hourReports.service.HourReportService
@@ -30,7 +30,7 @@ class HourReportControllerWebMvcTest {
     lateinit var performanceLoggingService: PerformanceLoggingService
 
     private fun rowResponse(): HourReportRowResponse =
-        HourReportRowResponse(AssistancePlanEditResponse().apply { id = 1 }, ClientSimpleDto(), DoubleArray(13))
+        HourReportRowResponse(AssistancePlanEditResponse().apply { id = 1 }, ClientNameDto(), DoubleArray(13))
 
     @Test
     fun getExecutedHoursReport_success_returnsOk() {
