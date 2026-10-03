@@ -116,4 +116,10 @@ class CategoryTemplateService(
     fun getEntityById(id: Long): CategoryTemplate? {
         return categoryTemplateRepository.findByIdOrNull(id)
     }
+
+    @InternalEntityApi
+    @Transactional(readOnly = true)
+    fun getAllCategoryEntitiesByIds(ids: Collection<Long>): List<Category> {
+        return categoryRepository.findAllById(ids).toList()
+    }
 }

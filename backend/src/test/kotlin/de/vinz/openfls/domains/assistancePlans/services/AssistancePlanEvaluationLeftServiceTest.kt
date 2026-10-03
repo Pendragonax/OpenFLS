@@ -7,8 +7,8 @@ import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.goals.entity.GoalHour
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourTypes.entity.HourType
-import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.dto.ServiceDto
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
@@ -84,11 +84,11 @@ class AssistancePlanEvaluationLeftServiceTest {
             hourCorridor = corridor
         )
         whenever(assistancePlanService.getEntityById(5)).thenReturn(plan)
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(emptyList())
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
             .thenReturn(emptyList())
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
             .thenReturn(emptyList())
 
         // When
@@ -214,11 +214,11 @@ class AssistancePlanEvaluationLeftServiceTest {
             goals = mutableSetOf(goal)
         )
         whenever(assistancePlanService.getEntityById(2)).thenReturn(plan)
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(emptyList())
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
             .thenReturn(emptyList())
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
             .thenReturn(emptyList())
 
         // When
@@ -247,11 +247,11 @@ class AssistancePlanEvaluationLeftServiceTest {
             goals = mutableSetOf(goal)
         )
         whenever(assistancePlanService.getEntityById(3)).thenReturn(plan)
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(emptyList())
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
             .thenReturn(emptyList())
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
             .thenReturn(emptyList())
 
         // When
@@ -278,11 +278,11 @@ class AssistancePlanEvaluationLeftServiceTest {
             goals = mutableSetOf(goal)
         )
         whenever(assistancePlanService.getEntityById(4)).thenReturn(plan)
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(emptyList())
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
             .thenReturn(emptyList())
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
             .thenReturn(emptyList())
 
         val daysInYearRange = DateService.countDaysOfYearBetweenStartAndEnd(2024, plan.start, plan.end)
@@ -311,11 +311,11 @@ class AssistancePlanEvaluationLeftServiceTest {
             hours = mutableSetOf(AssistancePlanHour(weeklyMinutes = 420, hourType = hourType))
         )
         whenever(assistancePlanService.getEntityById(4)).thenReturn(plan)
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(listOf(generateService(date, 60)))
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
             .thenReturn(listOf(generateService(date, 60)))
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
             .thenReturn(listOf(generateService(date, 60)))
 
         // When
@@ -329,17 +329,17 @@ class AssistancePlanEvaluationLeftServiceTest {
         assertThat(evaluation.leftComplete).isEqualTo(730.0)
     }
 
-    private fun generateService(start: LocalDate, minutes: Int): ServiceSoloProjection {
-        return object : ServiceSoloProjection {
-            override val id: Long = (Math.random() * 10000).toLong()
-            override val start: LocalDateTime = start.atTime(8, 0)
-            override val end: LocalDateTime = start.atTime(8, 0).plusMinutes(minutes.toLong())
-            override val minutes: Int = minutes
-            override val title: String = ""
-            override val content: String = ""
-            override val unfinished: Boolean = false
-            override val groupService: Boolean = false
-        }
+    private fun generateService(start: LocalDate, minutes: Int): ServiceDto {
+        return ServiceDto(
+            id = (Math.random() * 10000).toLong(),
+            start = start.atTime(8, 0),
+            end = start.atTime(8, 0).plusMinutes(minutes.toLong()),
+            minutes = minutes,
+            title = "",
+            content = "",
+            unfinished = false,
+            groupService = false
+        )
     }
 
     private fun goalWithHourType(hourType: HourType, weeklyMinutes: Int): Goal {
@@ -351,25 +351,25 @@ class AssistancePlanEvaluationLeftServiceTest {
 
     private fun stubExecutedMinutes(minutes: Int, date: LocalDate) {
         val services = listOf(generateService(date, minutes))
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
             .thenReturn(services)
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
             .thenReturn(services)
-        whenever(serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
             .thenReturn(services)
     }
 
     @Suppress("unused")
-    private fun serviceProjection(minutes: Int): ServiceSoloProjection {
-        return object : ServiceSoloProjection {
-            override val id: Long = 1
-            override val start: LocalDateTime = LocalDateTime.of(2024, 2, 1, 8, 0)
-            override val end: LocalDateTime = LocalDateTime.of(2024, 2, 1, 9, 0)
-            override val minutes: Int = minutes
-            override val title: String = ""
-            override val content: String = ""
-            override val unfinished: Boolean = false
-            override val groupService: Boolean = false
-        }
+    private fun serviceProjection(minutes: Int): ServiceDto {
+        return ServiceDto(
+            id = 1,
+            start = LocalDateTime.of(2024, 2, 1, 8, 0),
+            end = LocalDateTime.of(2024, 2, 1, 9, 0),
+            minutes = minutes,
+            title = "",
+            content = "",
+            unfinished = false,
+            groupService = false
+        )
     }
 }

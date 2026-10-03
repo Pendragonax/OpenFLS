@@ -6,7 +6,7 @@ import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDto
 import de.vinz.openfls.domains.assistancePlans.dtos.ApprovedHoursLeftResponseDto.HourTypeEvaluationDto
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.hourTypes.entity.HourType
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.stereotype.Service
@@ -218,10 +218,22 @@ class AssistancePlanEvaluationLeftService(
             return 0
         }
 
+        val countStartDate = if (start > assistancePlan.start) {
+            start
+        } else {
+            assistancePlan.start
+        }
+
+        val countEndDate = if (end < assistancePlan.end) {
+            end
+        } else {
+            assistancePlan.end
+        }
+
         return DateService.countDaysOfYearBetweenStartAndEnd(
             start.year,
-            start,
-            end
+            countStartDate,
+            countEndDate
         )
     }
 
@@ -278,7 +290,7 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Int {
-        val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
+        val services = serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
             start = assistancePlan.start,
             end = assistancePlan.end,
             assistancePlanId = assistancePlan.id,
@@ -293,7 +305,7 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Int {
-        val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
+        val services = serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(
             start = start,
             end = end,
             assistancePlanId = assistancePlan.id,
@@ -307,7 +319,7 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Int {
-        val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
+        val services = serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(
             assistancePlanId = assistancePlan.id,
             hourTypeId = hourTypeId,
             year = year
@@ -321,7 +333,7 @@ class AssistancePlanEvaluationLeftService(
         assistancePlan: AssistancePlan,
         hourTypeId: Long
     ): Int {
-        val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
+        val services = serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
             assistancePlanId = assistancePlan.id,
             hourTypeId = hourTypeId,
             year = year,

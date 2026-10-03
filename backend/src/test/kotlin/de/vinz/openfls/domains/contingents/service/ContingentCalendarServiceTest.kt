@@ -3,8 +3,8 @@ package de.vinz.openfls.domains.contingents.service
 import de.vinz.openfls.domains.absence.service.AbsenceService
 import de.vinz.openfls.domains.absence.entity.Absence
 import de.vinz.openfls.domains.contingents.entity.Contingent
-import de.vinz.openfls.domains.services.ServiceRepository
-import de.vinz.openfls.domains.services.projections.ServiceCalendarProjection
+import de.vinz.openfls.domains.services.service.ServiceService
+import de.vinz.openfls.domains.services.dto.ServiceCalendarDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -15,11 +15,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class ContingentCalendarServiceTest {
-    private val serviceRepository: ServiceRepository = mock()
+    private val serviceService: ServiceService = mock()
     private val contingentService: ContingentService = mock()
     private val contingentCalculationService: ContingentCalculationService = mock()
     private val absenceService: AbsenceService = mock()
-    private val contingentCalendarService = ContingentCalendarService(serviceRepository, contingentService, contingentCalculationService, absenceService)
+    private val contingentCalendarService = ContingentCalendarService(serviceService, contingentService, contingentCalculationService, absenceService)
 
     @Test
     fun generateContingentCalendarFor_multipleServicesSameDay_aggregatesMinutesAndContingent() {
@@ -35,17 +35,17 @@ class ContingentCalendarServiceTest {
             this.weeklyServiceHours = 10.0
         }
         val projections = listOf(
-            TestServiceCalendarProjection(
+            ServiceCalendarDto(
                 id = 1,
                 start = serviceDate.atTime(9, 0),
                 minutes = 60
             ),
-            TestServiceCalendarProjection(
+            ServiceCalendarDto(
                 id = 2,
                 start = serviceDate.atTime(13, 0),
                 minutes = 30
             ),
-            TestServiceCalendarProjection(
+            ServiceCalendarDto(
                 id = 3,
                 start = otherDate.atTime(10, 0),
                 minutes = 240
@@ -53,7 +53,7 @@ class ContingentCalendarServiceTest {
         )
 
         whenever(contingentService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(listOf(contingent))
-        whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
+        whenever(serviceService.getCalendarServicesByEmployeeIdAndStartAndEnd(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(emptyList())
         whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(serviceDate, listOf(contingent)))
             .thenReturn(120.0)
@@ -111,7 +111,7 @@ class ContingentCalendarServiceTest {
         val absences = listOf(now)
 
         whenever(contingentService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(listOf(contingent))
-        whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(emptyList())
+        whenever(serviceService.getCalendarServicesByEmployeeIdAndStartAndEnd(employeeId, start, now)).thenReturn(emptyList())
         whenever(absenceService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(
             absences.map { Absence(absenceDate = it, employeeId = employeeId) }
         )
@@ -159,7 +159,7 @@ class ContingentCalendarServiceTest {
             this.weeklyServiceHours = 35.0
         }
         val projections = listOf(
-            TestServiceCalendarProjection(
+            ServiceCalendarDto(
                 id = 9,
                 start = serviceDate.atTime(9, 0),
                 minutes = 60
@@ -168,7 +168,7 @@ class ContingentCalendarServiceTest {
         val absences = listOf(serviceDate)
 
         whenever(contingentService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(listOf(contingent))
-        whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
+        whenever(serviceService.getCalendarServicesByEmployeeIdAndStartAndEnd(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(
             absences.map { Absence(absenceDate = it, employeeId = employeeId) }
         )
@@ -200,7 +200,7 @@ class ContingentCalendarServiceTest {
         val now = LocalDate.now()
         val start = now.minusYears(1)
         val projections = listOf(
-            TestServiceCalendarProjection(
+            ServiceCalendarDto(
                 id = 12,
                 start = now.atTime(8, 0),
                 minutes = 61
@@ -208,7 +208,7 @@ class ContingentCalendarServiceTest {
         )
 
         whenever(contingentService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(emptyList())
-        whenever(serviceRepository.findServiceCalendarProjection(employeeId, start, now)).thenReturn(projections)
+        whenever(serviceService.getCalendarServicesByEmployeeIdAndStartAndEnd(employeeId, start, now)).thenReturn(projections)
         whenever(absenceService.getAllEntitiesByEmployeeId(employeeId)).thenReturn(emptyList())
         whenever(contingentCalculationService.calculateContingentMinutesForWorkdayBy(now, emptyList()))
             .thenReturn(0.0)
@@ -236,10 +236,4 @@ class ContingentCalendarServiceTest {
         assertThat(result.today.differenceHours).isEqualTo(1)
         assertThat(result.today.differenceMinutes).isEqualTo(1)
     }
-
-    private data class TestServiceCalendarProjection(
-        override val id: Long,
-        override val start: LocalDateTime,
-        override val minutes: Int
-    ) : ServiceCalendarProjection
 }

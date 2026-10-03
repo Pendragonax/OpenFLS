@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationRespons
 import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationResult
 import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalsTimeEvaluationResponse
 import de.vinz.openfls.domains.goals.entity.Goal
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.transaction.annotation.Transactional
@@ -151,7 +151,7 @@ class GoalTimeEvaluationService(
             start: LocalDate,
             end: LocalDate,
             year: Int,
-            services: List<de.vinz.openfls.domains.services.Service>,
+            services: List<de.vinz.openfls.domains.services.entity.Service>,
             matchesHourType: Boolean
     ): GoalTimeEvaluationResponse {
         val executedHours = if (matchesHourType)
@@ -220,7 +220,7 @@ class GoalTimeEvaluationService(
             assistancePlan: AssistancePlan,
             goalsWithHourType: List<Goal>,
             year: Int,
-            services: List<de.vinz.openfls.domains.services.Service>,
+            services: List<de.vinz.openfls.domains.services.entity.Service>,
             hourTypeId: Long,
             start: LocalDate,
             end: LocalDate
@@ -253,7 +253,7 @@ class GoalTimeEvaluationService(
             start: LocalDate,
             end: LocalDate,
             year: Int,
-            services: List<de.vinz.openfls.domains.services.Service>
+            services: List<de.vinz.openfls.domains.services.entity.Service>
     ): GoalTimeEvaluationResponse {
         val executedHours = getExecutedHoursByMonthInYearForGoal(goal, hourTypeId, start, end, year, services, false)
         val summedExecutedHours = getExecutedHoursByMonthInYearForGoal(goal, hourTypeId, start, end, year, services, true)
@@ -278,7 +278,7 @@ class GoalTimeEvaluationService(
                                       start: LocalDate,
                                       end: LocalDate,
                                       year: Int,
-                                      services: List<de.vinz.openfls.domains.services.Service>,
+                                      services: List<de.vinz.openfls.domains.services.entity.Service>,
                                       sum: Boolean): List<Double> {
         val executedMinutes = getExecutedMinutesByMonthInYearForAssistancePlan(assistancePlan, hourTypeId, start, end, year, services, sum)
         return executedMinutes.map { DateService.convertMinutesToHour(it) }
@@ -289,7 +289,7 @@ class GoalTimeEvaluationService(
                                       start: LocalDate,
                                       end: LocalDate,
                                       year: Int,
-                                      services: List<de.vinz.openfls.domains.services.Service>,
+                                      services: List<de.vinz.openfls.domains.services.entity.Service>,
                                       sum: Boolean): List<Double> {
         val executedMinutes = getExecutedMinutesByMonthInYearForGoal(goal, hourTypeId, start, end, year, services, sum)
         return executedMinutes.map { DateService.convertMinutesToHour(it) }
@@ -300,7 +300,7 @@ class GoalTimeEvaluationService(
                                         start: LocalDate,
                                         end: LocalDate,
                                         year: Int,
-                                        services: List<de.vinz.openfls.domains.services.Service>,
+                                        services: List<de.vinz.openfls.domains.services.entity.Service>,
                                         sum: Boolean): List<Double> {
         val executedMinutes = getExecutedMinutesByMonthForAssistancePlan(assistancePlan, hourTypeId, start, end, services, sum)
         return restrictToCalendarYear(executedMinutes, year)
@@ -311,7 +311,7 @@ class GoalTimeEvaluationService(
                                         start: LocalDate,
                                         end: LocalDate,
                                         year: Int,
-                                        services: List<de.vinz.openfls.domains.services.Service>,
+                                        services: List<de.vinz.openfls.domains.services.entity.Service>,
                                         sum: Boolean): List<Double> {
         val executedMinutes = getExecutedMinutesByMonthForGoal(goal, hourTypeId, start, end, services, sum)
         return restrictToCalendarYear(executedMinutes, year)
@@ -332,11 +332,11 @@ class GoalTimeEvaluationService(
                                   hourTypeId: Long,
                                   start: LocalDate,
                                   end: LocalDate,
-                                  services: List<de.vinz.openfls.domains.services.Service>,
+                                  services: List<de.vinz.openfls.domains.services.entity.Service>,
                                   sum: Boolean): List<YearMonthDoubleValue> {
-        val filterService: (service: de.vinz.openfls.domains.services.Service) -> Boolean =
+        val filterService: (service: de.vinz.openfls.domains.services.entity.Service) -> Boolean =
                 { service -> service.assistancePlan?.id == assistancePlan.id }
-        val minuteAdjustment: (service: de.vinz.openfls.domains.services.Service) -> Double =
+        val minuteAdjustment: (service: de.vinz.openfls.domains.services.entity.Service) -> Double =
                 { service -> service.minutes.toDouble() }
 
         return aggregateServiceMinutesByMonth(
@@ -354,11 +354,11 @@ class GoalTimeEvaluationService(
                                   hourTypeId: Long,
                                   start: LocalDate,
                                   end: LocalDate,
-                                  services: List<de.vinz.openfls.domains.services.Service>,
+                                  services: List<de.vinz.openfls.domains.services.entity.Service>,
                                   sum: Boolean): List<YearMonthDoubleValue> {
-        val filterService: (service: de.vinz.openfls.domains.services.Service) -> Boolean =
+        val filterService: (service: de.vinz.openfls.domains.services.entity.Service) -> Boolean =
                 { service -> serviceIncludesGoal(service, goal) }
-        val minuteAdjustment: (service: de.vinz.openfls.domains.services.Service) -> Double =
+        val minuteAdjustment: (service: de.vinz.openfls.domains.services.entity.Service) -> Double =
                 { service -> (service.minutes.toDouble() / service.goals.size).roundToInt().toDouble() }
 
         return aggregateServiceMinutesByMonth(
@@ -375,11 +375,11 @@ class GoalTimeEvaluationService(
     private fun aggregateServiceMinutesByMonth(
             start: LocalDate,
             end: LocalDate,
-            services: List<de.vinz.openfls.domains.services.Service>,
+            services: List<de.vinz.openfls.domains.services.entity.Service>,
             hourTypeId: Long,
             sum: Boolean,
-            filterService: (service: de.vinz.openfls.domains.services.Service) -> Boolean,
-            minuteAdjustment: (service: de.vinz.openfls.domains.services.Service) -> Double
+            filterService: (service: de.vinz.openfls.domains.services.entity.Service) -> Boolean,
+            minuteAdjustment: (service: de.vinz.openfls.domains.services.entity.Service) -> Double
     ): List<YearMonthDoubleValue> {
         val executedHours = YearMonthDoubleValue.getEmpty(start, end)
         val executedMinutesMap = executedHours.associate { it.yearMonth to it.value }.toMutableMap()
@@ -509,17 +509,17 @@ class GoalTimeEvaluationService(
         return resultList
     }
 
-    private fun isServiceWithinPeriod(service: de.vinz.openfls.domains.services.Service,
+    private fun isServiceWithinPeriod(service: de.vinz.openfls.domains.services.entity.Service,
                                    start: LocalDateTime,
                                    end: LocalDateTime): Boolean {
         return service.start in start..end
     }
 
-    private fun matchesHourType(service: de.vinz.openfls.domains.services.Service, hourTypeId: Long): Boolean {
+    private fun matchesHourType(service: de.vinz.openfls.domains.services.entity.Service, hourTypeId: Long): Boolean {
         return service.hourType?.id == hourTypeId
     }
 
-    private fun serviceIncludesGoal(service: de.vinz.openfls.domains.services.Service, goal: Goal): Boolean {
+    private fun serviceIncludesGoal(service: de.vinz.openfls.domains.services.entity.Service, goal: Goal): Boolean {
         return service.goals.any { it.id == goal.id }
     }
 

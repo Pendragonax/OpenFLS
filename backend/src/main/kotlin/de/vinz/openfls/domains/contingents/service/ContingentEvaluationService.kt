@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.contingents.dto.ContingentEvaluationResponse
 import de.vinz.openfls.domains.contingents.dto.ContingentServiceEntryDto
 import de.vinz.openfls.domains.contingents.dto.EmployeeContingentEvaluationResponse
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,7 +27,7 @@ class ContingentEvaluationService(
         institutionId: Long,
         includeArchivedEmployees: Boolean = false
     ): ContingentEvaluationResponse {
-        val services = serviceService.getContingentEvaluationServiceDtosBy(institutionId, year)
+        val services = serviceService.getContingentEvaluationServicesByInstitutionIdAndYear(institutionId, year)
             .map { ContingentServiceEntryDto(it.employeeId, it.start, it.minutes) }
         val contingents = contingentService.getAllEntitiesByInstitutionAndYear(institutionId, year)
             .filter { includeArchivedEmployees || it.employee?.archived != true }

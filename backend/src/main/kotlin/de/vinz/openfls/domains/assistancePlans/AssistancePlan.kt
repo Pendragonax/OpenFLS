@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.employees.entities.Employee
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.institutions.entity.Institution
-import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.services.entity.Service
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import java.time.LocalDate
 import jakarta.persistence.*

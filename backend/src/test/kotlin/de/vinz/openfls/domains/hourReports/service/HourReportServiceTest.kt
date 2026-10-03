@@ -14,7 +14,7 @@ import de.vinz.openfls.domains.hourReports.dto.HourReportRowResponse
 import de.vinz.openfls.domains.hourReports.dto.HourReportResult
 import de.vinz.openfls.domains.hourReports.service.HourReportService
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.TimeDoubleService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
@@ -41,7 +41,7 @@ class HourReportServiceTest {
             accessService, serviceService, assistancePlanService, hourCorridorService, clientService
         )
         whenever(accessService.isAdmin()).thenReturn(true)
-        whenever(serviceService.getAllEntitiesByYearAndHourTypeIdAndAreaIdAndSponsorId(any(), any(), any(), any(), any()))
+        whenever(serviceService.getAllEntitiesByYearAndMonthAndHourTypeIdAndInstitutionIdAndSponsorId(any(), any(), any(), any(), any()))
             .thenReturn(emptyList())
     }
 
@@ -176,7 +176,7 @@ class HourReportServiceTest {
         val corridor = corridorEntity(5L, hourTypeId, weeklyMinutesFrom, weeklyMinutesTill)
         whenever(hourCorridorService.getAllEntitiesByIds(listOf(5L))).thenReturn(listOf(corridor))
         stubContext(year, null, null, listOf(corridorPlan), listOf(client))
-        whenever(serviceService.getAllEntitiesByYearAndHourTypeIdAndAreaIdAndSponsorId(year, null, hourTypeId, null, null))
+        whenever(serviceService.getAllEntitiesByYearAndMonthAndHourTypeIdAndInstitutionIdAndSponsorId(year, null, hourTypeId, null, null))
             .thenReturn(listOf(service(11L, LocalDate.of(2024, 2, 10), 60)))
 
         val result = success(hourReportService.getDifferenceHoursReport(year, null, hourTypeId, null, null))
@@ -256,7 +256,7 @@ class HourReportServiceTest {
     }
 
     private fun service(assistancePlanId: Long, start: LocalDate, minutes: Int) =
-        de.vinz.openfls.domains.services.Service(
+        de.vinz.openfls.domains.services.entity.Service(
             start = start.atTime(8, 0),
             end = start.atTime(8, 0).plusMinutes(minutes.toLong()),
             minutes = minutes,

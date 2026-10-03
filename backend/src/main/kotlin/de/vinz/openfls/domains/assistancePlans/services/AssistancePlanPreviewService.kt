@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreviewProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,7 +18,7 @@ import java.time.temporal.ChronoUnit
 @Service
 class AssistancePlanPreviewService(
     private val assistancePlanRepository: AssistancePlanRepository,
-    private val serviceRepository: ServiceRepository,
+    private val serviceService: ServiceService,
     private val clock: Clock
 ) {
 
@@ -318,8 +318,8 @@ class AssistancePlanPreviewService(
         yearStart: LocalDate,
         yearEnd: LocalDate
     ): Map<Long, Long> {
-        return serviceRepository
-            .findMinutesByAssistancePlanIdsAndStartAndEnd(assistancePlanIds, yearStart, yearEnd)
+        return serviceService
+            .getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(assistancePlanIds, yearStart, yearEnd)
             .groupBy { it.assistancePlanId }
             .mapValues { (_, minutes) -> minutes.sumOf { it.minutes.toLong() } }
     }
@@ -328,8 +328,8 @@ class AssistancePlanPreviewService(
         assistancePlanIds: List<Long>,
         periodEnd: LocalDate
     ): Map<Long, Long> {
-        val minutesByAssistancePlanId = serviceRepository
-            .findMinutesByAssistancePlanIdsFromPlanStartToEnd(assistancePlanIds, periodEnd)
+        val minutesByAssistancePlanId = serviceService
+            .getMinutesInPlanPeriodByAssistancePlanIdsUntil(assistancePlanIds, periodEnd)
             .groupBy { it.assistancePlanId }
             .mapValues { (_, minutes) -> minutes.sumOf { it.minutes.toLong() } }
         return assistancePlanIds.associateWith { minutesByAssistancePlanId[it] ?: 0L }

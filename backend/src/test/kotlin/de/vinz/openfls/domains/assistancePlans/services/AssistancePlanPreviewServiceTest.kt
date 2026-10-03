@@ -5,8 +5,8 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanPreview
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanExistingProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanWeeklyMinutesProjection
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.services.ServiceRepository
-import de.vinz.openfls.domains.services.projections.AssistancePlanServiceMinutesProjection
+import de.vinz.openfls.domains.services.service.ServiceService
+import de.vinz.openfls.domains.services.dto.AssistancePlanServiceMinutesDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,14 +35,14 @@ class AssistancePlanPreviewServiceTest {
     lateinit var assistancePlanRepository: AssistancePlanRepository
 
     @Mock
-    lateinit var serviceRepository: ServiceRepository
+    lateinit var serviceService: ServiceService
 
     private val clock = Clock.fixed(Instant.parse("2026-07-01T12:00:00Z"), ZoneOffset.UTC)
     private lateinit var previewService: AssistancePlanPreviewService
 
     @BeforeEach
     fun setUp() {
-        previewService = AssistancePlanPreviewService(assistancePlanRepository, serviceRepository, clock)
+        previewService = AssistancePlanPreviewService(assistancePlanRepository, serviceService, clock)
     }
 
     @Test
@@ -61,14 +61,14 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(5L, 120)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(5L)))
             .thenReturn(listOf(weeklyMinutesProjection(5L, 300)))
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(5L), periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(5L), periodEnd))
             .thenReturn(
                 listOf(
                     serviceMinutesProjection(5L, 120),
                     serviceMinutesProjection(5L, 60)
                 )
             )
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(5L), yearStart, periodEnd))
             .thenReturn(listOf(serviceMinutesProjection(5L, 120), serviceMinutesProjection(5L, 60)))
 
         val result = previewService.getPreviewDtosByClientId(10L, 20L)
@@ -101,7 +101,7 @@ class AssistancePlanPreviewServiceTest {
             .isEqualTo(result.first().executedHoursThisYear)
         assertThat(result.first().approvedHoursLeftThisAssistancePlan)
             .isEqualTo(result.first().approvedHoursLeftThisYear)
-        verify(serviceRepository).findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(5L), now)
+        verify(serviceService).getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(5L), now)
     }
 
     @Test
@@ -115,7 +115,7 @@ class AssistancePlanPreviewServiceTest {
         verify(assistancePlanRepository, never()).findFavoriteAssistancePlanIdsByEmployeeId(any())
         verify(assistancePlanRepository, never()).findWeeklyMinutesFromAssistancePlanHoursByAssistancePlanIds(any())
         verify(assistancePlanRepository, never()).findWeeklyMinutesFromGoalHoursByAssistancePlanIds(any())
-        verify(serviceRepository, never()).findMinutesByAssistancePlanIdsFromPlanStartToEnd(any(), any())
+        verify(serviceService, never()).getMinutesInPlanPeriodByAssistancePlanIdsUntil(any(), any())
     }
 
     @Test
@@ -133,9 +133,9 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(6L, 180)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(6L)))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(6L), periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(6L), periodEnd))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(6L), yearStart, periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(6L), yearStart, periodEnd))
             .thenReturn(emptyList())
 
         val hiddenResult = previewService.getPreviewDtosByClientId(10L, 20L)
@@ -160,9 +160,9 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(7L, 210)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(7L)))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(7L), periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(7L), periodEnd))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(7L), yearStart, periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(7L), yearStart, periodEnd))
             .thenReturn(emptyList())
 
         val result = previewService.getFavoritePreviewDtosByEmployeeId(33L)
@@ -188,9 +188,9 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(8L, 180)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(8L)))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(8L), periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(8L), periodEnd))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(8L), yearStart, periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(8L), yearStart, periodEnd))
             .thenReturn(emptyList())
 
         val hiddenResult = previewService.getFavoritePreviewDtosByEmployeeId(44L)
@@ -220,9 +220,9 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(listOf(weeklyMinutesProjection(9L, 240)))
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(9L)))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(9L), periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(9L), periodEnd))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(9L), yearStart, periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(9L), yearStart, periodEnd))
             .thenReturn(emptyList())
 
         val hiddenResult = previewService.getPreviewDtosBySponsorId(77L, 55L)
@@ -287,14 +287,14 @@ class AssistancePlanPreviewServiceTest {
                 if (weeklyGoalMinutes == 0) emptyList()
                 else listOf(weeklyMinutesProjection(55L, weeklyGoalMinutes))
             )
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(55L), periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(55L), periodEnd))
             .thenReturn(
                 listOf(
                     serviceMinutesProjection(55L, executedMinutesA),
                     serviceMinutesProjection(55L, executedMinutesB)
                 )
             )
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(55L), yearStart, periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(55L), yearStart, periodEnd))
             .thenReturn(
                 listOf(
                     serviceMinutesProjection(55L, executedMinutesA),
@@ -347,9 +347,9 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(emptyList())
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(77L)))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(77L), periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(77L), periodEnd))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(77L), yearStart, periodEnd))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(77L), yearStart, periodEnd))
             .thenReturn(emptyList())
 
         val result = previewService.getPreviewDtosByClientId(10L, 20L)
@@ -390,9 +390,9 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(emptyList())
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(78L)))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(78L), now))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(78L), now))
             .thenReturn(listOf(serviceMinutesProjection(78L, 2_400)))
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(78L), yearStart, now))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(78L), yearStart, now))
             .thenReturn(listOf(serviceMinutesProjection(78L, 2_400)))
 
         val result = previewService.getPreviewDtosByClientId(10L, 20L).first()
@@ -424,9 +424,9 @@ class AssistancePlanPreviewServiceTest {
             .thenReturn(emptyList())
         whenever(assistancePlanRepository.findWeeklyMinutesFromGoalHoursByAssistancePlanIds(listOf(79L)))
             .thenReturn(emptyList())
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(listOf(79L), now))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsUntil(listOf(79L), now))
             .thenReturn(listOf(serviceMinutesProjection(79L, 4_000)))
-        whenever(serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(listOf(79L), yearStart, now))
+        whenever(serviceService.getMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(listOf(79L), yearStart, now))
             .thenReturn(listOf(serviceMinutesProjection(79L, 4_000)))
 
         val result = previewService.getPreviewDtosByClientId(10L, 20L).first()
@@ -489,11 +489,8 @@ class AssistancePlanPreviewServiceTest {
         }
     }
 
-    private fun serviceMinutesProjection(assistancePlanId: Long, minutes: Int): AssistancePlanServiceMinutesProjection {
-        return object : AssistancePlanServiceMinutesProjection {
-            override val assistancePlanId: Long = assistancePlanId
-            override val minutes: Int = minutes
-        }
+    private fun serviceMinutesProjection(assistancePlanId: Long, minutes: Int): AssistancePlanServiceMinutesDto {
+        return AssistancePlanServiceMinutesDto(assistancePlanId, minutes)
     }
 
     private fun existingProjection(

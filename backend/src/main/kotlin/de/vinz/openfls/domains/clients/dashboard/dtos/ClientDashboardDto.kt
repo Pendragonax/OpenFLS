@@ -2,7 +2,7 @@ package de.vinz.openfls.domains.clients.dashboard.dtos
 
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanPreviewDto
 import de.vinz.openfls.domains.clientTasks.dto.ClientTaskResponse
-import de.vinz.openfls.domains.services.dtos.ClientLatestServiceDto
+import de.vinz.openfls.domains.services.dto.ClientLatestServiceResponse
 
 /**
  * Everything the client dashboard shows on one page. Each section carries its own
@@ -25,7 +25,7 @@ data class ClientDashboardDto(
     val assistancePlanCount: Int,
 
     val servicesAccess: ClientDashboardAccess,
-    val latestServices: List<ClientLatestServiceDto>,
+    val latestServices: List<ClientLatestServiceResponse>,
 
     val tasks: List<ClientTaskResponse>,
     val openTaskCount: Int

@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlanHour
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.clients.Client
 import de.vinz.openfls.domains.hourTypes.entity.HourType
-import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.services.entity.Service
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -19,7 +19,7 @@ import java.time.temporal.ChronoUnit
 class AssistancePlanEvaluationServiceTest {
 
     private val assistancePlanService: AssistancePlanService = mock()
-    private val serviceService: de.vinz.openfls.domains.services.services.ServiceService = mock()
+    private val serviceService: de.vinz.openfls.domains.services.service.ServiceService = mock()
     private val evaluationService = AssistancePlanEvaluationService(
         assistancePlanService,
         serviceService
@@ -45,7 +45,7 @@ class AssistancePlanEvaluationServiceTest {
             )
         )
         whenever(assistancePlanService.getEntityById(plan.id)).thenReturn(plan)
-        whenever(serviceService.getByAssistancePlan(plan.id)).thenReturn(
+        whenever(serviceService.getAllEntitiesByAssistancePlanId(plan.id)).thenReturn(
             listOf(
                 Service(
                     id = 21,

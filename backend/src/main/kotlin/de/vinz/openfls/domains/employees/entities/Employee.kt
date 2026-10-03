@@ -8,7 +8,7 @@ import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.evaluations.entity.Evaluation
 import de.vinz.openfls.domains.employees.archive.EmployeeArchiveHistoryEntry
 import de.vinz.openfls.domains.permissions.entity.Permission
-import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.services.entity.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 

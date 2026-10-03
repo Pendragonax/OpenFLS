@@ -14,7 +14,7 @@ import de.vinz.openfls.domains.goals.entity.GoalHour
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.permissions.entity.Permission
-import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.services.entity.Service
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import java.time.LocalDate
 import kotlin.random.Random

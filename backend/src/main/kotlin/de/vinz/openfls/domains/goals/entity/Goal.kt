@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.categories.entity.Category
 import de.vinz.openfls.domains.evaluations.entity.Evaluation
 import de.vinz.openfls.domains.institutions.entity.Institution
-import de.vinz.openfls.domains.services.Service
+import de.vinz.openfls.domains.services.entity.Service
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotEmpty
 

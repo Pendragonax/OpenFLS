@@ -30,8 +30,8 @@ import de.vinz.openfls.domains.permissions.service.PermissionService
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
-import de.vinz.openfls.domains.services.Service
-import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.services.entity.Service
+import de.vinz.openfls.domains.services.repository.ServiceRepository
 import de.vinz.openfls.testsupport.TestBeans
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -61,6 +61,7 @@ import java.time.LocalDateTime
     InstitutionService::class,
     CategoryTemplateService::class,
     PermissionService::class,
+    de.vinz.openfls.domains.services.service.ServiceService::class,
     TestBeans::class
 )
 class ClientArchiveExportServiceDataJpaTest {
@@ -106,6 +107,15 @@ class ClientArchiveExportServiceDataJpaTest {
 
     @MockitoBean
     lateinit var accessService: AccessService
+
+    @MockitoBean
+    lateinit var assistancePlanService: de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
+
+    @MockitoBean
+    lateinit var hourTypeService: de.vinz.openfls.domains.hourTypes.service.HourTypeService
+
+    @MockitoBean
+    lateinit var goalService: de.vinz.openfls.domains.goals.service.GoalService
 
     @Test
     fun requestExport_withNestedReferences_writesJsonAndAuditHistory() {

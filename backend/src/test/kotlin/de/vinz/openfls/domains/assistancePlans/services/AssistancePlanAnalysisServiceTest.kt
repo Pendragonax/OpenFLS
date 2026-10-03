@@ -10,8 +10,8 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourCor
 import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourTypeProjection
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanInstitutionProjection
-import de.vinz.openfls.domains.services.projections.ServiceSoloProjection
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.dto.ServiceDto
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanSponsorProjection
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
@@ -50,7 +50,7 @@ class AssistancePlanAnalysisServiceTest {
         val executedMinutes = 3000
 
         whenever(
-            serviceService.getAllByAssistancePlanIdAndYearAndMonth(
+            serviceService.getServicesByAssistancePlanIdAndYearAndMonth(
                 assistancePlanId = projection.id,
                 year = today.year,
                 month = today.monthValue
@@ -86,7 +86,7 @@ class AssistancePlanAnalysisServiceTest {
         val executedMinutes = 3000
 
         whenever(
-            serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
+            serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
                 assistancePlanId = projection.id,
                 hourTypeId = hourType.id,
                 year = today.year,
@@ -175,16 +175,17 @@ class AssistancePlanAnalysisServiceTest {
         }
     }
 
-    private fun serviceProjection(assistancePlanId: Long, minutes: Int): ServiceSoloProjection {
-        return object : ServiceSoloProjection {
-            override val id: Long = 1
-            override val start: LocalDateTime = LocalDate.now().atStartOfDay()
-            override val end: LocalDateTime = start.plusMinutes(minutes.toLong())
-            override val minutes: Int = minutes
-            override val title: String = ""
-            override val content: String = ""
-            override val unfinished: Boolean = false
-            override val groupService: Boolean = false
-        }
+    private fun serviceProjection(assistancePlanId: Long, minutes: Int): ServiceDto {
+        val start = LocalDate.now().atStartOfDay()
+        return ServiceDto(
+            id = 1,
+            start = start,
+            end = start.plusMinutes(minutes.toLong()),
+            minutes = minutes,
+            title = "",
+            content = "",
+            unfinished = false,
+            groupService = false
+        )
     }
 }

@@ -110,7 +110,7 @@ export class MyServicesComponent implements OnInit {
     this.userId$
       .pipe(
         take(1),
-        switchMap((employeeId: number) => this.serviceService.getIllegalByEmployeeId(employeeId)),
+        switchMap((employeeId: number) => this.serviceService.getOutsideAssistancePlanPeriodByEmployeeId(employeeId)),
         finalize(() => {
           this.isBusy = false;
         }),

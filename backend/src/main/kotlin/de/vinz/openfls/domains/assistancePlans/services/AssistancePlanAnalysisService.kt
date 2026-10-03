@@ -11,7 +11,7 @@ import de.vinz.openfls.domains.assistancePlans.projections.AssistancePlanHourCor
 import de.vinz.openfls.domains.permissions.service.AccessService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -342,7 +342,7 @@ class AssistancePlanAnalysisService(
     private fun getExecutedHoursInMonth(year: Int,
                                 month: Int,
                                 assistancePlan: AssistancePlanProjection): Double {
-        val services = serviceService.getAllByAssistancePlanIdAndYearAndMonth(
+        val services = serviceService.getServicesByAssistancePlanIdAndYearAndMonth(
                 assistancePlanId = assistancePlan.id,
                 year = year,
                 month = month)
@@ -355,7 +355,7 @@ class AssistancePlanAnalysisService(
                                             month: Int,
                                             assistancePlan: AssistancePlanProjection,
                                             hourTypeId: Long): Double {
-        val services = serviceService.getAllByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
+        val services = serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(
                 assistancePlanId = assistancePlan.id,
                 hourTypeId = hourTypeId,
                 year = year,

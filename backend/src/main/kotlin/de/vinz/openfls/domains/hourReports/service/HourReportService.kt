@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.hourCorridors.service.HourCorridorService
 import de.vinz.openfls.domains.hourReports.dto.HourReportRowResponse
 import de.vinz.openfls.domains.hourReports.dto.HourReportResult
 import de.vinz.openfls.domains.permissions.service.AccessService
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.services.DateService
 import de.vinz.openfls.services.TimeDoubleService
 import org.springframework.transaction.annotation.Transactional
@@ -39,7 +39,7 @@ class HourReportService(
         validateAccess(areaId)?.let { return it }
         validateYearMonth(year, month)?.let { return it }
 
-        val services = serviceService.getAllEntitiesByYearAndHourTypeIdAndAreaIdAndSponsorId(
+        val services = serviceService.getAllEntitiesByYearAndMonthAndHourTypeIdAndInstitutionIdAndSponsorId(
             year, month, hourTypeId, areaId, sponsorId
         )
         val context = loadReportContext(year, month, areaId, sponsorId)
@@ -57,7 +57,7 @@ class HourReportService(
         validateYearMonth(year, null)?.let { return it }
 
         val services = serviceService
-            .getAllEntitiesByYearAndHourTypeIdAndAreaIdAndSponsorId(year, null, hourTypeId, areaId, sponsorId)
+            .getAllEntitiesByYearAndMonthAndHourTypeIdAndInstitutionIdAndSponsorId(year, null, hourTypeId, areaId, sponsorId)
             .filter { it.groupService }
         val context = loadReportContext(year, null, areaId, sponsorId)
 
@@ -94,7 +94,7 @@ class HourReportService(
         validateAccess(areaId)?.let { return it }
         validateYearMonth(year, month)?.let { return it }
 
-        val services = serviceService.getAllEntitiesByYearAndHourTypeIdAndAreaIdAndSponsorId(
+        val services = serviceService.getAllEntitiesByYearAndMonthAndHourTypeIdAndInstitutionIdAndSponsorId(
             year, month, hourTypeId, areaId, sponsorId
         )
         val context = loadReportContext(year, month, areaId, sponsorId)
@@ -108,7 +108,7 @@ class HourReportService(
     }
 
     private fun buildExecutedHoursReport(
-        services: List<de.vinz.openfls.domains.services.Service>,
+        services: List<de.vinz.openfls.domains.services.entity.Service>,
         context: HourReportContext,
         year: Int,
         month: Int?
@@ -202,7 +202,7 @@ class HourReportService(
     }
 
     private fun buildExecutedHoursYearly(
-        services: List<de.vinz.openfls.domains.services.Service>,
+        services: List<de.vinz.openfls.domains.services.entity.Service>,
         assistancePlanDtos: List<AssistancePlanEditDto>,
         clientDtos: List<ClientSimpleDto>,
         year: Int,
@@ -234,7 +234,7 @@ class HourReportService(
     }
 
     private fun buildExecutedHoursMonthly(
-        services: List<de.vinz.openfls.domains.services.Service>,
+        services: List<de.vinz.openfls.domains.services.entity.Service>,
         assistancePlanDtos: List<AssistancePlanEditDto>,
         clientDtos: List<ClientSimpleDto>,
         year: Int,
@@ -266,7 +266,7 @@ class HourReportService(
     }
 
     private fun buildDifferenceHoursYearly(
-        services: List<de.vinz.openfls.domains.services.Service>,
+        services: List<de.vinz.openfls.domains.services.entity.Service>,
         assistancePlanDtos: List<AssistancePlanEditDto>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,
@@ -291,7 +291,7 @@ class HourReportService(
     }
 
     private fun buildDifferenceHoursMonthly(
-        services: List<de.vinz.openfls.domains.services.Service>,
+        services: List<de.vinz.openfls.domains.services.entity.Service>,
         assistancePlanDtos: List<AssistancePlanEditDto>,
         clientSimpleDtos: List<ClientSimpleDto>,
         hourTypeId: Long?,

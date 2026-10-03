@@ -4,7 +4,7 @@ import de.vinz.openfls.domains.assistancePlans.AssistancePlan
 import de.vinz.openfls.domains.assistancePlans.dtos.ActualTargetValueDto
 import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanEvalDto
 import de.vinz.openfls.domains.hourTypes.dto.HourTypeResponse
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -19,7 +19,7 @@ class AssistancePlanEvaluationService(
     @Transactional(readOnly = true)
     fun getEvaluationById(id: Long): AssistancePlanEvalDto {
         val assistancePlan = assistancePlanService.getEntityById(id) ?: throw IllegalArgumentException("id not found ")
-        val services = serviceService.getByAssistancePlan(id)
+        val services = serviceService.getAllEntitiesByAssistancePlanId(id)
         val eval = AssistancePlanEvalDto()
 
         val days = ChronoUnit.DAYS.between(assistancePlan.start, assistancePlan.end) + 1

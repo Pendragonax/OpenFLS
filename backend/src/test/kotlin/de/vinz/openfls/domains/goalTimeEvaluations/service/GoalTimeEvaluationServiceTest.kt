@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.goalTimeEvaluations.dto.GoalTimeEvaluationResult
 import de.vinz.openfls.domains.goals.entity.Goal
 import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
 import de.vinz.openfls.domains.hourTypes.entity.HourType
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeEach

@@ -14,8 +14,8 @@ import de.vinz.openfls.domains.hourTypes.entity.HourType
 import de.vinz.openfls.domains.hourTypes.repository.HourTypeRepository
 import de.vinz.openfls.domains.institutions.entity.Institution
 import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
-import de.vinz.openfls.domains.services.Service
-import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.services.entity.Service
+import de.vinz.openfls.domains.services.repository.ServiceRepository
 import de.vinz.openfls.domains.sponsors.entity.Sponsor
 import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -114,7 +114,7 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
     }
 
     @Test
-    fun findMinutesByAssistancePlanIdsAndStartAndEnd_returnsOnlyMatchingYearWindowRows() {
+    fun findMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd_returnsOnlyMatchingYearWindowRows() {
         val base = createBaseData()
         val now = LocalDate.now()
         val yearStart = LocalDate.of(now.year, 1, 1)
@@ -167,7 +167,7 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
             )
         )
 
-        val result = serviceRepository.findMinutesByAssistancePlanIdsAndStartAndEnd(
+        val result = serviceRepository.findMinutesInPlanPeriodByAssistancePlanIdsAndStartAndEnd(
             listOf(assistancePlan.id),
             yearStart,
             yearEnd
@@ -179,7 +179,7 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
     }
 
     @Test
-    fun findMinutesByAssistancePlanIdsFromPlanStartToEnd_returnsRowsFromEachPlanStart() {
+    fun findMinutesInPlanPeriodByAssistancePlanIdsUntil_returnsRowsFromEachPlanStart() {
         val base = createBaseData()
         val now = LocalDate.now()
         val assistancePlan = assistancePlanRepository.save(
@@ -217,7 +217,7 @@ class AssistancePlanPreviewRepositoryDataJpaTest {
             )
         )
 
-        val result = serviceRepository.findMinutesByAssistancePlanIdsFromPlanStartToEnd(
+        val result = serviceRepository.findMinutesInPlanPeriodByAssistancePlanIdsUntil(
             listOf(assistancePlan.id),
             now
         )

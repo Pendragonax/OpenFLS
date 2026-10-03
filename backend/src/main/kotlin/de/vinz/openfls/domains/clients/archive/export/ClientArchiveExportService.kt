@@ -9,7 +9,7 @@ import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportDo
 import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportDownloadLinkDto
 import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportStatusDto
 import de.vinz.openfls.domains.assistancePlans.repositories.AssistancePlanRepository
-import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.services.service.ServiceService
 import de.vinz.openfls.exceptions.UserNotAllowedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,7 +23,7 @@ import java.util.UUID
 class ClientArchiveExportService(
     private val clientService: ClientService,
     private val clientArchiveService: ClientArchiveService,
-    private val serviceRepository: ServiceRepository,
+    private val serviceService: ServiceService,
     private val assistancePlanRepository: AssistancePlanRepository,
     private val clientArchiveExportRequestRepository: ClientArchiveExportRequestRepository,
     private val objectMapper: ObjectMapper,
@@ -50,7 +50,7 @@ class ClientArchiveExportService(
 
         val exportData = ClientArchiveExportDto.from(
             client = client,
-            services = serviceRepository.findByClientIdOrderByStartAsc(clientId),
+            services = serviceService.getAllEntitiesByClientId(clientId),
             assistancePlans = assistancePlanRepository.findByClientId(clientId),
             anonymize = anonymize
         )

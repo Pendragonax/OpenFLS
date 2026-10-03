@@ -7,7 +7,7 @@ import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardAccess
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardDto
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientFavoriteDto
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.service.ServiceService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Clock
@@ -67,7 +67,7 @@ class ClientDashboardService(
         }
 
         val latestServices = if (canReadDocumentation) {
-            serviceService.getLatestDtosByClientId(
+            serviceService.getLatestServicesByClientId(
                 clientId = clientId,
                 employeeId = employeeId,
                 readableInstitutionIds = readableInstitutionIds,

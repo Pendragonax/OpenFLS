@@ -5,7 +5,7 @@ import de.vinz.openfls.domains.contingents.dto.ContingentCalendarPeriodResponse
 import de.vinz.openfls.domains.contingents.entity.Contingent
 import de.vinz.openfls.domains.contingents.dto.ContingentCalendarDayResponse
 import de.vinz.openfls.domains.contingents.dto.ContingentCalendarResponse
-import de.vinz.openfls.domains.services.ServiceRepository
+import de.vinz.openfls.domains.services.service.ServiceService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.DayOfWeek
@@ -17,7 +17,7 @@ import kotlin.math.round
 @Service
 @Transactional(readOnly = true)
 class ContingentCalendarService(
-    private val serviceRepository: ServiceRepository,
+    private val serviceService: ServiceService,
     private val contingentService: ContingentService,
     private val contingentCalculationService: ContingentCalculationService,
     private val absenceService: AbsenceService
@@ -114,7 +114,7 @@ class ContingentCalendarService(
         contingents: List<Contingent>,
         absenceDates: MutableList<LocalDate>
     ): List<ContingentCalendarDayResponse> {
-        return serviceRepository.findServiceCalendarProjection(employeeId, start, end)
+        return serviceService.getCalendarServicesByEmployeeIdAndStartAndEnd(employeeId, start, end)
             .groupBy { it.start.toLocalDate() }
             .map {
                 val minutes = it.value.sumOf { service -> service.minutes }

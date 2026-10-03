@@ -11,8 +11,8 @@ import de.vinz.openfls.domains.clients.ClientService
 import de.vinz.openfls.domains.clients.dashboard.dtos.ClientDashboardAccess
 import de.vinz.openfls.domains.clients.dtos.ClientDto
 import de.vinz.openfls.domains.clients.dtos.ClientFavoriteRowDto
-import de.vinz.openfls.domains.services.dtos.ClientLatestServiceDto
-import de.vinz.openfls.domains.services.services.ServiceService
+import de.vinz.openfls.domains.services.dto.ClientLatestServiceResponse
+import de.vinz.openfls.domains.services.service.ServiceService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -51,7 +51,7 @@ class ClientDashboardServiceTest {
         whenever(clientService.isFavoriteOfEmployee(any(), any())).thenReturn(true)
         whenever(assistancePlanPreviewService.getPreviewDtosByClientId(any(), any(), any()))
             .thenReturn(listOf(endedPlan(), runningPlan(), futurePlan()))
-        whenever(serviceService.getLatestDtosByClientId(any(), any(), any(), any(), any()))
+        whenever(serviceService.getLatestServicesByClientId(any(), any(), any(), any(), any()))
             .thenReturn(listOf(latestService()))
         whenever(clientTaskService.getOpenTasksByClientId(any())).thenReturn(listOf(openTask(), doneTask()))
 
@@ -102,7 +102,7 @@ class ClientDashboardServiceTest {
         assertThat(dashboard.tasks).hasSize(1)
 
         verify(assistancePlanPreviewService, never()).getPreviewDtosByClientId(any(), any(), any())
-        verify(serviceService, never()).getLatestDtosByClientId(any(), any(), any(), any(), any())
+        verify(serviceService, never()).getLatestServicesByClientId(any(), any(), any(), any(), any())
     }
 
     @Test
@@ -111,7 +111,7 @@ class ClientDashboardServiceTest {
         whenever(clientService.isFavoriteOfEmployee(any(), any())).thenReturn(false)
         whenever(assistancePlanPreviewService.getPreviewDtosByClientId(any(), any(), any()))
             .thenReturn(listOf(endedPlan(), endedPlan().copy(id = 42, end = today.minusDays(1))))
-        whenever(serviceService.getLatestDtosByClientId(any(), any(), any(), any(), any())).thenReturn(emptyList())
+        whenever(serviceService.getLatestServicesByClientId(any(), any(), any(), any(), any())).thenReturn(emptyList())
         whenever(clientTaskService.getOpenTasksByClientId(any())).thenReturn(emptyList())
 
         val dashboard = clientDashboardService.getDashboard(
@@ -258,7 +258,7 @@ class ClientDashboardServiceTest {
         approvedHoursLeftThisAssistancePlan = 5.0
     )
 
-    private fun latestService() = ClientLatestServiceDto(
+    private fun latestService() = ClientLatestServiceResponse(
         id = 1,
         start = LocalDateTime.of(2026, 3, 9, 9, 0),
         end = LocalDateTime.of(2026, 3, 9, 10, 0),
