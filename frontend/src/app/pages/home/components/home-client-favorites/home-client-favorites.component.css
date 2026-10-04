@@ -1,0 +1,198 @@
+/* min-height (a floor, not a fixed height) gives .favorites-body room to centre
+   its content in. The 130px estimate covers the fixed navbar (~64px) and the
+   mat-tab-group's own tab header (~49px) above this component, plus this
+   wrapper's padding - it doesn't have to be exact, it only sets how much spare
+   height is available to center within before this component's own content
+   naturally takes over and starts growing downward past the viewport. */
+.favorites-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px;
+  min-height: calc(100dvh - 130px);
+  box-sizing: border-box;
+}
+
+/* Centered while short (few favourites leave spare height in the wrapper);
+   once the grid's own content reaches or exceeds that height, min-height on
+   the wrapper no longer leaves any space to distribute and this behaves like
+   an ordinary top-down block that scrolls with the page. */
+.favorites-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.favorites-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.favorites-search {
+  flex: 0 1 360px;
+  width: 100%;
+  max-width: 360px;
+}
+
+/* The default mat-form-field reserves a hint/error line below the input; that
+   extra height is what pushed the refresh button visually below the search
+   text's own centre. Collapsing it makes align-items: center on the toolbar
+   line the button up with the text itself instead of the whole field box. */
+.favorites-search ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.favorites-search ::ng-deep input {
+  text-align: center;
+}
+
+/* Flexbox instead of a stretching grid: with only a couple of favourites the
+   row doesn't stretch to the full container width, it starts as a short,
+   horizontally centered row and only grows wider as more cards wrap in below
+   it - the same "centered until it fills up" idea as .favorites-body, just on
+   the horizontal axis. */
+.favorites-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  gap: 10px;
+}
+
+.favorite-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(47, 58, 75, 0.12);
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.15s ease-in-out;
+  /* Fixed-ish width instead of stretching to fill the row - see .favorites-grid. */
+  flex: 0 1 240px;
+  box-sizing: border-box;
+}
+
+.favorite-card:hover {
+  box-shadow: 0 2px 10px rgba(47, 58, 75, 0.14);
+}
+
+.favorite-card--archived {
+  background: rgba(47, 58, 75, 0.04);
+}
+
+.favorite-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.favorite-card-head .mat-mdc-icon-button {
+  --mdc-icon-button-state-layer-size: 32px;
+  --mdc-icon-button-icon-size: 20px;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+}
+
+.favorite-name {
+  font-weight: 600;
+  color: #2f3a4b;
+}
+
+.favorite-institution {
+  font-size: 0.85rem;
+  color: rgba(47, 58, 75, 0.7);
+}
+
+/* Messenger-style status row: an icon per state instead of text pills, so a whole
+   row of favourites reads at a glance. */
+.favorite-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 1px 2px;
+}
+
+.status-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* A different glyph on top of the color (not color alone) keeps the two states
+   apart even at 20px and for colour-weak vision. */
+.status-icon--plan-active {
+  color: #1e7e46;
+}
+
+.status-icon--plan-inactive {
+  color: rgba(47, 58, 75, 0.45);
+}
+
+.status-icon--tasks {
+  color: var(--bs-primary, #0d6efd);
+}
+
+.status-icon--archived {
+  color: #b23a33;
+}
+
+.status-icon--tasks ::ng-deep .mat-badge-content {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.favorite-footer {
+  font-size: 0.78rem;
+  color: rgba(47, 58, 75, 0.6);
+}
+
+.favorites-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 8px;
+  background: rgba(47, 58, 75, 0.04);
+  color: rgba(47, 58, 75, 0.72);
+}
+
+.favorites-error {
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(233, 92, 84, 0.08);
+  color: #b23a33;
+}
+
+/* Mobile keeps the original, simple structure: a plain top-to-bottom list of
+   full-width cards, no vertical or horizontal centering trick. */
+@media (max-width: 700px) {
+  .favorites-wrapper {
+    min-height: 0;
+  }
+
+  .favorites-body {
+    flex: none;
+    justify-content: flex-start;
+  }
+
+  .favorites-grid {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+  }
+
+  .favorite-card {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}

@@ -1,14 +1,17 @@
 package de.vinz.openfls.domains.institutions
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.institutions.dtos.CreateInstitutionDTO
-import de.vinz.openfls.domains.institutions.dtos.UpdateInstitutionDTO
-import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.domains.institutions.dto.InstitutionCreateRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionDeleteResult
+import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateRequest
+import de.vinz.openfls.domains.institutions.dto.InstitutionCreateResult
+import de.vinz.openfls.domains.institutions.dto.InstitutionUpdateResult
+import de.vinz.openfls.domains.institutions.service.InstitutionService
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,166 +20,114 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/institutions")
 class InstitutionController(
         private val institutionService: InstitutionService,
-        private val accessService: AccessService
+        private val accessService: AccessService,
+        private val performanceLoggingService: PerformanceLoggingService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(InstitutionController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping
-    fun create(@Valid @RequestBody valueDto: CreateInstitutionDTO): Any {
+    fun create(@Valid @RequestBody request: InstitutionCreateRequest): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = institutionService.create(valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (val result = institutionService.create(request)) {
+                is InstitutionCreateResult.Success -> ResponseEntity.ok(result.response)
+                InstitutionCreateResult.EmployeeNotFound -> employeeNotFound()
             }
-
-            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.localizedMessage,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
     @PutMapping("{id}")
     fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: UpdateInstitutionDTO): Any {
+               @Valid @RequestBody request: InstitutionUpdateRequest): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        if (id != request.id)
+            return ResponseEntity.badRequest().body("path id and request id are not the same")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (id != valueDto.id)
-                throw IllegalArgumentException("path id and dto id are not the same")
-            if (!institutionService.existsById(id))
-                throw IllegalArgumentException("institution not found")
-
-            val dto = institutionService.update(valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (val result = institutionService.update(request)) {
+                is InstitutionUpdateResult.Success -> ResponseEntity.ok(result.response)
+                InstitutionUpdateResult.NotFound -> institutionNotFound()
+                InstitutionUpdateResult.EmployeeNotFound -> employeeNotFound()
             }
-
-            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("update", startMs, logger)
         }
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!institutionService.existsById(id))
-                throw IllegalArgumentException("institution not found")
-
-            val dto = institutionService.getDTOById(id)
-            institutionService.delete(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (val result = institutionService.delete(id)) {
+                is InstitutionDeleteResult.Success -> ResponseEntity.ok(result.response)
+                InstitutionDeleteResult.NotFound -> institutionNotFound()
             }
-
-            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("delete", startMs, logger)
         }
     }
 
     @GetMapping("")
     fun getAll(): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = institutionService.getAllDTOs()
-
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
+            ResponseEntity.ok(institutionService.getAllWithPermissions())
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                emptyList(),
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getAll", startMs, logger)
         }
     }
 
     @GetMapping("/readable")
     fun getAllReadable(): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val allDTOs = institutionService.getAllSoloDTOs()
-            val dtos = allDTOs.filter { accessService.canReadEntries(it.id) }
-
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
+            ResponseEntity.ok(institutionService.getAll().filter { accessService.canReadEntries(it.id) })
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    emptyList(),
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getAllReadable", startMs, logger)
         }
     }
 
     @GetMapping("{id}")
     fun getById(@PathVariable id: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = institutionService.getDTOById(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            val response = institutionService.getWithPermissionsById(id) ?: return institutionNotFound()
+            ResponseEntity.ok(response)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getById", startMs, logger)
         }
     }
+
+    private fun employeeNotFound(): ResponseEntity<String> =
+        ResponseEntity.badRequest().body("employee not found")
+
+    private fun institutionNotFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("institution not found")
 }

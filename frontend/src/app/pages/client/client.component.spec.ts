@@ -1,5 +1,6 @@
 import '@testbed';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatDialog} from '@angular/material/dialog';
 import {of} from 'rxjs';
 import {vi} from 'vitest';
 import {ClientComponent} from './client.component';
@@ -8,6 +9,7 @@ import {UserService} from '../../shared/services/user.service';
 import {InstitutionService} from '../../shared/services/institution.service';
 import {ServiceService} from '../../shared/services/service.service';
 import {HelperService} from '../../shared/services/helper.service';
+import {ClientDashboardService} from '../../shared/services/client-dashboard.service';
 import {Comparer} from '../../shared/services/comparer.helper';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {EmployeeDto} from '../../shared/dtos/employee-dto.model';
@@ -34,6 +36,12 @@ class MockServiceService {
 
 class MockHelperService {
   openSnackBar = vi.fn();
+}
+
+class MockClientDashboardService {
+  getFavorites = vi.fn().mockReturnValue(of([]));
+  addFavorite = vi.fn().mockReturnValue(of(undefined));
+  deleteFavorite = vi.fn().mockReturnValue(of(undefined));
 }
 
 function createUser(isAdmin: boolean, canLead = false): EmployeeDto {
@@ -85,6 +93,8 @@ describe('ClientComponent', () => {
         {provide: InstitutionService, useClass: MockInstitutionService},
         {provide: ServiceService, useClass: MockServiceService},
         {provide: HelperService, useClass: MockHelperService},
+        {provide: ClientDashboardService, useClass: MockClientDashboardService},
+        {provide: MatDialog, useValue: {open: vi.fn()}},
         {provide: Comparer, useValue: {compare: (a: any, b: any, isAsc: boolean) => (a < b ? -1 : a > b ? 1 : 0) * (isAsc ? 1 : -1)}},
         {provide: NgbModal, useValue: {open: vi.fn()}}
       ]
@@ -111,5 +121,52 @@ describe('ClientComponent', () => {
 
     expect(component.values.map(value => value.dto.id)).toEqual([1, 2]);
     expect(component.tableSource.data.map(value => value.dto.id)).toEqual([1, 2]);
+  });
+
+  it('marks rows already favourited by the signed in employee', () => {
+    currentUser = createUser(false, false);
+    const clientDashboardService = TestBed.inject(ClientDashboardService) as unknown as MockClientDashboardService;
+    clientDashboardService.getFavorites.mockReturnValue(of([{clientId: 1}]));
+    fixture = TestBed.createComponent(ClientComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component.values.find(value => value.dto.id === 1)?.favorite).toBe(true);
+  });
+
+  it('adds a client to the favourites without asking for confirmation', () => {
+    currentUser = createUser(false, false);
+    const clientDashboardService = TestBed.inject(ClientDashboardService) as unknown as MockClientDashboardService;
+    const matDialog = TestBed.inject(MatDialog) as unknown as {open: ReturnType<typeof vi.fn>};
+    fixture = TestBed.createComponent(ClientComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    const client = component.values[0];
+    const event = {stopPropagation: vi.fn(), preventDefault: vi.fn()} as unknown as Event;
+
+    component.toggleFavorite(client, event);
+
+    expect(matDialog.open).not.toHaveBeenCalled();
+    expect(clientDashboardService.addFavorite).toHaveBeenCalledWith(client.dto.id);
+    expect(client.favorite).toBe(true);
+  });
+
+  it('asks for confirmation before removing a client from the favourites', () => {
+    currentUser = createUser(false, false);
+    const clientDashboardService = TestBed.inject(ClientDashboardService) as unknown as MockClientDashboardService;
+    clientDashboardService.getFavorites.mockReturnValue(of([{clientId: 1}]));
+    const matDialog = TestBed.inject(MatDialog) as unknown as {open: ReturnType<typeof vi.fn>};
+    matDialog.open.mockReturnValue({componentInstance: {}, afterClosed: () => of(true)});
+    fixture = TestBed.createComponent(ClientComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    const client = component.values.find(value => value.dto.id === 1)!;
+    const event = {stopPropagation: vi.fn(), preventDefault: vi.fn()} as unknown as Event;
+
+    component.toggleFavorite(client, event);
+
+    expect(matDialog.open).toHaveBeenCalled();
+    expect(clientDashboardService.deleteFavorite).toHaveBeenCalledWith(1);
+    expect(client.favorite).toBe(false);
   });
 });

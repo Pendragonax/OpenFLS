@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Clock
 import java.time.Instant
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 class BackupStatusServiceTest {
@@ -16,9 +18,10 @@ class BackupStatusServiceTest {
     lateinit var statusDir: Path
 
     private val objectMapper = ObjectMapper()
+    private val clock: Clock = Clock.fixed(Instant.parse("2026-03-10T10:00:00Z"), ZoneOffset.UTC)
 
     private fun service(maxAgeHours: Long = 7) =
-        BackupStatusService(objectMapper, statusDir.toString(), maxAgeHours)
+        BackupStatusService(objectMapper, clock, statusDir.toString(), maxAgeHours)
 
     private fun write(name: String, content: String) {
         Files.writeString(statusDir.resolve(name), content)
@@ -40,7 +43,7 @@ class BackupStatusServiceTest {
 
     @Test
     fun status_recentSuccess_isOkAndNotOverdue() {
-        val now = Instant.now().minus(30, ChronoUnit.MINUTES).toString()
+        val now = clock.instant().minus(30, ChronoUnit.MINUTES).toString()
         write("latest.json", backupLine(now))
 
         val status = service().status()
@@ -55,7 +58,7 @@ class BackupStatusServiceTest {
 
     @Test
     fun status_successButTooOld_isOverdue() {
-        val old = Instant.now().minus(9, ChronoUnit.HOURS).toString()
+        val old = clock.instant().minus(9, ChronoUnit.HOURS).toString()
         write("latest.json", backupLine(old))
 
         val status = service().status()
@@ -66,7 +69,7 @@ class BackupStatusServiceTest {
 
     @Test
     fun status_lastRunFailed_isFailedEvenWhenRecent() {
-        val now = Instant.now().toString()
+        val now = clock.instant().toString()
         write("latest.json", backupLine(now, outcome = "failure"))
 
         val status = service().status()
@@ -79,7 +82,7 @@ class BackupStatusServiceTest {
     fun status_failedRun_exposesReason() {
         write(
             "latest.json",
-            """{"timestamp":"${Instant.now()}","level":"ERROR","event_name":"backup.completed","outcome":"failure","service":"openfls-backup","message":"mysqldump denied: backup database user missing or password mismatch","run_id":"r","database":"openfls","backup_file":"r.sql.gz","size_bytes":0,"sha256":"","duration_seconds":0,"reason":"backup_user_missing"}"""
+            """{"timestamp":"${clock.instant()}","level":"ERROR","event_name":"backup.completed","outcome":"failure","service":"openfls-backup","message":"mysqldump denied: backup database user missing or password mismatch","run_id":"r","database":"openfls","backup_file":"r.sql.gz","size_bytes":0,"sha256":"","duration_seconds":0,"reason":"backup_user_missing"}"""
         )
 
         val status = service().status()
@@ -90,7 +93,7 @@ class BackupStatusServiceTest {
 
     @Test
     fun status_successRun_hasNullReason() {
-        write("latest.json", backupLine(Instant.now().toString()))
+        write("latest.json", backupLine(clock.instant().toString()))
 
         assertThat(service().status().lastBackup?.reason).isNull()
     }
@@ -99,7 +102,7 @@ class BackupStatusServiceTest {
     fun status_newerSchemaVersion_isStillParsedLeniently() {
         write(
             "latest.json",
-            """{"schema_version":99,"timestamp":"${Instant.now()}","outcome":"success","message":"ok","backup_file":"x.sql.gz","size_bytes":10,"sha256":"h","duration_seconds":1,"reason":"","some_future_field":true}"""
+            """{"schema_version":99,"timestamp":"${clock.instant()}","outcome":"success","message":"ok","backup_file":"x.sql.gz","size_bytes":10,"sha256":"h","duration_seconds":1,"reason":"","some_future_field":true}"""
         )
 
         val status = service().status()
@@ -120,7 +123,7 @@ class BackupStatusServiceTest {
 
     @Test
     fun status_readsRestoreTestLatest() {
-        val now = Instant.now().toString()
+        val now = clock.instant().toString()
         write("latest.json", backupLine(now))
         write(
             "restore-test-latest.json",
@@ -204,7 +207,7 @@ class BackupStatusServiceTest {
 
     @Test
     fun status_readsConfigJson() {
-        write("latest.json", backupLine(Instant.now().toString()))
+        write("latest.json", backupLine(clock.instant().toString()))
         write("config.json", configJson(intervalDays = 3))
 
         val config = service().status().config
@@ -220,7 +223,7 @@ class BackupStatusServiceTest {
 
     @Test
     fun status_withoutConfigJson_hasNullConfigAndNextExpectedBackup() {
-        write("latest.json", backupLine(Instant.now().toString()))
+        write("latest.json", backupLine(clock.instant().toString()))
 
         val status = service().status()
         assertThat(status.config).isNull()
@@ -229,7 +232,7 @@ class BackupStatusServiceTest {
 
     @Test
     fun status_nextExpectedBackup_isTheConfiguredTimeAndRespectsTheDayInterval() {
-        write("latest.json", backupLine(Instant.now().toString()))
+        write("latest.json", backupLine(clock.instant().toString()))
         write("config.json", configJson(intervalDays = 1))
         val daily = java.time.Instant.parse(service().status().nextExpectedBackup)
 
@@ -238,14 +241,14 @@ class BackupStatusServiceTest {
 
         // Both land on 02:30 Europe/Berlin (00:30 or 01:30 UTC depending on DST).
         for (instant in listOf(daily, everyThirdDay)) {
-            assertThat(instant).isAfter(java.time.Instant.now())
+            assertThat(instant).isAfter(clock.instant())
             assertThat(instant.atZone(java.time.ZoneOffset.UTC).hour).isIn(0, 1)
             assertThat(instant.atZone(java.time.ZoneOffset.UTC).minute).isEqualTo(30)
         }
         // interval 1 -> ~1 day out (last success was today); interval 3 -> ~3 days out.
-        assertThat(daily).isBefore(java.time.Instant.now().plus(java.time.Duration.ofHours(48)))
+        assertThat(daily).isBefore(clock.instant().plus(java.time.Duration.ofHours(48)))
         assertThat(everyThirdDay).isAfter(daily.plus(java.time.Duration.ofHours(24)))
-        assertThat(everyThirdDay).isBefore(java.time.Instant.now().plus(java.time.Duration.ofDays(5)))
+        assertThat(everyThirdDay).isBefore(clock.instant().plus(java.time.Duration.ofDays(5)))
     }
 
     @Test

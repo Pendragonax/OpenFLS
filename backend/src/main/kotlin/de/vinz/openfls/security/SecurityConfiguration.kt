@@ -7,7 +7,6 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
 import de.vinz.openfls.logging.StructuredLog
-import org.modelmapper.ModelMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -56,9 +55,6 @@ class SecurityConfiguration {
     private val corsEnabled: Boolean = true
 
     @Bean
-    fun modelMapper(): ModelMapper? = ModelMapper()
-
-    @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     /**
@@ -96,7 +92,6 @@ class SecurityConfiguration {
             run {
                 auth.requestMatchers(HttpMethod.POST, "/login/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/changelog/**").permitAll()
-                        .requestMatchers("/change_role/**").hasAuthority("ADMIN")
                         .requestMatchers("/admin/logs/**").hasAuthority("ADMIN")
                         .requestMatchers("/admin/backup/**").hasAuthority("ADMIN")
                         .requestMatchers("/ws", "/ws/**").permitAll()
@@ -124,6 +119,8 @@ class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
                         .requestMatchers(HttpMethod.PUT, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
                         .requestMatchers(HttpMethod.DELETE, "/sponsors/**").hasAnyAuthority("ADMIN", "LEAD")
+                        .requestMatchers("/client_dashboards/**").authenticated()
+                        .requestMatchers("/client_tasks/**").authenticated()
                         .anyRequest().authenticated()
             }
         }

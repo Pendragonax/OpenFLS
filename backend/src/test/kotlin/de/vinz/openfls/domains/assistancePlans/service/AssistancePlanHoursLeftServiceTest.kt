@@ -1,0 +1,359 @@
+package de.vinz.openfls.domains.assistancePlans.service
+
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHourMode
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.goals.entity.GoalHour
+import de.vinz.openfls.domains.hourCorridors.entity.HourCorridor
+import de.vinz.openfls.domains.hourTypes.entity.HourType
+import de.vinz.openfls.domains.services.dto.ServiceDto
+import de.vinz.openfls.domains.services.service.ServiceService
+import de.vinz.openfls.common.time.DateService
+import de.vinz.openfls.common.time.TimeDoubleService
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
+import java.time.LocalDate
+import java.time.LocalDateTime
+
+@ExtendWith(MockitoExtension::class)
+class AssistancePlanHoursLeftServiceTest {
+
+    @Mock
+    lateinit var assistancePlanService: AssistancePlanService
+
+    @Mock
+    lateinit var serviceService: ServiceService
+
+    private lateinit var evaluationService: AssistancePlanHoursLeftService
+
+    @BeforeEach
+    fun setUp() {
+        evaluationService = AssistancePlanHoursLeftService(assistancePlanService, serviceService)
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_unknownAssistancePlan_returnsNull() {
+        // Given
+        val date = LocalDate.of(2024, 2, 1)
+        whenever(assistancePlanService.getEntityById(999)).thenReturn(null)
+
+        // When / Then
+        assertThat(evaluationService.getHoursLeftByAssistancePlanId(date, 999)).isNull()
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_noHoursAndGoals_returnsEmptyEvaluation() {
+        // Given
+        val date = LocalDate.of(2024, 2, 1)
+        val plan = AssistancePlan(id = 1, start = LocalDate.of(2024, 1, 1), end = LocalDate.of(2024, 12, 31))
+        whenever(assistancePlanService.getEntityById(1)).thenReturn(plan)
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 1)!!
+
+        // Then
+        assertThat(result.hourTypeEvaluation).isEmpty()
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_corridorPlan_returnsCorridorRangeAndHourType() {
+        // Given
+        val date = LocalDate.of(2024, 2, 1)
+        val hourType = HourType(id = 20, title = "Korridor")
+        val corridor = HourCorridor(
+            id = 5,
+            title = "5 bis 10",
+            weeklyMinutesFrom = 300,
+            weeklyMinutesTill = 600,
+            hourType = hourType
+        )
+        val plan = AssistancePlan(
+            id = 5,
+            start = LocalDate.of(2024, 1, 1),
+            end = LocalDate.of(2024, 12, 31),
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        whenever(assistancePlanService.getEntityById(5)).thenReturn(plan)
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 5)!!
+
+        // Then
+        assertThat(result.hourMode).isEqualTo(AssistancePlanHourMode.CORRIDOR)
+        assertThat(result.approvedHoursFrom).isEqualTo(5.0)
+        assertThat(result.approvedHoursTo).isEqualTo(10.0)
+        assertThat(result.hourTypeEvaluation).hasSize(1)
+        assertThat(result.hourTypeEvaluation.first().hourTypeName).isEqualTo("Korridor")
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_corridorPlan_withExecutedWithinRange_returnsZeroLeft() {
+        // Given
+        val date = LocalDate.of(2024, 3, 13)
+        val hourType = HourType(id = 21, title = "Korridor")
+        val corridor = HourCorridor(
+            id = 6,
+            title = "5 bis 10",
+            weeklyMinutesFrom = 300,
+            weeklyMinutesTill = 600,
+            hourType = hourType
+        )
+        val plan = AssistancePlan(
+            id = 6,
+            start = LocalDate.of(2024, 3, 11),
+            end = LocalDate.of(2024, 3, 17),
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        whenever(assistancePlanService.getEntityById(6)).thenReturn(plan)
+        stubExecutedMinutes(420, date)
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 6)!!
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(0.0)
+        assertThat(evaluation.leftComplete).isEqualTo(0.0)
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_corridorPlan_withExecutedBelowRange_returnsPositiveDifference() {
+        // Given
+        val date = LocalDate.of(2024, 3, 13)
+        val hourType = HourType(id = 22, title = "Korridor")
+        val corridor = HourCorridor(
+            id = 7,
+            title = "5 bis 10",
+            weeklyMinutesFrom = 300,
+            weeklyMinutesTill = 600,
+            hourType = hourType
+        )
+        val plan = AssistancePlan(
+            id = 7,
+            start = LocalDate.of(2024, 3, 11),
+            end = LocalDate.of(2024, 3, 17),
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        whenever(assistancePlanService.getEntityById(7)).thenReturn(plan)
+        stubExecutedMinutes(240, date)
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 7)!!
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(1.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(1.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(1.0)
+        assertThat(evaluation.leftComplete).isEqualTo(1.0)
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_corridorPlan_withExecutedAboveRange_returnsNegativeDifference() {
+        // Given
+        val date = LocalDate.of(2024, 3, 13)
+        val hourType = HourType(id = 23, title = "Korridor")
+        val corridor = HourCorridor(
+            id = 8,
+            title = "5 bis 10",
+            weeklyMinutesFrom = 300,
+            weeklyMinutesTill = 600,
+            hourType = hourType
+        )
+        val plan = AssistancePlan(
+            id = 8,
+            start = LocalDate.of(2024, 3, 11),
+            end = LocalDate.of(2024, 3, 17),
+            hourMode = AssistancePlanHourMode.CORRIDOR,
+            hourCorridor = corridor
+        )
+        whenever(assistancePlanService.getEntityById(8)).thenReturn(plan)
+        stubExecutedMinutes(720, date)
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 8)!!
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(-2.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(-2.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(-2.0)
+        assertThat(evaluation.leftComplete).isEqualTo(-2.0)
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_noServices_returnsZeroLeftForAllHourTypes() {
+        // Given
+        val date = LocalDate.of(2024, 2, 1)
+        val hourType = HourType(id = 10, title = "Einzel")
+        val goal = goalWithHourType(hourType, weeklyMinutes = 0)
+        val plan = AssistancePlan(
+            id = 2,
+            start = LocalDate.of(2024, 1, 1),
+            end = LocalDate.of(2024, 12, 31),
+            goals = mutableSetOf(goal)
+        )
+        whenever(assistancePlanService.getEntityById(2)).thenReturn(plan)
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 2)!!
+
+        // Then
+        assertThat(result.hourTypeEvaluation).hasSize(1)
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.hourTypeName).isEqualTo("Einzel")
+        assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(0.0)
+        assertThat(evaluation.leftComplete).isEqualTo(0.0)
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_planEndedLastYear_returnsZeroLeft() {
+        // Given
+        val date = LocalDate.of(2024, 2, 1)
+        val hourType = HourType(id = 11, title = "Gruppe")
+        val goal = goalWithHourType(hourType, weeklyMinutes = 420)
+        val plan = AssistancePlan(
+            id = 3,
+            start = LocalDate.of(2023, 1, 1),
+            end = LocalDate.of(2023, 12, 31),
+            goals = mutableSetOf(goal)
+        )
+        whenever(assistancePlanService.getEntityById(3)).thenReturn(plan)
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 3)!!
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(0.0)
+        assertThat(evaluation.leftComplete).isEqualTo(365.0)
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_planEndedPreviousMonth_returnsYearLeftOnly() {
+        // Given
+        val date = LocalDate.of(2024, 3, 10)
+        val hourType = HourType(id = 12, title = "Einzel")
+        val goal = goalWithHourType(hourType, weeklyMinutes = 420)
+        val plan = AssistancePlan(
+            id = 4,
+            start = LocalDate.of(2024, 1, 1),
+            end = LocalDate.of(2024, 2, 28),
+            goals = mutableSetOf(goal)
+        )
+        whenever(assistancePlanService.getEntityById(4)).thenReturn(plan)
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
+            .thenReturn(emptyList())
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(emptyList())
+
+        val daysInYearRange = DateService.countDaysOfYearBetweenStartAndEnd(2024, plan.start, plan.end)
+        val expectedLeftYear = TimeDoubleService.convertDoubleToTimeDouble(daysInYearRange.toDouble())
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 4)!!
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(0.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(0.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(expectedLeftYear)
+        assertThat(evaluation.leftComplete).isEqualTo(expectedLeftYear)
+    }
+
+    @Test
+    fun getHoursLeftByAssistancePlanId_leftThisWeekWithHoursOnAssistancePlan_returnsCorrectAmount() {
+        // Given
+        val date = LocalDate.of(2024, 3, 13) // Mittwoch
+        val hourType = HourType(id = 12, title = "Einzel")
+        val plan = AssistancePlan(
+            id = 4,
+            start = LocalDate.of(2024, 1, 1),
+            end = LocalDate.of(2025, 12, 31),
+            hours = mutableSetOf(AssistancePlanHour(weeklyMinutes = 420, hourType = hourType))
+        )
+        whenever(assistancePlanService.getEntityById(4)).thenReturn(plan)
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(listOf(generateService(date, 60)))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
+            .thenReturn(listOf(generateService(date, 60)))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(listOf(generateService(date, 60)))
+
+        // When
+        val result = evaluationService.getHoursLeftByAssistancePlanId(date, 4)!!
+
+        // Then
+        val evaluation = result.hourTypeEvaluation.first()
+        assertThat(evaluation.leftThisWeek).isEqualTo(6.0)
+        assertThat(evaluation.leftThisMonth).isEqualTo(30.0)
+        assertThat(evaluation.leftThisYear).isEqualTo(365.0)
+        assertThat(evaluation.leftComplete).isEqualTo(730.0)
+    }
+
+    private fun generateService(start: LocalDate, minutes: Int): ServiceDto {
+        return ServiceDto(
+            id = (Math.random() * 10000).toLong(),
+            start = start.atTime(8, 0),
+            end = start.atTime(8, 0).plusMinutes(minutes.toLong()),
+            minutes = minutes,
+            title = "",
+            content = "",
+            unfinished = false,
+            groupService = false
+        )
+    }
+
+    private fun goalWithHourType(hourType: HourType, weeklyMinutes: Int): Goal {
+        val goal = Goal(title = "Goal")
+        val goalHour = GoalHour(weeklyMinutes = weeklyMinutes, hourType = hourType, goal = goal)
+        goal.hours.add(goalHour)
+        return goal
+    }
+
+    private fun stubExecutedMinutes(minutes: Int, date: LocalDate) {
+        val services = listOf(generateService(date, minutes))
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndStartAndEnd(any(), any(), any(), any()))
+            .thenReturn(services)
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYear(any(), any(), any()))
+            .thenReturn(services)
+        whenever(serviceService.getServicesByAssistancePlanIdAndHourTypeIdAndYearAndMonth(any(), any(), any(), any()))
+            .thenReturn(services)
+    }
+}

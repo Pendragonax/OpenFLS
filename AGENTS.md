@@ -90,6 +90,16 @@ aber diese Verantwortungsgrenzen erhalten.
   Architekturgrenzen werden nicht eingeführt.
 - Größere Umstrukturierungen oder die Migration bestehender Domänen erfolgen nur
   bei einem ausdrücklichen Auftrag.
+- Die Migration auf die Regeln zu Service-Arten, Entity-Weitergabe, Projections
+  und DTO-Benennung erfolgt Domäne für Domäne, Abhängigkeits-Blätter zuerst.
+  Pro Domäne: 1. Inventur (Entities, DTOs, Projections, Service-Methoden,
+  Endpunkte), 2. Vorschlag mit Umbenennungen, 3. Freigabe, 4. Umsetzung
+  einschließlich Angular-Anpassung und `./gradlew clean build`.
+- Kein toter Code: Es existieren keine Methoden, Klassen, Properties oder
+  Repository-Abfragen, die ungenutzt sind oder nur wegen Tests existieren.
+  Wird ein Member nur von Tests aufgerufen, wird er samt Test entfernt (oder der
+  Test prüft stattdessen den produktiven Aufrufer). Bei jeder Domänen-Migration
+  wird der Bestand darauf geprüft.
 
 ### Schichten und Abhängigkeiten
 
@@ -101,25 +111,97 @@ aber diese Verantwortungsgrenzen erhalten.
 - Repositories kapseln jeden Persistenzzugriff. Spring-Data-
   `CrudRepository`/`JpaRepository` sind als interne JPA-Repräsentation erlaubt.
 - JPA-Entities dürfen innerhalb eines Services zum Lesen, Ändern und Speichern
-  verwendet werden, verlassen aber niemals dessen öffentliche Service-Grenze.
+  verwendet werden. Sie gelangen nie an einen RestController und nie in eine
+  HTTP-Antwort. Zwischen Services dürfen sie nur über gekennzeichnete Methoden
+  (siehe „Entity-Weitergabe zwischen Services“) weitergegeben werden.
 - Die erlaubte Richtung lautet grundsätzlich:
   `Controller → Service → Repository`. Keine Schicht umgeht die darunterliegende.
-- Domänen kommunizieren über klar definierte Services oder explizite DTOs; es
-  dürfen keine JPA-Entities domänenübergreifend weitergereicht werden.
+- Domänen kommunizieren über klar definierte Services. Für die Verarbeitung
+  dürfen Services untereinander Entities austauschen, aber ausschließlich über
+  Methoden, die mit `@InternalEntityApi` gekennzeichnet sind.
 
-### DTO-Regel für Persistenzzugriff
+### Service-Arten
+
+Services werden nach Zuständigkeit getrennt und bilden jeweils eigene Klassen.
+
+- **CRUD-Service** (`<Domain>Service`): Anlegen, Ändern, Löschen und Lesen der
+  Aggregate einer Domäne. Er ist der einzige Service, der die Repositories der
+  Domäne für diese Aggregate nutzt, und stellt bei Bedarf gekennzeichnete
+  Entity-Methoden für andere Services bereit.
+- **Anwendungsfall-Service** (nach Zweck benannt, z. B. `<Domain>EvaluationService`,
+  `<Domain>PreviewService`, `<Domain>ArchiveService`): bildet einen weiterführenden
+  Anwendungsfall ab, der Fachlogik über mehrere Aggregate oder Domänen hinweg
+  ausführt und dafür Entities benötigt. Er bezieht Entities über die
+  gekennzeichneten Methoden der CRUD-Services und liefert nach außen DTOs.
+- CRUD- und Anwendungsfall-Logik werden nicht in derselben Klasse vermischt.
+
+### Entity-Weitergabe zwischen Services
+
+- Jede öffentliche Service-Methode, die eine JPA-Entity (oder eine Collection
+  davon) herausgibt oder entgegennimmt, wird mit der Annotation
+  `@InternalEntityApi` versehen. Methoden ohne diese Annotation geben niemals
+  Entities heraus.
+- `@InternalEntityApi`-Methoden dürfen nur von anderen Services (Klassen mit
+  `@Service`) aufgerufen werden, niemals von einem `@RestController`.
+- Ein ArchUnit-Test (ArchTest) stellt dies automatisiert sicher und prüft
+  zusätzlich, dass RestController weder Entities noch Projections verwenden.
+  Der Test wird zusammen mit der Annotation eingeführt und für jede migrierte
+  Domäne eingehalten.
+- Die Benennung entitätsbasierter Methoden bleibt einheitlich:
+  `getEntityById`, `getAllEntities`, `createEntity`, `updateEntity`. Methoden,
+  die mehrere Entities liefern, heißen immer `getAllEntitiesBy<Kriterium>`
+  (z. B. `getAllEntitiesByEmployeeId`), nie `getEntitiesBy…`.
+- Für DTO-/Response-liefernde Methoden gilt dieselbe Konsistenz: eine Liste
+  nach einem Kriterium heißt `get<Was>By<Kriterium>` (z. B.
+  `getAssistancePlansByHourCorridorId`, `getAuditHistoryByHourCorridorId`),
+  eine Zählung `count<Was>By<Kriterium>` (z. B.
+  `countAssistancePlansByHourCorridorId`). Der Name nennt immer, was
+  zurückkommt, nicht nur das Kriterium.
+
+### Projections
+
+- Projections (Spring-Data-Interface-Projections) dienen ausschließlich dazu,
+  Daten gezielt und ohne Lazy-Loading-Nachladen zu laden und so Ladezeiten zu
+  reduzieren.
+- Sie bleiben intern: Sie werden nur zwischen Repository und Service verwendet.
+  Sie werden nie zwischen Services ausgetauscht und nie an RestController
+  gegeben. Nach außen gibt der Service DTOs zurück.
+- Eine Projection gehört der Domäne, deren Repository sie abfragt. Wird sie
+  in der Domäne der referenzierten Entity nicht selbst verwendet, liegt sie in
+  der Domäne, die sie braucht (auch verschachtelte Projections).
+- Als `*Projection` heißt nur, was tatsächlich von einem Repository als
+  Spring-Data-Projection abgefragt wird. Von Hand aus Entities gebaute
+  Lesemodelle sind DTOs und liegen in `dtos/`.
+
+### DTO-Regeln
 
 JPA-Entities sind ein internes Persistenzdetail und dürfen weder über eine
-öffentliche Service-API noch über Controller nach außen gelangen.
+öffentliche Service-API zu Controllern noch über Controller nach außen gelangen.
 
 - Die von Spring Data geerbten CRUD-Methoden dürfen innerhalb des zugehörigen
   Services verwendet werden. Ihre Entity-Rückgaben werden dort in explizite,
   zweckgebundene DTOs übersetzt.
-- Benutzerdefinierte Leseabfragen liefern bevorzugt DTOs oder Projektionen,
+- Benutzerdefinierte Leseabfragen liefern bevorzugt DTOs oder Projections,
   wenn kein Entity-Zugriff für eine Änderung benötigt wird.
-- Services und Controller geben niemals JPA-Entities weiter.
 - Repository-DTOs werden nach dem benötigten Anwendungsfall benannt und nicht
   als generische Entity-Kopien angelegt.
+
+**Namenskonvention (verbindlich):**
+
+- Grundform: `<X>Dto` ist die flache Form (Skalare und Fremdschlüssel-Ids,
+  keine verschachtelten Objekte anderer Domänen). Erweiterungen mit einer oder
+  zwei Relationen heißen `<X>With<Y>`. Ab drei Relationen oder bei eigenem
+  Zweck wird nach dem Anwendungsfall benannt. Die Begriffe `Solo`, `Simple`
+  und `XL` werden nicht verwendet.
+- DTOs an der HTTP-Grenze tragen `Request` (eingehend) oder `Response`
+  (ausgehend) im Namen, ergänzt um den Anwendungsfall, z. B.
+  `AbsenceCreateRequest`, `AbsenceUpdateRequest`, `AbsenceResponse`,
+  `AbsenceWithClientResponse`. Der Anwendungsfall steht vor dem Suffix.
+- DTOs, die nur innerhalb eines Services verwendet werden, tragen weder
+  `Request` noch `Response` im Namen (`<X>Dto`, `<X>With<Y>`). So ist an jedem
+  Namen erkennbar, ob ein Typ die HTTP-Grenze überschreitet.
+- Ein- und ausgehende Typen werden nicht wiederverwendet: Ein Lese-DTO dient
+  nie zugleich als Eingabe.
 
 ## Frontend
 
@@ -138,6 +220,37 @@ JPA-Entities sind ein internes Persistenzdetail und dürfen weder über eine
 - Mit Ausnahme der Anmeldung ist jeder REST-Endpunkt authentifiziert und mit
   einer fachlich eindeutig definierten rollenbasierten Berechtigung abgesichert.
   Ein Endpunkt wird nicht freigegeben, bevor diese Berechtigung geklärt ist.
+- Erwartete Fälle (z. B. Ressource nicht gefunden, Pfad-Id passt nicht zum
+  Request) werden nicht per Exception, sondern direkt als passende Response
+  zurückgegeben (z. B. `404`, `400`). Exceptions sind unerwarteten Fehlern
+  vorbehalten.
+- Fachliche Prüfungen für einen Anwendungsfall (Existenz, Wertebereiche,
+  Konflikte durch Nutzung an anderer Stelle) gehören in den Service, nicht in
+  den Controller. Der Controller prüft nur eingabeseitige, technische Dinge,
+  die keine Fachlogik brauchen (z. B. Pfad-Id gegen Request-Id, rollenbasierte
+  Berechtigung über den injizierten Berechtigungs-Service). Damit entfällt ein
+  vorgelagerter `existsById`-Aufruf im Controller vor einer Schreiboperation.
+- Muss ein Service-Aufruf zwischen mehreren erwarteten Ausgängen
+  unterscheiden (z. B. erfolgreich, nicht gefunden, Wertebereich ungültig,
+  Konflikt durch Nutzung), gibt die Methode dafür eine eigene, nach dem
+  Anwendungsfall benannte `sealed class` zurück (z. B.
+  `HourCorridorUpdateResult` mit `Success`, `NotFound`, `InvalidRange`,
+  `HourTypeNotFound`), statt eine Exception zu werfen. Der Controller
+  übersetzt sie per `when` erschöpfend in die passende HTTP-Antwort. Bei nur
+  einem erwarteten Ausgang neben dem Erfolg reicht ein nullable Rückgabewert
+  (wie bei `getById`).
+- Das gilt auch für Löschen: `delete(id)` prüft selbst, ob die Ressource
+  existiert, und gibt ein `XDeleteResult` (`Success` mit der gelöschten
+  Response, `NotFound`, ggf. `Conflict`) zurück, statt dass der Controller
+  vorab per `getById`/`existsById` nachschaut, nur um die Antwort für den
+  Löschfall zu bauen.
+- Performance-Logging ist in jeder Controller-Methode gleich aufgebaut:
+  `val startMs = System.currentTimeMillis()` steht als erste Zeile der
+  Methode, vor jeder Prüfung und außerhalb von `try`/`catch`. Der eigentliche
+  Aufruf steht im `try`, das Logging (`performanceLoggingService.logPerformance`)
+  im `finally`. Frühe Guard-Return (Berechtigung, Pfad-/Body-Id-Abgleich) vor
+  dem `try` bricht damit ab, ohne dass Performance geloggt wird – das ist so
+  gewollt, da dort keine eigentliche Verarbeitung stattfand.
 - Fehlerantworten verwenden einen festgelegten HTTP-Status und einen stabilen,
   maschinenlesbaren Fehlercode. Das Frontend reagiert auf diesen Code gezielt;
   Fehlermeldungen ersetzen keine fachliche Fehlerbehandlung.

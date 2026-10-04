@@ -19,6 +19,7 @@ import {EAssistancePlanEvaluationType} from './components/assistance-plan-time-e
 import {GoalEvaluationYearDto} from '../../shared/dtos/goal-evaluation-year-dto.model';
 import {EvaluationDto} from '../../shared/dtos/evaluation-dto.model';
 import {AssistancePlan} from '../../shared/projections/assistance-plan.projection';
+import {AssistancePlanHourMode} from '../../shared/dtos/assistance-plan-hour-mode.model';
 
 @Component({
   selector: 'app-assistance-plan-analysis',
@@ -29,7 +30,7 @@ import {AssistancePlan} from '../../shared/projections/assistance-plan.projectio
 export class AssistancePlanAnalysisComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
-  private validTabIndices = [0, 1, 2];
+  private validTabIndices = [0, 1, 2, 3];
   private tabParamName = 'tab';
   private idParamName = 'id';
 
@@ -70,7 +71,7 @@ export class AssistancePlanAnalysisComponent implements OnInit {
   ngOnInit(): void {
     this.executeURLParams();
     combineLatest([
-      this.assistancePlanService.getProjectionById(this.assistancePlanId),
+      this.assistancePlanService.getDetailById(this.assistancePlanId),
       this.clientService.allValues$
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -164,7 +165,15 @@ export class AssistancePlanAnalysisComponent implements OnInit {
     let rows = this.goalTimesEvaluation.goalTimeEvaluations
       .map(it => this.getGoalTimesAsRow(it, this.selectedGoalEvaluationHourType));
 
-    rows = [...rows, this.getGoalsTimeAsRow(this.goalTimesEvaluation, this.selectedGoalEvaluationHourType)];
+    if (this.goalTimesEvaluation.hourMode === AssistancePlanHourMode.CORRIDOR) {
+      // Korridor-Hilfepläne: drei Hilfeplan-Zeilen (Untergrenze / Obergrenze / Durchschnitt)
+      const corridorRows = this.goalTimesEvaluation.corridorAssistancePlanEvaluations
+        .map(it => this.getGoalTimesAsRow(it, this.selectedGoalEvaluationHourType, `Hilfeplan: ${it.title}`));
+      rows = [...rows, ...corridorRows];
+    } else {
+      rows = [...rows, this.getGoalsTimeAsRow(this.goalTimesEvaluation, this.selectedGoalEvaluationHourType)];
+    }
+
     this.data$.next(rows);
     this.columns$.next(this.dateService.getMonths(['Name']));
   }
@@ -205,8 +214,8 @@ export class AssistancePlanAnalysisComponent implements OnInit {
     return cells;
   }
 
-  getGoalTimesAsRow(goalTimes: GoalTimeEvaluationDto, type: EAssistancePlanEvaluationType | null): string[] {
-    const cells = [`Ziel: ${goalTimes.title}`];
+  getGoalTimesAsRow(goalTimes: GoalTimeEvaluationDto, type: EAssistancePlanEvaluationType | null, label?: string): string[] {
+    const cells = [label ?? `Ziel: ${goalTimes.title}`];
 
     for (let i = 0; i < goalTimes.approvedHours.length; i++) {
       switch (type) {

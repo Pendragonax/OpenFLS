@@ -112,6 +112,17 @@ describe('AssistancePlansComponent', () => {
     expect(assistancePlanService.getPreviewByClientId).toHaveBeenCalledWith(77);
   });
 
+  it('shows the plan to delete in the confirmation and loads its documentation count', () => {
+    const {component} = createComponent();
+    const plan = preview({id: 5, start: '2026-02-01', end: '2026-06-30'});
+
+    component.handleDeleteModalOpen(plan);
+
+    expect(component.editValue).toBe(plan);
+    expect(component.getDateString(component.editValue.start)).toBe('2026-02-01');
+    expect(component.deleteServiceCount).toBe(0);
+  });
+
   it('re-loads favorites context after deleting favorite', () => {
     const {component, assistancePlanService} = createComponent();
 

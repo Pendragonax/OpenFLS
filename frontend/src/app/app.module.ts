@@ -65,6 +65,29 @@ import {
   ClientArchiveHistoryPanelComponent
 } from './pages/client/components/client-detail/client-archive-history-panel.component';
 import {AssistancePlansComponent} from './pages/assistance-plans/assistance-plans/assistance-plans.component';
+import {ClientDashboardComponent} from './pages/client-dashboard/client-dashboard.component';
+import {
+  ClientDashboardPlanCardComponent
+} from './pages/client-dashboard/components/client-dashboard-plan-card/client-dashboard-plan-card.component';
+import {
+  ClientDashboardEntriesCardComponent
+} from './pages/client-dashboard/components/client-dashboard-entries-card/client-dashboard-entries-card.component';
+import {
+  ClientDashboardTasksCardComponent
+} from './pages/client-dashboard/components/client-dashboard-tasks-card/client-dashboard-tasks-card.component';
+import {
+  ClientTaskCreateModalComponent
+} from './pages/client-dashboard/components/client-dashboard-tasks-card/modals/client-task-create-modal/client-task-create-modal.component';
+import {
+  ClientTaskDetailModalComponent
+} from './pages/client-dashboard/components/client-dashboard-tasks-card/modals/client-task-detail-modal/client-task-detail-modal.component';
+import {ClientTaskEditModalComponent} from './pages/client-dashboard/components/client-dashboard-tasks-card/modals/client-task-edit-modal/client-task-edit-modal.component';
+import {
+  HomeClientFavoritesComponent
+} from './pages/home/components/home-client-favorites/home-client-favorites.component';
+import {
+  NoPermissionPanelComponent
+} from './shared/components/no-permission-panel/no-permission-panel.component';
 import {HourTypeComponent} from './pages/hour-type/hour-type.component';
 import {HourCorridorsComponent} from './pages/hour-corridors/hour-corridors.component';
 import {HourCorridorAuditHistoryComponent} from './pages/hour-corridors/hour-corridor-audit-history.component';
@@ -98,18 +121,19 @@ import {
 import {MatRadioModule} from "@angular/material/radio";
 import {OverviewTableComponent} from './shared/components/overview-table/overview-table.component';
 import {
-  ServiceEvaluationOverviewComponent
-} from './pages/service-evaluation-overview/service-evaluation-overview.component';
+  HourReportComponent
+} from './pages/hour-report/hour-report.component';
 import {
-  OverviewValueTypeInfoModalComponent
-} from './pages/service-evaluation-overview/modals/overview-valuetype-info-modal/overview-value-type-info-modal.component';
+  HourReportValueTypeInfoModalComponent
+} from './pages/hour-report/modals/hour-report-valuetype-info-modal/hour-report-value-type-info-modal.component';
 import {MatDialogModule} from "@angular/material/dialog";
 import {
-  OverviewPermissionInfoModalComponent
-} from './pages/service-evaluation-overview/modals/overview-permission-info-modal/overview-permission-info-modal.component';
+  HourReportPermissionInfoModalComponent
+} from './pages/hour-report/modals/hour-report-permission-info-modal/hour-report-permission-info-modal.component';
 import {AssistancePlanAnalysisComponent} from './pages/assistance-plan-analysis/assistance-plan-analysis.component';
 import {GoalSingleComponent} from './shared/components/goal-single/goal-single.component';
 import {MatChipsModule} from "@angular/material/chips";
+import {MatBadgeModule} from "@angular/material/badge";
 import {MatDividerModule} from "@angular/material/divider";
 import {YearMonthSelectionComponent} from './shared/components/year-month-selection/year-month-selection.component';
 import {
@@ -192,6 +216,15 @@ import {MarkdownModule} from "ngx-markdown";
         ClientArchiveExportPanelComponent,
         ClientArchiveHistoryPanelComponent,
         AssistancePlansComponent,
+        ClientDashboardComponent,
+        ClientDashboardPlanCardComponent,
+        ClientDashboardEntriesCardComponent,
+        ClientDashboardTasksCardComponent,
+        ClientTaskCreateModalComponent,
+        ClientTaskDetailModalComponent,
+        ClientTaskEditModalComponent,
+        HomeClientFavoritesComponent,
+        NoPermissionPanelComponent,
         HourTypeComponent,
         HourCorridorsComponent,
         HourCorridorAuditHistoryComponent,
@@ -206,9 +239,9 @@ import {MarkdownModule} from "ngx-markdown";
         WorkTimeCardComponent,
         AssistancePlanEvaluationComponent,
         OverviewTableComponent,
-        ServiceEvaluationOverviewComponent,
-        OverviewValueTypeInfoModalComponent,
-        OverviewPermissionInfoModalComponent,
+        HourReportComponent,
+        HourReportValueTypeInfoModalComponent,
+        HourReportPermissionInfoModalComponent,
         AssistancePlanAnalysisComponent,
         GoalSingleComponent,
         YearMonthSelectionComponent,
@@ -268,6 +301,7 @@ import {MarkdownModule} from "ngx-markdown";
     MatDialogModule,
     MatChipsModule,
     MatDividerModule,
+    MatBadgeModule,
     MarkdownModule.forRoot(),
     MatSlideToggleModule,
     SearchFieldComponent,

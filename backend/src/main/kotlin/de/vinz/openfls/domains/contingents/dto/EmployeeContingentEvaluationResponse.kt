@@ -1,0 +1,14 @@
+package de.vinz.openfls.domains.contingents.dto
+
+data class EmployeeContingentEvaluationResponse(
+    val employeeId: Long,
+    val lastname: String,
+    val firstname: String,
+    val archived: Boolean,
+    val contingentHours: List<Double>,
+    val executedHours: List<Double>,
+    val executedPercent: List<Double>,
+    val summedExecutedPercent: List<Double>,
+    val missingHours: List<Double>,
+    val absenceDays: List<Int>
+)

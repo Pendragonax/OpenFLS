@@ -1,0 +1,435 @@
+package de.vinz.openfls.domains.clients.service
+
+import de.vinz.openfls.domains.institutions.service.InstitutionLookupService
+import com.fasterxml.jackson.databind.ObjectMapper
+import de.vinz.openfls.common.config.TimeConfiguration
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlan
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
+import de.vinz.openfls.domains.assistancePlans.repository.AssistancePlanRepository
+import de.vinz.openfls.domains.categories.entity.Category
+import de.vinz.openfls.domains.categories.entity.CategoryTemplate
+import de.vinz.openfls.domains.categories.repository.CategoryRepository
+import de.vinz.openfls.domains.categories.repository.CategoryTemplateRepository
+import de.vinz.openfls.domains.categories.service.CategoryTemplateService
+import de.vinz.openfls.domains.clients.entity.Client
+import de.vinz.openfls.domains.clients.repository.ClientRepository
+import de.vinz.openfls.domains.clients.entity.ClientArchiveActionType
+import de.vinz.openfls.domains.clients.entity.ClientArchiveExportFormat
+import de.vinz.openfls.domains.clients.repository.ClientArchiveExportRecordRepository
+import de.vinz.openfls.domains.clients.dto.ClientArchiveExportDownloadResult
+import de.vinz.openfls.domains.clients.dto.ClientArchiveExportRequestResult
+import de.vinz.openfls.domains.clients.dto.ClientArchiveExportStatusResult
+import de.vinz.openfls.domains.employees.repository.EmployeeRepository
+import de.vinz.openfls.domains.employees.entity.Employee
+import de.vinz.openfls.domains.employees.entity.EmployeeAccess
+import de.vinz.openfls.domains.employees.service.EmployeeService
+import de.vinz.openfls.domains.goals.entity.Goal
+import de.vinz.openfls.domains.goals.entity.GoalHour
+import de.vinz.openfls.domains.goals.repository.GoalRepository
+import de.vinz.openfls.domains.hourTypes.entity.HourType
+import de.vinz.openfls.domains.hourTypes.repository.HourTypeRepository
+import de.vinz.openfls.domains.institutions.entity.Institution
+import de.vinz.openfls.domains.institutions.repository.InstitutionRepository
+import de.vinz.openfls.domains.institutions.service.InstitutionService
+import de.vinz.openfls.domains.permissions.service.PermissionService
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.domains.sponsors.entity.Sponsor
+import de.vinz.openfls.domains.sponsors.repository.SponsorRepository
+import de.vinz.openfls.domains.services.entity.Service
+import de.vinz.openfls.domains.services.repository.ServiceRepository
+import de.vinz.openfls.testsupport.TestBeans
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.TestPropertySource
+import java.nio.file.Files
+import java.nio.file.Path
+import java.time.LocalDate
+import java.time.LocalDateTime
+
+@DataJpaTest
+@TestPropertySource(properties = ["openfls.client-archive-export.download-link-ttl=5m"])
+@Import(
+    TimeConfiguration::class,
+    ClientArchiveExportService::class,
+    ClientArchiveExportStorage::class,
+    ClientArchiveService::class,
+    ClientService::class,
+    EmployeeService::class,
+    de.vinz.openfls.domains.employees.service.EmployeeFavoriteService::class,
+    de.vinz.openfls.domains.employees.service.EmployeeAccessService::class,
+    de.vinz.openfls.domains.sponsors.service.SponsorService::class,
+    de.vinz.openfls.domains.employees.service.UnprofessionalService::class,
+    InstitutionService::class,
+    CategoryTemplateService::class,
+    PermissionService::class,
+    InstitutionLookupService::class,
+    de.vinz.openfls.domains.services.service.ServiceService::class,
+    TestBeans::class
+)
+class ClientArchiveExportServiceDataJpaTest {
+
+    @Autowired
+    lateinit var clientArchiveExportService: ClientArchiveExportService
+
+    @Autowired
+    lateinit var clientArchiveExportRequestRepository: ClientArchiveExportRecordRepository
+
+    @Autowired
+    lateinit var clientRepository: ClientRepository
+
+    @Autowired
+    lateinit var institutionRepository: InstitutionRepository
+
+    @Autowired
+    lateinit var categoryTemplateRepository: CategoryTemplateRepository
+
+    @Autowired
+    lateinit var categoryRepository: CategoryRepository
+
+    @Autowired
+    lateinit var sponsorRepository: SponsorRepository
+
+    @Autowired
+    lateinit var assistancePlanRepository: AssistancePlanRepository
+
+    @Autowired
+    lateinit var goalRepository: GoalRepository
+
+    @Autowired
+    lateinit var serviceRepository: ServiceRepository
+
+    @Autowired
+    lateinit var hourTypeRepository: HourTypeRepository
+
+    @Autowired
+    lateinit var employeeRepository: EmployeeRepository
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
+
+    @MockitoBean
+    lateinit var accessService: AccessService
+
+    @MockitoBean
+    lateinit var assistancePlanService: de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
+
+    @MockitoBean
+    lateinit var hourTypeService: de.vinz.openfls.domains.hourTypes.service.HourTypeService
+
+    @MockitoBean
+    lateinit var goalService: de.vinz.openfls.domains.goals.service.GoalService
+
+    @Test
+    fun requestExport_withNestedReferences_writesJsonAndAuditHistory() {
+        // Given
+        val graph = createExportGraph()
+        signIn(graph)
+
+        // When
+        val status = (clientArchiveExportService.requestExport(
+            clientId = graph.client.id,
+            format = ClientArchiveExportFormat.JSON,
+            anonymize = false
+        ) as ClientArchiveExportRequestResult.Success).response
+
+        // Then
+        assertThat(status.ready).isTrue
+        assertThat(status.downloadLink).isNotNull
+
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }
+        assertThat(request).isNotNull
+        assertThat(Files.exists(Path.of(request!!.filePath))).isTrue
+
+        val json = objectMapper.readTree(Files.readString(Path.of(request.filePath)))
+        val serviceNode = json["services"][0]
+        val assistancePlansNode = json["assistancePlans"]
+        val assistancePlans = assistancePlansNode.toList()
+        val serviceAssistancePlan = assistancePlans.first { it["id"].asLong() == serviceNode["assistancePlan"]["id"].asLong() }
+        assertThat(json["client"]["firstName"].asText()).isEqualTo("Max")
+        assertThat(assistancePlansNode).hasSize(2)
+        assertThat(serviceNode["employee"]["firstName"].asText()).isEqualTo("Anna")
+        assertThat(serviceNode["institution"]["name"].asText()).isEqualTo("Institution")
+        assertThat(serviceNode["hourType"]["title"].asText()).isEqualTo("Service Hour")
+        assertThat(serviceNode["assistancePlan"]["id"].asLong()).isEqualTo(serviceAssistancePlan["id"].asLong())
+        assertThat(serviceNode["assistancePlan"]["start"].toString()).isEqualTo("[2026,1,1]")
+        assertThat(serviceNode["assistancePlan"]["end"].toString()).isEqualTo("[2026,12,31]")
+        assertThat(serviceNode["assistancePlan"].has("sponsor")).isFalse
+        assertThat(serviceNode["assistancePlan"].has("goals")).isFalse
+        assertThat(serviceNode["goals"][0]["title"].asText()).isEqualTo("Goal Title")
+        assertThat(serviceNode["goals"][0]["description"].asText()).isEqualTo("Goal Description")
+        assertThat(serviceNode["goals"][0].has("hours")).isFalse
+        assertThat(serviceNode["goals"][0].has("evaluations")).isFalse
+        assertThat(serviceAssistancePlan["sponsor"]["name"].asText()).isEqualTo("Sponsor")
+        assertThat(serviceAssistancePlan["goals"][0]["title"].asText()).isEqualTo("Goal Title")
+        assertThat(serviceAssistancePlan["goals"][0]["evaluations"][0]["createdBy"]["firstName"].asText()).isEqualTo("Anna")
+        assertThat(serviceNode["employee"].has("email")).isFalse
+        assertThat(serviceNode["institution"].has("email")).isFalse
+        assertThat(serviceNode["hourType"].has("price")).isFalse
+        assertThat(serviceNode["categories"][0].has("description")).isFalse
+        assertThat(serviceAssistancePlan["sponsor"].has("payExact")).isFalse
+        assertThat(serviceAssistancePlan["goals"][0].has("institution")).isFalse
+
+        val savedClient = clientRepository.findById(graph.client.id)
+        assertThat(savedClient).isPresent
+        assertThat(savedClient.get().archiveHistoryEntries).hasSize(1)
+        val historyEntry = savedClient.get().archiveHistoryEntries.first()
+        assertThat(historyEntry.actionType).isEqualTo(ClientArchiveActionType.EXPORT)
+        assertThat(historyEntry.exportFormat).isEqualTo(ClientArchiveExportFormat.JSON)
+    }
+
+    @Test
+    fun requestExport_withAnonymization_replacesEmployeeNamesAndRemark() {
+        // Given
+        val graph = createExportGraph()
+        signIn(graph)
+
+        // When
+        clientArchiveExportService.requestExport(
+            clientId = graph.client.id,
+            format = ClientArchiveExportFormat.JSON,
+            anonymize = true
+        )
+
+        // Then
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }
+        assertThat(request).isNotNull
+        val json = objectMapper.readTree(Files.readString(Path.of(request!!.filePath)))
+        val serviceNode = json["services"][0]
+        val assistancePlanNode = json["assistancePlans"].toList()
+            .first { it["id"].asLong() == serviceNode["assistancePlan"]["id"].asLong() }
+        val goalNode = assistancePlanNode["goals"][0]
+        val evaluationNode = goalNode["evaluations"][0]
+        assertThat(serviceNode["employee"]["firstName"].asText()).isEqualTo("Anonym")
+        assertThat(serviceNode["employee"]["lastName"].asText()).isEqualTo("Anonym")
+        assertThat(evaluationNode["createdBy"]["firstName"].asText()).isEqualTo("Anonym")
+        assertThat(evaluationNode["updatedBy"]["lastName"].asText()).isEqualTo("Anonym")
+
+        val savedClient = clientRepository.findById(graph.client.id)
+        assertThat(savedClient).isPresent
+        val historyEntry = savedClient.get().archiveHistoryEntries.first()
+        assertThat(historyEntry.remark).isEqualTo("JSON [anonym]")
+    }
+
+    @Test
+    fun requestExport_usesConfiguredDownloadLinkTtl() {
+        // Given
+        val graph = createExportGraph()
+        signIn(graph)
+
+        // When
+        clientArchiveExportService.requestExport(
+            clientId = graph.client.id,
+            format = ClientArchiveExportFormat.JSON,
+            anonymize = false
+        )
+
+        // Then
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }
+        assertThat(request).isNotNull
+        assertThat(request!!.expiresAt).isEqualTo(request.requestedAt.plusMinutes(5))
+    }
+
+    @Test
+    fun downloadExport_withValidToken_removesFileAndRequest() {
+        // Given
+        val graph = createExportGraph()
+        signIn(graph)
+        val status = (clientArchiveExportService.requestExport(
+            clientId = graph.client.id,
+            format = ClientArchiveExportFormat.JSON,
+            anonymize = false
+        ) as ClientArchiveExportRequestResult.Success).response
+        val token = status.downloadLink!!.downloadLink.substringAfterLast("/")
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }!!
+
+        // When
+        val download = (clientArchiveExportService.downloadExport(graph.client.id, token) as ClientArchiveExportDownloadResult.Success).download
+
+        // Then
+        assertThat(download.fileName).isEqualTo(request.fileName)
+        assertThat(download.content).isNotEmpty
+        assertThat(Files.exists(Path.of(request.filePath))).isFalse
+        assertThat(clientArchiveExportRequestRepository.findByClientIdAndDownloadToken(graph.client.id, token)).isNull()
+    }
+
+    @Test
+    fun getExportStatus_withExpiredRequest_returnsEmptyStatus() {
+        // Given
+        val graph = createExportGraph()
+        signIn(graph)
+        clientArchiveExportService.requestExport(
+            clientId = graph.client.id,
+            format = ClientArchiveExportFormat.JSON,
+            anonymize = false
+        )
+        val request = clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }!!
+        request.expiresAt = LocalDateTime.now().minusMinutes(1)
+        clientArchiveExportRequestRepository.save(request)
+
+        // When
+        val status = (clientArchiveExportService.getExportStatus(graph.client.id) as ClientArchiveExportStatusResult.Success).response
+
+        // Then
+        assertThat(status.ready).isFalse
+        assertThat(status.downloadLink).isNull()
+        assertThat(clientArchiveExportRequestRepository.findAllByClientId(graph.client.id).maxByOrNull { it.requestedAt }).isNull()
+    }
+
+    private fun signIn(graph: ExportGraph) {
+        whenever(accessService.getId()).thenReturn(graph.employee.id)
+        whenever(accessService.isAdmin()).thenReturn(true)
+        whenever(accessService.isLeader(any())).thenReturn(true)
+    }
+
+    private fun createExportGraph(): ExportGraph {
+        val institution = institutionRepository.save(
+            Institution(name = "Institution", email = "institution@example.com", phonenumber = "123")
+        )
+        val categoryTemplate = categoryTemplateRepository.save(
+            CategoryTemplate(title = "Template", description = "Template", withoutClient = false)
+        )
+        val client = clientRepository.save(
+            Client(
+                firstName = "Max",
+                lastName = "Mustermann",
+                institution = institution,
+                categoryTemplate = categoryTemplate
+            )
+        )
+        val sponsor = sponsorRepository.save(Sponsor(name = "Sponsor"))
+        val hourTypeService = hourTypeRepository.save(HourType(title = "Service Hour", price = 12.5))
+        val hourTypePlan = hourTypeRepository.save(HourType(title = "Plan Hour", price = 10.0))
+        val hourTypeGoal = hourTypeRepository.save(HourType(title = "Goal Hour", price = 8.0))
+        val category = categoryRepository.save(
+            Category(
+                title = "Category",
+                shortcut = "CAT",
+                description = "Category description",
+                faceToFace = true,
+                categoryTemplate = categoryTemplate
+            )
+        )
+        val employee = Employee(
+            firstname = "Anna",
+            lastname = "Lead",
+            phonenumber = "12345",
+            email = "anna@example.com"
+        ).apply {
+            access = EmployeeAccess(
+                username = "annalead",
+                password = "secret!",
+                role = 3,
+                employee = this
+            )
+        }
+        val savedEmployee = employeeRepository.save(employee)
+
+        val assistancePlan = assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 1, 1),
+                end = LocalDate.of(2026, 12, 31),
+                client = client,
+                sponsor = sponsor,
+                institution = institution,
+                hours = mutableSetOf(
+                    AssistancePlanHour(
+                        weeklyMinutes = 120,
+                        hourType = hourTypePlan
+                    )
+                )
+            )
+        )
+
+        val goal = goalRepository.save(
+            Goal(
+                title = "Goal Title",
+                description = "Goal Description",
+                institution = institution,
+                assistancePlan = assistancePlan,
+                hours = mutableSetOf(
+                    GoalHour(
+                        weeklyMinutes = 60,
+                        hourType = hourTypeGoal
+                    )
+                )
+            )
+        )
+        assistancePlan.goals.add(goal)
+        assistancePlanRepository.save(assistancePlan)
+
+        assistancePlanRepository.save(
+            AssistancePlan(
+                start = LocalDate.of(2026, 2, 1),
+                end = LocalDate.of(2026, 11, 30),
+                client = client,
+                sponsor = sponsor,
+                institution = institution,
+                hours = mutableSetOf(
+                    AssistancePlanHour(
+                        weeklyMinutes = 90,
+                        hourType = hourTypePlan
+                    )
+                )
+            )
+        )
+
+        goal.evaluations.add(
+            de.vinz.openfls.domains.evaluations.entity.Evaluation(
+                date = LocalDate.of(2026, 6, 13),
+                content = "Evaluation content",
+                approved = true,
+                createdAt = LocalDateTime.of(2026, 6, 13, 10, 0),
+                updatedAt = LocalDateTime.of(2026, 6, 13, 10, 5),
+                createdBy = savedEmployee,
+                updatedBy = savedEmployee,
+                goal = goal
+            )
+        )
+        goalRepository.save(goal)
+
+        serviceRepository.save(
+            Service(
+                start = LocalDateTime.of(2026, 6, 13, 11, 0),
+                end = LocalDateTime.of(2026, 6, 13, 12, 0),
+                minutes = 60,
+                title = "Service Title",
+                content = "Service Content",
+                groupService = false,
+                unfinished = false,
+                client = client,
+                employee = savedEmployee,
+                institution = institution,
+                hourType = hourTypeService,
+                assistancePlan = assistancePlan,
+                goals = mutableSetOf(goal),
+                categorys = mutableSetOf(category)
+            )
+        )
+
+        whenever(assistancePlanService.getAllEntitiesByClientId(client.id))
+            .thenAnswer { assistancePlanRepository.findByClientId(client.id) }
+
+        return ExportGraph(client = client, employee = savedEmployee)
+    }
+
+    private data class ExportGraph(
+        val client: Client,
+        val employee: Employee
+    )
+
+    @TestConfiguration
+    class JsonTestConfig {
+        @Bean
+        @Primary
+        fun objectMapper(): ObjectMapper = ObjectMapper().findAndRegisterModules()
+    }
+}

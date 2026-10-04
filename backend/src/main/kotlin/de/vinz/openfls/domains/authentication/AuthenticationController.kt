@@ -1,14 +1,15 @@
 package de.vinz.openfls.domains.authentication
 
-import de.vinz.openfls.domains.authentication.models.EUserRoles
-import de.vinz.openfls.domains.authentication.dtos.PasswordDto
-import de.vinz.openfls.domains.authentication.dtos.AuthenticationRequestDto
-import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.domains.authentication.dto.ChangePasswordRequest
+import de.vinz.openfls.domains.authentication.dto.ChangePasswordResult
+import de.vinz.openfls.domains.authentication.dto.LoginRequest
+import de.vinz.openfls.domains.authentication.service.AuthenticationService
 import de.vinz.openfls.logging.StructuredLog
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,27 +18,18 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 class AuthenticationController(
-        private val authenticationService: AuthenticationService
+        private val authenticationService: AuthenticationService,
+        private val performanceLoggingService: PerformanceLoggingService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AuthenticationController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping("/login")
-    fun login(@RequestBody request: AuthenticationRequestDto): ResponseEntity<Map<String, String>> {
-        try {
-            // performance
-            val startMs = System.currentTimeMillis()
+    fun login(@RequestBody request: LoginRequest): ResponseEntity<Map<String, String>> {
+        val startMs = System.currentTimeMillis()
 
+        try {
             val authentication = authenticationService.login(request.username, request.password)
             StructuredLog.audit("authentication.login", "success", "user", authentication.userId.toString())
-
-            if (logPerformance) {
-                logger.info(String.format("%s login took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.AUTHORIZATION, authentication.token)
@@ -50,57 +42,29 @@ class AuthenticationController(
             StructuredLog.error(logger, "authentication.login.failed", ex)
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        } finally {
+            performanceLoggingService.logPerformance("login", startMs, logger)
         }
     }
 
     @PostMapping("/password")
-    fun changePassword(@Valid @RequestBody passwordDto: PasswordDto): ResponseEntity<String> {
+    fun changePassword(@Valid @RequestBody request: ChangePasswordRequest): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            authenticationService.changePassword(passwordDto)
-            StructuredLog.audit("authentication.password.change", "success")
-
-            if (logPerformance) {
-                logger.info(String.format("%s changePassword took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (authenticationService.changePassword(request)) {
+                ChangePasswordResult.Success -> {
+                    StructuredLog.audit("authentication.password.change", "success")
+                    ResponseEntity(HttpStatus.OK)
+                }
+                ChangePasswordResult.EmployeeNotFound -> employeeNotFound()
+                ChangePasswordResult.WrongOldPassword -> wrongOldPassword()
             }
-
-            ResponseEntity(HttpStatus.OK)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "authentication.password.change.failed", ex)
-
-            ResponseEntity(
-                    ex.localizedMessage,
-                    HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @PostMapping("/change_role/{id}")
-    fun changeRole(@PathVariable id: Long,
-                   @RequestBody role: Int): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            authenticationService.changeRole(id, EUserRoles.fromId(role))
-            StructuredLog.audit("authorization.role.change", "success", "user", id.toString())
-
-            if (logPerformance) {
-                logger.info(String.format("%s changeRole took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity(HttpStatus.OK)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "authorization.role.change.failed", ex)
-
-            ResponseEntity(
-                    ex.localizedMessage,
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("changePassword", startMs, logger)
         }
     }
 
@@ -111,27 +75,25 @@ class AuthenticationController(
 
     @GetMapping("/user")
     fun getUser(): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val employee = authenticationService.getCurrentEmployeeDto()
-
-            if (logPerformance) {
-                logger.info(String.format("%s getUser took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            employee.orElseThrow { IllegalArgumentException() }
-
-            return ResponseEntity.ok(employee.get())
+            val employee = authenticationService.getCurrentEmployee() ?: return userNotFound()
+            ResponseEntity.ok(employee)
         } catch (ex: Exception) {
             StructuredLog.error(logger, "authentication.user.read.failed", ex)
-
-            ResponseEntity(
-                    ex.localizedMessage,
-                    HttpStatus.BAD_REQUEST)
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getUser", startMs, logger)
         }
     }
+
+    private fun employeeNotFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("employee not found")
+
+    private fun wrongOldPassword(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.BAD_REQUEST).body("old password is wrong")
+
+    private fun userNotFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("user not found")
 }

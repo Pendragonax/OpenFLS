@@ -21,6 +21,10 @@ import {ClientViewModel} from '../../../shared/models/client-view.model';
 import {InstitutionViewModel} from '../../../shared/models/institution-view.model';
 import {AssistancePlanPreviewDto} from '../../../shared/dtos/assistance-plan-preview-dto.model';
 import {AssistancePlanHourMode} from '../../../shared/dtos/assistance-plan-hour-mode.model';
+import {
+  AssistancePlanProgress,
+  AssistancePlanStatusPeriod
+} from '../../../shared/helpers/assistance-plan-progress.helper';
 
 type AssistancePlanPreviewRow = {
   preview: AssistancePlanPreviewDto;
@@ -28,7 +32,6 @@ type AssistancePlanPreviewRow = {
 };
 
 type AssistancePlanContext = 'none' | 'client' | 'sponsor' | 'institution' | 'favorites';
-type AssistancePlanStatusPeriod = 'assistancePlan' | 'year';
 
 @Component({
   selector: 'app-assistance-plans',
@@ -379,6 +382,8 @@ export class AssistancePlansComponent
   }
 
   override handleDeleteModalOpen(value: AssistancePlanPreviewDto) {
+    this.editValue = value;
+    this.deleteServiceCount = 0;
     this.serviceService.getCountByAssistancePlanId(value.id).subscribe({
       next: (count) => this.deleteServiceCount = count
     });
@@ -471,133 +476,31 @@ export class AssistancePlansComponent
   }
 
   getHourModeRange(preview: AssistancePlanPreviewDto): string {
-    if (preview.hourMode !== AssistancePlanHourMode.CORRIDOR) {
-      return '';
-    }
-
-    return `${this.formatHourValue(preview.approvedHoursFrom)} - ${this.formatHourValue(preview.approvedHoursTo)}`;
+    return AssistancePlanProgress.getHourModeRange(preview);
   }
 
   getWeeklyHoursDisplay(preview: AssistancePlanPreviewDto): string {
-    if (this.isCorridorPlan(preview)) {
-      return this.getHourModeRange(preview);
-    }
-
-    return `${this.formatHourValue(preview.approvedHoursPerWeek)}`;
+    return AssistancePlanProgress.getWeeklyHoursDisplay(preview);
   }
 
   getExecutedHoursPercent(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod = 'year'): number {
-    if (this.isCorridorPlan(preview)) {
-      return this.getCorridorExecutedHoursPercent(preview, period);
-    }
-
-    const approvedMinutes = this.convertTimeDoubleToMinutes(this.getApprovedHours(preview, period));
-    if (approvedMinutes <= 0) {
-      return 0;
-    }
-
-    const executedMinutes = this.convertTimeDoubleToMinutes(this.getExecutedHours(preview, period));
-    const percent = (executedMinutes * 100) / approvedMinutes;
-    return Math.max(0, Math.min(100, Number(percent.toFixed(1))));
+    return AssistancePlanProgress.getExecutedHoursPercent(preview, period);
   }
 
   isCorridorPlan(preview: AssistancePlanPreviewDto): boolean {
-    return preview.hourMode === AssistancePlanHourMode.CORRIDOR;
-  }
-
-  private convertTimeDoubleToMinutes(value: number): number {
-    const sign = value < 0 ? -1 : 1;
-    const absoluteValue = Math.abs(value);
-    const hours = Math.trunc(absoluteValue);
-    const minutes = Math.round((absoluteValue - hours) * 100);
-    return sign * (hours * 60 + minutes);
-  }
-
-  private formatHourValue(value: number): string {
-    return value.toLocaleString('de-DE', {maximumFractionDigits: 2});
+    return AssistancePlanProgress.isCorridorPlan(preview);
   }
 
   getApprovedHoursLeftDisplay(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod = 'year'): string {
-    const value = this.getApprovedHoursLeft(preview, period);
-    const sign = value < 0 ? '-' : '+';
-    return `${sign}${this.formatHourValue(Math.abs(value))}`;
+    return AssistancePlanProgress.getApprovedHoursLeftDisplay(preview, period);
   }
 
   getHoursTooltip(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod = 'year'): string {
-    const executedHours = this.getExecutedHours(preview, period);
-    const periodLabel = period === 'assistancePlan' ? 'Dieser Hilfeplan bis heute' : 'Dieses Jahr bis heute';
-    if (this.isCorridorPlan(preview)) {
-      return `${periodLabel}\nBewilligt von: ${this.getApprovedHoursFrom(preview, period)}\nBewilligt bis: ${this.getApprovedHoursTill(preview, period)}\nGeleistet: ${executedHours}`;
-    }
-
-    return `${periodLabel}\nBewilligt: ${this.getApprovedHours(preview, period)}\nGeleistet: ${executedHours}`;
+    return AssistancePlanProgress.getHoursTooltip(preview, period);
   }
 
   getExecutedHoursProgressClass(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod = 'year'): string {
-    const percent = this.getExecutedHoursPercent(preview, period);
-    if (this.isCorridorPlan(preview)) {
-      if (percent >= 40 && percent <= 60) {
-        return 'hours-progress-fill--ok';
-      }
-      return 'hours-progress-fill--bad';
-    }
-
-    if (percent >= 95) {
-      return 'hours-progress-fill--ok';
-    }
-    if (percent >= 90) {
-      return 'hours-progress-fill--warn';
-    }
-    return 'hours-progress-fill--bad';
-  }
-
-  private getCorridorExecutedHoursPercent(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
-    const approvedFrom = this.convertTimeDoubleToMinutes(this.getApprovedHoursFrom(preview, period));
-    const approvedTill = this.convertTimeDoubleToMinutes(this.getApprovedHoursTill(preview, period));
-    const executed = this.convertTimeDoubleToMinutes(this.getExecutedHours(preview, period));
-
-    if (approvedFrom <= 0 || approvedTill <= 0) {
-      return 0;
-    }
-
-    if (executed < approvedFrom) {
-      return this.clampPercent((executed * 40) / approvedFrom);
-    }
-
-    if (executed > approvedTill) {
-      return this.clampPercent(60 + (executed * 40) / (approvedFrom + approvedTill));
-    }
-
-    const corridorWidth = approvedTill - approvedFrom;
-    if (corridorWidth <= 0) {
-      return 40;
-    }
-
-    return this.clampPercent(40 + ((executed - approvedFrom) * 20) / corridorWidth);
-  }
-
-  private clampPercent(value: number): number {
-    return Math.max(0, Math.min(100, Number(value.toFixed(1))));
-  }
-
-  private getApprovedHoursFrom(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
-    return period === 'assistancePlan' ? preview.approvedHoursThisAssistancePlanFrom : preview.approvedHoursThisYearFrom;
-  }
-
-  private getApprovedHoursTill(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
-    return period === 'assistancePlan' ? preview.approvedHoursThisAssistancePlanTill : preview.approvedHoursThisYearTill;
-  }
-
-  private getApprovedHours(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
-    return period === 'assistancePlan' ? preview.approvedHoursThisAssistancePlan : preview.approvedHoursThisYear;
-  }
-
-  private getExecutedHours(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
-    return period === 'assistancePlan' ? preview.executedHoursThisAssistancePlan : preview.executedHoursThisYear;
-  }
-
-  private getApprovedHoursLeft(preview: AssistancePlanPreviewDto, period: AssistancePlanStatusPeriod): number {
-    return period === 'assistancePlan' ? preview.approvedHoursLeftThisAssistancePlan : preview.approvedHoursLeftThisYear;
+    return AssistancePlanProgress.getExecutedHoursProgressClass(preview, period);
   }
 
   onSearchStringChanges(searchString: string) {

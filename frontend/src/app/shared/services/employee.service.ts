@@ -31,11 +31,6 @@ export class EmployeeService extends Base<EmployeeDto>{
       .get<EmployeeDto[]>(`${environment.api_url}${this.url}?includeArchived=${includeArchived}`);
   }
 
-  getAllProjections(): Observable<EmployeeSolo[]> {
-    return this.http
-      .get<EmployeeSolo[]>(`${environment.api_url}${this.url}/projections`);
-  }
-
   getActiveEmployeeSelections(): Observable<EmployeeSolo[]> {
     return this.getAll().pipe(
       map(values => values

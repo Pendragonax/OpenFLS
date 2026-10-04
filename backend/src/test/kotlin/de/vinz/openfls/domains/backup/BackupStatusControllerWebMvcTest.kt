@@ -1,9 +1,8 @@
 package de.vinz.openfls.domains.backup
 
-import de.vinz.openfls.domains.backup.controller.BackupStatusController
-import de.vinz.openfls.domains.backup.dto.BackupHistoryEntryDto
-import de.vinz.openfls.domains.backup.dto.BackupRunDto
-import de.vinz.openfls.domains.backup.dto.BackupStatusDto
+import de.vinz.openfls.domains.backup.dto.BackupHistoryEntryResponse
+import de.vinz.openfls.domains.backup.dto.BackupRunResponse
+import de.vinz.openfls.domains.backup.dto.BackupStatusResponse
 import de.vinz.openfls.domains.backup.service.BackupStatusService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -16,7 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 
-@WebMvcTest(BackupStatusController::class, properties = ["logging.performance=false"])
+@WebMvcTest(BackupStatusController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class BackupStatusControllerWebMvcTest {
 
@@ -29,8 +28,8 @@ class BackupStatusControllerWebMvcTest {
     @Test
     fun status_returnsMappedDto() {
         given(backupStatusService.status()).willReturn(
-            BackupStatusDto(
-                lastBackup = BackupRunDto("2026-08-30T02:00:00.000Z", "success", "ok", "b.sql.gz", 123, "hash", 13, null),
+            BackupStatusResponse(
+                lastBackup = BackupRunResponse("2026-08-30T02:00:00.000Z", "success", "ok", "b.sql.gz", 123, "hash", 13, null),
                 lastRestoreTest = null,
                 backupOverdue = false,
                 maxAgeHours = 7,
@@ -51,7 +50,7 @@ class BackupStatusControllerWebMvcTest {
     @Test
     fun history_defaultLimitIsHundred() {
         given(backupStatusService.history(100)).willReturn(
-            listOf(BackupHistoryEntryDto("backup", "2026-08-30T02:00:00.000Z", "success", "ok", "b.sql.gz", 1, "h", 1))
+            listOf(BackupHistoryEntryResponse("backup", "2026-08-30T02:00:00.000Z", "success", "ok", "b.sql.gz", 1, "h", 1))
         )
 
         val result = mockMvc.get("/admin/backup/history").andReturn()

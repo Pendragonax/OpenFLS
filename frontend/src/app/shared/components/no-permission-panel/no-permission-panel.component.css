@@ -1,0 +1,29 @@
+.no-permission {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px dashed rgba(47, 58, 75, 0.35);
+  border-radius: 8px;
+  background: rgba(47, 58, 75, 0.04);
+}
+
+.no-permission-icon {
+  color: rgba(47, 58, 75, 0.6);
+}
+
+.no-permission-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.no-permission-title {
+  font-weight: 600;
+  color: #2f3a4b;
+}
+
+.no-permission-description {
+  color: rgba(47, 58, 75, 0.72);
+  font-size: 0.9rem;
+}

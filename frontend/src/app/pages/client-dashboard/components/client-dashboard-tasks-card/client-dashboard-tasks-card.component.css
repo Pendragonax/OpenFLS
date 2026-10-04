@@ -1,0 +1,162 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+}
+
+.tasks-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.card-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2f3a4b;
+  min-width: 0;
+}
+
+.card-header-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.tasks-count {
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  background: rgba(224, 178, 74, 0.2);
+  color: #8a6412;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.card-empty {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.task-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 3px solid rgba(47, 58, 75, 0.18);
+  border-radius: 0 6px 6px 0;
+  background: rgba(47, 58, 75, 0.03);
+  padding: 6px 10px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.task-row-actions { display: flex; position: absolute; top: 2px; right: 4px; }
+.task-row-actions .task-edit-action {
+  --mdc-icon-button-state-layer-size: 32px;
+  --mdc-icon-button-icon-size: 18px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+}
+.task-title { padding-right: 40px; }
+
+.task-item:hover,
+.task-item:focus-visible {
+  background: rgba(47, 58, 75, 0.07);
+  outline: none;
+}
+
+.task-item--overdue {
+  border-left-color: #e95c54;
+  background: rgba(233, 92, 84, 0.06);
+}
+
+.task-item--overdue:hover,
+.task-item--overdue:focus-visible {
+  background: rgba(233, 92, 84, 0.1);
+}
+
+.task-item--done {
+  border-left-color: #65b98f;
+  opacity: 0.75;
+}
+
+.task-title {
+  font-weight: 500;
+  color: #2f3a4b;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.task-item--done .task-title {
+  text-decoration: line-through;
+}
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: rgba(47, 58, 75, 0.6);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Very subtle cue for "angelegt von mir" - just the name, no badge or icon. */
+.task-employee--own {
+  color: var(--bs-primary, #0d6efd);
+  font-weight: 600;
+}

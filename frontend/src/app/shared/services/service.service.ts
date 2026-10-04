@@ -5,7 +5,6 @@ import {Observable} from "rxjs";
 import {environment} from "../../../environments/environment";
 import {HttpClient} from "@angular/common/http";
 import {Converter} from "./converter.helper";
-import {ServiceTimeDto} from "../dtos/service-time-dto.model";
 import {Service} from "../dtos/service.projection";
 import {ClientAndDateRequestDto} from "../dtos/client-and-date-request-dto.model";
 import {ClientAndDateResponseDto} from "../dtos/client-and-date-response-dto.model";
@@ -27,14 +26,9 @@ export class ServiceService extends Base<ServiceDto> {
   initialLoad() {
   }
 
-  getIllegalByEmployeeId(employeeId: number): Observable<Service[]> {
+  getOutsideAssistancePlanPeriodByEmployeeId(employeeId: number): Observable<Service[]> {
     return this.http
-      .get<Service[]>(`${environment.api_url}${this.url}/employee/${employeeId}/illegal`)
-  }
-
-  getByEmployeeAndDate(employeeId: number, date: Date): Observable<ServiceDto[]> {
-    return this.http
-      .get<ServiceDto[]>(`${environment.api_url}${this.url}/employee/${employeeId}/${this.converter.formatDate(date)}`)
+      .get<Service[]>(`${environment.api_url}${this.url}/employee/${employeeId}/outside_assistance_plan_period`)
   }
 
   getByEmployeeAndStartAndEnd(employeeId: number, start: Date, end: Date): Observable<Service[]> {
@@ -42,24 +36,9 @@ export class ServiceService extends Base<ServiceDto> {
       .get<Service[]>(`${environment.api_url}${this.url}/employee/${employeeId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
   }
 
-  getByClientAndDate(clientId: number, date: Date): Observable<ServiceDto[]> {
+  getOutsideAssistancePlanPeriodByInstitutionId(institutionId: number): Observable<Service[]> {
     return this.http
-      .get<ServiceDto[]>(`${environment.api_url}${this.url}/client/${clientId}/${this.converter.formatDate(date)}`)
-  }
-
-  getByClientAndStartAndEnd(clientId: number, start: Date, end: Date): Observable<ServiceDto[]> {
-    return this.http
-      .get<ServiceDto[]>(`${environment.api_url}${this.url}/client/${clientId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
-  }
-
-  getIllegalByInstitutionId(institutionId: number): Observable<Service[]> {
-    return this.http
-      .get<Service[]>(`${environment.api_url}${this.url}/institution/${institutionId}/illegal`)
-  }
-
-  getByInstitutionIdAndClientIdAndStartAndEnd(institutionId: number, clientId: number, start: Date, end: Date): Observable<Service[]> {
-    return this.http
-      .get<Service[]>(`${environment.api_url}${this.url}/institution/${institutionId}/client/${clientId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
+      .get<Service[]>(`${environment.api_url}${this.url}/institution/${institutionId}/outside_assistance_plan_period`)
   }
 
   getByInstitutionIdAndEmployeeIdAndClientIdAndStartAndEnd(institutionId: number, employeeId: number, clientId: number, start: Date, end: Date): Observable<Service[]> {
@@ -67,24 +46,9 @@ export class ServiceService extends Base<ServiceDto> {
       .get<Service[]>(`${environment.api_url}${this.url}/institution/${institutionId}/employee/${employeeId}/client/${clientId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
   }
 
-  getTimesByEmployeeAndStartEnd(employeeId: number, start: Date, end: Date): Observable<ServiceTimeDto> {
-    return this.http
-      .get<ServiceTimeDto>(`${environment.api_url}${this.url}/times/${employeeId}/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
-  }
-
   getByAssistancePlan(assistancePlanId: number): Observable<ServiceDto[]> {
     return this.http
       .get<ServiceDto[]>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}`)
-  }
-
-  getIllegalByAssistancePlan(assistancePlanId: number): Observable<Service[]> {
-    return this.http
-      .get<Service[]>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}/illegal`)
-  }
-
-  getByAssistancePlanAndNotBetweenStartAndEnd(assistancePlanId: number, start: Date, end: Date): Observable<Service[]> {
-    return this.http
-      .get<Service[]>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}/not_between/${this.converter.formatDate(start)}/${this.converter.formatDate(end)}`)
   }
 
   getCountByEmployeeId(employeeId: number): Observable<number> {
@@ -102,12 +66,6 @@ export class ServiceService extends Base<ServiceDto> {
   getCountByAssistancePlanId(assistancePlanId: number): Observable<number> {
     return this.http
       .get<number>(`${environment.api_url}${this.url}/count/assistance_plan/${assistancePlanId}`)
-
-  }
-
-  getCountByGoalId(goalId: number): Observable<number> {
-    return this.http
-      .get<number>(`${environment.api_url}${this.url}/count/goal/${goalId}`)
 
   }
 

@@ -1,0 +1,266 @@
+/* Unlike the tasks/entries columns, the plan panel is not stretched to the full
+   column height - it should only be as tall as its own content (see
+   .dashboard-column-plan in client-dashboard.component.css, which opts this
+   column out of the stretch). max-height/overflow stay as a safety net for
+   unusually small viewports only. */
+:host {
+  display: block;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.plan-card {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  max-height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.card-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2f3a4b;
+}
+
+.card-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Segmented pill toggle, matching the period switch used in the assistance plan
+   table (assistance-plans.component.css .year-status-period-toggle) so both places
+   share the same visual language instead of the generic Material button toggle. */
+.plan-period-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid #dfe3ec;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.plan-period-toggle mat-radio-button {
+  margin: 0;
+  padding: 0 15px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5568;
+  border-left: 1px solid #dfe3ec;
+}
+
+.plan-period-toggle mat-radio-button:first-child {
+  border-left: 0;
+}
+
+.plan-period-toggle mat-radio-button.mat-radio-checked,
+.plan-period-toggle mat-radio-button.mat-mdc-radio-checked {
+  color: #ffffff;
+  background: color-mix(in srgb, var(--bs-primary) 78%, #ffffff);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bs-primary) 78%, #ffffff);
+}
+
+.plan-period-toggle ::ng-deep .mat-radio-container,
+.plan-period-toggle ::ng-deep .mdc-radio {
+  display: none !important;
+}
+
+.plan-period-toggle ::ng-deep .mat-radio-label-content,
+.plan-period-toggle ::ng-deep .mdc-form-field > label {
+  padding-left: 0;
+}
+
+.plan-period-toggle mat-radio-button.mat-radio-checked ::ng-deep .mat-radio-label-content,
+.plan-period-toggle mat-radio-button.mat-mdc-radio-checked ::ng-deep .mdc-form-field > label {
+  color: #ffffff !important;
+}
+
+.card-empty {
+  color: rgba(47, 58, 75, 0.72);
+  font-style: italic;
+}
+
+.plan-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.plan-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.plan-fact-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(47, 58, 75, 0.6);
+}
+
+.plan-fact-value {
+  font-weight: 500;
+  color: #2f3a4b;
+}
+
+.plan-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.plan-status-pill {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid transparent;
+}
+
+.plan-status-pill--active {
+  color: #2f8d67;
+  background: #dcf5ea;
+  border-color: #9fd9c0;
+}
+
+.plan-status-pill--inactive {
+  color: rgba(47, 58, 75, 0.72);
+  background: rgba(47, 58, 75, 0.08);
+}
+
+.plan-status-pill--warning {
+  color: #b23a33;
+  background: rgba(233, 92, 84, 0.12);
+  border-color: rgba(233, 92, 84, 0.4);
+}
+
+.plan-status-hint {
+  font-size: 0.82rem;
+  color: rgba(47, 58, 75, 0.6);
+}
+
+.plan-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.year-status-track {
+  position: relative;
+  height: 16px;
+  border-radius: 8px;
+  background: rgba(47, 58, 75, 0.12);
+  overflow: hidden;
+}
+
+.year-status-track--corridor {
+  background: rgba(47, 58, 75, 0.16);
+}
+
+.hours-progress-fill {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  border-radius: 8px 0 0 8px;
+  background: linear-gradient(90deg, #f06b63 0%, #e95c54 100%);
+}
+
+.hours-progress-fill--bad {
+  background: linear-gradient(90deg, #f06b63 0%, #e95c54 100%);
+}
+
+.hours-progress-fill--warn {
+  background: linear-gradient(90deg, #e0b24a 0%, #c69225 100%);
+}
+
+.hours-progress-fill--ok {
+  background: linear-gradient(90deg, #65b98f 0%, #4a8c6f 100%);
+}
+
+.hours-progress-threshold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  z-index: 2;
+  background: rgba(47, 58, 75, 0.7);
+}
+
+.hours-progress-threshold--from {
+  left: 40%;
+}
+
+.hours-progress-threshold--till {
+  left: 60%;
+}
+
+.plan-progress-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: rgba(47, 58, 75, 0.78);
+}
+
+.plan-progress-summary {
+  font-size: 0.85rem;
+  color: rgba(47, 58, 75, 0.6);
+}
+
+.plan-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .card-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  /* Keep the edit action beside the title. The period selector uses the full
+     following line, so neither control gets squeezed on small screens. */
+  .card-header-actions {
+    display: contents;
+  }
+
+  .plan-period-toggle {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .card-header-actions > button {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}

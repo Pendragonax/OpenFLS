@@ -60,14 +60,18 @@ export class ClientNewComponent extends NewPageComponent<ClientDto> implements O
     this.infoForm.institution.valueChanges.subscribe((value) => {
       const selectedInstitution = this.institutions.find(institution => institution.id === value);
 
-      if (selectedInstitution != null)
+      if (selectedInstitution != null) {
         this.value.institution = selectedInstitution;
+        this.value.institutionId = selectedInstitution.id;
+      }
     });
     this.infoForm.categoryTemplate.valueChanges.subscribe((value) => {
       const selectedTemplate = this.categoryTemplates.find(template => template.id === value);
 
-      if (selectedTemplate != null)
+      if (selectedTemplate != null) {
         this.value.categoryTemplate = selectedTemplate;
+        this.value.categoryTemplateId = selectedTemplate.id;
+      }
     });
   }
 

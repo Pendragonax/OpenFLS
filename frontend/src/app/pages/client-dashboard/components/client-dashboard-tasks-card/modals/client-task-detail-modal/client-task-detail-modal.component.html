@@ -1,0 +1,77 @@
+<h1 mat-dialog-title>{{ task.title }}</h1>
+
+<div mat-dialog-content class="task-detail-content">
+  @if (task.description) {
+    <p class="task-detail-description">{{ task.description }}</p>
+  }
+
+  <div class="task-detail-facts">
+    <div class="task-detail-fact">
+      <span class="task-detail-fact-label">Angelegt von</span>
+      <span class="task-detail-fact-value">{{ task.createdByName }}, {{ getDateString(task.createdAt) }}</span>
+    </div>
+    <div class="task-detail-fact">
+      <span class="task-detail-fact-label">Fällig am</span>
+      <span class="task-detail-fact-value">
+        {{ getDateString(task.dueDate) }}
+        @if (task.overdue) {
+          <span class="task-detail-overdue">überfällig</span>
+        }
+      </span>
+    </div>
+  </div>
+
+  @if (task.done) {
+    <div class="task-detail-completion">
+      <div class="task-detail-fact">
+        <span class="task-detail-fact-label">Erledigt von</span>
+        <span class="task-detail-fact-value">{{ task.completedByName }}, {{ getDateString(task.completedOn) }}</span>
+      </div>
+      @if (task.completionComment) {
+        <p class="task-detail-comment">„{{ task.completionComment }}“</p>
+      }
+    </div>
+  } @else {
+    <form class="task-detail-complete-form" [formGroup]="completeForm" (ngSubmit)="complete()">
+      <mat-form-field appearance="outline" class="task-modal-field">
+        <mat-label>Kommentar</mat-label>
+        <textarea matInput formControlName="comment" rows="3" maxlength="1024"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="task-modal-field task-modal-field--date">
+        <mat-label>Erledigt am</mat-label>
+        <input matInput
+               formControlName="completedOn"
+               [matDatepicker]="completedOnPicker"
+               required>
+        <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="completedOnPicker"></mat-datepicker-toggle>
+        <mat-datepicker #completedOnPicker></mat-datepicker>
+      </mat-form-field>
+    </form>
+  }
+  @if (history.length > 0) {
+    <section class="task-history">
+      <h2>Historie</h2>
+      @for (entry of history; track entry.id) {
+        <div class="task-history-entry">
+          <strong>{{ historyLabel(entry) }}</strong>
+          <span>{{ entry.actor }}, {{ getDateString(entry.changedAt) }}</span>
+          @for (change of historyChanges(entry); track change) { <span>{{ change }}</span> }
+          @if (entry.action === 'COMPLETE' && entry.comment) { <span>{{ entry.comment }}</span> }
+        </div>
+      }
+    </section>
+  }
+</div>
+
+<div mat-dialog-actions class="justify-content-end">
+  <button mat-button type="button" (click)="close()">Schließen</button>
+  <button mat-button color="warn" type="button" [disabled]="isSubmitting" (click)="deleteTask()">Löschen</button>
+  @if (!task.done) {
+    <button mat-raised-button
+            color="primary"
+            [disabled]="completeForm.invalid || isSubmitting"
+            (click)="complete()">Abhaken</button>
+  }
+</div>

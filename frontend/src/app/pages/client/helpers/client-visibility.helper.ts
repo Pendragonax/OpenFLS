@@ -5,7 +5,8 @@ import {ClientViewModel} from "../../../shared/models/client-view.model";
 export function mapVisibleClients(
   clients: ClientDto[],
   user: EmployeeDto,
-  showArchivedEntries: boolean
+  showArchivedEntries: boolean,
+  favoriteClientIds: ReadonlySet<number> = new Set()
 ): ClientViewModel[] {
   return clients
     .filter(client => showArchivedEntries || !client.archived)
@@ -13,6 +14,7 @@ export function mapVisibleClients(
       dto: client,
       editable: user.permissions
         .filter(perm => perm.affiliated)
-        .some(perm => perm.institutionId === client.institution.id)
+        .some(perm => perm.institutionId === client.institution.id),
+      favorite: favoriteClientIds.has(client.id)
     });
 }

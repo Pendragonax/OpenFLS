@@ -53,7 +53,6 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
   archiveExportStatus: ClientArchiveExportStatusDto | null = null;
 
   // STATEs
-  editMode = false;
   canManageArchive = false;
   selectedTabIndex = 0;
   isArchiveExportRequesting = false;
@@ -97,7 +96,6 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
           this.editValue = <ClientViewModel> {...this.value};
           this.institutions = institutions;
           this.categoryTemplates = categories;
-          this.editMode = user.institutionId == this.value.dto.institution.id;
 
           this.refreshForm();
           this.loadArchiveState(id);
@@ -111,7 +109,7 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     this.infoForm.phone.setValue(this.value.dto.phoneNumber);
     this.infoForm.email.setValue(this.value.dto.email);
     this.infoForm.institution.setValue(this.value.dto.institution.id);
-    this.infoForm.categoryTemplate.setValue(this.value.dto.categoryTemplate.id);
+    this.infoForm.categoryTemplate.setValue(this.value.dto.categoryTemplateId);
 
     if (this.value.dto.archived) {
       this.infoForm.disable({emitEvent: false});
@@ -132,13 +130,15 @@ export class ClientDetailComponent extends DetailPageComponent<ClientViewModel> 
     this.infoForm.institution.valueChanges.subscribe(value => {
       const selectedInstitution = this.institutions.find(institution => institution.id === value);
       if (selectedInstitution != null) {
-        this.editValue.dto.institution = selectedInstitution
+        this.editValue.dto.institution = selectedInstitution;
+        this.editValue.dto.institutionId = selectedInstitution.id;
       }
     });
     this.infoForm.categoryTemplate.valueChanges.subscribe(value => {
       const selectedTemplate = this.categoryTemplates.find(template => template.id === value);
       if (selectedTemplate != null) {
         this.editValue.dto.categoryTemplate = selectedTemplate;
+        this.editValue.dto.categoryTemplateId = selectedTemplate.id;
       }
     });
   }

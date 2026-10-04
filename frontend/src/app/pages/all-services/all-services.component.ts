@@ -7,7 +7,7 @@ import {Converter} from "../../shared/services/converter.helper";
 import {ActivatedRoute, Router} from "@angular/router";
 import {DateService} from "../../shared/services/date.service";
 import {ClientsService} from "../../shared/services/clients.service";
-import {ClientSoloDto} from "../../shared/dtos/client-solo-dto.model";
+import {ClientSelectionDto} from "../../shared/dtos/client-selection-dto.model";
 import {Service} from "../../shared/dtos/service.projection";
 import {EmployeeSolo} from "../../shared/dtos/employee-solo.projection";
 import {EmployeeService} from "../../shared/services/employee.service";
@@ -24,14 +24,14 @@ export class AllServicesComponent implements OnInit {
   baseUrl: string = "services/all";
 
   readableInstitutions: ReadableInstitutionDto[] = [];
-  clients: ClientSoloDto[] = [];
+  clients: ClientSelectionDto[] = [];
   employees: EmployeeSolo[] = [];
   title: String = "Alle";
 
   services: Service[] = [];
   filteredServices: Service[] = [];
   selectedInstitution: ReadableInstitutionDto | null = null;
-  selectedClient: ClientSoloDto | null = null;
+  selectedClient: ClientSelectionDto | null = null;
   selectedEmployee: EmployeeSolo | null = null;
   paramClientId: number | null = null;
   paramInstitutionId: number | null = null;
@@ -131,7 +131,7 @@ export class AllServicesComponent implements OnInit {
     this.initialLoadServices();
   }
 
-  onClientChanged(client: ClientSoloDto | null) {
+  onClientChanged(client: ClientSelectionDto | null) {
     this.selectedClient = client;
     this.paramClientId = client?.id ?? 0;
 
@@ -179,7 +179,7 @@ export class AllServicesComponent implements OnInit {
 
   loadClients() {
     this.clientService
-      .getAllClientSoloDTOs()
+      .getAllForSelection()
       .subscribe(values => {
         this.clients = values;
         this.cdr.detectChanges();

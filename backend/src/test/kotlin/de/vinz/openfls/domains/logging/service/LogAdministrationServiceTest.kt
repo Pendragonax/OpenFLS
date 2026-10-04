@@ -1,6 +1,6 @@
 package de.vinz.openfls.domains.logging.service
 
-import de.vinz.openfls.domains.logging.dto.LogQueryDto
+import de.vinz.openfls.domains.logging.dto.LogQueryRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -44,7 +44,7 @@ class LogAdministrationServiceTest {
         writeLogFile(messageLine, *stacktraceLines.toTypedArray())
 
         // When
-        val content = service.page(LogQueryDto(all = true), 0, 100).content
+        val content = service.page(LogQueryRequest(all = true), 0, 100).content
 
         // Then
         assertThat(content).hasSize(1)
@@ -62,7 +62,7 @@ class LogAdministrationServiceTest {
         writeLogFile(plainLine)
 
         // When
-        val entry = service.page(LogQueryDto(all = true), 0, 100).content.single()
+        val entry = service.page(LogQueryRequest(all = true), 0, 100).content.single()
 
         // Then
         assertThat(entry.stacktrace).isNull()
@@ -74,8 +74,8 @@ class LogAdministrationServiceTest {
         writeLogFile(messageLine, *stacktraceLines.toTypedArray())
 
         // When
-        val matching = service.page(LogQueryDto(all = true, query = "connection pool exhausted"), 0, 100).content
-        val notMatching = service.page(LogQueryDto(all = true, query = "no-such-token-anywhere"), 0, 100).content
+        val matching = service.page(LogQueryRequest(all = true, query = "connection pool exhausted"), 0, 100).content
+        val notMatching = service.page(LogQueryRequest(all = true, query = "no-such-token-anywhere"), 0, 100).content
 
         // Then
         assertThat(matching).hasSize(1)
@@ -89,7 +89,7 @@ class LogAdministrationServiceTest {
         val buffer = ByteArrayOutputStream()
 
         // When
-        service.streamExport(LogQueryDto(all = true), buffer)
+        service.streamExport(LogQueryRequest(all = true), buffer)
 
         // Then
         val exported = firstZipEntryAsString(buffer.toByteArray())

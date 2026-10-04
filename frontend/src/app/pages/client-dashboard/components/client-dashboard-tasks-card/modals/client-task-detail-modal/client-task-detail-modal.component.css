@@ -1,0 +1,76 @@
+.task-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 440px;
+}
+
+.task-detail-description {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: break-word;
+  color: rgba(47, 58, 75, 0.85);
+}
+
+.task-detail-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-detail-fact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.88rem;
+}
+
+.task-detail-fact-label {
+  color: rgba(47, 58, 75, 0.6);
+  min-width: 100px;
+}
+
+.task-detail-fact-value {
+  font-weight: 500;
+  color: #2f3a4b;
+  overflow-wrap: break-word;
+}
+
+.task-detail-overdue {
+  margin-left: 6px;
+  color: #b23a33;
+  font-weight: 600;
+}
+
+.task-detail-completion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(47, 58, 75, 0.12);
+}
+
+.task-detail-comment {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: break-word;
+  font-style: italic;
+  color: rgba(47, 58, 75, 0.78);
+}
+
+.task-detail-complete-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(47, 58, 75, 0.12);
+}
+
+.task-modal-field {
+  width: 100%;
+}
+
+.task-history { border-top: 1px solid rgba(47, 58, 75, 0.12); padding-top: 10px; }
+.task-history h2 { font-size: 1rem; margin: 0 0 8px; }
+.task-history-entry { display: flex; flex-direction: column; font-size: 0.82rem; margin-bottom: 8px; color: rgba(47, 58, 75, 0.75); }

@@ -1,17 +1,14 @@
 package de.vinz.openfls.domains.contingents
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.contingents.services.ContingentCalendarService
-import de.vinz.openfls.domains.contingents.services.ContingentEvaluationService
-import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.ExceptionResponseService
-import de.vinz.openfls.services.PerformanceLoggingService
+import de.vinz.openfls.domains.contingents.service.ContingentCalendarService
+import de.vinz.openfls.domains.contingents.service.ContingentEvaluationService
+import de.vinz.openfls.domains.employees.service.EmployeeService
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -34,9 +31,6 @@ class ContingentEvaluationController(
 
     private val logger: Logger = LoggerFactory.getLogger(ContingentEvaluationController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @GetMapping("institution/{institutionId}/{year}")
     fun getByInstitution(
         @PathVariable institutionId: Long,
@@ -54,9 +48,9 @@ class ContingentEvaluationController(
             )
             return ResponseEntity.ok(contingentEvaluation)
         } catch (ex: IllegalAccessException) {
-            ExceptionResponseService.getPermissionDeniedResponseEntity(ex, logger)
+            ExceptionResponseService.getPermissionDeniedResponseEntity()
         } catch (ex: IllegalArgumentException) {
-            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity(ex, logger)
+            ExceptionResponseService.getIllegalArgumentExceptionResponseEntity()
         } catch (ex: Exception) {
             ExceptionResponseService.getExceptionResponseEntity(ex, logger)
         } finally {
@@ -67,34 +61,24 @@ class ContingentEvaluationController(
     @GetMapping("employee/{id}/{end}")
     fun getTimes2ByEmployee(@PathVariable id: Long,
                             @Valid @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") end: LocalDate): Any {
+        val employee = employeeService.getEmployeeNameById(id, includeArchived = true)
+        if (employee == null || employee.archived)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("employee not found")
+        if (accessService.getId() != id &&
+            !accessService.isAdmin() &&
+            !accessService.canReadEmployee(id))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No permission to get the times of this employee")
+
+        val startMs = System.currentTimeMillis()
+
         return try {
-            val startMs = System.currentTimeMillis()
-            val employee = employeeService.getEmployeeDtoById(id, true)
-                ?: throw IllegalArgumentException("employee not found")
-            if (employee.archived) {
-                throw IllegalArgumentException("employee not found")
-            }
-            if (accessService.getId() != id &&
-                !accessService.isAdmin() &&
-                !accessService.canReadEmployee(id))
-                throw IllegalArgumentException("No permission to get the times of this employee")
+            val calendar = contingentCalendarService.generateContingentCalendarFor(id, end)
 
-            val calendarDto = contingentCalendarService.generateContingentCalendarInformationFor(id, end)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getTimesByEmployee took %s ms",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(calendarDto)
+            ResponseEntity.ok(calendar)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getTimesByEmployee", startMs, logger)
         }
     }
 }

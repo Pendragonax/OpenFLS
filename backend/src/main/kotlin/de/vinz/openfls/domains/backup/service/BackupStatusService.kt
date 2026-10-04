@@ -2,18 +2,18 @@ package de.vinz.openfls.domains.backup.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.vinz.openfls.domains.backup.dto.BackupConfigDto
-import de.vinz.openfls.domains.backup.dto.BackupHistoryEntryDto
-import de.vinz.openfls.domains.backup.dto.BackupRunDto
-import de.vinz.openfls.domains.backup.dto.BackupStatusDto
+import de.vinz.openfls.domains.backup.dto.BackupConfigResponse
+import de.vinz.openfls.domains.backup.dto.BackupHistoryEntryResponse
+import de.vinz.openfls.domains.backup.dto.BackupRunResponse
+import de.vinz.openfls.domains.backup.dto.BackupStatusResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Clock
 import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -28,6 +28,7 @@ import java.time.ZonedDateTime
 @Service
 class BackupStatusService(
     private val objectMapper: ObjectMapper,
+    private val clock: Clock,
     @param:Value("\${openfls.backup.status-directory:./backup/status}")
     private val statusDirectory: String,
     @param:Value("\${openfls.backup.max-age-hours:7}")
@@ -53,7 +54,7 @@ class BackupStatusService(
         const val SUPPORTED_SCHEMA_VERSION = 1L
     }
 
-    fun status(): BackupStatusDto {
+    fun status(): BackupStatusResponse {
         val lastBackup = readLatest(BACKUP_LATEST)
         val lastRestoreTest = readLatest(RESTORE_TEST_LATEST)
         val overdue = isOverdue(lastBackup)
@@ -64,7 +65,7 @@ class BackupStatusService(
             else -> "ok"
         }
         val config = readConfig()
-        return BackupStatusDto(
+        return BackupStatusResponse(
             lastBackup, lastRestoreTest, overdue, maxAgeHours, overall, config,
             nextExpectedBackup(config, lastBackup)
         )
@@ -72,14 +73,14 @@ class BackupStatusService(
 
     /**
      * Next time a backup is expected: the configured time of day, on the first
-     * date that is both today-or-later and at least [BackupConfigDto.intervalDays]
+     * date that is both today-or-later and at least [BackupConfigResponse.intervalDays]
      * calendar days after the last successful backup.
      */
-    private fun nextExpectedBackup(config: BackupConfigDto?, lastBackup: BackupRunDto?): String? {
+    private fun nextExpectedBackup(config: BackupConfigResponse?, lastBackup: BackupRunResponse?): String? {
         val localTime = config?.backupTime?.let { runCatching { LocalTime.parse(it) }.getOrNull() } ?: return null
         val zone = runCatching { ZoneId.of(config.timezone ?: "UTC") }.getOrElse { ZoneId.of("UTC") }
         val intervalDays = (config.intervalDays ?: 1L).coerceAtLeast(1L)
-        val now = ZonedDateTime.now(zone)
+        val now = ZonedDateTime.now(clock.withZone(zone))
         val lastSuccessDate = lastBackup
             ?.takeIf { it.outcome == "success" }
             ?.timestamp
@@ -91,28 +92,28 @@ class BackupStatusService(
         return next.toInstant().toString()
     }
 
-    fun history(limit: Int): List<BackupHistoryEntryDto> {
+    fun history(limit: Int): List<BackupHistoryEntryResponse> {
         val safeLimit = limit.coerceIn(HISTORY_MIN_LIMIT, HISTORY_MAX_LIMIT)
         val entries = readHistory(BACKUP_HISTORY, "backup") + readHistory(RESTORE_TEST_HISTORY, "restore_test")
         return entries.sortedByDescending { it.timestamp ?: "" }.take(safeLimit)
     }
 
-    private fun isOverdue(lastBackup: BackupRunDto?): Boolean {
+    private fun isOverdue(lastBackup: BackupRunResponse?): Boolean {
         if (lastBackup?.outcome != "success") return true
         val instant = lastBackup.timestamp?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return true
-        return Duration.between(instant, Instant.now()) > Duration.ofHours(maxAgeHours)
+        return Duration.between(instant, clock.instant()) > Duration.ofHours(maxAgeHours)
     }
 
     private fun statusPath(): Path = Path.of(statusDirectory)
 
-    private fun readLatest(fileName: String): BackupRunDto? {
+    private fun readLatest(fileName: String): BackupRunResponse? {
         val node = readSingleObject(fileName) ?: return null
         return toRun(node)
     }
 
-    private fun readConfig(): BackupConfigDto? {
+    private fun readConfig(): BackupConfigResponse? {
         val node = readSingleObject(BACKUP_CONFIG) ?: return null
-        return BackupConfigDto(
+        return BackupConfigResponse(
             database = node.textOrNull("database"),
             backupTime = node.textOrNull("backup_time"),
             timezone = node.textOrNull("timezone"),
@@ -154,7 +155,7 @@ class BackupStatusService(
      * backup job), and a mix with individual broken lines - each salvageable
      * object is returned, newest-first ordering is applied by the caller.
      */
-    private fun readHistory(fileName: String, kind: String): List<BackupHistoryEntryDto> {
+    private fun readHistory(fileName: String, kind: String): List<BackupHistoryEntryResponse> {
         val file = statusPath().resolve(fileName)
         if (!Files.isReadable(file)) return emptyList()
         val text = runCatching { Files.readString(file) }.getOrElse {
@@ -176,7 +177,7 @@ class BackupStatusService(
     private fun readAllValues(content: String): List<JsonNode> =
         objectMapper.readerFor(JsonNode::class.java).readValues<JsonNode>(content).readAll()
 
-    private fun toRun(node: JsonNode) = BackupRunDto(
+    private fun toRun(node: JsonNode) = BackupRunResponse(
         timestamp = node.textOrNull("timestamp"),
         outcome = node.textOrNull("outcome"),
         message = node.textOrNull("message"),
@@ -187,7 +188,7 @@ class BackupStatusService(
         reason = node.textOrNull("reason")
     )
 
-    private fun toHistoryEntry(node: JsonNode, kind: String) = BackupHistoryEntryDto(
+    private fun toHistoryEntry(node: JsonNode, kind: String) = BackupHistoryEntryResponse(
         kind = kind,
         timestamp = node.textOrNull("timestamp"),
         outcome = node.textOrNull("outcome"),

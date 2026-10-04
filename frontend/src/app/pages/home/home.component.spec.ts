@@ -153,15 +153,24 @@ describe('HomeComponent', () => {
     expect(userService.changePassword).not.toHaveBeenCalled();
   });
 
+  it('defaults to the favourite clients tab', () => {
+    expect(component.selectedTabIndex).toBe(0);
+  });
+
   it('initTabSync sets selectedTabIndex from query param', () => {
     queryParamMap$.next(convertToParamMap({ tab: 'hours' }));
-    expect(component.selectedTabIndex).toBe(1);
+    expect(component.selectedTabIndex).toBe(2);
+  });
+
+  it('initTabSync keeps the favourite clients tab for an unknown query param', () => {
+    queryParamMap$.next(convertToParamMap({ tab: 'unknown' }));
+    expect(component.selectedTabIndex).toBe(0);
   });
 
   it('onTabIndexChange writes tab to URL', () => {
     routeSnapshot.queryParamMap = convertToParamMap({});
 
-    component.onTabIndexChange(2);
+    component.onTabIndexChange(3);
 
     expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
@@ -171,7 +180,7 @@ describe('HomeComponent', () => {
   });
 
   it('onTabIndexChange does not navigate when already on tab', () => {
-    routeSnapshot.queryParamMap = convertToParamMap({ tab: 'favorites' });
+    routeSnapshot.queryParamMap = convertToParamMap({ tab: 'clients' });
 
     component.onTabIndexChange(0);
 

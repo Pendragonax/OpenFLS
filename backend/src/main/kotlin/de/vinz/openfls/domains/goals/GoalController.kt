@@ -1,15 +1,17 @@
 package de.vinz.openfls.domains.goals
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.goals.dtos.GoalDto
-import de.vinz.openfls.domains.goals.services.GoalService
-import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.goals.dto.GoalCreateRequest
+import de.vinz.openfls.domains.goals.dto.GoalCreateResult
+import de.vinz.openfls.domains.goals.dto.GoalDeleteResult
+import de.vinz.openfls.domains.goals.dto.GoalUpdateRequest
+import de.vinz.openfls.domains.goals.dto.GoalUpdateResult
+import de.vinz.openfls.domains.goals.service.GoalService
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,131 +19,100 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/goals")
 class GoalController(
-        private val goalService: GoalService,
-        private val accessService: AccessService
+    private val goalService: GoalService,
+    private val accessService: AccessService,
+    private val performanceLoggingService: PerformanceLoggingService
 ) {
 
     private val logger: Logger = LoggerFactory.getLogger(GoalController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
+    @PostMapping
+    fun create(@Valid @RequestBody request: GoalCreateRequest): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
 
-    @PostMapping("")
-    fun create(@Valid @RequestBody valueDto: GoalDto
-    ): Any {
+        if (!accessService.canModifyAssistancePlan(request.assistancePlanId))
+            return forbidden("no permission to create goals for this assistance plan")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.canModifyAssistancePlan(valueDto.assistancePlanId))
-                throw IllegalArgumentException("no permission to create goals to this assistance plan")
-
-            val dto = goalService.create(valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (val result = goalService.create(request)) {
+                is GoalCreateResult.Success -> ResponseEntity.ok(result.response)
+                is GoalCreateResult.AssistancePlanNotFound -> ResponseEntity.badRequest().body(result.message)
+                is GoalCreateResult.InstitutionNotFound -> ResponseEntity.badRequest().body(result.message)
+                is GoalCreateResult.HourTypeNotFound -> ResponseEntity.badRequest().body(result.message)
+                is GoalCreateResult.CorridorHoursNotAllowed -> ResponseEntity.badRequest().body(result.message)
             }
-
-            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
     @PutMapping("{id}")
-    fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: GoalDto
-    ): Any {
+    fun update(@PathVariable id: Long, @Valid @RequestBody request: GoalUpdateRequest): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.canModifyAssistancePlan(request.assistancePlanId))
+            return forbidden("no permission to update this goal for this assistance plan")
+        if (id != request.id)
+            return ResponseEntity.badRequest().body("path id and request id are not the same")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.canModifyAssistancePlan(valueDto.assistancePlanId))
-                throw IllegalArgumentException("no permission to update this goal to this assistance plan")
-            if (id != valueDto.id)
-                throw java.lang.IllegalArgumentException("path id and dto id are not the same")
-            if (!goalService.existsById(id))
-                throw IllegalArgumentException("goal not found")
-
-            val dto = goalService.update(valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (val result = goalService.update(request)) {
+                is GoalUpdateResult.Success -> ResponseEntity.ok(result.response)
+                GoalUpdateResult.NotFound -> goalNotFound()
+                is GoalUpdateResult.AssistancePlanNotFound -> ResponseEntity.badRequest().body(result.message)
+                is GoalUpdateResult.InstitutionNotFound -> ResponseEntity.badRequest().body(result.message)
+                is GoalUpdateResult.HourTypeNotFound -> ResponseEntity.badRequest().body(result.message)
+                is GoalUpdateResult.HourNotInGoal -> ResponseEntity.badRequest().body(result.message)
+                is GoalUpdateResult.CorridorHoursNotAllowed -> ResponseEntity.badRequest().body(result.message)
             }
-
-            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("update", startMs, logger)
         }
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.isAdmin())
+            return forbidden("no permission to delete this goal")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.isAdmin())
-                throw IllegalArgumentException("no permission to delete this goal to this assistance plan")
-            if (!goalService.existsById(id))
-                throw IllegalArgumentException("goal not found")
-
-            val dto = goalService.getDtoById(id)
-            goalService.delete(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (val result = goalService.delete(id)) {
+                is GoalDeleteResult.Success -> ResponseEntity.ok(result.response)
+                GoalDeleteResult.NotFound -> goalNotFound()
             }
-
-            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("delete", startMs, logger)
         }
     }
 
     @GetMapping("assistance_plan/{id}")
     fun getByAssistancePlanId(@PathVariable id: Long): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = goalService.getByAssistancePlanId(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getByAssistancePlanId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ResponseEntity.ok(goalService.getByAssistancePlanId(id))
+        } catch (ex: Exception) {
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getByAssistancePlanId", startMs, logger)
         }
     }
+
+    private fun goalNotFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("goal not found")
+
+    private fun forbidden(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.FORBIDDEN).body(message)
 }

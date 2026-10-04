@@ -1,24 +1,14 @@
 package de.vinz.openfls.domains.clients
 
-import de.vinz.openfls.domains.clients.archive.ClientArchiveActionRequest
-import de.vinz.openfls.domains.clients.archive.ClientArchiveService
-import de.vinz.openfls.domains.clients.archive.ClientArchiveStateException
-import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportFormat
-import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportService
-import de.vinz.openfls.domains.clients.archive.export.ClientArchiveExportStateException
-import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportDownloadLinkDto
-import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportRequestDto
-import de.vinz.openfls.domains.clients.archive.export.dtos.ClientArchiveExportStatusDto
-import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryDto
-import de.vinz.openfls.domains.clients.archive.dtos.ClientArchiveHistoryEntryReadDto
-import de.vinz.openfls.domains.employees.dtos.EmployeeDto
-import de.vinz.openfls.domains.employees.services.EmployeeService
-import de.vinz.openfls.domains.permissions.AccessService
+import de.vinz.openfls.domains.clients.dto.ClientArchiveHistoryEntryResponse
+import de.vinz.openfls.domains.clients.dto.ClientArchiveHistoryResult
+import de.vinz.openfls.domains.clients.dto.ClientArchiveResult
+import de.vinz.openfls.domains.clients.entity.ClientArchiveActionType
+import de.vinz.openfls.domains.clients.service.ClientArchiveService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -30,7 +20,7 @@ import org.springframework.test.web.servlet.post
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@WebMvcTest(ClientArchiveController::class, properties = ["logging.performance=false"])
+@WebMvcTest(ClientArchiveController::class)
 @AutoConfigureMockMvc(addFilters = false)
 class ClientArchiveControllerWebMvcTest {
 
@@ -41,324 +31,104 @@ class ClientArchiveControllerWebMvcTest {
     lateinit var clientArchiveService: ClientArchiveService
 
     @MockitoBean
-    lateinit var clientArchiveExportService: ClientArchiveExportService
+    lateinit var performanceLoggingService: PerformanceLoggingService
 
-    @MockitoBean
-    lateinit var employeeService: EmployeeService
-
-    @MockitoBean
-    lateinit var accessService: AccessService
+    private val archiveDate = LocalDate.of(2026, 5, 23)
 
     @Test
-    fun getArchiveHistory_returnsReadDtosInNewestFirstOrder() {
+    fun getArchiveHistory_returnsEntriesInGivenOrder() {
         // Given
-        val clientId = 17L
-        val newest = ClientArchiveHistoryEntryReadDto().apply {
-            id = 2L
-            actionType = de.vinz.openfls.domains.clients.archive.ClientArchiveActionType.REACTIVATE
-            actionDate = LocalDate.of(2026, 5, 24)
-            actionTimestamp = LocalDateTime.of(2026, 5, 24, 10, 45)
-            reason = "Reactivated"
-            remark = "Back to active"
-            executingEmployeeId = 8L
-            executingEmployeeFirstname = "Anna"
-            executingEmployeeLastname = "Lead"
-        }
-        val older = ClientArchiveHistoryEntryReadDto().apply {
-            id = 1L
-            actionType = de.vinz.openfls.domains.clients.archive.ClientArchiveActionType.ARCHIVE
-            actionDate = LocalDate.of(2026, 5, 23)
-            actionTimestamp = LocalDateTime.of(2026, 5, 23, 10, 30)
-            reason = "Archived by request"
-            remark = "Initial archive"
-            executingEmployeeId = 8L
-            executingEmployeeFirstname = "Anna"
-            executingEmployeeLastname = "Lead"
-        }
-        given(clientArchiveService.getArchiveHistory(clientId)).willReturn(listOf(newest, older))
+        val newest = entry(2L, ClientArchiveActionType.REACTIVATE, LocalDateTime.of(2026, 5, 24, 10, 45))
+        val older = entry(1L, ClientArchiveActionType.ARCHIVE, LocalDateTime.of(2026, 5, 23, 10, 30))
+        given(clientArchiveService.getHistory(17L)).willReturn(ClientArchiveHistoryResult.Success(listOf(newest, older)))
 
         // When
-        val result = mockMvc.get("/clients/$clientId/archive/history").andReturn()
+        val result = mockMvc.get("/clients/17/archive/history").andReturn()
 
         // Then
         assertThat(result.response.status).isEqualTo(200)
-        assertThat(result.response.contentAsString).contains("\"id\":2")
-        assertThat(result.response.contentAsString).contains("\"id\":1")
         assertThat(result.response.contentAsString.indexOf("\"id\":2")).isLessThan(
             result.response.contentAsString.indexOf("\"id\":1")
         )
     }
 
     @Test
+    fun getArchiveHistory_withoutPermission_returnsForbidden() {
+        given(clientArchiveService.getHistory(17L)).willReturn(ClientArchiveHistoryResult.Forbidden)
+
+        assertThat(mockMvc.get("/clients/17/archive/history").andReturn().response.status).isEqualTo(403)
+    }
+
+    @Test
+    fun getArchiveHistory_unknownClient_returnsNotFound() {
+        given(clientArchiveService.getHistory(17L)).willReturn(ClientArchiveHistoryResult.NotFound)
+
+        assertThat(mockMvc.get("/clients/17/archive/history").andReturn().response.status).isEqualTo(404)
+    }
+
+    @Test
     fun archive_withPermission_returnsHistoryEntry() {
         // Given
-        val clientId = 17L
-        val archiveDate = LocalDate.of(2026, 5, 23)
-        val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
-        val entry = ClientArchiveHistoryEntryDto().apply {
-            id = 19L
-            actionType = de.vinz.openfls.domains.clients.archive.ClientArchiveActionType.ARCHIVE
-            actionDate = archiveDate
-            actionTimestamp = LocalDateTime.of(2026, 5, 23, 10, 30)
-            reason = "Client requested archive"
-            remark = "Initial archive"
-            executingEmployeeId = employeeId
-            executingEmployeeFirstname = "Anna"
-            executingEmployeeLastname = "Lead"
-        }
-        given(accessService.getId()).willReturn(employeeId)
-        given(accessService.isAdmin()).willReturn(false)
-        given(accessService.getLeadingInstitutionIds()).willReturn(listOf(3L))
-        given(employeeService.getEmployeeDtoById(employeeId, false)).willReturn(employeeDto)
-        given(
-            clientArchiveService.archive(
-                eq(clientId),
-                eq(archiveDate),
-                eq("Client requested archive"),
-                eq("Initial archive"),
-                any()
-            )
-        ).willReturn(entry)
+        given(clientArchiveService.archive(17L, archiveDate, "Client requested archive", "Initial archive")).willReturn(
+            ClientArchiveResult.Success(entry(19L, ClientArchiveActionType.ARCHIVE, LocalDateTime.of(2026, 5, 23, 10, 30)))
+        )
 
         // When
-        val result = mockMvc.post("/clients/$clientId/archive") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """
-                {
-                  "actionDate": "2026-05-23",
-                  "reason": "Client requested archive",
-                  "remark": "Initial archive"
-                }
-            """.trimIndent()
-        }.andReturn()
+        val result = postJson("/clients/17/archive")
 
         // Then
         assertThat(result.response.status).isEqualTo(200)
         assertThat(result.response.contentAsString).contains("\"id\":19")
-        assertThat(result.response.contentAsString).contains("\"reason\":\"Client requested archive\"")
+        assertThat(result.response.contentAsString).contains("\"actionType\":\"ARCHIVE\"")
     }
 
     @Test
     fun archive_withoutPermission_returnsForbidden() {
-        // Given
-        val clientId = 17L
-        val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Employee"
-        }
-        given(accessService.getId()).willReturn(employeeId)
-        given(accessService.isAdmin()).willReturn(false)
-        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, false)).willReturn(employeeDto)
-        given(
-            clientArchiveService.archive(
-                eq(clientId),
-                eq(LocalDate.of(2026, 5, 23)),
-                eq("Client requested archive"),
-                eq("Initial archive"),
-                any()
-            )
-        ).willThrow(de.vinz.openfls.exceptions.UserNotAllowedException())
+        given(clientArchiveService.archive(17L, archiveDate, "Client requested archive", "Initial archive"))
+            .willReturn(ClientArchiveResult.Forbidden)
 
-        // When
-        val result = mockMvc.post("/clients/$clientId/archive") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """
-                {
-                  "actionDate": "2026-05-23",
-                  "reason": "Client requested archive",
-                  "remark": "Initial archive"
-                }
-            """.trimIndent()
-        }.andReturn()
-
-        // Then
-        assertThat(result.response.status).isEqualTo(403)
+        assertThat(postJson("/clients/17/archive").response.status).isEqualTo(403)
     }
 
     @Test
-    fun reactivate_duplicateState_returnsConflict() {
-        // Given
-        val clientId = 17L
-        val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
-        given(accessService.getId()).willReturn(employeeId)
-        given(accessService.isAdmin()).willReturn(true)
-        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
-        given(
-            clientArchiveService.reactivate(
-                eq(clientId),
-                eq(LocalDate.of(2026, 5, 23)),
-                eq("Client is active again"),
-                eq("Reactivated"),
-                any()
-            )
-        ).willThrow(ClientArchiveStateException("client is not archived"))
+    fun archive_alreadyArchived_returnsConflict() {
+        given(clientArchiveService.archive(17L, archiveDate, "Client requested archive", "Initial archive"))
+            .willReturn(ClientArchiveResult.AlreadyArchived)
 
-        // When
-        val result = mockMvc.post("/clients/$clientId/reactivate") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """
-                {
-                  "actionDate": "2026-05-23",
-                  "reason": "Client is active again",
-                  "remark": "Reactivated"
-                }
-            """.trimIndent()
-        }.andReturn()
-
-        // Then
-        assertThat(result.response.status).isEqualTo(409)
+        assertThat(postJson("/clients/17/archive").response.status).isEqualTo(409)
     }
 
     @Test
-    fun requestExport_withPermission_returnsDownloadStatus() {
-        // Given
-        val clientId = 17L
-        val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
-        val downloadLink = ClientArchiveExportDownloadLinkDto().apply {
-            this.downloadLink = "/clients/$clientId/archive/export/token-1"
-            downloadLinkExpiresAt = LocalDateTime.of(2026, 6, 13, 12, 0)
-        }
-        val status = ClientArchiveExportStatusDto().apply {
-            ready = true
-            format = ClientArchiveExportFormat.JSON
-            requestedAt = LocalDateTime.of(2026, 6, 13, 11, 15)
-            requestedByEmployeeId = employeeId
-            this.downloadLink = downloadLink
-        }
-        given(accessService.getId()).willReturn(employeeId)
-        given(accessService.isAdmin()).willReturn(true)
-        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
-        given(
-            clientArchiveExportService.requestExport(
-                eq(clientId),
-                eq(ClientArchiveExportFormat.JSON),
-                eq(false),
-                any()
-            )
-        ).willReturn(status)
+    fun archive_unknownClient_returnsNotFound() {
+        given(clientArchiveService.archive(17L, archiveDate, "Client requested archive", "Initial archive"))
+            .willReturn(ClientArchiveResult.NotFound)
 
-        // When
-        val result = mockMvc.post("/clients/$clientId/archive/export") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """{"format":"JSON","anonymize":false}"""
-        }.andReturn()
-
-        // Then
-        assertThat(result.response.status).isEqualTo(200)
-        assertThat(result.response.contentAsString).contains("\"downloadLink\":\"/clients/$clientId/archive/export/token-1\"")
+        assertThat(postJson("/clients/17/archive").response.status).isEqualTo(404)
     }
 
     @Test
-    fun requestExport_withAnonymizeTrue_forwardsFlagToService() {
-        // Given
-        val clientId = 17L
-        val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
-        val status = ClientArchiveExportStatusDto().apply {
-            ready = true
-            format = ClientArchiveExportFormat.JSON
-            requestedAt = LocalDateTime.of(2026, 6, 13, 11, 15)
-            requestedByEmployeeId = employeeId
-        }
-        given(accessService.getId()).willReturn(employeeId)
-        given(accessService.isAdmin()).willReturn(true)
-        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
-        given(
-            clientArchiveExportService.requestExport(
-                eq(clientId),
-                eq(ClientArchiveExportFormat.JSON),
-                eq(true),
-                any()
-            )
-        ).willReturn(status)
+    fun reactivate_notArchived_returnsConflict() {
+        given(clientArchiveService.reactivate(17L, archiveDate, "Client requested archive", "Initial archive"))
+            .willReturn(ClientArchiveResult.NotArchived)
 
-        // When
-        val result = mockMvc.post("/clients/$clientId/archive/export") {
-            contentType = MediaType.APPLICATION_JSON
-            content = """{"format":"JSON","anonymize":true}"""
-        }.andReturn()
-
-        // Then
-        assertThat(result.response.status).isEqualTo(200)
+        assertThat(postJson("/clients/17/reactivate").response.status).isEqualTo(409)
     }
 
-    @Test
-    fun getExportStatus_withPermission_returnsCurrentLink() {
-        // Given
-        val clientId = 17L
-        val employeeId = 8L
-        val employeeDto = EmployeeDto().apply {
-            id = employeeId
-            firstName = "Anna"
-            lastName = "Lead"
-        }
-        val downloadLink = ClientArchiveExportDownloadLinkDto().apply {
-            this.downloadLink = "/clients/$clientId/archive/export/token-1"
-            downloadLinkExpiresAt = LocalDateTime.of(2026, 6, 13, 12, 0)
-        }
-        val status = ClientArchiveExportStatusDto().apply {
-            ready = true
-            format = ClientArchiveExportFormat.JSON
-            requestedAt = LocalDateTime.of(2026, 6, 13, 11, 15)
-            requestedByEmployeeId = employeeId
-            this.downloadLink = downloadLink
-        }
-        given(accessService.getId()).willReturn(employeeId)
-        given(accessService.isAdmin()).willReturn(true)
-        given(accessService.getLeadingInstitutionIds()).willReturn(emptyList())
-        given(employeeService.getEmployeeDtoById(employeeId, true)).willReturn(employeeDto)
-        given(clientArchiveExportService.getExportStatus(eq(clientId), any())).willReturn(status)
+    private fun postJson(url: String) = mockMvc.post(url) {
+        contentType = MediaType.APPLICATION_JSON
+        content = """{"actionDate":"2026-05-23","reason":"Client requested archive","remark":"Initial archive"}"""
+    }.andReturn()
 
-        // When
-        val result = mockMvc.get("/clients/$clientId/archive/export").andReturn()
-
-        // Then
-        assertThat(result.response.status).isEqualTo(200)
-        assertThat(result.response.contentAsString).contains("\"ready\":true")
-    }
-
-    @Test
-    fun downloadExport_withExpiredToken_returnsGone() {
-        // Given
-        val clientId = 17L
-        val downloadToken = "token-1"
-        given(
-            clientArchiveExportService.downloadExport(
-                clientId,
-                downloadToken
-            )
-        ).willThrow(ClientArchiveExportStateException("export unavailable"))
-
-        // When
-        val result = mockMvc.get("/clients/$clientId/archive/export/$downloadToken").andReturn()
-
-        // Then
-        assertThat(result.response.status).isEqualTo(410)
-    }
-
+    private fun entry(id: Long, actionType: ClientArchiveActionType, timestamp: LocalDateTime) =
+        ClientArchiveHistoryEntryResponse(
+            id = id,
+            actionType = actionType,
+            actionDate = timestamp.toLocalDate(),
+            actionTimestamp = timestamp,
+            reason = "Reason",
+            remark = "Remark",
+            executingEmployeeId = 8L,
+            executingEmployeeFirstname = "Anna",
+            executingEmployeeLastname = "Lead"
+        )
 }

@@ -1,0 +1,445 @@
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {combineLatest, Observable, ReplaySubject} from "rxjs";
+import {ActivatedRoute} from "@angular/router";
+import {UntypedFormControl, UntypedFormGroup} from "@angular/forms";
+import {HourReportService} from "../../shared/services/hour-report.service";
+import {HourReportRow} from "../../shared/dtos/hour-report-row.dto";
+import {Location} from '@angular/common';
+import {HourTypeDto} from "../../shared/dtos/hour-type-dto.model";
+import {HourTypeService} from "../../shared/services/hour-type.service";
+import {InstitutionService} from "../../shared/services/institution.service";
+import {InstitutionDto} from "../../shared/dtos/institution-dto.model";
+import {SponsorService} from "../../shared/services/sponsor.service";
+import {SponsorDto} from "../../shared/dtos/sponsor-dto.model";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS, NativeDateAdapter} from "@angular/material/core";
+import {EHourReportType} from "./enums/EHourReportType";
+import {Converter} from "../../shared/services/converter.helper";
+import {
+  HourReportValueTypeInfoModalComponent
+} from "./modals/hour-report-valuetype-info-modal/hour-report-value-type-info-modal.component";
+import {MatDialog} from "@angular/material/dialog";
+import { HttpErrorResponse, HttpStatusCode } from "@angular/common/http";
+import {
+  HourReportPermissionInfoModalComponent
+} from "./modals/hour-report-permission-info-modal/hour-report-permission-info-modal.component";
+import {DateService} from "../../shared/services/date.service";
+import {
+  HourReportMonthlySummaryService
+} from "./services/hour-report-monthly-summary.service";
+import {
+  HourReportMonthlySummaryDto
+} from "./dtos/hour-report-monthly-summary-dto";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ObjectTableRowColors} from '../../shared/components/object-table/object-table.component';
+import {AssistancePlanHourMode} from '../../shared/dtos/assistance-plan-hour-mode.model';
+
+@Component({
+    selector: 'app-hour-report',
+    templateUrl: './hour-report.component.html',
+    styleUrls: ['./hour-report.component.css'],
+    providers: [
+        { provide: MAT_DATE_LOCALE, useValue: 'de-DE' },
+        {
+            provide: DateAdapter,
+            useClass: NativeDateAdapter,
+            deps: [MAT_DATE_LOCALE],
+        },
+        { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
+    ],
+    standalone: false
+})
+export class HourReportComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
+  readonly FIXED_COLUMN_FROM_INDEX: number = 2
+  readonly COMBINATION_COLUMN_NAME: string = "Gesamt"
+  readonly CLIENT_COLUMN_HEADER: string = "Klient"
+  readonly ASSISTANCE_PLAN_START_COLUMN_HEADER: string = "Start"
+  readonly ASSISTANCE_PLAN_END_COLUMN_HEADER: string = "Ende"
+  readonly PERIOD_MODE_YEARLY: number = 1
+  readonly PERIOD_MODE_MONTHLY: number = 2
+
+  columns$: ReplaySubject<string[]> = new ReplaySubject<string[]>()
+  data$: ReplaySubject<string[][]> = new ReplaySubject()
+  columnFixedWidthFromIndex$: ReplaySubject<number> = new ReplaySubject<number>()
+  boldColumnIndices$: ReplaySubject<number[]> = new ReplaySubject<number[]>()
+
+  columns: string[] = []
+  data: string[][] = []
+  rowColors: Map<number, ObjectTableRowColors> = new Map()
+  rowDescriptions: Map<number, string> = new Map()
+  columnFixedWidthFromIndex: number = 0
+  boldColumnIndices: number[] = [2]
+
+  selectedPeriodMode: number = this.PERIOD_MODE_YEARLY;
+  hourTypeAll = new HourTypeDto({title:"alle"})
+  hourTypes: HourTypeDto[] = []
+  selectedHourType: HourTypeDto | null = null;
+  areaAll = new InstitutionDto({name:"alle"})
+  areas: InstitutionDto[] = [this.areaAll]
+  selectedArea: InstitutionDto | null = null;
+  sponsorAll = new SponsorDto({name:"alle"})
+  sponsors: SponsorDto[] = [this.sponsorAll]
+  selectedSponsor: SponsorDto | null = null;
+  valueTypes: string[] = Object.values(EHourReportType);
+  selectedValueType: EHourReportType | null = null;
+  year: number = new Date().getFullYear() + 1;
+  month: number = 0;
+  outputString: string = "";
+  generationAllowed: boolean = false;
+
+  // Status
+  isGenerating: boolean = false;
+  forbiddenRequest: boolean = false;
+  errorOccurred: boolean = false;
+
+  selectionForm: UntypedFormGroup = new UntypedFormGroup({
+    periodModeControl: new UntypedFormControl({value: '2', disabled: this.isGenerating}),
+    hourTypeControl: new UntypedFormControl({disabled: this.isGenerating}),
+    areaControl: new UntypedFormControl({disabled: this.isGenerating}),
+    sponsorControl: new UntypedFormControl({disabled: this.isGenerating}),
+    valueTypeControl: new UntypedFormControl({disabled: this.isGenerating})
+  });
+
+  constructor(private route: ActivatedRoute,
+              private hourReportService: HourReportService,
+              private hourTypeService: HourTypeService,
+              private institutionService: InstitutionService,
+              private sponsorService: SponsorService,
+              private dateService: DateService,
+              private hourReportMonthlySummaryService: HourReportMonthlySummaryService,
+              private converter: Converter,
+              private dialog: MatDialog,
+              private location: Location) {
+    this.boldColumnIndices$.next(this.boldColumnIndices)
+  }
+
+  get periodModeControl() { return this.selectionForm.controls['periodModeControl']; }
+  get hourTypeControl() { return this.selectionForm.controls['hourTypeControl']; }
+  get areaControl() { return this.selectionForm.controls['areaControl']; }
+  get sponsorControl() { return this.selectionForm.controls['sponsorControl']; }
+  get valueTypeControl() { return this.selectionForm.controls['valueTypeControl']; }
+
+  ngOnInit(): void {
+    this.isGenerating = true;
+    this.initFormControlSubscriptions();
+    this.loadValues();
+  }
+
+  loadValues() {
+    combineLatest([
+      this.hourTypeService.allValues$,
+      this.institutionService.allValues$,
+      this.sponsorService.allValues$
+    ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(([hourTypes, institutions, sponsors]) => {
+      this.hourTypes = []
+      this.hourTypes.push(...hourTypes);
+      this.areas = [this.areaAll]
+      this.areas.push(...institutions);
+      this.sponsors = [this.sponsorAll]
+      this.sponsors.push(...sponsors);
+      this.valueTypes = Object.values(EHourReportType);
+      this.columnFixedWidthFromIndex$.next(this.FIXED_COLUMN_FROM_INDEX);
+      this.loadURLParams();
+    })
+  }
+
+  initFormControlSubscriptions() {
+    this.periodModeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+      if (this.month == 0) {
+        this.month = new Date().getMonth() + 1
+      }
+      this.selectedPeriodMode = value;
+      this.updateUrl();
+      this.validateGenerationStatus();
+    });
+
+    this.hourTypeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+      this.selectedHourType = this.hourTypes.find(it => it.id == value) ?? null;
+      this.updateUrl();
+      this.validateGenerationStatus();
+    });
+
+    this.areaControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+      this.selectedArea = this.areas.find(it => it.id == value) ?? null;
+      this.updateUrl();
+      this.validateGenerationStatus();
+    });
+
+    this.sponsorControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+      this.selectedSponsor = this.sponsors.find(it => it.id == value) ?? null;
+      this.updateUrl();
+      this.validateGenerationStatus();
+    });
+
+    this.valueTypeControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+      this.selectedValueType = this.getEnumByValue(EHourReportType, value) ?? null;
+      this.updateUrl();
+      this.validateGenerationStatus();
+    });
+  }
+
+  loadURLParams() {
+    this.route.params
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+      this.periodModeControl.setValue(params['month'] != null && params['month'] != '0' ? '2' : '1');
+      this.year = params['year'] != null ? +params['year'] : new Date(Date.now()).getFullYear();
+
+      if (params['month'] != null) {
+        this.month = params['month'] <= 0 || params['month'] > 12 ? 1 : +params['month'];
+      }
+      this.hourTypeControl.setValue(this.hourTypes.find(value => value.id == params['hourTypeId'])?.id);
+      this.areaControl.setValue(this.areas.find(value => value.id == params['areaId'])?.id);
+      this.sponsorControl.setValue(this.sponsors.find(value => value.id == params['sponsorId'])?.id);
+      this.valueTypeControl.setValue(this.valueTypes.find(value => value == params['valueTypeId']));
+
+      this.isGenerating = false;
+    });
+  }
+
+  nextYear() {
+    this.year += 1;
+
+    this.updateUrl();
+  }
+
+  prevYear() {
+    this.year -= 1;
+
+    this.updateUrl();
+  }
+
+  nextMonth() {
+    if (this.month == 12) {
+      this.month = 1;
+      this.year += 1;
+    } else {
+      this.month += 1;
+    }
+
+    this.updateUrl();
+  }
+
+  prevMonth() {
+    if (this.month == 1) {
+      this.month = 12;
+      this.year -= 1;
+    } else {
+      this.month -= 1;
+    }
+
+    this.updateUrl();
+  }
+
+  loadTable() {
+    if (this.selectedValueType == null && this.selectedPeriodMode == this.PERIOD_MODE_YEARLY)
+      return
+
+    this.isGenerating = true
+    this.forbiddenRequest = false
+    this.errorOccurred = false
+
+    this.updateFixedAndBoldTableColumns()
+
+    // Year
+    if (this.selectedPeriodMode == this.PERIOD_MODE_YEARLY) {
+      this.loadYearlyData()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(this.getDataObserver(this.getTableHeaderStrings()))
+    }
+    // Month
+    else {
+      this.loadMonthlyData()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(this.getDataObserverWithoutSeparateHeader())
+    }
+  }
+
+  getLocalDateString(dateString: string | null): string {
+    return this.converter.getLocalDateString(dateString);
+  }
+
+  getMonthName(month: number): string {
+    return new Date(0, month - 1).toLocaleString('de-DE', { month: 'long' });
+  }
+
+  openPermissionInfoModal(event) {
+    event.stopPropagation()
+    this.dialog.open(HourReportPermissionInfoModalComponent)
+  }
+
+  openValueTypeInfoModal(event) {
+    event.stopPropagation();
+    this.dialog.open(HourReportValueTypeInfoModalComponent)
+  }
+
+  private updateFixedAndBoldTableColumns() {
+    if (this.selectedPeriodMode == this.PERIOD_MODE_YEARLY) {
+      this.columnFixedWidthFromIndex = 0
+      this.boldColumnIndices = [3]
+    } else if (this.selectedPeriodMode == this.PERIOD_MODE_MONTHLY) {
+      this.columnFixedWidthFromIndex = 0
+      this.boldColumnIndices = [0]
+    }
+
+    this.columnFixedWidthFromIndex$.next(this.columnFixedWidthFromIndex)
+    this.boldColumnIndices$.next(this.boldColumnIndices)
+  }
+
+  private loadYearlyData(): Observable<HourReportRow[]> {
+    return this.hourReportService.getHourReportByYear(
+      this.year,
+      this.selectedHourType?.id ?? null,
+      this.selectedArea?.id ?? null,
+      this.selectedSponsor?.id ?? null,
+      this.selectedValueType!!)
+  }
+
+  private loadMonthlyData(): Observable<HourReportMonthlySummaryDto> {
+    return this.hourReportMonthlySummaryService.getMonthlySummary(
+      this.year,
+      this.month,
+      this.selectedArea?.id ?? 0,
+      this.selectedSponsor?.id ?? 0,
+      this.selectedHourType?.id ?? 0)
+  }
+
+  private generateTableData(source: HourReportRow[]) {
+    this.rowColors = new Map()
+    this.rowDescriptions = new Map()
+    const data = source.map((value, rowIndex) => {
+      if (value.assistancePlanDto?.hourMode === AssistancePlanHourMode.CORRIDOR) {
+        this.rowColors.set(rowIndex, {
+          fontColor: '#000000',
+          backgroundColor: '#eef6ff'
+        })
+        this.rowDescriptions.set(rowIndex, 'Korridor-Hilfeplan')
+      } else if (value.assistancePlanDto?.id) {
+        this.rowDescriptions.set(rowIndex, 'Exakter Hilfeplan')
+      }
+
+      // client name
+      let result = [(value.clientDto?.lastName ?? "") + " " + (value.clientDto?.firstName ?? "unbekannt")];
+
+      // assistance plan end
+      result.push(this.getLocalDateString(value.assistancePlanDto?.start ?? null));
+      result.push(this.getLocalDateString(value.assistancePlanDto?.end ?? null));
+
+      for (let i = 0; i < value.values.length; i++) {
+        result.push(value.values[i].toString());
+      }
+      return result;
+    });
+
+    this.setTableData(data)
+  }
+
+  private setTableData(data: any[][]) {
+    this.data = data
+    this.data$.next(this.data)
+  }
+
+  private getTableHeaderStrings(): string[] {
+    let daysArray: string[] = [this.CLIENT_COLUMN_HEADER, this.ASSISTANCE_PLAN_START_COLUMN_HEADER, this.ASSISTANCE_PLAN_END_COLUMN_HEADER];
+
+    daysArray.push(this.COMBINATION_COLUMN_NAME)
+    for (let i = 1; i <= 12; i++) {
+      daysArray.push(i.toString().padStart(2, '0'));
+    }
+
+    return daysArray;
+  }
+
+  private updateUrl() {
+    let monthParam = this.selectedPeriodMode == 1 ? 0 : this.month
+    this.location.go(`hour_reports/${this.year}/${monthParam}/${this.selectedHourType?.id}/${this.selectedArea?.id}/${this.selectedSponsor?.id}/${this.selectedValueType}`);
+  }
+
+  private validateGenerationStatus() {
+    let yearlyGenerationAllowed = this.selectedPeriodMode == this.PERIOD_MODE_YEARLY &&
+      this.selectedValueType != null &&
+      this.selectedSponsor != null &&
+      this.selectedArea != null &&
+      this.selectedHourType != null
+
+    let monthlyGenerationAllowed = this.selectedPeriodMode == this.PERIOD_MODE_MONTHLY &&
+      this.selectedSponsor != null &&
+      this.selectedArea != null &&
+      this.selectedHourType != null
+
+    this.generationAllowed = yearlyGenerationAllowed || monthlyGenerationAllowed
+  }
+
+  private getDataObserverWithoutSeparateHeader() {
+    return {
+      next: (value: HourReportMonthlySummaryDto) => {
+        this.rowColors = new Map();
+        this.rowDescriptions = new Map();
+        value.rows.forEach((plan, index) => {
+          const rowIndex = index + 1;
+          if (plan.hourMode === AssistancePlanHourMode.CORRIDOR) {
+            this.rowColors.set(rowIndex, {fontColor: '#000000', backgroundColor: '#eef6ff'});
+            this.rowDescriptions.set(rowIndex, 'Korridor-Hilfeplan');
+          } else {
+            this.rowDescriptions.set(rowIndex, 'Exakter Hilfeplan');
+          }
+        });
+        let fullData = this.hourReportMonthlySummaryService.convertToArray(value)
+        let header = fullData[0]
+        let data = fullData.slice(1)
+        this.columns = header;
+        this.columns$.next(this.columns);
+        this.setTableData(data != undefined ? data : []);
+        this.isGenerating = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isGenerating = false
+        if (err.status == HttpStatusCode.Forbidden) {
+          this.forbiddenRequest = true
+        } else {
+          this.errorOccurred = true
+        }
+      }
+    };
+  }
+
+  private getDataObserver(header: string[]) {
+    return {
+      next: (value) => {
+        this.columns = header;
+        this.columns$.next(this.columns);
+        this.generateTableData(value);
+        this.isGenerating = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isGenerating = false
+        if (err.status == HttpStatusCode.Forbidden) {
+          this.forbiddenRequest = true
+        } else {
+          this.errorOccurred = true
+        }
+      }
+    };
+  }
+
+  private getEnumByValue<T>(enumObj: T, value: T[keyof T]): T[keyof T] | null {
+    for (const key in enumObj) {
+      if (enumObj[key] === value) {
+        return enumObj[key] as T[keyof T];
+      }
+    }
+    return null;
+  }
+}

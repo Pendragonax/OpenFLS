@@ -4,7 +4,7 @@ import {Base} from "./base.service";
 import {HttpClient, HttpResponse} from "@angular/common/http";
 import {Observable, map, tap} from "rxjs";
 import {environment} from "../../../environments/environment";
-import {ClientSoloDto} from "../dtos/client-solo-dto.model";
+import {ClientSelectionDto} from "../dtos/client-selection-dto.model";
 import {ClientForServiceEditingDto} from "../dtos/client-for-service-editing-dto.model";
 import {ClientArchiveHistoryEntryReadDto} from "../dtos/client-archive-history-entry-read-dto.model";
 import {ClientArchiveActionRequest} from "../dtos/client-archive-action-request.model";
@@ -32,11 +32,10 @@ export class ClientsService extends Base<ClientDto>{
     });
   }
 
-  getAllClientSoloDTOs(): Observable<ClientSoloDto[]> {
+  getAllForSelection(): Observable<ClientSelectionDto[]> {
     return this.http
-      .get<ClientSoloDto[]>(`${environment.api_url}${this.url}/solo`)
-      .pipe(map(data => data.map(item => this.transformToClientSoloDto(item)))
-      );
+      .get<ClientSelectionDto[]>(`${environment.api_url}${this.url}`)
+      .pipe(map(data => data.map(item => this.transformToClientSelectionDto(item))));
   }
 
   getByIdForServiceEditing(id: number): Observable<ClientForServiceEditingDto> {
@@ -141,7 +140,7 @@ export class ClientsService extends Base<ClientDto>{
     return 'client-archive-export.json';
   }
 
-  transformToClientSoloDto(data: any): ClientSoloDto {
+  transformToClientSelectionDto(data: any): ClientSelectionDto {
     return {
       id: data.id,
       firstName: data.firstName,

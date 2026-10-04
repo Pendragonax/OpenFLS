@@ -27,7 +27,6 @@ export class AbsenceService {
 
   create(date: Date) : Observable<EmployeeAbsenceDTO> {
     const value: CreateAbsenceDTO = {
-      employeeId: 0,
       absenceDate: this.converter.formatDate(date)
     };
     return this.http

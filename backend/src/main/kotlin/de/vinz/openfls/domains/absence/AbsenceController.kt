@@ -1,15 +1,13 @@
 package de.vinz.openfls.domains.absence
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.absence.dtos.CreateAbsenceDTO
-import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.domains.services.ServiceController
-import de.vinz.openfls.logback.PerformanceLogbackFilter
+import de.vinz.openfls.domains.absence.dto.AbsenceCreateRequest
+import de.vinz.openfls.domains.absence.service.AbsenceService
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
@@ -18,86 +16,52 @@ import java.time.LocalDate
 @RequestMapping("/absences")
 class AbsenceController(
     private val absenceService: AbsenceService,
-    private val accessService: AccessService
+    private val accessService: AccessService,
+    private val performanceLoggingService: PerformanceLoggingService
 ) {
 
-    private val logger: Logger = LoggerFactory.getLogger(ServiceController::class.java)
-
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
+    private val logger: Logger = LoggerFactory.getLogger(AbsenceController::class.java)
 
     @PostMapping
-    fun create(@Valid @RequestBody createAbsenceDTO: CreateAbsenceDTO): Any {
+    fun create(@Valid @RequestBody request: AbsenceCreateRequest): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            val startMs = System.currentTimeMillis()
-
-            val dto = absenceService.create(createAbsenceDTO.absenceDate)
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms for employee %d",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs,
-                    dto.employeeId))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(absenceService.create(request))
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
     @DeleteMapping("/{date}")
     fun remove(@PathVariable date: LocalDate): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            val startMs = System.currentTimeMillis()
-
-            absenceService.remove(date)
-
-            if (logPerformance) {
-                logger.info(String.format("%s remove took %s ms for employee %d",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs,
-                    accessService.getId()))
-            }
-
+            absenceService.delete(date)
             ResponseEntity.ok().build<Any>()
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("remove", startMs, logger)
         }
     }
 
     @GetMapping
     fun getAll(): Any {
+        // performance
+        val startMs = System.currentTimeMillis()
+
         return try {
-            val startMs = System.currentTimeMillis()
-
-            val dto = absenceService.getAllByEmployeeId(accessService.getId())
-
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms and found %d absences",
-                    PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                    System.currentTimeMillis() - startMs,
-                    dto.absenceDates.size))
-            }
-
-            ResponseEntity.ok(dto)
+            ResponseEntity.ok(absenceService.getAllByEmployeeId(accessService.getId()))
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getAll", startMs, logger)
         }
     }
 

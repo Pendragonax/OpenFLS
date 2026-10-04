@@ -2,11 +2,11 @@ package de.vinz.openfls.domains.logging.service
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
-import de.vinz.openfls.domains.logging.dto.LogEntryDto
-import de.vinz.openfls.domains.logging.dto.LogLevelDto
-import de.vinz.openfls.domains.logging.dto.LogPageDto
-import de.vinz.openfls.domains.logging.dto.LogQueryDto
-import de.vinz.openfls.domains.logging.dto.LogSettingsDto
+import de.vinz.openfls.domains.logging.dto.LogEntryResponse
+import de.vinz.openfls.domains.logging.dto.LogLevelResponse
+import de.vinz.openfls.domains.logging.dto.LogPageResponse
+import de.vinz.openfls.domains.logging.dto.LogQueryRequest
+import de.vinz.openfls.domains.logging.dto.LogSettingsResponse
 import org.slf4j.LoggerFactory
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Value
@@ -33,7 +33,8 @@ class LogAdministrationService(
     private val zone = ZoneId.systemDefault()
 
     @PostConstruct
-    fun captureStartupLevels() {
+    @Suppress("UnusedPrivateFunction")
+    private fun captureStartupLevels() {
         val context = LoggerFactory.getILoggerFactory() as LoggerContext
         startupRootLevel = context.getLogger(Logger.ROOT_LOGGER_NAME).level ?: Level.INFO
         startupClassLevels = context.loggerList.filter { it.name != Logger.ROOT_LOGGER_NAME }
@@ -46,17 +47,17 @@ class LogAdministrationService(
             .sorted { a, b -> b.compareTo(a) }.toList()
     }
 
-    fun entries(query: LogQueryDto): List<LogEntryDto> {
+    fun entries(query: LogQueryRequest): List<LogEntryResponse> {
         return page(query, 0, 5_000).content
     }
 
-    fun page(query: LogQueryDto, page: Int, size: Int): LogPageDto {
+    fun page(query: LogQueryRequest, page: Int, size: Int): LogPageResponse {
         val safePage = page.coerceAtLeast(0)
         // Keep the legacy non-paginated endpoint capped at 5,000 while the
         // paginated UI normally requests a much smaller page.
         val safeSize = size.coerceIn(1, 5_000)
         val offset = safePage.toLong() * safeSize
-        val retained = PriorityQueue<LogEntryDto>(compareBy { it.timestamp })
+        val retained = PriorityQueue<LogEntryResponse>(compareBy { it.timestamp })
         var total = 0L
         selectedDays(query).forEach { day ->
             streamEntries(logPath().resolve("open-fls-backend.$day.log")) { entry ->
@@ -69,7 +70,7 @@ class LogAdministrationService(
         val content = retained.toList().sortedByDescending { it.timestamp }
             .drop(offset.coerceAtMost(Int.MAX_VALUE.toLong()).toInt()).take(safeSize)
         val totalPages = if (total == 0L) 0 else ((total + safeSize - 1) / safeSize).toInt()
-        return LogPageDto(content, safePage, safeSize, total, totalPages, (safePage + 1) < totalPages)
+        return LogPageResponse(content, safePage, safeSize, total, totalPages, (safePage + 1) < totalPages)
     }
 
     fun deleteFrom(from: Instant?) {
@@ -92,7 +93,7 @@ class LogAdministrationService(
         }
     }
 
-    fun streamExport(query: LogQueryDto, output: OutputStream) {
+    fun streamExport(query: LogQueryRequest, output: OutputStream) {
         ZipOutputStream(output).use { zip ->
             selectedDays(query).sorted().forEach { day ->
                 val path = logPath().resolve("open-fls-backend.$day.log")
@@ -109,10 +110,10 @@ class LogAdministrationService(
         }
     }
 
-    fun settings(): LogSettingsDto {
+    fun settings(): LogSettingsResponse {
         val context = LoggerFactory.getILoggerFactory() as LoggerContext
-        return LogSettingsDto(context.getLogger(Logger.ROOT_LOGGER_NAME).level.levelStr,
-            context.loggerList.filter { it.level != null && it.name != "ROOT" }.map { LogLevelDto(it.name, it.level.levelStr) }.sortedBy { it.logger })
+        return LogSettingsResponse(context.getLogger(Logger.ROOT_LOGGER_NAME).level.levelStr,
+            context.loggerList.filter { it.level != null && it.name != "ROOT" }.map { LogLevelResponse(it.name, it.level.levelStr) }.sortedBy { it.logger })
     }
 
     fun setLevel(logger: String, level: String?) {
@@ -136,7 +137,7 @@ class LogAdministrationService(
         context.getLogger(Logger.ROOT_LOGGER_NAME).level = startupRootLevel
     }
 
-    private fun selectedDays(query: LogQueryDto): List<String> {
+    private fun selectedDays(query: LogQueryRequest): List<String> {
         val all = availableDays()
         if (query.all) return all
         val today = LocalDate.now(zone)
@@ -145,22 +146,22 @@ class LogAdministrationService(
         return all.filter { day -> LocalDate.parse(day) in from..to }
     }
 
-    private fun parse(path: Path): List<LogEntryDto> {
+    private fun parse(path: Path): List<LogEntryResponse> {
         if (!Files.exists(path)) return emptyList()
-        val result = mutableListOf<LogEntryDto>()
+        val result = mutableListOf<LogEntryResponse>()
         streamEntries(path) { result.add(it) }
         return result
     }
 
-    private fun streamEntries(path: Path, consumer: (LogEntryDto) -> Unit) {
+    private fun streamEntries(path: Path, consumer: (LogEntryResponse) -> Unit) {
         if (!Files.exists(path)) return
-        var current: LogEntryDto? = null
+        var current: LogEntryResponse? = null
         Files.newBufferedReader(path, StandardCharsets.UTF_8).use { reader ->
             reader.forEachLine { line ->
             val match = entryStart.matchEntire(line)
             if (match != null) {
                 current?.let(consumer)
-                current = LogEntryDto(Instant.parse(match.groupValues[1].replace(Regex("([+-]\\d{2})(\\d{2})$"), "$1:$2")).toString(), match.groupValues[3], match.groupValues[4], match.groupValues[2], match.groupValues[5])
+                current = LogEntryResponse(Instant.parse(match.groupValues[1].replace(Regex("([+-]\\d{2})(\\d{2})$"), "$1:$2")).toString(), match.groupValues[3], match.groupValues[4], match.groupValues[2], match.groupValues[5])
             } else if (current != null) {
                 // Continuation lines (exception stacktrace, "Caused by", "... N more") are
                 // kept separately so the UI can hide them behind a per-entry toggle.
@@ -171,7 +172,7 @@ class LogAdministrationService(
         current?.let(consumer)
     }
 
-    private fun matches(entry: LogEntryDto, query: LogQueryDto) = listOfNotNull(query.query?.let { entry.message.contains(it, true) || entry.logger.contains(it, true) || entry.stacktrace?.contains(it, true) == true }, query.level?.let { entry.level.equals(it, true) }, query.logger?.let { entry.logger.contains(it, true) }, query.thread?.let { entry.thread.contains(it, true) }).all { it }
-    private fun format(entry: LogEntryDto) = "${entry.timestamp.replace("Z", "+00:00").replace(Regex("([+-]\\d{2}):(\\d{2})$"), "$1$2")} [${entry.thread}] ${entry.level.padEnd(5)} ${entry.logger} - ${entry.message}" + (entry.stacktrace?.let { "\n$it" } ?: "")
+    private fun matches(entry: LogEntryResponse, query: LogQueryRequest) = listOfNotNull(query.query?.let { entry.message.contains(it, true) || entry.logger.contains(it, true) || entry.stacktrace?.contains(it, true) == true }, query.level?.let { entry.level.equals(it, true) }, query.logger?.let { entry.logger.contains(it, true) }, query.thread?.let { entry.thread.contains(it, true) }).all { it }
+    private fun format(entry: LogEntryResponse) = "${entry.timestamp.replace("Z", "+00:00").replace(Regex("([+-]\\d{2}):(\\d{2})$"), "$1$2")} [${entry.thread}] ${entry.level.padEnd(5)} ${entry.logger} - ${entry.message}" + (entry.stacktrace?.let { "\n$it" } ?: "")
     private fun logPath(): Path = Path.of(logDirectory).also { Files.createDirectories(it) }
 }

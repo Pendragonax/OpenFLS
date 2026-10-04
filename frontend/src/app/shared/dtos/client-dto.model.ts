@@ -1,6 +1,5 @@
 import {InstitutionDto} from "./institution-dto.model";
 import {CategoryTemplateDto} from "./category-template-dto.model";
-import {AssistancePlanDto} from "./assistance-plan-dto.model";
 
 export class ClientDto {
   id: number = 0
@@ -11,7 +10,9 @@ export class ClientDto {
   archived: boolean = false
   institution: InstitutionDto = new InstitutionDto()
   categoryTemplate: CategoryTemplateDto = new CategoryTemplateDto()
-  assistancePlans: AssistancePlanDto[] = []
+  institutionId: number = 0
+  categoryTemplateId: number = 0
+  categoryTemplateTitle: string = ""
 
   public toString = () : string => {
     return `${this.lastName} ${this.firstName}`;

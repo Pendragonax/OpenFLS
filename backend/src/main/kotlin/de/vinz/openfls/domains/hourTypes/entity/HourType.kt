@@ -1,0 +1,39 @@
+package de.vinz.openfls.domains.hourTypes.entity
+
+import de.vinz.openfls.domains.assistancePlans.entity.AssistancePlanHour
+import de.vinz.openfls.domains.services.entity.Service
+import jakarta.persistence.*
+import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.NotNull
+
+@Entity
+@Table(name = "hour_types")
+class HourType(
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Long = 0,
+
+        @field:NotEmpty(message = "Title is required.")
+        @Column(length = 64)
+        var title: String = "",
+
+        @field:NotNull
+        var price: Double = 0.0,
+
+        @OneToMany(mappedBy = "hourType", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        var services: MutableSet<Service> = mutableSetOf(),
+
+        @OneToMany(mappedBy = "hourType", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        var assistancePlanHours: MutableSet<AssistancePlanHour> = mutableSetOf()
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is HourType) return false
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode()
+    }
+
+}

@@ -1,0 +1,64 @@
+<mat-card class="tasks-card">
+  <div class="card-header">
+    <div class="card-header-title">
+      <mat-icon aria-hidden="true">checklist</mat-icon>
+      <span>Aufgaben</span>
+      @if (openTasks.length > 0) {
+        <span class="tasks-count">{{ openTasks.length }}</span>
+      }
+    </div>
+    <div class="card-header-actions">
+      <button mat-icon-button
+              color="primary"
+              [matTooltip]="showDoneTasks ? 'Erledigte ausblenden' : 'Erledigte einblenden'"
+              (click)="toggleDoneTasks()">
+        <mat-icon>{{ showDoneTasks ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <button mat-icon-button
+              color="primary"
+              matTooltip="Aufgabe hinzufügen"
+              (click)="openCreateModal()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  @if (visibleTasks.length === 0) {
+    <div class="card-empty">{{ showDoneTasks ? 'Es sind keine erledigten Aufgaben vorhanden.' : 'Es sind keine offenen Aufgaben vorhanden.' }}</div>
+  } @else {
+    <ul class="task-list">
+      @for (task of visibleTasks; track task.id) {
+        <li class="task-item"
+            [ngClass]="{'task-item--done': task.done, 'task-item--overdue': task.overdue}"
+            role="button"
+            tabindex="0"
+            [matTooltip]="task.done ? 'Details anzeigen' : 'Details anzeigen und abhaken'"
+            (click)="openDetailModal(task)"
+            (keydown.enter)="openDetailModal(task)">
+          <div class="task-title">{{ task.title }}</div>
+          @if (!task.done) {
+            <div class="task-row-actions">
+              <button mat-icon-button color="primary" class="task-edit-action" matTooltip="Aufgabe ändern" (click)="openEditModal(task, $event)"><mat-icon>edit</mat-icon></button>
+            </div>
+          }
+          @if (!task.done) {
+            <div class="task-meta">
+              <span>Angelegt von
+                <span [class.task-employee--own]="isOwnTask(task)">{{ task.createdByName }}</span>,
+                {{ getDateString(task.createdAt) }}</span>
+              <span>Fällig: {{ getDateString(task.dueDate) }}</span>
+            </div>
+          } @else {
+            <div class="task-meta">
+              <span>Erledigt von {{ task.completedByName }}, {{ getDateString(task.completedOn) }}</span>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+  @if (showDoneTasks) {
+    <mat-paginator [length]="completedTotal" [pageIndex]="completedPage" [pageSize]="10"
+                   [hidePageSize]="true" (page)="onCompletedPage($event)"></mat-paginator>
+  }
+</mat-card>

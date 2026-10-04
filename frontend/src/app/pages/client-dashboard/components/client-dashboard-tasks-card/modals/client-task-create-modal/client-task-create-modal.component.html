@@ -1,0 +1,37 @@
+<h1 mat-dialog-title>Neue Aufgabe</h1>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <div mat-dialog-content class="task-modal-content">
+    <mat-form-field appearance="outline" class="task-modal-field">
+      <mat-label>Titel</mat-label>
+      <input matInput formControlName="title" maxlength="128" required>
+      @if (form.controls.title.invalid && form.controls.title.touched) {
+        <mat-error>Bitte geben Sie einen Titel an.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="task-modal-field">
+      <mat-label>Beschreibung</mat-label>
+      <textarea matInput formControlName="description" rows="4" maxlength="1024"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="task-modal-field task-modal-field--date">
+      <mat-label>Fällig am</mat-label>
+      <input matInput
+             formControlName="dueDate"
+             [matDatepicker]="dueDatePicker"
+             required>
+      <mat-hint>Tag.Monat.Jahr (15.2.2000)</mat-hint>
+      <mat-datepicker-toggle matSuffix [for]="dueDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #dueDatePicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <div mat-dialog-actions class="justify-content-end">
+    <button mat-button type="button" (click)="cancel()">Abbrechen</button>
+    <button mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="form.invalid || isSubmitting">Anlegen</button>
+  </div>
+</form>

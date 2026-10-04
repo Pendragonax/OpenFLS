@@ -87,7 +87,7 @@ class MockServiceService {
 }
 
 class MockAssistancePlanService {
-  getEvaluationLeftById() {
+  getHoursLeftById() {
     return of({hourTypeEvaluation: []});
   }
 }

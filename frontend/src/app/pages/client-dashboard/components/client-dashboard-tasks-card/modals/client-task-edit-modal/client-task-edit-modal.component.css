@@ -1,0 +1,2 @@
+.task-modal-content { display: flex; flex-direction: column; gap: 4px; min-width: 320px; }
+.task-modal-content mat-form-field { width: 100%; }

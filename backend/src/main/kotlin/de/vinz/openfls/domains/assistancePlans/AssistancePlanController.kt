@@ -1,579 +1,144 @@
 package de.vinz.openfls.domains.assistancePlans
-import de.vinz.openfls.logging.StructuredLog
 
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanCreateDto
-import de.vinz.openfls.domains.assistancePlans.dtos.AssistancePlanUpdateDto
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationLeftService
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanEvaluationService
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanPreviewService
-import de.vinz.openfls.domains.assistancePlans.services.AssistancePlanService
-import de.vinz.openfls.domains.clients.ClientService
-import de.vinz.openfls.domains.permissions.AccessService
-import de.vinz.openfls.logback.PerformanceLogbackFilter
-import de.vinz.openfls.services.UserService
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanCreateRequest
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanCreateResult
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanDeleteResult
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanUpdateRequest
+import de.vinz.openfls.domains.assistancePlans.dto.AssistancePlanUpdateResult
+import de.vinz.openfls.domains.assistancePlans.service.AssistancePlanService
+import de.vinz.openfls.domains.permissions.service.AccessService
+import de.vinz.openfls.common.web.ExceptionResponseService
+import de.vinz.openfls.common.web.PerformanceLoggingService
 import jakarta.validation.Valid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDate
 
 @RestController
 @RequestMapping("/assistance_plans")
 class AssistancePlanController(
-        private val assistancePlanService: AssistancePlanService,
-        private val assistancePlanEvaluationService: AssistancePlanEvaluationService,
-        private val assistancePlanEvaluationLeftService: AssistancePlanEvaluationLeftService,
-        private val assistancePlanPreviewService: AssistancePlanPreviewService,
-        private val accessService: AccessService,
-        private val userService: UserService,
-        private val clientService: ClientService
+    private val assistancePlanService: AssistancePlanService,
+    private val accessService: AccessService,
+    private val performanceLoggingService: PerformanceLoggingService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(AssistancePlanController::class.java)
 
-    @Value("\${logging.performance}")
-    private val logPerformance: Boolean = false
-
     @PostMapping("")
-    fun create(@Valid @RequestBody valueDto: AssistancePlanCreateDto): Any {
+    fun create(@Valid @RequestBody request: AssistancePlanCreateRequest): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = assistancePlanService.create(valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s create took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (val result = assistancePlanService.create(request)) {
+                is AssistancePlanCreateResult.Success -> ResponseEntity.ok(result.response)
+                is AssistancePlanCreateResult.InvalidHours -> badRequest(result.reason)
+                AssistancePlanCreateResult.HourCorridorNotFound -> badRequest("hour corridor not found")
+                AssistancePlanCreateResult.ClientNotFound -> badRequest("client not found")
+                AssistancePlanCreateResult.ClientArchived -> clientArchived()
+                AssistancePlanCreateResult.InstitutionNotFound -> badRequest("institution not found")
+                AssistancePlanCreateResult.SponsorNotFound -> badRequest("sponsor not found")
+                AssistancePlanCreateResult.HourTypeNotFound -> badRequest("hour type not found")
             }
-
-            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("create", startMs, logger)
         }
     }
 
     @PutMapping("{id}")
-    fun update(@PathVariable id: Long,
-               @Valid @RequestBody valueDto: AssistancePlanUpdateDto): Any {
+    fun update(@PathVariable id: Long, @Valid @RequestBody request: AssistancePlanUpdateRequest): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.canModifyAssistancePlan(id))
+            return forbidden("no permission to update this assistance plan")
+        if (id != request.id)
+            return badRequest("path id and request id are not the same")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            if (!accessService.canModifyAssistancePlan(id))
-                throw IllegalArgumentException("user is not allowed to update this assistance plan")
-
-            val dto = assistancePlanService.update(id, valueDto)
-
-            if (logPerformance) {
-                logger.info(String.format("%s update took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
+            when (val result = assistancePlanService.update(id, request)) {
+                is AssistancePlanUpdateResult.Success -> ResponseEntity.ok(result.response)
+                AssistancePlanUpdateResult.NotFound -> notFound()
+                AssistancePlanUpdateResult.HourModeChanged ->
+                    conflict("assistance plan hour mode cannot be changed")
+                is AssistancePlanUpdateResult.InvalidHours -> badRequest(result.reason)
+                AssistancePlanUpdateResult.HourCorridorNotFound -> badRequest("hour corridor not found")
+                AssistancePlanUpdateResult.ClientNotFound -> badRequest("client not found")
+                AssistancePlanUpdateResult.ClientArchived -> clientArchived()
+                AssistancePlanUpdateResult.InstitutionNotFound -> badRequest("institution not found")
+                AssistancePlanUpdateResult.SponsorNotFound -> badRequest("sponsor not found")
+                AssistancePlanUpdateResult.HourTypeNotFound -> badRequest("hour type not found")
             }
-
-            ResponseEntity.ok(dto)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("update", startMs, logger)
         }
     }
 
     @DeleteMapping("{id}")
     fun delete(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
+        if (!accessService.isAdmin())
+            return forbidden("no permission to delete assistance plans")
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
+            when (val result = assistancePlanService.delete(id)) {
+                is AssistancePlanDeleteResult.Success -> ResponseEntity.ok(result.response)
+                AssistancePlanDeleteResult.NotFound -> notFound()
+            }
+        } catch (ex: Exception) {
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("delete", startMs, logger)
+        }
+    }
 
-            if (!accessService.isAdmin())
-                throw IllegalArgumentException("user is not allowed to delete assistance plans for this client")
-            if (!assistancePlanService.existsById(id))
-                throw IllegalArgumentException("assistance plan not found")
+    @GetMapping("{id}/edit")
+    fun getEditById(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
 
-            val dto = assistancePlanService.getAssistancePlanDtoById(
+        return try {
+            val assistancePlan = assistancePlanService.getEditById(
                 id,
                 includeArchived = accessService.isAdmin(),
                 leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-            assistancePlanService.delete(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s delete took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
+            ) ?: return notFound()
+            ResponseEntity.ok(assistancePlan)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getEditById", startMs, logger)
         }
     }
 
-    @GetMapping
-    fun getAll(): Any {
+    @GetMapping("{id}/detail")
+    fun getDetailById(@PathVariable id: Long): Any {
+        val startMs = System.currentTimeMillis()
+
         return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = assistancePlanService.getAllAssistancePlanDtos(
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-
-            if (logPerformance) {
-                logger.info(String.format("%s getAll took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("{id}")
-    fun getById(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = assistancePlanService.getAssistancePlanDtoById(
-                id,
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            ) ?: throw IllegalArgumentException("assistance plan not found")
-
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("projection/{id}")
-    fun getProjectionById(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = assistancePlanService.getProjectionById(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("client/{id}")
-    fun getByClientId(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = assistancePlanService.getAssistancePlanDtosByClientId(
-                id,
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-
-            if (logPerformance) {
-                logger.info(String.format("%s getByClientId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("client/{id}/illegal")
-    fun getIllegalByClientId(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = assistancePlanService.getIllegalByClientId(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalByClientId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("sponsor/{id}")
-    fun getBySponsorId(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = assistancePlanService.getAssistancePlanDtosBySponsorId(
-                id,
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-
-            if (logPerformance) {
-                logger.info(String.format("%s getBySponsorId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("sponsor/{id}/illegal")
-    fun getIllegalBySponsorId(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = assistancePlanService.getIllegalBySponsorId(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalBySponsorId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("institution/{id}")
-    fun getByInstitutionId(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = assistancePlanService.getAssistancePlanDtosByInstitutionId(
-                id,
-                includeArchived = accessService.isAdmin() || accessService.isLeader(id),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-
-            if (logPerformance) {
-                logger.info(String.format("%s getByInstitutionId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("institution/{id}/illegal")
-    fun getIllegalByInstitutionId(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dtos = assistancePlanService.getIllegalByInstitutionId(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getIllegalByInstitutionId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                    ex.message,
-                    HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("eval/{id}")
-    fun getEvalById(@PathVariable id: Long): Any {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val dto = assistancePlanEvaluationService.getEvaluationById(id)
-
-            if (logPerformance) {
-                logger.info(String.format("%s getEvalById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs))
-            }
-
-            ResponseEntity.ok(dto)
-        } catch(ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("eval/left/{id}")
-    fun getEvaluationLeftById(@PathVariable id: Long): ResponseEntity<Any> {
-        return try {
-            // performance
-            val startMs = System.currentTimeMillis()
-
-            val response = assistancePlanEvaluationLeftService.createAssistancePlanHourTypeAnalysis(LocalDate.now(), id)
-
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getEvaluationLeftById took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
-                )
-            }
-
-            ResponseEntity.ok(response)
+            val assistancePlan = assistancePlanService.getDetailById(id) ?: return notFound()
+            ResponseEntity.ok(assistancePlan)
         } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
+            ExceptionResponseService.getExceptionResponseEntity(ex, logger)
+        } finally {
+            performanceLoggingService.logPerformance("getDetailById", startMs, logger)
         }
     }
 
-    @GetMapping("client/{id}/preview")
-    fun getPreviewByClientId(@PathVariable id: Long): Any {
-        return try {
-            val startMs = System.currentTimeMillis()
-            val userId = userService.getUserId()
-            val dtos = assistancePlanPreviewService.getPreviewDtosByClientId(
-                id,
-                userId,
-                includeArchived = accessService.isAdmin() || accessService.isLeader(clientService.getById(id)?.institution?.id ?: 0)
-            )
+    private fun notFound(): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body("assistance plan not found")
 
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getPreviewByClientId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
-                )
-            }
+    private fun forbidden(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.FORBIDDEN).body(message)
 
-            ResponseEntity.ok(dtos)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
+    private fun badRequest(message: String): ResponseEntity<String> =
+        ResponseEntity.badRequest().body(message)
 
-    @GetMapping("client/{id}/existing")
-    fun getExistingByClientId(@PathVariable id: Long): Any {
-        return try {
-            val startMs = System.currentTimeMillis()
-            val dtos = assistancePlanPreviewService.getExistingDtosByClientId(
-                id,
-                includeArchived = accessService.isAdmin() || accessService.isLeader(clientService.getById(id)?.institution?.id ?: 0)
-            )
+    private fun conflict(message: String): ResponseEntity<String> =
+        ResponseEntity.status(HttpStatus.CONFLICT).body(message)
 
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getExistingByClientId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
-                )
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("institution/{id}/preview")
-    fun getPreviewByInstitutionId(@PathVariable id: Long): Any {
-        return try {
-            val startMs = System.currentTimeMillis()
-            val userId = userService.getUserId()
-            val dtos = assistancePlanPreviewService.getPreviewDtosByInstitutionId(
-                id,
-                userId,
-                includeArchived = accessService.isAdmin() || accessService.isLeader(id)
-            )
-
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getPreviewByInstitutionId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
-                )
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("sponsor/{id}/preview")
-    fun getPreviewBySponsorId(@PathVariable id: Long): Any {
-        return try {
-            val startMs = System.currentTimeMillis()
-            val userId = userService.getUserId()
-            val dtos = assistancePlanPreviewService.getPreviewDtosBySponsorId(
-                id,
-                userId,
-                includeArchived = accessService.isAdmin()
-            )
-
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getPreviewBySponsorId took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
-                )
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
-
-    @GetMapping("favorites/preview")
-    fun getFavoritePreviewsByLoggedInUser(): Any {
-        return try {
-            val startMs = System.currentTimeMillis()
-            val userId = userService.getUserId()
-            val dtos = assistancePlanPreviewService.getFavoritePreviewDtosByEmployeeId(
-                userId,
-                includeArchived = accessService.isAdmin(),
-                leadingInstitutionIds = accessService.getLeadingInstitutionIds()
-            )
-
-            if (logPerformance) {
-                logger.info(
-                    String.format(
-                        "%s getFavoritePreviewsByLoggedInUser took %s ms",
-                        PerformanceLogbackFilter.PERFORMANCE_FILTER_STRING,
-                        System.currentTimeMillis() - startMs
-                    )
-                )
-            }
-
-            ResponseEntity.ok(dtos)
-        } catch (ex: Exception) {
-            StructuredLog.error(logger, "application.request.failed", ex)
-            ResponseEntity(
-                ex.message,
-                HttpStatus.BAD_REQUEST
-            )
-        }
-    }
+    private fun clientArchived(): ResponseEntity<String> = conflict("client is archived")
 }

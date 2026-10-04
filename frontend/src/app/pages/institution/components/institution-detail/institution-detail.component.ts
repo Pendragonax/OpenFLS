@@ -64,7 +64,7 @@ export class InstitutionDetailComponent extends DetailPageComponent<InstitutionV
         this.employeeService.allValues$,
         this.userService.leadingInstitutions$,
         this.userService.user$,
-        this.serviceService.getIllegalByInstitutionId(+id)
+        this.serviceService.getOutsideAssistancePlanPeriodByInstitutionId(+id)
         ]
       )
         .subscribe(([institution, employees, leadingIds, user, illegalServices]) => {

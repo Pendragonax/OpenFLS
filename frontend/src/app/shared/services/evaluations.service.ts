@@ -30,16 +30,6 @@ export class EvaluationsService {
       .delete<EvaluationDto>(`${environment.api_url}${this.url}/${id}`)
   }
 
-  getAll(): Observable<EvaluationDto[]> {
-    return this.http
-      .get<EvaluationDto[]>(`${environment.api_url}${this.url}`);
-  }
-
-  getById(id: number): Observable<EvaluationDto> {
-    return this.http
-      .get<EvaluationDto>(`${environment.api_url}${this.url}/${id}`);
-  }
-
   getByAssistancePlanIdAndYear(assistancePlanId: number, year: number): Observable<EvaluationYearDto> {
     return this.http
       .get<EvaluationYearDto>(`${environment.api_url}${this.url}/assistance_plan/${assistancePlanId}/${year}`);

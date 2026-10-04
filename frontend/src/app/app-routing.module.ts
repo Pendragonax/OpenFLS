@@ -17,13 +17,14 @@ import {SponsorDetailComponent} from "./pages/sponsor/components/sponsor-detail/
 import {ClientComponent} from "./pages/client/client.component";
 import {ClientNewComponent} from "./pages/client/components/client-new/client-new.component";
 import {ClientDetailComponent} from "./pages/client/components/client-detail/client-detail.component";
+import {ClientDashboardComponent} from "./pages/client-dashboard/client-dashboard.component";
 import {HourTypeComponent} from "./pages/hour-type/hour-type.component";
 import {HourCorridorsComponent} from "./pages/hour-corridors/hour-corridors.component";
 import {ServiceNewComponent} from "./pages/my-services/service-new/service-new.component";
 import {ServiceEditComponent} from "./pages/my-services/service-edit/service-edit.component";
 import {
-  ServiceEvaluationOverviewComponent
-} from "./pages/service-evaluation-overview/service-evaluation-overview.component";
+  HourReportComponent
+} from "./pages/hour-report/hour-report.component";
 import {AssistancePlanAnalysisComponent} from "./pages/assistance-plan-analysis/assistance-plan-analysis.component";
 import {MyServicesComponent} from "./pages/my-services/my-services.component";
 import {AllServicesComponent} from "./pages/all-services/all-services.component";
@@ -53,6 +54,7 @@ const routes: Routes = [
   { path: 'clients', component: ClientComponent, canActivate: [AuthGuard] },
   { path: 'clients/new', component: ClientNewComponent, canActivate: [AuthGuard] },
   { path: 'clients/detail/:id', component: ClientDetailComponent, canActivate: [AuthGuard] },
+  { path: 'clients/dashboard/:id', component: ClientDashboardComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/new/:id', component: AssistancePlanNewPageComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/edit/:id', component: AssistancePlanEditComponent, canActivate: [AuthGuard] },
   { path: 'assistance_plans/analysis/:id', component: AssistancePlanAnalysisComponent, canActivate: [AuthGuard] },
@@ -66,8 +68,8 @@ const routes: Routes = [
   { path: 'services/new', component: ServiceNewComponent, canActivate: [AuthGuard] },
   { path: 'services/new/:date', component: ServiceNewComponent, canActivate: [AuthGuard] },
   { path: 'services/edit/:id', component: ServiceEditComponent, canActivate: [AuthGuard] },
-  { path: 'overview', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] },
-  { path: 'overview/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: ServiceEvaluationOverviewComponent, canActivate: [AuthGuard] }
+  { path: 'hour_reports', component: HourReportComponent, canActivate: [AuthGuard] },
+  { path: 'hour_reports/:year/:month/:hourTypeId/:areaId/:sponsorId/:valueTypeId', component: HourReportComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({

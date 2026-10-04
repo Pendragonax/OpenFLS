@@ -105,28 +105,36 @@
           <td mat-cell
               *matCellDef="let client"
               class="text-center">
-            <div class="">
+            <div class="actions-row">
               <button mat-icon-button
                       color="primary"
-                      class="m-1"
+                      [matTooltip]="client.favorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'"
+                      (click)="toggleFavorite(client, $event)">
+                <mat-icon>{{ client.favorite ? 'star' : 'star_border' }}</mat-icon>
+              </button>
+              <button mat-icon-button
+                      color="primary"
+                      matTooltip="Dashboard"
+                      [routerLink]="['/clients/dashboard', client.dto.id]">
+                <mat-icon>dashboard</mat-icon>
+              </button>
+              <button mat-icon-button
+                      color="primary"
                       [routerLink]="['/services/all/0/0/0/0', client.dto.id]">
                 <mat-icon>library_books</mat-icon>
               </button>
               <button mat-icon-button
                       color="primary"
-                      class="m-1"
                       [routerLink]="['/clients/detail/', client.dto.id]">
                 <mat-icon>edit</mat-icon>
               </button>
               <button mat-icon-button
                       color="primary"
-                      class="m-1"
                       (click)="openInformationModal(informationModal, client)">
                 <mat-icon>search</mat-icon>
               </button>
               <button mat-icon-button
                       color="warn"
-                      class="m-1"
                       *showOnRole="'admin'"
                       (click)="openDeleteConfirmation(deleteContent, client)">
                 <mat-icon>delete</mat-icon></button>
@@ -168,7 +176,7 @@
                 </div>
                 <div class="modal-body">
                   <p>Wollen sie den Klienten "<b>{{ client.dto.firstName }} {{ client.dto.lastName }}</b>" wirklich löschen?<br>
-                    Es würden <b>{{ deleteServiceCount }}</b> Dokumentationen ebenfalls gelöscht.</p>
+                    Es würden alle Hilfepläne des Klienten sowie <b>{{ deleteServiceCount }}</b> Dokumentationen ebenfalls gelöscht.</p>
                 </div>
                 <div class="modal-footer">
                   <button type="button"
